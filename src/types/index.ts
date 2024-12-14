@@ -18,12 +18,7 @@ declare type IPoint3D = IPoint2D & {
 
 declare interface IRect {
   size: ISize;
-  position: IPoint;
-}
-
-// 组件画板
-declare interface IStageSlide extends IRect {
-  scale: number;
+  position?: IPoint;
 }
 
 // 舞台画板

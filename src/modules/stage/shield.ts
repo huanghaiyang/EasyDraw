@@ -6,7 +6,6 @@ export default class StageShield implements IStageShield, ICanvas {
     width: defaults.state.shield.width,
     height: defaults.state.shield.height
   };
-  position: IPoint;
   canvas: HTMLCanvasElement;
 
   private renderEl: HTMLDivElement;
@@ -29,10 +28,7 @@ export default class StageShield implements IStageShield, ICanvas {
 
   async initCanvas(): Promise<void> {
     this.canvas = document.createElement('canvas');
-    this.canvas.width = this.size.width;
-    this.canvas.height = this.size.height;
     this.canvas.id = 'shield';
-
     this.renderEl.appendChild(this.canvas);
   }
 
@@ -44,19 +40,18 @@ export default class StageShield implements IStageShield, ICanvas {
 
   async initRenderResizeEvent(): Promise<void> {
     addResizeListener(this.renderEl, () => {
-      this.refreshPosition();
-      this.refreshRenderPosition();
+      this.refreshSize();
     })
   }
 
-  refreshPosition(): void {
+  refreshSize(): void {
     const { width, height } = this.renderEl.getBoundingClientRect();
-    this.position = { x: (width - this.size.width) / 2, y: (height - this.size.height) / 2 }
-  }
-
-  refreshRenderPosition(): void {
-    this.canvas.style.left = `${this.position.x}px`;
-    this.canvas.style.top = `${this.position.y}px`;
+    this.size = {
+      width: width,
+      height: height
+    }
+    this.canvas.width = width;
+    this.canvas.height = height;
   }
 
 }
