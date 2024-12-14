@@ -1,5 +1,11 @@
+import { defaults } from "@/types/constants";
+
 export default class StageShield implements IStageShield, ICanvas {
-  size: ISize;
+  size: ISize =  {
+    width: defaults.state.shield.width,
+    height: defaults.state.shield.height
+  };
+  position: IPoint;
   canvas: HTMLCanvasElement;
 
   getSize(): ISize {

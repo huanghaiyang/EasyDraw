@@ -16,16 +16,31 @@ declare type IPoint3D = IPoint2D & {
   w: number;
 }
 
-declare interface IStageSlide {
+declare interface IRect {
   size: ISize;
   position: IPoint;
+}
+
+// 组件画板
+declare interface IStageSlide extends IRect {
   scale: number;
 }
 
-declare interface IStageShield {
-  size: ISize;
+// 舞台画板
+declare interface IStageShield extends IRect {
+}
+
+// 舞台容器
+declare interface IStageContainer extends IRect {
+  el: HTMLDivElement;
 }
 
 declare interface ICanvas {
   canvas: HTMLCanvasElement;
+}
+
+declare type StageInitParams = {
+  containerEl?: HTMLDivElement;
+  shieldEl?: HTMLDivElement;
+  stageEl?: HTMLDivElement;
 }

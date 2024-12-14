@@ -16,16 +16,16 @@ init().then(() => {
 
 <template>
   <div class="top">
-    <TopBar />
+    <top-bar />
   </div>
   <div class="left">
-    <LeftBar />
+    <left-bar />
   </div>
   <div class="right">
-    <RightBar />
+    <right-bar />
   </div>
   <div class="stage">
-    <StageContainer />
+    <stage-container />
   </div>
 </template>
 
