@@ -11,3 +11,8 @@ export const defaults = {
     }
   }
 }
+
+export const creatorIndexes = {
+  moveable: 0,
+  shapes : 1
+}

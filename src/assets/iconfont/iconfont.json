@@ -1,0 +1,23 @@
+{
+  "id": "4781741",
+  "name": "verbise",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-verbise-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "41747725",
+      "name": "arrow-cursor-2--mouse-select-cursor",
+      "font_class": "arrow-cursor-2--mouse-select-cursor",
+      "unicode": "e72f",
+      "unicode_decimal": 59183
+    },
+    {
+      "icon_id": "23562427",
+      "name": "Rectangle",
+      "font_class": "Rectangle",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    }
+  ]
+}

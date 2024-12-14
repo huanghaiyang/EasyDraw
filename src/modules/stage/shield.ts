@@ -7,6 +7,7 @@ export default class StageShield implements IStageShield, ICanvas {
     height: defaults.state.shield.height
   };
   canvas: HTMLCanvasElement;
+  currentCreator: number;
 
   private renderEl: HTMLDivElement;
 
@@ -29,7 +30,7 @@ export default class StageShield implements IStageShield, ICanvas {
   async initCanvas(): Promise<void> {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
-    this.renderEl.appendChild(this.canvas);
+    this.renderEl.insertBefore(this.canvas, this.renderEl.firstChild);
   }
 
   async initEvents(): Promise<void> {
@@ -52,6 +53,10 @@ export default class StageShield implements IStageShield, ICanvas {
     }
     this.canvas.width = width;
     this.canvas.height = height;
+  }
+
+  async setCreator(creator: number): Promise<void> {
+    this.currentCreator = creator;
   }
 
 }

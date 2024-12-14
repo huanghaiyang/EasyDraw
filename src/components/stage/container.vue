@@ -2,12 +2,16 @@
 import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
 import StageShieldVue from "@/components/stage/shield.vue";
+import CreateBar from "@/components/stage/tools/create-bar.vue";
 
 const stageStore = useStageStore();
 const stageRef = ref<HTMLElement | null>(null);
 const stageShieldRef = ref<
   InstanceType<typeof StageShieldVue> & StageShieldInstance
 >();
+const handleCreatorSelect = (creator) => {
+  stageStore.setCreator(creator);
+}
 
 onMounted(async () => {
   if (stageShieldRef.value) {
@@ -22,6 +26,7 @@ onMounted(async () => {
 <template>
   <div class="stage-container" ref="stageRef">
     <stage-shield-vue ref="stageShieldRef" />
+    <create-bar @select="handleCreatorSelect"/>
   </div>
 </template>
 <style lang="less" scoped>
