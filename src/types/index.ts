@@ -30,10 +30,6 @@ declare interface IStageContainer extends IRect {
   el: HTMLDivElement;
 }
 
-declare interface ICanvas {
-  canvas: HTMLCanvasElement;
-}
-
 declare type StageInitParams = {
   containerEl?: HTMLDivElement;
   shieldEl?: HTMLDivElement;

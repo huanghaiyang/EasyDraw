@@ -12,7 +12,7 @@ export const defaults = {
   }
 }
 
-export const creatorIndexes = {
+export const creatorTypes = {
   moveable: 0,
   shapes : 1
 }

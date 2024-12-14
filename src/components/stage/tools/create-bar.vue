@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { creatorIndexes } from "@/types/constants";
+import { creatorTypes } from "@/types/constants";
 import { ref } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -19,10 +19,10 @@ const select = (evt) => {
       :class="[
         'create-bar__moveable tool-item',
         {
-          selected: current === creatorIndexes.moveable,
+          selected: current === creatorTypes.moveable,
         },
       ]"
-      :v-index="creatorIndexes.moveable"
+      :v-index="creatorTypes.moveable"
     >
       <el-icon
         class="icon-verbise-arrow-cursor-2--mouse-select-cursor iconfont"
@@ -32,10 +32,10 @@ const select = (evt) => {
       :class="[
         'create-bar__shapes tool-item',
         {
-          selected: current === creatorIndexes.shapes,
+          selected: current === creatorTypes.shapes,
         },
       ]"
-      :v-index="creatorIndexes.shapes"
+      :v-index="creatorTypes.shapes"
     >
       <el-icon class="icon-verbise-Rectangle iconfont"></el-icon>
     </div>
