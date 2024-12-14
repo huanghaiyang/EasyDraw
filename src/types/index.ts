@@ -44,3 +44,7 @@ declare type StageInitParams = {
   shieldEl?: HTMLDivElement;
   stageEl?: HTMLDivElement;
 }
+
+interface StageShieldInstance {
+  init: () => Promise<void>;
+}

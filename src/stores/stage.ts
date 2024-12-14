@@ -14,7 +14,7 @@ export const useStageStore = defineStore("stage", {
   actions: {
     async init(params: StageInitParams) {
       await container.init(params.containerEl);
-      await shield.init();
+      await shield.init(params.containerEl);
       await slide.init();
     },
   },
