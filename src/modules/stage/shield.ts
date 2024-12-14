@@ -94,6 +94,9 @@ export default class StageShield implements IStageShield {
         height: 30,
         color: '#000'
       })
+    } else {
+      this.clearMCanvas();
+      this.setCanvasCursor('default');
     }
   }
 
