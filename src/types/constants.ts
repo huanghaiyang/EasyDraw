@@ -12,6 +12,12 @@ export const defaults = {
   }
 }
 
+// 世界尺寸
+export const worldSize = {
+  width: 1024 * 1024,
+  height: 1024 * 1024
+}
+
 // 创作工具类型
 export enum CreatorTypes {
   moveable = 0,

@@ -7,6 +7,8 @@ export default class StageShield implements IStageShield {
     width: defaults.state.shield.width,
     height: defaults.state.shield.height
   };
+  // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
+  position: IPoint;
   // 画布
   private canvas: HTMLCanvasElement;
   // 遮罩画布用以绘制鼠标样式,工具图标等
@@ -212,6 +214,10 @@ export default class StageShield implements IStageShield {
     this.size = {
       width: width,
       height: height
+    }
+    this.position = {
+      x: -width / 2,
+      y: -height / 2
     }
     this.canvasRectCache = rect;
     this.canvas.width = width;
