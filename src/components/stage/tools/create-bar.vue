@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { creatorTypes } from "@/types/constants";
+import { creators } from "@/types/constants";
+import { getCreatorByType } from "@/types/helper";
 import { ref } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -9,7 +10,7 @@ const select = (evt) => {
   const toolItem = target.closest(".tool-item");
   if (toolItem) {
     current.value = parseInt(toolItem.getAttribute("v-index"));
-    emits("select", current.value);
+    emits("select", getCreatorByType(current.value));
   }
 };
 </script>
@@ -19,10 +20,10 @@ const select = (evt) => {
       :class="[
         'create-bar__moveable tool-item',
         {
-          selected: current === creatorTypes.moveable,
+          selected: current === creators.moveable.type,
         },
       ]"
-      :v-index="creatorTypes.moveable"
+      :v-index="creators.moveable.type"
     >
       <el-icon
         class="icon-verbise-arrow-cursor-2--mouse-select-cursor iconfont"
@@ -30,12 +31,12 @@ const select = (evt) => {
     </div>
     <div
       :class="[
-        'create-bar__shapes tool-item',
+        'create-bar__rectangle tool-item',
         {
-          selected: current === creatorTypes.shapes,
+          selected: current === creators.rectangle.type,
         },
       ]"
-      :v-index="creatorTypes.shapes"
+      :v-index="creators.rectangle.type"
     >
       <el-icon class="icon-verbise-Rectangle iconfont"></el-icon>
     </div>

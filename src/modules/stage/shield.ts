@@ -1,4 +1,4 @@
-import { defaults, creatorTypes } from "@/types/constants";
+import { defaults, cursorCanvasSize, Creator, CreatorCategories } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
 
@@ -12,7 +12,7 @@ export default class StageShield implements IStageShield {
   // 遮罩画布用以绘制鼠标样式,工具图标等
   private mCanvas: HTMLCanvasElement;
   // 当前正在使用的创作工具
-  private currentCreator: number;
+  private currentCreator: Creator;
   // canvas渲染容器
   private renderEl: HTMLDivElement;
   // 鼠标位置
@@ -79,15 +79,14 @@ export default class StageShield implements IStageShield {
    */
   async initCanvasCaches(): Promise<void> {
     this.cursorCanvasCache = document.createElement('canvas');
-    this.cursorCanvasCache.width = 24;
-    this.cursorCanvasCache.height = 24;
+    this.cursorCanvasCache.width = cursorCanvasSize;
+    this.cursorCanvasCache.height = cursorCanvasSize;
     // 同时绘制图标
     await this.drawImgLike(this.cursorCanvasCache, this.getCreatorMouseIcon(), {
       x: 0,
       y: 0,
-      width: 24,
-      height: 24,
-      color: '#000000'
+      width: cursorCanvasSize,
+      height: cursorCanvasSize,
     })
   }
 
@@ -191,11 +190,10 @@ export default class StageShield implements IStageShield {
       await this.setCanvasCursor('none');
       if (this.cursorCanvasCache) {
         await this.drawImgLike(this.mCanvas, this.cursorCanvasCache, {
-          x: this.mousePos.x - 12,
-          y: this.mousePos.y - 12,
-          width: 24,
-          height: 24,
-          color: '#000000'
+          x: this.mousePos.x - cursorCanvasSize / 2,
+          y: this.mousePos.y - cursorCanvasSize / 2,
+          width: cursorCanvasSize,
+          height: cursorCanvasSize,
         })
       } else {
         await this.initCanvasCaches();
@@ -227,7 +225,7 @@ export default class StageShield implements IStageShield {
    * 
    * @param creator 
    */
-  async setCreator(creator: number): Promise<void> {
+  async setCreator(creator: Creator): Promise<void> {
     this.currentCreator = creator;
   }
 
@@ -235,8 +233,8 @@ export default class StageShield implements IStageShield {
    * 获取当前创作工具的鼠标图标
    */
   getCreatorMouseIcon(): string {
-    switch (this.currentCreator) {
-      case creatorTypes.shapes:
+    switch (this.currentCreator.category) {
+      case CreatorCategories.shapes:
         return CrossSvg;
       default:
         return CrossSvg;
@@ -248,8 +246,9 @@ export default class StageShield implements IStageShield {
    * 
    * @param creator 
    */
-  checkCreatorActive(creator: number): boolean {
-    if ([creatorTypes.shapes].includes(creator)) {
+  checkCreatorActive(creator: Creator): boolean {
+    if (!creator) return false;
+    if ([CreatorCategories.shapes].includes(creator.category)) {
       return true;
     } else {
       return false;
@@ -279,7 +278,7 @@ export default class StageShield implements IStageShield {
    * @param svg 
    * @param options 
    */
-  async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: { x: number, y: number, width: number, height: number, color: string }): Promise<void> {
+  async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: { x: number, y: number, width: number, height: number }): Promise<void> {
     return new Promise((resolve, reject) => {
       const ctx = target.getContext('2d');
       if (typeof svg === 'string') {
