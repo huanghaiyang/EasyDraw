@@ -1,4 +1,4 @@
-import { creators } from "@/types/constants";
+import { creators, CreatorTypes, Creator } from "@/types/constants";
 
 export function getCreatorByType(type: CreatorTypes): Creator {
   // 遍历creators这个对象
