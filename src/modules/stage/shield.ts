@@ -23,6 +23,8 @@ export default class StageShield implements IStageShield {
   private cursorCanvasCache: HTMLCanvasElement;
   // 画布容器尺寸
   private canvasRectCache: DOMRect;
+  // 画布是否是第一次渲染
+  private isFirstResizeRender: boolean = true;
 
   constructor() {
     this.handleMouseMove = this.handleMouseMove.bind(this);
@@ -211,19 +213,24 @@ export default class StageShield implements IStageShield {
   refreshSize(): void {
     const rect = this.renderEl.getBoundingClientRect();
     const { width, height } = rect;
-    this.size = {
-      width: width,
-      height: height
-    }
-    this.position = {
-      x: -width / 2,
-      y: -height / 2
-    }
+    
     this.canvasRectCache = rect;
     this.canvas.width = width;
     this.canvas.height = height;
     this.mCanvas.width = width;
     this.mCanvas.height = height;
+
+    this.size = {
+      width,
+      height
+    }
+    if (this.isFirstResizeRender) {
+      this.isFirstResizeRender = false;
+      this.position = {
+        x: -width / 2,
+        y: -height / 2
+      }
+    }
   }
 
   /**
