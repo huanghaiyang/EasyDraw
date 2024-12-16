@@ -11,12 +11,18 @@ const init = async () => {
 defineExpose({
   init,
 });
-
 </script>
 <template>
+  <div class="stage-shield"></div>
 </template>
 <style lang="less">
-#shield {
+.stage-shield {
+  width: 100%;
+  height: 100%;
+}
+#shield,
+#b-shield,
+#m-shield {
   position: absolute;
   top: 0;
   left: 0;

@@ -1,17 +1,11 @@
-import { CreatorTypes, ElementObject, IPoint, IStageElement, IStageEngine, IStageShield } from "@/types";
+import { CreatorTypes, ElementObject, IPoint, IStageElement, IStagePersister, IStageShield } from "@/types";
 import { nanoid } from "nanoid";
 import StageElement from "@/modules/elements/StageElement";
 
-export default class StageEngine implements IStageEngine {
-
-  private shield: IStageShield;
+export default class StagePersister implements IStagePersister {
 
   // 画板上绘制的元素列表（形状、文字、图片等）
   elementList: IStageElement[];
-
-  constructor(shield: IStageShield) {
-    this.shield = shield;
-  }
 
   /**
    * 判断元素是否存在

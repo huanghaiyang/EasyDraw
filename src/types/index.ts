@@ -88,7 +88,7 @@ export enum shieldMouseDownUsage {
   drag = 3
 }
 
-export interface IStageEngine {
+export interface IStagePersister {
   elementList: IStageElement[];
   createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;

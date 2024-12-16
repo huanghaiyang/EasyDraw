@@ -13,7 +13,7 @@ export const useStageStore = defineStore("stage", {
   actions: {
     async init(params: StageInitParams) {
       await container.init(params.containerEl);
-      await shield.init(params.containerEl);
+      await shield.init(params.shieldEl);
     },
     async setCreator(creator: Creator) {
       await shield.setCreator(creator);

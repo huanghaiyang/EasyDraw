@@ -1,8 +1,8 @@
 import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStageEngine, IStageShield } from "@/types";
-import StageEngine from "@/modules/stage/StageEngine";
+import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStagePersister, IStageShield } from "@/types";
+import StagePersister from "@/modules/stage/StagePersister";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -18,6 +18,8 @@ export default class StageShield implements IStageShield {
   private canvas: HTMLCanvasElement;
   // 遮罩画布用以绘制鼠标样式,工具图标等
   private mCanvas: HTMLCanvasElement;
+  // 前景画板
+  private bCanvas: HTMLCanvasElement;
   // 当前正在使用的创作工具
   private currentCreator: Creator;
   // canvas渲染容器
@@ -39,12 +41,12 @@ export default class StageShield implements IStageShield {
   // 鼠标抬起时距离世界坐标中心点的偏移
   private pressUpWorldCenterOffset: IPoint;
   // 绘制引擎
-  private stageEngine: IStageEngine;
+  private persister: IStagePersister;
   // 当前正在创建的元素
   private currentCreatingElementId;
 
   constructor() {
-    this.stageEngine = new StageEngine(this);
+    this.persister = new StagePersister();
     this.initEventHandlers();
   }
 
@@ -90,9 +92,14 @@ export default class StageShield implements IStageShield {
     this.mCanvas.style.pointerEvents = 'none';
     this.renderEl.insertBefore(this.mCanvas, this.renderEl.firstChild);
 
+    this.bCanvas = document.createElement('canvas');
+    this.bCanvas.id = 'b-shield';
+    this.bCanvas.style.pointerEvents = 'none';
+    this.renderEl.insertBefore(this.bCanvas, this.mCanvas);
+
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
-    this.renderEl.insertBefore(this.canvas, this.renderEl.firstChild);
+    this.renderEl.insertBefore(this.canvas, this.bCanvas);
   }
 
   /**
@@ -287,12 +294,12 @@ export default class StageShield implements IStageShield {
     const { category, type } = this.currentCreator;
     switch(category) {
       case CreatorCategories.shapes: {
-        const obj = this.stageEngine.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
+        const obj = this.persister.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
         if (this.currentCreatingElementId) {
-          this.stageEngine.updateElementObj(this.currentCreatingElementId, obj);
+          this.persister.updateElementObj(this.currentCreatingElementId, obj);
         } else {
-          const element = this.stageEngine.createElement(obj);
-          this.stageEngine.addElement(element);
+          const element = this.persister.createElement(obj);
+          this.persister.addElement(element);
           this.currentCreatingElementId = element.id;
         }
         break;
@@ -361,6 +368,8 @@ export default class StageShield implements IStageShield {
     this.canvas.height = height;
     this.mCanvas.width = width;
     this.mCanvas.height = height;
+    this.bCanvas.width = width;
+    this.bCanvas.height = height;
 
     this.size = {
       width,
