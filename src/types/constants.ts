@@ -32,7 +32,7 @@ export const creators = {
   rectangle: {
     type: CreatorTypes.rectangle,
     name: '矩形',
-    usageType: CreatorUsageTypes.forever,
+    usageType: CreatorUsageTypes.once,
     category: CreatorCategories.shapes,
   }
 }

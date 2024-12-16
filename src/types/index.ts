@@ -14,52 +14,54 @@ export enum CreatorCategories {
   shapes = 1,
 }
 
-export declare type ISize = {
+export type ISize = {
   width: number;
   height: number;
 }
 
-export declare type IPoint = {
+export type IPoint = {
   x: number;
   y: number;
 }
 
-export declare type IPoint3D = IPoint & {
+export type IPoint3D = IPoint & {
   z: number;
 }
 
-export declare interface IRect {
+export interface IRect {
   size: ISize;
   position?: IPoint;
 }
 
 // 舞台画板
-export declare interface IStageShield extends IRect {
+export interface IStageShield extends IRect {
 }
 
 // 舞台容器
-export declare interface IStageContainer extends IRect {
+export interface IStageContainer extends IRect {
   el: HTMLDivElement;
 }
 
-export declare type StageInitParams = {
+export type StageInitParams = {
   containerEl?: HTMLDivElement;
   shieldEl?: HTMLDivElement;
   stageEl?: HTMLDivElement;
 }
 
-export declare interface StageShieldInstance {
+export interface StageShieldInstance {
   init: () => Promise<void>;
 }
 
-export declare type ElementObject = {
+export type ElementObject = {
   id: string;
   points: IPoint[];
   type: CreatorTypes;
   data: any;
 }
 
-export declare interface IStageElement extends ElementObject {
+export interface IStageElement {
+  id: string;
+  obj: ElementObject;
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -68,9 +70,11 @@ export declare interface IStageElement extends ElementObject {
   isResizing: boolean;
   isRotating: boolean;
   isDragging: boolean;
+  status: ElementCreateStatus;
+  init(): Promise<void>;
 }
 
-export declare type Creator = {
+export type Creator = {
   type: CreatorTypes,
   usage: CreatorUsageTypes,
   category: CreatorCategories,
@@ -82,4 +86,19 @@ export enum shieldMouseDownUsage {
   resize = 1,
   select = 2,
   drag = 3
+}
+
+export interface IStageEngine {
+  elementList:IStageElement;
+  createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
+  createElement(obj: ElementObject): IStageElement;
+  addElement(element: IStageElement): void;
+  removeElement(id: string): void;
+  updateElement(id: string, data: ElementObject): void;
+}
+
+export enum ElementCreateStatus {
+  starting = 0,
+  doing = 1,
+  finished = 2
 }

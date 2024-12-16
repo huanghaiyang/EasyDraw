@@ -1,7 +1,8 @@
 import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, IPoint, ISize, IStageElement, IStageShield } from "@/types";
+import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStageEngine, IStageShield } from "@/types";
+import StageEngine from "@/modules/stage/StageEngine";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -9,7 +10,7 @@ export default class StageShield implements IStageShield {
     height: defaults.state.shield.height
   };
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
-  worldCenterOffset: IPoint = {
+  private worldCenterOffset: IPoint = {
     x: 0,
     y: 0
   };
@@ -37,10 +38,20 @@ export default class StageShield implements IStageShield {
   private pressUpPosition: IPoint;
   // 鼠标抬起时距离世界坐标中心点的偏移
   private pressUpWorldCenterOffset: IPoint;
-  // 画板上绘制的元素列表（形状、文字、图片等）
-  private elementList:IStageElement;
+  // 绘制引擎
+  private stageEngine: IStageEngine;
+  // 当前正在创建的元素
+  private currentCreatingElementId;
 
   constructor() {
+    this.stageEngine = new StageEngine(this);
+    this.initEventHandlers();
+  }
+
+  /**
+   * 初始化事件处理器
+   */
+  initEventHandlers() {
     this.handleCursorMove = this.handleCursorMove.bind(this);
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
@@ -243,8 +254,10 @@ export default class StageShield implements IStageShield {
    */
   applyPressUp(e) {
     if (this.checkCreatorActive(this.currentCreator)) {
-      if (this.checkCursorPressMoveAvailable(e)) {
-
+      if (this.checkCursorPressMovedAvailable(e)) {
+        this.createElementTemporary();
+      } else {
+        this.createElementAtPosition();
       }
     }
   }
@@ -255,9 +268,38 @@ export default class StageShield implements IStageShield {
    * @param e 
    * @returns 
    */
-  checkCursorPressMoveAvailable(e: MouseEvent): boolean {
+  checkCursorPressMovedAvailable(e: MouseEvent): boolean {
     return Math.abs(this.pressUpWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) < minCursorMoveXDistance
       || Math.abs(this.pressUpWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) < minCursorMoveYDistance;
+  }
+
+  /**
+   * 在当前鼠标位置创建元素
+   */
+  createElementAtPosition(): void {
+    
+  }
+
+  /**
+   * 在当前鼠标位置创建临时元素
+   */
+  createElementTemporary(): void {
+    const { category, type } = this.currentCreator;
+    switch(category) {
+      case CreatorCategories.shapes: {
+        const obj = this.stageEngine.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
+        if (this.currentCreatingElementId) {
+          this.stageEngine.updateElement(this.currentCreatingElementId, obj);
+        } else {
+          const element = this.stageEngine.createElement(obj);
+          this.stageEngine.addElement(element);
+          this.currentCreatingElementId = element.id;
+        }
+        break;
+      }
+      default: 
+        break;
+    }
   }
 
   /**
