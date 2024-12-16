@@ -1,5 +1,5 @@
-import StageContainer from "@/modules/stage/container";
-import StageShield from "@/modules/stage/shield";
+import StageContainer from "@/modules/stage/StageContainer";
+import StageShield from "@/modules/stage/StageShield";
 import { Creator, StageInitParams } from "@/types";
 import { defineStore } from "pinia";
 

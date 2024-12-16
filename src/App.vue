@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
-import TopBar from "@/components/ui/top-bar.vue";
-import LeftBar from "@/components/ui/left-bar.vue";
-import RightBar from "@/components/ui/right-bar.vue";
-import StageContainer from "@/components/stage/container.vue";
+import TopBar from "@/components/ui/TopBar.vue";
+import LeftBar from "@/components/ui/LeftBar.vue";
+import RightBar from "@/components/ui/RightBar.vue";
+import StageContainer from "@/components/stage/Container.vue";
 
 const { locale: i18nLocale } = useI18n();
 const appStore = useAppStore();

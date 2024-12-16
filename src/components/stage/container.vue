@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
-import StageShieldVue from "@/components/stage/shield.vue";
-import CreateBar from "@/components/stage/tools/create-bar.vue";
+import StageShieldVue from "@/components/stage/Shield.vue";
+import CreatorBar from "@/components/stage/tools/CreatorBar.vue";
 import { StageShieldInstance } from "@/types";
 
 const stageStore = useStageStore();
@@ -27,7 +27,7 @@ onMounted(async () => {
 <template>
   <div class="stage-container" ref="stageRef">
     <stage-shield-vue ref="stageShieldRef" />
-    <create-bar @select="handleCreatorSelect"/>
+    <creator-bar @select="handleCreatorSelect"/>
   </div>
 </template>
 <style lang="less" scoped>

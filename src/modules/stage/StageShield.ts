@@ -1,7 +1,7 @@
 import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, IPoint, ISize, IStageShield } from "@/types";
+import { Creator, CreatorCategories, IPoint, ISize, IStageElement, IStageShield } from "@/types";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -37,6 +37,8 @@ export default class StageShield implements IStageShield {
   private pressUpPosition: IPoint;
   // 鼠标抬起时距离世界坐标中心点的偏移
   private pressUpWorldCenterOffset: IPoint;
+  // 画板上绘制的元素列表（形状、文字、图片等）
+  private elementList:IStageElement;
 
   constructor() {
     this.handleCursorMove = this.handleCursorMove.bind(this);
