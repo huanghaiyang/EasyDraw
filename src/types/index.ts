@@ -92,9 +92,9 @@ export interface IStagePersister {
   elementList: IStageElement[];
   createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;
-  addElement(element: IStageElement): void;
-  removeElement(id: string): void;
-  updateElementObj(id: string, data: ElementObject): void;
+  addElement(element: IStageElement): IStageElement;
+  removeElement(id: string): IStageElement;
+  updateElementObj(id: string, data: ElementObject): IStageElement;
 }
 
 export enum ElementCreateStatus {

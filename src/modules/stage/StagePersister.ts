@@ -22,8 +22,9 @@ export default class StagePersister implements IStagePersister {
    * 
    * @param element 
    */
-  addElement(element: IStageElement): void {
+  addElement(element: IStageElement): IStageElement {
     this.elementList.push(element);
+    return element;
   }
 
   /**
@@ -31,10 +32,12 @@ export default class StagePersister implements IStagePersister {
    * 
    * @param id 
    */
-  removeElement(id: string): void {
+  removeElement(id: string): IStageElement {
     const index = this.elementList.findIndex(item => item.id === id);
     if (index !== -1) {
+      const element = this.elementList[index];
       this.elementList.splice(index, 1);
+      return element;
     }
   }
 
@@ -44,12 +47,13 @@ export default class StagePersister implements IStagePersister {
    * @param id 
    * @param data 
    */
-  updateElementObj(id: string, data: ElementObject): void {
+  updateElementObj(id: string, data: ElementObject): IStageElement {
     const index = this.elementList.findIndex(item => item.id === id);
     if (index !== -1) {
       const element = this.elementList[index];
       const objId = element.obj.id;
       Object.assign(element.obj, data, { id: objId });
+      return element;
     }
   }
 

@@ -261,11 +261,7 @@ export default class StageShield implements IStageShield {
    */
   applyPressUp(e) {
     if (this.checkCreatorActive(this.currentCreator)) {
-      if (this.checkCursorPressMovedAvailable(e)) {
-        this.createElementTemporary();
-      } else {
-        this.createElementAtPosition();
-      }
+      this.createElementAtPosition();
     }
   }
 
@@ -290,19 +286,20 @@ export default class StageShield implements IStageShield {
   /**
    * 在当前鼠标位置创建临时元素
    */
-  createElementTemporary(): void {
+  createOrUpdateElement(): IStageElement {
     const { category, type } = this.currentCreator;
     switch(category) {
       case CreatorCategories.shapes: {
         const obj = this.persister.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
         if (this.currentCreatingElementId) {
-          this.persister.updateElementObj(this.currentCreatingElementId, obj);
+          const element = this.persister.updateElementObj(this.currentCreatingElementId, obj);
+          return element;
         } else {
           const element = this.persister.createElement(obj);
           this.persister.addElement(element);
           this.currentCreatingElementId = element.id;
+          return element;
         }
-        break;
       }
       default: 
         break;
