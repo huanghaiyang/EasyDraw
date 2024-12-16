@@ -13,6 +13,7 @@
     "element-plus": "^2.9.1",
     "lodash": "^4.17.21",
     "mathjs": "^14.0.1",
+    "nanoid": "^5.0.9",
     "normalize.css": "^8.0.1",
     "pinia": "^2.3.0",
     "resize-observer-polyfill": "^1.5.1",

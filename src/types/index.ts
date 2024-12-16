@@ -89,12 +89,12 @@ export enum shieldMouseDownUsage {
 }
 
 export interface IStageEngine {
-  elementList:IStageElement;
+  elementList: IStageElement[];
   createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;
   addElement(element: IStageElement): void;
   removeElement(id: string): void;
-  updateElement(id: string, data: ElementObject): void;
+  updateElementObj(id: string, data: ElementObject): void;
 }
 
 export enum ElementCreateStatus {

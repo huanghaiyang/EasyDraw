@@ -289,7 +289,7 @@ export default class StageShield implements IStageShield {
       case CreatorCategories.shapes: {
         const obj = this.stageEngine.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
         if (this.currentCreatingElementId) {
-          this.stageEngine.updateElement(this.currentCreatingElementId, obj);
+          this.stageEngine.updateElementObj(this.currentCreatingElementId, obj);
         } else {
           const element = this.stageEngine.createElement(obj);
           this.stageEngine.addElement(element);
