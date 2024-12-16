@@ -1,41 +1,85 @@
-declare type ISize = {
+// 创作工具类型
+export enum CreatorTypes {
+  moveable = 0,
+  rectangle = 1
+}
+
+export enum CreatorUsageTypes {
+  once = 0,
+  forever = 1
+}
+
+export enum CreatorCategories {
+  cursor = 0,
+  shapes = 1,
+}
+
+export declare type ISize = {
   width: number;
   height: number;
 }
 
-declare type IPoint = {
+export declare type IPoint = {
   x: number;
   y: number;
 }
 
-declare type IPoint2D = IPoint & {
+export declare type IPoint3D = IPoint & {
   z: number;
 }
 
-declare type IPoint3D = IPoint2D & {
-  w: number;
-}
-
-declare interface IRect {
+export declare interface IRect {
   size: ISize;
   position?: IPoint;
 }
 
 // 舞台画板
-declare interface IStageShield extends IRect {
+export declare interface IStageShield extends IRect {
 }
 
 // 舞台容器
-declare interface IStageContainer extends IRect {
+export declare interface IStageContainer extends IRect {
   el: HTMLDivElement;
 }
 
-declare type StageInitParams = {
+export declare type StageInitParams = {
   containerEl?: HTMLDivElement;
   shieldEl?: HTMLDivElement;
   stageEl?: HTMLDivElement;
 }
 
-interface StageShieldInstance {
+export declare interface StageShieldInstance {
   init: () => Promise<void>;
+}
+
+export declare type ElementObject = {
+  id: string;
+  points: IPoint[];
+  type: CreatorTypes;
+  data: any;
+}
+
+export declare interface IStageElement extends ElementObject {
+  isSelected: boolean;
+  isVisible: boolean;
+  isEditing: boolean;
+  isLocked: boolean;
+  isMoving: boolean;
+  isResizing: boolean;
+  isRotating: boolean;
+  isDragging: boolean;
+}
+
+export declare type Creator = {
+  type: CreatorTypes,
+  usage: CreatorUsageTypes,
+  category: CreatorCategories,
+}
+
+// 画板鼠标按下时的用途
+export enum shieldMouseDownUsage {
+  move = 0,
+  resize = 1,
+  select = 2,
+  drag = 3
 }

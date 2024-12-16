@@ -1,6 +1,7 @@
-import { defaults, cursorCanvasSize, Creator, CreatorCategories } from "@/types/constants";
+import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
+import { Creator, CreatorCategories, IPoint, ISize, IStageShield } from "@/types";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -8,7 +9,10 @@ export default class StageShield implements IStageShield {
     height: defaults.state.shield.height
   };
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
-  position: IPoint;
+  worldCenterOffset: IPoint = {
+    x: 0,
+    y: 0
+  };
   // 画布
   private canvas: HTMLCanvasElement;
   // 遮罩画布用以绘制鼠标样式,工具图标等
@@ -18,17 +22,27 @@ export default class StageShield implements IStageShield {
   // canvas渲染容器
   private renderEl: HTMLDivElement;
   // 鼠标位置
-  private mousePos: IPoint;
+  private cursorPos: IPoint;
   // 鼠标样式画布,用以加速绘制
   private cursorCanvasCache: HTMLCanvasElement;
   // 画布容器尺寸
   private canvasRectCache: DOMRect;
   // 画布是否是第一次渲染
   private isFirstResizeRender: boolean = true;
+  // 鼠标按下位置
+  private pressDownPosition: IPoint;
+  // 鼠标按下时距离世界坐标中心点的偏移
+  private pressDownWorldCenterOffset: IPoint;
+  // 鼠标抬起位置
+  private pressUpPosition: IPoint;
+  // 鼠标抬起时距离世界坐标中心点的偏移
+  private pressUpWorldCenterOffset: IPoint;
 
   constructor() {
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    this.handleCursorMove = this.handleCursorMove.bind(this);
+    this.handleCursorLeave = this.handleCursorLeave.bind(this);
+    this.handlePressDown = this.handlePressDown.bind(this);
+    this.handlePressUp = this.handlePressUp.bind(this);
   }
 
   // 销毁鼠标样式画布
@@ -107,8 +121,9 @@ export default class StageShield implements IStageShield {
    * 初始化鼠标事件
    */
   async initMouseEvents(): Promise<void> {
-    this.canvas.addEventListener('mousemove', this.handleMouseMove)
-    this.canvas.addEventListener('mouseleave', this.handleMouseLeave)
+    this.canvas.addEventListener('mousemove', this.handleCursorMove)
+    this.canvas.addEventListener('mouseleave', this.handleCursorLeave)
+    this.canvas.addEventListener('mousedown', this.handlePressDown)
   }
 
   /**
@@ -116,9 +131,9 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  handleMouseMove(e: MouseEvent): void {
-    this.calcMousePos(e);
-    this.applyMousePosMove(e);
+  handleCursorMove(e: MouseEvent): void {
+    this.calcCursorPos(e);
+    this.applyCursorPosMove(e);
   }
 
   /**
@@ -126,9 +141,36 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  handleMouseLeave(e: MouseEvent): void {
-    this.clearMousePos();
-    this.applyMousePosLeave(e)
+  handleCursorLeave(e: MouseEvent): void {
+    this.clearCursorPos();
+    this.applyCursorPosLeave(e)
+  }
+
+  /**
+   * 鼠标按下事件
+   * 
+   * @param e 
+   */
+  handlePressDown(e: MouseEvent): void {
+    this.calcPressDown(e);
+    this.initPressDownEvent();
+  }
+
+  /**
+   * 鼠标抬起事件
+   * 
+   * @param e 
+   */
+  handlePressUp(e: MouseEvent): void {
+    this.calcPressUp(e);
+    this.applyPressUp(e);
+  }
+
+  /**
+   * 初始化鼠标按下事件
+   */
+  initPressDownEvent(): void {
+    this.canvas.addEventListener('mouseup', this.handlePressUp)
   }
 
   /**
@@ -136,20 +178,20 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  calcMousePos(e: MouseEvent): IPoint {
+  calcCursorPos(e: MouseEvent): IPoint {
     const { x, y } = this.canvasRectCache;
-    this.mousePos = {
+    this.cursorPos = {
       x: e.clientX - x,
       y: e.clientY - y
     }
-    return this.mousePos;
+    return this.cursorPos;
   }
 
   /**
    * 清除鼠标位置
    */
-  clearMousePos(): void {
-    this.mousePos = null;
+  clearCursorPos(): void {
+    this.cursorPos = null;
   }
 
   /**
@@ -157,8 +199,8 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  async applyMousePosMove(e: MouseEvent): Promise<void> {
-    this.applyMCanvasMousePosMove(e)
+  async applyCursorPosMove(e: MouseEvent): Promise<void> {
+    this.applyMCanvasCursorPosMove(e)
   }
 
   /**
@@ -166,10 +208,54 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  applyMousePosLeave(e: MouseEvent): void {
+  applyCursorPosLeave(e: MouseEvent): void {
     this.clearMCanvas();
     this.setCanvasCursor('default');
     this.destroyCursorCanvasCache();
+  }
+
+  /**
+   * 鼠标按下事件
+   * 
+   * @param e 
+   */
+  calcPressDown(e: MouseEvent): void {
+    this.pressDownPosition = this.calcCursorPos(e);
+    this.pressDownWorldCenterOffset = this.calcOffsetByPos(this.pressDownPosition);
+  }
+
+  /**
+   * 鼠标抬起事件
+   * 
+   * @param e 
+   */
+  calcPressUp(e: MouseEvent): void {
+    this.pressUpPosition = this.calcCursorPos(e);
+    this.pressUpWorldCenterOffset = this.calcOffsetByPos(this.pressUpPosition);
+  }
+
+  /**
+   * 处理鼠标抬起逻辑（正常抬起、拖动抬起、绘制完成抬起等）
+   * 
+   * @param e 
+   */
+  applyPressUp(e) {
+    if (this.checkCreatorActive(this.currentCreator)) {
+      if (this.checkCursorPressMoveAvailable(e)) {
+
+      }
+    }
+  }
+
+  /**
+   * 检查鼠标是否移动过短（移动距离过短，可能为误触）
+   * 
+   * @param e 
+   * @returns 
+   */
+  checkCursorPressMoveAvailable(e: MouseEvent): boolean {
+    return Math.abs(this.pressUpWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) < minCursorMoveXDistance
+      || Math.abs(this.pressUpWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) < minCursorMoveYDistance;
   }
 
   /**
@@ -177,8 +263,20 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  async applyMCanvasMousePosMove(e: MouseEvent): Promise<void> {
+  async applyMCanvasCursorPosMove(e: MouseEvent): Promise<void> {
     this.renderMCreatorIfy(e)
+  }
+
+  /**
+   * 给定坐标计算距离世界坐标中心点的偏移
+   * 
+   * @param pos 
+   */
+  calcOffsetByPos(pos: IPoint): IPoint {
+    return {
+      x: pos.x - this.canvasRectCache.width / 2 + this.worldCenterOffset.x,
+      y: pos.y - this.canvasRectCache.height / 2 + this.worldCenterOffset.y
+    }
   }
 
   /**
@@ -194,8 +292,8 @@ export default class StageShield implements IStageShield {
       await this.setCanvasCursor('none');
       if (this.cursorCanvasCache) {
         await this.drawImgLike(this.mCanvas, this.cursorCanvasCache, {
-          x: this.mousePos.x - cursorCanvasSize / 2,
-          y: this.mousePos.y - cursorCanvasSize / 2,
+          x: this.cursorPos.x - cursorCanvasSize / 2,
+          y: this.cursorPos.y - cursorCanvasSize / 2,
           width: cursorCanvasSize,
           height: cursorCanvasSize,
         })
@@ -203,7 +301,7 @@ export default class StageShield implements IStageShield {
         await this.initCanvasCaches();
       }
     } else {
-      this.applyMousePosLeave(e);
+      this.applyCursorPosLeave(e);
     }
   }
 
@@ -213,7 +311,7 @@ export default class StageShield implements IStageShield {
   refreshSize(): void {
     const rect = this.renderEl.getBoundingClientRect();
     const { width, height } = rect;
-    
+
     this.canvasRectCache = rect;
     this.canvas.width = width;
     this.canvas.height = height;
@@ -226,10 +324,6 @@ export default class StageShield implements IStageShield {
     }
     if (this.isFirstResizeRender) {
       this.isFirstResizeRender = false;
-      this.position = {
-        x: -width / 2,
-        y: -height / 2
-      }
     }
   }
 
@@ -261,11 +355,7 @@ export default class StageShield implements IStageShield {
    */
   checkCreatorActive(creator: Creator): boolean {
     if (!creator) return false;
-    if ([CreatorCategories.shapes].includes(creator.category)) {
-      return true;
-    } else {
-      return false;
-    }
+    return [CreatorCategories.shapes].includes(creator.category);
   }
 
   /**

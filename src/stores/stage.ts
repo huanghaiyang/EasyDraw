@@ -1,6 +1,6 @@
 import StageContainer from "@/modules/stage/container";
 import StageShield from "@/modules/stage/shield";
-import { Creator } from "@/types/constants";
+import { Creator, StageInitParams } from "@/types";
 import { defineStore } from "pinia";
 
 const shield = new StageShield();

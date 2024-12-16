@@ -3,6 +3,7 @@ import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
 import StageShieldVue from "@/components/stage/shield.vue";
 import CreateBar from "@/components/stage/tools/create-bar.vue";
+import { StageShieldInstance } from "@/types";
 
 const stageStore = useStageStore();
 const stageRef = ref<HTMLElement | null>(null);
