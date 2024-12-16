@@ -1,10 +1,12 @@
-import { ElementCreateStatus, ElementObject, IStageElement } from "@/types";
+import { ElementCreateStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
 
 export default class StageElement implements IStageElement {
-  obj: ElementObject;
-  status: ElementCreateStatus;
   id: string;
+  obj: ElementObject;
+  points: IPoint[];
+  fullPoints: IPoint[];
+  status: ElementCreateStatus;
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -28,11 +30,11 @@ export default class StageElement implements IStageElement {
     this.isDragging = false;
   }
 
-  /**
-   * 初始化
-   * 
-   * @param obj 
-   */
-  async init(): Promise<void> {
+  render(canvas: HTMLCanvasElement): void {
+    throw new Error("Method not implemented.");
+  }
+
+  calcFullPoints(): IPoint[] {
+    return this.points;
   }
 }

@@ -41,3 +41,6 @@ export const creators = {
 export const cursorCanvasSize = 24;
 export const minCursorMoveXDistance = 2;
 export const minCursorMoveYDistance = 2;
+export const defaultCreatorStrokeColor = 'rgba(255, 255, 255, 0.5)';
+export const defaultCreatorFillColor = 'rgba(255, 255, 255, 0)';
+export const defaultCreatorStrokeWidth = 1;

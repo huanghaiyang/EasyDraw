@@ -1,11 +1,12 @@
-import { CreatorTypes, ElementObject, IPoint, IStageElement, IStagePersister, IStageShield } from "@/types";
+import { CreatorTypes, ElementObject, IPoint, IStageElement, IStagePersister } from "@/types";
 import { nanoid } from "nanoid";
 import StageElement from "@/modules/elements/StageElement";
+import StageElementRect from "@/modules/elements/StageElementRect";
 
 export default class StagePersister implements IStagePersister {
 
   // 画板上绘制的元素列表（形状、文字、图片等）
-  elementList: IStageElement[];
+  elementList: IStageElement[] = [];
 
   /**
    * 判断元素是否存在
@@ -82,8 +83,14 @@ export default class StagePersister implements IStagePersister {
    * @returns 
    */
   createElement(obj: ElementObject): IStageElement {
-    const element = new StageElement(obj);
-    return element;
+    const { type } = obj;
+    switch (type) {
+      case CreatorTypes.rectangle: {
+        return new StageElementRect(obj);
+      }
+      default:
+        return new StageElement(obj);
+    }
   }
 
 }

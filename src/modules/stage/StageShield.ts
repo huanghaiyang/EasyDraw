@@ -40,6 +40,12 @@ export default class StageShield implements IStageShield {
   private pressUpPosition: IPoint;
   // 鼠标抬起时距离世界坐标中心点的偏移
   private pressUpWorldCenterOffset: IPoint;
+  // 鼠标按下并移动时的位置  
+  private pressMovePosition: IPoint;
+  // 鼠标移动时距离世界坐标中心点的偏移
+  private pressMoveWorldCenterOffset: IPoint;
+  // 鼠标是否按下过
+  private isPressDown: boolean = false;
   // 绘制引擎
   private persister: IStagePersister;
   // 当前正在创建的元素
@@ -154,6 +160,11 @@ export default class StageShield implements IStageShield {
   handleCursorMove(e: MouseEvent): void {
     this.calcCursorPos(e);
     this.applyCursorPosMove(e);
+
+    if (this.isPressDown) {
+      this.calcPressMove(e);
+      this.tryRenderCreator(e);
+    }
   }
 
   /**
@@ -172,6 +183,7 @@ export default class StageShield implements IStageShield {
    * @param e 
    */
   handlePressDown(e: MouseEvent): void {
+    this.isPressDown = true;
     this.calcPressDown(e);
     this.initPressDownEvent();
   }
@@ -182,6 +194,7 @@ export default class StageShield implements IStageShield {
    * @param e 
    */
   handlePressUp(e: MouseEvent): void {
+    this.isPressDown = false;
     this.calcPressUp(e);
     this.applyPressUp(e);
   }
@@ -235,7 +248,7 @@ export default class StageShield implements IStageShield {
   }
 
   /**
-   * 鼠标按下事件
+   * 鼠标按下时计算位置
    * 
    * @param e 
    */
@@ -245,13 +258,23 @@ export default class StageShield implements IStageShield {
   }
 
   /**
-   * 鼠标抬起事件
+   * 鼠标抬起时计算位置
    * 
    * @param e 
    */
   calcPressUp(e: MouseEvent): void {
     this.pressUpPosition = this.calcCursorPos(e);
     this.pressUpWorldCenterOffset = this.calcOffsetByPos(this.pressUpPosition);
+  }
+
+  /**
+   * 鼠标按压并移动时候，计算偏移量
+   * 
+   * @param e 
+   */
+  calcPressMove(e: MouseEvent): void {
+    this.pressMovePosition = this.calcCursorPos(e);
+    this.pressMoveWorldCenterOffset = this.calcOffsetByPos(this.pressMovePosition);
   }
 
   /**
@@ -272,15 +295,15 @@ export default class StageShield implements IStageShield {
    * @returns 
    */
   checkCursorPressMovedAvailable(e: MouseEvent): boolean {
-    return Math.abs(this.pressUpWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) < minCursorMoveXDistance
-      || Math.abs(this.pressUpWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) < minCursorMoveYDistance;
+    return Math.abs(this.pressMoveWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) >= minCursorMoveXDistance
+      || Math.abs(this.pressMoveWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) >= minCursorMoveYDistance;
   }
 
   /**
    * 在当前鼠标位置创建元素
    */
   createElementAtPosition(): void {
-    
+
   }
 
   /**
@@ -288,9 +311,9 @@ export default class StageShield implements IStageShield {
    */
   createOrUpdateElement(): IStageElement {
     const { category, type } = this.currentCreator;
-    switch(category) {
+    switch (category) {
       case CreatorCategories.shapes: {
-        const obj = this.persister.createObject(type, [this.pressDownWorldCenterOffset, this.pressUpWorldCenterOffset])
+        const obj = this.persister.createObject(type, [this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset])
         if (this.currentCreatingElementId) {
           const element = this.persister.updateElementObj(this.currentCreatingElementId, obj);
           return element;
@@ -301,7 +324,7 @@ export default class StageShield implements IStageShield {
           return element;
         }
       }
-      default: 
+      default:
         break;
     }
   }
@@ -416,6 +439,20 @@ export default class StageShield implements IStageShield {
   }
 
   /**
+   * 清除画布内容
+   */
+  clearCanvas(): void {
+    this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /**
+   * 清除前景画布内容
+   */
+  clearBCanvas(): void {
+    this.bCanvas.getContext('2d').clearRect(0, 0, this.bCanvas.width, this.bCanvas.height);
+  }
+
+  /**
    * 设置画布鼠标样式
    * 
    * @param cursor 
@@ -449,6 +486,39 @@ export default class StageShield implements IStageShield {
         resolve();
       }
     })
+  }
+
+  /**
+   * 尝试渲染创作工具
+   * 
+   * @param e 
+   */
+  tryRenderCreator(e: MouseEvent): void {
+    if (this.checkCreatorActive(this.currentCreator) && this.checkCursorPressMovedAvailable(e)) {
+      this.renderCreator(e);
+    }
+  }
+
+  /**
+   * 渲染组件元素
+   * 
+   * @param e 
+   */
+  renderCreator(e: MouseEvent): void {
+    const element = this.createOrUpdateElement();
+    if (element) {
+      this.clearBCanvas();
+      // 计算element坐标相对于画布的坐标
+      const points = element.obj.points.map(p => {
+        return {
+          x: p.x + this.canvasRectCache.width / 2 - this.worldCenterOffset.x,
+          y: p.y + this.canvasRectCache.height / 2 - this.worldCenterOffset.y
+        }
+      })
+      element.points = points;
+      element.fullPoints = element.calcFullPoints();
+      element.render(this.bCanvas);
+    }
   }
 
 }

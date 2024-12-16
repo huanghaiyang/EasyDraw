@@ -57,11 +57,16 @@ export type ElementObject = {
   points: IPoint[];
   type: CreatorTypes;
   data: any;
+  strokeColor?: string;
+  strokeWidth?: number;
+  fillColor?: string;
 }
 
 export interface IStageElement {
   id: string;
   obj: ElementObject;
+  points: IPoint[];
+  fullPoints: IPoint[];
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -71,7 +76,8 @@ export interface IStageElement {
   isRotating: boolean;
   isDragging: boolean;
   status: ElementCreateStatus;
-  init(): Promise<void>;
+  render(canvas: HTMLCanvasElement): void;
+  calcFullPoints(): IPoint[];
 }
 
 export type Creator = {
