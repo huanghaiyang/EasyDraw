@@ -35,20 +35,29 @@ export interface IRect {
 
 // 舞台画板
 export interface IStageShield extends IRect {
+  cursorPos: IPoint;
+  currentCreator: Creator;
+  checkCreatorActive(creator: Creator): boolean;
 }
 
-export interface IStageMask extends IRect {
+export interface IStageStore {
+  createOrUpdateElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
+}
+
+export interface IStageCanvasDrawer extends IRect {
   canvas: HTMLCanvasElement;
-  initCanvas(renderEl: HTMLDivElement): void;
+  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl?: HTMLElement): void;
   setSize(size: ISize): void;
   clearCanvas(): void;
 }
 
-export interface IStageBeforeShield extends IRect {
-  canvas: HTMLCanvasElement;
-  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl: HTMLElement): void;
-  setSize(size: ISize): void;
-  clearCanvas(): void;
+export interface IStageMask extends IStageCanvasDrawer {
+  clearCursorCache(): void;
+  applyCursorMove(e: MouseEvent, pos: IPoint);
+}
+
+export interface IStageProvisional extends IStageCanvasDrawer {
+  renderElement(e: MouseEvent, element: IStageElement): void;
 }
 
 export interface IStageSelection extends IRect {
@@ -111,7 +120,7 @@ export enum shieldMouseDownUsage {
   drag = 3
 }
 
-export interface IStagePersister {
+export interface IStageStore {
   elementList: IStageElement[];
   createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;

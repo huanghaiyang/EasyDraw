@@ -1,16 +1,21 @@
-import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
+import { defaults, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
-import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, IPoint, ISize, IStageBeforeShield, IStageElement, IStageMask, IStagePersister, IStageShield } from "@/types";
-import StagePersister from "@/modules/stage/StagePersister";
+import { Creator, CreatorCategories, IPoint, ISize, IStageProvisional, IStageMask, IStageStore, IStageShield } from "@/types";
+import StageStore from "@/modules/stage/StageStore";
 import StageMask from "@/modules/stage/StageMask";
-import CanvasUtils from "@/utils/CanvasUtils";
+import StageProvisional from "@/modules/stage/StageProvisional";
 
 export default class StageShield implements IStageShield {
+  // 舞台尺寸
   size: ISize = {
     width: defaults.state.shield.width,
     height: defaults.state.shield.height
   };
+  // 鼠标位置
+  cursorPos: IPoint;
+  // 当前正在使用的创作工具
+  currentCreator: Creator;
+
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
   private worldCenterOffset: IPoint = {
     x: 0,
@@ -21,15 +26,11 @@ export default class StageShield implements IStageShield {
   // 遮罩画布用以绘制鼠标样式,工具图标等
   private mask: IStageMask;
   // 前景画板
-  private beforeShield: IStageBeforeShield;
-  // 当前正在使用的创作工具
-  private currentCreator: Creator;
+  private provisional: IStageProvisional;
+  // 数据存储
+  private store: IStageStore;
   // canvas渲染容器
   private renderEl: HTMLDivElement;
-  // 鼠标位置
-  private cursorPos: IPoint;
-  // 鼠标样式画布,用以加速绘制
-  private cursorCanvasCache: HTMLCanvasElement;
   // 画布容器尺寸
   private canvasRectCache: DOMRect;
   // 画布是否是第一次渲染
@@ -48,14 +49,11 @@ export default class StageShield implements IStageShield {
   private pressMoveWorldCenterOffset: IPoint;
   // 鼠标是否按下过
   private isPressDown: boolean = false;
-  // 绘制引擎
-  private persister: IStagePersister;
-  // 当前正在创建的元素
-  private currentCreatingElementId;
 
   constructor() {
-    this.persister = new StagePersister();
-    this.mask = new StageMask();
+    this.store = new StageStore(this);
+    this.mask = new StageMask(this);
+    this.provisional = new StageProvisional();
     this.initEventHandlers();
   }
 
@@ -67,16 +65,6 @@ export default class StageShield implements IStageShield {
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
     this.handlePressUp = this.handlePressUp.bind(this);
-  }
-
-  // 销毁鼠标样式画布
-  destroyCursorCanvasCache(): void {
-    this.cursorCanvasCache = null;
-  }
-
-  // 清除鼠标样式画布
-  clearCursorCanvasCache(): void {
-    this.cursorCanvasCache.getContext('2d').clearRect(0, 0, this.cursorCanvasCache.width, this.cursorCanvasCache.height);
   }
 
   /**
@@ -97,11 +85,11 @@ export default class StageShield implements IStageShield {
    */
   async initCanvas(): Promise<void> {
     this.mask.initCanvas(this.renderEl);
-    this.beforeShield.initCanvas(this.renderEl, this.mask.canvas);
+    this.provisional.initCanvas(this.renderEl, this.mask.canvas);
 
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
-    this.renderEl.insertBefore(this.canvas, this.beforeShield.canvas);
+    this.renderEl.insertBefore(this.canvas, this.provisional.canvas);
   }
 
   /**
@@ -112,22 +100,6 @@ export default class StageShield implements IStageShield {
       this.initRenderResizeEvent(),
       this.initMouseEvents()
     ])
-  }
-
-  /**
-   * 初始化鼠标样式画布
-   */
-  async initCanvasCaches(): Promise<void> {
-    this.cursorCanvasCache = document.createElement('canvas');
-    this.cursorCanvasCache.width = cursorCanvasSize;
-    this.cursorCanvasCache.height = cursorCanvasSize;
-    // 同时绘制图标
-    await CanvasUtils.drawImgLike(this.cursorCanvasCache, this.getCreatorMouseIcon(), {
-      x: 0,
-      y: 0,
-      width: cursorCanvasSize,
-      height: cursorCanvasSize,
-    })
   }
 
   /**
@@ -155,11 +127,11 @@ export default class StageShield implements IStageShield {
    */
   handleCursorMove(e: MouseEvent): void {
     this.calcCursorPos(e);
-    this.applyCursorPosMove(e);
+    this.applyCursorMove(e);
 
     if (this.isPressDown) {
       this.calcPressMove(e);
-      this.tryRenderCreator(e);
+      this.renderElementIfy(e);
     }
   }
 
@@ -170,7 +142,7 @@ export default class StageShield implements IStageShield {
    */
   handleCursorLeave(e: MouseEvent): void {
     this.clearCursorPos();
-    this.applyCursorPosLeave(e)
+    this.applyCursorLeave(e)
   }
 
   /**
@@ -228,8 +200,11 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  async applyCursorPosMove(e: MouseEvent): Promise<void> {
-    this.applyMCanvasCursorPosMove(e)
+  async applyCursorMove(e: MouseEvent): Promise<void> {
+    this.mask.applyCursorMove(e, this.cursorPos);
+    if (this.checkCreatorActive(this.currentCreator)) {
+      this.setCursorStyle('none')
+    }
   }
 
   /**
@@ -237,10 +212,10 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  applyCursorPosLeave(e: MouseEvent): void {
+  applyCursorLeave(e: MouseEvent): void {
     this.mask.clearCanvas();
-    this.setCanvasCursor('default');
-    this.destroyCursorCanvasCache();
+    this.mask.clearCursorCache();
+    this.setCursorStyle('default');
   }
 
   /**
@@ -302,37 +277,7 @@ export default class StageShield implements IStageShield {
 
   }
 
-  /**
-   * 在当前鼠标位置创建临时元素
-   */
-  createOrUpdateElement(): IStageElement {
-    const { category, type } = this.currentCreator;
-    switch (category) {
-      case CreatorCategories.shapes: {
-        const obj = this.persister.createObject(type, [this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset])
-        if (this.currentCreatingElementId) {
-          const element = this.persister.updateElementObj(this.currentCreatingElementId, obj);
-          return element;
-        } else {
-          const element = this.persister.createElement(obj);
-          this.persister.addElement(element);
-          this.currentCreatingElementId = element.id;
-          return element;
-        }
-      }
-      default:
-        break;
-    }
-  }
 
-  /**
-   * 渲染鼠标样式
-   * 
-   * @param e 
-   */
-  async applyMCanvasCursorPosMove(e: MouseEvent): Promise<void> {
-    this.renderMCreatorIfy(e)
-  }
 
   /**
    * 给定坐标计算距离世界坐标中心点的偏移
@@ -347,32 +292,6 @@ export default class StageShield implements IStageShield {
   }
 
   /**
-   * 渲染鼠标样式
-   * 
-   * @param e 
-   */
-  async renderMCreatorIfy(e: MouseEvent): Promise<void> {
-    // 检测当前创作工具是否可用
-    if (this.checkCreatorActive(this.currentCreator)) {
-      // 清除画布
-      this.mask.clearCanvas();
-      await this.setCanvasCursor('none');
-      if (this.cursorCanvasCache) {
-        await CanvasUtils.drawImgLike(this.mask.canvas, this.cursorCanvasCache, {
-          x: this.cursorPos.x - cursorCanvasSize / 2,
-          y: this.cursorPos.y - cursorCanvasSize / 2,
-          width: cursorCanvasSize,
-          height: cursorCanvasSize,
-        })
-      } else {
-        await this.initCanvasCaches();
-      }
-    } else {
-      this.applyCursorPosLeave(e);
-    }
-  }
-
-  /**
    * 刷新画布尺寸
    */
   refreshSize(): void {
@@ -381,7 +300,7 @@ export default class StageShield implements IStageShield {
 
     this.canvasRectCache = rect;
     this.mask.setSize({ width, height })
-    this.beforeShield.setSize({ width, height });
+    this.provisional.setSize({ width, height });
     this.canvas.width = width;
     this.canvas.height = height;
     this.size = {
@@ -400,18 +319,6 @@ export default class StageShield implements IStageShield {
    */
   async setCreator(creator: Creator): Promise<void> {
     this.currentCreator = creator;
-  }
-
-  /**
-   * 获取当前创作工具的鼠标图标
-   */
-  getCreatorMouseIcon(): string {
-    switch (this.currentCreator.category) {
-      case CreatorCategories.shapes:
-        return CrossSvg;
-      default:
-        return CrossSvg;
-    }
   }
 
   /**
@@ -436,7 +343,7 @@ export default class StageShield implements IStageShield {
    * 
    * @param cursor 
    */
-  async setCanvasCursor(cursor: string): Promise<void> {
+  setCursorStyle(cursor: string): void {
     this.canvas.style.cursor = cursor;
   }
 
@@ -445,31 +352,12 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  tryRenderCreator(e: MouseEvent): void {
+  renderElementIfy(e: MouseEvent): void {
     if (this.checkCreatorActive(this.currentCreator) && this.checkCursorPressMovedAvailable(e)) {
-      this.renderCreator(e);
-    }
-  }
-
-  /**
-   * 渲染组件元素
-   * 
-   * @param e 
-   */
-  renderCreator(e: MouseEvent): void {
-    const element = this.createOrUpdateElement();
-    if (element) {
-      this.beforeShield.clearCanvas();
-      // 计算element坐标相对于画布的坐标
-      const points = element.obj.points.map(p => {
-        return {
-          x: p.x + this.canvasRectCache.width / 2 - this.worldCenterOffset.x,
-          y: p.y + this.canvasRectCache.height / 2 - this.worldCenterOffset.y
-        }
-      })
-      element.points = points;
-      element.fullPoints = element.calcFullPoints();
-      element.render(this.beforeShield.canvas);
+      const element = this.store.createOrUpdateElement([this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset], this.canvasRectCache, this.worldCenterOffset);
+      if (element) {
+        this.provisional.renderElement(e, element);
+      }
     }
   }
 
