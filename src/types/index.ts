@@ -108,6 +108,7 @@ export interface IStageElement {
   status: ElementCreateStatus;
   render(canvas: HTMLCanvasElement): void;
   calcFullPoints(): IPoint[];
+  getEdgePoints(): IPoint[];
 }
 
 export type Creator = {
@@ -139,7 +140,7 @@ export enum ElementCreateStatus {
   finished = 2
 }
 
-export enum SelectionDrawTypes {
+export enum SelectionRenderTypes {
   none = 0,
   rect = 1,
   line = 2

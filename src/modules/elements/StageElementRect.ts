@@ -48,4 +48,13 @@ export default class StageElementRect extends StageElement {
     ];
   }
 
+  /**
+   * 获取矩形的边线点
+   * 
+   * @returns 
+   */
+  getEdgePoints(): IPoint[] {
+    return this.fullPoints;
+  }
+
 }

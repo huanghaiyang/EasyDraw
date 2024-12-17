@@ -37,4 +37,8 @@ export default class StageElement implements IStageElement {
   calcFullPoints(): IPoint[] {
     return this.points;
   }
+
+  getEdgePoints(): IPoint[] {
+    throw new Error("Method not implemented.");
+  }
 }

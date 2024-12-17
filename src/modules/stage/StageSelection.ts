@@ -1,4 +1,5 @@
-import { IStageElement, IStageSelection, IStageShield } from "@/types";
+import { CreatorTypes, IPoint, IStageElement, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
+import { first } from "lodash";
 
 export default class StageSelection implements IStageSelection {
 
@@ -24,7 +25,25 @@ export default class StageSelection implements IStageSelection {
    * 重绘选区
    */
   redraw(): void {
+    const renderType = this.getSelectionRenderType();
+    switch (renderType) {
+      case SelectionRenderTypes.rect: {
+        const points = this.getSelectionRenderPoints();
+        this.redrawRect(points);
+        break;
+      }
+      default:
+        break;
+    }
+  }
 
+  /**
+   * 渲染矩形选区
+   * 
+   * @param points 
+   */
+  redrawRect(points: IPoint[]): void {
+    
   }
 
   /**
@@ -32,8 +51,66 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param elements 
    */
-  setElements(elements: IStageElement[]) : void {
+  setElements(elements: IStageElement[]): void {
     this.elementList = elements;
+  }
+
+  /**
+   * 获取选区渲染类型
+   * 
+   * @returns 
+   */
+  getSelectionRenderType() {
+    if (this.elementList.length === 0) {
+      const type = first(this.elementList).obj.type;
+      switch (type) {
+        case CreatorTypes.rectangle: {
+          return SelectionRenderTypes.rect;
+        }
+      }
+    }
+    return SelectionRenderTypes.none;
+  }
+
+  /**
+   * 获取需要渲染的选区坐标
+   * 
+   * @returns IPoint[]
+   */
+  getSelectionRenderPoints(): IPoint[] {
+    let points: IPoint[] = [];
+    const renderType = this.getSelectionRenderType();
+    switch (renderType) {
+      case SelectionRenderTypes.rect: {
+        points = this.getElementsEdge();
+        break;
+      }
+      default:
+        break;
+    }
+    return points;
+  }
+
+  /**
+   * 获取组件的边缘坐标
+   * 
+   * @returns IPoint[]
+   */
+  getElementsEdge(): IPoint[] {
+    const points = this.elementList.map(element => {
+      return element.getEdgePoints();
+    });
+    const minX = Math.min(...points.map(point => point[0].x));
+    const minY = Math.min(...points.map(point => point[0].y));
+    const maxX = Math.max(...points.map(point => point[2].x));
+    const maxY = Math.max(...points.map(point => point[2].y));
+
+    return [
+      { x: minX, y: minY },
+      { x: maxX, y: minY },
+      { x: maxX, y: maxY },
+      { x: minX, y: maxY }
+    ];
   }
 
 }
