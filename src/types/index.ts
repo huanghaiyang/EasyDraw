@@ -37,6 +37,16 @@ export interface IRect {
 export interface IStageShield extends IRect {
 }
 
+export interface IStageMask extends IRect {
+  canvas: HTMLCanvasElement;
+  initCanvas(renderEl: HTMLDivElement): void;
+  setSize(size: ISize): void;
+  clearCanvas(): void;
+}
+
+export interface IStageSelection extends IRect {
+}
+
 // 舞台容器
 export interface IStageContainer extends IRect {
   el: HTMLDivElement;

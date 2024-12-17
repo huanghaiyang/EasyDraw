@@ -1,8 +1,9 @@
 import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStagePersister, IStageShield } from "@/types";
+import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStageMask, IStagePersister, IStageShield } from "@/types";
 import StagePersister from "@/modules/stage/StagePersister";
+import StageMask from "@/modules/stage/StageMask";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -17,7 +18,7 @@ export default class StageShield implements IStageShield {
   // 画布
   private canvas: HTMLCanvasElement;
   // 遮罩画布用以绘制鼠标样式,工具图标等
-  private mCanvas: HTMLCanvasElement;
+  private mask: IStageMask;
   // 前景画板
   private bCanvas: HTMLCanvasElement;
   // 当前正在使用的创作工具
@@ -53,6 +54,7 @@ export default class StageShield implements IStageShield {
 
   constructor() {
     this.persister = new StagePersister();
+    this.mask = new StageMask();
     this.initEventHandlers();
   }
 
@@ -93,15 +95,12 @@ export default class StageShield implements IStageShield {
    * 初始化画布
    */
   async initCanvas(): Promise<void> {
-    this.mCanvas = document.createElement('canvas');
-    this.mCanvas.id = 'm-shield';
-    this.mCanvas.style.pointerEvents = 'none';
-    this.renderEl.insertBefore(this.mCanvas, this.renderEl.firstChild);
+    this.mask.initCanvas(this.renderEl);
 
     this.bCanvas = document.createElement('canvas');
     this.bCanvas.id = 'b-shield';
     this.bCanvas.style.pointerEvents = 'none';
-    this.renderEl.insertBefore(this.bCanvas, this.mCanvas);
+    this.renderEl.insertBefore(this.bCanvas, this.mask.canvas);
 
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
@@ -242,7 +241,7 @@ export default class StageShield implements IStageShield {
    * @param e 
    */
   applyCursorPosLeave(e: MouseEvent): void {
-    this.clearMCanvas();
+    this.mask.clearCanvas();
     this.setCanvasCursor('default');
     this.destroyCursorCanvasCache();
   }
@@ -359,10 +358,10 @@ export default class StageShield implements IStageShield {
     // 检测当前创作工具是否可用
     if (this.checkCreatorActive(this.currentCreator)) {
       // 清除画布
-      this.clearMCanvas();
+      this.mask.clearCanvas();
       await this.setCanvasCursor('none');
       if (this.cursorCanvasCache) {
-        await this.drawImgLike(this.mCanvas, this.cursorCanvasCache, {
+        await this.drawImgLike(this.mask.canvas, this.cursorCanvasCache, {
           x: this.cursorPos.x - cursorCanvasSize / 2,
           y: this.cursorPos.y - cursorCanvasSize / 2,
           width: cursorCanvasSize,
@@ -384,10 +383,9 @@ export default class StageShield implements IStageShield {
     const { width, height } = rect;
 
     this.canvasRectCache = rect;
+    this.mask.setSize({ width, height })
     this.canvas.width = width;
     this.canvas.height = height;
-    this.mCanvas.width = width;
-    this.mCanvas.height = height;
     this.bCanvas.width = width;
     this.bCanvas.height = height;
 
@@ -429,13 +427,6 @@ export default class StageShield implements IStageShield {
   checkCreatorActive(creator: Creator): boolean {
     if (!creator) return false;
     return [CreatorCategories.shapes].includes(creator.category);
-  }
-
-  /**
-   * 清除遮罩画布内容
-   */
-  clearMCanvas(): void {
-    this.mCanvas.getContext('2d').clearRect(0, 0, this.mCanvas.width, this.mCanvas.height);
   }
 
   /**
