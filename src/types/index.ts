@@ -44,6 +44,13 @@ export interface IStageMask extends IRect {
   clearCanvas(): void;
 }
 
+export interface IStageBeforeShield extends IRect {
+  canvas: HTMLCanvasElement;
+  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl: HTMLElement): void;
+  setSize(size: ISize): void;
+  clearCanvas(): void;
+}
+
 export interface IStageSelection extends IRect {
 }
 

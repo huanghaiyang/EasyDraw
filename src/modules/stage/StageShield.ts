@@ -1,9 +1,10 @@
 import { defaults, cursorCanvasSize, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
 import CrossSvg from "@/assets/Cross.svg";
-import { Creator, CreatorCategories, ElementObject, IPoint, ISize, IStageElement, IStageMask, IStagePersister, IStageShield } from "@/types";
+import { Creator, CreatorCategories, IPoint, ISize, IStageBeforeShield, IStageElement, IStageMask, IStagePersister, IStageShield } from "@/types";
 import StagePersister from "@/modules/stage/StagePersister";
 import StageMask from "@/modules/stage/StageMask";
+import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class StageShield implements IStageShield {
   size: ISize = {
@@ -20,7 +21,7 @@ export default class StageShield implements IStageShield {
   // 遮罩画布用以绘制鼠标样式,工具图标等
   private mask: IStageMask;
   // 前景画板
-  private bCanvas: HTMLCanvasElement;
+  private beforeShield: IStageBeforeShield;
   // 当前正在使用的创作工具
   private currentCreator: Creator;
   // canvas渲染容器
@@ -96,15 +97,11 @@ export default class StageShield implements IStageShield {
    */
   async initCanvas(): Promise<void> {
     this.mask.initCanvas(this.renderEl);
-
-    this.bCanvas = document.createElement('canvas');
-    this.bCanvas.id = 'b-shield';
-    this.bCanvas.style.pointerEvents = 'none';
-    this.renderEl.insertBefore(this.bCanvas, this.mask.canvas);
+    this.beforeShield.initCanvas(this.renderEl, this.mask.canvas);
 
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
-    this.renderEl.insertBefore(this.canvas, this.bCanvas);
+    this.renderEl.insertBefore(this.canvas, this.beforeShield.canvas);
   }
 
   /**
@@ -125,7 +122,7 @@ export default class StageShield implements IStageShield {
     this.cursorCanvasCache.width = cursorCanvasSize;
     this.cursorCanvasCache.height = cursorCanvasSize;
     // 同时绘制图标
-    await this.drawImgLike(this.cursorCanvasCache, this.getCreatorMouseIcon(), {
+    await CanvasUtils.drawImgLike(this.cursorCanvasCache, this.getCreatorMouseIcon(), {
       x: 0,
       y: 0,
       width: cursorCanvasSize,
@@ -361,7 +358,7 @@ export default class StageShield implements IStageShield {
       this.mask.clearCanvas();
       await this.setCanvasCursor('none');
       if (this.cursorCanvasCache) {
-        await this.drawImgLike(this.mask.canvas, this.cursorCanvasCache, {
+        await CanvasUtils.drawImgLike(this.mask.canvas, this.cursorCanvasCache, {
           x: this.cursorPos.x - cursorCanvasSize / 2,
           y: this.cursorPos.y - cursorCanvasSize / 2,
           width: cursorCanvasSize,
@@ -384,11 +381,9 @@ export default class StageShield implements IStageShield {
 
     this.canvasRectCache = rect;
     this.mask.setSize({ width, height })
+    this.beforeShield.setSize({ width, height });
     this.canvas.width = width;
     this.canvas.height = height;
-    this.bCanvas.width = width;
-    this.bCanvas.height = height;
-
     this.size = {
       width,
       height
@@ -437,46 +432,12 @@ export default class StageShield implements IStageShield {
   }
 
   /**
-   * 清除前景画布内容
-   */
-  clearBCanvas(): void {
-    this.bCanvas.getContext('2d').clearRect(0, 0, this.bCanvas.width, this.bCanvas.height);
-  }
-
-  /**
    * 设置画布鼠标样式
    * 
    * @param cursor 
    */
   async setCanvasCursor(cursor: string): Promise<void> {
     this.canvas.style.cursor = cursor;
-  }
-
-  /**
-   * 绘制svg
-   * 
-   * @param target 
-   * @param svg 
-   * @param options 
-   */
-  async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: Partial<DOMRect>): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const ctx = target.getContext('2d');
-      if (typeof svg === 'string') {
-        const img = new Image();
-        img.src = svg;
-        img.onload = () => {
-          ctx.drawImage(img, options.x, options.y, options.width, options.height);
-          resolve();
-        }
-        img.onerror = () => {
-          reject();
-        }
-      } else if (svg instanceof HTMLCanvasElement) {
-        ctx.drawImage(svg, options.x, options.y, options.width, options.height);
-        resolve();
-      }
-    })
   }
 
   /**
@@ -498,7 +459,7 @@ export default class StageShield implements IStageShield {
   renderCreator(e: MouseEvent): void {
     const element = this.createOrUpdateElement();
     if (element) {
-      this.clearBCanvas();
+      this.beforeShield.clearCanvas();
       // 计算element坐标相对于画布的坐标
       const points = element.obj.points.map(p => {
         return {
@@ -508,7 +469,7 @@ export default class StageShield implements IStageShield {
       })
       element.points = points;
       element.fullPoints = element.calcFullPoints();
-      element.render(this.bCanvas);
+      element.render(this.beforeShield.canvas);
     }
   }
 
