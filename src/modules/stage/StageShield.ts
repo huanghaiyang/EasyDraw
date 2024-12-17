@@ -459,7 +459,7 @@ export default class StageShield implements IStageShield {
    * @param svg 
    * @param options 
    */
-  async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: { x: number, y: number, width: number, height: number }): Promise<void> {
+  async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: Partial<DOMRect>): Promise<void> {
     return new Promise((resolve, reject) => {
       const ctx = target.getContext('2d');
       if (typeof svg === 'string') {
