@@ -1,6 +1,6 @@
-import { defaults, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
+import { StageDefaults, MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
-import { Creator, CreatorCategories, IPoint, ISize, IStageProvisional, IStageMask, IStageStore, IStageShield, IStageSelection } from "@/types";
+import { Creator, CreatorCategories, IPoint, ISize, IStageProvisional, IStageMask, IStageStore, IStageShield, IStageSelection, IStageElement } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageMask from "@/modules/stage/StageMask";
 import StageProvisional from "@/modules/stage/StageProvisional";
@@ -9,8 +9,8 @@ import StageSelection from "./StageSelection";
 export default class StageShield implements IStageShield {
   // 舞台尺寸
   size: ISize = {
-    width: defaults.state.shield.width,
-    height: defaults.state.shield.height
+    width: StageDefaults.shield.width,
+    height: StageDefaults.shield.height
   };
   // 鼠标位置
   cursorPos: IPoint;
@@ -88,9 +88,12 @@ export default class StageShield implements IStageShield {
    * 初始化画布
    */
   async initCanvas(): Promise<void> {
-    this.mask.initCanvas(this.renderEl);
-    this.provisional.initCanvas(this.renderEl, this.mask.canvas);
+    const maskCanvas = this.mask.initCanvas();
+    const provisionalCanvas = this.provisional.initCanvas();
 
+    this.renderEl.insertBefore(maskCanvas, this.renderEl.firstChild);
+    this.renderEl.insertBefore(provisionalCanvas, this.mask.canvas);
+    this.selection.setCanvas(this.mask.canvas);
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
     this.renderEl.insertBefore(this.canvas, this.provisional.canvas);
@@ -135,7 +138,11 @@ export default class StageShield implements IStageShield {
 
     if (this.isPressDown) {
       this.calcPressMove(e);
-      this.renderElementIfy(e);
+      const element = this.renderProvisionalElement(e);
+      if (element) {
+        this.selection.setElements([element]);
+        this.selection.redraw();
+      }
     }
   }
 
@@ -270,8 +277,8 @@ export default class StageShield implements IStageShield {
    * @returns 
    */
   checkCursorPressMovedAvailable(e: MouseEvent): boolean {
-    return Math.abs(this.pressMoveWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) >= minCursorMoveXDistance
-      || Math.abs(this.pressMoveWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) >= minCursorMoveYDistance;
+    return Math.abs(this.pressMoveWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) >= MinCursorMoveXDistance
+      || Math.abs(this.pressMoveWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) >= MinCursorMoveYDistance;
   }
 
   /**
@@ -356,11 +363,12 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  renderElementIfy(e: MouseEvent): void {
+  renderProvisionalElement(e: MouseEvent): IStageElement | null {
     if (this.checkCreatorActive(this.currentCreator) && this.checkCursorPressMovedAvailable(e)) {
       const element = this.store.createOrUpdateElement([this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset], this.canvasRectCache, this.worldCenterOffset);
       if (element) {
         this.provisional.renderElement(e, element);
+        return element;
       }
     }
   }

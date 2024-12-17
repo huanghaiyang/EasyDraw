@@ -46,7 +46,7 @@ export interface IStageStore {
 
 export interface IStageCanvasDrawer {
   canvas: HTMLCanvasElement;
-  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl?: HTMLElement): void;
+  initCanvas(): HTMLCanvasElement;
   updateCanvasSize(size: ISize): void;
   clearCanvas(): void;
 }
@@ -61,6 +61,10 @@ export interface IStageProvisional extends IStageCanvasDrawer {
 }
 
 export interface IStageSelection {
+  canvas: HTMLCanvasElement;
+  redraw(): void;
+  setElements(elements: IStageElement[]) : void;
+  setCanvas(canvas: HTMLCanvasElement): void;
 }
 
 // 舞台容器
@@ -113,7 +117,7 @@ export type Creator = {
 }
 
 // 画板鼠标按下时的用途
-export enum shieldMouseDownUsage {
+export enum ShieldMouseDownUsage {
   move = 0,
   resize = 1,
   select = 2,
@@ -133,4 +137,10 @@ export enum ElementCreateStatus {
   starting = 0,
   doing = 1,
   finished = 2
+}
+
+export enum SelectionDrawTypes {
+  none = 0,
+  rect = 1,
+  line = 2
 }

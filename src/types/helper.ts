@@ -1,12 +1,12 @@
-import { creators } from "@/types/constants";
+import { Creators } from "@/types/constants";
 import { Creator, CreatorTypes } from "@/types";
 
 export function getCreatorByType(type: CreatorTypes): Creator {
-  // 遍历creators这个对象
-  for (const key in creators) {
-    // 如果creators[key].type等于type，就返回creators[key]
-    if (creators[key].type === type) {
-      return creators[key];
+  // 遍历Creators这个对象
+  for (const key in Creators) {
+    // 如果Creators[key].type等于type，就返回Creators[key]
+    if (Creators[key].type === type) {
+      return Creators[key];
     }
   }
 }

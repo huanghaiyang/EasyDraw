@@ -1,28 +1,24 @@
 import { CreatorCategories, CreatorTypes, CreatorUsageTypes } from "@/types/index";
 
-export const defaults = {
-  state: {
-    slide: {
-      width: 1080,
-      height: 1920,
-      scale: 1
-    },
-    shield: {
-      width: 1920,
-      height: 1080,
-    }
+export const StageDefaults = {
+  slide: {
+    width: 1080,
+    height: 1920,
+    scale: 1
+  },
+  shield: {
+    width: 1920,
+    height: 1080,
   }
 }
 
 // 世界尺寸
-export const worldSize = {
+export const WorldSize = {
   width: 1024 * 1024,
   height: 1024 * 1024
 }
 
-
-
-export const creators = {
+export const Creators = {
   moveable: {
     type: CreatorTypes.moveable,
     name: '移动',
@@ -38,9 +34,12 @@ export const creators = {
 }
 
 // 鼠标样式画布尺寸
-export const cursorCanvasSize = 24;
-export const minCursorMoveXDistance = 2;
-export const minCursorMoveYDistance = 2;
-export const defaultCreatorStrokeColor = 'rgba(0, 0, 0, 0.15)';
-export const defaultCreatorFillColor = 'rgba(0, 0, 0, 0.35)';
-export const defaultCreatorStrokeWidth = 1;
+export const CursorCanvasSize = 24;
+export const MinCursorMoveXDistance = 2;
+export const MinCursorMoveYDistance = 2;
+export const DefaultCreatorStrokeColor = 'rgba(0, 0, 0, 0.15)';
+export const DefaultCreatorFillColor = 'rgba(0, 0, 0, 0.35)';
+export const DefaultCreatorStrokeWidth = 1;
+export const DefaultSelectionStrokeColor = '#0c8ce9';
+export const DefaultSelectionFillColor = 'rgba(0, 0, 0, 0';
+export const DefaultSelectionStrokeWidth = 1;

@@ -1,6 +1,6 @@
 import StageElement from "@/modules/elements/StageElement";
 import { IPoint } from "@/types";
-import { defaultCreatorStrokeColor, defaultCreatorStrokeWidth } from "@/types/constants";
+import { DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/constants";
 
 export default class StageElementRect extends StageElement {
 
@@ -12,9 +12,9 @@ export default class StageElementRect extends StageElement {
   render(canvas: HTMLCanvasElement): void {
     const ctx = canvas.getContext('2d');
     ctx.save();
-    ctx.strokeStyle = this.obj.strokeColor || defaultCreatorStrokeColor;
-    ctx.fillStyle = this.obj.fillColor || defaultCreatorStrokeColor;
-    ctx.lineWidth = this.obj.strokeWidth || defaultCreatorStrokeWidth;
+    ctx.strokeStyle = this.obj.strokeColor || DefaultCreatorStrokeColor;
+    ctx.fillStyle = this.obj.fillColor || DefaultCreatorStrokeColor;
+    ctx.lineWidth = this.obj.strokeWidth || DefaultCreatorStrokeWidth;
     ctx.beginPath();
     this.fullPoints.forEach((point, index) => {
       if (index === 0) {

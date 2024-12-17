@@ -10,15 +10,12 @@ export default class StageProvisional implements IStageProvisional {
 
   /**
    * 画板初始化
-   * 
-   * @param renderEl 
-   * @param siblingBeforeEl 
    */
-  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl?: HTMLElement): void {
+  initCanvas(): HTMLCanvasElement {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'b-shield';
     this.canvas.style.pointerEvents = 'none';
-    renderEl.insertBefore(this.canvas, siblingBeforeEl || renderEl.firstElementChild);
+    return this.canvas;
   }
 
   /**

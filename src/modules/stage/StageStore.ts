@@ -108,7 +108,7 @@ export default class StageStore implements IStageStore {
    * @param canvasRect 
    * @param worldCenterOffset 
    */
-  completeElementPoints(element: IStageElement, canvasRect: DOMRect, worldCenterOffset: IPoint) {
+  calcStagePoints(element: IStageElement, canvasRect: DOMRect, worldCenterOffset: IPoint) {
     if (element) {
       // 计算element坐标相对于画布的坐标
       const points = element.obj.points.map(p => {
@@ -146,7 +146,7 @@ export default class StageStore implements IStageStore {
       default:
         break;
     }
-    this.completeElementPoints(element, canvasRect, worldCenterOffset);
+    this.calcStagePoints(element, canvasRect, worldCenterOffset);
     return element;
   }
 

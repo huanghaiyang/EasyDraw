@@ -1,10 +1,9 @@
 import { CreatorCategories, IPoint, ISize, IStageMask, IStageShield } from "@/types";
-import { cursorCanvasSize } from "@/types/constants";
+import { CursorCanvasSize } from "@/types/constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CrossSvg from '@/assets/Cross.svg';
 
 export default class StageMask implements IStageMask {
-  position?: IPoint;
   canvas: HTMLCanvasElement;
   shield: IStageShield;
   private cursorCacheCanvas: HTMLCanvasElement;
@@ -13,17 +12,11 @@ export default class StageMask implements IStageMask {
     this.shield = shield;
   }
 
-  /**
-   * 画板初始化
-   * 
-   * @param renderEl 
-   * @param siblingBeforeEl 
-   */
-  initCanvas(renderEl: HTMLDivElement, siblingBeforeEl?: HTMLElement): void {
+  initCanvas(): HTMLCanvasElement {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'm-shield';
     this.canvas.style.pointerEvents = 'none';
-    renderEl.insertBefore(this.canvas, siblingBeforeEl || renderEl.firstChild);
+    return this.canvas;
   }
 
   /**
@@ -58,14 +51,14 @@ export default class StageMask implements IStageMask {
    */
   async initCursorCacheCanvas(): Promise<void> {
     this.cursorCacheCanvas = document.createElement('canvas');
-    this.cursorCacheCanvas.width = cursorCanvasSize;
-    this.cursorCacheCanvas.height = cursorCanvasSize;
+    this.cursorCacheCanvas.width = CursorCanvasSize;
+    this.cursorCacheCanvas.height = CursorCanvasSize;
     // 同时绘制图标
     await CanvasUtils.drawImgLike(this.cursorCacheCanvas, this.getCreatorMouseIcon(), {
       x: 0,
       y: 0,
-      width: cursorCanvasSize,
-      height: cursorCanvasSize,
+      width: CursorCanvasSize,
+      height: CursorCanvasSize,
     })
   }
 
@@ -91,10 +84,10 @@ export default class StageMask implements IStageMask {
       this.clearCanvas();
       if (this.cursorCacheCanvas) {
         await CanvasUtils.drawImgLike(this.canvas, this.cursorCacheCanvas, {
-          x: this.shield.cursorPos.x - cursorCanvasSize / 2,
-          y: this.shield.cursorPos.y - cursorCanvasSize / 2,
-          width: cursorCanvasSize,
-          height: cursorCanvasSize,
+          x: this.shield.cursorPos.x - CursorCanvasSize / 2,
+          y: this.shield.cursorPos.y - CursorCanvasSize / 2,
+          width: CursorCanvasSize,
+          height: CursorCanvasSize,
         })
       } else {
         await this.initCursorCacheCanvas();
