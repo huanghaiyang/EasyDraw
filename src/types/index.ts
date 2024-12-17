@@ -44,10 +44,10 @@ export interface IStageStore {
   createOrUpdateElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
 }
 
-export interface IStageCanvasDrawer extends IRect {
+export interface IStageCanvasDrawer {
   canvas: HTMLCanvasElement;
   initCanvas(renderEl: HTMLDivElement, siblingBeforeEl?: HTMLElement): void;
-  setSize(size: ISize): void;
+  updateCanvasSize(size: ISize): void;
   clearCanvas(): void;
 }
 
@@ -60,7 +60,7 @@ export interface IStageProvisional extends IStageCanvasDrawer {
   renderElement(e: MouseEvent, element: IStageElement): void;
 }
 
-export interface IStageSelection extends IRect {
+export interface IStageSelection {
 }
 
 // 舞台容器

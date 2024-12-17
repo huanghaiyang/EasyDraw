@@ -1,9 +1,10 @@
 import { defaults, minCursorMoveXDistance, minCursorMoveYDistance } from "@/types/constants";
 import { addResizeListener } from '@/utils/resize-event';
-import { Creator, CreatorCategories, IPoint, ISize, IStageProvisional, IStageMask, IStageStore, IStageShield } from "@/types";
+import { Creator, CreatorCategories, IPoint, ISize, IStageProvisional, IStageMask, IStageStore, IStageShield, IStageSelection } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageMask from "@/modules/stage/StageMask";
 import StageProvisional from "@/modules/stage/StageProvisional";
+import StageSelection from "./StageSelection";
 
 export default class StageShield implements IStageShield {
   // 舞台尺寸
@@ -29,6 +30,8 @@ export default class StageShield implements IStageShield {
   private provisional: IStageProvisional;
   // 数据存储
   private store: IStageStore;
+  // 选区操作
+  private selection: IStageSelection;
   // canvas渲染容器
   private renderEl: HTMLDivElement;
   // 画布容器尺寸
@@ -53,7 +56,8 @@ export default class StageShield implements IStageShield {
   constructor() {
     this.store = new StageStore(this);
     this.mask = new StageMask(this);
-    this.provisional = new StageProvisional();
+    this.provisional = new StageProvisional(this);
+    this.selection = new StageSelection(this);
     this.initEventHandlers();
   }
 
@@ -299,8 +303,8 @@ export default class StageShield implements IStageShield {
     const { width, height } = rect;
 
     this.canvasRectCache = rect;
-    this.mask.setSize({ width, height })
-    this.provisional.setSize({ width, height });
+    this.mask.updateCanvasSize(rect)
+    this.provisional.updateCanvasSize(rect);
     this.canvas.width = width;
     this.canvas.height = height;
     this.size = {

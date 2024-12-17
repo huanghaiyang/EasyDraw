@@ -5,7 +5,6 @@ import CrossSvg from '@/assets/Cross.svg';
 
 export default class StageMask implements IStageMask {
   position?: IPoint;
-  size: ISize;
   canvas: HTMLCanvasElement;
   shield: IStageShield;
   private cursorCacheCanvas: HTMLCanvasElement;
@@ -32,8 +31,7 @@ export default class StageMask implements IStageMask {
    * 
    * @param size 
    */
-  setSize(size: ISize): void {
-    this.size = size;
+  updateCanvasSize(size: ISize): void {
     this.canvas.width = size.width;
     this.canvas.height = size.height;
   }
@@ -42,10 +40,12 @@ export default class StageMask implements IStageMask {
    * 画布清空
    */
   clearCanvas(): void {
-    this.canvas.getContext('2d')?.clearRect(0, 0, this.size.width, this.size.height);
+    this.canvas.getContext('2d')?.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  // 清除鼠标样式画布
+  /**
+   * 清除鼠标样式画布
+   */
   clearCursorCache(): void {
     if (this.cursorCacheCanvas) {
       this.cursorCacheCanvas.getContext('2d').clearRect(0, 0, this.cursorCacheCanvas.width, this.cursorCacheCanvas.height);

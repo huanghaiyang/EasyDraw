@@ -1,8 +1,12 @@
-import { ISize, IStageElement, IStageProvisional } from "@/types";
+import { ISize, IStageElement, IStageProvisional, IStageShield } from "@/types";
 
 export default class StageProvisional implements IStageProvisional {
-  size: ISize;
   canvas: HTMLCanvasElement;
+  shield: IStageShield;
+
+  constructor(shield: IStageShield) {
+    this.shield = shield;
+  }
 
   /**
    * 画板初始化
@@ -22,8 +26,7 @@ export default class StageProvisional implements IStageProvisional {
    * 
    * @param size 
    */
-  setSize(size: ISize): void {
-    this.size = size;
+  updateCanvasSize(size: ISize): void {
     this.canvas.width = size.width;
     this.canvas.height = size.height;
   }
@@ -32,7 +35,7 @@ export default class StageProvisional implements IStageProvisional {
    * 画布清空
    */
   clearCanvas(): void {
-    this.canvas.getContext('2d')?.clearRect(0, 0, this.size.width, this.size.height);
+    this.canvas.getContext('2d')?.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**
