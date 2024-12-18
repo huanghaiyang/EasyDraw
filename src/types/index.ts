@@ -196,12 +196,13 @@ export interface ITaskFunc {
 
 export interface IRenderTask {
   id: string;
-  run(): Promise<boolean>;
-  destroy(): void;
+  run(): Promise<void>;
+  destroy(): Promise<void>;
 }
 
 export interface IRenderTaskCargo extends IRenderTask {
   tasks: IRenderTask[];
+  running: boolean;
   prepend(task: IRenderTask): void;
   add(task: IRenderTask): void;
   isEmpty(): boolean;

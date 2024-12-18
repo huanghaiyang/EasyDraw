@@ -13,7 +13,7 @@ export default class StageMaskTaskCursor extends StageMaskTaskBase implements IS
   /**
    * 运行绘制任务
    */
-  async run(): Promise<boolean> {
+  async run(): Promise<void> {
     const canvas = this.getCanvas();
     if (canvas) {
       await CanvasUtils.drawImgLike(canvas, this.getCreatorIcon(), {
@@ -23,7 +23,6 @@ export default class StageMaskTaskCursor extends StageMaskTaskBase implements IS
         height: CursorCanvasSize,
       })
     }
-    return true;
   }
 
   /**

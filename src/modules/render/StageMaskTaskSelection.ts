@@ -6,9 +6,4 @@ export default class StageMaskTaskSelection extends StageMaskTaskBase implements
   get data() {
     return this.obj as  IStageMaskTaskSelectionObj;
   }
-
-  run(): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-
 }

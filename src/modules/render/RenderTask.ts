@@ -1,5 +1,4 @@
 import { ITaskFunc } from "@/types";
-import { isBoolean } from "lodash";
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
 
 export default class RenderTask extends RenderTaskBase {
@@ -15,12 +14,15 @@ export default class RenderTask extends RenderTaskBase {
    * 
    * @returns 
    */
-  async run(): Promise<boolean> {
-    const result = await this.func();
-    if (isBoolean(result)) {
-      return result;
-    }
-    return true;
+  async run(): Promise<void> {
+    await this.func();
+  }
+
+  /**
+   * 销毁任务
+   */
+  async destroy(): Promise<void> {
+    // do nothing
   }
 
 }

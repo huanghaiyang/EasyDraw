@@ -7,11 +7,11 @@ export default abstract class RenderTaskBase implements IRenderTask {
   constructor() {
     this.id = nanoid();
   }
-
-  abstract run(): Promise<boolean>;
-
-  destroy(): void {
-
+  run(): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  destroy(): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 
 }

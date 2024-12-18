@@ -3,6 +3,7 @@ import RenderTaskBase from "@/modules/render/RenderTaskBase";
 
 export default class RenderTaskCargo extends RenderTaskBase implements IRenderTaskCargo {
   tasks: IRenderTask[];
+  running: boolean;
 
   constructor(tasks: IRenderTask[]) {
     super();
@@ -24,6 +25,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
    * @param task 
    */
   add(task: IRenderTask) {
+    if (this.running) {
+      return;
+    }
     this.tasks.push(task);
   }
 
@@ -33,18 +37,26 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
    * @param task 
    */
   prepend(task: IRenderTask): void {
+    if (this.running) {
+      return;
+    }
     this.tasks.unshift(task);
   }
 
-  async run(): Promise<boolean> {
+  async run(): Promise<void> {
+    this.running = true;
     while (this.tasks.length > 0) {
       let task = this.tasks.shift();
       if (task) {
-        await task.run();
+        try {
+          await task.run();
+        } catch (e) {
+          console.error(e);
+        }
         task = null;
       }
     }
-    return true;
+    this.running = false;
   }
 
 }
