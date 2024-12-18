@@ -1,5 +1,6 @@
 import { CreatorTypes, IPoint, IStageElement, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
-import { first } from "lodash";
+import CommonUtils from "@/utils/CommonUtils";
+import { first, flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
 
@@ -43,7 +44,7 @@ export default class StageSelection implements IStageSelection {
    * @param points 
    */
   redrawRect(points: IPoint[]): void {
-    
+
   }
 
   /**
@@ -97,20 +98,10 @@ export default class StageSelection implements IStageSelection {
    * @returns IPoint[]
    */
   getElementsEdge(): IPoint[] {
-    const points = this.elementList.map(element => {
+    const points = flatten(this.elementList.map(element => {
       return element.getEdgePoints();
-    });
-    const minX = Math.min(...points.map(point => point[0].x));
-    const minY = Math.min(...points.map(point => point[0].y));
-    const maxX = Math.max(...points.map(point => point[2].x));
-    const maxY = Math.max(...points.map(point => point[2].y));
-
-    return [
-      { x: minX, y: minY },
-      { x: maxX, y: minY },
-      { x: maxX, y: maxY },
-      { x: minX, y: maxY }
-    ];
+    }));
+    return CommonUtils.getBoxByPoints(points);
   }
 
 }

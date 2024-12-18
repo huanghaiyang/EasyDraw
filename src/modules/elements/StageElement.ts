@@ -5,7 +5,7 @@ export default class StageElement implements IStageElement {
   id: string;
   obj: ElementObject;
   points: IPoint[];
-  fullPoints: IPoint[];
+  pathPoints: IPoint[];
   status: ElementCreateStatus;
   isSelected: boolean;
   isVisible: boolean;
@@ -34,7 +34,7 @@ export default class StageElement implements IStageElement {
     throw new Error("Method not implemented.");
   }
 
-  calcFullPoints(): IPoint[] {
+  calcPathPoints(): IPoint[] {
     return this.points;
   }
 

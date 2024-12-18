@@ -96,7 +96,7 @@ export interface IStageElement {
   id: string;
   obj: ElementObject;
   points: IPoint[];
-  fullPoints: IPoint[];
+  pathPoints: IPoint[];
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -107,7 +107,7 @@ export interface IStageElement {
   isDragging: boolean;
   status: ElementCreateStatus;
   render(canvas: HTMLCanvasElement): void;
-  calcFullPoints(): IPoint[];
+  calcPathPoints(): IPoint[];
   getEdgePoints(): IPoint[];
 }
 

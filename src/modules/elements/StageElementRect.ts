@@ -1,6 +1,7 @@
 import StageElement from "@/modules/elements/StageElement";
 import { IPoint } from "@/types";
 import { DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/constants";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class StageElementRect extends StageElement {
 
@@ -16,7 +17,7 @@ export default class StageElementRect extends StageElement {
     ctx.fillStyle = this.obj.fillColor || DefaultCreatorStrokeColor;
     ctx.lineWidth = this.obj.strokeWidth || DefaultCreatorStrokeWidth;
     ctx.beginPath();
-    this.fullPoints.forEach((point, index) => {
+    this.pathPoints.forEach((point, index) => {
       if (index === 0) {
         ctx.moveTo(point.x, point.y);
       } else {
@@ -34,18 +35,9 @@ export default class StageElementRect extends StageElement {
    * 
    * @returns 
    */
-  calcFullPoints(): IPoint[] {
-    const minX = Math.min(...this.points.map(point => point.x));
-    const minY = Math.min(...this.points.map(point => point.y));
-    const maxX = Math.max(...this.points.map(point => point.x));
-    const maxY = Math.max(...this.points.map(point => point.y));
-
-    return [
-      { x: minX, y: minY },
-      { x: minX, y: maxY },
-      { x: maxX, y: maxY },
-      { x: maxX, y: minY },
-    ];
+  calcPathPoints(): IPoint[] {
+    this.pathPoints = CommonUtils.getBoxByPoints(this.points);
+    return this.pathPoints;
   }
 
   /**
@@ -54,7 +46,7 @@ export default class StageElementRect extends StageElement {
    * @returns 
    */
   getEdgePoints(): IPoint[] {
-    return this.fullPoints;
+    return this.pathPoints;
   }
 
 }
