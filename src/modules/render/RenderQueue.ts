@@ -29,12 +29,19 @@ export default class RenderQueue implements IRenderQueue {
   async run(): Promise<void> {
     if (this.queue.length === 0) {
       this.running = false;
-      console.log('RenderQueue: all tasks completed');
       return;
     }
-    const task = this.queue.shift()!;
+    let task = this.queue.shift()!;
     if (task) {
       await task.run();
+      try {
+        await this.run();
+      } catch (error) {
+        console.error('RenderQueue: error running task', task.id, error);
+      } finally {
+        task.destroy();
+        task = null;
+      }
     }
 
     requestAnimationFrame(() => {

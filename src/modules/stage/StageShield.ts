@@ -11,21 +11,15 @@ import {
   IStageSelection,
   IStageElement,
   IStageCursor,
-  IStageMaskTaskSelectionObj,
-  StageMaskElementTypes,
-  SelectionRenderTypes,
-  IStageMaskTaskCursorObj
+  IStageRenderer
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageMask from "@/modules/stage/StageMask";
 import StageProvisional from "@/modules/stage/StageProvisional";
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
-import StageMaskTaskSelection from "@/modules/render/StageMaskTaskSelection";
-import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
-import StageMaskTaskCursor from "@/modules/render/StageMaskTaskCursor";
-import StageMaskTaskClear from "@/modules/render/StageMaskTaskClear";
 import ResizeEvents from '@/utils/ResizeEvents';
+import StageRenderer from "@/modules/stage/StageRenderer";
 
 export default class StageShield implements IStageShield {
   // 舞台尺寸
@@ -45,6 +39,8 @@ export default class StageShield implements IStageShield {
   store: IStageStore;
   // 选区操作
   selection: IStageSelection;
+  // 渲染器
+  renderer: IStageRenderer;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
   worldCenterOffset: IPoint = {
     x: 0,
@@ -79,6 +75,7 @@ export default class StageShield implements IStageShield {
     this.provisional = new StageProvisional(this);
     this.selection = new StageSelection(this);
     this.mask = new StageMask(this);
+    this.renderer = new StageRenderer(this);
     this.initEventHandlers();
   }
 
@@ -165,7 +162,9 @@ export default class StageShield implements IStageShield {
         this.selection.setElements([element]);
       }
     }
-    this.renderMask();
+    this.renderer.redrawMask();
+    this.renderer.redrawProvisional();
+    this.renderer.redraw();
   }
 
   /**
@@ -205,44 +204,6 @@ export default class StageShield implements IStageShield {
    */
   initPressDownEvent(): void {
     this.canvas.addEventListener('mouseup', this.handlePressUp)
-  }
-
-  /**
-   * 渲染mask内容
-   */
-  renderMask(): void {
-    let cargo = new RenderTaskCargo([]);
-    const params = {
-      canvas: this.mask.canvas
-    }
-
-    if (this.selection.getRenderType() === SelectionRenderTypes.rect) {
-      const selectionObj: IStageMaskTaskSelectionObj = {
-        points: this.selection.getEdge(),
-        type: StageMaskElementTypes.selection
-      }
-      const selectionTask = new StageMaskTaskSelection(selectionObj, params);
-      cargo.add(selectionTask);
-    }
-
-    if (this.checkCreatorActive()) {
-      const cursorObj: IStageMaskTaskCursorObj = {
-        point: this.cursor.pos,
-        type: StageMaskElementTypes.cursor,
-        creatorCategory: this.currentCreator.category
-      }
-      const cursorTask = new StageMaskTaskCursor(cursorObj, params);
-      cargo.add(cursorTask);
-    }
-
-    if (!cargo.isEmpty()) {
-      const clearTask = new StageMaskTaskClear(null, params);
-      cargo.prepend(clearTask);
-
-      this.mask.renderCargo(cargo);
-    } else {
-      cargo = null;
-    }
   }
 
   /**

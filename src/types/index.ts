@@ -41,6 +41,7 @@ export interface IStageShield extends IRect {
   store: IStageStore;
   mask: IStageMask;
   provisional: IStageProvisional;
+  renderer: IStageRenderer;
   currentCreator: Creator;
   canvas: HTMLCanvasElement;
   renderEl: HTMLDivElement;
@@ -213,4 +214,13 @@ export interface IRenderQueue {
   queue: IRenderTask[];
   add(task: IRenderTask): Promise<void>;
   run(): Promise<void>;
+}
+
+export interface IStageRenderer {
+  redrawMask(): void;
+  redrawProvisional(): void;
+  redraw(): void;
+  clear(): void;
+  clearMask(): void;
+  clearProvisional(): void;
 }
