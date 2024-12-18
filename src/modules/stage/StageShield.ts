@@ -20,6 +20,7 @@ import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
 import ResizeEvents from '@/utils/ResizeEvents';
 import StageRenderer from "@/modules/stage/StageRenderer";
+import { throttle } from "lodash";
 
 export default class StageShield implements IStageShield {
   // 舞台尺寸
@@ -83,7 +84,7 @@ export default class StageShield implements IStageShield {
    * 初始化事件处理器
    */
   initEventHandlers() {
-    this.handleCursorMove = this.handleCursorMove.bind(this);
+    this.handleCursorMove = throttle(this.handleCursorMove.bind(this), 1000 / 120);
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
     this.handlePressUp = this.handlePressUp.bind(this);
