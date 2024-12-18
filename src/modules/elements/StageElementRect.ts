@@ -36,8 +36,7 @@ export default class StageElementRect extends StageElement {
    * @returns 
    */
   calcPathPoints(): IPoint[] {
-    this.pathPoints = CommonUtils.getBoxByPoints(this.points);
-    return this.pathPoints;
+    return CommonUtils.getBoxByPoints(this.points);
   }
 
   /**

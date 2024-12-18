@@ -1,4 +1,5 @@
 // 创作工具类型
+import { IStageMask } from '@/types';
 export enum CreatorTypes {
   moveable = 0,
   rectangle = 1
@@ -35,9 +36,16 @@ export interface IRect {
 
 // 舞台画板
 export interface IStageShield extends IRect {
-  cursorPos: IPoint;
+  cursor: IStageCursor;
+  selection: IStageSelection;
+  store: IStageStore;
+  mask: IStageMask;
+  provisional: IStageProvisional;
   currentCreator: Creator;
-  checkCreatorActive(creator: Creator): boolean;
+  canvas: HTMLCanvasElement;
+  renderEl: HTMLDivElement;
+  worldCenterOffset: IPoint;
+  checkCreatorActive(): boolean;
 }
 
 export interface IStageStore {
@@ -51,9 +59,45 @@ export interface IStageCanvasDrawer {
   clearCanvas(): void;
 }
 
+export interface IStageCursor {
+  pos: IPoint;
+  clear(): void;
+  calcPos(e: MouseEvent, canvasRect: DOMRect): IPoint;
+}
+
 export interface IStageMask extends IStageCanvasDrawer {
-  clearCursorCache(): void;
-  applyCursorMove(e: MouseEvent, pos: IPoint);
+  renderCargo(cargo: IRenderTaskCargo): Promise<void>;
+}
+
+export enum StageMaskElementTypes {
+  selection = 0,
+  cursor = 1
+}
+
+export interface IStageMaskTaskObj {
+  type: StageMaskElementTypes;
+}
+
+export interface IStageMaskTaskSelectionObj extends IStageMaskTaskObj {
+  points: IPoint[];
+}
+
+export interface IStageMaskTaskCursorObj extends IStageMaskTaskObj {
+  point: IPoint;
+  creatorCategory: CreatorCategories;
+}
+
+export interface IStageMaskTask extends IRenderTask {
+  obj: IStageMaskTaskObj;
+}
+
+export interface IStageMaskTaskSelection extends IStageMaskTask {
+}
+
+export interface IStageMaskTaskCursor extends IStageMaskTask {
+}
+
+export interface IStageMaskTaskClear extends IStageMaskTask {
 }
 
 export interface IStageProvisional extends IStageCanvasDrawer {
@@ -61,10 +105,10 @@ export interface IStageProvisional extends IStageCanvasDrawer {
 }
 
 export interface IStageSelection {
-  canvas: HTMLCanvasElement;
-  redraw(): void;
-  setElements(elements: IStageElement[]) : void;
-  setCanvas(canvas: HTMLCanvasElement): void;
+  setElements(elements: IStageElement[]): void;
+  getEdge(): IPoint[];
+  isEmpty(): boolean;
+  getRenderType(): SelectionRenderTypes
 }
 
 // 舞台容器
@@ -144,4 +188,28 @@ export enum SelectionRenderTypes {
   none = 0,
   rect = 1,
   line = 2
+}
+
+export interface ITaskFunc {
+  (): Promise<boolean | void>;
+}
+
+export interface IRenderTask {
+  id: string;
+  run(): Promise<boolean>;
+  destroy(): void;
+}
+
+export interface IRenderTaskCargo extends IRenderTask {
+  tasks: IRenderTask[];
+  prepend(task: IRenderTask): void;
+  add(task: IRenderTask): void;
+  isEmpty(): boolean;
+}
+
+export interface IRenderQueue {
+  running: boolean;
+  queue: IRenderTask[];
+  add(task: IRenderTask): Promise<void>;
+  run(): Promise<void>;
 }

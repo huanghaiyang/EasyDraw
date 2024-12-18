@@ -118,7 +118,7 @@ export default class StageStore implements IStageStore {
         }
       })
       element.points = points;
-      element.fullPoints = element.calcPathPoints();
+      element.pathPoints = element.calcPathPoints();
     }
   }
 
