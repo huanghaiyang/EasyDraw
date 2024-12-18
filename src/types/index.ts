@@ -72,7 +72,20 @@ export interface IStageMask extends IStageCanvasDrawer {
 
 export enum StageMaskElementTypes {
   selection = 0,
-  cursor = 1
+  selectionHandler = 1,
+  cursor = 2
+}
+
+export enum StageMaskSelectionHandlerTypes {
+  topLeft = 0,
+  topCenter = 1,
+  topRight = 2,
+  rightCenter = 3,
+  bottomRight = 4,
+  bottomCenter = 5,
+  bottomLeft = 6,
+  leftCenter = 7,
+  freedom = 8
 }
 
 export interface IStageMaskTaskObj {
