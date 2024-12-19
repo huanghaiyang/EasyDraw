@@ -1,8 +1,8 @@
-import { CreatorCategories, IStageMaskTaskCursor, IStageMaskTaskCursorObj } from "@/types";
-import CrossSvg from '@/assets/Cross.svg';
+import { IStageMaskTaskCursor, IStageMaskTaskCursorObj } from "@/types";
 import StageMaskTaskBase from "@/modules/render/StageMaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { CursorCanvasSize } from "@/types/constants";
+import CursorUtils from "@/utils/CursorUtils";
 
 export default class StageMaskTaskCursor extends StageMaskTaskBase implements IStageMaskTaskCursor {
 
@@ -16,26 +16,12 @@ export default class StageMaskTaskCursor extends StageMaskTaskBase implements IS
   async run(): Promise<void> {
     const canvas = this.getCanvas();
     if (canvas) {
-      await CanvasUtils.drawImgLike(canvas, this.getCreatorIcon(), {
+      await CanvasUtils.drawImgLike(canvas, CursorUtils.getCursorSvg(this.data.creatorCategory), {
         x: this.data.point.x - CursorCanvasSize / 2,
         y: this.data.point.y - CursorCanvasSize / 2,
         width: CursorCanvasSize,
         height: CursorCanvasSize,
       })
-    }
-  }
-
-  /**
-   * 获取图标
-   * 
-   * @returns 
-   */
-  getCreatorIcon(): string {
-    switch (this.data.creatorCategory) {
-      case CreatorCategories.shapes:
-        return CrossSvg;
-      default:
-        return CrossSvg;
     }
   }
 

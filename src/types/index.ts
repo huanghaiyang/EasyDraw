@@ -1,5 +1,4 @@
 // 创作工具类型
-import { IStageMask } from '@/types';
 export enum CreatorTypes {
   moveable = 0,
   rectangle = 1
@@ -27,6 +26,10 @@ export type IPoint = {
 
 export type IPoint3D = IPoint & {
   z: number;
+}
+
+export type IDirectionPoint = IPoint & {
+  direction: Directions;
 }
 
 export interface IRect {
@@ -70,13 +73,13 @@ export interface IStageMask extends IStageCanvasDrawer {
   renderCargo(cargo: IRenderTaskCargo): Promise<void>;
 }
 
-export enum StageMaskElementTypes {
+export enum StageMaskElementObjTypes {
   selection = 0,
   selectionHandler = 1,
   cursor = 2
 }
 
-export enum StageMaskSelectionHandlerTypes {
+export enum Directions {
   topLeft = 0,
   topCenter = 1,
   topRight = 2,
@@ -89,11 +92,16 @@ export enum StageMaskSelectionHandlerTypes {
 }
 
 export interface IStageMaskTaskObj {
-  type: StageMaskElementTypes;
+  type: StageMaskElementObjTypes;
 }
 
 export interface IStageMaskTaskSelectionObj extends IStageMaskTaskObj {
   points: IPoint[];
+}
+
+export interface IStageMaskTaskSelectionHandlerObj extends IStageMaskTaskObj {
+  point: IPoint;
+  direction: Directions;
 }
 
 export interface IStageMaskTaskCursorObj extends IStageMaskTaskObj {
@@ -106,6 +114,10 @@ export interface IStageMaskTask extends IRenderTask {
 }
 
 export interface IStageMaskTaskSelection extends IStageMaskTask {
+}
+
+export interface IStageMaskTaskSelectionHandler extends IStageMaskTask {
+  direction: Directions;
 }
 
 export interface IStageMaskTaskCursor extends IStageMaskTask {
@@ -219,6 +231,7 @@ export interface IRenderTaskCargo extends IRenderTask {
   running: boolean;
   prepend(task: IRenderTask): void;
   add(task: IRenderTask): void;
+  addAll(tasks: IRenderTask[]): void;
   isEmpty(): boolean;
 }
 

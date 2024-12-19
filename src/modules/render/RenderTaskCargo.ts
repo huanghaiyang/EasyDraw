@@ -32,6 +32,19 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
   }
 
   /**
+   * 添加多个任务
+   * 
+   * @param tasks 
+   * @returns 
+   */
+  addAll(tasks: IRenderTask[]): void {
+    if (this.running) {
+      return;
+    }
+    this.tasks.push(...tasks);
+  }
+
+  /**
    * 添加一个任务到头部
    * 
    * @param task 

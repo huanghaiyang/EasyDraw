@@ -1,7 +1,6 @@
 import { IStageMaskTaskSelection, IStageMaskTaskSelectionObj } from "@/types";
 import StageMaskTaskBase from "@/modules/render/StageMaskTaskBase";
-import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth } from "@/types/constants";
-import { DefaultSelectionFillColor } from './../../types/constants';
+import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/constants";
 
 export default class StageMaskTaskSelection extends StageMaskTaskBase implements IStageMaskTaskSelection {
 

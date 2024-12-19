@@ -21,6 +21,7 @@ import StageCursor from "@/modules/stage/StageCursor";
 import ResizeEvents from '@/utils/ResizeEvents';
 import StageRenderer from "@/modules/stage/StageRenderer";
 import { throttle } from "lodash";
+import CursorUtils from "@/utils/CursorUtils";
 
 export default class StageShield implements IStageShield {
   // 舞台尺寸
@@ -154,7 +155,7 @@ export default class StageShield implements IStageShield {
   handleCursorMove(e: MouseEvent): void {
     this.cursor.calcPos(e, this.canvasRectCache);
     if (this.checkCreatorActive()) {
-      this.setCursorStyle('none')
+      this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
