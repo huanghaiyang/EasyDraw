@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 // 创作工具类型
 export enum CreatorTypes {
   moveable = 0,
@@ -128,6 +130,10 @@ export interface IStageMaskTaskClear extends IStageMaskTask {
 
 export interface IStageProvisional extends IStageCanvasDrawer {
   renderElement(e: MouseEvent, element: IStageElement): void;
+}
+
+export interface IStageEvent extends EventEmitter {
+  init(): void;
 }
 
 export interface IStageSelection {

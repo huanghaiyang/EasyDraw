@@ -11,17 +11,18 @@ import {
   IStageSelection,
   IStageElement,
   IStageCursor,
-  IStageRenderer
+  IStageRenderer,
+  IStageEvent
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageMask from "@/modules/stage/StageMask";
 import StageProvisional from "@/modules/stage/StageProvisional";
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
-import ResizeEvents from '@/utils/ResizeEvents';
 import StageRenderer from "@/modules/stage/StageRenderer";
-import { throttle } from "lodash";
+import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
+import { throttle } from "lodash";
 
 export default class StageShield implements IStageShield {
   // 舞台尺寸
@@ -43,6 +44,8 @@ export default class StageShield implements IStageShield {
   selection: IStageSelection;
   // 渲染器
   renderer: IStageRenderer;
+  // 事件处理中心
+  event: IStageEvent;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
   worldCenterOffset: IPoint = {
     x: 0,
@@ -72,19 +75,15 @@ export default class StageShield implements IStageShield {
   private isPressDown: boolean = false;
 
   constructor() {
+    this.event = new StageEvent(this);
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);
     this.provisional = new StageProvisional(this);
     this.selection = new StageSelection(this);
     this.mask = new StageMask(this);
     this.renderer = new StageRenderer(this);
-    this.initEventHandlers();
-  }
 
-  /**
-   * 初始化事件处理器
-   */
-  initEventHandlers() {
+    this.refreshSize = this.refreshSize.bind(this);
     this.handleCursorMove = throttle(this.handleCursorMove.bind(this), 1000 / 120);
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
@@ -98,10 +97,15 @@ export default class StageShield implements IStageShield {
    */
   async init(renderEl: HTMLDivElement): Promise<void> {
     this.renderEl = renderEl;
-    Promise.all([
+    await Promise.all([
       this.initCanvas(),
-      this.initEvents()
+      this.event.init(),
     ])
+    this.event.on('resize', this.refreshSize)
+    this.event.on('cursorMove', this.handleCursorMove)
+    this.event.on('cursorLeave', this.handleCursorLeave)
+    this.event.on('pressDown', this.handlePressDown)
+    this.event.on('pressUp', this.handlePressUp)
   }
 
   /**
@@ -117,34 +121,6 @@ export default class StageShield implements IStageShield {
     this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
     this.renderEl.insertBefore(this.canvas, this.provisional.canvas);
-  }
-
-  /**
-   * 初始化事件
-   */
-  async initEvents(): Promise<void> {
-    Promise.all([
-      this.initRenderResizeEvent(),
-      this.initMouseEvents()
-    ])
-  }
-
-  /**
-   * 初始化画布容器尺寸变更监听
-   */
-  async initRenderResizeEvent(): Promise<void> {
-    ResizeEvents.addListener(this.renderEl, () => {
-      this.refreshSize();
-    })
-  }
-
-  /**
-   * 初始化鼠标事件
-   */
-  async initMouseEvents(): Promise<void> {
-    this.canvas.addEventListener('mousemove', this.handleCursorMove)
-    this.canvas.addEventListener('mouseleave', this.handleCursorLeave)
-    this.canvas.addEventListener('mousedown', this.handlePressDown)
   }
 
   /**
@@ -187,7 +163,6 @@ export default class StageShield implements IStageShield {
   handlePressDown(e: MouseEvent): void {
     this.isPressDown = true;
     this.calcPressDown(e);
-    this.initPressDownEvent();
   }
 
   /**
@@ -199,13 +174,6 @@ export default class StageShield implements IStageShield {
     this.isPressDown = false;
     this.calcPressUp(e);
     this.applyPressUp(e);
-  }
-
-  /**
-   * 初始化鼠标按下事件
-   */
-  initPressDownEvent(): void {
-    this.canvas.addEventListener('mouseup', this.handlePressUp)
   }
 
   /**
