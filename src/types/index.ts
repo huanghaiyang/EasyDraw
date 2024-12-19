@@ -99,12 +99,10 @@ export interface IStageDrawer extends IStageCanvas {
 }
 
 // 辅助画布
-export interface IStageDrawerMask extends IStageDrawer {
-}
+export interface IStageDrawerMask extends IStageDrawer { }
 
 // 临时组件绘制画布
-export interface IStageDrawerProvisional extends IStageDrawer {
-}
+export interface IStageDrawerProvisional extends IStageDrawer { }
 
 // 辅助画布绘制任务类型
 export enum StageDrawerMaskObjTypes {
@@ -155,8 +153,7 @@ export interface IStageDrawerMaskTask extends IRenderTask {
 }
 
 // 辅助画布选区绘制任务
-export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask {
-}
+export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask { }
 
 // 辅助画布选区控制器绘制任务
 export interface IStageDrawerMaskTaskSelectionHandler extends IStageDrawerMaskTask {
@@ -164,12 +161,10 @@ export interface IStageDrawerMaskTaskSelectionHandler extends IStageDrawerMaskTa
 }
 
 // 辅助画布光标绘制任务
-export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask {
-}
+export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask { }
 
 // 辅助画布清除绘制任务
-export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask {
-}
+export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask { }
 
 // 舞台元素绘制任务
 export interface IStageElementTask extends IRenderTask {
@@ -177,16 +172,13 @@ export interface IStageElementTask extends IRenderTask {
 }
 
 // 舞台元素绘制任务-矩形
-export interface IStageElementTaskRect extends IStageElementTask {
-}
+export interface IStageElementTaskRect extends IStageElementTask { }
 
 // 舞台元素绘制任务-圆形
-export interface IStageElementTaskCircle extends IStageElementTask {
-}
+export interface IStageElementTaskCircle extends IStageElementTask { }
 
 // 舞台元素清除绘制任务
-export interface IStageElementTaskClear extends IStageElementTask {
-}
+export interface IStageElementTaskClear extends IStageElementTask { }
 
 // 舞台事件处理器
 export interface IStageEvent extends EventEmitter {
@@ -249,12 +241,10 @@ export interface IStageElement {
 }
 
 // 舞台元素（组件）-React
-export interface IStageElementReact extends IStageElement {
-}
+export interface IStageElementReact extends IStageElement { }
 
 // 舞台元素（组件）-圆形
-export interface IStageElementCircle extends IStageElement {
-}
+export interface IStageElementCircle extends IStageElement { }
 
 // 创作工具
 export type Creator = {
@@ -332,12 +322,10 @@ export interface IStageRenderer {
 }
 
 // 辅助画布绘制器
-export interface IStageDrawerMaskRenderer extends IStageRenderer, IQueueRender {
-}
+export interface IStageDrawerMaskRenderer extends IStageRenderer, IQueueRender { }
 
 // 临时画布绘制器 
-export interface IStageDrawerProvisionalRenderer extends IStageRenderer, IQueueRender {
-}
+export interface IStageDrawerProvisionalRenderer extends IStageRenderer, IQueueRender { }
 
 // 画板元素样式定义
 export type CanvasCreatorStyles = {

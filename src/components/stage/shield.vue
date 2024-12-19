@@ -21,8 +21,8 @@ defineExpose({
   height: 100%;
 }
 #shield,
-#b-shield,
-#m-shield {
+#mask,
+#provisional {
   position: absolute;
   top: 0;
   left: 0;

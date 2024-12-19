@@ -7,4 +7,11 @@ export default class StageDrawerProvisional extends StageDrawerBase implements I
     super(shield);
     this.renderer = new StageDrawerProvisionalRenderer(this);
   }
+
+  initCanvas(): HTMLCanvasElement {
+    super.initCanvas();
+    this.canvas.id = 'provisional'
+    this.canvas.style.pointerEvents = 'none'
+    return this.canvas;
+  }
 }

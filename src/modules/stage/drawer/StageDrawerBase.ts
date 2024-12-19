@@ -16,8 +16,6 @@ export default class StageDrawerBase implements IStageDrawer {
    */
   initCanvas(): HTMLCanvasElement {
     this.canvas = document.createElement('canvas');
-    this.canvas.id = 'm-shield';
-    this.canvas.style.pointerEvents = 'none';
     return this.canvas;
   }
 

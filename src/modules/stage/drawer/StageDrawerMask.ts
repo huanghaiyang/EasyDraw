@@ -7,4 +7,11 @@ export default class StageDrawerMask extends StageDrawerBase implements IStageDr
     super(shield);
     this.renderer = new StageDrawerMaskRenderer(this);
   }
+
+  initCanvas(): HTMLCanvasElement {
+    super.initCanvas();
+    this.canvas.id = 'mask'
+    this.canvas.style.pointerEvents = 'none'
+    return this.canvas;
+  }
 }
