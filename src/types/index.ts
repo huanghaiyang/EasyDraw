@@ -63,7 +63,11 @@ export interface IStageShield extends IRect {
 // 用于维护舞台数据关系
 export interface IStageStore {
   get creatingElements(): IStageElement[];
+  hasElement(id: string): boolean;
+  getElementById(id: string): IStageElement;
+  getIndexById(id: string): number;
   creatingElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
+  finishCreatingElement(): IStageElement;
 }
 
 // 画板画布

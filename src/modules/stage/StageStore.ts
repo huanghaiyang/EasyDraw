@@ -11,6 +11,7 @@ export default class StageStore implements IStageStore {
 
   // 当前正在创建的元素
   private currentCreatingElementId;
+  private elementMap = new Map();
 
   get creatingElements() {
     return this.elementList.filter(item => item.status === ElementStatus.creating);
@@ -27,7 +28,30 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   hasElement(id: string): boolean {
-    return this.elementList.some(item => item.id === id);
+    return this.elementMap.has(id);
+  }
+
+  /**
+   * 通过id获取元素
+   * 
+   * @param id 
+   * @returns 
+   */
+  getElementById(id: string): IStageElement {
+    return this.elementMap.get(id);
+  }
+
+  /**
+   * 获取元素在列表中的索引
+   * 
+   * @param id 
+   * @returns 
+   */
+  getIndexById(id: string): number {
+    if (this.hasElement(id)) {
+      return this.elementList.findIndex(item => item.id === id);
+    }
+    return -1;
   }
 
   /**
@@ -37,6 +61,7 @@ export default class StageStore implements IStageStore {
    */
   addElement(element: IStageElement): IStageElement {
     this.elementList.push(element);
+    this.elementMap.set(element.id, element);
     return element;
   }
 
@@ -46,10 +71,11 @@ export default class StageStore implements IStageStore {
    * @param id 
    */
   removeElement(id: string): IStageElement {
-    const index = this.elementList.findIndex(item => item.id === id);
-    if (index !== -1) {
-      const element = this.elementList[index];
+    if (this.hasElement(id)) {
+      const element = this.elementMap.get(id);
+      const index = this.getIndexById(id);
       this.elementList.splice(index, 1);
+      this.elementMap.delete(id);
       return element;
     }
   }
@@ -61,9 +87,8 @@ export default class StageStore implements IStageStore {
    * @param data 
    */
   updateElementObj(id: string, data: ElementObject): IStageElement {
-    const index = this.elementList.findIndex(item => item.id === id);
-    if (index !== -1) {
-      const element = this.elementList[index];
+    if (this.hasElement(id)) {
+      const element = this.elementMap.get(id);
       const objId = element.obj.id;
       Object.assign(element.obj, data, { id: objId });
       return element;
@@ -112,7 +137,7 @@ export default class StageStore implements IStageStore {
    * @param canvasRect 
    * @param worldCenterOffset 
    */
-  calcStagePoints(element: IStageElement, canvasRect: DOMRect, worldCenterOffset: IPoint) {
+  private calcPathPoints(element: IStageElement, canvasRect: DOMRect, worldCenterOffset: IPoint) {
     if (element) {
       // 计算element坐标相对于画布的坐标
       const points = element.obj.points.map(p => {
@@ -153,9 +178,22 @@ export default class StageStore implements IStageStore {
         break;
     }
     if (element) {
-      this.calcStagePoints(element, canvasRect, worldCenterOffset);
+      this.calcPathPoints(element, canvasRect, worldCenterOffset);
     }
     return element;
+  }
+
+  /**
+   * 完成创建元素
+   */
+  finishCreatingElement(): IStageElement {
+    if(this.currentCreatingElementId) {
+      const element = this.getElementById(this.currentCreatingElementId);
+      if (element) {
+        element.status = ElementStatus.finished;
+        return element;
+      }
+    }
   }
 
 }
