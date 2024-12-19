@@ -130,10 +130,7 @@ export default class StageShield implements IStageShield {
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
-      const element = this.creatingElement(e);
-      if (element) {
-        this.selection.setElements([element]);
-      }
+      this.creatingElement(e);
       this.provisional.redraw();
     }
     this.mask.redraw();
@@ -157,6 +154,7 @@ export default class StageShield implements IStageShield {
   handlePressDown(e: MouseEvent): void {
     this.isPressDown = true;
     this.calcPressDown(e);
+    this.selection.clearSelects();
   }
 
   /**
@@ -218,7 +216,7 @@ export default class StageShield implements IStageShield {
    */
   applyPressUp(e) {
     if (this.checkCreatorActive()) {
-      this.createElementAtPosition();
+      this.store.finishCreatingElement();
     }
   }
 
@@ -232,15 +230,6 @@ export default class StageShield implements IStageShield {
     return Math.abs(this.pressMoveWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) >= MinCursorMoveXDistance
       || Math.abs(this.pressMoveWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) >= MinCursorMoveYDistance;
   }
-
-  /**
-   * 在当前鼠标位置创建元素
-   */
-  createElementAtPosition(): void {
-
-  }
-
-
 
   /**
    * 给定坐标计算距离世界坐标中心点的偏移

@@ -195,10 +195,11 @@ export interface IStageEvent extends EventEmitter {
 
 // 舞台选区
 export interface IStageSelection {
-  setElements(elements: IStageElement[]): void;
+  get selects(): IStageElement[];
   getEdge(): IPoint[];
   isEmpty(): boolean;
-  getRenderType(): SelectionRenderTypes
+  getRenderType(): SelectionRenderTypes;
+  clearSelects(): void;
 }
 
 // 舞台容器

@@ -178,6 +178,7 @@ export default class StageStore implements IStageStore {
         break;
     }
     if (element) {
+      element.isSelected = true;
       this.calcPathPoints(element, canvasRect, worldCenterOffset);
     }
     return element;
@@ -191,6 +192,8 @@ export default class StageStore implements IStageStore {
       const element = this.getElementById(this.currentCreatingElementId);
       if (element) {
         element.status = ElementStatus.finished;
+        element.isEditing = true;
+        this.currentCreatingElementId = null;
         return element;
       }
     }

@@ -1,22 +1,16 @@
-import { CreatorTypes, IPoint, IStageElement, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
+import { CreatorTypes, IPoint, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { first, flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
-  private elementList: IStageElement[] = [];
+
+  get selects() {
+    return this.shield.store.elementList.filter(element => element.isSelected);
+  }
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-  }
-
-  /**
-   * 设置选区元素
-   * 
-   * @param elements 
-   */
-  setElements(elements: IStageElement[]): void {
-    this.elementList = elements;
   }
 
   /**
@@ -26,7 +20,7 @@ export default class StageSelection implements IStageSelection {
    */
   getRenderType(): SelectionRenderTypes {
     if (!this.isEmpty()) {
-      const type = first(this.elementList).obj.type;
+      const type = first(this.selects).obj.type;
       switch (type) {
         case CreatorTypes.rectangle: {
           return SelectionRenderTypes.rect;
@@ -42,7 +36,7 @@ export default class StageSelection implements IStageSelection {
    * @returns IPoint[]
    */
   getEdge(): IPoint[] {
-    const points = flatten(this.elementList.map(element => {
+    const points = flatten(this.selects.map(element => {
       return element.getEdgePoints();
     }));
     return CommonUtils.getBoxByPoints(points);
@@ -54,7 +48,15 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   isEmpty(): boolean {
-    return this.elementList.length === 0;
+    return this.selects.length === 0;
   }
 
+  /**
+   * 清空选区
+   */
+  clearSelects(): void {
+    this.selects.forEach(element => {
+      element.isSelected = false;
+    });
+  }
 }
