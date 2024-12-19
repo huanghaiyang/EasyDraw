@@ -1,6 +1,6 @@
-import StageDrawerBase from "@/modules/stage/StageDrawerBase";
+import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import { IStageDrawerMask, IStageShield } from "@/types";
-import StageDrawerMaskRenderer from "@/modules/render/renderer/StageDrawerMaskRenderer";
+import StageDrawerMaskRenderer from "@/modules/render/renderer/drawer/StageDrawerMaskRenderer";
 
 export default class StageDrawerMask extends StageDrawerBase implements IStageDrawerMask {
   constructor(shield: IStageShield) {

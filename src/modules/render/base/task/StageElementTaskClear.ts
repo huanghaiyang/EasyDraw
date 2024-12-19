@@ -1,4 +1,4 @@
-import StageElementTaskBase from "@/modules/render/base/element/StageElementTaskBase";
+import StageElementTaskBase from "@/modules/render/base/task/StageElementTaskBase";
 import { IStageElementTaskClear } from "@/types";
 
 export default class StageElementTaskClear extends StageElementTaskBase implements IStageElementTaskClear {

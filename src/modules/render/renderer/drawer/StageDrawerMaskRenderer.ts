@@ -8,14 +8,13 @@ import {
   SelectionRenderTypes,
   StageDrawerMaskElementObjTypes,
   Directions,
-  IRenderTaskCargo
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
-import StageDrawerMaskTaskSelection from "@/modules/render/mask/StageDrawerMaskTaskSelection";
-import StageDrawerMaskTaskCursor from "@/modules/render/mask/StageDrawerMaskTaskCursor";
-import StageDrawerMaskTaskClear from "@/modules/render/mask/StageDrawerMaskTaskClear";
-import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/StageDrawerMaskTaskSelectionHandler";
-import StageDrawerBaseRenderer from "@/modules/render/renderer/StageDrawerBaseRenderer";
+import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
+import StageDrawerMaskTaskCursor from "@/modules/render/mask/task/StageDrawerMaskTaskCursor";
+import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMaskTaskClear";
+import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
+import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 
 export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer implements IStageDrawerMaskRenderer {
   /**

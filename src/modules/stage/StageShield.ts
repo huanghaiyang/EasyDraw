@@ -14,8 +14,8 @@ import {
   IStageEvent
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
-import StageDrawerMask from "@/modules/stage/StageDrawerMask";
-import StageDrawerProvisional from "@/modules/stage/StageDrawerProvisional";
+import StageDrawerMask from "@/modules/stage/drawer/StageDrawerMask";
+import StageDrawerProvisional from "@/modules/stage/drawer/StageDrawerProvisional";
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
 import StageEvent from '@/modules/stage/StageEvent';

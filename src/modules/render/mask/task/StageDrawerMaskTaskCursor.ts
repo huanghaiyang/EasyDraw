@@ -1,5 +1,5 @@
 import { IStageDrawerMaskTaskCursor, IStageDrawerMaskTaskCursorObj } from "@/types";
-import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { CursorCanvasSize } from "@/types/constants";
 import CursorUtils from "@/utils/CursorUtils";

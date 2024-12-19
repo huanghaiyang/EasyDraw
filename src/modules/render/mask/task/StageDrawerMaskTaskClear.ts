@@ -1,4 +1,4 @@
-import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
 import { IStageDrawerMaskTaskClear } from "@/types";
 
 export default class StageDrawerMaskTaskClear extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskClear {

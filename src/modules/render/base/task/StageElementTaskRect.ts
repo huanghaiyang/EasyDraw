@@ -1,5 +1,5 @@
 import { IStageElementReact, IStageElementTaskRect } from "@/types";
-import StageElementTaskBase from "@/modules/render/base/element/StageElementTaskBase";
+import StageElementTaskBase from "@/modules/render/base/task/StageElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { DefaultCreatorFillColor, DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/constants";
 

@@ -1,5 +1,5 @@
 import { IStageDrawerMaskTaskSelection, IStageDrawerMaskTaskSelectionObj } from "@/types";
-import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
 import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 
