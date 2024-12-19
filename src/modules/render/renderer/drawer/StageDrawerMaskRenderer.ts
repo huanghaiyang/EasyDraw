@@ -6,7 +6,7 @@ import {
   IStageDrawerMaskTaskSelectionObj,
   IStageDrawerMaskRenderer,
   SelectionRenderTypes,
-  StageDrawerMaskElementObjTypes,
+  StageDrawerMaskObjTypes,
   Directions,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
@@ -46,7 +46,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer imp
   private createMaskCursorTask(): IRenderTask {
     const obj: IStageDrawerMaskTaskCursorObj = {
       point: this.drawer.shield.cursor.pos,
-      type: StageDrawerMaskElementObjTypes.cursor,
+      type: StageDrawerMaskObjTypes.cursor,
       creatorCategory: this.drawer.shield.currentCreator.category
     }
     const task = new StageDrawerMaskTaskCursor(obj, this.maskParams);
@@ -61,7 +61,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer imp
   private createMaskSelectionTask(): IRenderTask {
     const obj: IStageDrawerMaskTaskSelectionObj = {
       points: this.drawer.shield.selection.getEdge(),
-      type: StageDrawerMaskElementObjTypes.selection
+      type: StageDrawerMaskObjTypes.selection
     }
     const task = new StageDrawerMaskTaskSelection(obj, this.maskParams);
     return task;
@@ -104,7 +104,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer imp
       const obj: IStageDrawerMaskTaskSelectionHandlerObj = {
         point,
         direction,
-        type: StageDrawerMaskElementObjTypes.selectionHandler,
+        type: StageDrawerMaskObjTypes.selectionHandler,
       }
       const task = new StageDrawerMaskTaskSelectionHandler(direction, obj, this.maskParams);
       tasks.push(task);

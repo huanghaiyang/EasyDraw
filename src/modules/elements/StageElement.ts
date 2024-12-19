@@ -1,4 +1,4 @@
-import { ElementCreateStatus, ElementObject, IPoint, IStageElement } from "@/types";
+import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
 
 export default class StageElement implements IStageElement {
@@ -6,7 +6,7 @@ export default class StageElement implements IStageElement {
   obj: ElementObject;
   points: IPoint[];
   pathPoints: IPoint[];
-  status: ElementCreateStatus;
+  status: ElementStatus;
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -18,7 +18,7 @@ export default class StageElement implements IStageElement {
 
   constructor(obj: ElementObject) {
     this.obj = obj;
-    this.status = ElementCreateStatus.starting;
+    this.status = ElementStatus.starting;
     this.id = nanoid();
     this.isSelected = false;
     this.isVisible = true;

@@ -1,4 +1,4 @@
-import { CreatorCategories, CreatorTypes, ElementCreateStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore } from "@/types";
+import { CreatorCategories, CreatorTypes, ElementStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore } from "@/types";
 import { nanoid } from "nanoid";
 import StageElement from "@/modules/elements/StageElement";
 import StageElementRect from "@/modules/elements/StageElementRect";
@@ -13,7 +13,7 @@ export default class StageStore implements IStageStore {
   private currentCreatingElementId;
 
   get creatingElements() {
-    return this.elementList.filter(item => item.status === ElementCreateStatus.creating);
+    return this.elementList.filter(item => item.status === ElementStatus.creating);
   }
 
   constructor(shield: IStageShield) {
@@ -141,8 +141,10 @@ export default class StageStore implements IStageStore {
         const obj = this.createObject(type, points)
         if (this.currentCreatingElementId) {
           element = this.updateElementObj(this.currentCreatingElementId, obj);
+          element.status = ElementStatus.creating;
         } else {
           element = this.createElement(obj);
+          element.status = ElementStatus.creating;
           this.addElement(element);
           this.currentCreatingElementId = element.id;
         }
@@ -152,7 +154,6 @@ export default class StageStore implements IStageStore {
     }
     if (element) {
       this.calcStagePoints(element, canvasRect, worldCenterOffset);
-      element.status = ElementCreateStatus.creating;
     }
     return element;
   }
