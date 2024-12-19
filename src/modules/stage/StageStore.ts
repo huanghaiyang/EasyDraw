@@ -1,4 +1,4 @@
-import { CreatorCategories, CreatorTypes, ElementObject, IPoint, IStageElement, IStageShield, IStageStore } from "@/types";
+import { CreatorCategories, CreatorTypes, ElementCreateStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore } from "@/types";
 import { nanoid } from "nanoid";
 import StageElement from "@/modules/elements/StageElement";
 import StageElementRect from "@/modules/elements/StageElementRect";
@@ -11,6 +11,10 @@ export default class StageStore implements IStageStore {
 
   // 当前正在创建的元素
   private currentCreatingElementId;
+
+  get creatingElements() {
+    return this.elementList.filter(item => item.status === ElementCreateStatus.creating);
+  }
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -129,7 +133,7 @@ export default class StageStore implements IStageStore {
    * @param canvasRect
    * @param worldOffset
    */
-  createOrUpdateElement(points: IPoint[], canvasRect: DOMRect, worldCenterOffset: IPoint): IStageElement {
+  creatingElement(points: IPoint[], canvasRect: DOMRect, worldCenterOffset: IPoint): IStageElement {
     let element: IStageElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
@@ -146,7 +150,10 @@ export default class StageStore implements IStageStore {
       default:
         break;
     }
-    this.calcStagePoints(element, canvasRect, worldCenterOffset);
+    if (element) {
+      this.calcStagePoints(element, canvasRect, worldCenterOffset);
+      element.status = ElementCreateStatus.creating;
+    }
     return element;
   }
 

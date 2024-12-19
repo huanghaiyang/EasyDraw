@@ -1,13 +1,13 @@
-import { IStageMaskTaskCursor, IStageMaskTaskCursorObj } from "@/types";
-import StageMaskTaskBase from "@/modules/render/mask/StageMaskTaskBase";
+import { IStageDrawerMaskTaskCursor, IStageDrawerMaskTaskCursorObj } from "@/types";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { CursorCanvasSize } from "@/types/constants";
 import CursorUtils from "@/utils/CursorUtils";
 
-export default class StageMaskTaskCursor extends StageMaskTaskBase implements IStageMaskTaskCursor {
+export default class StageDrawerMaskTaskCursor extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskCursor {
 
-  get data() {
-    return this.obj as IStageMaskTaskCursorObj;
+  get data(): IStageDrawerMaskTaskCursorObj {
+    return this.obj as IStageDrawerMaskTaskCursorObj;
   }
 
   /**

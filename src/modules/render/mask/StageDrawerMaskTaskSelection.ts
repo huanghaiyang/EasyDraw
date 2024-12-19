@@ -1,12 +1,12 @@
-import { IStageMaskTaskSelection, IStageMaskTaskSelectionObj } from "@/types";
-import StageMaskTaskBase from "@/modules/render/mask/StageMaskTaskBase";
+import { IStageDrawerMaskTaskSelection, IStageDrawerMaskTaskSelectionObj } from "@/types";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
 import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 
-export default class StageMaskTaskSelection extends StageMaskTaskBase implements IStageMaskTaskSelection {
+export default class StageDrawerMaskTaskSelection extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskSelection {
 
-  get data() {
-    return this.obj as IStageMaskTaskSelectionObj;
+  get data(): IStageDrawerMaskTaskSelectionObj {
+    return this.obj as IStageDrawerMaskTaskSelectionObj;
   }
 
   /**

@@ -1,22 +1,22 @@
-import { IRenderQueue, ISize, IStageElement, IStageProvisional, IStageShield } from "@/types";
-import RenderQueue from "@/modules/render/RenderQueue";
+import { ISize, IStageDrawer, IStageRenderer, IStageShield } from "@/types";
 
-export default class StageProvisional implements IStageProvisional {
+export default class StageDrawerBase implements IStageDrawer {
   canvas: HTMLCanvasElement;
   shield: IStageShield;
-  private renderQueue: IRenderQueue;
+  renderer: IStageRenderer;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this.renderQueue = new RenderQueue();
   }
 
   /**
-   * 画板初始化
+   * 初始化画布
+   * 
+   * @returns 
    */
   initCanvas(): HTMLCanvasElement {
     this.canvas = document.createElement('canvas');
-    this.canvas.id = 'b-shield';
+    this.canvas.id = 'm-shield';
     this.canvas.style.pointerEvents = 'none';
     return this.canvas;
   }
@@ -39,15 +39,9 @@ export default class StageProvisional implements IStageProvisional {
   }
 
   /**
-   * 渲染组件元素
-   * 
-   * @param e 
-   * @param element
+   * 重绘
    */
-  renderElement(e: MouseEvent, element: IStageElement): void {
-    if (element) {
-      this.clearCanvas();
-      element.render(this.canvas);
-    }
+  redraw(): void {
+    this.renderer.redraw();
   }
 }

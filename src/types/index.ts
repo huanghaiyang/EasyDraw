@@ -44,9 +44,8 @@ export interface IStageShield extends IRect {
   cursor: IStageCursor;
   selection: IStageSelection;
   store: IStageStore;
-  mask: IStageMask;
-  provisional: IStageProvisional;
-  renderer: IStageRenderer;
+  mask: IStageDrawerMask;
+  provisional: IStageDrawerProvisional;
   currentCreator: Creator;
   canvas: HTMLCanvasElement;
   renderEl: HTMLDivElement;
@@ -55,14 +54,20 @@ export interface IStageShield extends IRect {
 }
 
 export interface IStageStore {
-  createOrUpdateElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
+  get creatingElements(): IStageElement[];
+  creatingElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
 }
 
-export interface IStageCanvasDrawer {
+export interface IStageCanvas {
   canvas: HTMLCanvasElement;
   initCanvas(): HTMLCanvasElement;
   updateCanvasSize(size: ISize): void;
   clearCanvas(): void;
+}
+
+export interface IQueueRender {
+  renderQueue: IRenderQueue;
+  renderCargo(cargo: IRenderTaskCargo): Promise<void>;
 }
 
 export interface IStageCursor {
@@ -71,11 +76,19 @@ export interface IStageCursor {
   calcPos(e: MouseEvent, canvasRect: DOMRect): IPoint;
 }
 
-export interface IStageMask extends IStageCanvasDrawer {
-  renderCargo(cargo: IRenderTaskCargo): Promise<void>;
+export interface IStageDrawer extends IStageCanvas {
+  shield: IStageShield;
+  renderer: IStageRenderer;
+  redraw(): void;
 }
 
-export enum StageMaskElementObjTypes {
+export interface IStageDrawerMask extends IStageDrawer {
+}
+
+export interface IStageDrawerProvisional extends IStageDrawer {
+}
+
+export enum StageDrawerMaskElementObjTypes {
   selection = 0,
   selectionHandler = 1,
   cursor = 2
@@ -93,53 +106,53 @@ export enum Directions {
   freedom = 8
 }
 
-export interface IStageMaskTaskObj {
-  type: StageMaskElementObjTypes;
+export interface IStageDrawerMaskTaskObj {
+  type: StageDrawerMaskElementObjTypes;
 }
 
-export interface IStageMaskTaskSelectionObj extends IStageMaskTaskObj {
+export interface IStageDrawerMaskTaskSelectionObj extends IStageDrawerMaskTaskObj {
   points: IPoint[];
 }
 
-export interface IStageMaskTaskSelectionHandlerObj extends IStageMaskTaskObj {
+export interface IStageDrawerMaskTaskSelectionHandlerObj extends IStageDrawerMaskTaskObj {
   point: IPoint;
   direction: Directions;
 }
 
-export interface IStageMaskTaskCursorObj extends IStageMaskTaskObj {
+export interface IStageDrawerMaskTaskCursorObj extends IStageDrawerMaskTaskObj {
   point: IPoint;
   creatorCategory: CreatorCategories;
 }
 
-export interface IStageMaskTask extends IRenderTask {
-  obj: IStageMaskTaskObj;
+export interface IStageDrawerMaskTask extends IRenderTask {
+  get data(): IStageDrawerMaskTaskObj;
+  obj: IStageDrawerMaskTaskObj;
 }
 
-export interface IStageMaskTaskSelection extends IStageMaskTask {
+export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask {
 }
 
-export interface IStageMaskTaskSelectionHandler extends IStageMaskTask {
+export interface IStageDrawerMaskTaskSelectionHandler extends IStageDrawerMaskTask {
   direction: Directions;
 }
 
-export interface IStageMaskTaskCursor extends IStageMaskTask {
+export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask {
 }
 
-export interface IStageMaskTaskClear extends IStageMaskTask {
+export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask {
 }
 
-export interface IStageElementRenderTask extends IRenderTask {
+export interface IStageElementTask extends IRenderTask {
   element: IStageElement;
 }
 
-export interface IStageElementRectRenderTask extends IStageElementRenderTask {
+export interface IStageElementTaskRect extends IStageElementTask {
 }
 
-export interface IStageElementCircleRenderTask extends IStageElementRenderTask {
+export interface IStageElementTaskCircle extends IStageElementTask {
 }
 
-export interface IStageProvisional extends IStageCanvasDrawer {
-  renderElement(e: MouseEvent, element: IStageElement): void;
+export interface IStageElementTaskClear extends IStageElementTask {
 }
 
 export interface IStageEvent extends EventEmitter {
@@ -192,9 +205,14 @@ export interface IStageElement {
   isRotating: boolean;
   isDragging: boolean;
   status: ElementCreateStatus;
-  render(canvas: HTMLCanvasElement): void;
   calcPathPoints(): IPoint[];
   getEdgePoints(): IPoint[];
+}
+
+export interface IStageElementReact extends IStageElement {
+}
+
+export interface IStageElementCircle extends IStageElement {
 }
 
 export type Creator = {
@@ -222,7 +240,7 @@ export interface IStageStore {
 
 export enum ElementCreateStatus {
   starting = 0,
-  doing = 1,
+  creating = 1,
   finished = 2
 }
 
@@ -259,12 +277,14 @@ export interface IRenderQueue {
 }
 
 export interface IStageRenderer {
-  redrawMask(): void;
-  redrawProvisional(): void;
   redraw(): void;
   clear(): void;
-  clearMask(): void;
-  clearProvisional(): void;
+}
+
+export interface IStageDrawerMaskRenderer extends IStageRenderer, IQueueRender {
+}
+
+export interface IStageDrawerProvisionalRenderer extends IStageRenderer, IQueueRender {
 }
 
 export type CanvasCreatorStyles = {

@@ -4,22 +4,20 @@ import {
   CreatorCategories,
   IPoint,
   ISize,
-  IStageProvisional,
-  IStageMask,
+  IStageDrawerProvisional,
+  IStageDrawerMask,
   IStageStore,
   IStageShield,
   IStageSelection,
   IStageElement,
   IStageCursor,
-  IStageRenderer,
   IStageEvent
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
-import StageMask from "@/modules/stage/StageMask";
-import StageProvisional from "@/modules/stage/StageProvisional";
+import StageDrawerMask from "@/modules/stage/StageDrawerMask";
+import StageDrawerProvisional from "@/modules/stage/StageDrawerProvisional";
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
-import StageRenderer from "@/modules/stage/StageRenderer";
 import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
 import { throttle } from "lodash";
@@ -35,15 +33,13 @@ export default class StageShield implements IStageShield {
   // 鼠标操作
   cursor: IStageCursor;
   // 遮罩画布用以绘制鼠标样式,工具图标等
-  mask: IStageMask;
+  mask: IStageDrawerMask;
   // 前景画板
-  provisional: IStageProvisional;
+  provisional: IStageDrawerProvisional;
   // 数据存储
   store: IStageStore;
   // 选区操作
   selection: IStageSelection;
-  // 渲染器
-  renderer: IStageRenderer;
   // 事件处理中心
   event: IStageEvent;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -78,10 +74,9 @@ export default class StageShield implements IStageShield {
     this.event = new StageEvent(this);
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);
-    this.provisional = new StageProvisional(this);
+    this.provisional = new StageDrawerProvisional(this);
     this.selection = new StageSelection(this);
-    this.mask = new StageMask(this);
-    this.renderer = new StageRenderer(this);
+    this.mask = new StageDrawerMask(this);
 
     this.refreshSize = this.refreshSize.bind(this);
     this.handleCursorMove = throttle(this.handleCursorMove.bind(this), 1000 / 120);
@@ -135,14 +130,13 @@ export default class StageShield implements IStageShield {
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
-      const element = this.renderProvisionalElement(e);
+      const element = this.creatingElement(e);
       if (element) {
         this.selection.setElements([element]);
       }
+      this.provisional.redraw();
     }
-    this.renderer.redrawMask();
-    this.renderer.redrawProvisional();
-    this.renderer.redraw();
+    this.mask.redraw();
   }
 
   /**
@@ -321,11 +315,10 @@ export default class StageShield implements IStageShield {
    * 
    * @param e 
    */
-  renderProvisionalElement(e: MouseEvent): IStageElement | null {
+  creatingElement(e: MouseEvent): IStageElement | null {
     if (this.checkCreatorActive() && this.checkCursorPressMovedAvailable(e)) {
-      const element = this.store.createOrUpdateElement([this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset], this.canvasRectCache, this.worldCenterOffset);
+      const element = this.store.creatingElement([this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset], this.canvasRectCache, this.worldCenterOffset);
       if (element) {
-        this.provisional.renderElement(e, element);
         return element;
       }
     }

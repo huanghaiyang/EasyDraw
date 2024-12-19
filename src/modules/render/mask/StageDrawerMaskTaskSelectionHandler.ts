@@ -1,21 +1,21 @@
-import { IStageMaskTaskSelectionHandler, IStageMaskTaskSelectionHandlerObj, Directions } from "@/types";
-import StageMaskTaskBase from "@/modules/render/mask/StageMaskTaskBase";
+import { IStageDrawerMaskTaskSelectionHandler, IStageDrawerMaskTaskSelectionHandlerObj, Directions } from "@/types";
+import StageDrawerMaskTaskBase from "@/modules/render/mask/StageDrawerMaskTaskBase";
 import { DefaultSelectionHandlerStrokeColor, DefaultSelectionHandlerStrokeWidth, DefaultSelectionHandlerFillColor, DefaultSelectionHandlerSize } from "@/types/constants";
 import DirectionUtils from "@/utils/DirectionUtils";
 import CanvasUtils from "@/utils/CanvasUtils";
 
-export default class StageMaskTaskSelectionHandler extends StageMaskTaskBase implements IStageMaskTaskSelectionHandler {
+export default class StageDrawerMaskTaskSelectionHandler extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskSelectionHandler {
 
   direction: Directions;
 
-  constructor(direction: Directions, obj: IStageMaskTaskSelectionHandlerObj, params?: any) {
+  constructor(direction: Directions, obj: IStageDrawerMaskTaskSelectionHandlerObj, params?: any) {
     super(obj, params);
     this.direction = direction;
     this.obj = obj;
   }
 
-  get data() {
-    return this.obj as IStageMaskTaskSelectionHandlerObj;
+  get data(): IStageDrawerMaskTaskSelectionHandlerObj {
+    return this.obj as IStageDrawerMaskTaskSelectionHandlerObj;
   }
 
   /**

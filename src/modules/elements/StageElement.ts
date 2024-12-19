@@ -29,11 +29,7 @@ export default class StageElement implements IStageElement {
     this.isRotating = false;
     this.isDragging = false;
   }
-
-  render(canvas: HTMLCanvasElement): void {
-    throw new Error("Method not implemented.");
-  }
-
+  
   calcPathPoints(): IPoint[] {
     return this.points;
   }

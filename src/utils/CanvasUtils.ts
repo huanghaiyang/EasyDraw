@@ -1,6 +1,15 @@
 import { CanvasCreatorStyles, IPoint } from "@/types";
 
 export default class CanvasUtils {
+
+  /**
+   * 绘制图片或者canvas到canvas上
+   * 
+   * @param target 
+   * @param svg 
+   * @param options 
+   * @returns 
+   */
   static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: Partial<DOMRect>): Promise<void> {
     return new Promise((resolve, reject) => {
       const { x, y, width, height } = options;
