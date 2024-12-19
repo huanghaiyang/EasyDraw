@@ -1,5 +1,5 @@
 import { IStageMaskTaskSelection, IStageMaskTaskSelectionObj } from "@/types";
-import StageMaskTaskBase from "@/modules/render/StageMaskTaskBase";
+import StageMaskTaskBase from "@/modules/render/mask/StageMaskTaskBase";
 import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 

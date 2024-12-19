@@ -11,10 +11,10 @@ import {
   Directions
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
-import StageMaskTaskSelection from "@/modules/render/StageMaskTaskSelection";
-import StageMaskTaskCursor from "@/modules/render/StageMaskTaskCursor";
-import StageMaskTaskClear from "@/modules/render/StageMaskTaskClear";
-import StageMaskTaskSelectionHandler from "@/modules/render/StageMaskTaskSelectionHandler";
+import StageMaskTaskSelection from "@/modules/render/mask/StageMaskTaskSelection";
+import StageMaskTaskCursor from "@/modules/render/mask/StageMaskTaskCursor";
+import StageMaskTaskClear from "@/modules/render/mask/StageMaskTaskClear";
+import StageMaskTaskSelectionHandler from "@/modules/render/mask/StageMaskTaskSelectionHandler";
 
 export default class StageRenderer implements IStageRenderer {
 

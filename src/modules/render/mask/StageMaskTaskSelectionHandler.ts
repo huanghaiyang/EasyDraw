@@ -1,5 +1,5 @@
 import { IStageMaskTaskSelectionHandler, IStageMaskTaskSelectionHandlerObj, Directions } from "@/types";
-import StageMaskTaskBase from "@/modules/render/StageMaskTaskBase";
+import StageMaskTaskBase from "@/modules/render/mask/StageMaskTaskBase";
 import { DefaultSelectionHandlerStrokeColor, DefaultSelectionHandlerStrokeWidth, DefaultSelectionHandlerFillColor, DefaultSelectionHandlerSize } from "@/types/constants";
 import DirectionUtils from "@/utils/DirectionUtils";
 import CanvasUtils from "@/utils/CanvasUtils";
