@@ -22,7 +22,7 @@ export default class StageMaskTaskSelectionHandler extends StageMaskTaskBase imp
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(this.getCanvas(), DirectionUtils.get4DirectionPoints(this.data.point, {
+    CanvasUtils.drawPath(this.canvas, DirectionUtils.get4DirectionPoints(this.data.point, {
       width: DefaultSelectionHandlerSize,
       height: DefaultSelectionHandlerSize
     }), {

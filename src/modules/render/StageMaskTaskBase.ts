@@ -1,12 +1,16 @@
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
-import { IStageMaskTaskObj } from "@/types";
+import { IStageMaskTask, IStageMaskTaskObj } from "@/types";
 
-export default abstract class StageMaskTaskBase extends RenderTaskBase {
+export default abstract class StageMaskTaskBase extends RenderTaskBase implements IStageMaskTask {
   obj: IStageMaskTaskObj;
   protected _canvas: HTMLCanvasElement;
 
   get data() {
     return this.obj;
+  }
+
+  get canvas() {
+    return this._canvas;
   }
 
   constructor(obj: IStageMaskTaskObj, params?: any) {
@@ -15,14 +19,5 @@ export default abstract class StageMaskTaskBase extends RenderTaskBase {
     if (params) {
       this._canvas = params.canvas as HTMLCanvasElement;
     }
-  }
-
-  /**
-   * 获取canvas
-   * 
-   * @returns 
-   */
-  getCanvas(): HTMLCanvasElement {
-    return this._canvas;
   }
 }

@@ -128,6 +128,16 @@ export interface IStageMaskTaskCursor extends IStageMaskTask {
 export interface IStageMaskTaskClear extends IStageMaskTask {
 }
 
+export interface IStageElementRenderTask extends IRenderTask {
+  element: IStageElement;
+}
+
+export interface IStageElementRectRenderTask extends IStageElementRenderTask {
+}
+
+export interface IStageElementCircleRenderTask extends IStageElementRenderTask {
+}
+
 export interface IStageProvisional extends IStageCanvasDrawer {
   renderElement(e: MouseEvent, element: IStageElement): void;
 }

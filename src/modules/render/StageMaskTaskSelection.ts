@@ -13,7 +13,7 @@ export default class StageMaskTaskSelection extends StageMaskTaskBase implements
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(this.getCanvas(), this.data.points, {
+    CanvasUtils.drawPath(this.canvas, this.data.points, {
       strokeStyle: DefaultSelectionStrokeColor,
       lineWidth: DefaultSelectionStrokeWidth,
       fillStyle: DefaultSelectionFillColor
