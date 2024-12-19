@@ -2,6 +2,7 @@ import { IStageMaskTaskSelectionHandler, IStageMaskTaskSelectionHandlerObj, Dire
 import StageMaskTaskBase from "@/modules/render/StageMaskTaskBase";
 import { DefaultSelectionHandlerStrokeColor, DefaultSelectionHandlerStrokeWidth, DefaultSelectionHandlerFillColor, DefaultSelectionHandlerSize } from "@/types/constants";
 import DirectionUtils from "@/utils/DirectionUtils";
+import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class StageMaskTaskSelectionHandler extends StageMaskTaskBase implements IStageMaskTaskSelectionHandler {
 
@@ -21,26 +22,13 @@ export default class StageMaskTaskSelectionHandler extends StageMaskTaskBase imp
    * 运行任务
    */
   async run(): Promise<void> {
-    const canvas = this.getCanvas();
-    const ctx = canvas?.getContext('2d');
-    ctx.save();
-    ctx.strokeStyle = DefaultSelectionHandlerStrokeColor;
-    ctx.lineWidth = DefaultSelectionHandlerStrokeWidth;
-    ctx.fillStyle = DefaultSelectionHandlerFillColor;
-    ctx.beginPath();
-    DirectionUtils.get4DirectionPoints(this.data.point, {
+    CanvasUtils.drawPath(this.getCanvas(), DirectionUtils.get4DirectionPoints(this.data.point, {
       width: DefaultSelectionHandlerSize,
       height: DefaultSelectionHandlerSize
-    }).forEach((point, index) => {
-      if (index === 0) {
-        ctx.moveTo(point.x, point.y);
-      } else {
-        ctx.lineTo(point.x, point.y);
-      }
+    }), {
+      strokeStyle: DefaultSelectionHandlerStrokeColor,
+      lineWidth: DefaultSelectionHandlerStrokeWidth,
+      fillStyle: DefaultSelectionHandlerFillColor
     });
-    ctx.closePath();
-    ctx.stroke();
-    ctx.fill();
-    ctx.restore();
   }
 }

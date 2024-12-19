@@ -256,3 +256,9 @@ export interface IStageRenderer {
   clearMask(): void;
   clearProvisional(): void;
 }
+
+export type CanvasCreatorStyles = {
+  strokeStyle?: string;
+  lineWidth?: number;
+  fillStyle?: string;
+}

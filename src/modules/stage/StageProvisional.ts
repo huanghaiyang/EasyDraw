@@ -1,11 +1,14 @@
-import { ISize, IStageElement, IStageProvisional, IStageShield } from "@/types";
+import { IRenderQueue, ISize, IStageElement, IStageProvisional, IStageShield } from "@/types";
+import RenderQueue from "@/modules/render/RenderQueue";
 
 export default class StageProvisional implements IStageProvisional {
   canvas: HTMLCanvasElement;
   shield: IStageShield;
+  private renderQueue: IRenderQueue;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+    this.renderQueue = new RenderQueue();
   }
 
   /**

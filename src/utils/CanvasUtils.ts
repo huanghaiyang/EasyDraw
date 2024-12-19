@@ -1,3 +1,5 @@
+import { CanvasCreatorStyles, IPoint } from "@/types";
+
 export default class CanvasUtils {
   static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: Partial<DOMRect>): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -18,5 +20,32 @@ export default class CanvasUtils {
         resolve();
       }
     })
+  }
+  
+  /**
+   * 绘制路径
+   * 
+   * @param target 
+   * @param points 
+   * @param styles 
+   */
+  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: CanvasCreatorStyles): void {
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.strokeStyle = styles.strokeStyle;
+    ctx.fillStyle = styles.fillStyle;
+    ctx.lineWidth = styles.lineWidth;
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point.x, point.y);
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    });
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+    ctx.restore();
   }
 }
