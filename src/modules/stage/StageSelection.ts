@@ -6,7 +6,7 @@ export default class StageSelection implements IStageSelection {
   shield: IStageShield;
 
   get selects() {
-    return this.shield.store.elementList.filter(element => element.isSelected);
+    return this.shield.store.findElements(element => element.isSelected);
   }
 
   constructor(shield: IStageShield) {
@@ -56,7 +56,7 @@ export default class StageSelection implements IStageSelection {
    */
   clearSelects(): void {
     this.selects.forEach(element => {
-      element.isSelected = false;
+      this.shield.store.updateElement(element.id, { isSelected: false, isEditing: false })
     });
   }
 }

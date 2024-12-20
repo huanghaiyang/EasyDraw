@@ -1,7 +1,8 @@
 import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
+import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
 
-export default class StageElement implements IStageElement {
+export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
   obj: ElementObject;
   points: IPoint[];
@@ -18,7 +19,7 @@ export default class StageElement implements IStageElement {
 
   constructor(obj: ElementObject) {
     this.obj = obj;
-    this.status = ElementStatus.starting;
+    this.status = ElementStatus.initialed;
     this.id = nanoid();
     this.isSelected = false;
     this.isVisible = true;
@@ -29,7 +30,7 @@ export default class StageElement implements IStageElement {
     this.isRotating = false;
     this.isDragging = false;
   }
-  
+
   calcPathPoints(): IPoint[] {
     return this.points;
   }

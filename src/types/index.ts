@@ -63,7 +63,14 @@ export interface IStageShield extends IRect {
 // 用于维护舞台数据关系
 export interface IStageStore {
   get creatingElements(): IStageElement[];
+  createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
+  createElement(obj: ElementObject): IStageElement;
+  addElement(element: IStageElement): IStageElement;
+  removeElement(id: string): IStageElement;
+  updateElement(id: string, data: Partial<IStageElement>): IStageElement;
+  updateElementObj(id: string, data: ElementObject): IStageElement;
   hasElement(id: string): boolean;
+  findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
   getElementById(id: string): IStageElement;
   getIndexById(id: string): number;
   creatingElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
@@ -261,19 +268,10 @@ export enum ShieldMouseDownUsage {
   drag = 3
 }
 
-// 舞台数据存储器
-export interface IStageStore {
-  elementList: IStageElement[];
-  createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
-  createElement(obj: ElementObject): IStageElement;
-  addElement(element: IStageElement): IStageElement;
-  removeElement(id: string): IStageElement;
-  updateElementObj(id: string, data: ElementObject): IStageElement;
-}
-
 // 舞台组件状态
 export enum ElementStatus {
-  starting = 0,
+  initialed = -1,
+  startCreating = 0,
   creating = 1,
   finished = 2
 }
