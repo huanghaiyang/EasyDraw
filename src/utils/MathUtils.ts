@@ -18,7 +18,7 @@ export default class MathUtils {
       y: translatedPoint[1]
     }
   }
-  
+
   /**
    * 旋转
    * 
@@ -88,5 +88,43 @@ export default class MathUtils {
    */
   static radiansToDegrees(radians: number): number {
     return radians * (180 / Math.PI);
+  }
+
+  /**
+   * 使用面积和法线判断点是否在多边形内
+   * 
+   * @param coord 
+   * @param polygonCoords 
+   * @returns 
+   */
+  static isPointInPolygon(coord: IPoint, polygonCoords: IPoint[]): boolean {
+    const point = [coord.x, coord.y];
+    const polygon = polygonCoords.map(p => [p.x, p.y]);
+    const [px, py] = point;
+    let totalArea = 0;
+    const n = polygon.length;
+
+    for (let i = 0; i < n; i++) {
+      const [x1, y1] = polygon[i];
+      const [x2, y2] = polygon[(i + 1) % n];
+
+      // 计算三角形面积
+      const area = (x1 * y2 - x2 * y1) / 2;
+      totalArea += area;
+    }
+
+    // 计算点与多边形顶点连线形成的三角形面积之和
+    let testArea = 0;
+    for (let i = 0; i < n; i++) {
+      const [x1, y1] = polygon[i];
+      const [x2, y2] = polygon[(i + 1) % n];
+
+      // 计算三角形面积
+      const area = Math.abs((x1 * (y2 - py) + x2 * (py - y1) + px * (y1 - y2)) / 2);
+      testArea += area;
+    }
+
+    // 如果两个面积相等，则点在多边形内部
+    return Math.abs(totalArea - testArea) < Number.EPSILON;
   }
 }
