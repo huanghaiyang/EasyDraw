@@ -47,14 +47,13 @@ export interface IRect {
 }
 
 // 舞台主画板
-export interface IStageShield extends IRect {
+export interface IStageShield extends IRect, IStageDrawer {
   cursor: IStageCursor;
   selection: IStageSelection;
   store: IStageStore;
   mask: IStageDrawerMask;
   provisional: IStageDrawerProvisional;
   currentCreator: Creator;
-  canvas: HTMLCanvasElement;
   renderEl: HTMLDivElement;
   worldCenterOffset: IPoint;
   checkCreatorActive(): boolean;
@@ -100,9 +99,12 @@ export interface IStageCursor {
 
 // 舞台画布
 export interface IStageDrawer extends IStageCanvas {
-  shield: IStageShield;
   renderer: IStageRenderer;
   redraw(): void;
+}
+
+export interface StageHelperDrawer extends IStageDrawer {
+  shield: IStageShield;
 }
 
 // 辅助画布

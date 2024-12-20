@@ -1,13 +1,8 @@
-import { ISize, IStageDrawer, IStageRenderer, IStageShield } from "@/types";
+import { ISize, IStageDrawer, IStageRenderer } from "@/types";
 
 export default class StageDrawerBase implements IStageDrawer {
   canvas: HTMLCanvasElement;
-  shield: IStageShield;
   renderer: IStageRenderer;
-
-  constructor(shield: IStageShield) {
-    this.shield = shield;
-  }
 
   /**
    * 初始化画布

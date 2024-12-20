@@ -1,8 +1,8 @@
-import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import { IStageDrawerMask, IStageShield } from "@/types";
 import StageDrawerProvisionalRenderer from "@/modules/render/renderer/drawer/StageDrawerProvisionalRenderer";
+import StageHelperDrawer from "@/modules/stage/drawer/StageHelperDrawerBase";
 
-export default class StageDrawerProvisional extends StageDrawerBase implements IStageDrawerMask {
+export default class StageDrawerProvisional extends StageHelperDrawer implements IStageDrawerMask {
   constructor(shield: IStageShield) {
     super(shield);
     this.renderer = new StageDrawerProvisionalRenderer(this);

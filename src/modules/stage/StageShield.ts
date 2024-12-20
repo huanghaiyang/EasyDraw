@@ -11,7 +11,7 @@ import {
   IStageSelection,
   IStageElement,
   IStageCursor,
-  IStageEvent
+  IStageEvent,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageDrawerMask from "@/modules/stage/drawer/StageDrawerMask";
@@ -21,8 +21,9 @@ import StageCursor from "@/modules/stage/StageCursor";
 import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
 import { throttle } from "lodash";
+import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 
-export default class StageShield implements IStageShield {
+export default class StageShield extends StageDrawerBase implements IStageShield {
   // 舞台尺寸
   size: ISize = {
     width: StageDefaults.shield.width,
@@ -47,8 +48,6 @@ export default class StageShield implements IStageShield {
     x: 0,
     y: 0
   };
-  // 画布
-  canvas: HTMLCanvasElement;
   // canvas渲染容器
   renderEl: HTMLDivElement;
   // 画布容器尺寸
@@ -71,6 +70,7 @@ export default class StageShield implements IStageShield {
   private isPressDown: boolean = false;
 
   constructor() {
+    super();
     this.event = new StageEvent(this);
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);
@@ -106,16 +106,19 @@ export default class StageShield implements IStageShield {
   /**
    * 初始化画布
    */
-  async initCanvas(): Promise<void> {
+  initCanvas(): HTMLCanvasElement {
+    super.initCanvas();
+
     const maskCanvas = this.mask.initCanvas();
     const provisionalCanvas = this.provisional.initCanvas();
 
     this.renderEl.insertBefore(maskCanvas, this.renderEl.firstChild);
     this.renderEl.insertBefore(provisionalCanvas, this.mask.canvas);
 
-    this.canvas = document.createElement('canvas');
     this.canvas.id = 'shield';
     this.renderEl.insertBefore(this.canvas, this.provisional.canvas);
+
+    return this.canvas;
   }
 
   /**
@@ -253,8 +256,7 @@ export default class StageShield implements IStageShield {
     this.canvasRectCache = rect;
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
-    this.canvas.width = width;
-    this.canvas.height = height;
+    this.updateCanvasSize(rect);
     this.size = {
       width,
       height
@@ -281,13 +283,6 @@ export default class StageShield implements IStageShield {
   checkCreatorActive(): boolean {
     if (!this.currentCreator) return false;
     return [CreatorCategories.shapes].includes(this.currentCreator.category);
-  }
-
-  /**
-   * 清除画布内容
-   */
-  clearCanvas(): void {
-    this.canvas.getContext('2d').clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**
