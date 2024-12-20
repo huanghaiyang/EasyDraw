@@ -101,7 +101,7 @@ export interface IStageCursor {
 }
 
 // 舞台画布
-export interface IStageDrawer extends IStageCanvas {
+export interface IStageDrawer extends IStageCanvas, EventEmitter {
   renderer: IStageRenderer;
   redraw(): Promise<void>;
 }
@@ -352,4 +352,9 @@ export type TranslationValue = {
 export type ScaleValue = {
   sx: number;
   sy: number
+}
+
+// 舞台通知名称
+export enum ShieldDispatcherNames {
+  elementCreated = 0,
 }

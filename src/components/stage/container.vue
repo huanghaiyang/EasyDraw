@@ -27,7 +27,7 @@ onMounted(async () => {
 <template>
   <div class="stage-container" ref="stageRef">
     <stage-shield-vue ref="stageShieldRef" />
-    <creator-bar @select="handleCreatorSelect"/>
+    <creator-bar @select="handleCreatorSelect" :current-creator="stageStore.currentCreator"/>
   </div>
 </template>
 <style lang="less" scoped>

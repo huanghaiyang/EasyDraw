@@ -175,7 +175,8 @@ export default class StageStore implements IStageStore {
       id: nanoid(),
       type,
       points,
-      data
+      data,
+      angle: 0
     }
     return obj;
   }

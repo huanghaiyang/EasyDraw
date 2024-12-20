@@ -1,16 +1,29 @@
 <script lang="ts" setup>
-import { Creators } from "@/types/constants";
+import { Creator, CreatorTypes } from "@/types";
 import { getCreatorByType } from "@/types/helper";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
+const props = defineProps({
+  currentCreator: { type: Object, required: true },
+});
+const type = ref((props.currentCreator as Creator).type);
 const emits = defineEmits(["select"]);
-const current = ref(-1);
+
+watch(
+  () => props.currentCreator,
+  (val) => {
+    type.value = (val as Creator).type;
+  }
+);
+
 const select = (evt) => {
   const target = evt.target;
   const toolItem = target.closest(".tool-item");
   if (toolItem) {
-    current.value = parseInt(toolItem.getAttribute("v-index"));
-    emits("select", getCreatorByType(current.value));
+    emits(
+      "select",
+      getCreatorByType(parseInt(toolItem.getAttribute("v-index")))
+    );
   }
 };
 </script>
@@ -20,10 +33,10 @@ const select = (evt) => {
       :class="[
         'create-bar__moveable tool-item',
         {
-          selected: current === Creators.moveable.type,
+          selected: type === CreatorTypes.moveable,
         },
       ]"
-      :v-index="Creators.moveable.type"
+      :v-index="CreatorTypes.moveable"
     >
       <el-icon
         class="icon-verbise-arrow-cursor-2--mouse-select-cursor iconfont"
@@ -33,10 +46,10 @@ const select = (evt) => {
       :class="[
         'create-bar__rectangle tool-item',
         {
-          selected: current === Creators.rectangle.type,
+          selected: type === CreatorTypes.rectangle,
         },
       ]"
-      :v-index="Creators.rectangle.type"
+      :v-index="CreatorTypes.rectangle"
     >
       <el-icon class="icon-verbise-Rectangle iconfont"></el-icon>
     </div>

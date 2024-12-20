@@ -12,6 +12,7 @@ import {
   IStageElement,
   IStageCursor,
   IStageEvent,
+  ShieldDispatcherNames,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageDrawerMask from "@/modules/stage/drawer/StageDrawerMask";
@@ -22,7 +23,7 @@ import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
 import { throttle } from "lodash";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
-import StageDrawerShieldRenderer from "../render/renderer/drawer/StageDrawerShieldRenderer";
+import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
   // 舞台尺寸
@@ -179,7 +180,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async commitRedraw(): Promise<void> {
     await this.redraw();
-    this.store.updateElements(this.store.noneRenderedElements, { isRendered: true });
+    const noneRenderedElements = this.store.noneRenderedElements;
+    if (noneRenderedElements.length) {
+      this.store.updateElements(noneRenderedElements, { isRendered: true });
+      this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
+    }
   }
 
   /**
