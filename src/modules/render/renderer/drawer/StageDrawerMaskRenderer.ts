@@ -22,7 +22,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
   /**
    * 重绘蒙版
    */
-  redraw(): void {
+  async redraw(): Promise<void> {
     let cargo = new RenderTaskCargo([]);
     if (this.drawer.shield.selection.getRenderType() === SelectionRenderTypes.rect) {
       const selectionTask = this.createMaskSelectionTask();
@@ -34,7 +34,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     }
     if (!cargo.isEmpty()) {
       cargo.prepend(this.createMaskClearTask());
-      this.renderCargo(cargo);
+      await this.renderCargo(cargo);
     } else {
       cargo = null;
     }

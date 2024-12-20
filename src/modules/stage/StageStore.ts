@@ -15,11 +15,33 @@ export default class StageStore implements IStageStore {
   // 元素对象映射关系，加快查询
   private elementMap = new Map<string, IStageElement>();
 
-  // 当前创建中的组件
+  // 正在创建的元素列表
+  get startCreatingElements(): ElementObject[] {
+    const result = [];
+    this.elementList.forEach(item => {
+      if (item.data.status === ElementStatus.startCreating) {
+        result.push(item.data.obj);
+      }
+    });
+    return result;
+  }
+
+  // 当前创建并更新中的组件
   get creatingElements(): IStageElement[] {
     const result = [];
     this.elementList.forEach(item => {
       if (item.data.status === ElementStatus.creating) {
+        result.push(item.data);
+      }
+    });
+    return result;
+  }
+
+  // 没有渲染到舞台的组件
+  get noneRenderedElements(): IStageElement[] {
+    const result = [];
+    this.elementList.forEach(item => {
+      if (!item.data.isRendered) {
         result.push(item.data);
       }
     });
@@ -104,12 +126,25 @@ export default class StageStore implements IStageStore {
    * @param data 
    * @returns 
    */
-  updateElement(id: string, data: Partial<IStageElement>): IStageElement {
+  updateElement(id: string, props: Partial<IStageElement>): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
-      Object.assign(element, data);
+      Object.assign(element, props);
       return element;
     }
+  }
+
+  /**
+   * 批量更新元素属性
+   * 
+   * @param elements 
+   * @param props 
+   * @returns 
+   */
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
+    return elements.map(element => {
+      return this.updateElement(element.id, props);
+    })
   }
 
   /**
@@ -204,6 +239,7 @@ export default class StageStore implements IStageStore {
         } else {
           element = this.createElement(obj);
           this.updateElement(element.id, {
+            isRendered: false,
             status: ElementStatus.startCreating,
           })
           this.addElement(element);

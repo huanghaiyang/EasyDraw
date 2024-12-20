@@ -22,6 +22,7 @@ import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
 import { throttle } from "lodash";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
+import StageDrawerShieldRenderer from "../render/renderer/drawer/StageDrawerShieldRenderer";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
   // 舞台尺寸
@@ -77,6 +78,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.provisional = new StageDrawerProvisional(this);
     this.selection = new StageSelection(this);
     this.mask = new StageDrawerMask(this);
+    this.renderer = new StageDrawerShieldRenderer(this);
 
     this.refreshSize = this.refreshSize.bind(this);
     this.handleCursorMove = throttle(this.handleCursorMove.bind(this), 1000 / 120);
@@ -169,6 +171,15 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.isPressDown = false;
     this.calcPressUp(e);
     this.applyPressUp(e);
+    this.commitRedraw();
+  }
+
+  /**
+   * 提交绘制
+   */
+  async commitRedraw(): Promise<void> {
+    await this.redraw();
+    this.store.updateElements(this.store.noneRenderedElements, { isRendered: true });
   }
 
   /**

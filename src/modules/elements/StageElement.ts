@@ -16,6 +16,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   isResizing: boolean;
   isRotating: boolean;
   isDragging: boolean;
+  isRendered: boolean;
 
   constructor(obj: ElementObject) {
     this.obj = obj;
@@ -29,6 +30,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     this.isResizing = false;
     this.isRotating = false;
     this.isDragging = false;
+    this.isRendered = false;
   }
 
   calcPathPoints(): IPoint[] {

@@ -34,7 +34,7 @@ export default class StageDrawerBase implements IStageDrawer {
   /**
    * 重绘
    */
-  redraw(): void {
-    this.renderer.redraw();
+  async redraw(): Promise<void> {
+    await this.renderer.redraw();
   }
 }

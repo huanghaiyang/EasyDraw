@@ -7,9 +7,11 @@ export default abstract class RenderTaskBase implements IRenderTask {
   constructor() {
     this.id = nanoid();
   }
+
   run(): Promise<void> {
     return Promise.resolve();
   }
+  
   destroy(): Promise<void> {
     return Promise.resolve();
   }

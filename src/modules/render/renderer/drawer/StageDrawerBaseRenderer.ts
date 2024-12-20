@@ -34,7 +34,7 @@ export default class StageDrawerBaseRenderer<T extends IStageDrawer> implements 
   /**
    * 重绘蒙版
    */
-  redraw(): void {
+  async redraw(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

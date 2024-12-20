@@ -8,7 +8,7 @@ export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRende
   /**
    * 重绘
    */
-  redraw(): void {
+  async redraw(): Promise<void> {
     let cargo = new RenderTaskCargo([]);
     const elements = this.drawer.shield.store.creatingElements;
     if (elements.length > 0) {
@@ -21,7 +21,7 @@ export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRende
     }
     if (!cargo.isEmpty()) {
       cargo.prepend(new StageElementTaskClear(null, this.maskParams));
-      this.renderCargo(cargo);
+      await this.renderCargo(cargo);
     } else {
       cargo = null;
     }

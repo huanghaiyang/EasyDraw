@@ -61,12 +61,15 @@ export interface IStageShield extends IRect, IStageDrawer {
 
 // 用于维护舞台数据关系
 export interface IStageStore {
+  get startCreatingElements(): ElementObject[];
   get creatingElements(): IStageElement[];
+  get noneRenderedElements(): IStageElement[];
   createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
-  updateElement(id: string, data: Partial<IStageElement>): IStageElement;
+  updateElement(id: string, props: Partial<IStageElement>): IStageElement;
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
   updateElementObj(id: string, data: ElementObject): IStageElement;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
@@ -100,7 +103,7 @@ export interface IStageCursor {
 // 舞台画布
 export interface IStageDrawer extends IStageCanvas {
   renderer: IStageRenderer;
-  redraw(): void;
+  redraw(): Promise<void>;
 }
 
 export interface IStageHelperDrawer extends IStageDrawer {
@@ -244,6 +247,7 @@ export interface IStageElement {
   isResizing: boolean;
   isRotating: boolean;
   isDragging: boolean;
+  isRendered: boolean;
   status: ElementStatus;
   calcPathPoints(): IPoint[];
   getEdgePoints(): IPoint[];
@@ -317,7 +321,7 @@ export interface IRenderQueue {
 
 // 舞台渲染器
 export interface IStageRenderer {
-  redraw(): void;
+  redraw(): Promise<void>;
   clear(): void;
 }
 
