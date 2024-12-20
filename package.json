@@ -12,6 +12,7 @@
     "axios": "^1.7.9",
     "element-plus": "^2.9.1",
     "events": "^3.3.0",
+    "eventsource-polyfill": "^0.9.6",
     "lodash": "^4.17.21",
     "mathjs": "^14.0.1",
     "nanoid": "^5.0.9",
@@ -23,8 +24,8 @@
     "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
     "@types/events": "^3.0.3",
+    "@types/node": "^22.10.2",
     "@vitejs/plugin-vue": "^5.2.1",
     "less": "^4.2.1",
     "unplugin-auto-import": "^0.19.0",
