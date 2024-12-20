@@ -231,6 +231,7 @@ export type ElementObject = {
   strokeColor?: string;
   strokeWidth?: number;
   fillColor?: string;
+  angle: number;
 }
 
 // 舞台元素（组件）
@@ -339,4 +340,16 @@ export type CanvasCreatorStyles = {
   strokeStyle?: string;
   lineWidth?: number;
   fillStyle?: string;
+}
+
+// 平移值
+export type TranslationValue = {
+  dx: number;
+  dy: number;
+}
+
+// 缩放值
+export type ScaleValue = {
+  sx: number;
+  sy: number
 }
