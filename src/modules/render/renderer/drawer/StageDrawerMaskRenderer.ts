@@ -51,7 +51,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       type: StageDrawerMaskObjTypes.cursor,
       creatorCategory: this.drawer.shield.currentCreator.category
     }
-    const task = new StageDrawerMaskTaskCursor(obj, this.maskParams);
+    const task = new StageDrawerMaskTaskCursor(obj, this.renderParams);
     return task;
   }
 
@@ -65,7 +65,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       points: this.drawer.shield.selection.getEdge(),
       type: StageDrawerMaskObjTypes.selection
     }
-    const task = new StageDrawerMaskTaskSelection(obj, this.maskParams);
+    const task = new StageDrawerMaskTaskSelection(obj, this.renderParams);
     return task;
   }
 
@@ -75,7 +75,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @returns 
    */
   private createMaskClearTask(): IRenderTask {
-    const task = new StageDrawerMaskTaskClear(null, this.maskParams);
+    const task = new StageDrawerMaskTaskClear(null, this.renderParams);
     return task;
   }
 
@@ -108,7 +108,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
         direction,
         type: StageDrawerMaskObjTypes.selectionHandler,
       }
-      const task = new StageDrawerMaskTaskSelectionHandler(direction, obj, this.maskParams);
+      const task = new StageDrawerMaskTaskSelectionHandler(direction, obj, this.renderParams);
       tasks.push(task);
     });
     return tasks;

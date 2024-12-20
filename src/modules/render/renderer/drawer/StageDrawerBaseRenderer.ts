@@ -21,7 +21,7 @@ export default class StageDrawerBaseRenderer<T extends IStageDrawer> implements 
     await this.renderQueue.add(cargo);
   }
 
-  get maskParams() {
+  get renderParams() {
     return {
       canvas: this.drawer.canvas
     }
