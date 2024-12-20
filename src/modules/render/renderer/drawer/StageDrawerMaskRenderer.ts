@@ -8,6 +8,7 @@ import {
   SelectionRenderTypes,
   StageDrawerMaskObjTypes,
   Directions,
+  IStageDrawerMask,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
@@ -16,7 +17,8 @@ import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMask
 import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 
-export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer implements IStageDrawerMaskRenderer {
+export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
+
   /**
    * 重绘蒙版
    */

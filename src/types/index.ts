@@ -103,15 +103,15 @@ export interface IStageDrawer extends IStageCanvas {
   redraw(): void;
 }
 
-export interface StageHelperDrawer extends IStageDrawer {
+export interface IStageHelperDrawer extends IStageDrawer {
   shield: IStageShield;
 }
 
 // 辅助画布
-export interface IStageDrawerMask extends IStageDrawer { }
+export interface IStageDrawerMask extends IStageHelperDrawer { }
 
 // 临时组件绘制画布
-export interface IStageDrawerProvisional extends IStageDrawer { }
+export interface IStageDrawerProvisional extends IStageHelperDrawer { }
 
 // 辅助画布绘制任务类型
 export enum StageDrawerMaskObjTypes {
@@ -326,6 +326,9 @@ export interface IStageDrawerMaskRenderer extends IStageRenderer, IQueueRender {
 
 // 临时画布绘制器 
 export interface IStageDrawerProvisionalRenderer extends IStageRenderer, IQueueRender { }
+
+// 主画布绘制器
+export interface IStageDrawerShieldRenderer extends IStageRenderer, IQueueRender { }
 
 // 画板元素样式定义
 export type CanvasCreatorStyles = {

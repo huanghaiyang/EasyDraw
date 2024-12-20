@@ -1,10 +1,10 @@
-import { CreatorTypes, IStageDrawerProvisionalRenderer, IStageElement, IStageElementTask } from "@/types";
+import { CreatorTypes, IStageDrawerProvisional, IStageDrawerProvisionalRenderer, IStageElement, IStageElementTask } from "@/types";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageElementTaskClear from "@/modules/render/base/task/StageElementTaskClear";
 import StageElementTaskRect from "@/modules/render/base/task/StageElementTaskRect";
 
-export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRenderer implements IStageDrawerProvisionalRenderer {
+export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRenderer<IStageDrawerProvisional> implements IStageDrawerProvisionalRenderer {
   /**
    * 重绘
    */

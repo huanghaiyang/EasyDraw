@@ -1,7 +1,7 @@
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
-import { IStageShield } from "@/types";
+import { IStageHelperDrawer, IStageShield } from "@/types";
 
-export default class StageHelperDrawer extends StageDrawerBase implements StageHelperDrawer {
+export default class StageHelperDrawer extends StageDrawerBase implements IStageHelperDrawer {
   shield: IStageShield;
 
   constructor(shield: IStageShield) {

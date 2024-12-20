@@ -3,16 +3,16 @@ import {
   IQueueRender,
   IRenderQueue,
   IStageDrawer,
-  IRenderTaskCargo
+  IRenderTaskCargo,
 } from "@/types";
 import RenderQueue from "@/modules/render/RenderQueue";
 
-export default class StageDrawerBaseRenderer implements IStageRenderer, IQueueRender {
+export default class StageDrawerBaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
 
-  drawer: IStageDrawer;
+  drawer: T;
   renderQueue: IRenderQueue;
 
-  constructor(drawer: IStageDrawer) {
+  constructor(drawer: T) {
     this.drawer = drawer;
     this.renderQueue = new RenderQueue();
   }
