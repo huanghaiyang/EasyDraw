@@ -25,11 +25,7 @@ import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
-  // 舞台尺寸
-  size: ISize = {
-    width: StageDefaults.shield.width,
-    height: StageDefaults.shield.height
-  };
+  size: ISize;
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -255,13 +251,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const { width, height } = rect;
 
     this.stageRect = rect;
+    // TODO this.worldCenterCoord = ?
+    this.store.refreshAllElementStagePoints();
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
     this.updateCanvasSize(rect);
-    this.size = {
-      width,
-      height
-    }
     if (this.isFirstResizeRender) {
       this.isFirstResizeRender = false;
     }
