@@ -15,7 +15,6 @@ export default class StageStore implements IStageStore {
   // 元素对象映射关系，加快查询
   private elementMap = new Map<string, IStageElement>();
 
-  private _startCreatingElements: IStageElement[] = [];
   private _creatingElements: IStageElement[] = [];
   private _renderedElements: IStageElement[] = [];
   private _noneRenderedElements: IStageElement[] = [];
@@ -25,11 +24,6 @@ export default class StageStore implements IStageStore {
   constructor(shield: IStageShield) {
     this.shield = shield;
     this.elementList = new LinkedList<IStageElement>();
-  }
-
-  // 正在创建的元素列表
-  get startCreatingElements(): IStageElement[] {
-    return this._startCreatingElements;
   }
 
   // 当前创建并更新中的组件
@@ -53,15 +47,6 @@ export default class StageStore implements IStageStore {
 
   get hittingElements(): IStageElement[] {
     return this._hittingElements;
-  }
-
-  private _refreshStartCreatingElements(): void {
-    this._startCreatingElements = [];
-    this.elementList.forEach(item => {
-      if (item.data.status === ElementStatus.startCreating) {
-        this._startCreatingElements.push(item.data);
-      }
-    })
   }
 
   private _refreshCreatingElements(): void {
@@ -93,18 +78,23 @@ export default class StageStore implements IStageStore {
 
   private _refreshSelectedElements(): void {
     this._selectedElements = [];
-    this.elementList.forEach(item => {
-      if (item.data.isSelected) {
-        this._selectedElements.push(item.data);
+    this.renderedElements.forEach(item => {
+      if (item.isSelected) {
+        this._selectedElements.push(item);
       }
     })
+    if (this._selectedElements.length === 0) {
+      if (this.currentCreatingElementId) {
+        this._selectedElements.push(this.getElementById(this.currentCreatingElementId));
+      }
+    }
   }
 
   private _refreshHittingElements(): void {
     this._hittingElements = [];
-    this.elementList.forEach(item => {
-      if (item.data.isHitting) {
-        this._hittingElements.push(item.data);
+    this.renderedElements.forEach(item => {
+      if (item.isHitting) {
+        this._hittingElements.push(item);
       }
     })
   }
@@ -338,16 +328,12 @@ export default class StageStore implements IStageStore {
    */
   refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void {
     if (!cacheTypes) {
-      this._refreshStartCreatingElements();
       this._refreshCreatingElements();
       this._refreshRenderedElements();
       this._refreshNoneRenderedElements();
       this._refreshSelectedElements();
       this._refreshHittingElements();
     } else {
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.startCreating)) {
-        this._refreshCreatingElements();
-      }
       if (cacheTypes.includes(StageStoreRefreshCacheTypes.creating)) {
         this._refreshCreatingElements();
       }
@@ -377,7 +363,6 @@ export default class StageStore implements IStageStore {
     if (isArray(element)) {
       if (element.includes('status')) {
         result.push(StageStoreRefreshCacheTypes.creating);
-        result.push(StageStoreRefreshCacheTypes.startCreating);
       }
       if (element.includes('isSelected')) {
         result.push(StageStoreRefreshCacheTypes.selected);
@@ -392,7 +377,6 @@ export default class StageStore implements IStageStore {
     } else {
       if (element.hasOwnProperty('status')) {
         result.push(StageStoreRefreshCacheTypes.creating);
-        result.push(StageStoreRefreshCacheTypes.startCreating);
       }
       if (element.hasOwnProperty('isSelected')) {
         result.push(StageStoreRefreshCacheTypes.selected);

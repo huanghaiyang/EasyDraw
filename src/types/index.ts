@@ -68,7 +68,6 @@ export interface IStageShield extends IStageDrawer {
 
 // 用于维护舞台数据关系
 export interface IStageStore {
-  get startCreatingElements(): IStageElement[];
   get creatingElements(): IStageElement[];
   get renderedElements(): IStageElement[];
   get noneRenderedElements(): IStageElement[];
