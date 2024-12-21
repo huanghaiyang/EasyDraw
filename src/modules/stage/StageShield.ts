@@ -21,7 +21,6 @@ import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
 import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
-import { throttle } from "lodash";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 
@@ -82,7 +81,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.renderer = new StageDrawerShieldRenderer(this);
 
     this.refreshSize = this.refreshSize.bind(this);
-    this.handleCursorMove = throttle(this.handleCursorMove.bind(this), 1000 / 120);
+    this.handleCursorMove = this.handleCursorMove.bind(this);
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
     this.handlePressUp = this.handlePressUp.bind(this);
