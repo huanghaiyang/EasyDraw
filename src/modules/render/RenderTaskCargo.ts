@@ -28,7 +28,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
     if (this.running) {
       return;
     }
-    this.tasks.push(task);
+    if (task) {
+      this.tasks.push(task);
+    }
   }
 
   /**
@@ -38,10 +40,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
    * @returns 
    */
   addAll(tasks: IRenderTask[]): void {
-    if (this.running) {
-      return;
-    }
-    this.tasks.push(...tasks);
+    tasks.forEach((task) => {
+      this.add(task);
+    });
   }
 
   /**
@@ -53,7 +54,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
     if (this.running) {
       return;
     }
-    this.tasks.unshift(task);
+    if (task) {
+      this.tasks.unshift(task);
+    }
   }
 
   async run(): Promise<void> {

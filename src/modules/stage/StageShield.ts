@@ -129,17 +129,22 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  handleCursorMove(e: MouseEvent): void {
+  async handleCursorMove(e: MouseEvent): Promise<void> {
+    const funcs = [];
     this.cursor.calcPos(e, this.canvasRectCache);
+
     if (this.checkCreatorActive()) {
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
+    } else {
+      this.setCursorStyle('default');
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
       this.creatingElement(e);
-      this.provisional.redraw();
+      funcs.push(() => this.provisional.redraw())
     }
-    this.mask.redraw();
+    funcs.push(() => this.mask.redraw());
+    await Promise.all(funcs.map(func => func()));
   }
 
   /**
@@ -147,9 +152,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  handleCursorLeave(e: MouseEvent): void {
+  async handleCursorLeave(e: MouseEvent): Promise<void> {
     this.cursor.clear();
-    this.applyCursorLeave(e)
+    this.setCursorStyle('default');
+    await this.mask.redraw();
   }
 
   /**
@@ -157,7 +163,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  handlePressDown(e: MouseEvent): void {
+  async handlePressDown(e: MouseEvent): Promise<void> {
     this.isPressDown = true;
     this.calcPressDown(e);
     this.selection.clearSelects();
@@ -168,11 +174,13 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  handlePressUp(e: MouseEvent): void {
+  async handlePressUp(e: MouseEvent): Promise<void> {
     this.isPressDown = false;
     this.calcPressUp(e);
-    this.applyPressUp(e);
-    this.commitRedraw();
+    if (this.checkCreatorActive()) {
+      this.store.finishCreatingElement();
+    }
+    await this.commitRedraw();
   }
 
   /**
@@ -185,17 +193,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.store.updateElements(noneRenderedElements, { isRendered: true });
       this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
     }
-  }
-
-  /**
-   * 鼠标离开画布事件
-   * 
-   * @param e 
-   */
-  applyCursorLeave(e: MouseEvent): void {
-    this.mask.clearCanvas();
-    this.cursor.clear();
-    this.setCursorStyle('default');
   }
 
   /**
@@ -226,17 +223,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   calcPressMove(e: MouseEvent): void {
     this.pressMovePosition = this.cursor.calcPos(e, this.canvasRectCache);
     this.pressMoveWorldCenterOffset = this.calcOffsetByPos(this.pressMovePosition);
-  }
-
-  /**
-   * 处理鼠标抬起逻辑（正常抬起、拖动抬起、绘制完成抬起等）
-   * 
-   * @param e 
-   */
-  applyPressUp(e) {
-    if (this.checkCreatorActive()) {
-      this.store.finishCreatingElement();
-    }
   }
 
   /**
