@@ -64,10 +64,9 @@ export default class StageSelection implements IStageSelection {
     let element: IStageElement;
     for (let i = this.shield.store.renderedElements.length - 1; i >= 0; i--) {
       element = this.shield.store.renderedElements[i];
-      if (MathUtils.isPointInPolygonByRayCasting(point, element.pathPoints)) {
-        this.shield.store.updateElement(element.id, { isHitting: true }, false);
-      } else {
-        this.shield.store.updateElement(element.id, { isHitting: false }, false);
+      this.shield.store.updateElement(element.id, { isHitting: MathUtils.isPointInPolygonByRayCasting(point, element.pathPoints) });
+      if (element.isHitting) {
+        break;
       }
     }
   }

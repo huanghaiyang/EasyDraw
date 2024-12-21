@@ -78,8 +78,8 @@ export interface IStageStore {
   createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
-  updateElement(id: string, props: Partial<IStageElement>, isRefresh?: boolean): IStageElement;
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>, isRefresh?: boolean): IStageElement[];
+  updateElement(id: string, props: Partial<IStageElement>): IStageElement;
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
   updateElementObj(id: string, data: ElementObject): IStageElement;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];

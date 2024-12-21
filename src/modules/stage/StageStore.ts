@@ -185,13 +185,11 @@ export default class StageStore implements IStageStore {
    * @param isRefresh
    * @returns 
    */
-  updateElement(id: string, props: Partial<IStageElement>, isRefresh: boolean = true): IStageElement {
+  updateElement(id: string, props: Partial<IStageElement>): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
       Object.assign(element, props);
-      if (isRefresh) {
-        this.refreshElementCaches(this._getRefreshCacheTypes(props));
-      }
+      this.refreshElementCaches(this._getRefreshCacheTypes(props));
       return element;
     }
   }
@@ -203,13 +201,10 @@ export default class StageStore implements IStageStore {
    * @param props 
    * @returns 
    */
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>, isRefresh: boolean = true): IStageElement[] {
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
     elements.forEach(element => {
-      return this.updateElement(element.id, props, isRefresh);
+      return this.updateElement(element.id, props);
     })
-    if (isRefresh) {
-      this.refreshElementCaches();
-    }
     return elements;
   }
 
@@ -282,7 +277,6 @@ export default class StageStore implements IStageStore {
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     }
-    this.refreshElementCaches(this._getRefreshCacheTypes(['status', 'isSelected', 'isRendered']));
     return element;
   }
 
