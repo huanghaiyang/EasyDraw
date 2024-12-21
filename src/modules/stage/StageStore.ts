@@ -1,10 +1,9 @@
-import { CreatorCategories, CreatorTypes, ElementStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore } from "@/types";
+import { CreatorCategories, CreatorTypes, ElementStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore, StageStoreRefreshCacheTypes } from "@/types";
 import { nanoid } from "nanoid";
-import StageElement from "@/modules/elements/StageElement";
-import StageElementRect from "@/modules/elements/StageElementRect";
 import LinkedList, { ILinkedList } from "@/modules/struct/LinkedList";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/ElementUtils";
+import { isArray } from "lodash";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -21,6 +20,7 @@ export default class StageStore implements IStageStore {
   private _renderedElements: IStageElement[] = [];
   private _noneRenderedElements: IStageElement[] = [];
   private _selectedElements: IStageElement[] = [];
+  private _hittingElements: IStageElement[] = [];
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -49,6 +49,10 @@ export default class StageStore implements IStageStore {
 
   get selectedElements(): IStageElement[] {
     return this._selectedElements;
+  }
+
+  get hittingElements(): IStageElement[] {
+    return this._hittingElements;
   }
 
   private _refreshStartCreatingElements(): void {
@@ -92,6 +96,15 @@ export default class StageStore implements IStageStore {
     this.elementList.forEach(item => {
       if (item.data.isSelected) {
         this._selectedElements.push(item.data);
+      }
+    })
+  }
+
+  private _refreshHittingElements(): void {
+    this._hittingElements = [];
+    this.elementList.forEach(item => {
+      if (item.data.isHitting) {
+        this._hittingElements.push(item.data);
       }
     })
   }
@@ -169,13 +182,16 @@ export default class StageStore implements IStageStore {
    * 
    * @param id 
    * @param data 
+   * @param isRefresh
    * @returns 
    */
-  updateElement(id: string, props: Partial<IStageElement>): IStageElement {
+  updateElement(id: string, props: Partial<IStageElement>, isRefresh: boolean = true): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
       Object.assign(element, props);
-      this.refreshElementCaches();
+      if (isRefresh) {
+        this.refreshElementCaches(this._getRefreshCacheTypes(props));
+      }
       return element;
     }
   }
@@ -187,11 +203,13 @@ export default class StageStore implements IStageStore {
    * @param props 
    * @returns 
    */
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>, isRefresh: boolean = true): IStageElement[] {
     elements.forEach(element => {
-      return this.updateElement(element.id, props);
+      return this.updateElement(element.id, props, isRefresh);
     })
-    this.refreshElementCaches();
+    if (isRefresh) {
+      this.refreshElementCaches();
+    }
     return elements;
   }
 
@@ -264,7 +282,7 @@ export default class StageStore implements IStageStore {
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     }
-    this.refreshElementCaches();
+    this.refreshElementCaches(this._getRefreshCacheTypes(['status', 'isSelected', 'isRendered']));
     return element;
   }
 
@@ -276,9 +294,8 @@ export default class StageStore implements IStageStore {
       const element = this.getElementById(this.currentCreatingElementId);
       if (element) {
         element.status = ElementStatus.finished;
-        element.isEditing = true;
         this.currentCreatingElementId = null;
-        this.refreshElementCaches();
+        this.refreshElementCaches(this._getRefreshCacheTypes(['status']));
         return element;
       }
     }
@@ -322,13 +339,80 @@ export default class StageStore implements IStageStore {
 
   /**
    * 刷新元素列表
+   * 
+   * @param cacheTypes
    */
-  refreshElementCaches(): void {
-    this._refreshStartCreatingElements();
-    this._refreshCreatingElements();
-    this._refreshRenderedElements();
-    this._refreshNoneRenderedElements();
-    this._refreshSelectedElements();
+  refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void {
+    if (!cacheTypes) {
+      this._refreshStartCreatingElements();
+      this._refreshCreatingElements();
+      this._refreshRenderedElements();
+      this._refreshNoneRenderedElements();
+      this._refreshSelectedElements();
+      this._refreshHittingElements();
+    } else {
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.startCreating)) {
+        this._refreshCreatingElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.creating)) {
+        this._refreshCreatingElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.rendered)) {
+        this._refreshRenderedElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.noneRendered)) {
+        this._refreshNoneRenderedElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.selected)) {
+        this._refreshSelectedElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.hitting)) {
+        this._refreshHittingElements();
+      }
+    }
   }
+
+  /**
+   * 获取刷新缓存类型
+   * 
+   * @param props 
+   * @returns 
+   */
+  private _getRefreshCacheTypes(element: Partial<IStageElement> | string[]): StageStoreRefreshCacheTypes[] {
+    const result: StageStoreRefreshCacheTypes[] = [];
+    if (isArray(element)) {
+      if (element.includes('status')) {
+        result.push(StageStoreRefreshCacheTypes.creating);
+        result.push(StageStoreRefreshCacheTypes.startCreating);
+      }
+      if (element.includes('isSelected')) {
+        result.push(StageStoreRefreshCacheTypes.selected);
+      }
+      if (element.includes('isRendered')) {
+        result.push(StageStoreRefreshCacheTypes.rendered);
+        result.push(StageStoreRefreshCacheTypes.noneRendered);
+      }
+      if (element.includes('isHitting')) {
+        result.push(StageStoreRefreshCacheTypes.hitting);
+      }
+    } else {
+      if (element.hasOwnProperty('status')) {
+        result.push(StageStoreRefreshCacheTypes.creating);
+        result.push(StageStoreRefreshCacheTypes.startCreating);
+      }
+      if (element.hasOwnProperty('isSelected')) {
+        result.push(StageStoreRefreshCacheTypes.selected);
+      }
+      if (element.hasOwnProperty('isRendered')) {
+        result.push(StageStoreRefreshCacheTypes.rendered);
+        result.push(StageStoreRefreshCacheTypes.noneRendered);
+      }
+      if (element.hasOwnProperty('isHitting')) {
+        result.push(StageStoreRefreshCacheTypes.hitting);
+      }
+    }
+    return result;
+  }
+
 
 }

@@ -161,6 +161,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
     } else {
       this.setCursorStyle('default');
+      this.selection.hitElements(this.cursor.pos);
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
@@ -215,7 +216,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const noneRenderedElements = this.store.noneRenderedElements;
     if (noneRenderedElements.length) {
       this.store.updateElements(noneRenderedElements, { isRendered: true });
-      this.store.refreshElementCaches();
       this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
     }
   }

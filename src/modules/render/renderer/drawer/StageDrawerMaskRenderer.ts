@@ -83,7 +83,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskSelectionTask(): IRenderTask {
     const obj: IStageDrawerMaskTaskSelectionObj = {
-      points: this.drawer.shield.selection.getEdge(),
+      points: this.drawer.shield.selection.getgetBoxPoints(),
       type: StageDrawerMaskObjTypes.selection
     }
     const task = new StageDrawerMaskTaskSelection(obj, this.renderParams);

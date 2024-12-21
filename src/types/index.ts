@@ -40,6 +40,16 @@ export type IDirectionPoint = IPoint & {
   direction: Directions;
 }
 
+// 舞台元素缓存刷新类型
+export enum StageStoreRefreshCacheTypes {
+  startCreating = 0,
+  creating = 1,
+  selected = 2,
+  hitting = 3,
+  rendered = 4,
+  noneRendered = 5,
+}
+
 // 舞台主画板
 export interface IStageShield extends IStageDrawer {
   cursor: IStageCursor;
@@ -63,12 +73,13 @@ export interface IStageStore {
   get renderedElements(): IStageElement[];
   get noneRenderedElements(): IStageElement[];
   get selectedElements(): IStageElement[];
-  refreshElementCaches(): void;
+  get hittingElements(): IStageElement[];
+  refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void;
   createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
-  updateElement(id: string, props: Partial<IStageElement>): IStageElement;
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
+  updateElement(id: string, props: Partial<IStageElement>, isRefresh?: boolean): IStageElement;
+  updateElements(elements: IStageElement[], props: Partial<IStageElement>, isRefresh?: boolean): IStageElement[];
   updateElementObj(id: string, data: ElementObject): IStageElement;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
@@ -200,10 +211,11 @@ export interface IStageEvent extends EventEmitter {
 
 // 舞台选区
 export interface IStageSelection {
-  getEdge(): IPoint[];
+  getgetBoxPoints(): IPoint[];
   isEmpty(): boolean;
   getRenderType(): SelectionRenderTypes;
   clearSelects(): void;
+  hitElements(point: IPoint): void;
 }
 
 // 舞台容器
@@ -240,7 +252,7 @@ export interface IStageElement {
   obj: ElementObject;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
-  get edgePoints(): IPoint[];
+  get boxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   isSelected: boolean;
@@ -252,6 +264,7 @@ export interface IStageElement {
   isRotating: boolean;
   isDragging: boolean;
   isRendered: boolean;
+  isHitting: boolean;
   status: ElementStatus;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
   isInPolygon(points: IPoint[]): boolean;

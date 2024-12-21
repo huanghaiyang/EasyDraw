@@ -1,4 +1,5 @@
-import { CreatorTypes, IPoint, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
+import { CreatorTypes, IPoint, IStageElement, IStageSelection, IStageShield, SelectionRenderTypes, StageStoreRefreshCacheTypes } from "@/types";
+import MathUtils from "@/utils/MathUtils";
 import { first, flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
@@ -30,9 +31,9 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns IPoint[]
    */
-  getEdge(): IPoint[] {
+  getgetBoxPoints(): IPoint[] {
     return flatten(this.shield.store.selectedElements.map(element => {
-      return element.edgePoints;
+      return element.boxPoints;
     }));
   }
 
@@ -50,7 +51,24 @@ export default class StageSelection implements IStageSelection {
    */
   clearSelects(): void {
     this.shield.store.selectedElements.forEach(element => {
-      this.shield.store.updateElement(element.id, { isSelected: false, isEditing: false })
+      this.shield.store.updateElement(element.id, { isSelected: false })
     });
+  }
+
+  /**
+   * 根据坐标获取命中的组件
+   * 
+   * @param point 
+   */
+  hitElements(point: IPoint): void {
+    let element: IStageElement;
+    for (let i = this.shield.store.renderedElements.length - 1; i >= 0; i--) {
+      element = this.shield.store.renderedElements[i];
+      if (MathUtils.isPointInPolygonByRayCasting(point, element.pathPoints)) {
+        this.shield.store.updateElement(element.id, { isHitting: true }, false);
+      } else {
+        this.shield.store.updateElement(element.id, { isHitting: false }, false);
+      }
+    }
   }
 }

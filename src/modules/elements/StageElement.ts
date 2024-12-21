@@ -19,10 +19,11 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   isRotating: boolean;
   isDragging: boolean;
   isRendered: boolean;
+  isHitting: boolean;
 
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
-  protected _edgePoints: IPoint[];
+  protected _boxPoints: IPoint[];
   protected _rotatePoints: IPoint[];
   protected _rotatePathPoints: IPoint[];
 
@@ -34,8 +35,8 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     return this._pathPoints;
   }
 
-  get edgePoints(): IPoint[] {
-    return this._edgePoints;
+  get boxPoints(): IPoint[] {
+    return this._boxPoints;
   }
 
   get rotatePoints(): IPoint[] {
@@ -59,6 +60,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     this.isRotating = false;
     this.isDragging = false;
     this.isRendered = false;
+    this.isHitting = false;
   }
 
   /**
@@ -69,7 +71,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     this._pathPoints = this._points;
     this._rotatePoints = this._points.map(point => MathUtils.rotate(point, this.obj.angle))
     this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotate(point, this.obj.angle))
-    this._edgePoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
+    this._boxPoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
   }
 
   /**
@@ -78,6 +80,6 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
    * @param rect 
    */
   isInPolygon(points: IPoint[]): boolean {
-    return every(this.edgePoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
+    return every(this.pathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
   }
 }
