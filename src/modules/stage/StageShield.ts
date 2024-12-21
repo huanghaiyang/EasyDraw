@@ -45,28 +45,28 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   // 事件处理中心
   event: IStageEvent;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
-  worldCenterOffset: IPoint = {
+  stageWorldCoord: IPoint = {
     x: 0,
     y: 0
   };
   // canvas渲染容器
   renderEl: HTMLDivElement;
   // 画布容器尺寸
-  private canvasRectCache: DOMRect;
+  private rect: DOMRect;
   // 画布是否是第一次渲染
   private isFirstResizeRender: boolean = true;
   // 鼠标按下位置
   private pressDownPosition: IPoint;
   // 鼠标按下时距离世界坐标中心点的偏移
-  private pressDownWorldCenterOffset: IPoint;
+  private pressDownStageWorldCoord: IPoint;
   // 鼠标抬起位置
   private pressUpPosition: IPoint;
   // 鼠标抬起时距离世界坐标中心点的偏移
-  private pressUpWorldCenterOffset: IPoint;
+  private pressUpStageWorldCoord: IPoint;
   // 鼠标按下并移动时的位置  
   private pressMovePosition: IPoint;
   // 鼠标移动时距离世界坐标中心点的偏移
-  private pressMoveWorldCenterOffset: IPoint;
+  private pressMoveStageWorldCoord: IPoint;
   // 鼠标是否按下过
   private isPressDown: boolean = false;
 
@@ -130,7 +130,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
-    this.cursor.calcPos(e, this.canvasRectCache);
+    this.cursor.calcPos(e, this.rect);
 
     if (this.checkCreatorActive()) {
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
@@ -200,8 +200,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressDown(e: MouseEvent): void {
-    this.pressDownPosition = this.cursor.calcPos(e, this.canvasRectCache);
-    this.pressDownWorldCenterOffset = this.calcOffsetByPos(this.pressDownPosition);
+    this.pressDownPosition = this.cursor.calcPos(e, this.rect);
+    this.pressDownStageWorldCoord = this.calcOffsetByPos(this.pressDownPosition);
   }
 
   /**
@@ -210,8 +210,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressUp(e: MouseEvent): void {
-    this.pressUpPosition = this.cursor.calcPos(e, this.canvasRectCache);
-    this.pressUpWorldCenterOffset = this.calcOffsetByPos(this.pressUpPosition);
+    this.pressUpPosition = this.cursor.calcPos(e, this.rect);
+    this.pressUpStageWorldCoord = this.calcOffsetByPos(this.pressUpPosition);
   }
 
   /**
@@ -220,8 +220,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressMove(e: MouseEvent): void {
-    this.pressMovePosition = this.cursor.calcPos(e, this.canvasRectCache);
-    this.pressMoveWorldCenterOffset = this.calcOffsetByPos(this.pressMovePosition);
+    this.pressMovePosition = this.cursor.calcPos(e, this.rect);
+    this.pressMoveStageWorldCoord = this.calcOffsetByPos(this.pressMovePosition);
   }
 
   /**
@@ -231,8 +231,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @returns 
    */
   checkCursorPressMovedAvailable(e: MouseEvent): boolean {
-    return Math.abs(this.pressMoveWorldCenterOffset.x - this.pressDownWorldCenterOffset.x) >= MinCursorMoveXDistance
-      || Math.abs(this.pressMoveWorldCenterOffset.y - this.pressDownWorldCenterOffset.y) >= MinCursorMoveYDistance;
+    return Math.abs(this.pressMoveStageWorldCoord.x - this.pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
+      || Math.abs(this.pressMoveStageWorldCoord.y - this.pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
   }
 
   /**
@@ -242,8 +242,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   calcOffsetByPos(pos: IPoint): IPoint {
     return {
-      x: pos.x - this.canvasRectCache.width / 2 + this.worldCenterOffset.x,
-      y: pos.y - this.canvasRectCache.height / 2 + this.worldCenterOffset.y
+      x: pos.x - this.rect.width / 2 + this.stageWorldCoord.x,
+      y: pos.y - this.rect.height / 2 + this.stageWorldCoord.y
     }
   }
 
@@ -254,7 +254,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const rect = this.renderEl.getBoundingClientRect();
     const { width, height } = rect;
 
-    this.canvasRectCache = rect;
+    this.rect = rect;
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
     this.updateCanvasSize(rect);
@@ -302,7 +302,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   creatingElement(e: MouseEvent): IStageElement | null {
     if (this.checkCreatorActive() && this.checkCursorPressMovedAvailable(e)) {
-      const element = this.store.creatingElement([this.pressDownWorldCenterOffset, this.pressMoveWorldCenterOffset], this.canvasRectCache, this.worldCenterOffset);
+      const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord], this.rect, this.stageWorldCoord);
       if (element) {
         return element;
       }

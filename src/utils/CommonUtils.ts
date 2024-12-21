@@ -8,7 +8,7 @@ export default class CommonUtils {
    * @param points 
    * @returns 
    */
-  static getBoxByPoints(points: IPoint[]): IPoint[] {
+  static getBoxPoints(points: IPoint[]): IPoint[] {
     let minX = Number.MAX_SAFE_INTEGER,
       minY = Number.MAX_SAFE_INTEGER,
       maxX = Number.MIN_SAFE_INTEGER,

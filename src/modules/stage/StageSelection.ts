@@ -39,7 +39,7 @@ export default class StageSelection implements IStageSelection {
     const points = flatten(this.selects.map(element => {
       return element.getEdgePoints();
     }));
-    return CommonUtils.getBoxByPoints(points);
+    return CommonUtils.getBoxPoints(points);
   }
 
   /**

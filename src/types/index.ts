@@ -55,7 +55,7 @@ export interface IStageShield extends IRect, IStageDrawer {
   provisional: IStageDrawerProvisional;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
-  worldCenterOffset: IPoint;
+  stageWorldCoord: IPoint;
   checkCreatorActive(): boolean;
 }
 
@@ -64,7 +64,8 @@ export interface IStageStore {
   get startCreatingElements(): ElementObject[];
   get creatingElements(): IStageElement[];
   get noneRenderedElements(): IStageElement[];
-  createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject;
+  get viewportElements(): IStageElement[];
+  createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   createElement(obj: ElementObject): IStageElement;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
@@ -225,7 +226,7 @@ export interface StageShieldInstance {
 // 舞台元素数据模型
 export type ElementObject = {
   id: string;
-  points: IPoint[];
+  coords: IPoint[]; // 相对于世界中心的坐标
   type: CreatorTypes;
   data: any;
   strokeColor?: string;
@@ -238,8 +239,8 @@ export type ElementObject = {
 export interface IStageElement {
   id: string;
   obj: ElementObject;
-  points: IPoint[];
-  pathPoints: IPoint[];
+  get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
+  get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -250,8 +251,8 @@ export interface IStageElement {
   isDragging: boolean;
   isRendered: boolean;
   status: ElementStatus;
-  calcPathPoints(): IPoint[];
   getEdgePoints(): IPoint[];
+  refreshPoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
 }
 
 // 舞台元素（组件）-React

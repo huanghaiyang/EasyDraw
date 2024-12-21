@@ -1,12 +1,11 @@
 import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
 import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
+import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
   obj: ElementObject;
-  points: IPoint[];
-  pathPoints: IPoint[];
   status: ElementStatus;
   isSelected: boolean;
   isVisible: boolean;
@@ -17,6 +16,17 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   isRotating: boolean;
   isDragging: boolean;
   isRendered: boolean;
+
+  protected _points: IPoint[];
+  protected _pathPoints: IPoint[];
+
+  get points(): IPoint[] {
+    return this._points;
+  }
+
+  get pathPoints(): IPoint[] {
+    return this._pathPoints;
+  }
 
   constructor(obj: ElementObject) {
     this.obj = obj;
@@ -33,8 +43,12 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     this.isRendered = false;
   }
 
-  calcPathPoints(): IPoint[] {
-    return this.points;
+  /**
+   * 刷新坐标
+   */
+  refreshPoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+    this._points = ElementUtils.calcStageRelativePoints(this.obj.coords, stageRect, stageWorldCoord);
+    this._pathPoints = this._points;
   }
 
   getEdgePoints(): IPoint[] {

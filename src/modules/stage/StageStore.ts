@@ -48,6 +48,17 @@ export default class StageStore implements IStageStore {
     return result;
   }
 
+  // 获取视窗可见的元素
+  get viewportElements(): IStageElement[] {
+    const result = [];
+    this.elementList.forEach(item => {
+      if (item.data.isVisible) {
+        result.push(item.data);
+      }
+    });
+    return result;
+  }
+
   constructor(shield: IStageShield) {
     this.shield = shield;
     this.elementList = new LinkedList<IStageElement>();
@@ -170,11 +181,11 @@ export default class StageStore implements IStageStore {
    * @param data 
    * @returns 
    */
-  createObject(type: CreatorTypes, points: IPoint[], data?: any): ElementObject {
+  createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
     const obj = {
       id: nanoid(),
       type,
-      points,
+      coords,
       data,
       angle: 0
     }
@@ -199,34 +210,13 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 将世界坐标转换为画板相对坐标
-   * 
-   * @param element 
-   * @param canvasRect 
-   * @param worldCenterOffset 
-   */
-  private calcPathPoints(element: IStageElement, canvasRect: DOMRect, worldCenterOffset: IPoint) {
-    if (element) {
-      // 计算element坐标相对于画布的坐标
-      const points = element.obj.points.map(p => {
-        return {
-          x: p.x + canvasRect.width / 2 - worldCenterOffset.x,
-          y: p.y + canvasRect.height / 2 - worldCenterOffset.y
-        }
-      })
-      this.updateElement(element.id, { points })
-      this.updateElement(element.id, { pathPoints: element.calcPathPoints() });
-    }
-  }
-
-  /**
    * 在当前鼠标位置创建临时元素
    * 
    * @param points
    * @param canvasRect
    * @param worldOffset
    */
-  creatingElement(points: IPoint[], canvasRect: DOMRect, worldCenterOffset: IPoint): IStageElement {
+  creatingElement(points: IPoint[], canvasRect: DOMRect, stageWorldCoord: IPoint): IStageElement {
     let element: IStageElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
@@ -251,8 +241,10 @@ export default class StageStore implements IStageStore {
         break;
     }
     if (element) {
-      element.isSelected = true;
-      this.calcPathPoints(element, canvasRect, worldCenterOffset);
+      this.updateElement(element.id, {
+        isSelected: true,
+      })
+      element.refreshPoints(canvasRect, stageWorldCoord);
     }
     return element;
   }

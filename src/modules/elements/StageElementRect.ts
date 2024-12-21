@@ -5,14 +5,15 @@ import CommonUtils from "@/utils/CommonUtils";
 export default class StageElementRect extends StageElement implements IStageElementReact {
 
   /**
-   * 矩形在绘制过程中仅有两个点，需要计算出四个点
+   * 刷新点坐标
    * 
-   * @returns 
+   * @param stageRect 
+   * @param stageWorldCoord 
    */
-  calcPathPoints(): IPoint[] {
-    return CommonUtils.getBoxByPoints(this.points);
+  refreshPoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+    super.refreshPoints(stageRect, stageWorldCoord);
+    this._pathPoints = CommonUtils.getBoxPoints(this._points);
   }
-
   /**
    * 获取矩形的边线点
    * 
