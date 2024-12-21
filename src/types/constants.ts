@@ -6,10 +6,6 @@ export const StageDefaults = {
     height: 1920,
     scale: 1
   },
-  shield: {
-    width: 1920,
-    height: 1080,
-  }
 }
 
 // 世界尺寸

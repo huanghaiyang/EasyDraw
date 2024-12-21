@@ -54,4 +54,8 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   getEdgePoints(): IPoint[] {
     throw new Error("Method not implemented.");
   }
+
+  isInRect(rect: DOMRect): void {
+      
+  }
 }

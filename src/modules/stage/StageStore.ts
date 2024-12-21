@@ -287,16 +287,16 @@ export default class StageStore implements IStageStore {
   refreshElementStagePoints(element: IStageElement[]): void {
     element.forEach(element => {
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
-    })      
+    })
   }
 
   /**
    * 刷新所有组件相对于舞台的坐标
    */
   refreshAllElementStagePoints(): void {
-      this.elementList.forEach(node => {
-        node.data.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
-      })
+    this.elementList.forEach(node => {
+      node.data.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })
   }
 
 }

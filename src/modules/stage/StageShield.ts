@@ -1,4 +1,4 @@
-import { StageDefaults, MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/constants";
+import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/constants";
 import {
   Creator,
   CreatorCategories,
@@ -25,7 +25,6 @@ import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
-  size: ISize;
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作

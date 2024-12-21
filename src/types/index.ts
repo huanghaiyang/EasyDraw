@@ -40,14 +40,8 @@ export type IDirectionPoint = IPoint & {
   direction: Directions;
 }
 
-//盒模型
-export interface IRect {
-  size: ISize;
-  position?: IPoint;
-}
-
 // 舞台主画板
-export interface IStageShield extends IRect, IStageDrawer {
+export interface IStageShield extends IStageDrawer {
   cursor: IStageCursor;
   selection: IStageSelection;
   store: IStageStore;
@@ -211,7 +205,7 @@ export interface IStageSelection {
 }
 
 // 舞台容器
-export interface IStageContainer extends IRect {
+export interface IStageContainer {
   el: HTMLDivElement;
 }
 
@@ -256,6 +250,7 @@ export interface IStageElement {
   status: ElementStatus;
   getEdgePoints(): IPoint[];
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
+  isInRect(rect: DOMRect): void;
 }
 
 // 舞台元素（组件）-React
