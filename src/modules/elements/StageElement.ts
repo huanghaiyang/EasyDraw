@@ -46,7 +46,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   /**
    * 刷新坐标
    */
-  refreshPoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
     this._points = ElementUtils.calcStageRelativePoints(this.obj.coords, stageRect, stageWorldCoord);
     this._pathPoints = this._points;
   }

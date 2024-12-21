@@ -4,6 +4,7 @@ import StageElement from "@/modules/elements/StageElement";
 import StageElementRect from "@/modules/elements/StageElementRect";
 import LinkedList, { ILinkedList } from "@/modules/struct/LinkedList";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
+import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -213,15 +214,13 @@ export default class StageStore implements IStageStore {
    * 在当前鼠标位置创建临时元素
    * 
    * @param points
-   * @param canvasRect
-   * @param worldOffset
    */
-  creatingElement(points: IPoint[], canvasRect: DOMRect, stageWorldCoord: IPoint): IStageElement {
+  creatingElement(points: IPoint[]): IStageElement {
     let element: IStageElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const obj = this.createObject(type, points)
+        const obj = this.createObject(type, ElementUtils.calcCreatorPoints(points, type))
         if (this.currentCreatingElementId) {
           element = this.updateElementObj(this.currentCreatingElementId, obj);
           this.updateElement(element.id, {
@@ -244,7 +243,7 @@ export default class StageStore implements IStageStore {
       this.updateElement(element.id, {
         isSelected: true,
       })
-      element.refreshPoints(canvasRect, stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     }
     return element;
   }
@@ -278,6 +277,26 @@ export default class StageStore implements IStageStore {
       }
     })
     return result;
+  }
+
+  /**
+   * 刷新组件相对于舞台的坐标
+   * 
+   * @param element
+   */
+  refreshElementStagePoints(element: IStageElement[]): void {
+    element.forEach(element => {
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })      
+  }
+
+  /**
+   * 刷新所有组件相对于舞台的坐标
+   */
+  refreshAllElementStagePoints(): void {
+      this.elementList.forEach(node => {
+        node.data.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      })
   }
 
 }

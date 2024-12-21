@@ -1,5 +1,6 @@
 import { CreatorTypes, IPoint, IStageElement, IStageElementTask } from "@/types";
 import StageElementTaskRect from "@/modules/render/base/task/StageElementTaskRect";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementUtils {
   static createElementTask(element: IStageElement, params?: any): IStageElementTask {
@@ -31,5 +32,21 @@ export default class ElementUtils {
       }
     })
     return points;
+  }
+
+  /**
+   * 在绘制图形时补全缺省点
+   * 
+   * @param points 
+   * @param creatorType 
+   * @returns 
+   */
+  static calcCreatorPoints(points: IPoint[], creatorType: CreatorTypes) {
+    switch (creatorType) {
+      case CreatorTypes.rectangle:
+        return CommonUtils.getBoxPoints(points);
+      default:
+        return points;
+    }
   }
 }

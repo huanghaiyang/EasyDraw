@@ -55,6 +55,7 @@ export interface IStageShield extends IRect, IStageDrawer {
   provisional: IStageDrawerProvisional;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
+  stageRect: DOMRect;
   stageWorldCoord: IPoint;
   checkCreatorActive(): boolean;
 }
@@ -76,8 +77,10 @@ export interface IStageStore {
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
   getElementById(id: string): IStageElement;
   getIndexById(id: string): number;
-  creatingElement(points: IPoint[], canvasRect: DOMRect, worldOffset: IPoint): IStageElement;
+  creatingElement(points: IPoint[]): IStageElement;
   finishCreatingElement(): IStageElement;
+  refreshAllElementStagePoints(): void;
+  refreshElementStagePoints(element: IStageElement[]): void;
 }
 
 // 画板画布
@@ -252,7 +255,7 @@ export interface IStageElement {
   isRendered: boolean;
   status: ElementStatus;
   getEdgePoints(): IPoint[];
-  refreshPoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
+  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
 }
 
 // 舞台元素（组件）-React

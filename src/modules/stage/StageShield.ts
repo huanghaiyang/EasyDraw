@@ -52,7 +52,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   // canvas渲染容器
   renderEl: HTMLDivElement;
   // 画布容器尺寸
-  private rect: DOMRect;
+  stageRect: DOMRect;
   // 画布是否是第一次渲染
   private isFirstResizeRender: boolean = true;
   // 鼠标按下位置
@@ -130,7 +130,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
-    this.cursor.calcPos(e, this.rect);
+    this.cursor.calcPos(e, this.stageRect);
 
     if (this.checkCreatorActive()) {
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
@@ -200,7 +200,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressDown(e: MouseEvent): void {
-    this.pressDownPosition = this.cursor.calcPos(e, this.rect);
+    this.pressDownPosition = this.cursor.calcPos(e, this.stageRect);
     this.pressDownStageWorldCoord = this.calcOffsetByPos(this.pressDownPosition);
   }
 
@@ -210,7 +210,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressUp(e: MouseEvent): void {
-    this.pressUpPosition = this.cursor.calcPos(e, this.rect);
+    this.pressUpPosition = this.cursor.calcPos(e, this.stageRect);
     this.pressUpStageWorldCoord = this.calcOffsetByPos(this.pressUpPosition);
   }
 
@@ -220,7 +220,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressMove(e: MouseEvent): void {
-    this.pressMovePosition = this.cursor.calcPos(e, this.rect);
+    this.pressMovePosition = this.cursor.calcPos(e, this.stageRect);
     this.pressMoveStageWorldCoord = this.calcOffsetByPos(this.pressMovePosition);
   }
 
@@ -242,8 +242,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   calcOffsetByPos(pos: IPoint): IPoint {
     return {
-      x: pos.x - this.rect.width / 2 + this.stageWorldCoord.x,
-      y: pos.y - this.rect.height / 2 + this.stageWorldCoord.y
+      x: pos.x - this.stageRect.width / 2 + this.stageWorldCoord.x,
+      y: pos.y - this.stageRect.height / 2 + this.stageWorldCoord.y
     }
   }
 
@@ -254,7 +254,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const rect = this.renderEl.getBoundingClientRect();
     const { width, height } = rect;
 
-    this.rect = rect;
+    this.stageRect = rect;
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
     this.updateCanvasSize(rect);
@@ -302,7 +302,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   creatingElement(e: MouseEvent): IStageElement | null {
     if (this.checkCreatorActive() && this.checkCursorPressMovedAvailable(e)) {
-      const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord], this.rect, this.stageWorldCoord);
+      const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord]);
       if (element) {
         return element;
       }
