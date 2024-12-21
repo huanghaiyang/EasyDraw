@@ -2,6 +2,8 @@ import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
 import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
+import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
@@ -19,6 +21,9 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
 
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
+  protected _edgePoints: IPoint[];
+  protected _rotatePoints: IPoint[];
+  protected _rotatePathPoints: IPoint[];
 
   get points(): IPoint[] {
     return this._points;
@@ -26,6 +31,18 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
 
   get pathPoints(): IPoint[] {
     return this._pathPoints;
+  }
+
+  get edgePoints(): IPoint[] {
+    return this._edgePoints;
+  }
+
+  get rotatePoints(): IPoint[] {
+    return this._rotatePoints;
+  }
+
+  get rotatePathPoints(): IPoint[] {
+    return this._rotatePathPoints;
   }
 
   constructor(obj: ElementObject) {
@@ -49,13 +66,17 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
     this._points = ElementUtils.calcStageRelativePoints(this.obj.coords, stageRect, stageWorldCoord);
     this._pathPoints = this._points;
+    this._rotatePoints = this._points.map(point => MathUtils.rotate(point, this.obj.angle))
+    this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotate(point, this.obj.angle))
+    this._edgePoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
   }
 
-  getEdgePoints(): IPoint[] {
-    throw new Error("Method not implemented.");
-  }
-
-  isInRect(rect: DOMRect): void {
-      
+  /**
+   * 判断是否在矩形内
+   * 
+   * @param rect 
+   */
+  isInRect(rect: DOMRect): boolean {
+    return true;
   }
 }

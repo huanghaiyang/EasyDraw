@@ -238,6 +238,9 @@ export interface IStageElement {
   obj: ElementObject;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
+  get edgePoints(): IPoint[];
+  get rotatePoints(): IPoint[];
+  get rotatePathPoints(): IPoint[];
   isSelected: boolean;
   isVisible: boolean;
   isEditing: boolean;
@@ -248,9 +251,8 @@ export interface IStageElement {
   isDragging: boolean;
   isRendered: boolean;
   status: ElementStatus;
-  getEdgePoints(): IPoint[];
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
-  isInRect(rect: DOMRect): void;
+  isInRect(rect: DOMRect): boolean;
 }
 
 // 舞台元素（组件）-React

@@ -1,5 +1,4 @@
 import { CreatorTypes, IPoint, IStageSelection, IStageShield, SelectionRenderTypes } from "@/types";
-import CommonUtils from "@/utils/CommonUtils";
 import { first, flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
@@ -36,10 +35,9 @@ export default class StageSelection implements IStageSelection {
    * @returns IPoint[]
    */
   getEdge(): IPoint[] {
-    const points = flatten(this.selects.map(element => {
-      return element.getEdgePoints();
+    return flatten(this.selects.map(element => {
+      return element.edgePoints;
     }));
-    return CommonUtils.getBoxPoints(points);
   }
 
   /**
