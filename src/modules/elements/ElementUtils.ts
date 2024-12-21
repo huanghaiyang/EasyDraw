@@ -1,6 +1,8 @@
-import { CreatorTypes, IPoint, IStageElement, IStageElementTask } from "@/types";
+import { CreatorTypes, ElementObject, IPoint, IStageElement, IStageElementTask } from "@/types";
 import StageElementTaskRect from "@/modules/render/base/task/StageElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
+import StageElementRect from "@/modules/elements/StageElementRect";
+import StageElement from "@/modules/elements/StageElement";
 
 export default class ElementUtils {
   static createElementTask(element: IStageElement, params?: any): IStageElementTask {
@@ -47,6 +49,23 @@ export default class ElementUtils {
         return CommonUtils.getBoxPoints(points);
       default:
         return points;
+    }
+  }
+
+  /**
+   * 根据对象创建元素
+   * 
+   * @param obj 
+   * @returns 
+   */
+  static createElement(obj: ElementObject): IStageElement {
+    const { type } = obj;
+    switch (type) {
+      case CreatorTypes.rectangle: {
+        return new StageElementRect(obj);
+      }
+      default:
+        return new StageElement(obj);
     }
   }
 }

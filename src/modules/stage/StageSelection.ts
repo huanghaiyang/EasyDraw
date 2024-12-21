@@ -4,10 +4,6 @@ import { first, flatten } from "lodash";
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
 
-  get selects() {
-    return this.shield.store.findElements(element => element.isSelected);
-  }
-
   constructor(shield: IStageShield) {
     this.shield = shield;
   }
@@ -19,7 +15,7 @@ export default class StageSelection implements IStageSelection {
    */
   getRenderType(): SelectionRenderTypes {
     if (!this.isEmpty()) {
-      const type = first(this.selects).obj.type;
+      const type = first(this.shield.store.selectedElements).obj.type;
       switch (type) {
         case CreatorTypes.rectangle: {
           return SelectionRenderTypes.rect;
@@ -35,7 +31,7 @@ export default class StageSelection implements IStageSelection {
    * @returns IPoint[]
    */
   getEdge(): IPoint[] {
-    return flatten(this.selects.map(element => {
+    return flatten(this.shield.store.selectedElements.map(element => {
       return element.edgePoints;
     }));
   }
@@ -46,14 +42,14 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   isEmpty(): boolean {
-    return this.selects.length === 0;
+    return this.shield.store.selectedElements.length === 0;
   }
 
   /**
    * 清空选区
    */
   clearSelects(): void {
-    this.selects.forEach(element => {
+    this.shield.store.selectedElements.forEach(element => {
       this.shield.store.updateElement(element.id, { isSelected: false, isEditing: false })
     });
   }

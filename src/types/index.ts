@@ -51,17 +51,20 @@ export interface IStageShield extends IStageDrawer {
   renderEl: HTMLDivElement;
   stageRect: DOMRect;
   stageWorldCoord: IPoint;
+  get stageRectPoints(): IPoint[];
+  get stageWordRectPoints(): IPoint[];
   checkCreatorActive(): boolean;
 }
 
 // 用于维护舞台数据关系
 export interface IStageStore {
-  get startCreatingElements(): ElementObject[];
+  get startCreatingElements(): IStageElement[];
   get creatingElements(): IStageElement[];
+  get renderedElements(): IStageElement[];
   get noneRenderedElements(): IStageElement[];
-  get viewportElements(): IStageElement[];
+  get selectedElements(): IStageElement[];
+  refreshElementCaches(): void;
   createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
-  createElement(obj: ElementObject): IStageElement;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
   updateElement(id: string, props: Partial<IStageElement>): IStageElement;
@@ -197,7 +200,6 @@ export interface IStageEvent extends EventEmitter {
 
 // 舞台选区
 export interface IStageSelection {
-  get selects(): IStageElement[];
   getEdge(): IPoint[];
   isEmpty(): boolean;
   getRenderType(): SelectionRenderTypes;
@@ -252,7 +254,7 @@ export interface IStageElement {
   isRendered: boolean;
   status: ElementStatus;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
-  isInRect(rect: DOMRect): boolean;
+  isInPolygon(points: IPoint[]): boolean;
 }
 
 // 舞台元素（组件）-React

@@ -127,4 +127,36 @@ export default class MathUtils {
     // 如果两个面积相等，则点在多边形内部
     return Math.abs(totalArea - testArea) < Number.EPSILON;
   }
+
+  /**
+   * 使用射线法判断点是否在多边形内
+   * 
+   * @param coord 
+   * @param polygonCoords 
+   * @returns 
+   */
+  static isPointInPolygonByRayCasting(coord: IPoint, polygonCoords: IPoint[]) {
+    const point = [coord.x, coord.y];
+    const polygon = polygonCoords.map(p => [p.x, p.y]);
+    const [px, py] = point;
+    let inside = false;
+
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const [xi, yi] = polygon[i];
+        const [xj, yj] = polygon[j];
+
+        // 检查点是否在多边形的边上
+        if ((yi > py) !== (yj > py) &&
+            (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+
+        // 特殊情况：点恰好在多边形的边上
+        if ((yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj))) {
+            return true;
+        }
+    }
+
+    return inside;
+}
 }

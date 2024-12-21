@@ -4,6 +4,7 @@ import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import { every } from "lodash";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
@@ -76,7 +77,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
    * 
    * @param rect 
    */
-  isInRect(rect: DOMRect): boolean {
-    return true;
+  isInPolygon(points: IPoint[]): boolean {
+    return every(this.edgePoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
   }
 }

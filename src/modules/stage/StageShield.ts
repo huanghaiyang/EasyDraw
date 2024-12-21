@@ -3,7 +3,6 @@ import {
   Creator,
   CreatorCategories,
   IPoint,
-  ISize,
   IStageDrawerProvisional,
   IStageDrawerMask,
   IStageStore,
@@ -48,6 +47,37 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   renderEl: HTMLDivElement;
   // 画布容器尺寸
   stageRect: DOMRect;
+
+  get stageRectPoints(): IPoint[] {
+    return [{
+      x: 0, y: 0
+    }, {
+      x: this.stageRect.width,
+      y: 0
+    }, {
+      x: this.stageRect.width,
+      y: this.stageRect.height
+    }, {
+      x: 0, y: this.stageRect.height
+    }]
+  }
+
+  get stageWordRectPoints(): IPoint[] {
+    return [{
+      x: this.stageWorldCoord.x - this.stageRect.width / 2,
+      y: this.stageWorldCoord.y - this.stageRect.height / 2
+    }, {
+      x: this.stageWorldCoord.x + this.stageRect.width / 2,
+      y: this.stageWorldCoord.y - this.stageRect.height / 2
+    }, {
+      x: this.stageWorldCoord.x + this.stageRect.width / 2,
+      y: this.stageWorldCoord.y + this.stageRect.height / 2
+    }, {
+      x: this.stageWorldCoord.x - this.stageRect.width / 2,
+      y: this.stageWorldCoord.y + this.stageRect.height / 2
+    }]
+  }
+
   // 画布是否是第一次渲染
   private isFirstResizeRender: boolean = true;
   // 鼠标按下位置
@@ -185,6 +215,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const noneRenderedElements = this.store.noneRenderedElements;
     if (noneRenderedElements.length) {
       this.store.updateElements(noneRenderedElements, { isRendered: true });
+      this.store.refreshElementCaches();
       this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
     }
   }

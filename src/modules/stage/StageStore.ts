@@ -16,53 +16,84 @@ export default class StageStore implements IStageStore {
   // 元素对象映射关系，加快查询
   private elementMap = new Map<string, IStageElement>();
 
-  // 正在创建的元素列表
-  get startCreatingElements(): ElementObject[] {
-    const result = [];
-    this.elementList.forEach(item => {
-      if (item.data.status === ElementStatus.startCreating) {
-        result.push(item.data.obj);
-      }
-    });
-    return result;
-  }
-
-  // 当前创建并更新中的组件
-  get creatingElements(): IStageElement[] {
-    const result = [];
-    this.elementList.forEach(item => {
-      if (item.data.status === ElementStatus.creating) {
-        result.push(item.data);
-      }
-    });
-    return result;
-  }
-
-  // 没有渲染到舞台的组件
-  get noneRenderedElements(): IStageElement[] {
-    const result = [];
-    this.elementList.forEach(item => {
-      if (!item.data.isRendered) {
-        result.push(item.data);
-      }
-    });
-    return result;
-  }
-
-  // 获取视窗可见的元素
-  get viewportElements(): IStageElement[] {
-    const result = [];
-    this.elementList.forEach(item => {
-      if (item.data.isVisible) {
-        result.push(item.data);
-      }
-    });
-    return result;
-  }
+  private _startCreatingElements: IStageElement[] = [];
+  private _creatingElements: IStageElement[] = [];
+  private _renderedElements: IStageElement[] = [];
+  private _noneRenderedElements: IStageElement[] = [];
+  private _selectedElements: IStageElement[] = [];
 
   constructor(shield: IStageShield) {
     this.shield = shield;
     this.elementList = new LinkedList<IStageElement>();
+  }
+
+  // 正在创建的元素列表
+  get startCreatingElements(): IStageElement[] {
+    return this._startCreatingElements;
+  }
+
+  // 当前创建并更新中的组件
+  get creatingElements(): IStageElement[] {
+    return this._creatingElements;
+  }
+
+  // 已经渲染到舞台的组件
+  get renderedElements(): IStageElement[] {
+    return this._renderedElements;
+  }
+
+  // 没有渲染到舞台的组件
+  get noneRenderedElements(): IStageElement[] {
+    return this._noneRenderedElements;
+  }
+
+  get selectedElements(): IStageElement[] {
+    return this._selectedElements;
+  }
+
+  private _refreshStartCreatingElements(): void {
+    this._startCreatingElements = [];
+    this.elementList.forEach(item => {
+      if (item.data.status === ElementStatus.startCreating) {
+        this._startCreatingElements.push(item.data);
+      }
+    })
+  }
+
+  private _refreshCreatingElements(): void {
+    this._creatingElements = [];
+    this.elementList.forEach(item => {
+      if (item.data.status === ElementStatus.creating) {
+        this._creatingElements.push(item.data);
+      }
+    })
+  }
+
+  private _refreshRenderedElements(): void {
+    this._renderedElements = [];
+    this.elementList.forEach(item => {
+      if (item.data.isRendered) {
+        this._renderedElements.push(item.data);
+      }
+    })
+  }
+
+  private _refreshNoneRenderedElements(): void {
+    this._noneRenderedElements = [];
+    this.elementList.forEach(item => {
+      if (!item.data.isRendered) {
+        this._noneRenderedElements.push(item.data);
+      }
+    })
+  }
+
+  private _refreshSelectedElements(): void {
+    this._selectedElements = [];
+    this.elementList.forEach(item => {
+      if (item.data.isSelected) {
+        this._selectedElements.push(item.data);
+      }
+    })
   }
 
   /**
@@ -114,6 +145,7 @@ export default class StageStore implements IStageStore {
   addElement(element: IStageElement): IStageElement {
     this.elementList.insert(new LinkedNode(element))
     this.elementMap.set(element.id, element);
+    this.refreshElementCaches();
     return element;
   }
 
@@ -127,6 +159,7 @@ export default class StageStore implements IStageStore {
       const element = this.elementMap.get(id);
       this.elementList.removeBy(node => node.data.id === id);
       this.elementMap.delete(id);
+      this.refreshElementCaches();
       return element;
     }
   }
@@ -142,6 +175,7 @@ export default class StageStore implements IStageStore {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
       Object.assign(element, props);
+      this.refreshElementCaches();
       return element;
     }
   }
@@ -154,9 +188,11 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
-    return elements.map(element => {
+    elements.forEach(element => {
       return this.updateElement(element.id, props);
     })
+    this.refreshElementCaches();
+    return elements;
   }
 
   /**
@@ -194,23 +230,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 创建组件元素
-   * 
-   * @param obj 
-   * @returns 
-   */
-  createElement(obj: ElementObject): IStageElement {
-    const { type } = obj;
-    switch (type) {
-      case CreatorTypes.rectangle: {
-        return new StageElementRect(obj);
-      }
-      default:
-        return new StageElement(obj);
-    }
-  }
-
-  /**
    * 在当前鼠标位置创建临时元素
    * 
    * @param points
@@ -227,7 +246,7 @@ export default class StageStore implements IStageStore {
             status: ElementStatus.creating,
           })
         } else {
-          element = this.createElement(obj);
+          element = ElementUtils.createElement(obj);
           this.updateElement(element.id, {
             isRendered: false,
             status: ElementStatus.startCreating,
@@ -245,6 +264,7 @@ export default class StageStore implements IStageStore {
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     }
+    this.refreshElementCaches();
     return element;
   }
 
@@ -258,6 +278,7 @@ export default class StageStore implements IStageStore {
         element.status = ElementStatus.finished;
         element.isEditing = true;
         this.currentCreatingElementId = null;
+        this.refreshElementCaches();
         return element;
       }
     }
@@ -297,6 +318,17 @@ export default class StageStore implements IStageStore {
     this.elementList.forEach(node => {
       node.data.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
+  }
+
+  /**
+   * 刷新元素列表
+   */
+  refreshElementCaches(): void {
+    this._refreshStartCreatingElements();
+    this._refreshCreatingElements();
+    this._refreshRenderedElements();
+    this._refreshNoneRenderedElements();
+    this._refreshSelectedElements();
   }
 
 }
