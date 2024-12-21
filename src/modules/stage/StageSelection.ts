@@ -1,49 +1,39 @@
-import { CreatorTypes, IPoint, IStageElement, IStageSelection, IStageShield, SelectionRenderTypes, StageStoreRefreshCacheTypes } from "@/types";
+import { IPoint, IStageDrawerMaskTaskSelectionObj, IStageElement, IStageSelection, IStageShield, StageDrawerMaskObjTypes } from "@/types";
 import MathUtils from "@/utils/MathUtils";
-import { first, flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
+
+  get isEmpty(): boolean {
+    return this.shield.store.selectedElements.length === 0 && this.shield.store.hittingElements.length === 0;
+  }
 
   constructor(shield: IStageShield) {
     this.shield = shield;
   }
 
   /**
-   * 获取选区渲染类型
+   * 获取选区对象
    * 
    * @returns 
    */
-  getRenderType(): SelectionRenderTypes {
-    if (!this.isEmpty()) {
-      const type = first(this.shield.store.selectedElements).obj.type;
-      switch (type) {
-        case CreatorTypes.rectangle: {
-          return SelectionRenderTypes.rect;
-        }
-      }
-    }
-    return SelectionRenderTypes.none;
-  }
+  getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[] {
+    const result: IStageDrawerMaskTaskSelectionObj[] = [];
 
-  /**
-   * 获取组件的边缘坐标
-   * 
-   * @returns IPoint[]
-   */
-  getgetBoxPoints(): IPoint[] {
-    return flatten(this.shield.store.selectedElements.map(element => {
-      return element.boxPoints;
-    }));
-  }
+    this.shield.store.hittingElements.forEach(element => {
+      result.push({
+        points: element.boxPoints,
+        type: StageDrawerMaskObjTypes.highlight
+      });
+    });
 
-  /**
-   * 判断是否为空
-   * 
-   * @returns 
-   */
-  isEmpty(): boolean {
-    return this.shield.store.selectedElements.length === 0;
+    this.shield.store.selectedElements.forEach(element => {
+      result.push({
+        points: element.boxPoints,
+        type: StageDrawerMaskObjTypes.selection
+      });
+    });
+    return result;
   }
 
   /**
@@ -62,11 +52,12 @@ export default class StageSelection implements IStageSelection {
    */
   hitElements(point: IPoint): void {
     let element: IStageElement;
+    let hitting = false;
     for (let i = this.shield.store.renderedElements.length - 1; i >= 0; i--) {
       element = this.shield.store.renderedElements[i];
-      this.shield.store.updateElement(element.id, { isHitting: MathUtils.isPointInPolygonByRayCasting(point, element.pathPoints) });
+      this.shield.store.updateElement(element.id, { isHitting: hitting ? false : MathUtils.isPointInPolygonByRayCasting(point, element.pathPoints) });
       if (element.isHitting) {
-        break;
+        hitting = true;
       }
     }
   }

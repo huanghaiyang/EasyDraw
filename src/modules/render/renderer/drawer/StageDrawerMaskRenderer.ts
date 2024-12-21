@@ -5,7 +5,6 @@ import {
   IStageDrawerMaskTaskSelectionHandlerObj,
   IStageDrawerMaskTaskSelectionObj,
   IStageDrawerMaskRenderer,
-  SelectionRenderTypes,
   StageDrawerMaskObjTypes,
   Directions,
   IStageDrawerMask,
@@ -28,13 +27,23 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     let cargo = new RenderTaskCargo([]);
     let hasSelection = false;
     let hasCursor = false;
+    let hasHitting = false;
 
     // 绘制选区
-    if (this.drawer.shield.selection.getRenderType() === SelectionRenderTypes.rect) {
-      const selectionTask = this.createMaskSelectionTask();
-      cargo.add(selectionTask);
-      cargo.addAll(this.createMaskSelectionHandlerTasks((selectionTask as IStageDrawerMaskTask).obj as IStageDrawerMaskTaskSelectionObj));
+    const selectionTasks = this.createMaskSelectionTasks();
+    selectionTasks.forEach(task => {
+      cargo.add(task);
+      if (((task as IStageDrawerMaskTask).data as IStageDrawerMaskTaskSelectionObj).type === StageDrawerMaskObjTypes.selection) {
+        cargo.addAll(this.createMaskSelectionHandlerTasks((task as IStageDrawerMaskTask).obj as IStageDrawerMaskTaskSelectionObj));
+      }
+    });
+    if (selectionTasks.length) {
       hasSelection = true;
+    }
+
+    // 绘制命中选区
+    if (this.drawer.shield.store.hittingElements.length) {
+      hasHitting = true;
     }
 
     // 绘制光标
@@ -52,7 +61,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       await this.renderCargo(cargo);
     } else {
       // 解决光标移出舞台出现残留的问题
-      if (this._lastCursorRendered && !hasSelection && !hasCursor) {
+      if (this._lastCursorRendered && !hasSelection && !hasCursor && !hasHitting) {
         cargo.add(new StageDrawerMaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
       } else {
@@ -81,13 +90,14 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * 
    * @returns 
    */
-  private createMaskSelectionTask(): IRenderTask {
-    const obj: IStageDrawerMaskTaskSelectionObj = {
-      points: this.drawer.shield.selection.getgetBoxPoints(),
-      type: StageDrawerMaskObjTypes.selection
-    }
-    const task = new StageDrawerMaskTaskSelection(obj, this.renderParams);
-    return task;
+  private createMaskSelectionTasks(): IRenderTask[] {
+    const tasks: IRenderTask[] = [];
+    const objs: IStageDrawerMaskTaskSelectionObj[] = this.drawer.shield.selection.getSelectionObjs();
+    objs.forEach(obj => {
+      const task = new StageDrawerMaskTaskSelection(obj, this.renderParams);
+      tasks.push(task);
+    });
+    return tasks;
   }
 
   /**

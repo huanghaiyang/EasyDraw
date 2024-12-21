@@ -131,7 +131,8 @@ export interface IStageDrawerProvisional extends IStageHelperDrawer { }
 export enum StageDrawerMaskObjTypes {
   selection = 0,
   selectionHandler = 1,
-  cursor = 2
+  cursor = 2,
+  highlight = 3,
 }
 
 // 方位
@@ -155,6 +156,7 @@ export interface IStageDrawerMaskTaskObj {
 // 辅助画布绘制任务选区对象
 export interface IStageDrawerMaskTaskSelectionObj extends IStageDrawerMaskTaskObj {
   points: IPoint[];
+  type: StageDrawerMaskObjTypes
 }
 
 // 辅助画布绘制任务选区控制器对象
@@ -210,9 +212,8 @@ export interface IStageEvent extends EventEmitter {
 
 // 舞台选区
 export interface IStageSelection {
-  getgetBoxPoints(): IPoint[];
-  isEmpty(): boolean;
-  getRenderType(): SelectionRenderTypes;
+  get isEmpty(): boolean;
+  getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
   clearSelects(): void;
   hitElements(point: IPoint): void;
 }
