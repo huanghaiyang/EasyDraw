@@ -8,7 +8,7 @@ import { cloneDeep, every } from "lodash";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
-  obj: ElementObject;
+  model: ElementObject;
   status: ElementStatus;
   isSelected: boolean;
   isVisible: boolean;
@@ -48,8 +48,8 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     return this._rotatePathPoints;
   }
 
-  constructor(obj: ElementObject) {
-    this.obj = obj;
+  constructor(model: ElementObject) {
+    this.model = model;
     this.status = ElementStatus.initialed;
     this.id = nanoid();
     this.isSelected = false;
@@ -69,10 +69,10 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
    * 刷新坐标
    */
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
-    this._points = ElementUtils.calcStageRelativePoints(this.obj.coords, stageRect, stageWorldCoord);
+    this._points = ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
     this._pathPoints = this._points;
-    this._rotatePoints = this._points.map(point => MathUtils.rotate(point, this.obj.angle))
-    this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotate(point, this.obj.angle))
+    this._rotatePoints = this._points.map(point => MathUtils.rotate(point, this.model.angle))
+    this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotate(point, this.model.angle))
     this._boxPoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
   }
 

@@ -169,7 +169,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
-    this.cursor.transformEventPosition(e, this.stageRect);
+    this.cursor.transform(e);
 
     // 判断是否是绘制模式
     if (this.checkDrawerActive()) {
@@ -283,7 +283,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
           // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
           const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
           this.store.updateElements(this.store.selectedElements, { isSelected: false })
-          if(topAElement) {
+          if (topAElement) {
             this.store.updateElement(topAElement.id, { isSelected: true });
           }
         }
@@ -317,7 +317,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressDown(e: MouseEvent): void {
-    this.pressDownPosition = this.cursor.transformEventPosition(e, this.stageRect);
+    this.pressDownPosition = this.cursor.transform(e);
     this.pressDownStageWorldCoord = this.calcWorldCoord(this.pressDownPosition);
   }
 
@@ -327,7 +327,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressUp(e: MouseEvent): void {
-    this.pressUpPosition = this.cursor.transformEventPosition(e, this.stageRect);
+    this.pressUpPosition = this.cursor.transform(e);
     this.pressUpStageWorldCoord = this.calcWorldCoord(this.pressUpPosition);
   }
 
@@ -337,7 +337,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressMove(e: MouseEvent): void {
-    this.pressMovePosition = this.cursor.transformEventPosition(e, this.stageRect);
+    this.pressMovePosition = this.cursor.transform(e);
     this.pressMoveStageWorldCoord = this.calcWorldCoord(this.pressMovePosition);
   }
 

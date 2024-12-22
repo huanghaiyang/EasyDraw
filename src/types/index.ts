@@ -77,12 +77,12 @@ export interface IStageStore {
   get stageElements(): IStageElement[];
   get noneStageElements(): IStageElement[];
   refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void;
-  createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
   updateElement(id: string, props: Partial<IStageElement>): IStageElement;
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
-  updateElementObj(id: string, data: Partial<ElementObject>): IStageElement;
+  updateElementModel(id: string, data: Partial<ElementObject>): IStageElement;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
   getElementById(id: string): IStageElement;
@@ -114,7 +114,7 @@ export interface IQueueRender {
 export interface IStageCursor {
   value: IPoint;
   clear(): void;
-  transformEventPosition(e: MouseEvent, canvasRect: DOMRect): IPoint;
+  transform(e: MouseEvent): IPoint;
 }
 
 // 舞台画布
@@ -134,7 +134,7 @@ export interface IStageDrawerMask extends IStageHelperDrawer { }
 export interface IStageDrawerProvisional extends IStageHelperDrawer { }
 
 // 辅助画布绘制任务类型
-export enum StageDrawerMaskObjTypes {
+export enum StageDrawerMaskModelTypes {
   selection = 0,
   selectionHandler = 1,
   cursor = 2,
@@ -155,32 +155,32 @@ export enum Directions {
 }
 
 // 辅助画布绘制任务对象类型
-export interface IStageDrawerMaskTaskObj {
-  type: StageDrawerMaskObjTypes;
+export interface IStageDrawerMaskTaskModel {
+  type: StageDrawerMaskModelTypes;
 }
 
 // 辅助画布绘制任务选区对象
-export interface IStageDrawerMaskTaskSelectionObj extends IStageDrawerMaskTaskObj {
+export interface IStageDrawerMaskTaskSelectionModel extends IStageDrawerMaskTaskModel {
   points: IPoint[];
-  type: StageDrawerMaskObjTypes
+  type: StageDrawerMaskModelTypes
 }
 
 // 辅助画布绘制任务选区控制器对象
-export interface IStageDrawerMaskTaskSelectionHandlerObj extends IStageDrawerMaskTaskObj {
+export interface IStageDrawerMaskTaskSelectionHandlerModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
   direction: Directions;
 }
 
 // 辅助画布绘制任务光标对象
-export interface IStageDrawerMaskTaskCursorObj extends IStageDrawerMaskTaskObj {
+export interface IStageDrawerMaskTaskCursorModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
   creatorCategory: CreatorCategories;
 }
 
 // 辅助画布绘制任务
 export interface IStageDrawerMaskTask extends IRenderTask {
-  get data(): IStageDrawerMaskTaskObj;
-  obj: IStageDrawerMaskTaskObj;
+  get data(): IStageDrawerMaskTaskModel;
+  model: IStageDrawerMaskTaskModel;
 }
 
 // 辅助画布选区绘制任务
@@ -222,7 +222,7 @@ export interface IStageSelection {
   get isRange(): boolean;
   setRange(points: IPoint[]): void;
   selectRange(): void;
-  getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
+  getSelectionModels(): IStageDrawerMaskTaskSelectionModel[];
   changeHittingElementsToSelect(): void;
   clearSelects(): void;
   hitElements(point: IPoint): void;
@@ -263,7 +263,7 @@ export type ElementObject = {
 // 舞台元素（组件）
 export interface IStageElement {
   id: string;
-  obj: ElementObject;
+  model: ElementObject;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get boxPoints(): IPoint[];

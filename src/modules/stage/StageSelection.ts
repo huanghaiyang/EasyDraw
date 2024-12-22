@@ -1,4 +1,4 @@
-import { IPoint, IStageDrawerMaskTaskSelectionObj, IStageElement, IStageSelection, IStageShield, StageDrawerMaskObjTypes } from "@/types";
+import { IPoint, IStageDrawerMaskTaskSelectionModel, IStageElement, IStageSelection, IStageShield, StageDrawerMaskModelTypes } from "@/types";
 import MathUtils from "@/utils/MathUtils";
 import { every, includes } from "lodash";
 
@@ -34,27 +34,27 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[] {
-    const result: IStageDrawerMaskTaskSelectionObj[] = [];
+  getSelectionModels(): IStageDrawerMaskTaskSelectionModel[] {
+    const result: IStageDrawerMaskTaskSelectionModel[] = [];
 
     this.shield.store.hittingElements.forEach(element => {
       result.push({
         points: element.boxPoints,
-        type: this.isRange ? StageDrawerMaskObjTypes.selection : StageDrawerMaskObjTypes.hitting
+        type: this.isRange ? StageDrawerMaskModelTypes.selection : StageDrawerMaskModelTypes.hitting
       });
     });
 
     this.shield.store.selectedElements.forEach(element => {
       result.push({
         points: element.boxPoints,
-        type: StageDrawerMaskObjTypes.selection
+        type: StageDrawerMaskModelTypes.selection
       });
     });
 
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
-        type: StageDrawerMaskObjTypes.hitting
+        type: StageDrawerMaskModelTypes.hitting
       });
     }
     return result;

@@ -232,11 +232,11 @@ export default class StageStore implements IStageStore {
    * @param id 
    * @param data 
    */
-  updateElementObj(id: string, data: Partial<ElementObject>): IStageElement {
+  updateElementModel(id: string, data: Partial<ElementObject>): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
-      const objId = element.obj.id;
-      Object.assign(element.obj, data, { id: objId });
+      const modelId = element.model.id;
+      Object.assign(element.model, data, { id: modelId });
       return element;
     }
   }
@@ -249,8 +249,8 @@ export default class StageStore implements IStageStore {
    * @param data 
    * @returns 
    */
-  createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
-    const obj = {
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
+    const model = {
       id: nanoid(),
       type,
       coords,
@@ -258,7 +258,7 @@ export default class StageStore implements IStageStore {
       data,
       angle: 0
     }
-    return obj;
+    return model;
   }
 
   /**
@@ -271,14 +271,14 @@ export default class StageStore implements IStageStore {
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const obj = this.createObject(type, ElementUtils.calcCreatorPoints(points, type))
+        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(points, type))
         if (this.currentCreatingElementId) {
-          element = this.updateElementObj(this.currentCreatingElementId, obj);
+          element = this.updateElementModel(this.currentCreatingElementId, model);
           this.updateElement(element.id, {
             status: ElementStatus.creating,
           })
         } else {
-          element = ElementUtils.createElement(obj);
+          element = ElementUtils.createElement(model);
           this.updateElement(element.id, {
             isRendered: false,
             status: ElementStatus.startCreating,
@@ -433,8 +433,8 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
-      this.updateElementObj(element.id, {
-        coords: element.obj.originalCoords.map(point => {
+      this.updateElementModel(element.id, {
+        coords: element.model.originalCoords.map(point => {
           return {
             x: point.x + offset.x,
             y: point.y + offset.y,
@@ -462,8 +462,8 @@ export default class StageStore implements IStageStore {
    */
   refreshElementsCoords(elements: IStageElement[]): void {
     elements.forEach(element => {
-      this.updateElementObj(element.id, {
-        originalCoords: cloneDeep(element.obj.coords),
+      this.updateElementModel(element.id, {
+        originalCoords: cloneDeep(element.model.coords),
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })

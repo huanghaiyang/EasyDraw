@@ -17,11 +17,10 @@ export default class StageCursor implements IStageCursor {
    * 计算鼠标相对于画板的位置
    * 
    * @param e 
-   * @param canvasRect 
    * @returns 
    */
-  transformEventPosition(e: MouseEvent, canvasRect: DOMRect): IPoint {
-    const { x, y } = canvasRect;
+  transform(e: MouseEvent): IPoint {
+    const { x, y } = this.shield.stageRect;
     this.value = {
       x: e.clientX - x,
       y: e.clientY - y

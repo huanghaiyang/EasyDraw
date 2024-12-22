@@ -7,7 +7,7 @@ import StageElement from "@/modules/elements/StageElement";
 export default class ElementUtils {
   static createElementTask(element: IStageElement, params?: any): IStageElementTask {
     let task: IStageElementTask;
-    switch (element.obj.type) {
+    switch (element.model.type) {
       case CreatorTypes.rectangle:
         task = new StageElementTaskRect(element, params);
         break;
@@ -55,17 +55,17 @@ export default class ElementUtils {
   /**
    * 根据对象创建元素
    * 
-   * @param obj 
+   * @param model 
    * @returns 
    */
-  static createElement(obj: ElementObject): IStageElement {
-    const { type } = obj;
+  static createElement(model: ElementObject): IStageElement {
+    const { type } = model;
     switch (type) {
       case CreatorTypes.rectangle: {
-        return new StageElementRect(obj);
+        return new StageElementRect(model);
       }
       default:
-        return new StageElement(obj);
+        return new StageElement(model);
     }
   }
 
