@@ -12,6 +12,7 @@ import {
   IStageCursor,
   IStageEvent,
   ShieldDispatcherNames,
+  CreatorTypes,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import StageDrawerMask from "@/modules/stage/drawer/StageDrawerMask";
@@ -158,18 +159,28 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const funcs = [];
     this.cursor.calcPos(e, this.stageRect);
 
-    if (this.checkCreatorActive()) {
+    // 判断是否是绘制模式
+    if (this.checkDrawerActive()) {
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
     } else {
       this.setCursorStyle('default');
       this.selection.hitElements(this.cursor.pos);
     }
+    // 判断鼠标是否按下
     if (this.isPressDown) {
       this.calcPressMove(e);
+      // 移动过程中创建元素
       this.creatingElementIfy(e);
-      if (this.store.selectedElements.length === 0) {
-        const rangePoints = CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]);
-        this.selection.setRange(rangePoints);
+
+      // 如果是选择模式
+      if (this.checkMoveableActive()) {
+        // 如果不存在选中的元素
+        if (this.store.selectedElements.length === 0) {
+          // 计算选区
+          const rangePoints = CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]);
+          // 更新选区，命中组件
+          this.selection.setRange(rangePoints);
+        }
       }
       funcs.push(() => this.provisional.redraw())
     }
@@ -196,9 +207,18 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   async handlePressDown(e: MouseEvent): Promise<void> {
     this.isPressDown = true;
     this.calcPressDown(e);
-    this.selection.clearSelects();
-    this.selection.refreshSelects();
-    this.selection.setRange([]);
+
+    // 1. 如果是绘制模式则直接清空
+    // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
+    // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
+    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.pos) || !this.selection.checkSelectContainsHitting()))) {
+      // 清空所有组件的选中状态
+      this.selection.clearSelects();
+      // 将处于命中状态的组件转换为被选中状态
+      this.selection.commitHittingElements();
+      // 清空选区
+      this.selection.setRange([]);
+    }
     this.mask.redraw();
   }
 
@@ -210,13 +230,23 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   async handlePressUp(e: MouseEvent): Promise<void> {
     this.isPressDown = false;
     this.calcPressUp(e);
-    if (this.checkCreatorActive()) {
+    // 如果是绘制模式，则完成元素的绘制
+    if (this.checkDrawerActive()) {
       this.store.finishCreatingElement();
-    } else {
-      this.selection.selectRange();
-      this.selection.setRange(null);
+    } else if (this.checkMoveableActive()) { // 如果是选择模式
+      // 判断是否是拖动组件操作，并且判断拖动位移是否有效
+      if (this.store.selectedElements.length && this.checkCursorPressUpAvailable(e)) {
+
+      } else {
+        this.selection.selectRange();
+        this.selection.setRange(null);
+      }
     }
-    await this.commitRedraw();
+    await Promise.all([
+      this.mask.redraw(),
+      this.provisional.redraw(),
+      this.commitRedraw()
+    ])
   }
 
   /**
@@ -226,7 +256,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     await this.redraw();
     const noneRenderedElements = this.store.noneRenderedElements;
     if (noneRenderedElements.length) {
-      this.store.updateElements(noneRenderedElements, { isRendered: true });
+      this.store.updateElements(noneRenderedElements, { isRendered: true, isOnStage: true });
       this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
     }
   }
@@ -273,6 +303,17 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   }
 
   /**
+   * 检查鼠标抬起是否移动过短（移动距离过短，可能为误触）
+   * 
+   * @param e 
+   * @returns 
+   */
+  checkCursorPressUpAvailable(e: MouseEvent): boolean {
+    return Math.abs(this.pressUpStageWorldCoord.x - this.pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
+      || Math.abs(this.pressUpStageWorldCoord.y - this.pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
+  }
+
+  /**
    * 给定坐标计算距离世界坐标中心点的偏移
    * 
    * @param pos 
@@ -314,9 +355,18 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param creator 
    */
-  checkCreatorActive(): boolean {
+  checkDrawerActive(): boolean {
     if (!this.currentCreator) return false;
     return [CreatorCategories.shapes].includes(this.currentCreator.category);
+  }
+
+  /**
+   * 检查移动工具是否可用
+   * 
+   * @returns 
+   */
+  checkMoveableActive(): boolean {
+    return CreatorTypes.moveable === this.currentCreator?.type;
   }
 
   /**
@@ -334,7 +384,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   creatingElementIfy(e: MouseEvent): IStageElement | null {
-    if (this.checkCreatorActive() && this.checkCursorPressMovedAvailable(e)) {
+    if (this.checkDrawerActive() && this.checkCursorPressMovedAvailable(e)) {
       const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord]);
       if (element) {
         return element;

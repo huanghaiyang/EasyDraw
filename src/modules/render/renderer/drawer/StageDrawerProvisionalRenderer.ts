@@ -5,6 +5,9 @@ import StageElementTaskClear from "@/modules/render/base/task/StageElementTaskCl
 import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRenderer<IStageDrawerProvisional> implements IStageDrawerProvisionalRenderer {
+
+  private _latestElementRendered: boolean;
+
   /**
    * 重绘
    */
@@ -18,8 +21,9 @@ export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRende
           cargo.add(task);
         }
       });
+      this._latestElementRendered = true;
     }
-    if (!cargo.isEmpty()) {
+    if (!cargo.isEmpty() || (cargo.isEmpty() && this._latestElementRendered)) {
       cargo.prepend(new StageElementTaskClear(null, this.renderParams));
       await this.renderCargo(cargo);
     } else {

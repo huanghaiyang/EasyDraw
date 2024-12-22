@@ -1,5 +1,6 @@
 import { IPoint, IStageDrawerMaskTaskSelectionObj, IStageElement, IStageSelection, IStageShield, StageDrawerMaskObjTypes } from "@/types";
 import MathUtils from "@/utils/MathUtils";
+import { every, includes } from "lodash";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
@@ -88,7 +89,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
    */
-  refreshSelects(): void {
+  commitHittingElements(): void {
     this.shield.store.updateElements(this.shield.store.hittingElements, { isSelected: true, isHitting: false });
   }
 
@@ -116,5 +117,26 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       this.shield.store.updateElements(this.shield.store.hittingElements, { isSelected: true, isHitting: false });
     }
+  }
+
+  /**
+   * 给定坐标获取命中的组件
+   * 
+   * @param point 
+   * @returns 
+   */
+  getElementOnPoint(point: IPoint): IStageElement {
+    return this.shield.store.renderedElements.find(item => item.isContainsPoint(point));
+  }
+
+  /**
+   * 检查当前鼠标命中的组件是否都已经被选中
+   * 
+   * @returns 
+   */
+  checkSelectContainsHitting(): boolean {
+    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
+    const hittingIds = this.shield.store.hittingElements.map(item => item.id);
+    return every(hittingIds, item => includes(selectedIds, item))
   }
 }

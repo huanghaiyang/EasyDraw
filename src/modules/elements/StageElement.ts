@@ -20,6 +20,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
   isDragging: boolean;
   isRendered: boolean;
   isHitting: boolean;
+  isOnStage: boolean;
 
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
@@ -61,6 +62,7 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
     this.isDragging = false;
     this.isRendered = false;
     this.isHitting = false;
+    this.isOnStage = false;
   }
 
   /**

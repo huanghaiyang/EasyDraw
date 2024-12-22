@@ -47,7 +47,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     }
 
     // 绘制光标
-    if (this.drawer.shield.checkCreatorActive()) {
+    if (this.drawer.shield.checkDrawerActive()) {
       if (this.drawer.shield.cursor.pos) {
         cargo.add(this.createMaskCursorTask());
         hasCursor = true;

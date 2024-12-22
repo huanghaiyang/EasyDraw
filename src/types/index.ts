@@ -42,12 +42,11 @@ export type IDirectionPoint = IPoint & {
 
 // 舞台元素缓存刷新类型
 export enum StageStoreRefreshCacheTypes {
-  startCreating = 0,
-  creating = 1,
+  status = 1,
   selected = 2,
   hitting = 3,
   rendered = 4,
-  noneRendered = 5,
+  onStage = 5,
 }
 
 // 舞台主画板
@@ -63,7 +62,7 @@ export interface IStageShield extends IStageDrawer {
   stageWorldCoord: IPoint;
   get stageRectPoints(): IPoint[];
   get stageWordRectPoints(): IPoint[];
-  checkCreatorActive(): boolean;
+  checkDrawerActive(): boolean;
 }
 
 // 用于维护舞台数据关系
@@ -73,6 +72,8 @@ export interface IStageStore {
   get noneRenderedElements(): IStageElement[];
   get selectedElements(): IStageElement[];
   get hittingElements(): IStageElement[];
+  get stageElements(): IStageElement[];
+  get noneStageElements(): IStageElement[];
   refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void;
   createObject(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
@@ -217,10 +218,12 @@ export interface IStageSelection {
   setRange(points: IPoint[]): void;
   selectRange(): void;
   getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
-  refreshSelects(): void;
+  commitHittingElements(): void;
   clearSelects(): void;
   hitElements(point: IPoint): void;
   refreshRangeElements(rangePoints: IPoint[]): void;
+  getElementOnPoint(point: IPoint): IStageElement;
+  checkSelectContainsHitting(): boolean;
 }
 
 // 舞台容器
@@ -270,6 +273,7 @@ export interface IStageElement {
   isDragging: boolean;
   isRendered: boolean;
   isHitting: boolean;
+  isOnStage: boolean;
   status: ElementStatus;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
   isInPolygon(points: IPoint[]): boolean;

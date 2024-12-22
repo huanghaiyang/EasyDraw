@@ -20,6 +20,8 @@ export default class StageStore implements IStageStore {
   private _noneRenderedElements: IStageElement[] = [];
   private _selectedElements: IStageElement[] = [];
   private _hittingElements: IStageElement[] = [];
+  private _stageElements: IStageElement[] = [];
+  private _noneStageElements: IStageElement[] = [];
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -49,7 +51,15 @@ export default class StageStore implements IStageStore {
     return this._hittingElements;
   }
 
-  private _refreshCreatingElements(): void {
+  get stageElements(): IStageElement[] {
+    return this._stageElements;
+  }
+
+  get noneStageElements(): IStageElement[] {
+    return this._noneStageElements;
+  }
+
+  private _refreshStatusElements(): void {
     this._creatingElements = [];
     this.elementList.forEach(item => {
       if (item.data.status === ElementStatus.creating) {
@@ -60,17 +70,12 @@ export default class StageStore implements IStageStore {
 
   private _refreshRenderedElements(): void {
     this._renderedElements = [];
+    this._noneRenderedElements = [];
+    
     this.elementList.forEach(item => {
       if (item.data.isRendered) {
         this._renderedElements.push(item.data);
-      }
-    })
-  }
-
-  private _refreshNoneRenderedElements(): void {
-    this._noneRenderedElements = [];
-    this.elementList.forEach(item => {
-      if (!item.data.isRendered) {
+      } else {
         this._noneRenderedElements.push(item.data);
       }
     })
@@ -95,6 +100,19 @@ export default class StageStore implements IStageStore {
     this.renderedElements.forEach(item => {
       if (item.isHitting) {
         this._hittingElements.push(item);
+      }
+    })
+  }
+
+  private _refreshStageElements(): void {
+    this._stageElements = [];
+    this._noneStageElements = [];
+
+    this.elementList.forEach(item => {
+      if (item.data.isOnStage) {
+        this._stageElements.push(item.data);
+      } else {
+        this._noneStageElements.push(item.data);
       }
     })
   }
@@ -277,9 +295,10 @@ export default class StageStore implements IStageStore {
     if (this.currentCreatingElementId) {
       const element = this.getElementById(this.currentCreatingElementId);
       if (element) {
-        element.status = ElementStatus.finished;
         this.currentCreatingElementId = null;
-        this.refreshElementCaches(this._getRefreshCacheTypes(['status']));
+        this.updateElement(element.id, {
+          status: ElementStatus.finished,
+        })
         return element;
       }
     }
@@ -328,26 +347,26 @@ export default class StageStore implements IStageStore {
    */
   refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void {
     if (!cacheTypes) {
-      this._refreshCreatingElements();
+      this._refreshStatusElements();
       this._refreshRenderedElements();
-      this._refreshNoneRenderedElements();
       this._refreshSelectedElements();
       this._refreshHittingElements();
+      this._refreshStageElements();
     } else {
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.creating)) {
-        this._refreshCreatingElements();
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.status)) {
+        this._refreshStatusElements();
       }
       if (cacheTypes.includes(StageStoreRefreshCacheTypes.rendered)) {
         this._refreshRenderedElements();
-      }
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.noneRendered)) {
-        this._refreshNoneRenderedElements();
       }
       if (cacheTypes.includes(StageStoreRefreshCacheTypes.selected)) {
         this._refreshSelectedElements();
       }
       if (cacheTypes.includes(StageStoreRefreshCacheTypes.hitting)) {
         this._refreshHittingElements();
+      }
+      if (cacheTypes.includes(StageStoreRefreshCacheTypes.onStage)) {
+        this._refreshStageElements();
       }
     }
   }
@@ -362,31 +381,35 @@ export default class StageStore implements IStageStore {
     const result: StageStoreRefreshCacheTypes[] = [];
     if (isArray(element)) {
       if (element.includes('status')) {
-        result.push(StageStoreRefreshCacheTypes.creating);
+        result.push(StageStoreRefreshCacheTypes.status);
       }
       if (element.includes('isSelected')) {
         result.push(StageStoreRefreshCacheTypes.selected);
       }
       if (element.includes('isRendered')) {
         result.push(StageStoreRefreshCacheTypes.rendered);
-        result.push(StageStoreRefreshCacheTypes.noneRendered);
       }
       if (element.includes('isHitting')) {
         result.push(StageStoreRefreshCacheTypes.hitting);
       }
+      if (element.includes('isOnStage')) {
+        result.push(StageStoreRefreshCacheTypes.onStage);
+      }
     } else {
       if (element.hasOwnProperty('status')) {
-        result.push(StageStoreRefreshCacheTypes.creating);
+        result.push(StageStoreRefreshCacheTypes.status);
       }
       if (element.hasOwnProperty('isSelected')) {
         result.push(StageStoreRefreshCacheTypes.selected);
       }
       if (element.hasOwnProperty('isRendered')) {
         result.push(StageStoreRefreshCacheTypes.rendered);
-        result.push(StageStoreRefreshCacheTypes.noneRendered);
       }
       if (element.hasOwnProperty('isHitting')) {
         result.push(StageStoreRefreshCacheTypes.hitting);
+      }
+      if (element.hasOwnProperty('isOnStage')) {
+        result.push(StageStoreRefreshCacheTypes.onStage);
       }
     }
     return result;
