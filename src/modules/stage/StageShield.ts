@@ -22,6 +22,7 @@ import StageEvent from '@/modules/stage/StageEvent';
 import CursorUtils from "@/utils/CursorUtils";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -165,7 +166,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     }
     if (this.isPressDown) {
       this.calcPressMove(e);
-      this.creatingElement(e);
+      this.creatingElementIfy(e);
+      if (this.store.selectedElements.length === 0) {
+        this.selection.refreshRangeElements(CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]))
+      }
       funcs.push(() => this.provisional.redraw())
     }
     funcs.push(() => this.mask.redraw());
@@ -192,6 +196,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.isPressDown = true;
     this.calcPressDown(e);
     this.selection.clearSelects();
+    this.selection.refreshSelects();
+    this.mask.redraw();
   }
 
   /**
@@ -227,7 +233,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   calcPressDown(e: MouseEvent): void {
     this.pressDownPosition = this.cursor.calcPos(e, this.stageRect);
-    this.pressDownStageWorldCoord = this.calcOffsetByPos(this.pressDownPosition);
+    this.pressDownStageWorldCoord = this.calcWorldCoord(this.pressDownPosition);
   }
 
   /**
@@ -237,7 +243,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   calcPressUp(e: MouseEvent): void {
     this.pressUpPosition = this.cursor.calcPos(e, this.stageRect);
-    this.pressUpStageWorldCoord = this.calcOffsetByPos(this.pressUpPosition);
+    this.pressUpStageWorldCoord = this.calcWorldCoord(this.pressUpPosition);
   }
 
   /**
@@ -247,7 +253,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   calcPressMove(e: MouseEvent): void {
     this.pressMovePosition = this.cursor.calcPos(e, this.stageRect);
-    this.pressMoveStageWorldCoord = this.calcOffsetByPos(this.pressMovePosition);
+    this.pressMoveStageWorldCoord = this.calcWorldCoord(this.pressMovePosition);
   }
 
   /**
@@ -266,7 +272,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param pos 
    */
-  calcOffsetByPos(pos: IPoint): IPoint {
+  calcWorldCoord(pos: IPoint): IPoint {
     return {
       x: pos.x - this.stageRect.width / 2 + this.stageWorldCoord.x,
       y: pos.y - this.stageRect.height / 2 + this.stageWorldCoord.y
@@ -324,7 +330,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  creatingElement(e: MouseEvent): IStageElement | null {
+  creatingElementIfy(e: MouseEvent): IStageElement | null {
     if (this.checkCreatorActive() && this.checkCursorPressMovedAvailable(e)) {
       const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord]);
       if (element) {

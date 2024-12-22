@@ -13,7 +13,7 @@ export default class StageElementTaskRect extends StageElementTaskBase implement
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(this.canvas, this.node.pathPoints, {
+    CanvasUtils.drawPath(this.canvas, this.node.rotatePathPoints, {
       strokeStyle: DefaultCreatorStrokeColor,
       lineWidth: DefaultCreatorStrokeWidth,
       fillStyle: DefaultCreatorFillColor

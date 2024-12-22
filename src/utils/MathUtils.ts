@@ -142,21 +142,88 @@ export default class MathUtils {
     let inside = false;
 
     for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
-        const [xi, yi] = polygon[i];
-        const [xj, yj] = polygon[j];
+      const [xi, yi] = polygon[i];
+      const [xj, yj] = polygon[j];
 
-        // 检查点是否在多边形的边上
-        if ((yi > py) !== (yj > py) &&
-            (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
-            inside = !inside;
-        }
+      // 检查点是否在多边形的边上
+      if ((yi > py) !== (yj > py) &&
+        (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
 
-        // 特殊情况：点恰好在多边形的边上
-        if ((yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj))) {
-            return true;
-        }
+      // 特殊情况：点恰好在多边形的边上
+      if ((yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj))) {
+        return true;
+      }
     }
 
     return inside;
-}
+  }
+
+  /**
+   * 要判断两个多边形是否重叠，可以使用分离轴定理（Separating Axis Theorem, SAT）。这个定理指出，如果存在一条轴，使得将两个多边形投影到这条轴上时，它们的投影不重叠，那么这两个多边形就不重叠。
+   * 
+   * @param points1 
+   * @param points2 
+   * @returns 
+   */
+  static polygonsOverlap(points1: IPoint[], points2: IPoint[]) {
+    const poly1 = points1.map(p => [p.x, p.y]);
+    const poly2 = points2.map(p => [p.x, p.y]);
+
+    // 获取所有边
+    function getEdges(polygon: number[][]) {
+      let edges = [];
+      for (let i = 0; i < polygon.length; i++) {
+        let next = (i + 1) % polygon.length;
+        let edge = [polygon[next][0] - polygon[i][0], polygon[next][1] - polygon[i][1]];
+        edges.push(edge);
+      }
+      return edges;
+    }
+
+    // 计算点积
+    function dotProduct(v1: number[], v2: number[]) {
+      return v1[0] * v2[0] + v1[1] * v2[1];
+    }
+
+    // 计算法向量
+    function normal(edge: number[]) {
+      return [-edge[1], edge[0]];
+    }
+
+    // 投影多边形到轴上
+    function projectPolygon(axis: number[], polygon: number[][]) {
+      let min = dotProduct(axis, polygon[0]);
+      let max = min;
+      for (let i = 1; i < polygon.length; i++) {
+        let projection = dotProduct(axis, polygon[i]);
+        min = Math.min(min, projection);
+        max = Math.max(max, projection);
+      }
+      return [min, max];
+    }
+
+    // 检查投影是否重叠
+    function overlap(proj1: number[], proj2: number[]) {
+      return proj1[0] <= proj2[1] && proj2[0] <= proj1[1];
+    }
+
+    // 获取两个多边形的所有边
+    let edges1 = getEdges(poly1);
+    let edges2 = getEdges(poly2);
+
+    // 检查每个多边形的每条边作为分离轴
+    for (let edge of edges1.concat(edges2)) {
+      let axis = normal(edge);
+      let proj1 = projectPolygon(axis, poly1);
+      let proj2 = projectPolygon(axis, poly2);
+      if (!overlap(proj1, proj2)) {
+        return false; // 如果在任何轴上投影不重叠，则多边形不重叠
+      }
+    }
+
+    return true; // 在所有轴上投影都重叠，则多边形重叠
+  }
+
 }

@@ -214,8 +214,10 @@ export interface IStageEvent extends EventEmitter {
 export interface IStageSelection {
   get isEmpty(): boolean;
   getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
+  refreshSelects(): void;
   clearSelects(): void;
   hitElements(point: IPoint): void;
+  refreshRangeElements(rangePoints: IPoint[]): void;
 }
 
 // 舞台容器
@@ -268,6 +270,8 @@ export interface IStageElement {
   status: ElementStatus;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
   isInPolygon(points: IPoint[]): boolean;
+  isContainsPoint(point: IPoint): boolean;
+  isPolygonOverlap(points: IPoint[]): boolean;
 }
 
 // 舞台元素（组件）-React

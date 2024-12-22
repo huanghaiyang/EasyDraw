@@ -80,6 +80,25 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
    * @param rect 
    */
   isInPolygon(points: IPoint[]): boolean {
-    return every(this.pathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
+    return every(this.rotatePathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
+  }
+
+  /**
+   * 判断是否包含点
+   * 
+   * @param point 
+   */
+  isContainsPoint(point: IPoint): boolean {
+    return MathUtils.isPointInPolygon(point, this.rotatePathPoints);
+  }
+
+  /**
+   * 判断是否于多边形相交
+   * 
+   * @param points 
+   * @returns 
+   */
+  isPolygonOverlap(points: IPoint[]): boolean {
+      return MathUtils.polygonsOverlap(this.rotatePathPoints, points);
   }
 }
