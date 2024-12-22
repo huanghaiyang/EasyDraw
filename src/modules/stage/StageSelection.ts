@@ -4,12 +4,28 @@ import MathUtils from "@/utils/MathUtils";
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
 
+  private _rangePoints: IPoint[] = null;
+
   get isEmpty(): boolean {
     return this.shield.store.selectedElements.length === 0 && this.shield.store.hittingElements.length === 0;
   }
 
+  get isRange(): boolean {
+    return this._rangePoints !== null && this._rangePoints.length > 0;
+  }
+
   constructor(shield: IStageShield) {
     this.shield = shield;
+  }
+
+  /**
+   * 设置选区
+   * 
+   * @param points 
+   */
+  setRange(points: IPoint[]): void {
+    this._rangePoints = points;
+    this.refreshRangeElements(this._rangePoints);
   }
 
   /**
@@ -23,7 +39,7 @@ export default class StageSelection implements IStageSelection {
     this.shield.store.hittingElements.forEach(element => {
       result.push({
         points: element.boxPoints,
-        type: StageDrawerMaskObjTypes.highlight
+        type: this.isRange ? StageDrawerMaskObjTypes.selection : StageDrawerMaskObjTypes.highlight
       });
     });
 
@@ -33,6 +49,13 @@ export default class StageSelection implements IStageSelection {
         type: StageDrawerMaskObjTypes.selection
       });
     });
+
+    if (this.isRange) {
+      result.push({
+        points: this._rangePoints,
+        type: StageDrawerMaskObjTypes.highlight
+      });
+    }
     return result;
   }
 
@@ -75,12 +98,23 @@ export default class StageSelection implements IStageSelection {
    * @param rangePoints 
    */
   refreshRangeElements(rangePoints: IPoint[]): void {
-    const result: IStageElement[] = [];
-    this.shield.store.renderedElements.forEach(element => {
-      if (element.isPolygonOverlap(rangePoints)) {
-        result.push(element);
-      }
-    });
-    this.shield.store.updateElements(result, { isHitting: true });
+    if (rangePoints && rangePoints.length) {
+      const result: IStageElement[] = [];
+      this.shield.store.renderedElements.forEach(element => {
+        if (element.isPolygonOverlap(rangePoints)) {
+          result.push(element);
+        }
+      });
+      this.shield.store.updateElements(result, { isHitting: true });
+    }
+  }
+
+  /**
+   * 确定选区组件选中
+   */
+  selectRange(): void {
+    if (this.isRange) {
+      this.shield.store.updateElements(this.shield.store.hittingElements, { isSelected: true, isHitting: false });
+    }
   }
 }

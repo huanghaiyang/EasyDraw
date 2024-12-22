@@ -168,7 +168,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.calcPressMove(e);
       this.creatingElementIfy(e);
       if (this.store.selectedElements.length === 0) {
-        this.selection.refreshRangeElements(CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]))
+        const rangePoints = CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]);
+        this.selection.setRange(rangePoints);
       }
       funcs.push(() => this.provisional.redraw())
     }
@@ -197,6 +198,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.calcPressDown(e);
     this.selection.clearSelects();
     this.selection.refreshSelects();
+    this.selection.setRange([]);
     this.mask.redraw();
   }
 
@@ -210,6 +212,9 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.calcPressUp(e);
     if (this.checkCreatorActive()) {
       this.store.finishCreatingElement();
+    } else {
+      this.selection.selectRange();
+      this.selection.setRange(null);
     }
     await this.commitRedraw();
   }
@@ -284,8 +289,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   refreshSize(): void {
     const rect = this.renderEl.getBoundingClientRect();
-    const { width, height } = rect;
-
     this.stageRect = rect;
     // TODO this.worldCenterCoord = ?
     this.store.refreshAllElementStagePoints();

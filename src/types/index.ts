@@ -213,6 +213,9 @@ export interface IStageEvent extends EventEmitter {
 // 舞台选区
 export interface IStageSelection {
   get isEmpty(): boolean;
+  get isRange(): boolean;
+  setRange(points: IPoint[]): void;
+  selectRange(): void;
   getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
   refreshSelects(): void;
   clearSelects(): void;
