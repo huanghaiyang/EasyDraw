@@ -10,16 +10,16 @@ import {
   StageStoreRefreshCacheTypes
 } from "@/types";
 import { nanoid } from "nanoid";
-import LinkedList, { ILinkedList } from "@/modules/struct/LinkedList";
-import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
+import LinkedNode from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/ElementUtils";
 import { cloneDeep, isArray } from "lodash";
+import ElementList from "@/modules/elements/ElementList";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
 
   // 画板上绘制的元素列表（形状、文字、图片等）
-  private elementList: ILinkedList<ILinkedNode<IStageElement>>;
+  private elementList: ElementList;
   // 当前正在创建的元素
   private currentCreatingElementId;
   // 元素对象映射关系，加快查询
@@ -35,7 +35,7 @@ export default class StageStore implements IStageStore {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this.elementList = new LinkedList<IStageElement>();
+    this.elementList = new ElementList();
   }
 
   // 当前创建并更新中的组件

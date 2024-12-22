@@ -391,3 +391,5 @@ export type ScaleValue = {
 export enum ShieldDispatcherNames {
   elementCreated = 0,
 }
+
+export interface IElementList extends EventEmitter {}

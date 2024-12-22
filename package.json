@@ -15,6 +15,7 @@
     "eventsource-polyfill": "^0.9.6",
     "lodash": "^4.17.21",
     "mathjs": "^14.0.1",
+    "mobx": "^6.13.5",
     "nanoid": "^5.0.9",
     "normalize.css": "^8.0.1",
     "pinia": "^2.3.0",

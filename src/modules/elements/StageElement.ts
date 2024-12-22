@@ -4,7 +4,7 @@ import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { cloneDeep, every } from "lodash";
+import { every } from "lodash";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;

@@ -1,6 +1,7 @@
 import { ILinkedNode, ILinkedNodeData } from "@/modules/struct/LinkedNode";
+import { EventEmitter } from "events";
 
-export interface ILinkedList<T> {
+export interface ILinkedList<T> extends EventEmitter {
   nodes: Set<T>;
   get length(): number;
   get tail(): T | null;
@@ -10,15 +11,15 @@ export interface ILinkedList<T> {
   insertAfter(node: T, target: T): void;
   prepend(node: T): void;
   remove(node: T): void;
-  removeBy(predicate: (node: T) => boolean): T;
+  removeBy(predicate: (node: T) => boolean): void;
   forEach(callback: (node: T, index: number) => void): void;
   forEachRevert(callback: (node: T, index: number) => void): void;
   forEachBreak(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
   forEachBreakRevert(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
-  getNodeIndex(node: T): number;
+  getIndex(node: T): number;
 }
 
-export default class LinkedList<T extends ILinkedNodeData> implements ILinkedList<ILinkedNode<ILinkedNodeData>> {
+export default class LinkedList<T extends ILinkedNodeData> extends EventEmitter implements ILinkedList<ILinkedNode<ILinkedNodeData>> {
   nodes: Set<ILinkedNode<T>>;
   private _head: ILinkedNode<T>;
   private _tail: ILinkedNode<T>;
@@ -36,6 +37,7 @@ export default class LinkedList<T extends ILinkedNodeData> implements ILinkedLis
   }
 
   constructor() {
+    super();
     this.nodes = new Set();
     this._head = null;
     this._tail = null;
@@ -51,6 +53,7 @@ export default class LinkedList<T extends ILinkedNodeData> implements ILinkedLis
       this.insertAfter(node, this._tail);
     } else {
       this._tail = node;
+      this.nodes.add(node);
     }
     if (!this._head) {
       this._head = node;
@@ -67,6 +70,7 @@ export default class LinkedList<T extends ILinkedNodeData> implements ILinkedLis
       this.insertBefore(node, this._head);
     } else {
       this._head = node;
+      this.nodes.add(node);
     }
     if (!this._tail) {
       this._tail = node;
@@ -95,12 +99,11 @@ export default class LinkedList<T extends ILinkedNodeData> implements ILinkedLis
    * 
    * @param predicate 
    */
-  removeBy(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T> {
+  removeBy(predicate: (node: ILinkedNode<T>) => boolean): void {
     const node = Array.from(this.nodes).find(node => predicate(node));
     if (node) {
       this.remove(node);
     }
-    return node;
   }
 
   /**
@@ -201,7 +204,7 @@ export default class LinkedList<T extends ILinkedNodeData> implements ILinkedLis
    * @param node 
    * @returns 
    */
-  getNodeIndex(node: ILinkedNode<T>): number {
+  getIndex(node: ILinkedNode<T>): number {
     let index = -1;
     let current = this._head;
     while (current) {
