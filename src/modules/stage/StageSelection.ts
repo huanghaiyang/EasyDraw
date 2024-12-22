@@ -40,7 +40,7 @@ export default class StageSelection implements IStageSelection {
     this.shield.store.hittingElements.forEach(element => {
       result.push({
         points: element.boxPoints,
-        type: this.isRange ? StageDrawerMaskObjTypes.selection : StageDrawerMaskObjTypes.highlight
+        type: this.isRange ? StageDrawerMaskObjTypes.selection : StageDrawerMaskObjTypes.hitting
       });
     });
 
@@ -54,7 +54,7 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
-        type: StageDrawerMaskObjTypes.highlight
+        type: StageDrawerMaskObjTypes.hitting
       });
     }
     return result;
@@ -89,7 +89,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
    */
-  commitHittingElements(): void {
+  changeHittingElementsToSelect(): void {
     this.shield.store.updateElements(this.shield.store.hittingElements, { isSelected: true, isHitting: false });
   }
 

@@ -1,9 +1,19 @@
-import { CreatorCategories, CreatorTypes, ElementStatus, ElementObject, IPoint, IStageElement, IStageShield, IStageStore, StageStoreRefreshCacheTypes } from "@/types";
+import {
+  CreatorCategories,
+  CreatorTypes,
+  ElementStatus,
+  ElementObject,
+  IPoint,
+  IStageElement,
+  IStageShield,
+  IStageStore,
+  StageStoreRefreshCacheTypes
+} from "@/types";
 import { nanoid } from "nanoid";
 import LinkedList, { ILinkedList } from "@/modules/struct/LinkedList";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/ElementUtils";
-import { isArray } from "lodash";
+import { cloneDeep, isArray } from "lodash";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -71,7 +81,7 @@ export default class StageStore implements IStageStore {
   private _refreshRenderedElements(): void {
     this._renderedElements = [];
     this._noneRenderedElements = [];
-    
+
     this.elementList.forEach(item => {
       if (item.data.isRendered) {
         this._renderedElements.push(item.data);
@@ -222,7 +232,7 @@ export default class StageStore implements IStageStore {
    * @param id 
    * @param data 
    */
-  updateElementObj(id: string, data: ElementObject): IStageElement {
+  updateElementObj(id: string, data: Partial<ElementObject>): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
       const objId = element.obj.id;
@@ -244,6 +254,7 @@ export default class StageStore implements IStageStore {
       id: nanoid(),
       type,
       coords,
+      originalCoords: cloneDeep(coords),
       data,
       angle: 0
     }
@@ -415,5 +426,46 @@ export default class StageStore implements IStageStore {
     return result;
   }
 
+  /**
+   * 组件移动
+   * 
+   * @param offset 
+   */
+  updateSelectedElementsMovement(offset: IPoint): void {
+    this.selectedElements.forEach(element => {
+      this.updateElementObj(element.id, {
+        coords: element.obj.originalCoords.map(point => {
+          return {
+            x: point.x + offset.x,
+            y: point.y + offset.y,
+          }
+        })
+      })
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })
+  }
 
+  /**
+   * 遍历所有节点
+   * 
+   * @param callback 
+   */
+  forEach(callback: (element: IStageElement, index: number) => void): void {
+    this.elementList.forEach((node, index) => {
+      callback(node.data, index);
+    })
+  }
+
+  /**
+   * 组件坐标更新
+   * @param elements 
+   */
+  refreshElementsCoords(elements: IStageElement[]): void {
+    elements.forEach(element => {
+      this.updateElementObj(element.id, {
+        originalCoords: cloneDeep(element.obj.coords),
+      })
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })
+  }
 }

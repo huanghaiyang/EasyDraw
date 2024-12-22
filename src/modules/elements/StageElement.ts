@@ -4,7 +4,7 @@ import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every } from "lodash";
+import { cloneDeep, every } from "lodash";
 
 export default class StageElement implements IStageElement, ILinkedNodeData {
   id: string;
@@ -101,6 +101,6 @@ export default class StageElement implements IStageElement, ILinkedNodeData {
    * @returns 
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-      return MathUtils.polygonsOverlap(this.rotatePathPoints, points);
+    return MathUtils.polygonsOverlap(this.rotatePathPoints, points);
   }
 }

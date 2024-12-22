@@ -62,6 +62,8 @@ export interface IStageShield extends IStageDrawer {
   stageWorldCoord: IPoint;
   get stageRectPoints(): IPoint[];
   get stageWordRectPoints(): IPoint[];
+  get isDragging(): boolean;
+  get isResizing(): boolean;
   checkDrawerActive(): boolean;
 }
 
@@ -80,7 +82,7 @@ export interface IStageStore {
   removeElement(id: string): IStageElement;
   updateElement(id: string, props: Partial<IStageElement>): IStageElement;
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
-  updateElementObj(id: string, data: ElementObject): IStageElement;
+  updateElementObj(id: string, data: Partial<ElementObject>): IStageElement;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
   getElementById(id: string): IStageElement;
@@ -89,6 +91,9 @@ export interface IStageStore {
   finishCreatingElement(): IStageElement;
   refreshAllElementStagePoints(): void;
   refreshElementStagePoints(element: IStageElement[]): void;
+  updateSelectedElementsMovement(offset: IPoint): void;
+  refreshElementsCoords(elements: IStageElement[]): void;
+  forEach(callback: (element: IStageElement, index: number) => void): void;
 }
 
 // 画板画布
@@ -133,7 +138,7 @@ export enum StageDrawerMaskObjTypes {
   selection = 0,
   selectionHandler = 1,
   cursor = 2,
-  highlight = 3,
+  hitting = 3,
 }
 
 // 方位
@@ -218,7 +223,7 @@ export interface IStageSelection {
   setRange(points: IPoint[]): void;
   selectRange(): void;
   getSelectionObjs(): IStageDrawerMaskTaskSelectionObj[];
-  commitHittingElements(): void;
+  changeHittingElementsToSelect(): void;
   clearSelects(): void;
   hitElements(point: IPoint): void;
   refreshRangeElements(rangePoints: IPoint[]): void;
@@ -246,6 +251,7 @@ export interface StageShieldInstance {
 export type ElementObject = {
   id: string;
   coords: IPoint[]; // 相对于世界中心的坐标
+  originalCoords?: IPoint[]; // 用于移动、变形时的原始坐标
   type: CreatorTypes;
   data: any;
   strokeColor?: string;

@@ -97,6 +97,17 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   // 鼠标是否按下过
   private isPressDown: boolean = false;
 
+  private _isDragging: boolean = false;
+  private _isResizing: boolean = false;
+
+  get isDragging(): boolean {
+    return this._isDragging;
+  }
+
+  set isResizing(value: boolean) {
+    this._isResizing = value;
+  }
+
   constructor() {
     super();
     this.event = new StageEvent(this);
@@ -169,9 +180,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     // 判断鼠标是否按下
     if (this.isPressDown) {
       this.calcPressMove(e);
-      // 移动过程中创建元素
-      this.creatingElementIfy(e);
-
+      // 绘制模式
+      if (this.checkDrawerActive()) {
+        // 移动过程中创建元素
+        this.creatingElementIfy(e);
+      }
       // 如果是选择模式
       if (this.checkMoveableActive()) {
         // 如果不存在选中的元素
@@ -180,6 +193,19 @@ export default class StageShield extends StageDrawerBase implements IStageShield
           const rangePoints = CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]);
           // 更新选区，命中组件
           this.selection.setRange(rangePoints);
+        } else if (this._isDragging || this.selection.checkSelectContainsHitting()) {
+          if (this.checkCursorPressMovedAvailable(e)) {
+            // 标记拖动
+            this._isDragging = true;
+            // 更新元素位置
+            this.store.updateSelectedElementsMovement({
+              x: this.pressMoveStageWorldCoord.x - this.pressDownStageWorldCoord.x,
+              y: this.pressMoveStageWorldCoord.y - this.pressDownStageWorldCoord.y
+            })
+            // 标记组件正在拖动
+            this.store.updateElements(this.store.selectedElements, { isDragging: true });
+            funcs.push(() => this.redraw())
+          }
         }
       }
       funcs.push(() => this.provisional.redraw())
@@ -215,7 +241,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态
-      this.selection.commitHittingElements();
+      this.selection.changeHittingElementsToSelect();
       // 清空选区
       this.selection.setRange([]);
     }
@@ -236,7 +262,15 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     } else if (this.checkMoveableActive()) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
       if (this.store.selectedElements.length && this.checkCursorPressUpAvailable(e)) {
-
+        if (this._isDragging) {
+          this.store.updateSelectedElementsMovement({
+            x: this.pressUpStageWorldCoord.x - this.pressDownStageWorldCoord.x,
+            y: this.pressUpStageWorldCoord.y - this.pressDownStageWorldCoord.y
+          })
+          this.store.updateElements(this.store.selectedElements, { isDragging: false });
+          this.store.refreshElementsCoords(this.store.selectedElements);
+          this._isDragging = false;
+        }
       } else {
         this.selection.selectRange();
         this.selection.setRange(null);
