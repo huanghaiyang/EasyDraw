@@ -20,7 +20,7 @@ export default class StageCursor implements IStageCursor {
    * @param canvasRect 
    * @returns 
    */
-  calcPos(e: MouseEvent, canvasRect: DOMRect): IPoint {
+  transformEventPosition(e: MouseEvent, canvasRect: DOMRect): IPoint {
     const { x, y } = canvasRect;
     this.pos = {
       x: e.clientX - x,

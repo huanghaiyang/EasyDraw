@@ -114,7 +114,7 @@ export interface IQueueRender {
 export interface IStageCursor {
   pos: IPoint;
   clear(): void;
-  calcPos(e: MouseEvent, canvasRect: DOMRect): IPoint;
+  transformEventPosition(e: MouseEvent, canvasRect: DOMRect): IPoint;
 }
 
 // 舞台画布
