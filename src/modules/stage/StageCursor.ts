@@ -1,16 +1,16 @@
 import { IPoint, IStageCursor, IStageShield } from "@/types";
 
 export default class StageCursor implements IStageCursor {
-  pos: IPoint;
+  value: IPoint;
   shield: IStageShield;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this.pos = null;
+    this.value = null;
   }
 
   clear(): void {
-    this.pos = null;
+    this.value = null;
   }
 
   /**
@@ -22,11 +22,11 @@ export default class StageCursor implements IStageCursor {
    */
   transformEventPosition(e: MouseEvent, canvasRect: DOMRect): IPoint {
     const { x, y } = canvasRect;
-    this.pos = {
+    this.value = {
       x: e.clientX - x,
       y: e.clientY - y
     }
-    return this.pos;
+    return this.value;
   }
 
 }

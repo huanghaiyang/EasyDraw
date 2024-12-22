@@ -68,4 +68,19 @@ export default class ElementUtils {
         return new StageElement(obj);
     }
   }
+
+  /**
+   * 给定一个坐标，选出最上层的那个组件
+   * 
+   * @param elements 
+   * @param point 
+   */
+  static getTopAElementByPoint(elements: IStageElement[], point: IPoint): IStageElement {
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const element = elements[i];
+      if (element.isContainsPoint(point)) {
+        return element;
+      }
+    }
+  }
 }

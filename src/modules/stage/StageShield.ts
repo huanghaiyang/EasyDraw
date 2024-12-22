@@ -24,6 +24,7 @@ import CursorUtils from "@/utils/CursorUtils";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
+import ElementUtils from "../elements/ElementUtils";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -175,7 +176,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
     } else {
       this.setCursorStyle('default');
-      this.selection.hitElements(this.cursor.pos);
+      this.selection.hitElements(this.cursor.value);
     }
     // 判断鼠标是否按下
     if (this.isPressDown) {
@@ -237,7 +238,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     // 1. 如果是绘制模式则直接清空
     // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
     // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
-    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.pos) || !this.selection.checkSelectContainsHitting()))) {
+    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsHitting()))) {
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态
@@ -280,7 +281,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
           }
         } else {
           // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
-
+          const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
+          this.store.updateElements(this.store.selectedElements, { isSelected: false })
+          if(topAElement) {
+            this.store.updateElement(topAElement.id, { isSelected: true });
+          }
         }
       } else {
         this.selection.selectRange();

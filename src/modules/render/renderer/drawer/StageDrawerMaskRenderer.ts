@@ -48,7 +48,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
 
     // 绘制光标
     if (this.drawer.shield.checkDrawerActive()) {
-      if (this.drawer.shield.cursor.pos) {
+      if (this.drawer.shield.cursor.value) {
         cargo.add(this.createMaskCursorTask());
         hasCursor = true;
         this._lastCursorRendered = true;
@@ -77,7 +77,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskCursorTask(): IRenderTask {
     const obj: IStageDrawerMaskTaskCursorObj = {
-      point: this.drawer.shield.cursor.pos,
+      point: this.drawer.shield.cursor.value,
       type: StageDrawerMaskObjTypes.cursor,
       creatorCategory: this.drawer.shield.currentCreator.category
     }
