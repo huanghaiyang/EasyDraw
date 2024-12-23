@@ -18,13 +18,12 @@ export default class StageStore implements IStageStore {
   shield: IStageShield;
 
   // 画板上绘制的元素列表（形状、文字、图片等）
-  private elementList: ElementList;
+  private _elementList: ElementList;
   // 当前正在创建的元素
-  private currentCreatingElementId;
+  private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
-  private elementMap = new Map<string, IStageElement>();
+  private _elementMap = new Map<string, IStageElement>();
 
-  private _creatingElements: IStageElement[] = [];
   private _renderedElements: IStageElement[] = [];
   private _noneRenderedElements: IStageElement[] = [];
   private _selectedElements: IStageElement[] = [];
@@ -35,12 +34,12 @@ export default class StageStore implements IStageStore {
   constructor(shield: IStageShield) {
     this.shield = shield;
 
-    this.elementList = new ElementList();
-    this.elementList.on(ElementsSizeChangedName, () => {
+    this._elementList = new ElementList();
+    this._elementList.on(ElementsSizeChangedName, () => {
       this.refreshElementCaches();
     })
     Object.keys(ElementReactionPropNames).forEach(propName => {
-      this.elementList.on(propName, (element, value) => {
+      this._elementList.on(propName, (element, value) => {
         switch (propName) {
           case ElementReactionPropNames.isSelected:
             this._refreshElementsCaches([ElementReactionPropNames.isSelected]);
@@ -66,7 +65,7 @@ export default class StageStore implements IStageStore {
 
   // 当前创建并更新中的组件
   get creatingElements(): IStageElement[] {
-    const element = this.elementMap.get(this.currentCreatingElementId);
+    const element = this._elementMap.get(this._currentCreatingElementId);
     if (element) {
       return [element];
     }
@@ -116,8 +115,8 @@ export default class StageStore implements IStageStore {
       this._selectedElements.push(element);
     }
     if (this._selectedElements.length === 0) {
-      if (this.currentCreatingElementId) {
-        this._selectedElements.push(this.getElementById(this.currentCreatingElementId));
+      if (this._currentCreatingElementId) {
+        this._selectedElements.push(this.getElementById(this._currentCreatingElementId));
       }
     }
   }
@@ -143,7 +142,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   hasElement(id: string): boolean {
-    return this.elementMap.has(id);
+    return this._elementMap.has(id);
   }
 
   /**
@@ -153,7 +152,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   getElementById(id: string): IStageElement {
-    return this.elementMap.get(id);
+    return this._elementMap.get(id);
   }
 
   /**
@@ -164,7 +163,7 @@ export default class StageStore implements IStageStore {
    */
   getIndexById(id: string): number {
     if (this.hasElement(id)) {
-      this.elementList.forEachBreak((node, index) => {
+      this._elementList.forEachBreak((node, index) => {
         if (node.value.id === id) {
           return index;
         }
@@ -183,8 +182,8 @@ export default class StageStore implements IStageStore {
    * @param element 
    */
   addElement(element: IStageElement): IStageElement {
-    this.elementList.insert(new LinkedNode(element))
-    this.elementMap.set(element.id, element);
+    this._elementList.insert(new LinkedNode(element))
+    this._elementMap.set(element.id, element);
     return element;
   }
 
@@ -195,9 +194,9 @@ export default class StageStore implements IStageStore {
    */
   removeElement(id: string): IStageElement {
     if (this.hasElement(id)) {
-      const element = this.elementMap.get(id);
-      this.elementList.removeBy(node => node.value.id === id);
-      this.elementMap.delete(id);
+      const element = this._elementMap.get(id);
+      this._elementList.removeBy(node => node.value.id === id);
+      this._elementMap.delete(id);
       return element;
     }
   }
@@ -210,9 +209,9 @@ export default class StageStore implements IStageStore {
    * @param isRefresh
    * @returns 
    */
-  updateElement(id: string, props: Partial<IStageElement>): IStageElement {
+  updateElementById(id: string, props: Partial<IStageElement>): IStageElement {
     if (this.hasElement(id)) {
-      const element = this.elementMap.get(id);
+      const element = this._elementMap.get(id);
       Object.assign(element, props);
       return element;
     }
@@ -227,7 +226,7 @@ export default class StageStore implements IStageStore {
    */
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
     elements.forEach(element => {
-      return this.updateElement(element.id, props);
+      return this.updateElementById(element.id, props);
     })
     return elements;
   }
@@ -240,7 +239,7 @@ export default class StageStore implements IStageStore {
    */
   updateElementModel(id: string, data: Partial<ElementObject>): IStageElement {
     if (this.hasElement(id)) {
-      const element = this.elementMap.get(id);
+      const element = this._elementMap.get(id);
       const modelId = element.model.id;
       Object.assign(element.model, data, { id: modelId });
       return element;
@@ -278,26 +277,26 @@ export default class StageStore implements IStageStore {
     switch (category) {
       case CreatorCategories.shapes: {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(points, type))
-        if (this.currentCreatingElementId) {
-          element = this.updateElementModel(this.currentCreatingElementId, model);
-          this.updateElement(element.id, {
+        if (this._currentCreatingElementId) {
+          element = this.updateElementModel(this._currentCreatingElementId, model);
+          this.updateElementById(element.id, {
             status: ElementStatus.creating,
           })
         } else {
           element = ElementUtils.createElement(model);
-          this.updateElement(element.id, {
+          this.updateElementById(element.id, {
             isRendered: false,
             status: ElementStatus.startCreating,
           })
           this.addElement(element);
-          this.currentCreatingElementId = element.id;
+          this._currentCreatingElementId = element.id;
         }
       }
       default:
         break;
     }
     if (element) {
-      this.updateElement(element.id, {
+      this.updateElementById(element.id, {
         isSelected: true,
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
@@ -309,11 +308,11 @@ export default class StageStore implements IStageStore {
    * 完成创建元素
    */
   finishCreatingElement(): IStageElement {
-    if (this.currentCreatingElementId) {
-      const element = this.getElementById(this.currentCreatingElementId);
+    if (this._currentCreatingElementId) {
+      const element = this.getElementById(this._currentCreatingElementId);
       if (element) {
-        this.currentCreatingElementId = null;
-        this.updateElement(element.id, {
+        this._currentCreatingElementId = null;
+        this.updateElementById(element.id, {
           status: ElementStatus.finished,
         })
         return element;
@@ -329,7 +328,7 @@ export default class StageStore implements IStageStore {
    */
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[] {
     const result = [];
-    this.elementList.forEach(node => {
+    this._elementList.forEach(node => {
       if (predicate(node.value)) {
         result.push(node.value);
       }
@@ -352,7 +351,7 @@ export default class StageStore implements IStageStore {
    * 刷新所有组件相对于舞台的坐标
    */
   refreshAllElementStagePoints(): void {
-    this.elementList.forEach(node => {
+    this._elementList.forEach(node => {
       node.value.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
   }
@@ -376,7 +375,7 @@ export default class StageStore implements IStageStore {
       // TODO
     }
 
-    this.elementList.forEach(node => {
+    this._elementList.forEach(node => {
       const element = node.value;
       if (props.includes(ElementReactionPropNames.isOnStage)) {
         this._refreshStageElements(element)
@@ -434,7 +433,7 @@ export default class StageStore implements IStageStore {
    * @param callback 
    */
   forEach(callback: (element: IStageElement, index: number) => void): void {
-    this.elementList.forEach((node, index) => {
+    this._elementList.forEach((node, index) => {
       callback(node.value, index);
     })
   }

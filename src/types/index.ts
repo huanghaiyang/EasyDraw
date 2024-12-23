@@ -53,8 +53,8 @@ export interface IStageShield extends IStageDrawer {
   stageWorldCoord: IPoint;
   get stageRectPoints(): IPoint[];
   get stageWordRectPoints(): IPoint[];
-  get isDragging(): boolean;
-  get isResizing(): boolean;
+  get isElementsDragging(): boolean;
+  get isElementsResizing(): boolean;
   checkDrawerActive(): boolean;
 }
 
@@ -71,7 +71,7 @@ export interface IStageStore {
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
-  updateElement(id: string, props: Partial<IStageElement>): IStageElement;
+  updateElementById(id: string, props: Partial<IStageElement>): IStageElement;
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
   updateElementModel(id: string, data: Partial<ElementObject>): IStageElement;
   hasElement(id: string): boolean;

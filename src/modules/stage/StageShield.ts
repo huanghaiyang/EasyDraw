@@ -82,31 +82,40 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   }
 
   // 画布是否是第一次渲染
-  private isFirstResizeRender: boolean = true;
+  private _isFirstResizeRender: boolean = true;
   // 鼠标按下位置
-  private pressDownPosition: IPoint;
+  private _pressDownPosition: IPoint;
   // 鼠标按下时距离世界坐标中心点的偏移
-  private pressDownStageWorldCoord: IPoint;
+  private _pressDownStageWorldCoord: IPoint;
   // 鼠标抬起位置
-  private pressUpPosition: IPoint;
+  private _pressUpPosition: IPoint;
   // 鼠标抬起时距离世界坐标中心点的偏移
-  private pressUpStageWorldCoord: IPoint;
+  private _pressUpStageWorldCoord: IPoint;
   // 鼠标按下并移动时的位置  
-  private pressMovePosition: IPoint;
+  private _pressMovePosition: IPoint;
   // 鼠标移动时距离世界坐标中心点的偏移
-  private pressMoveStageWorldCoord: IPoint;
+  private _pressMoveStageWorldCoord: IPoint;
   // 鼠标是否按下过
-  private isPressDown: boolean = false;
+  private _isPressDown: boolean = false;
+  // 是否正在拖拽组件
+  private _isElementsDragging: boolean = false;
+  // 是否正在调整组件大小
+  private _isElementsResizing: boolean = false;
 
-  private _isDragging: boolean = false;
-  private _isResizing: boolean = false;
-
-  get isDragging(): boolean {
-    return this._isDragging;
+  get isElementsDragging(): boolean {
+    return this._isElementsDragging;
   }
 
-  set isResizing(value: boolean) {
-    this._isResizing = value;
+  set isElementsDragging(value: boolean) {
+    this._isElementsResizing = value;
+  }
+
+  get isElementsResizing(): boolean {
+    return this._isElementsResizing;
+  }
+
+  set isElementsResizing(value: boolean) {
+    this._isElementsResizing = value;
   }
 
   constructor() {
@@ -179,7 +188,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.selection.hitElements(this.cursor.value);
     }
     // 判断鼠标是否按下
-    if (this.isPressDown) {
+    if (this._isPressDown) {
       this.calcPressMove(e);
       // 绘制模式
       if (this.checkDrawerActive()) {
@@ -191,17 +200,17 @@ export default class StageShield extends StageDrawerBase implements IStageShield
         // 如果不存在选中的元素
         if (this.store.selectedElements.length === 0) {
           // 计算选区
-          const rangePoints = CommonUtils.getBoxPoints([this.pressDownPosition, this.pressMovePosition]);
+          const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
           // 更新选区，命中组件
           this.selection.setRange(rangePoints);
-        } else if (this._isDragging || this.selection.checkSelectContainsHitting()) {
+        } else if (this._isElementsDragging || this.selection.checkSelectContainsHitting()) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
-            this._isDragging = true;
+            this._isElementsDragging = true;
             // 更新元素位置
             this.store.updateSelectedElementsMovement({
-              x: this.pressMoveStageWorldCoord.x - this.pressDownStageWorldCoord.x,
-              y: this.pressMoveStageWorldCoord.y - this.pressDownStageWorldCoord.y
+              x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+              y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
             })
             // 标记组件正在拖动
             this.store.updateElements(this.store.selectedElements, { isDragging: true });
@@ -232,7 +241,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   async handlePressDown(e: MouseEvent): Promise<void> {
-    this.isPressDown = true;
+    this._isPressDown = true;
     this.calcPressDown(e);
 
     // 1. 如果是绘制模式则直接清空
@@ -255,7 +264,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   async handlePressUp(e: MouseEvent): Promise<void> {
-    this.isPressDown = false;
+    this._isPressDown = false;
     this.calcPressUp(e);
     // 如果是绘制模式，则完成元素的绘制
     if (this.checkDrawerActive()) {
@@ -266,25 +275,25 @@ export default class StageShield extends StageDrawerBase implements IStageShield
         // 检查位移是否有效
         if (this.checkCursorPressUpALittle(e)) {
           // 如果当前是在拖动中
-          if (this._isDragging) {
+          if (this._isElementsDragging) {
             // 更新组件的坐标位置
             this.store.updateSelectedElementsMovement({
-              x: this.pressUpStageWorldCoord.x - this.pressDownStageWorldCoord.x,
-              y: this.pressUpStageWorldCoord.y - this.pressDownStageWorldCoord.y
+              x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+              y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
             })
             // 取消组件拖动状态
             this.store.updateElements(this.store.selectedElements, { isDragging: false });
             // 刷新组件坐标数据
             this.store.refreshElementsCoords(this.store.selectedElements);
             // 将拖动状态置为false
-            this._isDragging = false;
+            this._isElementsDragging = false;
           }
         } else {
           // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
           const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
           this.store.updateElements(this.store.selectedElements, { isSelected: false })
           if (topAElement) {
-            this.store.updateElement(topAElement.id, { isSelected: true });
+            this.store.updateElementById(topAElement.id, { isSelected: true });
           }
         }
       } else {
@@ -317,8 +326,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressDown(e: MouseEvent): void {
-    this.pressDownPosition = this.cursor.transform(e);
-    this.pressDownStageWorldCoord = this.calcWorldCoord(this.pressDownPosition);
+    this._pressDownPosition = this.cursor.transform(e);
+    this._pressDownStageWorldCoord = this.calcWorldCoord(this._pressDownPosition);
   }
 
   /**
@@ -327,8 +336,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressUp(e: MouseEvent): void {
-    this.pressUpPosition = this.cursor.transform(e);
-    this.pressUpStageWorldCoord = this.calcWorldCoord(this.pressUpPosition);
+    this._pressUpPosition = this.cursor.transform(e);
+    this._pressUpStageWorldCoord = this.calcWorldCoord(this._pressUpPosition);
   }
 
   /**
@@ -337,8 +346,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @param e 
    */
   calcPressMove(e: MouseEvent): void {
-    this.pressMovePosition = this.cursor.transform(e);
-    this.pressMoveStageWorldCoord = this.calcWorldCoord(this.pressMovePosition);
+    this._pressMovePosition = this.cursor.transform(e);
+    this._pressMoveStageWorldCoord = this.calcWorldCoord(this._pressMovePosition);
   }
 
   /**
@@ -348,8 +357,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @returns 
    */
   checkCursorPressMovedALittle(e: MouseEvent): boolean {
-    return Math.abs(this.pressMoveStageWorldCoord.x - this.pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
-      || Math.abs(this.pressMoveStageWorldCoord.y - this.pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
+    return Math.abs(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
+      || Math.abs(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
   }
 
   /**
@@ -359,8 +368,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * @returns 
    */
   checkCursorPressUpALittle(e: MouseEvent): boolean {
-    return Math.abs(this.pressUpStageWorldCoord.x - this.pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
-      || Math.abs(this.pressUpStageWorldCoord.y - this.pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
+    return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
+      || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
   }
 
   /**
@@ -386,8 +395,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
     this.updateCanvasSize(rect);
-    if (this.isFirstResizeRender) {
-      this.isFirstResizeRender = false;
+    if (this._isFirstResizeRender) {
+      this._isFirstResizeRender = false;
     }
   }
 
@@ -435,7 +444,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   creatingElementIfy(e: MouseEvent): IStageElement | null {
     if (this.checkCursorPressMovedALittle(e)) {
-      const element = this.store.creatingElement([this.pressDownStageWorldCoord, this.pressMoveStageWorldCoord]);
+      const element = this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
       if (element) {
         return element;
       }
