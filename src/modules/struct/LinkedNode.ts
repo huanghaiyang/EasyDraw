@@ -1,9 +1,9 @@
-export interface ILinkedNodeData { }
+export interface ILinkedNodeValue { }
 
 export interface ILinkedNode<T> {
   prev: ILinkedNode<T> | null;
   next: ILinkedNode<T> | null;
-  data: T;
+  value: T;
 
   get isHead(): boolean;
   get isTail(): boolean;
@@ -13,13 +13,13 @@ export interface ILinkedNode<T> {
   insertBefore(node: ILinkedNode<T>): void;
 }
 
-export default class LinkedNode<T extends ILinkedNodeData> implements ILinkedNode<ILinkedNodeData> {
+export default class LinkedNode<T extends ILinkedNodeValue> implements ILinkedNode<ILinkedNodeValue> {
   prev: ILinkedNode<T> | null = null;
   next: ILinkedNode<T> | null = null;
-  data: T;
+  value: T;
 
-  constructor(data: T) {
-    this.data = data;
+  constructor(value: T) {
+    this.value = value;
   }
 
   get isHead(): boolean {
@@ -31,7 +31,7 @@ export default class LinkedNode<T extends ILinkedNodeData> implements ILinkedNod
   }
 
   get isEmpty(): boolean {
-    return this.data === null;
+    return this.value === null;
   }
 
   /**

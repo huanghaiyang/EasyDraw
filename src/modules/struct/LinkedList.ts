@@ -1,4 +1,4 @@
-import { ILinkedNode, ILinkedNodeData } from "@/modules/struct/LinkedNode";
+import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import { EventEmitter } from "events";
 
 export interface ILinkedList<T> extends EventEmitter {
@@ -19,7 +19,7 @@ export interface ILinkedList<T> extends EventEmitter {
   getIndex(node: T): number;
 }
 
-export default class LinkedList<T extends ILinkedNodeData> extends EventEmitter implements ILinkedList<ILinkedNode<ILinkedNodeData>> {
+export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter implements ILinkedList<ILinkedNode<ILinkedNodeValue>> {
   nodes: Set<ILinkedNode<T>>;
   private _head: ILinkedNode<T>;
   private _tail: ILinkedNode<T>;

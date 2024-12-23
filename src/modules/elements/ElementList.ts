@@ -2,18 +2,29 @@ import LinkedList from "@/modules/struct/LinkedList";
 import { IElementList, IStageElement } from "@/types";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import { observable, reaction, runInAction } from "mobx";
+import { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
 
 export default class ElementList extends LinkedList<IStageElement> implements IElementList {
 
   constructor() {
     super();
     this.nodes = observable.set(this.nodes);
+    reaction(() => this.nodes.size, (size) => this.emit(ElementsSizeChangedName, size));
+  }
 
-    reaction(() => {
-      return this.nodes.size
-    }, (size) => {
-      this.emit("sizeChange", size);
-    });
+  /**
+   * 给节点添加属性监听
+   * 
+   * @param element 
+   */
+  private _addElementObserve(element: IStageElement): void {
+    ElementReactionPropNames.forEach(propName => {
+      reaction(() => {
+        return element[propName];
+      }, (value) => {
+        this.emit(`element${propName}Changed`, element, value);
+      });
+    })
   }
 
   /**
@@ -23,7 +34,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insert(node: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      node.data = observable(node.data);
+      this._addElementObserve(node.value);
       super.insert(node);
     })
   }
@@ -36,7 +47,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insertBefore(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      node.data = observable(node.data);
+      this._addElementObserve(node.value);
       super.insertBefore(node, target);
     })
   }
@@ -49,7 +60,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insertAfter(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      node.data = observable(node.data);
+      this._addElementObserve(node.value);
       super.insertAfter(node, target);
     })
   }
@@ -61,7 +72,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   prepend(node: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      node.data = observable(node.data);
+      this._addElementObserve(node.value);
       super.prepend(node);
     })
   }

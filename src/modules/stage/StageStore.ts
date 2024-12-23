@@ -11,7 +11,7 @@ import {
 } from "@/types";
 import { nanoid } from "nanoid";
 import LinkedNode from "@/modules/struct/LinkedNode";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils, { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
 import { cloneDeep, isArray } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
 
@@ -36,6 +36,14 @@ export default class StageStore implements IStageStore {
   constructor(shield: IStageShield) {
     this.shield = shield;
     this.elementList = new ElementList();
+    this.elementList.on(ElementsSizeChangedName, () => {
+      this.refreshElementCaches();
+    })
+    ElementReactionPropNames.forEach(propName => {
+      this.elementList.on(propName, (element, value) => {
+        console.log(propName, element, value);
+      })
+    })
   }
 
   // 当前创建并更新中的组件
@@ -72,8 +80,8 @@ export default class StageStore implements IStageStore {
   private _refreshStatusElements(): void {
     this._creatingElements = [];
     this.elementList.forEach(item => {
-      if (item.data.status === ElementStatus.creating) {
-        this._creatingElements.push(item.data);
+      if (item.value.status === ElementStatus.creating) {
+        this._creatingElements.push(item.value);
       }
     })
   }
@@ -83,10 +91,10 @@ export default class StageStore implements IStageStore {
     this._noneRenderedElements = [];
 
     this.elementList.forEach(item => {
-      if (item.data.isRendered) {
-        this._renderedElements.push(item.data);
+      if (item.value.isRendered) {
+        this._renderedElements.push(item.value);
       } else {
-        this._noneRenderedElements.push(item.data);
+        this._noneRenderedElements.push(item.value);
       }
     })
   }
@@ -119,10 +127,10 @@ export default class StageStore implements IStageStore {
     this._noneStageElements = [];
 
     this.elementList.forEach(item => {
-      if (item.data.isOnStage) {
-        this._stageElements.push(item.data);
+      if (item.value.isOnStage) {
+        this._stageElements.push(item.value);
       } else {
-        this._noneStageElements.push(item.data);
+        this._noneStageElements.push(item.value);
       }
     })
   }
@@ -156,11 +164,11 @@ export default class StageStore implements IStageStore {
   getIndexById(id: string): number {
     if (this.hasElement(id)) {
       this.elementList.forEachBreak((node, index) => {
-        if (node.data.id === id) {
+        if (node.value.id === id) {
           return index;
         }
       }, (node) => {
-        if (node.data.id === id) {
+        if (node.value.id === id) {
           return true;
         }
       })
@@ -176,7 +184,6 @@ export default class StageStore implements IStageStore {
   addElement(element: IStageElement): IStageElement {
     this.elementList.insert(new LinkedNode(element))
     this.elementMap.set(element.id, element);
-    this.refreshElementCaches();
     return element;
   }
 
@@ -188,9 +195,8 @@ export default class StageStore implements IStageStore {
   removeElement(id: string): IStageElement {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
-      this.elementList.removeBy(node => node.data.id === id);
+      this.elementList.removeBy(node => node.value.id === id);
       this.elementMap.delete(id);
-      this.refreshElementCaches();
       return element;
     }
   }
@@ -324,8 +330,8 @@ export default class StageStore implements IStageStore {
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[] {
     const result = [];
     this.elementList.forEach(node => {
-      if (predicate(node.data)) {
-        result.push(node.data);
+      if (predicate(node.value)) {
+        result.push(node.value);
       }
     })
     return result;
@@ -347,7 +353,7 @@ export default class StageStore implements IStageStore {
    */
   refreshAllElementStagePoints(): void {
     this.elementList.forEach(node => {
-      node.data.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      node.value.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
   }
 
@@ -452,7 +458,7 @@ export default class StageStore implements IStageStore {
    */
   forEach(callback: (element: IStageElement, index: number) => void): void {
     this.elementList.forEach((node, index) => {
-      callback(node.data, index);
+      callback(node.value, index);
     })
   }
 

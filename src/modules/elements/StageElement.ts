@@ -1,12 +1,12 @@
 import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
 import { nanoid } from "nanoid";
-import { ILinkedNodeData } from '@/modules/struct/LinkedNode';
+import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { every } from "lodash";
 
-export default class StageElement implements IStageElement, ILinkedNodeData {
+export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
   status: ElementStatus;

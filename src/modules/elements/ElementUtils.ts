@@ -4,6 +4,22 @@ import CommonUtils from "@/utils/CommonUtils";
 import StageElementRect from "@/modules/elements/StageElementRect";
 import StageElement from "@/modules/elements/StageElement";
 
+export const ElementReactionPropNames = [
+  'isSelected',
+  'isHitting',
+  'isOnStage',
+  'isRendered',
+  'isVisible',
+  'isLocked',
+  'isEditing',
+  'isDragging',
+  'isMoving',
+  'isResizing',
+  'isRotating'
+];
+
+export const ElementsSizeChangedName = 'elementsSizeChanged'
+
 export default class ElementUtils {
   static createElementTask(element: IStageElement, params?: any): IStageElementTask {
     let task: IStageElementTask;
