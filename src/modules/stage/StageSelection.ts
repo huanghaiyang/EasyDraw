@@ -43,7 +43,7 @@ export default class StageSelection implements IStageSelection {
       this.shield.store.rangeElements.forEach(element => {
         result.push({
           points: element.boxPoints,
-          type: StageDrawerMaskModelTypes.highlight
+          type: StageDrawerMaskModelTypes.selection
         });
       });
     }
