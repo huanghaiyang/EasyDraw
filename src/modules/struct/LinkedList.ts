@@ -11,7 +11,7 @@ export interface ILinkedList<T> extends EventEmitter {
   insertAfter(node: T, target: T): void;
   prepend(node: T): void;
   remove(node: T): void;
-  removeBy(predicate: (node: T) => boolean): void;
+  removeBy(predicate: (node: T) => boolean): T[];
   forEach(callback: (node: T, index: number) => void): void;
   forEachRevert(callback: (node: T, index: number) => void): void;
   forEachBreak(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
@@ -99,11 +99,15 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    * 
    * @param predicate 
    */
-  removeBy(predicate: (node: ILinkedNode<T>) => boolean): void {
-    const node = Array.from(this.nodes).find(node => predicate(node));
-    if (node) {
-      this.remove(node);
-    }
+  removeBy(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T>[] {
+    let result: ILinkedNode<T>[] = [];
+    Array.from(this.nodes).forEach(node => {
+      if (predicate(node)) {
+        this.remove(node);
+        result.push(node);
+      }
+    });
+    return result;
   }
 
   /**

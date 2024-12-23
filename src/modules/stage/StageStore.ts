@@ -8,8 +8,8 @@ import {
   IStageShield,
   IStageStore,
 } from "@/types";
-import LinkedNode from "@/modules/struct/LinkedNode";
-import ElementUtils, { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
+import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
+import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
 import { cloneDeep } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
 import SortedMap from "../struct/SortedMap";
@@ -40,7 +40,8 @@ export default class StageStore implements IStageStore {
   constructor(shield: IStageShield) {
     this.shield = shield;
     this._elementList = new ElementList();
-    this._reactionElementsSizeChanged();
+    this._reactionElementAdded();
+    this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
   }
 
@@ -80,18 +81,31 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 元素数量变化时，更新元素映射关系
+   * 组件新增
    */
-  private _reactionElementsSizeChanged(): void {
-    this._elementList.on(ElementsSizeChangedName, () => {
-      this._elementList.forEach(node => {
-        const element = node.value;
-        this._reactionElementPropsChanged(ElementReactionPropNames.isSelected, element, element.isSelected);
-        this._reactionElementPropsChanged(ElementReactionPropNames.isOnStage, element, element.isOnStage);
-        this._reactionElementPropsChanged(ElementReactionPropNames.isRendered, element, element.isRendered);
-        this._reactionElementPropsChanged(ElementReactionPropNames.isHitting, element, element.isHitting);
-        this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
-      })
+  private _reactionElementAdded(): void {
+    this._elementList.on(ElementListEventNames.added, (node: ILinkedNode<IStageElement>) => {
+      const element = node.value;
+      this._reactionElementPropsChanged(ElementReactionPropNames.isSelected, element, element.isSelected);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isOnStage, element, element.isOnStage);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isRendered, element, element.isRendered);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isHitting, element, element.isHitting);
+      this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
+    })
+  }
+
+  /**
+   * 组件删除
+   */
+  private _reactionElementRemoved(): void {
+    this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IStageElement>) => {
+      const element = node.value;
+      this._selectedElementsMap.delete(element.id);
+      this._stageElementsMap.delete(element.id);
+      this._noneStageElementsMap.delete(element.id);
+      this._renderedElementsMap.delete(element.id);
+      this._noneRenderedElementsMap.delete(element.id);
+      this._hittingElementsMap.delete(element.id);
     })
   }
 

@@ -19,7 +19,12 @@ export enum ElementReactionPropNames {
   status = 'status'
 }
 
-export const ElementsSizeChangedName = 'elementsSizeChanged'
+export enum ElementListEventNames {
+  added = 'added',
+  removed = 'removed',
+  updated = 'updated',
+  sizeChanged = 'sizeChanged'
+}
 
 export default class ElementUtils {
   static createElementTask(element: IStageElement, params?: any): IStageElementTask {

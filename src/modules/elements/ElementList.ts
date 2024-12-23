@@ -2,14 +2,14 @@ import LinkedList from "@/modules/struct/LinkedList";
 import { IElementList, IStageElement } from "@/types";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import { observable, reaction, runInAction } from "mobx";
-import { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
+import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
 
 export default class ElementList extends LinkedList<IStageElement> implements IElementList {
 
   constructor() {
     super();
     this.nodes = observable.set(this.nodes);
-    reaction(() => this.nodes.size, (size) => this.emit(ElementsSizeChangedName, size));
+    reaction(() => this.nodes.size, (size) => this.emit(ElementListEventNames.sizeChanged, size));
   }
 
   /**
@@ -34,6 +34,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
     runInAction(() => {
       this._addElementObserve(node);
       super.insert(node);
+      this.emit(ElementListEventNames.added, node);
     })
   }
 
@@ -47,6 +48,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
     runInAction(() => {
       this._addElementObserve(node);
       super.insertBefore(node, target);
+      this.emit(ElementListEventNames.added, node);
     })
   }
 
@@ -60,6 +62,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
     runInAction(() => {
       this._addElementObserve(node);
       super.insertAfter(node, target);
+      this.emit(ElementListEventNames.added, node);
     })
   }
 
@@ -72,6 +75,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
     runInAction(() => {
       this._addElementObserve(node);
       super.prepend(node);
+      this.emit(ElementListEventNames.added, node);
     })
   }
 
@@ -83,6 +87,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
   remove(node: ILinkedNode<IStageElement>): void {
     runInAction(() => {
       super.remove(node);
+      this.emit(ElementListEventNames.removed, node);
     })
   }
 
@@ -91,10 +96,15 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    *
    * @param predicate 
    */
-  removeBy(predicate: (node: ILinkedNode<IStageElement>) => boolean): void {
+  removeBy(predicate: (node: ILinkedNode<IStageElement>) => boolean): ILinkedNode<IStageElement>[] {
+    let result: ILinkedNode<IStageElement>[] = [];
     runInAction(() => {
-      super.removeBy(predicate);
+      result = super.removeBy(predicate);
+      result.forEach(node => {
+        this.emit(ElementListEventNames.removed, node);
+      });
     })
+    return result;
   }
 
 }
