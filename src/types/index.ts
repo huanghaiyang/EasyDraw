@@ -40,15 +40,6 @@ export type IDirectionPoint = IPoint & {
   direction: Directions;
 }
 
-// 舞台元素缓存刷新类型
-export enum StageStoreRefreshCacheTypes {
-  status = 1,
-  selected = 2,
-  hitting = 3,
-  rendered = 4,
-  onStage = 5,
-}
-
 // 舞台主画板
 export interface IStageShield extends IStageDrawer {
   cursor: IStageCursor;
@@ -76,7 +67,7 @@ export interface IStageStore {
   get hittingElements(): IStageElement[];
   get stageElements(): IStageElement[];
   get noneStageElements(): IStageElement[];
-  refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void;
+  refreshElementCaches(): void;
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
@@ -269,18 +260,33 @@ export interface IStageElement {
   get boxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
-  isSelected: boolean;
-  isVisible: boolean;
-  isEditing: boolean;
-  isLocked: boolean;
-  isMoving: boolean;
-  isResizing: boolean;
-  isRotating: boolean;
-  isDragging: boolean;
-  isRendered: boolean;
-  isHitting: boolean;
-  isOnStage: boolean;
-  status: ElementStatus;
+
+  get isSelected(): boolean;
+  get isVisible(): boolean;
+  get isEditing(): boolean;
+  get isLocked(): boolean;
+  get isMoving(): boolean;
+  get isResizing(): boolean;
+  get isRotating(): boolean;
+  get isDragging(): boolean;
+  get isRendered(): boolean;
+  get isHitting(): boolean;
+  get isOnStage(): boolean;
+  get status(): ElementStatus;
+
+  set isSelected(value: boolean);
+  set isVisible(value: boolean);
+  set isEditing(value: boolean);
+  set isLocked(value: boolean);
+  set isMoving(value: boolean);
+  set isResizing(value: boolean);
+  set isRotating(value: boolean);
+  set isDragging(value: boolean);
+  set isRendered(value: boolean);
+  set isHitting(value: boolean);
+  set isOnStage(value: boolean);
+  set status(value: ElementStatus);
+
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;

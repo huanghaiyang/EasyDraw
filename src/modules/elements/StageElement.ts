@@ -5,22 +5,192 @@ import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { every } from "lodash";
+import { action, makeObservable, observable, computed } from "mobx";
 
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
-  status: ElementStatus;
-  isSelected: boolean;
-  isVisible: boolean;
-  isEditing: boolean;
-  isLocked: boolean;
-  isMoving: boolean;
-  isResizing: boolean;
-  isRotating: boolean;
-  isDragging: boolean;
-  isRendered: boolean;
-  isHitting: boolean;
-  isOnStage: boolean;
+
+  @observable _status: ElementStatus = ElementStatus.initialed;
+  @observable _isSelected: boolean = false;
+  @observable _isVisible: boolean = true;
+  @observable _isEditing: boolean = false;
+  @observable _isLocked: boolean = false;
+  @observable _isMoving: boolean = false;
+  @observable _isResizing: boolean = false;
+  @observable _isRotating: boolean = false;
+  @observable _isDragging: boolean = false;
+  @observable _isRendered: boolean = false;
+  @observable _isHitting: boolean = false;
+  @observable _isOnStage: boolean = false;
+
+  @computed
+  get status(): ElementStatus {
+    return this._status;
+  }
+
+  set status(value: ElementStatus) {
+    this._setStatus(value);
+  }
+
+  @computed
+  get isSelected(): boolean {
+    return this._isSelected;
+  }
+
+  set isSelected(value: boolean) {
+    this._setIsSelected(value);
+  }
+
+  @computed
+  get isVisible(): boolean {
+    return this._isVisible;
+  }
+
+  set isVisible(value: boolean) {
+    this._setIsVisible(value);
+  }
+
+  @computed
+  get isEditing(): boolean {
+    return this._isEditing;
+  }
+
+  set isEditing(value: boolean) {
+    this._setIsEditing(value);
+  }
+
+  @computed
+  get isLocked(): boolean {
+    return this._isLocked;
+  }
+
+  set isLocked(value: boolean) {
+    this._setIsLocked(value);
+  }
+
+  @computed
+  get isMoving(): boolean {
+    return this._isMoving;
+  }
+
+  set isMoving(value: boolean) {
+    this._setIsMoving(value);
+  }
+
+  @computed
+  get isResizing(): boolean {
+    return this._isResizing;
+  }
+
+  set isResizing(value: boolean) {
+    this._setIsResizing(value);
+  }
+
+  @computed
+  get isRotating(): boolean {
+    return this._isRotating;
+  }
+
+  set isRotating(value: boolean) {
+    this._setIsRotating(value);
+  }
+
+  @computed
+  get isDragging(): boolean {
+    return this._isDragging;
+  }
+
+  set isDragging(value: boolean) {
+    this._setIsDragging(value);
+  }
+
+  @computed
+  get isRendered(): boolean {
+    return this._isRendered;
+  }
+
+  set isRendered(value: boolean) {
+    this._setIsRendered(value);
+  }
+
+  @computed
+  get isHitting(): boolean {
+    return this._isHitting;
+  }
+
+  set isHitting(value: boolean) {
+    this._setIsHitting(value);
+  }
+
+  @computed
+  get isOnStage(): boolean {
+    return this._isOnStage;
+  }
+
+  set isOnStage(value: boolean) {
+    this._setIsOnStage(value);
+  }
+
+  @action
+  private _setStatus(status: ElementStatus): void {
+    this._status = status;
+  }
+
+  @action
+  private _setIsSelected(value: boolean): void {
+    this._isSelected = value;
+  }
+
+  @action
+  private _setIsVisible(value: boolean): void {
+    this._isVisible = value;
+  }
+
+  @action
+  private _setIsEditing(value: boolean): void {
+    this._isEditing = value;
+  }
+
+  @action
+  private _setIsLocked(value: boolean): void {
+    this._isLocked = value;
+  }
+
+  @action
+  private _setIsMoving(value: boolean): void {
+    this._isMoving = value;
+  }
+
+  @action
+  private _setIsResizing(value: boolean): void {
+    this._isResizing = value;
+  }
+
+  @action
+  private _setIsRotating(value: boolean): void {
+    this._isRotating = value;
+  }
+
+  @action
+  private _setIsDragging(value: boolean): void {
+    this._isDragging = value;
+  }
+
+  @action
+  private _setIsRendered(value: boolean): void {
+    this._isRendered = value;
+  }
+
+  @action
+  private _setIsHitting(value: boolean): void {
+    this._isHitting = value;
+  }
+
+  @action
+  private _setIsOnStage(value: boolean): void {
+    this._isOnStage = value;
+  }
 
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
@@ -50,19 +220,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   constructor(model: ElementObject) {
     this.model = model;
-    this.status = ElementStatus.initialed;
     this.id = nanoid();
-    this.isSelected = false;
-    this.isVisible = true;
-    this.isEditing = false;
-    this.isLocked = false;
-    this.isMoving = false;
-    this.isResizing = false;
-    this.isRotating = false;
-    this.isDragging = false;
-    this.isRendered = false;
-    this.isHitting = false;
-    this.isOnStage = false;
+    makeObservable(this);
   }
 
   /**

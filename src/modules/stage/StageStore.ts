@@ -7,12 +7,11 @@ import {
   IStageElement,
   IStageShield,
   IStageStore,
-  StageStoreRefreshCacheTypes
 } from "@/types";
 import { nanoid } from "nanoid";
 import LinkedNode from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
-import { cloneDeep, isArray } from "lodash";
+import { cloneDeep } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
 
 export default class StageStore implements IStageStore {
@@ -35,13 +34,32 @@ export default class StageStore implements IStageStore {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+
     this.elementList = new ElementList();
     this.elementList.on(ElementsSizeChangedName, () => {
       this.refreshElementCaches();
     })
-    ElementReactionPropNames.forEach(propName => {
+    Object.keys(ElementReactionPropNames).forEach(propName => {
       this.elementList.on(propName, (element, value) => {
-        console.log(propName, element, value);
+        switch (propName) {
+          case ElementReactionPropNames.isSelected:
+            this._refreshElementsCaches([ElementReactionPropNames.isSelected]);
+            break;
+          case ElementReactionPropNames.isOnStage:
+            this._refreshElementsCaches([ElementReactionPropNames.isOnStage]);
+            break;
+          case ElementReactionPropNames.isRendered:
+            this._refreshElementsCaches([ElementReactionPropNames.isRendered]);
+            break;
+          case ElementReactionPropNames.isHitting:
+            this._refreshElementsCaches([ElementReactionPropNames.isHitting]);
+            break;
+          case ElementReactionPropNames.status:
+            this._refreshElementsCaches([ElementReactionPropNames.status]);
+            break;
+          default:
+            break;
+        }
       })
     })
   }
@@ -77,35 +95,24 @@ export default class StageStore implements IStageStore {
     return this._noneStageElements;
   }
 
-  private _refreshStatusElements(): void {
-    this._creatingElements = [];
-    this.elementList.forEach(item => {
-      if (item.value.status === ElementStatus.creating) {
-        this._creatingElements.push(item.value);
-      }
-    })
+  private _refreshStatusElements(element: IStageElement): void {
+    if (element.status === ElementStatus.creating) {
+      this._creatingElements.push(element);
+    }
   }
 
-  private _refreshRenderedElements(): void {
-    this._renderedElements = [];
-    this._noneRenderedElements = [];
-
-    this.elementList.forEach(item => {
-      if (item.value.isRendered) {
-        this._renderedElements.push(item.value);
-      } else {
-        this._noneRenderedElements.push(item.value);
-      }
-    })
+  private _refreshRenderedElements(element: IStageElement): void {
+    if (element.isRendered) {
+      this._renderedElements.push(element);
+    } else {
+      this._noneRenderedElements.push(element);
+    }
   }
 
-  private _refreshSelectedElements(): void {
-    this._selectedElements = [];
-    this.renderedElements.forEach(item => {
-      if (item.isSelected) {
-        this._selectedElements.push(item);
-      }
-    })
+  private _refreshSelectedElements(element: IStageElement): void {
+    if (element.isSelected) {
+      this._selectedElements.push(element);
+    }
     if (this._selectedElements.length === 0) {
       if (this.currentCreatingElementId) {
         this._selectedElements.push(this.getElementById(this.currentCreatingElementId));
@@ -113,26 +120,18 @@ export default class StageStore implements IStageStore {
     }
   }
 
-  private _refreshHittingElements(): void {
-    this._hittingElements = [];
-    this.renderedElements.forEach(item => {
-      if (item.isHitting) {
-        this._hittingElements.push(item);
-      }
-    })
+  private _refreshHittingElements(element: IStageElement): void {
+    if (element.isHitting) {
+      this._hittingElements.push(element);
+    }
   }
 
-  private _refreshStageElements(): void {
-    this._stageElements = [];
-    this._noneStageElements = [];
-
-    this.elementList.forEach(item => {
-      if (item.value.isOnStage) {
-        this._stageElements.push(item.value);
-      } else {
-        this._noneStageElements.push(item.value);
-      }
-    })
+  private _refreshStageElements(element: IStageElement): void {
+    if (element.isOnStage) {
+      this._stageElements.push(element);
+    } else {
+      this._noneStageElements.push(element);
+    }
   }
 
   /**
@@ -213,7 +212,6 @@ export default class StageStore implements IStageStore {
     if (this.hasElement(id)) {
       const element = this.elementMap.get(id);
       Object.assign(element, props);
-      this.refreshElementCaches(this._getRefreshCacheTypes(props));
       return element;
     }
   }
@@ -357,79 +355,56 @@ export default class StageStore implements IStageStore {
     })
   }
 
-  /**
-   * 刷新元素列表
-   * 
-   * @param cacheTypes
-   */
-  refreshElementCaches(cacheTypes?: StageStoreRefreshCacheTypes[]): void {
-    if (!cacheTypes) {
-      this._refreshStatusElements();
-      this._refreshRenderedElements();
-      this._refreshSelectedElements();
-      this._refreshHittingElements();
-      this._refreshStageElements();
-    } else {
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.status)) {
-        this._refreshStatusElements();
-      }
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.rendered)) {
-        this._refreshRenderedElements();
-      }
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.selected)) {
-        this._refreshSelectedElements();
-      }
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.hitting)) {
-        this._refreshHittingElements();
-      }
-      if (cacheTypes.includes(StageStoreRefreshCacheTypes.onStage)) {
-        this._refreshStageElements();
-      }
+  private _refreshElementsCaches(props: ElementReactionPropNames[]): void {
+    if (props.includes(ElementReactionPropNames.isOnStage)) {
+      this._stageElements = [];
+      this._noneStageElements = [];
     }
+    if (props.includes(ElementReactionPropNames.isRendered)) {
+      this._renderedElements = [];
+      this._noneRenderedElements = [];
+    }
+    if (props.includes(ElementReactionPropNames.isSelected)) {
+      this._selectedElements = [];
+    }
+    if (props.includes(ElementReactionPropNames.isHitting)) {
+      this._hittingElements = [];
+    }
+    if (props.includes(ElementReactionPropNames.status)) {
+      this._creatingElements = [];
+    }
+
+    this.elementList.forEach(node => {
+      const element = node.value;
+      if (props.includes(ElementReactionPropNames.isOnStage)) {
+        this._refreshStageElements(element)
+      }
+      if (props.includes(ElementReactionPropNames.status)) {
+        this._refreshStatusElements(element);
+      }
+      if (props.includes(ElementReactionPropNames.isRendered)) {
+        this._refreshRenderedElements(element);
+      }
+      if (props.includes(ElementReactionPropNames.isHitting)) {
+        this._refreshHittingElements(element);
+      }
+      if (props.includes(ElementReactionPropNames.isSelected)) {
+        this._refreshSelectedElements(element);
+      }
+    })
   }
 
   /**
-   * 获取刷新缓存类型
-   * 
-   * @param props 
-   * @returns 
+   * 刷新元素列表
    */
-  private _getRefreshCacheTypes(element: Partial<IStageElement> | string[]): StageStoreRefreshCacheTypes[] {
-    const result: StageStoreRefreshCacheTypes[] = [];
-    if (isArray(element)) {
-      if (element.includes('status')) {
-        result.push(StageStoreRefreshCacheTypes.status);
-      }
-      if (element.includes('isSelected')) {
-        result.push(StageStoreRefreshCacheTypes.selected);
-      }
-      if (element.includes('isRendered')) {
-        result.push(StageStoreRefreshCacheTypes.rendered);
-      }
-      if (element.includes('isHitting')) {
-        result.push(StageStoreRefreshCacheTypes.hitting);
-      }
-      if (element.includes('isOnStage')) {
-        result.push(StageStoreRefreshCacheTypes.onStage);
-      }
-    } else {
-      if (element.hasOwnProperty('status')) {
-        result.push(StageStoreRefreshCacheTypes.status);
-      }
-      if (element.hasOwnProperty('isSelected')) {
-        result.push(StageStoreRefreshCacheTypes.selected);
-      }
-      if (element.hasOwnProperty('isRendered')) {
-        result.push(StageStoreRefreshCacheTypes.rendered);
-      }
-      if (element.hasOwnProperty('isHitting')) {
-        result.push(StageStoreRefreshCacheTypes.hitting);
-      }
-      if (element.hasOwnProperty('isOnStage')) {
-        result.push(StageStoreRefreshCacheTypes.onStage);
-      }
-    }
-    return result;
+  refreshElementCaches(): void {
+    this._refreshElementsCaches([
+      ElementReactionPropNames.status,
+      ElementReactionPropNames.isOnStage,
+      ElementReactionPropNames.isRendered,
+      ElementReactionPropNames.isSelected,
+      ElementReactionPropNames.isHitting,
+    ])
   }
 
   /**

@@ -4,19 +4,20 @@ import CommonUtils from "@/utils/CommonUtils";
 import StageElementRect from "@/modules/elements/StageElementRect";
 import StageElement from "@/modules/elements/StageElement";
 
-export const ElementReactionPropNames = [
-  'isSelected',
-  'isHitting',
-  'isOnStage',
-  'isRendered',
-  'isVisible',
-  'isLocked',
-  'isEditing',
-  'isDragging',
-  'isMoving',
-  'isResizing',
-  'isRotating'
-];
+export enum ElementReactionPropNames {
+  isSelected = 'isSelected',
+  isVisible = 'isVisible',
+  isLocked = 'isLocked',
+  isEditing = 'isEditing',
+  isMoving = 'isMoving',
+  isResizing = 'isResizing',
+  isRotating = 'isRotating',
+  isDragging = 'isDragging',
+  isRendered = 'isRendered',
+  isHitting = 'isHitting',
+  isOnStage = 'isOnStage',
+  status = 'status'
+}
 
 export const ElementsSizeChangedName = 'elementsSizeChanged'
 

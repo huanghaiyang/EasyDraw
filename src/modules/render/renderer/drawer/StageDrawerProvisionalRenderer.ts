@@ -7,6 +7,7 @@ import ElementUtils from "@/modules/elements/ElementUtils";
 export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRenderer<IStageDrawerProvisional> implements IStageDrawerProvisionalRenderer {
 
   private _latestElementRendered: boolean;
+  private _latestClearRendered: boolean;
 
   /**
    * 重绘
@@ -23,9 +24,13 @@ export default class StageDrawerProvisionalRenderer extends StageDrawerBaseRende
       });
       this._latestElementRendered = true;
     }
-    if (!cargo.isEmpty() || (cargo.isEmpty() && this._latestElementRendered)) {
+    this._latestClearRendered = (cargo.isEmpty() && this._latestElementRendered)
+    if (!cargo.isEmpty() || this._latestClearRendered) {
       cargo.prepend(new StageElementTaskClear(null, this.renderParams));
       await this.renderCargo(cargo);
+      if (this._latestClearRendered) {
+        this._latestClearRendered = false;
+      }
     } else {
       cargo = null;
     }

@@ -17,14 +17,12 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    * 
    * @param element 
    */
-  private _addElementObserve(element: IStageElement): void {
-    ElementReactionPropNames.forEach(propName => {
-      reaction(() => {
-        return element[propName];
-      }, (value) => {
-        this.emit(`element${propName}Changed`, element, value);
+  private _addElementObserve(node: ILinkedNode<IStageElement>): void {
+    Object.keys(ElementReactionPropNames).forEach(propName => {
+      reaction(() => node.value[propName], () => {
+        this.emit(propName, node.value, node.value[propName]);
       });
-    })
+    });
   }
 
   /**
@@ -34,7 +32,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insert(node: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      this._addElementObserve(node.value);
+      this._addElementObserve(node);
       super.insert(node);
     })
   }
@@ -47,7 +45,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insertBefore(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      this._addElementObserve(node.value);
+      this._addElementObserve(node);
       super.insertBefore(node, target);
     })
   }
@@ -60,7 +58,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   insertAfter(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      this._addElementObserve(node.value);
+      this._addElementObserve(node);
       super.insertAfter(node, target);
     })
   }
@@ -72,7 +70,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    */
   prepend(node: ILinkedNode<IStageElement>): void {
     runInAction(() => {
-      this._addElementObserve(node.value);
+      this._addElementObserve(node);
       super.prepend(node);
     })
   }
