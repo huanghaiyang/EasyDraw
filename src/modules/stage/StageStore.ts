@@ -66,7 +66,11 @@ export default class StageStore implements IStageStore {
 
   // 当前创建并更新中的组件
   get creatingElements(): IStageElement[] {
-    return this._creatingElements;
+    const element = this.elementMap.get(this.currentCreatingElementId);
+    if (element) {
+      return [element];
+    }
+    return [];
   }
 
   // 已经渲染到舞台的组件
@@ -96,9 +100,7 @@ export default class StageStore implements IStageStore {
   }
 
   private _refreshStatusElements(element: IStageElement): void {
-    if (element.status === ElementStatus.creating) {
-      this._creatingElements.push(element);
-    }
+    // TODO
   }
 
   private _refreshRenderedElements(element: IStageElement): void {
@@ -371,7 +373,7 @@ export default class StageStore implements IStageStore {
       this._hittingElements = [];
     }
     if (props.includes(ElementReactionPropNames.status)) {
-      this._creatingElements = [];
+      // TODO
     }
 
     this.elementList.forEach(node => {
