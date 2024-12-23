@@ -185,7 +185,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
     } else {
       this.setCursorStyle('default');
-      this.selection.hitElements(this.cursor.value);
+      this.selection.checkTargetElements(this.cursor.value);
     }
     // 判断鼠标是否按下
     if (this._isPressDown) {
@@ -203,7 +203,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
           const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
           // 更新选区，命中组件
           this.selection.setRange(rangePoints);
-        } else if (this._isElementsDragging || this.selection.checkSelectContainsHitting()) {
+        } else if (this._isElementsDragging || this.selection.checkSelectContainsTarget()) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
@@ -247,11 +247,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     // 1. 如果是绘制模式则直接清空
     // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
     // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
-    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsHitting()))) {
+    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态
-      this.selection.changeHittingElementsToSelect();
+      this.selection.selectTarget();
       // 清空选区
       this.selection.setRange([]);
     }

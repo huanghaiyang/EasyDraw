@@ -20,7 +20,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isRotating: boolean = false;
   @observable _isDragging: boolean = false;
   @observable _isRendered: boolean = false;
-  @observable _isHitting: boolean = false;
+  @observable _isTarget: boolean = false;
+  @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
   @computed
@@ -114,12 +115,21 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   @computed
-  get isHitting(): boolean {
-    return this._isHitting;
+  get isTarget(): boolean {
+    return this._isTarget;
   }
 
-  set isHitting(value: boolean) {
-    this._setIsHitting(value);
+  set isTarget(value: boolean) {
+    this._setIsTarget(value);
+  }
+
+  @computed
+  get isInRange(): boolean {
+    return this._isInRange;
+  }
+
+  set isInRange(value: boolean) {
+    this._setIsInRange(value);
   }
 
   @computed
@@ -182,13 +192,18 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   @action
-  private _setIsHitting(value: boolean): void {
-    this._isHitting = value;
+  private _setIsTarget(value: boolean): void {
+    this._isTarget = value;
   }
 
   @action
   private _setIsOnStage(value: boolean): void {
     this._isOnStage = value;
+  }
+
+  @action
+  private _setIsInRange(value: boolean): void {
+    this._isInRange = value;
   }
 
   protected _points: IPoint[];

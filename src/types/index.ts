@@ -64,9 +64,10 @@ export interface IStageStore {
   get renderedElements(): IStageElement[];
   get noneRenderedElements(): IStageElement[];
   get selectedElements(): IStageElement[];
-  get hittingElements(): IStageElement[];
+  get targetElements(): IStageElement[];
   get stageElements(): IStageElement[];
   get noneStageElements(): IStageElement[];
+  get rangeElements(): IStageElement[];
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
@@ -128,7 +129,7 @@ export enum StageDrawerMaskModelTypes {
   selection = 0,
   selectionHandler = 1,
   cursor = 2,
-  hitting = 3,
+  highlight = 3,
 }
 
 // 方位
@@ -213,12 +214,12 @@ export interface IStageSelection {
   setRange(points: IPoint[]): void;
   selectRange(): void;
   getSelectionModels(): IStageDrawerMaskTaskSelectionModel[];
-  changeHittingElementsToSelect(): void;
+  selectTarget(): void;
   clearSelects(): void;
-  hitElements(point: IPoint): void;
+  checkTargetElements(point: IPoint): void;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IStageElement;
-  checkSelectContainsHitting(): boolean;
+  checkSelectContainsTarget(): boolean;
 }
 
 // 舞台容器
@@ -269,8 +270,9 @@ export interface IStageElement {
   get isRotating(): boolean;
   get isDragging(): boolean;
   get isRendered(): boolean;
-  get isHitting(): boolean;
+  get isTarget(): boolean;
   get isOnStage(): boolean;
+  get isInRange(): boolean;
   get status(): ElementStatus;
 
   set isSelected(value: boolean);
@@ -282,8 +284,9 @@ export interface IStageElement {
   set isRotating(value: boolean);
   set isDragging(value: boolean);
   set isRendered(value: boolean);
-  set isHitting(value: boolean);
+  set isTarget(value: boolean);
   set isOnStage(value: boolean);
+  set isInRange(value: boolean);
   set status(value: ElementStatus);
 
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;

@@ -31,11 +31,13 @@ export default class StageStore implements IStageStore {
   // 被选中的组件映射关系，加快查询
   private _selectedElementsMap = new SortedMap<string, IStageElement>();
   // 命中的组件映射关系，加快查询
-  private _hittingElementsMap = new SortedMap<string, IStageElement>();
+  private _targetElementsMap = new SortedMap<string, IStageElement>();
   // 舞台元素映射关系，加快查询
   private _stageElementsMap = new SortedMap<string, IStageElement>();
   // 未在舞台的元素映射关系，加快查询
   private _noneStageElementsMap = new SortedMap<string, IStageElement>();
+  // 选区元素映射关系，加快查询
+  private _rangeElementsMap = new SortedMap<string, IStageElement>();
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -68,8 +70,8 @@ export default class StageStore implements IStageStore {
     return this._selectedElementsMap.valuesArray();
   }
 
-  get hittingElements(): IStageElement[] {
-    return this._hittingElementsMap.valuesArray();
+  get targetElements(): IStageElement[] {
+    return this._targetElementsMap.valuesArray();
   }
 
   get stageElements(): IStageElement[] {
@@ -78,6 +80,10 @@ export default class StageStore implements IStageStore {
 
   get noneStageElements(): IStageElement[] {
     return this._noneStageElementsMap.valuesArray();
+  }
+
+  get rangeElements(): IStageElement[] {
+    return this._rangeElementsMap.valuesArray();
   }
 
   /**
@@ -89,8 +95,9 @@ export default class StageStore implements IStageStore {
       this._reactionElementPropsChanged(ElementReactionPropNames.isSelected, element, element.isSelected);
       this._reactionElementPropsChanged(ElementReactionPropNames.isOnStage, element, element.isOnStage);
       this._reactionElementPropsChanged(ElementReactionPropNames.isRendered, element, element.isRendered);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isHitting, element, element.isHitting);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isTarget, element, element.isTarget);
       this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isInRange, element, element.isInRange);
     })
   }
 
@@ -105,7 +112,8 @@ export default class StageStore implements IStageStore {
       this._noneStageElementsMap.delete(element.id);
       this._renderedElementsMap.delete(element.id);
       this._noneRenderedElementsMap.delete(element.id);
-      this._hittingElementsMap.delete(element.id);
+      this._targetElementsMap.delete(element.id);
+      this._rangeElementsMap.delete(element.id);
     })
   }
 
@@ -155,13 +163,23 @@ export default class StageStore implements IStageStore {
           this._renderedElementsMap.delete(element.id);
           this._noneRenderedElementsMap.set(element.id, element);
         }
+        break;
       }
-      case ElementReactionPropNames.isHitting: {
+      case ElementReactionPropNames.isTarget: {
         if (value) {
-          this._hittingElementsMap.set(element.id, element);
+          this._targetElementsMap.set(element.id, element);
         } else {
-          this._hittingElementsMap.delete(element.id);
+          this._targetElementsMap.delete(element.id);
         }
+        break;
+      }
+      case ElementReactionPropNames.isInRange: {
+        if (value) {
+          this._rangeElementsMap.set(element.id, element);
+        } else {
+          this._rangeElementsMap.delete(element.id);
+        }
+        break;
       }
       case ElementReactionPropNames.status: {
         if (this._currentCreatingElementId && value === ElementStatus.creating) {

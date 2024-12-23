@@ -2,6 +2,10 @@ export default class SortedMap<K, V> {
   private map: Map<K, V>;
   private keys: K[];
 
+  get size(): number {
+    return this.map.size;
+  }
+
   constructor() {
     this.map = new Map<K, V>();
     this.keys = [];

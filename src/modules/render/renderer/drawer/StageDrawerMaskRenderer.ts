@@ -27,7 +27,8 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     let cargo = new RenderTaskCargo([]);
     let hasSelection = false;
     let hasCursor = false;
-    let hasHitting = false;
+    let hasTarget = false;
+    let hasRange = false;
 
     // 绘制选区
     const selectionTasks = this.createMaskSelectionTasks();
@@ -42,8 +43,11 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     }
 
     // 绘制命中选区
-    if (this.drawer.shield.store.hittingElements.length) {
-      hasHitting = true;
+    if (this.drawer.shield.store.rangeElements.length) {
+      hasRange = true;
+    }
+    if (this.drawer.shield.store.targetElements.length) {
+      hasTarget = true;
     }
 
     // 绘制光标
@@ -61,7 +65,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       await this.renderCargo(cargo);
     } else {
       // 解决光标移出舞台出现残留的问题
-      if (this._lastCursorRendered && !hasSelection && !hasCursor && !hasHitting) {
+      if (this._lastCursorRendered && !hasSelection && !hasCursor && !hasTarget && !hasRange) {
         cargo.add(new StageDrawerMaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
       } else {
