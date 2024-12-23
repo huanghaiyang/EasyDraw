@@ -8,11 +8,12 @@ import {
   IStageShield,
   IStageStore,
 } from "@/types";
-import { nanoid } from "nanoid";
 import LinkedNode from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementReactionPropNames, ElementsSizeChangedName } from "@/modules/elements/ElementUtils";
 import { cloneDeep } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
+import SortedMap from "../struct/SortedMap";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -22,45 +23,25 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
-  private _elementMap = new Map<string, IStageElement>();
-
-  private _renderedElements: IStageElement[] = [];
-  private _noneRenderedElements: IStageElement[] = [];
-  private _selectedElements: IStageElement[] = [];
-  private _hittingElements: IStageElement[] = [];
-  private _stageElements: IStageElement[] = [];
-  private _noneStageElements: IStageElement[] = [];
+  private _elementMap = new SortedMap<string, IStageElement>();
+  // 已渲染的组件映射关系
+  private _renderedElementsMap = new SortedMap<string, IStageElement>();
+  // 未渲染的组件映射关系
+  private _noneRenderedElementsMap = new SortedMap<string, IStageElement>();
+  // 被选中的组件映射关系，加快查询
+  private _selectedElementsMap = new SortedMap<string, IStageElement>();
+  // 命中的组件映射关系，加快查询
+  private _hittingElementsMap = new SortedMap<string, IStageElement>();
+  // 舞台元素映射关系，加快查询
+  private _stageElementsMap = new SortedMap<string, IStageElement>();
+  // 未在舞台的元素映射关系，加快查询
+  private _noneStageElementsMap = new SortedMap<string, IStageElement>();
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-
     this._elementList = new ElementList();
-    this._elementList.on(ElementsSizeChangedName, () => {
-      this.refreshElementCaches();
-    })
-    Object.keys(ElementReactionPropNames).forEach(propName => {
-      this._elementList.on(propName, (element, value) => {
-        switch (propName) {
-          case ElementReactionPropNames.isSelected:
-            this._refreshElementsCaches([ElementReactionPropNames.isSelected]);
-            break;
-          case ElementReactionPropNames.isOnStage:
-            this._refreshElementsCaches([ElementReactionPropNames.isOnStage]);
-            break;
-          case ElementReactionPropNames.isRendered:
-            this._refreshElementsCaches([ElementReactionPropNames.isRendered]);
-            break;
-          case ElementReactionPropNames.isHitting:
-            this._refreshElementsCaches([ElementReactionPropNames.isHitting]);
-            break;
-          case ElementReactionPropNames.status:
-            this._refreshElementsCaches([ElementReactionPropNames.status]);
-            break;
-          default:
-            break;
-        }
-      })
-    })
+    this._reactionElementsSizeChanged();
+    this._reactionElementsPropsChanged();
   }
 
   // 当前创建并更新中的组件
@@ -74,64 +55,109 @@ export default class StageStore implements IStageStore {
 
   // 已经渲染到舞台的组件
   get renderedElements(): IStageElement[] {
-    return this._renderedElements;
+    return this._renderedElementsMap.valuesArray();
   }
 
   // 没有渲染到舞台的组件
   get noneRenderedElements(): IStageElement[] {
-    return this._noneRenderedElements;
+    return this._noneRenderedElementsMap.valuesArray();
   }
 
   get selectedElements(): IStageElement[] {
-    return this._selectedElements;
+    return this._selectedElementsMap.valuesArray();
   }
 
   get hittingElements(): IStageElement[] {
-    return this._hittingElements;
+    return this._hittingElementsMap.valuesArray();
   }
 
   get stageElements(): IStageElement[] {
-    return this._stageElements;
+    return this._stageElementsMap.valuesArray();
   }
 
   get noneStageElements(): IStageElement[] {
-    return this._noneStageElements;
+    return this._noneStageElementsMap.valuesArray();
   }
 
-  private _refreshStatusElements(element: IStageElement): void {
-    // TODO
+  /**
+   * 元素数量变化时，更新元素映射关系
+   */
+  private _reactionElementsSizeChanged(): void {
+    this._elementList.on(ElementsSizeChangedName, () => {
+      this._elementList.forEach(node => {
+        const element = node.value;
+        this._reactionElementPropsChanged(ElementReactionPropNames.isSelected, element, element.isSelected);
+        this._reactionElementPropsChanged(ElementReactionPropNames.isOnStage, element, element.isOnStage);
+        this._reactionElementPropsChanged(ElementReactionPropNames.isRendered, element, element.isRendered);
+        this._reactionElementPropsChanged(ElementReactionPropNames.isHitting, element, element.isHitting);
+        this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
+      })
+    })
   }
 
-  private _refreshRenderedElements(element: IStageElement): void {
-    if (element.isRendered) {
-      this._renderedElements.push(element);
-    } else {
-      this._noneRenderedElements.push(element);
-    }
+  /**
+   * 元素属性变化时，更新元素映射关系
+   */
+  private _reactionElementsPropsChanged(): void {
+    Object.keys(ElementReactionPropNames).forEach(propName => {
+      this._elementList.on(propName, (element, value) => {
+        this._reactionElementPropsChanged(propName, element, value);
+      })
+    })
   }
 
-  private _refreshSelectedElements(element: IStageElement): void {
-    if (element.isSelected) {
-      this._selectedElements.push(element);
-    }
-    if (this._selectedElements.length === 0) {
-      if (this._currentCreatingElementId) {
-        this._selectedElements.push(this.getElementById(this._currentCreatingElementId));
+  /**
+   * 元素属性发生变化时，更新元素映射关系
+   * 
+   * @param propName 
+   * @param element 
+   * @param value 
+   */
+  private _reactionElementPropsChanged(propName: string, element: IStageElement, value: boolean | ElementStatus): void {
+    switch (propName) {
+      case ElementReactionPropNames.isSelected: {
+        if (value) {
+          this._selectedElementsMap.set(element.id, element);
+        } else {
+          this._selectedElementsMap.delete(element.id);
+        }
+        break;
       }
-    }
-  }
-
-  private _refreshHittingElements(element: IStageElement): void {
-    if (element.isHitting) {
-      this._hittingElements.push(element);
-    }
-  }
-
-  private _refreshStageElements(element: IStageElement): void {
-    if (element.isOnStage) {
-      this._stageElements.push(element);
-    } else {
-      this._noneStageElements.push(element);
+      case ElementReactionPropNames.isOnStage: {
+        if (value) {
+          this._stageElementsMap.set(element.id, element);
+          this._noneStageElementsMap.delete(element.id);
+        } else {
+          this._stageElementsMap.delete(element.id);
+          this._noneStageElementsMap.set(element.id, element);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isRendered: {
+        if (value) {
+          this._renderedElementsMap.set(element.id, element);
+          this._noneRenderedElementsMap.delete(element.id);
+        } else {
+          this._renderedElementsMap.delete(element.id);
+          this._noneRenderedElementsMap.set(element.id, element);
+        }
+      }
+      case ElementReactionPropNames.isHitting: {
+        if (value) {
+          this._hittingElementsMap.set(element.id, element);
+        } else {
+          this._hittingElementsMap.delete(element.id);
+        }
+      }
+      case ElementReactionPropNames.status: {
+        if (this._currentCreatingElementId && value === ElementStatus.creating) {
+          this._selectedElementsMap.set(element.id, element);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 
@@ -256,7 +282,7 @@ export default class StageStore implements IStageStore {
    */
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
     const model = {
-      id: nanoid(),
+      id: CommonUtils.getRandomDateId(),
       type,
       coords,
       originalCoords: cloneDeep(coords),
@@ -354,58 +380,6 @@ export default class StageStore implements IStageStore {
     this._elementList.forEach(node => {
       node.value.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
-  }
-
-  private _refreshElementsCaches(props: ElementReactionPropNames[]): void {
-    if (props.includes(ElementReactionPropNames.isOnStage)) {
-      this._stageElements = [];
-      this._noneStageElements = [];
-    }
-    if (props.includes(ElementReactionPropNames.isRendered)) {
-      this._renderedElements = [];
-      this._noneRenderedElements = [];
-    }
-    if (props.includes(ElementReactionPropNames.isSelected)) {
-      this._selectedElements = [];
-    }
-    if (props.includes(ElementReactionPropNames.isHitting)) {
-      this._hittingElements = [];
-    }
-    if (props.includes(ElementReactionPropNames.status)) {
-      // TODO
-    }
-
-    this._elementList.forEach(node => {
-      const element = node.value;
-      if (props.includes(ElementReactionPropNames.isOnStage)) {
-        this._refreshStageElements(element)
-      }
-      if (props.includes(ElementReactionPropNames.status)) {
-        this._refreshStatusElements(element);
-      }
-      if (props.includes(ElementReactionPropNames.isRendered)) {
-        this._refreshRenderedElements(element);
-      }
-      if (props.includes(ElementReactionPropNames.isHitting)) {
-        this._refreshHittingElements(element);
-      }
-      if (props.includes(ElementReactionPropNames.isSelected)) {
-        this._refreshSelectedElements(element);
-      }
-    })
-  }
-
-  /**
-   * 刷新元素列表
-   */
-  refreshElementCaches(): void {
-    this._refreshElementsCaches([
-      ElementReactionPropNames.status,
-      ElementReactionPropNames.isOnStage,
-      ElementReactionPropNames.isRendered,
-      ElementReactionPropNames.isSelected,
-      ElementReactionPropNames.isHitting,
-    ])
   }
 
   /**

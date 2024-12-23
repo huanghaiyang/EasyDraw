@@ -1,5 +1,4 @@
 import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
-import { nanoid } from "nanoid";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -220,7 +219,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   constructor(model: ElementObject) {
     this.model = model;
-    this.id = nanoid();
+    this.id = CommonUtils.getRandomDateId();
     makeObservable(this);
   }
 

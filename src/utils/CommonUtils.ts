@@ -1,4 +1,5 @@
 import { IPoint } from "@/types";
+import { nanoid } from "nanoid";
 
 export default class CommonUtils {
 
@@ -26,5 +27,14 @@ export default class CommonUtils {
       { x: maxX, y: maxY },
       { x: minX, y: maxY },
     ];
+  }
+
+  /**
+   * 获取随机id, 以时间戳加随机字符串组合
+   * 
+   * @returns 
+   */
+  static getRandomDateId() {
+    return `${+ new Date()}_${nanoid(8)}`
   }
 }

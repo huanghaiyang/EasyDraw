@@ -53,7 +53,7 @@ export default class SortedMap<K, V> {
 
   private compareKeys(a: K, b: K): number {
     if (typeof a === 'string' && typeof b === 'string') {
-      return a.localeCompare(b);
+      return a.localeCompare(b, 'en', { numeric: true });
     } else if (typeof a === 'number' && typeof b === 'number') {
       return a - b;
     } else {

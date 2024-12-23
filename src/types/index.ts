@@ -67,7 +67,6 @@ export interface IStageStore {
   get hittingElements(): IStageElement[];
   get stageElements(): IStageElement[];
   get noneStageElements(): IStageElement[];
-  refreshElementCaches(): void;
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;

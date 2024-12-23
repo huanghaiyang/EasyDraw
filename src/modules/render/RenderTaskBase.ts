@@ -1,11 +1,11 @@
 import { IRenderTask } from "@/types";
-import { nanoid } from "nanoid";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default abstract class RenderTaskBase implements IRenderTask {
   id: string;
 
   constructor() {
-    this.id = nanoid();
+    this.id = CommonUtils.getRandomDateId();
   }
 
   run(): Promise<void> {
