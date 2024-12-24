@@ -14,20 +14,22 @@ export const WorldSize = {
   height: 1024 * 1024
 }
 
-export const Creators = {
-  moveable: {
+export const Creators = [
+  {
     type: CreatorTypes.moveable,
     name: '移动',
     usageType: CreatorUsageTypes.forever,
     category: CreatorCategories.cursor,
+    icon: 'icon-verbise-arrow-cursor-2--mouse-select-cursor'
   },
-  rectangle: {
+  {
     type: CreatorTypes.rectangle,
     name: '矩形',
     usageType: CreatorUsageTypes.once,
     category: CreatorCategories.shapes,
+    icon: 'icon-verbise-Rectangle'
   }
-}
+]
 
 // 鼠标样式画布尺寸
 export const CursorCanvasSize = 24;

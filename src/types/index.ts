@@ -304,8 +304,10 @@ export interface IStageElementCircle extends IStageElement { }
 // 创作工具
 export type Creator = {
   type: CreatorTypes,
-  usage: CreatorUsageTypes,
+  name: string,
+  usageType: CreatorUsageTypes,
   category: CreatorCategories,
+  icon?: string,
 }
 
 // 画板鼠标按下时的用途

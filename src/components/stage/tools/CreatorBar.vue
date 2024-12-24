@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { Creator, CreatorTypes } from "@/types";
-import { getCreatorByType } from "@/types/helper";
+import { Creator } from "@/types";
+import { Creators } from "@/types/constants";
 import { ref, watch } from "vue";
 
 const props = defineProps({
@@ -16,42 +16,25 @@ watch(
   }
 );
 
-const select = (evt) => {
-  const target = evt.target;
-  const toolItem = target.closest(".tool-item");
-  if (toolItem) {
-    emits(
-      "select",
-      getCreatorByType(parseInt(toolItem.getAttribute("v-index")))
-    );
-  }
+const select = (item) => {
+  emits("select", item);
 };
 </script>
 <template>
-  <div class="create-bar" @click="select">
+  <div class="create-bar">
     <div
+      v-for="item in Creators"
       :class="[
-        'create-bar__moveable tool-item',
+        'tool-item',
         {
-          selected: type === CreatorTypes.moveable,
+          selected: type === item.type,
         },
       ]"
-      :v-index="CreatorTypes.moveable"
+      :v-index="item.type"
+      :key="item.type"
+      @click="select(item)"
     >
-      <el-icon
-        class="icon-verbise-arrow-cursor-2--mouse-select-cursor iconfont"
-      ></el-icon>
-    </div>
-    <div
-      :class="[
-        'create-bar__rectangle tool-item',
-        {
-          selected: type === CreatorTypes.rectangle,
-        },
-      ]"
-      :v-index="CreatorTypes.rectangle"
-    >
-      <el-icon class="icon-verbise-Rectangle iconfont"></el-icon>
+      <el-icon :class="['iconfont', item.icon]"></el-icon>
     </div>
   </div>
 </template>

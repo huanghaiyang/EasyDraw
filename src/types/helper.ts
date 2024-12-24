@@ -1,12 +1,12 @@
 import { Creators } from "@/types/constants";
 import { Creator, CreatorTypes } from "@/types";
 
+/**
+ * 根据类型查找创建工具
+ * 
+ * @param type 
+ * @returns 
+ */
 export function getCreatorByType(type: CreatorTypes): Creator {
-  // 遍历Creators这个对象
-  for (const key in Creators) {
-    // 如果Creators[key].type等于type，就返回Creators[key]
-    if (Creators[key].type === type) {
-      return Creators[key];
-    }
-  }
+  return Creators.find(item => item.type === type);
 }
