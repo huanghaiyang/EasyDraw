@@ -23,7 +23,7 @@ export const MoveableCreator = {
 }
 
 export const HandCreator = {
-  type: CreatorTypes.moveable,
+  type: CreatorTypes.hand,
   name: '手型',
   usageType: CreatorUsageTypes.forever,
   category: CreatorCategories.cursor,
@@ -40,6 +40,7 @@ export const RectangleCreator = {
 
 export const CursorCreators = [
   MoveableCreator,
+  HandCreator
 ]
 
 export const Creators = [

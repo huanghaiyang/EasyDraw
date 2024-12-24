@@ -3,7 +3,8 @@ import { EventEmitter } from "events";
 // 创作工具类型,同时也是组件类型
 export enum CreatorTypes {
   moveable = 0,
-  rectangle = 1
+  rectangle = 1,
+  hand = 2,
 }
 
 // 创作工具使用次数

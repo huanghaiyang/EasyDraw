@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
+import { CursorCreators } from "@/types/constants";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -23,6 +24,34 @@ const select = (item) => {
     >
       <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
     </div>
+
+    <el-dropdown>
+      <div class="tool-dropdown">
+        <el-icon class="icon-verbise-arrow_down iconfont"></el-icon>
+      </div>
+
+      <template #dropdown>
+        <el-dropdown-menu>
+          <el-dropdown-item
+            v-for="creator in CursorCreators"
+            :key="creator.type"
+            :class="[
+              {
+                selected: creator.type === currentCreator.type,
+              },
+            ]"
+            @click="select(creator)"
+          >
+            <div class="creator-menu__item">
+              <div class="create-menu__item-text">{{ creator.name }}</div>
+              <div class="create-menu__item-icon">
+                <el-icon :class="['iconfont', creator.icon]"></el-icon>
+              </div>
+            </div>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </template>
+    </el-dropdown>
 
     <div
       :class="[
@@ -68,6 +97,52 @@ const select = (item) => {
       }
     }
   }
+  .tool-dropdown {
+    width: 10px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+    margin: 0 0 0 2px;
+    &:focus-visible {
+      outline: none;
+    }
+    .iconfont {
+      font-size: 8px;
+    }
+  }
   padding: 0 5px;
+}
+</style>
+<style lang="less">
+.menu-active {
+  background-color: #409eff;
+  color: #fff;
+}
+
+.el-dropdown-menu__item {
+  .creator-menu {
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 120px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: all 0.2s;
+      &:hover {
+        .menu-active();
+      }
+    }
+  }
+  &.selected {
+    .creator-menu {
+      &__item {
+        .menu-active();
+      }
+    }
+  }
 }
 </style>
