@@ -19,7 +19,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isResizing: boolean = false;
   @observable _isRotating: boolean = false;
   @observable _isDragging: boolean = false;
-  @observable _isRendered: boolean = false;
+  @observable _isProvisional: boolean = false;
   @observable _isTarget: boolean = false;
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
@@ -106,11 +106,11 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   @computed
-  get isRendered(): boolean {
-    return this._isRendered;
+  get isProvisional(): boolean {
+    return this._isProvisional;
   }
 
-  set isRendered(value: boolean) {
+  set isProvisional(value: boolean) {
     this._setIsRendered(value);
   }
 
@@ -188,7 +188,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   @action
   private _setIsRendered(value: boolean): void {
-    this._isRendered = value;
+    this._isProvisional = value;
   }
 
   @action
@@ -275,5 +275,15 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    */
   isPolygonOverlap(points: IPoint[]): boolean {
     return MathUtils.polygonsOverlap(this.rotatePathPoints, points);
+  }
+  /**
+   * 判断世界模型是否与多边形相交、
+   * 
+   * @param points 
+   * @returns 
+   */
+  isModelPolygonOverlap(points: IPoint[]): boolean {
+    const modelRotatePathPoints = this.model.coords.map(point => MathUtils.rotate(point, this.model.angle))
+    return MathUtils.polygonsOverlap(modelRotatePathPoints, points);
   }
 }

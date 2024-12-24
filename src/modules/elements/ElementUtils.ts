@@ -13,7 +13,7 @@ export enum ElementReactionPropNames {
   isResizing = 'isResizing',
   isRotating = 'isRotating',
   isDragging = 'isDragging',
-  isRendered = 'isRendered',
+  isProvisional = 'isProvisional',
   isTarget = 'isTarget',
   isInRange = 'isInRange',
   isOnStage = 'isOnStage',

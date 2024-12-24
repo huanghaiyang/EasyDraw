@@ -37,4 +37,61 @@ export default class CommonUtils {
   static getRandomDateId() {
     return `${+ new Date()}_${nanoid(8)}`
   }
+
+  /**
+   * 获取事件触发时相对于给定盒模型的坐标
+   * 
+   * @param e 
+   * @param rect 
+   * @returns 
+   */
+  static getEventPosition(e: MouseEvent, rect: DOMRect): IPoint {
+    return {
+      x: e.clientX - rect.x,
+      y: e.clientY - rect.y
+    }
+  }
+
+  /**
+   * 给定中心点及所属的和模型，返回盒模型四个顶点
+   * 
+   * @param point 
+   * @param rect 
+   * @returns 
+   */
+  static getBoxVertices(point: IPoint, rect: DOMRect): IPoint[] {
+    return [{
+      x: point.x - rect.width / 2,
+      y: point.y - rect.height / 2
+    }, {
+      x: point.x + rect.width / 2,
+      y: point.y - rect.height / 2
+    }, {
+      x: point.x + rect.width / 2,
+      y: point.y + rect.height / 2
+    }, {
+      x: point.x - rect.width / 2,
+      y: point.y + rect.height / 2
+    }]
+  }
+
+  /**
+   * 返回rect的四个顶点
+   * 
+   * @param rect 
+   * @returns 
+   */
+  static getRectVertices(rect: DOMRect): IPoint[] {
+    return [{
+      x: 0, y: 0
+    }, {
+      x: rect.width,
+      y: 0
+    }, {
+      x: rect.width,
+      y: rect.height
+    }, {
+      x: 0, y: rect.height
+    }]
+  }
 }

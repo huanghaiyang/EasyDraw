@@ -7,8 +7,8 @@ import StageElementTaskClear from "@/modules/render/base/task/StageElementTaskCl
 export default class StageDrawerShieldRenderer extends StageDrawerBaseRenderer<IStageShield> implements IStageDrawerShieldRenderer {
   async redraw(): Promise<void> {
     const cargo = new RenderTaskCargo([]);
-    if (this.drawer.store.noneRenderedElements.length) {
-      this.drawer.store.noneRenderedElements.forEach((element) => {
+    if (this.drawer.store.provisionalElements.length) {
+      this.drawer.store.provisionalElements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);
@@ -19,9 +19,9 @@ export default class StageDrawerShieldRenderer extends StageDrawerBaseRenderer<I
         return;
       }
     }
-    if (this.drawer.isElementsDragging || this.drawer.isElementsResizing) {
+    if (this.drawer.isElementsDragging || this.drawer.isElementsResizing || this.drawer.isStageMoving) {
       cargo.add(new StageElementTaskClear(null, this.renderParams));
-      this.drawer.store.forEach((element) => {
+      this.drawer.store.stageElements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

@@ -23,7 +23,8 @@ import StageEvent from '@/modules/stage/StageEvent';
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
-import ElementUtils from "../elements/ElementUtils";
+import ElementUtils from "@/modules/elements/ElementUtils";
+import { cloneDeep } from "lodash";
 
 export default class StageShield extends StageDrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -51,33 +52,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   stageRect: DOMRect;
 
   get stageRectPoints(): IPoint[] {
-    return [{
-      x: 0, y: 0
-    }, {
-      x: this.stageRect.width,
-      y: 0
-    }, {
-      x: this.stageRect.width,
-      y: this.stageRect.height
-    }, {
-      x: 0, y: this.stageRect.height
-    }]
+    return CommonUtils.getRectVertices(this.stageRect);
   }
 
   get stageWordRectPoints(): IPoint[] {
-    return [{
-      x: this.stageWorldCoord.x - this.stageRect.width / 2,
-      y: this.stageWorldCoord.y - this.stageRect.height / 2
-    }, {
-      x: this.stageWorldCoord.x + this.stageRect.width / 2,
-      y: this.stageWorldCoord.y - this.stageRect.height / 2
-    }, {
-      x: this.stageWorldCoord.x + this.stageRect.width / 2,
-      y: this.stageWorldCoord.y + this.stageRect.height / 2
-    }, {
-      x: this.stageWorldCoord.x - this.stageRect.width / 2,
-      y: this.stageWorldCoord.y + this.stageRect.height / 2
-    }]
+    return CommonUtils.getBoxVertices(this.stageWorldCoord, this.stageRect);
   }
 
   // 画布是否是第一次渲染
@@ -98,8 +77,12 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   private _isPressDown: boolean = false;
   // 是否正在拖拽组件
   private _isElementsDragging: boolean = false;
+  // 舞台是否在移动
+  private _isStageMoving: boolean = false;
   // 是否正在调整组件大小
   private _isElementsResizing: boolean = false;
+  // 移动舞台前的原始坐标
+  private _originalStageWorldCoord: IPoint;
 
   get isElementsDragging(): boolean {
     return this._isElementsDragging;
@@ -115,6 +98,14 @@ export default class StageShield extends StageDrawerBase implements IStageShield
 
   set isElementsResizing(value: boolean) {
     this._isElementsResizing = value;
+  }
+
+  set isStageMoving(value: boolean) {
+    this._isStageMoving = value;
+  }
+
+  get isStageMoving(): boolean {
+    return this._isStageMoving;
   }
 
   get isDrawerActive(): boolean {
@@ -203,9 +194,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       if (this.isDrawerActive) {
         // 移动过程中创建元素
         this.creatingElementIfy(e);
-      }
-      // 如果是选择模式
-      if (this.isMoveableActive) {
+      } else if (this.isMoveableActive) { // 如果是选择模式
         // 如果不存在选中的元素
         if (this.store.selectedElements.length === 0) {
           // 计算选区
@@ -226,6 +215,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             funcs.push(() => this.redraw())
           }
         }
+      } else if (this.isHandActive) {
+        this._isStageMoving = true;
+        this._refreshStageWorldCoord(e);
+        this.store.refreshStageElements();
+        funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())
     }
@@ -264,6 +258,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       // 清空选区
       this.selection.setRange([]);
     }
+    // 判断是否是要拖动舞台
+    if (this.isHandActive) {
+      this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
+    }
     this.mask.redraw();
   }
 
@@ -293,7 +291,9 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             // 取消组件拖动状态
             this.store.updateElements(this.store.selectedElements, { isDragging: false });
             // 刷新组件坐标数据
-            this.store.refreshElementsCoords(this.store.selectedElements);
+            this.store.setupStageElementsModelCoords(this.store.selectedElements);
+            // 刷新组件坐标数据
+            this.store.refreshStageElementsPoints(this.store.selectedElements);
             // 将拖动状态置为false
             this._isElementsDragging = false;
           }
@@ -309,6 +309,9 @@ export default class StageShield extends StageDrawerBase implements IStageShield
         this.selection.selectRange();
         this.selection.setRange(null);
       }
+    } else if (this.isHandActive) {
+      this._refreshStageWorldCoord(e);
+      this.store.refreshStageElements();
     }
     await Promise.all([
       this.mask.redraw(),
@@ -322,10 +325,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async renderCreatedElement(): Promise<void> {
     await this.redraw();
-    const noneRenderedElements = this.store.noneRenderedElements;
-    if (noneRenderedElements.length) {
-      this.store.updateElements(noneRenderedElements, { isRendered: true, isOnStage: true });
-      this.emit(ShieldDispatcherNames.elementCreated, noneRenderedElements.map(item => item.id));
+    const provisionalElements = this.store.provisionalElements;
+    if (provisionalElements.length) {
+      this.store.updateElements(provisionalElements, { isProvisional: false, isOnStage: true });
+      this.emit(ShieldDispatcherNames.elementCreated, provisionalElements.map(item => item.id));
     }
   }
 
@@ -400,7 +403,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
     // TODO this.worldCenterCoord = ?
-    this.store.refreshAllElementStagePoints();
     this.mask.updateCanvasSize(rect)
     this.provisional.updateCanvasSize(rect);
     this.updateCanvasSize(rect);
@@ -438,6 +440,17 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       if (element) {
         return element;
       }
+    }
+  }
+
+  /**
+   * 刷新当前舞台世界坐标
+   */
+  private _refreshStageWorldCoord(e: MouseEvent): void {
+    const point = CommonUtils.getEventPosition(e, this.stageRect);
+    this.stageWorldCoord = {
+      x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
+      y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y)
     }
   }
 

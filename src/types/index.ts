@@ -50,6 +50,7 @@ export interface IStageShield extends IStageDrawer {
   get stageWordRectPoints(): IPoint[];
   get isElementsDragging(): boolean;
   get isElementsResizing(): boolean;
+  get isStageMoving(): boolean;
   get isDrawerActive(): boolean;
   get isMoveableActive(): boolean;
   get isHandActive(): boolean;
@@ -58,8 +59,7 @@ export interface IStageShield extends IStageDrawer {
 // 用于维护舞台数据关系
 export interface IStageStore {
   get creatingElements(): IStageElement[];
-  get renderedElements(): IStageElement[];
-  get noneRenderedElements(): IStageElement[];
+  get provisionalElements(): IStageElement[];
   get selectedElements(): IStageElement[];
   get targetElements(): IStageElement[];
   get stageElements(): IStageElement[];
@@ -77,11 +77,11 @@ export interface IStageStore {
   getIndexById(id: string): number;
   creatingElement(points: IPoint[]): IStageElement;
   finishCreatingElement(): IStageElement;
-  refreshAllElementStagePoints(): void;
-  refreshElementStagePoints(element: IStageElement[]): void;
   updateSelectedElementsMovement(offset: IPoint): void;
-  refreshElementsCoords(elements: IStageElement[]): void;
+  setupStageElementsModelCoords(elements: IStageElement[]): void;
+  refreshStageElementsPoints(elements: IStageElement[]): void;
   forEach(callback: (element: IStageElement, index: number) => void): void;
+  refreshStageElements(): void;
 }
 
 // 画板画布
@@ -266,7 +266,7 @@ export interface IStageElement {
   get isResizing(): boolean;
   get isRotating(): boolean;
   get isDragging(): boolean;
-  get isRendered(): boolean;
+  get isProvisional(): boolean;
   get isTarget(): boolean;
   get isOnStage(): boolean;
   get isInRange(): boolean;
@@ -280,7 +280,7 @@ export interface IStageElement {
   set isResizing(value: boolean);
   set isRotating(value: boolean);
   set isDragging(value: boolean);
-  set isRendered(value: boolean);
+  set isProvisional(value: boolean);
   set isTarget(value: boolean);
   set isOnStage(value: boolean);
   set isInRange(value: boolean);
@@ -290,6 +290,7 @@ export interface IStageElement {
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;
   isPolygonOverlap(points: IPoint[]): boolean;
+  isModelPolygonOverlap(points: IPoint[]): boolean;
 }
 
 // 舞台元素（组件）-React

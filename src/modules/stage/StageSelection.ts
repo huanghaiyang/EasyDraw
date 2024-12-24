@@ -84,8 +84,8 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    */
   checkTargetElements(point: IPoint): void {
-    for (let i = this.shield.store.renderedElements.length - 1; i >= 0; i--) {
-      const element = this.shield.store.renderedElements[i];
+    for (let i = this.shield.store.stageElements.length - 1; i >= 0; i--) {
+      const element = this.shield.store.stageElements[i];
       const isTarget = MathUtils.isPointInPolygonByRayCasting(point, element.rotatePathPoints);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
@@ -110,7 +110,7 @@ export default class StageSelection implements IStageSelection {
    */
   refreshRangeElements(rangePoints: IPoint[]): void {
     if (rangePoints && rangePoints.length) {
-      this.shield.store.renderedElements.forEach(element => {
+      this.shield.store.stageElements.forEach(element => {
         this.shield.store.updateElementById(element.id, { isInRange: element.isPolygonOverlap(rangePoints) })
       });
     }
@@ -132,7 +132,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getElementOnPoint(point: IPoint): IStageElement {
-    return this.shield.store.renderedElements.find(item => item.isContainsPoint(point));
+    return this.shield.store.stageElements.find(item => item.isContainsPoint(point));
   }
 
   /**

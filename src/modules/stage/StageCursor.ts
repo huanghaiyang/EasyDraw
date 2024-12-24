@@ -1,4 +1,5 @@
 import { IPoint, IStageCursor, IStageShield } from "@/types";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -20,11 +21,7 @@ export default class StageCursor implements IStageCursor {
    * @returns 
    */
   transform(e: MouseEvent): IPoint {
-    const { x, y } = this.shield.stageRect;
-    this.value = {
-      x: e.clientX - x,
-      y: e.clientY - y
-    }
+    this.value = CommonUtils.getEventPosition(e, this.shield.stageRect);
     return this.value;
   }
 
