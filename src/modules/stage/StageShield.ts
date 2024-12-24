@@ -20,7 +20,6 @@ import StageDrawerProvisional from "@/modules/stage/drawer/StageDrawerProvisiona
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
 import StageEvent from '@/modules/stage/StageEvent';
-import CursorUtils from "@/utils/CursorUtils";
 import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
 import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
@@ -118,6 +117,18 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this._isElementsResizing = value;
   }
 
+  get isDrawerActive(): boolean {
+    return [CreatorCategories.shapes].includes(this.currentCreator.category);
+  }
+
+  get isHandActive(): boolean {
+    return this.currentCreator.type === CreatorTypes.hand;
+  }
+
+  get isMoveableActive(): boolean {
+    return this.currentCreator.type === CreatorTypes.moveable;
+  }
+
   constructor() {
     super();
     this.event = new StageEvent(this);
@@ -179,24 +190,22 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
     this.cursor.transform(e);
+    this.setCursorStyle(this.currentCreator.cursor);
 
-    // 判断是否是绘制模式
-    if (this.checkDrawerActive()) {
-      this.setCursorStyle(CursorUtils.getCursorStyle(this.currentCreator.category));
-    } else {
-      this.setCursorStyle('default');
+    if (this.isMoveableActive) {
       this.selection.checkTargetElements(this.cursor.value);
     }
+
     // 判断鼠标是否按下
     if (this._isPressDown) {
       this.calcPressMove(e);
       // 绘制模式
-      if (this.checkDrawerActive()) {
+      if (this.isDrawerActive) {
         // 移动过程中创建元素
         this.creatingElementIfy(e);
       }
       // 如果是选择模式
-      if (this.checkMoveableActive()) {
+      if (this.isMoveableActive) {
         // 如果不存在选中的元素
         if (this.store.selectedElements.length === 0) {
           // 计算选区
@@ -247,7 +256,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     // 1. 如果是绘制模式则直接清空
     // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
     // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
-    if (this.checkDrawerActive() || (this.checkMoveableActive() && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
+    if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态
@@ -267,9 +276,9 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this._isPressDown = false;
     this.calcPressUp(e);
     // 如果是绘制模式，则完成元素的绘制
-    if (this.checkDrawerActive()) {
+    if (this.isDrawerActive) {
       this.store.finishCreatingElement();
-    } else if (this.checkMoveableActive()) { // 如果是选择模式
+    } else if (this.isMoveableActive) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
       if (this.store.selectedElements.length) {
         // 检查位移是否有效
@@ -407,25 +416,6 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    */
   async setCreator(creator: Creator): Promise<void> {
     this.currentCreator = creator;
-  }
-
-  /**
-   * 检查创作工具是否可用
-   * 
-   * @param creator 
-   */
-  checkDrawerActive(): boolean {
-    if (!this.currentCreator) return false;
-    return [CreatorCategories.shapes].includes(this.currentCreator.category);
-  }
-
-  /**
-   * 检查移动工具是否可用
-   * 
-   * @returns 
-   */
-  checkMoveableActive(): boolean {
-    return CreatorTypes.moveable === this.currentCreator?.type;
   }
 
   /**

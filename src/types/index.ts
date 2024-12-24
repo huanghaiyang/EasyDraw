@@ -7,12 +7,6 @@ export enum CreatorTypes {
   hand = 2,
 }
 
-// 创作工具使用次数
-export enum CreatorUsageTypes {
-  once = 0,
-  forever = 1
-}
-
 // 创作工具分类
 export enum CreatorCategories {
   cursor = 0,
@@ -56,7 +50,9 @@ export interface IStageShield extends IStageDrawer {
   get stageWordRectPoints(): IPoint[];
   get isElementsDragging(): boolean;
   get isElementsResizing(): boolean;
-  checkDrawerActive(): boolean;
+  get isDrawerActive(): boolean;
+  get isMoveableActive(): boolean;
+  get isHandActive(): boolean;
 }
 
 // 用于维护舞台数据关系
@@ -306,9 +302,9 @@ export interface IStageElementCircle extends IStageElement { }
 export type Creator = {
   type: CreatorTypes,
   name: string,
-  usageType: CreatorUsageTypes,
   category: CreatorCategories,
   icon?: string,
+  cursor: string,
 }
 
 // 画板鼠标按下时的用途

@@ -24,6 +24,7 @@ export const useStageStore = defineStore("stage", {
     async init(params: StageInitParams) {
       await container.init(params.containerEl);
       await shield.init(params.shieldEl);
+      this.setCreator(MoveableCreator);
       shield.on(ShieldDispatcherNames.elementCreated, this.onElementCreated);
     },
     /**

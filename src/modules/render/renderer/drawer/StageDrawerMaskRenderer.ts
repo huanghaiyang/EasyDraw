@@ -19,13 +19,14 @@ import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawe
 export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
 
   private _lastCursorRendered = false;
+  private _lastSelectionRendered = false;
 
   /**
    * 重绘蒙版
    */
   async redraw(): Promise<void> {
     let cargo = new RenderTaskCargo([]);
-    let hasCursor = false;
+    let cursorRendered = false;
 
     // 绘制选区
     const selectionTasks = this.createMaskSelectionTasks();
@@ -35,12 +36,15 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
         cargo.addAll(this.createMaskSelectionHandlerTasks((task as IStageDrawerMaskTask).model as IStageDrawerMaskTaskSelectionModel));
       }
     });
+    if (selectionTasks.length) {
+      this._lastSelectionRendered = true;
+    }
 
     // 绘制光标
-    if (this.drawer.shield.checkDrawerActive()) {
+    if (this.drawer.shield.isDrawerActive) {
       if (this.drawer.shield.cursor.value) {
         cargo.add(this.createMaskCursorTask());
-        hasCursor = true;
+        cursorRendered = true;
         this._lastCursorRendered = true;
       }
     }
@@ -51,9 +55,11 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       await this.renderCargo(cargo);
     } else {
       // 解决光标移出舞台出现残留的问题
-      if (this._lastCursorRendered && !selectionTasks.length && !hasCursor) {
+      if ((this._lastCursorRendered || this._lastSelectionRendered) && !selectionTasks.length && !cursorRendered) {
         cargo.add(new StageDrawerMaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
+        this._lastCursorRendered = false;
+        this._lastSelectionRendered = false;
       } else {
         cargo = null;
       }
