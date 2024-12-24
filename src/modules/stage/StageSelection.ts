@@ -89,6 +89,11 @@ export default class StageSelection implements IStageSelection {
       const isTarget = MathUtils.isPointInPolygonByRayCasting(point, element.rotatePathPoints);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
+        this.shield.store.targetElements.forEach(target => {
+          if (target.id !== element.id) {
+            this.shield.store.updateElementById(target.id, { isTarget: false });
+          }
+        });
         break;
       }
     }

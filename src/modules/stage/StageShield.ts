@@ -312,6 +312,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     } else if (this.isHandActive) {
       this._refreshStageWorldCoord(e);
       this.store.refreshStageElements();
+      this._isStageMoving = false;
     }
     await Promise.all([
       this.mask.redraw(),
