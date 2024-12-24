@@ -1,20 +1,12 @@
 <script lang="ts" setup>
-import { Creator } from "@/types";
-import { Creators } from "@/types/constants";
-import { ref, watch } from "vue";
+import { useStageStore } from "@/stores/stage";
+import { computed } from "vue";
 
-const props = defineProps({
-  currentCreator: { type: Object, required: true },
-});
-const type = ref((props.currentCreator as Creator).type);
 const emits = defineEmits(["select"]);
-
-watch(
-  () => props.currentCreator,
-  (val) => {
-    type.value = (val as Creator).type;
-  }
-);
+const store = useStageStore();
+const currentCreator = computed(() => store.currentCreator);
+const currentCursorCreator = computed(() => store.currentCursorCreator);
+const currentShapeCreator = computed(() => store.currentShapeCreator);
 
 const select = (item) => {
   emits("select", item);
@@ -23,18 +15,23 @@ const select = (item) => {
 <template>
   <div class="create-bar">
     <div
-      v-for="item in Creators"
       :class="[
         'tool-item',
-        {
-          selected: type === item.type,
-        },
+        { selected: currentCursorCreator.category === currentCreator.category },
       ]"
-      :v-index="item.type"
-      :key="item.type"
-      @click="select(item)"
+      @click="select(currentCursorCreator)"
     >
-      <el-icon :class="['iconfont', item.icon]"></el-icon>
+      <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
+    </div>
+
+    <div
+      :class="[
+        'tool-item',
+        { selected: currentShapeCreator.category === currentCreator.category },
+      ]"
+      @click="select(currentShapeCreator)"
+    >
+      <el-icon :class="['iconfont', currentShapeCreator.icon]"></el-icon>
     </div>
   </div>
 </template>

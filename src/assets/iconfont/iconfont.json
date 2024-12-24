@@ -6,6 +6,83 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "974174",
+      "name": "pencil",
+      "font_class": "pencil",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "1786157",
+      "name": "pen",
+      "font_class": "pen",
+      "unicode": "e6d6",
+      "unicode_decimal": 59094
+    },
+    {
+      "icon_id": "7715190",
+      "name": "text",
+      "font_class": "text",
+      "unicode": "e67e",
+      "unicode_decimal": 59006
+    },
+    {
+      "icon_id": "11864258",
+      "name": "star",
+      "font_class": "star",
+      "unicode": "e6d5",
+      "unicode_decimal": 59093
+    },
+    {
+      "icon_id": "14678946",
+      "name": "circle",
+      "font_class": "circle",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "22813460",
+      "name": "line",
+      "font_class": "line",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "24492812",
+      "name": "Image",
+      "font_class": "Image",
+      "unicode": "e614",
+      "unicode_decimal": 58900
+    },
+    {
+      "icon_id": "26853556",
+      "name": "polygon",
+      "font_class": "polygon",
+      "unicode": "e6d7",
+      "unicode_decimal": 59095
+    },
+    {
+      "icon_id": "34983303",
+      "name": "arrow-line",
+      "font_class": "arrow-line",
+      "unicode": "e711",
+      "unicode_decimal": 59153
+    },
+    {
+      "icon_id": "310692",
+      "name": "hand",
+      "font_class": "hand",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "12486925",
+      "name": "scale",
+      "font_class": "scale",
+      "unicode": "e6c4",
+      "unicode_decimal": 59076
+    },
+    {
       "icon_id": "41747725",
       "name": "arrow-cursor-2--mouse-select-cursor",
       "font_class": "arrow-cursor-2--mouse-select-cursor",

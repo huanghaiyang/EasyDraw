@@ -1,7 +1,7 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
-import { Creator, CreatorTypes, ShieldDispatcherNames, StageInitParams } from "@/types";
-import { getCreatorByType } from "@/types/helper";
+import { Creator, CreatorCategories, ShieldDispatcherNames, StageInitParams } from "@/types";
+import { MoveableCreator, RectangleCreator } from "@/types/constants";
 import { defineStore } from "pinia";
 
 const shield = new StageShield();
@@ -10,7 +10,9 @@ const container = new StageContainer();
 export const useStageStore = defineStore("stage", {
   state: ()=> {
     return {
-      currentCreator: getCreatorByType(CreatorTypes.moveable),
+      currentCreator: MoveableCreator,
+      currentCursorCreator: MoveableCreator,
+      currentShapeCreator: RectangleCreator,
     }
   },
   actions: {
@@ -32,6 +34,12 @@ export const useStageStore = defineStore("stage", {
     async setCreator(creator: Creator) {
       await shield.setCreator(creator);
       this.currentCreator = creator;
+      if (creator.category === CreatorCategories.cursor) {
+        this.currentCursorCreator = creator;
+      }
+      if (creator.category === CreatorCategories.shapes) {
+        this.currentShapeCreator = creator;
+      }
     },
     /**
      * 舞台组件创建完毕
@@ -39,7 +47,7 @@ export const useStageStore = defineStore("stage", {
      * @param elementIds 
      */
     onElementCreated(elementIds: string[]) {
-      this.setCreator(getCreatorByType(CreatorTypes.moveable));
+      this.setCreator(MoveableCreator);
     }
   },
 });

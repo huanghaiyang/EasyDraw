@@ -14,21 +14,38 @@ export const WorldSize = {
   height: 1024 * 1024
 }
 
+export const MoveableCreator = {
+  type: CreatorTypes.moveable,
+  name: '移动',
+  usageType: CreatorUsageTypes.forever,
+  category: CreatorCategories.cursor,
+  icon: 'icon-verbise-arrow-cursor-2--mouse-select-cursor',
+}
+
+export const HandCreator = {
+  type: CreatorTypes.moveable,
+  name: '手型',
+  usageType: CreatorUsageTypes.forever,
+  category: CreatorCategories.cursor,
+  icon: 'icon-verbise-hand',
+}
+
+export const RectangleCreator = {
+  type: CreatorTypes.rectangle,
+  name: '矩形',
+  usageType: CreatorUsageTypes.once,
+  category: CreatorCategories.shapes,
+  icon: 'icon-verbise-Rectangle'
+}
+
+export const CursorCreators = [
+  MoveableCreator,
+]
+
 export const Creators = [
-  {
-    type: CreatorTypes.moveable,
-    name: '移动',
-    usageType: CreatorUsageTypes.forever,
-    category: CreatorCategories.cursor,
-    icon: 'icon-verbise-arrow-cursor-2--mouse-select-cursor'
-  },
-  {
-    type: CreatorTypes.rectangle,
-    name: '矩形',
-    usageType: CreatorUsageTypes.once,
-    category: CreatorCategories.shapes,
-    icon: 'icon-verbise-Rectangle'
-  }
+  MoveableCreator,
+  CursorCreators,
+  RectangleCreator
 ]
 
 // 鼠标样式画布尺寸
