@@ -42,7 +42,7 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       this.shield.store.rangeElements.forEach(element => {
         result.push({
-          points: element.boxPoints,
+          points: element.rotatePathPoints,
           type: StageDrawerMaskModelTypes.selection
         });
       });
@@ -50,14 +50,14 @@ export default class StageSelection implements IStageSelection {
 
     this.shield.store.targetElements.forEach(element => {
       result.push({
-        points: element.boxPoints,
+        points: element.rotatePathPoints,
         type: StageDrawerMaskModelTypes.highlight
       });
     });
 
     this.shield.store.selectedElements.forEach(element => {
       result.push({
-        points: element.boxPoints,
+        points: element.rotatePathPoints,
         type: StageDrawerMaskModelTypes.selection
       });
     });

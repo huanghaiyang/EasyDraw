@@ -223,6 +223,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
         } else if (this._isElementRotating) {
           if (this.checkCursorPressMovedALittle(e)) {
             this.store.updateSelectedElementsRotation(this._pressMovePosition)
+            this.store.updateElements(this.store.selectedElements, { isRotating: true });
             funcs.push(() => this.redraw())
           }
         }
@@ -313,6 +314,14 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             this.store.refreshStageElementsPoints(this.store.selectedElements);
             // 将拖动状态置为false
             this._isElementsDragging = false;
+          } else if (this._isElementRotating) {
+            this.store.updateSelectedElementsRotation(this._pressUpPosition)
+            this.store.updateElements(this.store.rotatingTargetElements, {
+              isRotatingTarget: false,
+              isRotating: false,
+            })
+            // 将旋转状态置为false
+            this._isElementRotating = false;
           }
         } else {
           // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态

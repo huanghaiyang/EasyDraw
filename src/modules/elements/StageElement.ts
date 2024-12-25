@@ -293,11 +293,12 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 刷新旋转句柄在舞台的坐标
    */
   refreshRotationModelPoints() {
+    this.rotationModel.angle = this.model.angle - 90;
     this.rotationModel.point = ElementUtils.calcElementRotatePoint(this);
     this.rotationModel.vertices = CommonUtils.getBoxVertices(this.rotationModel.point, {
       width: this.rotationModel.width,
       height: this.rotationModel.height
-    }).map(point => MathUtils.rotate(point, this.model.angle))
+    }).map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.rotationModel.point))
   }
 
   /**
