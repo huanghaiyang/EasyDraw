@@ -1,4 +1,4 @@
-import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerMaskTaskRotateModel, StageDrawerMaskModelTypes } from "@/types";
+import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -11,7 +11,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
 
-  rotationModel: IStageDrawerMaskTaskRotateModel = {
+  rotationModel: IStageDrawerRotationModel = {
     point: null,
     type: StageDrawerMaskModelTypes.rotate,
     width: DefaultSelectionRotateSize,
@@ -28,6 +28,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isMoving: boolean = false;
   @observable _isResizing: boolean = false;
   @observable _isRotating: boolean = false;
+  @observable _isRotatingTarget: boolean = false;
   @observable _isDragging: boolean = false;
   @observable _isProvisional: boolean = false;
   @observable _isTarget: boolean = false;
@@ -108,6 +109,15 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   set isRotating(value: boolean) {
     this._setIsRotating(value);
+  }
+
+  @computed
+  get isRotatingTarget(): boolean {
+    return this._isRotatingTarget;
+  }
+
+  set isRotatingTarget(value: boolean) {
+    this._setIsRotatingTarget(value);
   }
 
   @computed
@@ -193,6 +203,11 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @action
   private _setIsRotating(value: boolean): void {
     this._isRotating = value;
+  }
+
+  @action
+  private _setIsRotatingTarget(value: boolean): void {
+    this._isRotatingTarget = value;
   }
 
   @action

@@ -1,12 +1,12 @@
-import { IStageDrawerMaskTaskRotate, IStageDrawerMaskTaskRotateModel } from "@/types";
+import { IStageDrawerMaskTaskRotate, IStageDrawerRotationModel } from "@/types";
 import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import RotateSvg from "@/assets/svg/rotate.svg";
 
 export default class StageDrawerMaskTaskRotate extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskRotate {
 
-  get data(): IStageDrawerMaskTaskRotateModel {
-    return this.model as IStageDrawerMaskTaskRotateModel;
+  get data(): IStageDrawerRotationModel {
+    return this.model as IStageDrawerRotationModel;
   }
 
   /**

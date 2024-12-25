@@ -81,6 +81,8 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   private _isStageMoving: boolean = false;
   // 是否正在调整组件大小
   private _isElementsResizing: boolean = false;
+  // 组件是否旋转中
+  private _isElementRotating: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
 
@@ -118,6 +120,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
 
   get isMoveableActive(): boolean {
     return this.currentCreator.type === CreatorTypes.moveable;
+  }
+
+  get isElementRotating(): boolean {
+    return this._isElementRotating;
   }
 
   constructor() {
@@ -184,8 +190,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.setCursorStyle(this.currentCreator.cursor);
 
     if (this.isMoveableActive) {
-      this.selection.checkTargetElements(this.cursor.value);
-      this.selection.checkTargetRotation(this.cursor.value);
+      this.selection.hitTargetElements(this.cursor.value);
     }
 
     // 判断鼠标是否按下
@@ -248,10 +253,14 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this._isPressDown = true;
     this.calcPressDown(e);
 
-    // 1. 如果是绘制模式则直接清空
-    // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
-    // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
-    if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
+    const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
+
+    if (this.isMoveableActive && targetRotateElement) {
+      this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
+    } else if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
+      // 1. 如果是绘制模式则直接清空
+      // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
+      // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态

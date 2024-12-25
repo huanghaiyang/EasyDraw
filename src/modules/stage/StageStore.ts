@@ -36,6 +36,8 @@ export default class StageStore implements IStageStore {
   private _noneStageElementsMap = new SortedMap<string, IStageElement>();
   // 选区元素映射关系，加快查询
   private _rangeElementsMap = new SortedMap<string, IStageElement>();
+  // 旋转目标元素映射关系，加快查询
+  private _rotatingTargetElementsMap = new SortedMap<string, IStageElement>();
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -83,6 +85,10 @@ export default class StageStore implements IStageStore {
     if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
   }
 
+  get rotatingTargetElements(): IStageElement[] {
+    return this._rotatingTargetElementsMap.valuesArray();
+  }
+
   /**
    * 组件新增
    */
@@ -95,6 +101,7 @@ export default class StageStore implements IStageStore {
       this._reactionElementPropsChanged(ElementReactionPropNames.isTarget, element, element.isTarget);
       this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
       this._reactionElementPropsChanged(ElementReactionPropNames.isInRange, element, element.isInRange);
+      this._reactionElementPropsChanged(ElementReactionPropNames.isRotatingTarget, element, element.isRotatingTarget);
     })
   }
 
@@ -110,6 +117,7 @@ export default class StageStore implements IStageStore {
       this._provisionalElementsMap.delete(element.id);
       this._targetElementsMap.delete(element.id);
       this._rangeElementsMap.delete(element.id);
+      this._rotatingTargetElementsMap.delete(element.id);
     })
   }
 
@@ -178,6 +186,14 @@ export default class StageStore implements IStageStore {
       case ElementReactionPropNames.status: {
         if (this._currentCreatingElementId && value === ElementStatus.creating) {
           this._selectedElementsMap.set(element.id, element);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isRotatingTarget: {
+        if (value) {
+          this._rotatingTargetElementsMap.set(element.id, element);
+        } else {
+          this._rotatingTargetElementsMap.delete(element.id);
         }
         break;
       }

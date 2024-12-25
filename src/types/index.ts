@@ -54,6 +54,7 @@ export interface IStageShield extends IStageDrawer {
   get isDrawerActive(): boolean;
   get isMoveableActive(): boolean;
   get isHandActive(): boolean;
+  get isElementRotating(): boolean;
 }
 
 // 用于维护舞台数据关系
@@ -66,6 +67,7 @@ export interface IStageStore {
   get noneStageElements(): IStageElement[];
   get rangeElements(): IStageElement[];
   get uniqSelectedElement(): IStageElement;
+  get rotatingTargetElements(): IStageElement[];
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
@@ -168,7 +170,7 @@ export interface IStageDrawerMaskTaskCursorModel extends IStageDrawerMaskTaskMod
 }
 
 // 组件旋转图标绘制任务对象
-export interface IStageDrawerMaskTaskRotateModel extends IStageDrawerMaskTaskModel {
+export interface IStageDrawerRotationModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
   width: number;
   height: number;
@@ -227,8 +229,8 @@ export interface IStageSelection {
   getSelectionModels(): IStageDrawerMaskTaskSelectionModel[];
   selectTarget(): void;
   clearSelects(): void;
-  checkTargetElements(point: IPoint): void;
-  checkTargetRotation(point: IPoint): void;
+  hitTargetElements(point: IPoint): void;
+  checkTargetRotateElement(point: IPoint): IStageElement;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IStageElement;
   checkSelectContainsTarget(): boolean;
@@ -267,7 +269,7 @@ export type ElementObject = {
 export interface IStageElement {
   id: string;
   model: ElementObject;
-  rotationModel: IStageDrawerMaskTaskRotateModel;
+  rotationModel: IStageDrawerRotationModel;
 
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
@@ -283,6 +285,7 @@ export interface IStageElement {
   get isMoving(): boolean;
   get isResizing(): boolean;
   get isRotating(): boolean;
+  get isRotatingTarget(): boolean;
   get isDragging(): boolean;
   get isProvisional(): boolean;
   get isTarget(): boolean;
