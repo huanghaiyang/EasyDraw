@@ -65,6 +65,7 @@ export interface IStageStore {
   get stageElements(): IStageElement[];
   get noneStageElements(): IStageElement[];
   get rangeElements(): IStageElement[];
+  get uniqSelectedElement(): IStageElement;
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IStageElement): IStageElement;
   removeElement(id: string): IStageElement;
@@ -127,6 +128,7 @@ export enum StageDrawerMaskModelTypes {
   selectionHandler = 1,
   cursor = 2,
   highlight = 3,
+  rotate = 4,
 }
 
 // 方位
@@ -165,6 +167,14 @@ export interface IStageDrawerMaskTaskCursorModel extends IStageDrawerMaskTaskMod
   creatorCategory: CreatorCategories;
 }
 
+// 组件旋转图标绘制任务对象
+export interface IStageDrawerMaskTaskRotateModel extends IStageDrawerMaskTaskModel {
+  point: IPoint;
+  width: number;
+  height: number;
+  angle: number;
+}
+
 // 辅助画布绘制任务
 export interface IStageDrawerMaskTask extends IRenderTask {
   get data(): IStageDrawerMaskTaskModel;
@@ -181,6 +191,9 @@ export interface IStageDrawerMaskTaskSelectionHandler extends IStageDrawerMaskTa
 
 // 辅助画布光标绘制任务
 export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask { }
+
+// 组件旋转图标绘制
+export interface IStageDrawerMaskTaskRotate extends IStageDrawerMaskTask { }
 
 // 辅助画布清除绘制任务
 export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask { }
@@ -257,7 +270,7 @@ export interface IStageElement {
   get boxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
-
+  get angle(): number;
   get isSelected(): boolean;
   get isVisible(): boolean;
   get isEditing(): boolean;

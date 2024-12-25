@@ -79,6 +79,10 @@ export default class StageStore implements IStageStore {
     return this._rangeElementsMap.valuesArray();
   }
 
+  get uniqSelectedElement(): IStageElement {
+    if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
+  }
+
   /**
    * 组件新增
    */

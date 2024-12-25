@@ -3,6 +3,8 @@ import StageElementTaskRect from "@/modules/render/base/task/StageElementTaskRec
 import CommonUtils from "@/utils/CommonUtils";
 import StageElementRect from "@/modules/elements/StageElementRect";
 import StageElement from "@/modules/elements/StageElement";
+import MathUtils from "@/utils/MathUtils";
+import { DefaultSelectionRotateDistance } from "@/types/constants";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -105,5 +107,20 @@ export default class ElementUtils {
         return element;
       }
     }
+  }
+
+  /**
+   * 几何法计算多边形中心节点
+   * 
+   * @param element 
+   * @returns 
+   */
+  static calcElementRotatePoint(element: IStageElement): IPoint {
+    const { boxPoints, angle } = element;
+    const centroid = MathUtils.calcPolygonCentroid(boxPoints);
+    const v1 = boxPoints[0]
+    const v2 = boxPoints[3];
+    const halfValue = Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)) / 2;
+    return MathUtils.calculateTargetPoint(centroid, halfValue + DefaultSelectionRotateDistance, angle);
   }
 }

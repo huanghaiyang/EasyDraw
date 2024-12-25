@@ -1,4 +1,5 @@
 import { CanvasCreatorStyles, IPoint } from "@/types";
+import MathUtils from "./MathUtils";
 
 export default class CanvasUtils {
 
@@ -8,29 +9,49 @@ export default class CanvasUtils {
    * @param target 
    * @param svg 
    * @param options 
+   * @param options
    * @returns 
    */
-  static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, options: Partial<DOMRect>): Promise<void> {
+  static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): Promise<void> {
     return new Promise((resolve, reject) => {
-      const { x, y, width, height } = options;
-      const ctx = target.getContext('2d');
       if (typeof svg === 'string') {
         const img = new Image();
         img.src = svg;
         img.onload = () => {
-          ctx.drawImage(img, x, y, width, height);
+          CanvasUtils.drawRotateImage(target, img, rect, options);
           resolve();
         }
         img.onerror = () => {
           reject();
         }
       } else if (svg instanceof HTMLCanvasElement) {
-        ctx.drawImage(svg, x, y, width, height);
+        CanvasUtils.drawRotateImage(target, svg, rect, options);
         resolve();
       }
     })
   }
-  
+
+  /**
+   * 绘制一张旋转过的图片
+   * 
+   * @param target 
+   * @param svg 
+   * @param rect 
+   * @param options 
+   */
+  static drawRotateImage(target: HTMLCanvasElement, svg: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): void {
+    const { x, y, width, height } = rect;
+    const { angle } = options || { angle: 0 };
+    const ctx = target.getContext('2d');
+    if (angle) {
+      ctx.translate(x + width / 2, y + height / 2);
+      ctx.rotate(MathUtils.degreesToRadians(angle));
+      ctx.drawImage(svg, -width / 2, -height / 2, width, height);
+    } else {
+      ctx.drawImage(svg, x, y, width, height);
+    }
+  }
+
   /**
    * 绘制路径
    * 

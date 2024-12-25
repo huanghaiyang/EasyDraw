@@ -24,6 +24,10 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
+  get angle() {
+    return this.model.angle - 90;
+  }
+
   @computed
   get status(): ElementStatus {
     return this._status;

@@ -63,3 +63,5 @@ export const DefaultSelectionHandlerStrokeColor = '#0c8ce9';
 export const DefaultSelectionHandlerFillColor = 'rgba(255,255,255,1)';
 export const DefaultSelectionHandlerStrokeWidth = 1;
 export const DefaultSelectionHandlerSize = 4;
+export const DefaultSelectionRotateSize = 18;
+export const DefaultSelectionRotateDistance = 18;

@@ -8,6 +8,8 @@ import {
   StageDrawerMaskModelTypes,
   Directions,
   IStageDrawerMask,
+  IStageElement,
+  IStageDrawerMaskTaskRotateModel,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
@@ -15,6 +17,9 @@ import StageDrawerMaskTaskCursor from "@/modules/render/mask/task/StageDrawerMas
 import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMaskTaskClear";
 import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
+import StageDrawerMaskTaskRotate from "@/modules/render/mask/task/StageDrawerMaskTaskRotate";
+import { DefaultSelectionRotateSize } from "@/types/constants";
+import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
 
@@ -38,6 +43,11 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     });
     if (selectionTasks.length) {
       this._lastSelectionRendered = true;
+    }
+
+    // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
+    if (this.drawer.shield.store.uniqSelectedElement) {
+      cargo.add(this.createMaskRotateTask(this.drawer.shield.store.uniqSelectedElement));
     }
 
     // 绘制光标
@@ -139,6 +149,24 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       tasks.push(task);
     });
     return tasks;
+  }
+
+  /**
+   * 创建一个绘制旋转图标的任务
+   * 
+   * @param element 
+   * @returns 
+   */
+  private createMaskRotateTask(element: IStageElement): IRenderTask {
+    const model: IStageDrawerMaskTaskRotateModel = {
+      point: ElementUtils.calcElementRotatePoint(element),
+      angle: element.angle,
+      type: StageDrawerMaskModelTypes.rotate,
+      width: DefaultSelectionRotateSize,
+      height: DefaultSelectionRotateSize,
+    }
+    const task = new StageDrawerMaskTaskRotate(model, this.renderParams);
+    return task;
   }
 
 }

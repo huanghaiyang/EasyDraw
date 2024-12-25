@@ -10,9 +10,8 @@ export default class MathUtils {
    * @returns 
    */
   static translate(coord: IPoint, value: TranslationValue): IPoint {
-    const point = [coord.x, coord.y];
     const translationMatrix = [[1, 0, value.dx], [0, 1, value.dy], [0, 0, 1]];
-    const translatedPoint = multiply(translationMatrix, [point[0], point[1], 1]);
+    const translatedPoint = multiply(translationMatrix, [coord.x, coord.y, 1]);
     return {
       x: translatedPoint[0],
       y: translatedPoint[1]
@@ -27,14 +26,13 @@ export default class MathUtils {
    * @returns 
    */
   static rotate(coord: IPoint, thetaDegrees: number): IPoint {
-    const point = [coord.x, coord.y];
     const theta = MathUtils.degreesToRadians(thetaDegrees); // 将角度转换为弧度
     const rotationMatrix = [
       [Math.cos(theta), -Math.sin(theta), 0],
       [Math.sin(theta), Math.cos(theta), 0],
       [0, 0, 1]
     ];
-    const rotatedPoint = multiply(rotationMatrix, [point[0], point[1], 1]);
+    const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
       y: rotatedPoint[1]
@@ -61,9 +59,8 @@ export default class MathUtils {
    * @returns 
    */
   static scale(coord: IPoint, value: ScaleValue): IPoint {
-    const point = [coord.x, coord.y];
     const scaleMatrix = [[value.sx, 0, 0], [0, value.sy, 0], [0, 0, 1]];
-    const scaledPoint = multiply(scaleMatrix, [point[0], point[1], 1]);
+    const scaledPoint = multiply(scaleMatrix, [coord.x, coord.y, 1]);
     return {
       x: scaledPoint[0],
       y: scaledPoint[1]
@@ -98,15 +95,13 @@ export default class MathUtils {
    * @returns 
    */
   static isPointInPolygon(coord: IPoint, polygonCoords: IPoint[]): boolean {
-    const point = [coord.x, coord.y];
-    const polygon = polygonCoords.map(p => [p.x, p.y]);
-    const [px, py] = point;
+    const { x: px, y: py } = coord;
     let totalArea = 0;
-    const n = polygon.length;
+    const n = polygonCoords.length;
 
     for (let i = 0; i < n; i++) {
-      const [x1, y1] = polygon[i];
-      const [x2, y2] = polygon[(i + 1) % n];
+      const { x: x1, y: y1 } = polygonCoords[i];
+      const { x: x2, y: y2 } = polygonCoords[(i + 1) % n];
 
       // 计算三角形面积
       const area = (x1 * y2 - x2 * y1) / 2;
@@ -116,8 +111,8 @@ export default class MathUtils {
     // 计算点与多边形顶点连线形成的三角形面积之和
     let testArea = 0;
     for (let i = 0; i < n; i++) {
-      const [x1, y1] = polygon[i];
-      const [x2, y2] = polygon[(i + 1) % n];
+      const { x: x1, y: y1 } = polygonCoords[i];
+      const { x: x2, y: y2 } = polygonCoords[(i + 1) % n];
 
       // 计算三角形面积
       const area = Math.abs((x1 * (y2 - py) + x2 * (py - y1) + px * (y1 - y2)) / 2);
@@ -226,4 +221,46 @@ export default class MathUtils {
     return true; // 在所有轴上投影都重叠，则多边形重叠
   }
 
+  /**
+   * 计算多边形的中心节点（几何法）
+   * 
+   * @param points 
+   * @returns 
+   */
+  static calcPolygonCentroid(points: IPoint[]): IPoint {
+    if (!points || points.length === 0) {
+      throw new Error("顶点数组不能为空");
+    }
+
+    let centroidX = 0;
+    let centroidY = 0;
+    const numPoints = points.length;
+
+    for (let i = 0; i < numPoints; i++) {
+      centroidX += points[i].x;
+      centroidY += points[i].y;
+    }
+
+    centroidX /= numPoints;
+    centroidY /= numPoints;
+
+    return { x: centroidX, y: centroidY };
+  }
+
+  /**
+   * 给定中心点和一个距离，以及一个角度，计算出该角度下的目标点。
+   * 
+   * @param center 
+   * @param distance 
+   * @param angleDeg 
+   * @returns 
+   */
+  static calculateTargetPoint(center: IPoint, distance: number, angleDeg: number) {
+    // 将角度转换为弧度
+    const angleRad = MathUtils.degreesToRadians(angleDeg);
+    // 计算目标点的坐标
+    const targetX = center.x + distance * Math.cos(angleRad);
+    const targetY = center.y + distance * Math.sin(angleRad);
+    return { x: targetX, y: targetY };
+  }
 }
