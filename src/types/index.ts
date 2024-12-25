@@ -74,6 +74,7 @@ export interface IStageStore {
   updateElementById(id: string, props: Partial<IStageElement>): IStageElement;
   updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
   updateElementModel(id: string, data: Partial<ElementObject>): IStageElement;
+  updateElementsModel(elements: IStageElement[], props: Partial<ElementObject>): void;
   hasElement(id: string): boolean;
   findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
   getElementById(id: string): IStageElement;
@@ -81,6 +82,8 @@ export interface IStageStore {
   creatingElement(points: IPoint[]): IStageElement;
   finishCreatingElement(): IStageElement;
   updateSelectedElementsMovement(offset: IPoint): void;
+  updateSelectedElementsRotation(point: IPoint): void;
+  calcRotatingElementsCentroid(): void;
   setupStageElementsModelCoords(elements: IStageElement[]): void;
   refreshStageElementsPoints(elements: IStageElement[]): void;
   forEach(callback: (element: IStageElement, index: number) => void): void;

@@ -189,7 +189,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.cursor.transform(e);
     this.setCursorStyle(this.currentCreator.cursor);
 
-    if (this.isMoveableActive) {
+    if (this.isMoveableActive && !this.isElementRotating) {
       this.selection.hitTargetElements(this.cursor.value);
     }
 
@@ -218,6 +218,11 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             })
             // 标记组件正在拖动
             this.store.updateElements(this.store.selectedElements, { isDragging: true });
+            funcs.push(() => this.redraw())
+          }
+        } else if (this._isElementRotating) {
+          if (this.checkCursorPressMovedALittle(e)) {
+            this.store.updateSelectedElementsRotation(this._pressMovePosition)
             funcs.push(() => this.redraw())
           }
         }
@@ -257,6 +262,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
 
     if (this.isMoveableActive && targetRotateElement) {
       this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
+      this.store.calcRotatingElementsCentroid();
       this._isElementRotating = true;
     } else if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
       // 1. 如果是绘制模式则直接清空

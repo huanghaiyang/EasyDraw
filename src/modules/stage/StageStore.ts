@@ -10,10 +10,11 @@ import {
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
-import { cloneDeep } from "lodash";
+import { cloneDeep, flatten } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
 import SortedMap from "@/modules/struct/SortedMap";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -38,6 +39,9 @@ export default class StageStore implements IStageStore {
   private _rangeElementsMap = new SortedMap<string, IStageElement>();
   // 旋转目标元素映射关系，加快查询
   private _rotatingTargetElementsMap = new SortedMap<string, IStageElement>();
+
+  // 旋转组件中心点
+  private _rotatingTargetElementsCentroid: IPoint;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -315,6 +319,18 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 更新元素数据
+   * 
+   * @param elements 
+   * @param props 
+   */
+  updateElementsModel(elements: IStageElement[], props: Partial<ElementObject>): void {
+    elements.forEach(element => {
+      this.updateElementModel(element.id, props);
+    })
+  }
+
+  /**
    * 创建元素的数据对象
    * 
    * @param type 
@@ -467,6 +483,30 @@ export default class StageStore implements IStageStore {
       const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
       this.updateElementById(element.id, {
         isOnStage,
+      })
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })
+  }
+
+  /**
+   * 计算旋转组件的中心点
+   */
+  calcRotatingElementsCentroid(): IPoint {
+    const point = MathUtils.calcPolygonCentroid(flatten(this.selectedElements.map(element => element.pathPoints)))
+    this._rotatingTargetElementsCentroid = point;
+    return point;
+  }
+
+  /**
+   * 根据当前鼠标位置，计算旋转角度
+   * 
+   * @param point 
+   */
+  updateSelectedElementsRotation(point: IPoint): void {
+    const angle = MathUtils.calculateAngle(this._rotatingTargetElementsCentroid, point);
+    this.rotatingTargetElements.forEach(element => {
+      this.updateElementModel(element.id, {
+        angle: angle + 90,
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })

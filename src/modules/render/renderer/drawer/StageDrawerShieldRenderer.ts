@@ -19,7 +19,7 @@ export default class StageDrawerShieldRenderer extends StageDrawerBaseRenderer<I
         return;
       }
     }
-    if (this.drawer.isElementsDragging || this.drawer.isElementsResizing || this.drawer.isStageMoving) {
+    if (this.drawer.isElementsDragging || this.drawer.isElementsResizing || this.drawer.isStageMoving || this.drawer.isElementRotating) {
       cargo.add(new StageElementTaskClear(null, this.renderParams));
       this.drawer.store.stageElements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);

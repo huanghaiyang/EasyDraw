@@ -24,16 +24,12 @@ export default class MathUtils {
    * 在右手坐标系中，当从旋转轴的正向向原点看去，如果旋转是逆时针方向进行的，那么这种旋转被定义为正方向。相反，如果旋转是顺时针方向进行的，则定义为负方向。这一规则适用于绕任意坐标轴（x轴、y轴或z轴）的旋转。
    * 
    * @param coord 
-   * @param thetaDegrees 
+   * @param angle 
    * @returns 
    */
-  static rotate(coord: IPoint, thetaDegrees: number): IPoint {
-    const theta = MathUtils.degreesToRadians(thetaDegrees); // 将角度转换为弧度
-    const rotationMatrix = [
-      [Math.cos(theta), -Math.sin(theta), 0],
-      [Math.sin(theta), Math.cos(theta), 0],
-      [0, 0, 1]
-    ];
+  static rotate(coord: IPoint, angle: number): IPoint {
+    const theta = MathUtils.degreesToRadians(angle); // 将角度转换为弧度
+    const rotationMatrix = [[Math.cos(theta), -Math.sin(theta), 0], [Math.sin(theta), Math.cos(theta), 0], [0, 0, 1]];
     const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
@@ -42,15 +38,35 @@ export default class MathUtils {
   }
 
   /**
+   * 相对于圆心上旋转
+   * 
+   * @param coord 
+   * @param angle 
+   * @param centroid 
+   * @returns 
+   */
+  static rotateRelativeCentroid(coord: IPoint, angle: number, centroid: IPoint): IPoint {
+    const point = {
+      x: coord.x - centroid.x,
+      y: coord.y - centroid.y
+    };
+    const result =  MathUtils.rotate(point, angle);
+    return {
+      x: result.x + centroid.x,
+      y: result.y + centroid.y
+    }
+  }
+
+  /**
    * 旋转并平移
    * 
    * @param coord 
-   * @param thetaDegrees 
+   * @param angle 
    * @param value 
    * @returns 
    */
-  static rotateAndTranslate(coord: IPoint, thetaDegrees: number, value: TranslationValue): IPoint {
-    return MathUtils.translate(MathUtils.rotate(coord, thetaDegrees), value);
+  static rotateAndTranslate(coord: IPoint, angle: number, value: TranslationValue): IPoint {
+    return MathUtils.translate(MathUtils.rotate(coord, angle), value);
   }
 
   /**
@@ -266,5 +282,23 @@ export default class MathUtils {
     const targetX = center.x + distance * Math.cos(angleRad);
     const targetY = center.y + distance * Math.sin(angleRad);
     return { x: targetX, y: targetY };
+  }
+
+  /**
+   * 计算两个点至今的夹角
+   * 
+   * @param p1 
+   * @param p2 
+   * @returns 
+   */
+  static calculateAngle(p1: IPoint, p2: IPoint): number {
+    // 计算两点之间的差值
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    // 使用atan2函数计算角度（弧度）
+    const angleRadians = Math.atan2(dy, dx);
+    // 将角度转换为度数
+    const angleDegrees = angleRadians * (180 / Math.PI);
+    return angleDegrees;
   }
 }
