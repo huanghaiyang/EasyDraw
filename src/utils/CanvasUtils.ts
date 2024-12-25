@@ -3,6 +3,8 @@ import MathUtils from "./MathUtils";
 
 export default class CanvasUtils {
 
+  static ImageCaches = new Map();
+
   /**
    * 绘制图片或者canvas到canvas上
    * 
@@ -15,9 +17,15 @@ export default class CanvasUtils {
   static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): Promise<void> {
     return new Promise((resolve, reject) => {
       if (typeof svg === 'string') {
+        if (CanvasUtils.ImageCaches.has(svg)) {
+          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(svg), rect, options);
+          resolve();
+          return;
+        }
         const img = new Image();
         img.src = svg;
         img.onload = () => {
+          CanvasUtils.ImageCaches.set(svg, img);
           CanvasUtils.drawRotateImage(target, img, rect, options);
           resolve();
         }
