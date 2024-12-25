@@ -108,7 +108,6 @@ export default class StageSelection implements IStageSelection {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       const { rotationModel: { vertices } } = element;
-      // console.log(vertices)
       if (MathUtils.isPointInPolygonByRayCasting(point, vertices)) {
         return element;
       }
@@ -162,8 +161,9 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   checkSelectContainsTarget(): boolean {
-    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
     const targetIds = this.shield.store.targetElements.map(item => item.id);
+    if (targetIds.length === 0) return false;
+    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
     return every(targetIds, item => includes(selectedIds, item))
   }
 }

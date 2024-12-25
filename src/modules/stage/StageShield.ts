@@ -257,6 +257,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
 
     if (this.isMoveableActive && targetRotateElement) {
       this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
+      this._isElementRotating = true;
     } else if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
       // 1. 如果是绘制模式则直接清空
       // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
