@@ -100,6 +100,22 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 检查当前鼠标是否命中组件的旋转句柄区域
+   * 
+   * @param point 
+   */
+  checkTargetRotation(point: IPoint): void {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element) {
+      const { rotationModel: { vertices } } = element;
+      // console.log(vertices)
+      if (MathUtils.isPointInPolygonByRayCasting(point, vertices)) {
+        console.log('checkTargetRotation');
+      }
+    }
+  }
+
+  /**
    * 刷新选区
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态

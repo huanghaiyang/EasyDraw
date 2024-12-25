@@ -110,14 +110,14 @@ export default class ElementUtils {
   }
 
   /**
-   * 几何法计算多边形中心节点
+   * 计算组件旋转按钮的中心点
    * 
    * @param element 
    * @returns 
    */
   static calcElementRotatePoint(element: IStageElement): IPoint {
-    const { boxPoints, angle, centroid } = element;
-    const v1 = boxPoints[0]
+    const { boxPoints, centroid, rotationModel: { angle } } = element;
+    const v1 = boxPoints[0];
     const v2 = boxPoints[3];
     const halfValue = Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)) / 2;
     return MathUtils.calculateTargetPoint(centroid, halfValue + DefaultSelectionRotateDistance, angle);

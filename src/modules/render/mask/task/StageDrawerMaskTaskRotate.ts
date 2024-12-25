@@ -20,6 +20,8 @@ export default class StageDrawerMaskTaskRotate extends StageDrawerMaskTaskBase i
         y: y - height / 2,
         width,
         height,
+      }, {
+        angle: this.data.angle
       })
     }
   }

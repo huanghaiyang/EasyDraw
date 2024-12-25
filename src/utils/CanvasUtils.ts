@@ -52,12 +52,14 @@ export default class CanvasUtils {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     if (angle) {
+      ctx.save()
       ctx.translate(x + width / 2, y + height / 2);
       ctx.rotate(MathUtils.degreesToRadians(angle));
       ctx.drawImage(svg, -width / 2, -height / 2, width, height);
     } else {
       ctx.drawImage(svg, x, y, width, height);
     }
+    ctx.restore();
   }
 
   /**

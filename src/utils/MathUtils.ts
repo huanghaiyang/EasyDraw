@@ -21,6 +21,8 @@ export default class MathUtils {
   /**
    * 旋转
    * 
+   * 在右手坐标系中，当从旋转轴的正向向原点看去，如果旋转是逆时针方向进行的，那么这种旋转被定义为正方向。相反，如果旋转是顺时针方向进行的，则定义为负方向。这一规则适用于绕任意坐标轴（x轴、y轴或z轴）的旋转。
+   * 
    * @param coord 
    * @param thetaDegrees 
    * @returns 
@@ -249,6 +251,8 @@ export default class MathUtils {
 
   /**
    * 给定中心点和一个距离，以及一个角度，计算出该角度下的目标点。
+   * 
+   * 以x轴为0度，顺时针为正，逆时针为负
    * 
    * @param center 
    * @param distance 

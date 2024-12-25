@@ -1,4 +1,4 @@
-import { IPoint } from "@/types";
+import { IPoint, ISize } from "@/types";
 import { nanoid } from "nanoid";
 
 export default class CommonUtils {
@@ -59,7 +59,7 @@ export default class CommonUtils {
    * @param rect 
    * @returns 
    */
-  static getBoxVertices(point: IPoint, rect: DOMRect): IPoint[] {
+  static getBoxVertices(point: IPoint, rect: ISize | DOMRect): IPoint[] {
     return [{
       x: point.x - rect.width / 2,
       y: point.y - rect.height / 2

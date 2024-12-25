@@ -173,6 +173,7 @@ export interface IStageDrawerMaskTaskRotateModel extends IStageDrawerMaskTaskMod
   width: number;
   height: number;
   angle: number;
+  vertices: IPoint[];
 }
 
 // 辅助画布绘制任务
@@ -227,6 +228,7 @@ export interface IStageSelection {
   selectTarget(): void;
   clearSelects(): void;
   checkTargetElements(point: IPoint): void;
+  checkTargetRotation(point: IPoint): void;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IStageElement;
   checkSelectContainsTarget(): boolean;
@@ -265,14 +267,14 @@ export type ElementObject = {
 export interface IStageElement {
   id: string;
   model: ElementObject;
+  rotationModel: IStageDrawerMaskTaskRotateModel;
+
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get boxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
-  get angle(): number;
   get centroid(): IPoint;
-  get rotationPoint(): IPoint;
 
   get isSelected(): boolean;
   get isVisible(): boolean;

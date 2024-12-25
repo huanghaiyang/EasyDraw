@@ -185,6 +185,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
 
     if (this.isMoveableActive) {
       this.selection.checkTargetElements(this.cursor.value);
+      this.selection.checkTargetRotation(this.cursor.value);
     }
 
     // 判断鼠标是否按下

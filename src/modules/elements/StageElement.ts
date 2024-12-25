@@ -1,14 +1,24 @@
-import { ElementStatus, ElementObject, IPoint, IStageElement } from "@/types";
+import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerMaskTaskRotateModel, StageDrawerMaskModelTypes } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
+import { DefaultSelectionRotateSize } from "@/types/constants";
 
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
+
+  rotationModel: IStageDrawerMaskTaskRotateModel = {
+    point: null,
+    type: StageDrawerMaskModelTypes.rotate,
+    width: DefaultSelectionRotateSize,
+    height: DefaultSelectionRotateSize,
+    angle: -90,
+    vertices: []
+  };
 
   @observable _status: ElementStatus = ElementStatus.initialed;
   @observable _isSelected: boolean = false;
@@ -24,16 +34,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
-  get angle(): number {
-    return this.model.angle - 90;
-  }
-
   get centroid(): IPoint {
     return MathUtils.calcPolygonCentroid(this.boxPoints);
-  }
-
-  get rotationPoint(): IPoint {
-    return ElementUtils.calcElementRotatePoint(this);
   }
 
   @computed
@@ -254,11 +256,33 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 刷新坐标
    */
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+    this.refreshElementPoints(stageRect, stageWorldCoord);
+    this.refreshRotationModelPoints();
+  }
+
+  /**
+   * 刷新舞台坐标
+   * 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   */
+  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint) {
     this._points = ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
     this._pathPoints = this._points;
     this._rotatePoints = this._points.map(point => MathUtils.rotate(point, this.model.angle))
     this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotate(point, this.model.angle))
     this._boxPoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
+  }
+
+  /**
+   * 刷新旋转句柄在舞台的坐标
+   */
+  refreshRotationModelPoints() {
+    this.rotationModel.point = ElementUtils.calcElementRotatePoint(this);
+    this.rotationModel.vertices = CommonUtils.getBoxVertices(this.rotationModel.point, {
+      width: this.rotationModel.width,
+      height: this.rotationModel.height
+    }).map(point => MathUtils.rotate(point, this.model.angle))
   }
 
   /**

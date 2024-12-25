@@ -9,7 +9,6 @@ import {
   Directions,
   IStageDrawerMask,
   IStageElement,
-  IStageDrawerMaskTaskRotateModel,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
@@ -18,8 +17,6 @@ import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMask
 import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 import StageDrawerMaskTaskRotate from "@/modules/render/mask/task/StageDrawerMaskTaskRotate";
-import { DefaultSelectionRotateSize } from "@/types/constants";
-import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
 
@@ -158,15 +155,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @returns 
    */
   private createMaskRotateTask(element: IStageElement): IRenderTask {
-    const model: IStageDrawerMaskTaskRotateModel = {
-      point: element.rotationPoint,
-      angle: element.angle,
-      type: StageDrawerMaskModelTypes.rotate,
-      width: DefaultSelectionRotateSize,
-      height: DefaultSelectionRotateSize,
-    }
-    const task = new StageDrawerMaskTaskRotate(model, this.renderParams);
-    return task;
+    return new StageDrawerMaskTaskRotate(element.rotationModel, this.renderParams);
   }
 
 }
