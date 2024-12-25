@@ -159,7 +159,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskRotateTask(element: IStageElement): IRenderTask {
     const model: IStageDrawerMaskTaskRotateModel = {
-      point: ElementUtils.calcElementRotatePoint(element),
+      point: element.rotationPoint,
       angle: element.angle,
       type: StageDrawerMaskModelTypes.rotate,
       width: DefaultSelectionRotateSize,

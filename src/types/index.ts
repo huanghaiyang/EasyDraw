@@ -271,6 +271,9 @@ export interface IStageElement {
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get angle(): number;
+  get centroid(): IPoint;
+  get rotationPoint(): IPoint;
+
   get isSelected(): boolean;
   get isVisible(): boolean;
   get isEditing(): boolean;

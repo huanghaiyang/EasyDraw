@@ -24,8 +24,16 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
-  get angle() {
+  get angle(): number {
     return this.model.angle - 90;
+  }
+
+  get centroid(): IPoint {
+    return MathUtils.calcPolygonCentroid(this.boxPoints);
+  }
+
+  get rotationPoint(): IPoint {
+    return ElementUtils.calcElementRotatePoint(this);
   }
 
   @computed

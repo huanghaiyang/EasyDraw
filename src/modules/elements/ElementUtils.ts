@@ -116,8 +116,7 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IStageElement): IPoint {
-    const { boxPoints, angle } = element;
-    const centroid = MathUtils.calcPolygonCentroid(boxPoints);
+    const { boxPoints, angle, centroid } = element;
     const v1 = boxPoints[0]
     const v2 = boxPoints[3];
     const halfValue = Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)) / 2;
