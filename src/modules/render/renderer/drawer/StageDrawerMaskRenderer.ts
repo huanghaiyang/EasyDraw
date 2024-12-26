@@ -170,6 +170,16 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @param element 
    */
   private createMaskSizeIndicatorTask(element: IStageElement): IRenderTask {
+    if (element.model.angle % 90 === 0) {
+      const p1 = element.boxPoints[3]
+      const p2 = element.boxPoints[2]
+      return new StageDrawerMaskTaskSizeIndicator({
+        point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
+        angle: 0,
+        type: StageDrawerMaskModelTypes.sizeIndicator,
+        text: Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)).toFixed(2) + 'px',
+      } as IStageDrawerMaskTaskSizeIndicatorModel, this.renderParams);
+    }
     const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
     let leftAngle = MathUtils.calculateAngle(bottomPoint, leftPoint) + 180;
     let rightAngle = MathUtils.calculateAngle(bottomPoint, rightPoint) + 180;
@@ -180,7 +190,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       rightAngle = 180 - rightAngle;
     }
     const point = leftAngle < rightAngle ? leftPoint : rightPoint;
-    
+
     let p1, p2;
     if (point.x < bottomPoint.x) {
       p1 = point;
