@@ -54,7 +54,7 @@ export const CursorCanvasSize = 24;
 export const MinCursorMoveXDistance = 2;
 export const MinCursorMoveYDistance = 2;
 export const DefaultCreatorStrokeColor = 'rgba(0, 0, 0, 0.05)';
-export const DefaultCreatorFillColor = 'rgba(0, 0, 0, 0.15)';
+export const DefaultCreatorFillColor = 'rgba(0, 0, 0, 0.065)';
 export const DefaultCreatorStrokeWidth = 1;
 export const DefaultSelectionStrokeColor = '#0c8ce9';
 export const DefaultSelectionFillColor = 'rgba(0, 0, 0, 0)';
@@ -65,3 +65,12 @@ export const DefaultSelectionHandlerStrokeWidth = 1;
 export const DefaultSelectionHandlerSize = 4;
 export const DefaultSelectionRotateSize = 18;
 export const DefaultSelectionRotateDistance = 18;
+
+// 尺寸指示器
+export const DefaultSelectionSizeIndicatorStrokeColor = '#0c8ce9';
+export const DefaultSelectionSizeIndicatorFillColor = '#0c8ce9';
+export const DefaultSelectionSizeIndicatorStrokeWidth = 0;
+export const DefaultSelectionSizeIndicatorDistance = 10;
+export const DefaultSelectionSizeIndicatorTextColor = '#000';
+export const DefaultSelectionSizeIndicatorFontSize = 12;
+export const DefaultSelectionSizeIndicatorFontFamily = 'Arial';

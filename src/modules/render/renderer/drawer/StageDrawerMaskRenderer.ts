@@ -9,6 +9,7 @@ import {
   Directions,
   IStageDrawerMask,
   IStageElement,
+  IStageDrawerMaskTaskSizeIndicatorModel,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
@@ -17,6 +18,10 @@ import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMask
 import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 import StageDrawerMaskTaskRotate from "@/modules/render/mask/task/StageDrawerMaskTaskRotate";
+import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
+import StageDrawerMaskTaskSizeIndicator from "@/modules/render/mask/task/StageDrawerMaskTaskSizeIndicator";
+import { DefaultSelectionSizeIndicatorDistance } from "@/types/constants";
 
 export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
 
@@ -45,6 +50,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
     if (this.drawer.shield.store.uniqSelectedElement) {
       cargo.add(this.createMaskRotateTask(this.drawer.shield.store.uniqSelectedElement));
+      cargo.add(this.createMaskSizeIndicatorTask(this.drawer.shield.store.uniqSelectedElement));
     }
 
     // 绘制光标
@@ -156,6 +162,41 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskRotateTask(element: IStageElement): IRenderTask {
     return new StageDrawerMaskTaskRotate(element.rotationModel, this.renderParams);
+  }
+
+  /**
+   * 给出一个元素创建一个绘制尺寸指示器的任务
+   * 
+   * @param element 
+   */
+  private createMaskSizeIndicatorTask(element: IStageElement): IRenderTask {
+    const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
+    let leftAngle = MathUtils.calculateAngle(bottomPoint, leftPoint) + 180;
+    let rightAngle = MathUtils.calculateAngle(bottomPoint, rightPoint) + 180;
+    if (leftAngle > 90) {
+      leftAngle = 180 - leftAngle;
+    }
+    if (rightAngle > 90) {
+      rightAngle = 180 - rightAngle;
+    }
+    const point = leftAngle < rightAngle ? leftPoint : rightPoint;
+    
+    let p1, p2;
+    if (point.x < bottomPoint.x) {
+      p1 = point;
+      p2 = bottomPoint;
+    } else {
+      p1 = bottomPoint;
+      p2 = point;
+    }
+    const angle = MathUtils.calculateAngle(p1, p2);
+    const model: IStageDrawerMaskTaskSizeIndicatorModel = {
+      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
+      angle,
+      type: StageDrawerMaskModelTypes.sizeIndicator,
+      text: Math.sqrt(Math.pow(point.x - bottomPoint.x, 2) + Math.pow(point.y - bottomPoint.y, 2)).toFixed(2) + 'px',
+    }
+    return new StageDrawerMaskTaskSizeIndicator(model, this.renderParams);
   }
 
 }

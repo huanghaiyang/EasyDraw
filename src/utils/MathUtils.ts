@@ -50,7 +50,7 @@ export default class MathUtils {
       x: coord.x - centroid.x,
       y: coord.y - centroid.y
     };
-    const result =  MathUtils.rotate(point, angle);
+    const result = MathUtils.rotate(point, angle);
     return {
       x: result.x + centroid.x,
       y: result.y + centroid.y
@@ -264,5 +264,21 @@ export default class MathUtils {
     // 将角度转换为度数
     const angleDegrees = angleRadians * (180 / Math.PI);
     return angleDegrees;
+  }
+
+  /**
+   * 给定一条线段，求距离线段中心点距离的一点，参数为直线的点一和点二，是否顺时针还是逆时针，距离，共四个参数
+   * 
+   * 注意p1一定是x轴值最小的那个点
+   * 
+   * @param p1 
+   * @param p2 
+   * @param isClockwise 
+   * @param distance 
+   */
+  static calculateSegmentLineCentroidCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
+    const centroid = MathUtils.calcPolygonCentroid([p1, p2]);
+    const angle = MathUtils.calculateAngle(p1, p2);
+    return MathUtils.calculateTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
   }
 }

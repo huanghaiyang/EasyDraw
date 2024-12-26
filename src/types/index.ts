@@ -134,6 +134,7 @@ export enum StageDrawerMaskModelTypes {
   cursor = 2,
   highlight = 3,
   rotate = 4,
+  sizeIndicator,
 }
 
 // 方位
@@ -158,6 +159,12 @@ export interface IStageDrawerMaskTaskModel {
 export interface IStageDrawerMaskTaskSelectionModel extends IStageDrawerMaskTaskModel {
   points: IPoint[];
   type: StageDrawerMaskModelTypes
+}
+
+export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMaskTaskModel {
+  point: IPoint;
+  text: string;
+  angle: number;
 }
 
 // 辅助画布绘制任务选区控制器对象
@@ -203,6 +210,9 @@ export interface IStageDrawerMaskTaskRotate extends IStageDrawerMaskTask { }
 
 // 辅助画布清除绘制任务
 export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask { }
+
+// 用于显示组件尺寸
+export interface IStageDrawerMaskTaskSizeIndicator extends IStageDrawerMaskTask { }
 
 // 舞台元素绘制任务
 export interface IStageElementTask extends IRenderTask {
@@ -405,6 +415,9 @@ export type CanvasCreatorStyles = {
   strokeStyle?: string;
   lineWidth?: number;
   fillStyle?: string;
+  font?: string;
+  textAlign?: CanvasTextAlign;
+  textBaseline?: CanvasTextBaseline;
 }
 
 // 平移值

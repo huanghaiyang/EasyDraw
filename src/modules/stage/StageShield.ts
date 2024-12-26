@@ -265,7 +265,16 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
       this.store.calcRotatingElementsCentroid();
       this._isElementRotating = true;
-    } else if (this.isDrawerActive || (this.isMoveableActive && (!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget()))) {
+    } else if (
+      this.isDrawerActive
+      || (
+        this.isMoveableActive
+        && (
+          !this.selection.getElementOnPoint(this.cursor.value)
+          || !this.selection.checkSelectContainsTarget()
+        )
+      )
+    ) {
       // 1. 如果是绘制模式则直接清空
       // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
       // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区

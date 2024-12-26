@@ -42,6 +42,8 @@ export default class CanvasUtils {
   /**
    * 绘制一张旋转过的图片
    * 
+   * canvas是以x的正方向为0，顺时针为正角度旋转的
+   * 
    * @param target 
    * @param svg 
    * @param rect 
@@ -59,6 +61,29 @@ export default class CanvasUtils {
     } else {
       ctx.drawImage(svg, x, y, width, height);
     }
+    ctx.restore();
+  }
+
+  /**
+   * 绘制一个旋转的文字
+   * 
+   * @param target 
+   * @param text 
+   * @param centroid 
+   * @param styles 
+   * @param options 
+   */
+  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint , styles: CanvasCreatorStyles, options?: {  angle: number }): void {
+    const { angle } = options || { angle: 0 };
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.translate(centroid.x, centroid.y);
+    ctx.rotate(MathUtils.degreesToRadians(angle));
+    ctx.font = styles.font;
+    ctx.fillStyle = styles.fillStyle;
+    ctx.textAlign = styles.textAlign;
+    ctx.textBaseline = styles.textBaseline;
+    ctx.fillText(text, 0, 0);
     ctx.restore();
   }
 

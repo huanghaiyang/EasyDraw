@@ -94,4 +94,25 @@ export default class CommonUtils {
       x: 0, y: rect.height
     }]
   }
+
+  /**
+   * 给定一个多边形，取最左侧，最下侧，最右侧三个点
+   * 
+   * @param points 
+   */
+  static getLBRPoints(points: IPoint[]): IPoint[] {
+    let leftIndex, bottomIndex, rightIndex;
+    points.forEach((point, index) => {
+      if (leftIndex === undefined || point.x < points[leftIndex].x) {
+        leftIndex = index;
+      }
+      if (bottomIndex === undefined || point.y > points[bottomIndex].y) {
+        bottomIndex = index;
+      }
+      if (rightIndex === undefined || point.x > points[rightIndex].x) {
+        rightIndex = index;
+      }
+    });
+    return [points[leftIndex], points[bottomIndex], points[rightIndex]];
+  }
 }
