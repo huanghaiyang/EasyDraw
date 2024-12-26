@@ -4,10 +4,10 @@ import { CursorCreators } from "@/types/constants";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
-const store = useStageStore();
-const currentCreator = computed(() => store.currentCreator);
-const currentCursorCreator = computed(() => store.currentCursorCreator);
-const currentShapeCreator = computed(() => store.currentShapeCreator);
+const stageStore = useStageStore();
+const currentCreator = computed(() => stageStore.currentCreator);
+const currentCursorCreator = computed(() => stageStore.currentCursorCreator);
+const currentShapeCreator = computed(() => stageStore.currentShapeCreator);
 
 const select = (item) => {
   emits("select", item);

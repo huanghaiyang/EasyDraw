@@ -50,14 +50,14 @@ export default class StageStore implements IStageStore {
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
 
-    this._provisionalElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._provisionalElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements)
     })
-    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => {})
-    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => {})
-    this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => {})
-    this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements)
     })
@@ -118,6 +118,7 @@ export default class StageStore implements IStageStore {
       this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
       this._reactionElementPropsChanged(ElementReactionPropNames.isInRange, element, element.isInRange);
       this._reactionElementPropsChanged(ElementReactionPropNames.isRotatingTarget, element, element.isRotatingTarget);
+      this._reactionElementPropsChanged(ElementReactionPropNames.position, element, element.position);
     })
   }
 
@@ -155,7 +156,7 @@ export default class StageStore implements IStageStore {
    * @param element 
    * @param value 
    */
-  private _reactionElementPropsChanged(propName: string, element: IStageElement, value: boolean | ElementStatus): void {
+  private _reactionElementPropsChanged(propName: string, element: IStageElement, value: boolean | ElementStatus | IPoint): void {
     switch (propName) {
       case ElementReactionPropNames.isSelected: {
         if (value) {
@@ -211,6 +212,10 @@ export default class StageStore implements IStageStore {
         } else {
           this._rotatingTargetElementsMap.delete(element.id);
         }
+        break;
+      }
+      case ElementReactionPropNames.position: {
+        this.shield.emit(ShieldDispatcherNames.positionChanged, element, value)
         break;
       }
       default: {

@@ -34,9 +34,19 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isTarget: boolean = false;
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
+  @observable _position: IPoint;
 
   get centroid(): IPoint {
     return MathUtils.calcPolygonCentroid(this.pathPoints);
+  }
+
+  @computed
+  get position(): IPoint {
+    return this._position;
+  }
+
+  set position(value: IPoint) {
+    this._setPosition(value);
   }
 
   @computed
@@ -235,6 +245,11 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._isInRange = value;
   }
 
+  @action
+  private _setPosition(value: IPoint): void {
+    this._position = value;
+  }
+
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
   protected _boxPoints: IPoint[];
@@ -282,6 +297,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param stageWorldCoord 
    */
   refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint) {
+    this.position = CommonUtils.getBoxPoints(this.model.coords)[0];
     this._points = ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
     this._pathPoints = this._points;
     this._rotatePoints = this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))

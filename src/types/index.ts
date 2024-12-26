@@ -284,6 +284,7 @@ export interface IStageElement {
   model: ElementObject;
   rotationModel: IStageDrawerRotationModel;
 
+  get position(): IPoint;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get boxPoints(): IPoint[];
@@ -306,6 +307,7 @@ export interface IStageElement {
   get isInRange(): boolean;
   get status(): ElementStatus;
 
+  set position(value: IPoint);
   set isSelected(value: boolean);
   set isVisible(value: boolean);
   set isEditing(value: boolean);
@@ -437,6 +439,7 @@ export enum ShieldDispatcherNames {
   elementCreated = 0,
   selectedChanged = 1,
   targetChanged = 2,
+  positionChanged = 3,
 }
 
 export interface IElementList extends EventEmitter {}

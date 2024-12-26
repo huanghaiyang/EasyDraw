@@ -20,7 +20,8 @@ export enum ElementReactionPropNames {
   isTarget = 'isTarget',
   isInRange = 'isInRange',
   isOnStage = 'isOnStage',
-  status = 'status'
+  status = 'status',
+  position = 'position',
 }
 
 export enum ElementListEventNames {
