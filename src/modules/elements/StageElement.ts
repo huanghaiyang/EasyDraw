@@ -316,7 +316,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param point 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointInPolygon(point, this.rotatePathPoints);
+    return MathUtils.isPointInPolygonByRayCasting(point, this.rotatePathPoints);
   }
 
   /**

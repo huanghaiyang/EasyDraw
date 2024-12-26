@@ -106,42 +106,6 @@ export default class MathUtils {
   }
 
   /**
-   * 使用面积和法线判断点是否在多边形内
-   * 
-   * @param coord 
-   * @param polygonCoords 
-   * @returns 
-   */
-  static isPointInPolygon(coord: IPoint, polygonCoords: IPoint[]): boolean {
-    const { x: px, y: py } = coord;
-    let totalArea = 0;
-    const n = polygonCoords.length;
-
-    for (let i = 0; i < n; i++) {
-      const { x: x1, y: y1 } = polygonCoords[i];
-      const { x: x2, y: y2 } = polygonCoords[(i + 1) % n];
-
-      // 计算三角形面积
-      const area = (x1 * y2 - x2 * y1) / 2;
-      totalArea += area;
-    }
-
-    // 计算点与多边形顶点连线形成的三角形面积之和
-    let testArea = 0;
-    for (let i = 0; i < n; i++) {
-      const { x: x1, y: y1 } = polygonCoords[i];
-      const { x: x2, y: y2 } = polygonCoords[(i + 1) % n];
-
-      // 计算三角形面积
-      const area = Math.abs((x1 * (y2 - py) + x2 * (py - y1) + px * (y1 - y2)) / 2);
-      testArea += area;
-    }
-
-    // 如果两个面积相等，则点在多边形内部
-    return Math.abs(totalArea - testArea) < Number.EPSILON;
-  }
-
-  /**
    * 使用射线法判断点是否在多边形内
    * 
    * @param coord 
