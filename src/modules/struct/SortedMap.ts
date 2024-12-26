@@ -1,12 +1,15 @@
-export default class SortedMap<K, V> {
-  private map: Map<K, V>;
-  private keys: K[];
+import { EventEmitter } from "events";
+
+export default class SortedMap<K, V> extends EventEmitter{
+  protected map: Map<K, V>;
+  protected keys: K[];
 
   get size(): number {
     return this.map.size;
   }
 
   constructor() {
+    super();
     this.map = new Map<K, V>();
     this.keys = [];
   }

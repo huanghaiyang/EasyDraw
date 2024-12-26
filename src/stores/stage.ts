@@ -1,6 +1,6 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
-import { Creator, CreatorCategories, ShieldDispatcherNames, StageInitParams } from "@/types";
+import { Creator, CreatorCategories, IStageElement, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { MoveableCreator, RectangleCreator } from "@/types/constants";
 import { defineStore } from "pinia";
 
@@ -8,11 +8,13 @@ const shield = new StageShield();
 const container = new StageContainer();
 
 export const useStageStore = defineStore("stage", {
-  state: ()=> {
+  state: () => {
     return {
       currentCreator: MoveableCreator,
       currentCursorCreator: MoveableCreator,
       currentShapeCreator: RectangleCreator,
+      selectedElements: [],
+      targetElements: [],
     }
   },
   actions: {
@@ -24,8 +26,12 @@ export const useStageStore = defineStore("stage", {
     async init(params: StageInitParams) {
       await container.init(params.containerEl);
       await shield.init(params.shieldEl);
+
       this.setCreator(MoveableCreator);
+
       shield.on(ShieldDispatcherNames.elementCreated, this.onElementCreated);
+      shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
+      shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
     },
     /**
      * 设置绘制工具
@@ -49,6 +55,23 @@ export const useStageStore = defineStore("stage", {
      */
     onElementCreated(elementIds: string[]) {
       this.setCreator(MoveableCreator);
-    }
+    },
+    /**
+     * 舞台组件选中状态改变
+     * 
+     * @param selectedElements 
+     */
+    onSelectedChanged(selectedElements: IStageElement[]) {
+      this.selectedElements = selectedElements;
+    },
+
+    /**
+     * 舞台组件命中状态改变
+     * 
+     * @param targetElements 
+     */
+    onTargetChanged(targetElements: IStageElement[]) {
+      this.targetElements = targetElements;
+    },
   },
 });

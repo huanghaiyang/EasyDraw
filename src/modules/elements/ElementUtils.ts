@@ -27,7 +27,7 @@ export enum ElementListEventNames {
   added = 'added',
   removed = 'removed',
   updated = 'updated',
-  sizeChanged = 'sizeChanged'
+  sizeChanged = 'sizeChanged',
 }
 
 export default class ElementUtils {

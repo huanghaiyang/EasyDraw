@@ -7,14 +7,15 @@ import {
   IStageElement,
   IStageShield,
   IStageStore,
+  ShieldDispatcherNames,
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
 import { cloneDeep, flatten } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
-import SortedMap from "@/modules/struct/SortedMap";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/ElementSortedMap";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -24,22 +25,21 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
-  private _elementMap = new SortedMap<string, IStageElement>();
+  private _elementMap = new ElementSortedMap<string, IStageElement>();
   // 已渲染的组件映射关系
-  private _provisionalElementsMap = new SortedMap<string, IStageElement>();
+  private _provisionalElementsMap = new ElementSortedMap<string, IStageElement>();
   // 被选中的组件映射关系，加快查询
-  private _selectedElementsMap = new SortedMap<string, IStageElement>();
+  private _selectedElementsMap = new ElementSortedMap<string, IStageElement>();
   // 命中的组件映射关系，加快查询
-  private _targetElementsMap = new SortedMap<string, IStageElement>();
+  private _targetElementsMap = new ElementSortedMap<string, IStageElement>();
   // 舞台元素映射关系，加快查询
-  private _stageElementsMap = new SortedMap<string, IStageElement>();
+  private _stageElementsMap = new ElementSortedMap<string, IStageElement>();
   // 未在舞台的元素映射关系，加快查询
-  private _noneStageElementsMap = new SortedMap<string, IStageElement>();
+  private _noneStageElementsMap = new ElementSortedMap<string, IStageElement>();
   // 选区元素映射关系，加快查询
-  private _rangeElementsMap = new SortedMap<string, IStageElement>();
+  private _rangeElementsMap = new ElementSortedMap<string, IStageElement>();
   // 旋转目标元素映射关系，加快查询
-  private _rotatingTargetElementsMap = new SortedMap<string, IStageElement>();
-
+  private _rotatingTargetElementsMap = new ElementSortedMap<string, IStageElement>();
   // 旋转组件中心点
   private _rotatingTargetElementsCentroid: IPoint;
 
@@ -49,6 +49,18 @@ export default class StageStore implements IStageStore {
     this._reactionElementAdded();
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
+
+    this._provisionalElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
+      this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements)
+    })
+    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => {})
+    this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
+      this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements)
+    })
   }
 
   // 当前创建并更新中的组件
