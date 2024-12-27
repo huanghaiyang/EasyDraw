@@ -291,7 +291,7 @@ export interface IStageElement {
   get position(): IPoint;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
-  get boxPoints(): IPoint[];
+  get maxBoxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get centroid(): IPoint;
@@ -332,6 +332,13 @@ export interface IStageElement {
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
   isRotationContainsPoint(point: IPoint): boolean;
+
+  calcPosition(): IPoint;
+  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[];
+  calcPathPoints(): IPoint[];
+  calcRotatePoints(): IPoint[];
+  calcRotatePathPoints(): IPoint[];
+  calcMaxBoxPoints(): IPoint[];
 }
 
 // 舞台元素（组件）-React

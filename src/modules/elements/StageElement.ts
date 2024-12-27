@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every } from "lodash";
+import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import { DefaultSelectionRotateSize } from "@/types/constants";
 
@@ -252,7 +252,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   protected _points: IPoint[];
   protected _pathPoints: IPoint[];
-  protected _boxPoints: IPoint[];
+  protected _maxBoxPoints: IPoint[];
   protected _rotatePoints: IPoint[];
   protected _rotatePathPoints: IPoint[];
 
@@ -264,8 +264,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     return this._pathPoints;
   }
 
-  get boxPoints(): IPoint[] {
-    return this._boxPoints;
+  get maxBoxPoints(): IPoint[] {
+    return this._maxBoxPoints;
   }
 
   get rotatePoints(): IPoint[] {
@@ -283,6 +283,62 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算坐标
+   * 
+   * @returns 
+   */
+  calcPosition(): IPoint {
+    return CommonUtils.getBoxPoints(this.model.coords)[0];
+  }
+
+  /**
+   * 计算舞台坐标
+   * 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @returns 
+   */
+  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
+    return ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
+  }
+
+  /**
+   * 计算路径坐标
+   * 
+   * @returns 
+   */
+  calcPathPoints(): IPoint[] {
+    return cloneDeep(this._points)
+  }
+
+  /**
+   * 计算旋转坐标
+   * 
+   * @returns 
+   */
+  calcRotatePoints(): IPoint[] {
+      return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))
+  }
+
+  /**
+   * 计算旋转路径坐标
+   * 
+   * @returns 
+   */
+  calcRotatePathPoints(): IPoint[] {
+      return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid));
+  }
+
+  /**
+   * 计算非旋转的最大盒模型
+   * 
+   * @returns 
+   */
+  calcMaxBoxPoints(): IPoint[] {
+      return CommonUtils.getBoxPoints(this._rotatePathPoints)
+  }
+
+  /**
    * 刷新坐标
    */
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
@@ -297,12 +353,12 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param stageWorldCoord 
    */
   refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint) {
-    this.position = CommonUtils.getBoxPoints(this.model.coords)[0];
-    this._points = ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
-    this._pathPoints = this._points;
-    this._rotatePoints = this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))
-    this._rotatePathPoints = this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid))
-    this._boxPoints = CommonUtils.getBoxPoints(this._rotatePathPoints)
+    this.position = this.calcPosition();
+    this._points = this.calcPoints(stageRect, stageWorldCoord);
+    this._pathPoints = this.calcPathPoints();
+    this._rotatePoints = this.calcRotatePoints();
+    this._rotatePathPoints = this.calcRotatePathPoints();
+    this._maxBoxPoints = this.calcMaxBoxPoints();
   }
 
   /**

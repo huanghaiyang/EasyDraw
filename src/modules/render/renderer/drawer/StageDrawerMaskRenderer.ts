@@ -171,8 +171,8 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskSizeIndicatorTask(element: IStageElement): IRenderTask {
     if (element.model.angle % 90 === 0) {
-      const p1 = element.boxPoints[3]
-      const p2 = element.boxPoints[2]
+      const p1 = element.maxBoxPoints[3]
+      const p2 = element.maxBoxPoints[2]
       return new StageDrawerMaskTaskSizeIndicator({
         point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
         angle: 0,
