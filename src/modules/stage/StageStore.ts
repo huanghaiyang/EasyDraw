@@ -16,6 +16,7 @@ import ElementList from "@/modules/elements/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/ElementSortedMap";
+import CreatorHelper from "@/types/helper";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -362,7 +363,8 @@ export default class StageStore implements IStageStore {
       coords,
       originalCoords: cloneDeep(coords),
       data,
-      angle: 0
+      angle: 0,
+      name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`
     }
     return model;
   }

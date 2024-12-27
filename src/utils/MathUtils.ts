@@ -281,4 +281,17 @@ export default class MathUtils {
     const angle = MathUtils.calculateAngle(p1, p2);
     return MathUtils.calculateTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
   }
+
+  /**
+   * 将大于90度的钝角转换为锐角
+   * 
+   * @param angle 
+   * @returns 
+   */
+  static transformToAcuteAngle(angle: number) {
+    if (angle > 90) {
+      angle = 180 - angle;
+    }
+    return angle;
+  }
 }

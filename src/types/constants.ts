@@ -1,4 +1,4 @@
-import { CreatorCategories, CreatorTypes } from "@/types/index";
+import { Creator, CreatorCategories, CreatorTypes } from "@/types/index";
 
 export const StageDefaults = {
   slide: {
@@ -14,7 +14,7 @@ export const WorldSize = {
   height: 1024 * 1024
 }
 
-export const MoveableCreator = {
+export const MoveableCreator: Creator = {
   type: CreatorTypes.moveable,
   name: '移动',
   category: CreatorCategories.cursor,
@@ -22,7 +22,7 @@ export const MoveableCreator = {
   cursor: 'default'
 }
 
-export const HandCreator = {
+export const HandCreator: Creator = {
   type: CreatorTypes.hand,
   name: '手型',
   category: CreatorCategories.cursor,
@@ -30,7 +30,7 @@ export const HandCreator = {
   cursor: 'grab'
 }
 
-export const RectangleCreator = {
+export const RectangleCreator: Creator = {
   type: CreatorTypes.rectangle,
   name: '矩形',
   category: CreatorCategories.shapes,
@@ -38,14 +38,14 @@ export const RectangleCreator = {
   cursor: 'crosshair'
 }
 
-export const CursorCreators = [
+export const CursorCreators: Creator[] = [
   MoveableCreator,
   HandCreator
 ]
 
-export const Creators = [
+export const Creators: Creator[] = [
   MoveableCreator,
-  CursorCreators,
+  ...CursorCreators,
   RectangleCreator
 ]
 

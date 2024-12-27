@@ -276,6 +276,7 @@ export type ElementObject = {
   strokeWidth?: number;
   fillColor?: string;
   angle: number;
+  name: string;
 }
 
 // 舞台元素（组件）

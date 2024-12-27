@@ -181,16 +181,9 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       } as IStageDrawerMaskTaskSizeIndicatorModel, this.renderParams);
     }
     const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
-    let leftAngle = MathUtils.calculateAngle(bottomPoint, leftPoint) + 180;
-    let rightAngle = MathUtils.calculateAngle(bottomPoint, rightPoint) + 180;
-    if (leftAngle > 90) {
-      leftAngle = 180 - leftAngle;
-    }
-    if (rightAngle > 90) {
-      rightAngle = 180 - rightAngle;
-    }
+    let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
+    let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
     const point = leftAngle < rightAngle ? leftPoint : rightPoint;
-
     let p1, p2;
     if (point.x < bottomPoint.x) {
       p1 = point;
