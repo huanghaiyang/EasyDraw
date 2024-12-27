@@ -1,17 +1,19 @@
-import { Directions, IPoint, ITransformer } from "@/types";
+import { Directions, IPoint, IElementTransformer } from "@/types";
 import MathUtils from "@/utils/MathUtils";
 
-export default class Transformer implements ITransformer {
+export default class ElementTransformer implements IElementTransformer {
   x: number;
   y: number;
   direction?: Directions;
   points: IPoint[];
+  isActive: boolean;
 
   constructor(x: number, y: number, points: IPoint[], direction?: Directions) {
     this.x = x;
     this.y = y;
     this.points = points;
     this.direction = direction;
+    this.isActive = false;
   }
 
   /**

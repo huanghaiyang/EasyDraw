@@ -230,6 +230,15 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             this.store.updateElements(this.store.selectedElements, { isRotating: true });
             funcs.push(() => this.redraw())
           }
+        } else if (this._isElementsTransforming) {
+          if (this.checkCursorPressMovedALittle(e)) {
+            this.store.updateSelectedElementsTransform({
+              x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+              y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
+            })
+            this.store.updateElements(this.store.selectedElements, { isTransforming: true });
+            funcs.push(() => this.redraw())
+          }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
@@ -272,7 +281,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
         this.store.calcRotatingElementsCentroid();
         this._isElementRotating = true;
       } else {
-        sizeTransformerElement = this.selection.checkSizeTransformerElement(this.cursor.value);
+        sizeTransformerElement = this.selection.checkTransformerElement(this.cursor.value);
         if (sizeTransformerElement) {
           this._isElementsTransforming = true;
         } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {

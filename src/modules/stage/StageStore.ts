@@ -466,6 +466,18 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 形变
+   * 
+   * @param offset 
+   */
+  updateSelectedElementsTransform(offset: IPoint): void {
+    this.selectedElements.forEach(element => {
+      element.transform(offset);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+    })
+  }
+
+  /**
    * 遍历所有节点
    * 
    * @param callback 

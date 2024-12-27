@@ -1,4 +1,4 @@
-import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes, ITransformer, BoxDirections } from "@/types";
+import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes, IElementTransformer, BoxDirections } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
-import Transformer from "@/modules/elements/transformer/Transformer";
+import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
@@ -259,12 +259,12 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._position = value;
   }
 
-  protected _points: IPoint[];
-  protected _pathPoints: IPoint[];
-  protected _maxBoxPoints: IPoint[];
-  protected _rotatePoints: IPoint[];
-  protected _rotatePathPoints: IPoint[];
-  protected _transformers: ITransformer[];
+  protected _points: IPoint[] = [];
+  protected _pathPoints: IPoint[] = [];
+  protected _maxBoxPoints: IPoint[] = [];
+  protected _rotatePoints: IPoint[] = [];
+  protected _rotatePathPoints: IPoint[] = [];
+  protected _transformers: IElementTransformer[] = [];
 
   get points(): IPoint[] {
     return this._points;
@@ -286,7 +286,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     return this._rotatePathPoints;
   }
 
-  get transformers(): ITransformer[] {
+  get transformers(): IElementTransformer[] {
     return this._transformers;
   }
 
@@ -366,16 +366,24 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcSizeTransformers(): ITransformer[] {
+  calcTransformers(): IElementTransformer[] {
     const result = this._rotatePathPoints.map((point, index) => {
-      const { x,y } = point;
+      const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
         width: DefaultSizeTransformerValue,
         height: DefaultSizeTransformerValue
       }, {
         angle: this.model.angle
       });
-      return new Transformer(x, y, points, BoxDirections[index]);
+      let transformer = this._transformers[index];
+      if (transformer) {
+        transformer.points = points;
+        transformer.x = x;
+        transformer.y = y;
+      } else {
+        transformer = new ElementTransformer(x, y, points, BoxDirections[index]);
+      }
+      return transformer;
     })
     return result;
   }
@@ -400,7 +408,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
-    this._transformers = this.calcSizeTransformers();
+    this._transformers = this.calcTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
   }
 
@@ -470,7 +478,27 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param point 
    * @returns 
    */
-  getTransformerByPoint(point: IPoint): ITransformer {
+  getTransformerByPoint(point: IPoint): IElementTransformer {
     return this.transformers.find(item => item.isContainsPoint(point));
+  }
+
+  /**
+   * 激活变形器
+   * 
+   * @param transformer 
+   */
+  activeTransformer(transformer: ElementTransformer): void {
+    this._transformers.forEach(item => {
+      item.isActive = item.direction === transformer.direction;
+    });
+  }
+
+  /**
+   * 形变
+   * 
+   * @param offset 
+   */
+  transform(offset: IPoint): void {
+
   }
 }

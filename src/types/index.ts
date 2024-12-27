@@ -31,9 +31,10 @@ export type IPoint3D = IPoint & {
 }
 
 // 方位坐标
-export type ITransformer = IPoint & {
+export type IElementTransformer = IPoint & {
   direction?: Directions;
   points: IPoint[];
+  isActive: boolean;
   isContainsPoint(point: IPoint): boolean;
 }
 
@@ -88,6 +89,7 @@ export interface IStageStore {
   finishCreatingElement(): IStageElement;
   updateSelectedElementsMovement(offset: IPoint): void;
   updateSelectedElementsRotation(point: IPoint): void;
+  updateSelectedElementsTransform(point: IPoint): void;
   calcRotatingElementsCentroid(): void;
   setupStageElementsModelCoords(elements: IStageElement[]): void;
   refreshStageElementsPoints(elements: IStageElement[]): void;
@@ -255,7 +257,7 @@ export interface IStageSelection {
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
   checkTargetRotateElement(point: IPoint): IStageElement;
-  checkSizeTransformerElement(point: IPoint): IStageElement;
+  checkTransformerElement(point: IPoint): IStageElement;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IStageElement;
   checkSelectContainsTarget(): boolean;
@@ -310,7 +312,7 @@ export interface IStageElement {
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get centroid(): IPoint;
-  get transformers(): ITransformer[];
+  get transformers(): IElementTransformer[];
 
   get isSelected(): boolean;
   get isVisible(): boolean;
@@ -357,9 +359,11 @@ export interface IStageElement {
   calcRotatePathPoints(): IPoint[];
   calcMaxBoxPoints(): IPoint[];
   calcCentroid(): IPoint;
-  calcSizeTransformers(): IPoint[];
+  calcTransformers(): IPoint[];
 
-  getTransformerByPoint(point: IPoint): ITransformer;
+  getTransformerByPoint(point: IPoint): IElementTransformer;
+  activeTransformer(transformer: IElementTransformer): void;
+  transform(offset: IPoint): void;
 }
 
 // 舞台元素（组件）-React

@@ -1,4 +1,11 @@
-import { IPoint, IStageDrawerMaskTaskSelectionModel, IStageElement, IStageSelection, IStageShield, StageDrawerMaskModelTypes } from "@/types";
+import {
+  IPoint,
+  IStageDrawerMaskTaskSelectionModel,
+  IStageElement,
+  IStageSelection,
+  IStageShield,
+  StageDrawerMaskModelTypes
+} from "@/types";
 import { every, includes } from "lodash";
 
 export default class StageSelection implements IStageSelection {
@@ -117,10 +124,14 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  checkSizeTransformerElement(point: IPoint): IStageElement {
+  checkTransformerElement(point: IPoint): IStageElement {
     const element = this.shield.store.uniqSelectedElement;
-    if (element && element.getTransformerByPoint(point)) {
-      return element;
+    if (element) {
+      const transformer = element.getTransformerByPoint(point);
+      if (transformer) {
+        element.activeTransformer(transformer);
+        return element;
+      }
     }
   }
 
