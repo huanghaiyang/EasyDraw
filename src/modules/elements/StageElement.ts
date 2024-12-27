@@ -7,6 +7,7 @@ import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
+import { multiply } from 'mathjs';
 
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
@@ -499,6 +500,27 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param offset 
    */
   transform(offset: IPoint): void {
-
+    if (this._points.length === 4) {
+      const index = this._transformers.findIndex(item => item.isActive);
+      if (index !== -1) {
+        const centroidIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
+        const centroidPoint = this.model.originalCoords[centroidIndex];
+        const currentOriginalPoint = this.model.originalCoords[index];
+        const currentPoint = {
+          x: currentOriginalPoint.x + offset.x,
+          y: currentOriginalPoint.y + offset.y
+        }
+        const matrix: number[][] = MathUtils.calcTransformMatrixOfCentroid(centroidPoint, currentPoint, currentOriginalPoint);
+        this.model.originalCoords.forEach((coord, index) => {
+          if (index !== centroidIndex) {
+            const [x, y] = multiply(matrix, [coord.x - centroidPoint.x, coord.y - centroidPoint.y, 1]);
+            this.model.coords[index] = {
+              x: x + centroidPoint.x,
+              y: y + centroidPoint.y
+            }
+          }
+        })
+      }
+    }
   }
 }

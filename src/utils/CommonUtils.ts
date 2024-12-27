@@ -149,4 +149,54 @@ export default class CommonUtils {
     });
     return points;
   }
+  /**
+   * 获取数组中前一个索引
+   * 
+   * @param length 
+   * @param index 
+   * @returns 
+   */
+  static getPrevIndexOfArray(length: number, index: number, step: number = 1): number {
+    let result;
+    while (true) {
+      result = index - step;
+      if (result < 0) {
+        result = length - 1;
+      }
+      if (result >= 0) {
+        break;
+      }
+    }
+    return result;
+  }
+  /**
+   * 获取数组中后一个索引
+   * 
+   * @param length 
+   * @param index 
+   * @returns 
+   */
+  static getNextIndexOfArray(length: number, index: number, step: number = 1): number {
+    let result;
+    while (true) {
+      result = index + step;
+      if (result >= length) {
+        result = 0;
+      }
+      if (result < length) {
+        break;
+      }
+    }
+    return result;
+  }
+  /**
+   * 获取数组中后一个元素
+   * 
+   * @param array 
+   * @param index 
+   * @returns 
+   */
+  static getNextOfArray(array: any[], index: number) {
+    return array[index + 1 < array.length ? index + 1 : 0];
+  }
 }

@@ -38,6 +38,23 @@ export default class MathUtils {
   }
 
   /**
+   * 给定原点，以及一个不断移动的点，计算出缩放矩阵
+   * 
+   * @param centroid 旋转中心点
+   * @param point 移动点
+   * @param originalPoint 缩放前的点
+   */
+  static calcTransformMatrixOfCentroid(centroid: IPoint, point: IPoint, originalPoint: IPoint): number[][] {
+    const originalWidth = originalPoint.x - centroid.x;
+    const originalHeight = originalPoint.y - centroid.y;
+    const newWidth = point.x - centroid.x;
+    const newHeight = point.y - centroid.y;
+    const scaleX = newWidth / originalWidth;
+    const scaleY = newHeight / originalHeight;
+    return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
+  }
+
+  /**
    * 相对于圆心上旋转
    * 
    * @param coord 

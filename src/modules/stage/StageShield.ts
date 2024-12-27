@@ -211,32 +211,32 @@ export default class StageShield extends StageDrawerBase implements IStageShield
           const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
           // 更新选区，命中组件
           this.selection.setRange(rangePoints);
-        } else if (this._isElementsDragging || this.selection.checkSelectContainsTarget()) {
+        } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget()) && !this._isElementsTransforming) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
+            // 标记组件正在拖动
+            this.store.updateElements(this.store.selectedElements, { isDragging: true });
             // 更新元素位置
             this.store.updateSelectedElementsMovement({
               x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
               y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
             })
-            // 标记组件正在拖动
-            this.store.updateElements(this.store.selectedElements, { isDragging: true });
             funcs.push(() => this.redraw())
           }
         } else if (this._isElementRotating) {
           if (this.checkCursorPressMovedALittle(e)) {
-            this.store.updateSelectedElementsRotation(this._pressMovePosition)
             this.store.updateElements(this.store.selectedElements, { isRotating: true });
+            this.store.updateSelectedElementsRotation(this._pressMovePosition)
             funcs.push(() => this.redraw())
           }
         } else if (this._isElementsTransforming) {
           if (this.checkCursorPressMovedALittle(e)) {
+            this.store.updateElements(this.store.selectedElements, { isTransforming: true });
             this.store.updateSelectedElementsTransform({
               x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
               y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
             })
-            this.store.updateElements(this.store.selectedElements, { isTransforming: true });
             funcs.push(() => this.redraw())
           }
         }
