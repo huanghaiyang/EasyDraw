@@ -130,7 +130,7 @@ export interface IStageDrawerProvisional extends IStageHelperDrawer { }
 // 辅助画布绘制任务类型
 export enum StageDrawerMaskModelTypes {
   selection = 0,
-  selectionHandler = 1,
+  sizeTransformer = 1,
   cursor = 2,
   highlight = 3,
   rotate = 4,
@@ -168,7 +168,7 @@ export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMask
 }
 
 // 辅助画布绘制任务选区控制器对象
-export interface IStageDrawerMaskTaskSelectionHandlerModel extends IStageDrawerMaskTaskModel {
+export interface IStageDrawerMaskTaskSizeTransformerModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
   direction: Directions;
 }
@@ -198,7 +198,7 @@ export interface IStageDrawerMaskTask extends IRenderTask {
 export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask { }
 
 // 辅助画布选区控制器绘制任务
-export interface IStageDrawerMaskTaskSelectionHandler extends IStageDrawerMaskTask {
+export interface IStageDrawerMaskTaskSizeTransformer extends IStageDrawerMaskTask {
   direction: Directions;
 }
 
@@ -277,6 +277,9 @@ export type ElementObject = {
   fillColor?: string;
   angle: number;
   name: string;
+  width?: number;
+  height?: number;
+  length?: number;
 }
 
 // 舞台元素（组件）
@@ -328,6 +331,7 @@ export interface IStageElement {
   isContainsPoint(point: IPoint): boolean;
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
+  isRotationContainsPoint(point: IPoint): boolean;
 }
 
 // 舞台元素（组件）-React

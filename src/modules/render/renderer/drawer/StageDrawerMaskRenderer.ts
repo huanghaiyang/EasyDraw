@@ -2,7 +2,7 @@ import {
   IRenderTask,
   IStageDrawerMaskTask,
   IStageDrawerMaskTaskCursorModel,
-  IStageDrawerMaskTaskSelectionHandlerModel,
+  IStageDrawerMaskTaskSizeTransformerModel,
   IStageDrawerMaskTaskSelectionModel,
   IStageDrawerMaskRenderer,
   StageDrawerMaskModelTypes,
@@ -15,7 +15,7 @@ import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
 import StageDrawerMaskTaskCursor from "@/modules/render/mask/task/StageDrawerMaskTaskCursor";
 import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMaskTaskClear";
-import StageDrawerMaskTaskSelectionHandler from "@/modules/render/mask/task/StageDrawerMaskTaskSelectionHandler";
+import StageDrawerMaskTaskSizeTransformer from "@/modules/render/mask/task/StageDrawerMaskTaskSizeTransformer";
 import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
 import StageDrawerMaskTaskRotate from "@/modules/render/mask/task/StageDrawerMaskTaskRotate";
 import CommonUtils from "@/utils/CommonUtils";
@@ -40,7 +40,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     selectionTasks.forEach(task => {
       cargo.add(task);
       if (((task as IStageDrawerMaskTask).data as IStageDrawerMaskTaskSelectionModel).type === StageDrawerMaskModelTypes.selection) {
-        cargo.addAll(this.createMaskSelectionHandlerTasks((task as IStageDrawerMaskTask).model as IStageDrawerMaskTaskSelectionModel));
+        cargo.addAll(this.createMaskSizeTransformerTasks((task as IStageDrawerMaskTask).model as IStageDrawerMaskTaskSelectionModel));
       }
     });
     if (selectionTasks.length) {
@@ -125,7 +125,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @param selectionModel 
    * @returns 
    */
-  private createMaskSelectionHandlerTasks(selectionModel: IStageDrawerMaskTaskSelectionModel): IRenderTask[] {
+  private createMaskSizeTransformerTasks(selectionModel: IStageDrawerMaskTaskSelectionModel): IRenderTask[] {
     const tasks: IRenderTask[] = [];
     selectionModel.points.forEach((point, index) => {
       let direction;
@@ -143,12 +143,12 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
           direction = Directions.bottomLeft;
           break;
       }
-      const model: IStageDrawerMaskTaskSelectionHandlerModel = {
+      const model: IStageDrawerMaskTaskSizeTransformerModel = {
         point,
         direction,
-        type: StageDrawerMaskModelTypes.selectionHandler,
+        type: StageDrawerMaskModelTypes.sizeTransformer,
       }
-      const task = new StageDrawerMaskTaskSelectionHandler(direction, model, this.renderParams);
+      const task = new StageDrawerMaskTaskSizeTransformer(direction, model, this.renderParams);
       tasks.push(task);
     });
     return tasks;

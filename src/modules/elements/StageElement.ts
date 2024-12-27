@@ -336,6 +336,17 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   /**
+   * 旋转区域是否包含点
+   * 
+   * @param point 
+   * @returns 
+   */
+  isRotationContainsPoint(point: IPoint): boolean {
+    const { rotationModel: { vertices } } = this;
+    return MathUtils.isPointInPolygonByRayCasting(point, vertices);
+  }
+
+  /**
    * 判断是否于多边形相交
    * 
    * @param points 

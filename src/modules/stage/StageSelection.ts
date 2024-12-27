@@ -86,7 +86,7 @@ export default class StageSelection implements IStageSelection {
   hitTargetElements(point: IPoint): void {
     for (let i = this.shield.store.stageElements.length - 1; i >= 0; i--) {
       const element = this.shield.store.stageElements[i];
-      const isTarget = MathUtils.isPointInPolygonByRayCasting(point, element.rotatePathPoints);
+      const isTarget = element.isContainsPoint(point);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
         this.shield.store.targetElements.forEach(target => {
@@ -106,11 +106,8 @@ export default class StageSelection implements IStageSelection {
    */
   checkTargetRotateElement(point: IPoint): IStageElement {
     const element = this.shield.store.uniqSelectedElement;
-    if (element) {
-      const { rotationModel: { vertices } } = element;
-      if (MathUtils.isPointInPolygonByRayCasting(point, vertices)) {
-        return element;
-      }
+    if (element && element.isRotationContainsPoint(point)) {
+      return element;
     }
   }
 
