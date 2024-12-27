@@ -1,5 +1,4 @@
 import { IPoint, IStageDrawerMaskTaskSelectionModel, IStageElement, IStageSelection, IStageShield, StageDrawerMaskModelTypes } from "@/types";
-import MathUtils from "@/utils/MathUtils";
 import { every, includes } from "lodash";
 
 export default class StageSelection implements IStageSelection {
@@ -109,6 +108,18 @@ export default class StageSelection implements IStageSelection {
   checkTargetRotateElement(point: IPoint): IStageElement {
     const element = this.shield.store.uniqSelectedElement;
     if (element && element.isRotationContainsPoint(point)) {
+      return element;
+    }
+  }
+
+  /**
+   * 检测鼠标当前位置是否在组件的尺寸变换句柄区域
+   * 
+   * @param point 
+   */
+  checkSizeTransformerElement(point: IPoint): IStageElement {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element && element.getTransformerByPoint(point)) {
       return element;
     }
   }

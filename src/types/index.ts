@@ -31,8 +31,10 @@ export type IPoint3D = IPoint & {
 }
 
 // 方位坐标
-export type IDirectionPoint = IPoint & {
+export type ITransformer = IPoint & {
   direction?: Directions;
+  points: IPoint[];
+  isContainsPoint(point: IPoint): boolean;
 }
 
 // 舞台主画板
@@ -130,7 +132,7 @@ export interface IStageDrawerProvisional extends IStageHelperDrawer { }
 // 辅助画布绘制任务类型
 export enum StageDrawerMaskModelTypes {
   selection = 0,
-  sizeTransformer = 1,
+  transformer = 1,
   cursor = 2,
   highlight = 3,
   rotate = 4,
@@ -149,6 +151,13 @@ export enum Directions {
   leftCenter = 7,
   freedom = 8
 }
+
+export const BoxDirections = [
+  Directions.topLeft,
+  Directions.topRight,
+  Directions.bottomRight,
+  Directions.bottomLeft,
+]
 
 // 辅助画布绘制任务对象类型
 export interface IStageDrawerMaskTaskModel {
@@ -171,7 +180,6 @@ export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMask
 // 辅助画布绘制任务选区控制器对象
 export interface IStageDrawerMaskTaskSizeTransformerModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
-  direction: Directions;
   angle?: number;
 }
 
@@ -200,9 +208,7 @@ export interface IStageDrawerMaskTask extends IRenderTask {
 export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask { }
 
 // 辅助画布选区控制器绘制任务
-export interface IStageDrawerMaskTaskSizeTransformer extends IStageDrawerMaskTask {
-  direction: Directions;
-}
+export interface IStageDrawerMaskTaskSizeTransformer extends IStageDrawerMaskTask { }
 
 // 辅助画布光标绘制任务
 export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask { }
@@ -246,6 +252,7 @@ export interface IStageSelection {
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
   checkTargetRotateElement(point: IPoint): IStageElement;
+  checkSizeTransformerElement(point: IPoint): IStageElement;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IStageElement;
   checkSelectContainsTarget(): boolean;
@@ -297,7 +304,7 @@ export interface IStageElement {
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get centroid(): IPoint;
-  get sizeTransformerPoints(): IPoint[];
+  get transformers(): ITransformer[];
 
   get isSelected(): boolean;
   get isVisible(): boolean;
@@ -330,6 +337,7 @@ export interface IStageElement {
   set status(value: ElementStatus);
 
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
+
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;
   isPolygonOverlap(points: IPoint[]): boolean;
@@ -343,7 +351,9 @@ export interface IStageElement {
   calcRotatePathPoints(): IPoint[];
   calcMaxBoxPoints(): IPoint[];
   calcCentroid(): IPoint;
-  calcSizeTransformerPoints(): IPoint[];
+  calcSizeTransformers(): IPoint[];
+
+  getTransformerByPoint(point: IPoint): ITransformer;
 }
 
 // 舞台元素（组件）-React
@@ -459,4 +469,4 @@ export enum ShieldDispatcherNames {
   positionChanged = 3,
 }
 
-export interface IElementList extends EventEmitter {}
+export interface IElementList extends EventEmitter { }

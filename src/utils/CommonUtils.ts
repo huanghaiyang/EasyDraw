@@ -1,5 +1,6 @@
 import { IPoint, ISize } from "@/types";
 import { nanoid } from "nanoid";
+import MathUtils from "@/utils/MathUtils";
 
 export default class CommonUtils {
 
@@ -114,5 +115,38 @@ export default class CommonUtils {
       }
     });
     return [points[leftIndex], points[bottomIndex], points[rightIndex]];
+  }
+
+  /**
+   * 给定中心点，宽高和角度，返回矩形的四个顶点
+   * 
+   * @param center 
+   * @param size 
+   * @param param2 
+   * @returns 
+   */
+  static get4BoxPoints(center: IPoint, size: ISize, { angle: number } = { angle: 0 }): IPoint[] {
+    const points = [
+      {
+        x: center.x - size.width / 2,
+        y: center.y - size.height / 2,
+      },
+      {
+        x: center.x + size.width / 2,
+        y: center.y - size.height / 2,
+      },
+      {
+        x: center.x + size.width / 2,
+        y: center.y + size.height / 2,
+      },
+      {
+        x: center.x - size.width / 2,
+        y: center.y + size.height / 2,
+      },
+    ];
+    points.forEach((point) => {
+      Object.assign(point, MathUtils.rotateRelativeCentroid(point, number, center));
+    });
+    return points;
   }
 }

@@ -129,28 +129,12 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     const tasks: IRenderTask[] = [];
     const { points = [], angle = 0 } = selectionModel;
     points.forEach((point, index) => {
-      let direction;
-      switch (index) {
-        case 0:
-          direction = Directions.topLeft;
-          break;
-        case 1:
-          direction = Directions.topRight;
-          break;
-        case 2:
-          direction = Directions.bottomRight;
-          break;
-        case 3:
-          direction = Directions.bottomLeft;
-          break;
-      }
       const model: IStageDrawerMaskTaskSizeTransformerModel = {
         point,
-        direction,
-        type: StageDrawerMaskModelTypes.sizeTransformer,
+        type: StageDrawerMaskModelTypes.transformer,
         angle
       }
-      const task = new StageDrawerMaskTaskSizeTransformer(direction, model, this.renderParams);
+      const task = new StageDrawerMaskTaskSizeTransformer(model, this.renderParams);
       tasks.push(task);
     });
     return tasks;

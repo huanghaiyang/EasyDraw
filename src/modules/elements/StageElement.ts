@@ -1,11 +1,12 @@
-import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes } from "@/types";
+import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes, ITransformer, BoxDirections } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import { DefaultSelectionRotateSize } from "@/types/constants";
+import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
+import Transformer from "@/modules/elements/transformer/Transformer";
 
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
@@ -255,7 +256,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   protected _maxBoxPoints: IPoint[];
   protected _rotatePoints: IPoint[];
   protected _rotatePathPoints: IPoint[];
-  protected _sizeTransformerPoints: IPoint[];
+  protected _transformers: ITransformer[];
 
   get points(): IPoint[] {
     return this._points;
@@ -277,8 +278,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     return this._rotatePathPoints;
   }
 
-  get sizeTransformerPoints(): IPoint[] {
-    return this._sizeTransformerPoints;
+  get transformers(): ITransformer[] {
+    return this._transformers;
   }
 
   constructor(model: ElementObject) {
@@ -357,8 +358,18 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcSizeTransformerPoints(): IPoint[] {
-    return cloneDeep(this._rotatePathPoints);
+  calcSizeTransformers(): ITransformer[] {
+    const result = this._rotatePathPoints.map((point, index) => {
+      const { x,y } = point;
+      const points = CommonUtils.get4BoxPoints(point, {
+        width: DefaultSizeTransformerValue,
+        height: DefaultSizeTransformerValue
+      }, {
+        angle: this.model.angle
+      });
+      return new Transformer(x, y, points, BoxDirections[index]);
+    })
+    return result;
   }
 
   /**
@@ -381,7 +392,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
-    this._sizeTransformerPoints = this.calcSizeTransformerPoints();
+    this._transformers = this.calcSizeTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
   }
 
@@ -444,5 +455,14 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   isModelPolygonOverlap(points: IPoint[]): boolean {
     const modelRotatePathPoints = this.model.coords.map(point => MathUtils.rotate(point, this.model.angle))
     return MathUtils.polygonsOverlap(modelRotatePathPoints, points);
+  }
+
+  /**
+   * 
+   * @param point 
+   * @returns 
+   */
+  getTransformerByPoint(point: IPoint): ITransformer {
+    return this.transformers.find(item => item.isContainsPoint(point));
   }
 }
