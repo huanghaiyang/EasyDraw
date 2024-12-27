@@ -361,7 +361,6 @@ export default class StageStore implements IStageStore {
       id: CommonUtils.getRandomDateId(),
       type,
       coords,
-      originalCoords: cloneDeep(coords),
       data,
       angle: 0,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
@@ -425,6 +424,7 @@ export default class StageStore implements IStageStore {
         this.updateElementById(element.id, {
           status: ElementStatus.finished,
         })
+        element.calcOriginalProps();
         return element;
       }
     }
@@ -454,7 +454,7 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
       this.updateElementModel(element.id, {
-        coords: element.model.originalCoords.map(point => {
+        coords: element.originalModelCoords.map(point => {
           return {
             x: point.x + offset.x,
             y: point.y + offset.y,
@@ -493,11 +493,9 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  setupStageElementsModelCoords(elements: IStageElement[]): void {
+  keepOriginalProps(elements: IStageElement[]): void {
     elements.forEach(element => {
-      this.updateElementModel(element.id, {
-        originalCoords: cloneDeep(element.model.coords),
-      })
+      element.calcOriginalProps();
     })
   }
 

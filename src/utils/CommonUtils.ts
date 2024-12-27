@@ -161,7 +161,7 @@ export default class CommonUtils {
     while (true) {
       result = index - step;
       if (result < 0) {
-        result = length - 1;
+        result = length + result;
       }
       if (result >= 0) {
         break;
@@ -181,7 +181,7 @@ export default class CommonUtils {
     while (true) {
       result = index + step;
       if (result >= length) {
-        result = 0;
+        result = result - length ;
       }
       if (result < length) {
         break;

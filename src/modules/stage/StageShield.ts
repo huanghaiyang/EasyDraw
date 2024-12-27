@@ -330,13 +330,16 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             // 取消组件拖动状态
             this.store.updateElements(this.store.selectedElements, { isDragging: false });
             // 刷新组件坐标数据
-            this.store.setupStageElementsModelCoords(this.store.selectedElements);
+            this.store.keepOriginalProps(this.store.selectedElements);
             // 刷新组件坐标数据
             this.store.refreshStageElementsPoints(this.store.selectedElements);
             // 将拖动状态置为false
             this._isElementsDragging = false;
           } else if (this._isElementRotating) {
             this.store.updateSelectedElementsRotation(this._pressUpPosition)
+            // 刷新组件坐标数据
+            this.store.keepOriginalProps(this.store.rotatingTargetElements);
+            // 更新组件状态
             this.store.updateElements(this.store.rotatingTargetElements, {
               isRotatingTarget: false,
               isRotating: false,

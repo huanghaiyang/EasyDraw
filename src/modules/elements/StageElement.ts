@@ -1,4 +1,13 @@
-import { ElementStatus, ElementObject, IPoint, IStageElement, IStageDrawerRotationModel, StageDrawerMaskModelTypes, IElementTransformer, BoxDirections } from "@/types";
+import {
+  ElementStatus,
+  ElementObject,
+  IPoint,
+  IStageElement,
+  IStageDrawerRotationModel,
+  StageDrawerMaskModelTypes,
+  IElementTransformer,
+  BoxDirections
+} from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -12,6 +21,8 @@ import { multiply } from 'mathjs';
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
+  originalTransformerPoints: IPoint[];
+  originalModelCoords: IPoint[];
 
   rotationModel: IStageDrawerRotationModel = {
     point: null,
@@ -294,6 +305,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   constructor(model: ElementObject) {
     this.model = model;
     this.id = CommonUtils.getRandomDateId();
+    this.calcOriginalProps();
     makeObservable(this);
   }
 
@@ -484,6 +496,40 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   /**
+   * 重新维护原始变形器坐标
+   */
+  calcOriginalTransformPoints() {
+    this.originalTransformerPoints = this.transformers.map(transformer => {
+      const { x, y } = transformer;
+      return {
+        x,
+        y
+      }
+    })
+  }
+
+  /**
+   * 重新维护原始坐标
+   */
+  calcOriginalModelCoords() {
+    this.originalModelCoords = this.model.coords.map(point => {
+      const { x, y } = point;
+      return {
+        x,
+        y
+      }
+    })
+  }
+
+  /**
+   * 重新维护原始属性，用于组件的移动、旋转、大小变换
+   */
+  calcOriginalProps(): void {
+    this.calcOriginalModelCoords();
+    this.calcOriginalTransformPoints();
+  }
+
+  /**
    * 激活变形器
    * 
    * @param transformer 
@@ -504,20 +550,23 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
       const index = this._transformers.findIndex(item => item.isActive);
       if (index !== -1) {
         const centroidIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
-        const centroidPoint = this.model.originalCoords[centroidIndex];
-        const currentOriginalPoint = this.model.originalCoords[index];
+        const centroidPoint = this.originalTransformerPoints[centroidIndex];
+        const targetOriginalPoint = this.originalTransformerPoints[index];
         const currentPoint = {
-          x: currentOriginalPoint.x + offset.x,
-          y: currentOriginalPoint.y + offset.y
+          x: targetOriginalPoint.x + offset.x,
+          y: targetOriginalPoint.y + offset.y
         }
-        const matrix: number[][] = MathUtils.calcTransformMatrixOfCentroid(centroidPoint, currentPoint, currentOriginalPoint);
-        this.model.originalCoords.forEach((coord, index) => {
-          if (index !== centroidIndex) {
-            const [x, y] = multiply(matrix, [coord.x - centroidPoint.x, coord.y - centroidPoint.y, 1]);
-            this.model.coords[index] = {
-              x: x + centroidPoint.x,
-              y: y + centroidPoint.y
-            }
+        const matrix: number[][] = MathUtils.calcTransformMatrixOfCentroid(
+          centroidPoint,
+          MathUtils.rotateRelativeCentroid(currentPoint, -this.model.angle, centroidPoint),
+          MathUtils.rotateRelativeCentroid(targetOriginalPoint, -this.model.angle, centroidPoint)
+        );
+        const centroidCoord = this.originalModelCoords[centroidIndex];
+        this.originalModelCoords.forEach((coord, index) => {
+          const [x, y] = multiply(matrix, [coord.x - centroidCoord.x, coord.y - centroidCoord.y, 1]);
+          this.model.coords[index] = {
+            x: x + centroidCoord.x,
+            y: y + centroidCoord.y
           }
         })
       }

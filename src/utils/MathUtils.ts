@@ -40,6 +40,8 @@ export default class MathUtils {
   /**
    * 给定原点，以及一个不断移动的点，计算出缩放矩阵
    * 
+   * 旋转角度为0的情况下
+   * 
    * @param centroid 旋转中心点
    * @param point 移动点
    * @param originalPoint 缩放前的点

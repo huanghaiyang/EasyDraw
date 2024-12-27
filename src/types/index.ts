@@ -91,7 +91,7 @@ export interface IStageStore {
   updateSelectedElementsRotation(point: IPoint): void;
   updateSelectedElementsTransform(point: IPoint): void;
   calcRotatingElementsCentroid(): void;
-  setupStageElementsModelCoords(elements: IStageElement[]): void;
+  keepOriginalProps(elements: IStageElement[]): void;
   refreshStageElementsPoints(elements: IStageElement[]): void;
   forEach(callback: (element: IStageElement, index: number) => void): void;
   refreshStageElements(): void;
@@ -283,7 +283,6 @@ export interface StageShieldInstance {
 export type ElementObject = {
   id: string;
   coords: IPoint[]; // 相对于世界中心的坐标
-  originalCoords?: IPoint[]; // 用于移动、变形时的原始坐标
   type: CreatorTypes;
   data: any;
   strokeColor?: string;
@@ -301,6 +300,8 @@ export interface IStageElement {
   id: string;
   model: ElementObject;
   rotationModel: IStageDrawerRotationModel;
+  originalTransformerPoints: IPoint[];
+  originalModelCoords: IPoint[];
   
   get width(): number;
   get height(): number;
@@ -364,6 +365,10 @@ export interface IStageElement {
   getTransformerByPoint(point: IPoint): IElementTransformer;
   activeTransformer(transformer: IElementTransformer): void;
   transform(offset: IPoint): void;
+
+  calcOriginalTransformPoints(): void;
+  calcOriginalModelCoords(): void;
+  calcOriginalProps(): void;
 }
 
 // 舞台元素（组件）-React
