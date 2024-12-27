@@ -74,6 +74,9 @@ export const useStageStore = defineStore("stage", {
      */
     onSelectedChanged(selectedElements: IStageElement[]) {
       this.selectedElements = selectedElements;
+      if (!!this.selectedElements.length) {
+        this._setPosition(this.selectedElements[0]?.position);
+      }
     },
     /**
      * 舞台组件命中状态改变
@@ -84,17 +87,25 @@ export const useStageStore = defineStore("stage", {
       this.targetElements = targetElements;
     },
     /**
-     * 组件坐标变化
+     * 设置舞台组件坐标
      * 
      * @param position 
      */
-    onPositionChanged(element: IStageElement, position: IPoint) {
+    _setPosition(position: IPoint) {
       if (position) {
         this.position = {
           x: position.x,
           y: position.y
         };
       }
+    },
+    /**
+     * 组件坐标变化
+     * 
+     * @param position 
+     */
+    onPositionChanged(element: IStageElement, position: IPoint) {
+       this._setPosition(position);
     },
   },
 });

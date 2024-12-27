@@ -177,27 +177,20 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
         point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
         angle: 0,
         type: StageDrawerMaskModelTypes.sizeIndicator,
-        text: Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)).toFixed(2) + 'px',
+        text: MathUtils.distanceBetweenPoints(p1, p2) + 'px',
       } as IStageDrawerMaskTaskSizeIndicatorModel, this.renderParams);
     }
     const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
     let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
     let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
     const point = leftAngle < rightAngle ? leftPoint : rightPoint;
-    let p1, p2;
-    if (point.x < bottomPoint.x) {
-      p1 = point;
-      p2 = bottomPoint;
-    } else {
-      p1 = bottomPoint;
-      p2 = point;
-    }
+    const [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
     const angle = MathUtils.calculateAngle(p1, p2);
     const model: IStageDrawerMaskTaskSizeIndicatorModel = {
       point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
       angle,
       type: StageDrawerMaskModelTypes.sizeIndicator,
-      text: Math.sqrt(Math.pow(point.x - bottomPoint.x, 2) + Math.pow(point.y - bottomPoint.y, 2)).toFixed(2) + 'px',
+      text: MathUtils.distanceBetweenPoints(p1, p2).toFixed(2) + 'px',
     }
     return new StageDrawerMaskTaskSizeIndicator(model, this.renderParams);
   }
