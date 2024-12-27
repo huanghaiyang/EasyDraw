@@ -12,7 +12,7 @@ export enum ElementReactionPropNames {
   isLocked = 'isLocked',
   isEditing = 'isEditing',
   isMoving = 'isMoving',
-  isResizing = 'isResizing',
+  isTransforming = 'isTransforming',
   isRotating = 'isRotating',
   isRotatingTarget = 'isRotatingTarget',
   isDragging = 'isDragging',

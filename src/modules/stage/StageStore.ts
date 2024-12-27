@@ -357,14 +357,20 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
-    const model = {
+    const model: ElementObject = {
       id: CommonUtils.getRandomDateId(),
       type,
       coords,
       originalCoords: cloneDeep(coords),
       data,
       angle: 0,
-      name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`
+      name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
+    }
+    switch(type) {
+      case CreatorTypes.rectangle:
+        model.width = Math.abs(coords[0].x - coords[1].x);
+        model.height = Math.abs(coords[0].y - coords[3].y);
+        break;
     }
     return model;
   }

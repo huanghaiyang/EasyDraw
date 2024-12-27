@@ -27,7 +27,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isEditing: boolean = false;
   @observable _isLocked: boolean = false;
   @observable _isMoving: boolean = false;
-  @observable _isResizing: boolean = false;
+  @observable _isTransforming: boolean = false;
   @observable _isRotating: boolean = false;
   @observable _isRotatingTarget: boolean = false;
   @observable _isDragging: boolean = false;
@@ -36,6 +36,14 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
   @observable _position: IPoint;
+
+  get width(): number {
+    return this.model.width;
+  }
+
+  get height(): number {
+    return this.model.height;
+  }
 
   get centroid(): IPoint {
     return this.calcCentroid();
@@ -105,12 +113,12 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   @computed
-  get isResizing(): boolean {
-    return this._isResizing;
+  get isTransforming(): boolean {
+    return this._isTransforming;
   }
 
-  set isResizing(value: boolean) {
-    this._setIsResizing(value);
+  set isTransforming(value: boolean) {
+    this._setIsTransforming(value);
   }
 
   @computed
@@ -207,8 +215,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   @action
-  private _setIsResizing(value: boolean): void {
-    this._isResizing = value;
+  private _setIsTransforming(value: boolean): void {
+    this._isTransforming = value;
   }
 
   @action

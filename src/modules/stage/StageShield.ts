@@ -80,26 +80,30 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   // 舞台是否在移动
   private _isStageMoving: boolean = false;
   // 是否正在调整组件大小
-  private _isElementsResizing: boolean = false;
+  private _isElementsTransforming: boolean = false;
   // 组件是否旋转中
   private _isElementRotating: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
+
+  get shouldRedraw() {
+    return this.isElementsDragging || this.isElementsTransforming || this.isStageMoving || this.isElementRotating || this.isElementsTransforming
+  }
 
   get isElementsDragging(): boolean {
     return this._isElementsDragging;
   }
 
   set isElementsDragging(value: boolean) {
-    this._isElementsResizing = value;
+    this._isElementsTransforming = value;
   }
 
-  get isElementsResizing(): boolean {
-    return this._isElementsResizing;
+  get isElementsTransforming(): boolean {
+    return this._isElementsTransforming;
   }
 
-  set isElementsResizing(value: boolean) {
-    this._isElementsResizing = value;
+  set isElementsTransforming(value: boolean) {
+    this._isElementsTransforming = value;
   }
 
   set isStageMoving(value: boolean) {
@@ -258,26 +262,25 @@ export default class StageShield extends StageDrawerBase implements IStageShield
   async handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
+    let shouldClear = this.isDrawerActive;
 
-    const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
-
-    if (this.isMoveableActive && targetRotateElement) {
-      this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
-      this.store.calcRotatingElementsCentroid();
-      this._isElementRotating = true;
-    } else if (
-      this.isDrawerActive
-      || (
-        this.isMoveableActive
-        && (
-          !this.selection.getElementOnPoint(this.cursor.value)
-          || !this.selection.checkSelectContainsTarget()
-        )
-      )
-    ) {
-      // 1. 如果是绘制模式则直接清空
-      // 2. 如果是选择模式且当前鼠标位置没有选中元素，也清空选区
-      // 3. 如果是选择模式且当前鼠标位置有命中元素，但该元素不包含在选中元素中，则清空选区
+    if (this.isMoveableActive) {
+      let sizeTransformerElement: IStageElement;
+      const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
+      if (targetRotateElement) {
+        this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
+        this.store.calcRotatingElementsCentroid();
+        this._isElementRotating = true;
+      } else {
+        sizeTransformerElement = this.selection.checkSizeTransformerElement(this.cursor.value);
+        if (sizeTransformerElement) {
+          this._isElementsTransforming = true;
+        } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
+          shouldClear = true;
+        }
+      }
+    }
+    if (shouldClear) {
       // 清空所有组件的选中状态
       this.selection.clearSelects();
       // 将处于命中状态的组件转换为被选中状态

@@ -6,7 +6,6 @@ import {
   IStageDrawerMaskTaskSelectionModel,
   IStageDrawerMaskRenderer,
   StageDrawerMaskModelTypes,
-  Directions,
   IStageDrawerMask,
   IStageElement,
   IStageDrawerMaskTaskSizeIndicatorModel,
@@ -163,7 +162,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
         point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
         angle: 0,
         type: StageDrawerMaskModelTypes.sizeIndicator,
-        text: MathUtils.distanceBetweenPoints(p1, p2) + 'px',
+        text: `${element.width} x ${element.height}`,
       } as IStageDrawerMaskTaskSizeIndicatorModel, this.renderParams);
     }
     const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
@@ -176,7 +175,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
       point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
       angle,
       type: StageDrawerMaskModelTypes.sizeIndicator,
-      text: MathUtils.distanceBetweenPoints(p1, p2).toFixed(2) + 'px',
+      text: `${element.width} x ${element.height}`,
     }
     return new StageDrawerMaskTaskSizeIndicator(model, this.renderParams);
   }

@@ -48,10 +48,13 @@ export interface IStageShield extends IStageDrawer {
   renderEl: HTMLDivElement;
   stageRect: DOMRect;
   stageWorldCoord: IPoint;
+
+  get shouldRedraw(): boolean;
+
   get stageRectPoints(): IPoint[];
   get stageWordRectPoints(): IPoint[];
   get isElementsDragging(): boolean;
-  get isElementsResizing(): boolean;
+  get isElementsTransforming(): boolean;
   get isStageMoving(): boolean;
   get isDrawerActive(): boolean;
   get isMoveableActive(): boolean;
@@ -296,6 +299,9 @@ export interface IStageElement {
   id: string;
   model: ElementObject;
   rotationModel: IStageDrawerRotationModel;
+  
+  get width(): number;
+  get height(): number;
 
   get position(): IPoint;
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
@@ -311,7 +317,7 @@ export interface IStageElement {
   get isEditing(): boolean;
   get isLocked(): boolean;
   get isMoving(): boolean;
-  get isResizing(): boolean;
+  get isTransforming(): boolean;
   get isRotating(): boolean;
   get isRotatingTarget(): boolean;
   get isDragging(): boolean;
@@ -327,7 +333,7 @@ export interface IStageElement {
   set isEditing(value: boolean);
   set isLocked(value: boolean);
   set isMoving(value: boolean);
-  set isResizing(value: boolean);
+  set isTransforming(value: boolean);
   set isRotating(value: boolean);
   set isDragging(value: boolean);
   set isProvisional(value: boolean);
