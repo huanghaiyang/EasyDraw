@@ -32,7 +32,7 @@ export type IPoint3D = IPoint & {
 
 // 方位坐标
 export type IDirectionPoint = IPoint & {
-  direction: Directions;
+  direction?: Directions;
 }
 
 // 舞台主画板
@@ -158,7 +158,8 @@ export interface IStageDrawerMaskTaskModel {
 // 辅助画布绘制任务选区对象
 export interface IStageDrawerMaskTaskSelectionModel extends IStageDrawerMaskTaskModel {
   points: IPoint[];
-  type: StageDrawerMaskModelTypes
+  type: StageDrawerMaskModelTypes;
+  angle?: number;
 }
 
 export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMaskTaskModel {
@@ -171,6 +172,7 @@ export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMask
 export interface IStageDrawerMaskTaskSizeTransformerModel extends IStageDrawerMaskTaskModel {
   point: IPoint;
   direction: Directions;
+  angle?: number;
 }
 
 // 辅助画布绘制任务光标对象
@@ -295,6 +297,7 @@ export interface IStageElement {
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get centroid(): IPoint;
+  get sizeTransformerPoints(): IPoint[];
 
   get isSelected(): boolean;
   get isVisible(): boolean;
@@ -339,6 +342,8 @@ export interface IStageElement {
   calcRotatePoints(): IPoint[];
   calcRotatePathPoints(): IPoint[];
   calcMaxBoxPoints(): IPoint[];
+  calcCentroid(): IPoint;
+  calcSizeTransformerPoints(): IPoint[];
 }
 
 // 舞台元素（组件）-React

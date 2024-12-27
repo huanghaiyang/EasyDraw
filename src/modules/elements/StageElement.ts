@@ -37,7 +37,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _position: IPoint;
 
   get centroid(): IPoint {
-    return MathUtils.calcPolygonCentroid(this.pathPoints);
+    return this.calcCentroid();
   }
 
   @computed
@@ -255,6 +255,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   protected _maxBoxPoints: IPoint[];
   protected _rotatePoints: IPoint[];
   protected _rotatePathPoints: IPoint[];
+  protected _sizeTransformerPoints: IPoint[];
 
   get points(): IPoint[] {
     return this._points;
@@ -274,6 +275,10 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   get rotatePathPoints(): IPoint[] {
     return this._rotatePathPoints;
+  }
+
+  get sizeTransformerPoints(): IPoint[] {
+    return this._sizeTransformerPoints;
   }
 
   constructor(model: ElementObject) {
@@ -317,7 +322,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePoints(): IPoint[] {
-      return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))
+    return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))
   }
 
   /**
@@ -326,7 +331,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePathPoints(): IPoint[] {
-      return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid));
+    return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid));
   }
 
   /**
@@ -335,7 +340,25 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @returns 
    */
   calcMaxBoxPoints(): IPoint[] {
-      return CommonUtils.getBoxPoints(this._rotatePathPoints)
+    return CommonUtils.getBoxPoints(this._rotatePathPoints)
+  }
+
+  /**
+   * 计算中心点
+   * 
+   * @returns 
+   */
+  calcCentroid(): IPoint {
+    return MathUtils.calcPolygonCentroid(this.pathPoints);
+  }
+
+  /**
+   * 计算大小变换器坐标
+   * 
+   * @returns 
+   */
+  calcSizeTransformerPoints(): IPoint[] {
+    return cloneDeep(this._rotatePathPoints);
   }
 
   /**
@@ -358,6 +381,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
+    this._sizeTransformerPoints = this.calcSizeTransformerPoints();
     this._maxBoxPoints = this.calcMaxBoxPoints();
   }
 

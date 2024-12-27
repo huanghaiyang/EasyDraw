@@ -25,7 +25,7 @@ export default class StageDrawerMaskTaskSizeTransformer extends StageDrawerMaskT
     CanvasUtils.drawPath(this.canvas, DirectionUtils.get4DirectionPoints(this.data.point, {
       width: DefaultSizeTransformerValue,
       height: DefaultSizeTransformerValue
-    }), {
+    }, { angle: this.data.angle }), {
       strokeStyle: DefaultSizeTransformerStrokeColor,
       lineWidth: DefaultSizeTransformerStrokeWidth,
       fillStyle: DefaultSizeTransformerFillColor
