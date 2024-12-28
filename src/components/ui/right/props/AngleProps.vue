@@ -20,7 +20,7 @@ watch(
     <div class="angle-props__row">
       <div class="angle-props__row-item">
         <el-input v-model="aValue" placeholder="输入数字">
-          <template #prepend>w</template>
+          <template #prepend>a</template>
           <template #append>°</template>
         </el-input>
       </div>

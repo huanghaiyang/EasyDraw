@@ -364,4 +364,14 @@ export default class MathUtils {
     const uniqueSides = new Set(sides);
     return uniqueSides.size === 2;
   }
+
+  /**
+   * 判断两个数值的符号是否相等
+   * 
+   * @param a 
+   * @param b 
+   */
+  static isSameSign(a: number, b: number): boolean {
+    return (a * b) >= 0;
+  }
 }

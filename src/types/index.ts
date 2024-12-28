@@ -306,6 +306,7 @@ export interface IStageElement {
   get angle(): number;
   get position(): IPoint;
 
+  get originalModelCoords(): IPoint[];
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get maxBoxPoints(): IPoint[];
@@ -364,7 +365,7 @@ export interface IStageElement {
   activeTransformer(transformer: IElementTransformer): void;
   transform(offset: IPoint): void;
 
-  calcOriginalPoints(): void;
+  calcOriginalElementProps(): void;
   calcOriginalModelCoords(): void;
   calcOriginalProps(): void;
 }

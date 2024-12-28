@@ -346,6 +346,19 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             })
             // 将旋转状态置为false
             this._isElementRotating = false;
+          } else if (this._isElementsTransforming) {
+            this.store.updateSelectedElementsTransform({
+              x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+              y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
+            })
+            // 刷新组件坐标数据
+            this.store.keepOriginalProps(this.store.selectedElements);
+            // 更新组件状态
+            this.store.updateElements(this.store.selectedElements, {
+              isTransforming: false,
+            })
+            // 将旋转状态置为false
+            this._isElementsTransforming= false;
           }
         } else {
           // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态

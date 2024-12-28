@@ -49,6 +49,10 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isOnStage: boolean = false;
   @observable _position: IPoint;
 
+  get originalModelCoords() {
+    return this._originalModelCoords;
+  }
+
   @computed
   get width(): number {
     return this.model.width;
@@ -279,6 +283,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   protected _stageWorldCoord: IPoint;
   protected _originalCentroidCoord: IPoint;
   protected _originalRotatePoints: IPoint[] = [];
+  protected _originalAngle: number = 0;
 
   get points(): IPoint[] {
     return this._points;
@@ -501,7 +506,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   /**
    * 重新维护原始变形器坐标
    */
-  calcOriginalPoints() {
+  calcOriginalElementProps() {
     this._originalTransformerPoints = this.transformers.map(transformer => {
       const { x, y } = transformer;
       return {
@@ -510,6 +515,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
       }
     })
     this._originalRotatePoints = cloneDeep(this._rotatePoints);
+    this._originalAngle = this.angle;
   }
 
   /**
@@ -531,7 +537,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    */
   calcOriginalProps(): void {
     this.calcOriginalModelCoords();
-    this.calcOriginalPoints();
+    this.calcOriginalElementProps();
   }
 
   /**
@@ -563,35 +569,42 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
         // 当前拖动的点当前的位置
         const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
         // 原始矩阵
-        const originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
+        const originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this._originalAngle);
         // 原始的横轴缩放系数
         const xScaleOriginal = originalMatrix[0][0];
         // 原始的纵轴缩放系数
         const yScaleOriginal = originalMatrix[1][1];
         // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-        const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+        const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this._originalAngle);
         // 横轴缩放系数
         const xScale = matrix[0][0];
         // 纵轴缩放系数
         const yScale = matrix[1][1];
         const newPoints = this._originalRotatePoints.map(point => {
           // 先旋转回角度0
-          point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
+          point = MathUtils.rotateRelativeCentroid(point, -this._originalAngle, lockPoint)
           // 以不动点为圆心，计算形变
           const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
           // 重新计算坐标
           point = { x: x + lockPoint.x, y: y + lockPoint.y }
           // 坐标重新按照角度偏转
-          point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
+          point = MathUtils.rotateRelativeCentroid(point, this._originalAngle, lockPoint)
           return point;
         });
         const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
         const coords = newPoints.map(point => {
-          point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
+          point = MathUtils.rotateRelativeCentroid(point, -this._originalAngle, newCentroidPoint);
           point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord);
           return point;
         })
         this.model.coords = coords;
+        if (!MathUtils.isSameSign(xScale, xScaleOriginal) && !MathUtils.isSameSign(yScale, yScaleOriginal)) {
+          if (this._originalAngle > 0) {
+            this.model.angle = this._originalAngle - 180;
+          } else {
+            this.model.angle = this._originalAngle + 180;
+          }
+        }
       }
     }
   }
