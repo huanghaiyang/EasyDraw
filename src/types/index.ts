@@ -364,7 +364,7 @@ export interface IStageElement {
   activeTransformer(transformer: IElementTransformer): void;
   transform(offset: IPoint): void;
 
-  calcOriginalTransformPoints(): void;
+  calcOriginalPoints(): void;
   calcOriginalModelCoords(): void;
   calcOriginalProps(): void;
 }

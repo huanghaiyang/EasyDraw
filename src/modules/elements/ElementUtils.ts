@@ -56,14 +56,14 @@ export default class ElementUtils {
    * @returns 
    */
   static calcStageRelativePoints(worldCoords: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
-    // 计算element坐标相对于画布的坐标
-    const points = worldCoords.map(p => {
-      return {
-        x: p.x + stageRect.width / 2 - stageWorldCoord.x,
-        y: p.y + stageRect.height / 2 - stageWorldCoord.y
-      }
-    })
-    return points;
+    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, stageRect, stageWorldCoord));
+  }
+
+  static calcStageRelativePoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint): IPoint {
+    return {
+      x: point.x + stageRect.width / 2 - stageWorldCoord.x,
+      y: point.y + stageRect.height / 2 - stageWorldCoord.y
+    }
   }
 
   /**
@@ -75,14 +75,14 @@ export default class ElementUtils {
    * @returns 
    */
   static calcWorldPoints(points: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
-    // 计算element坐标相对于画布的坐标
-    const points1 = points.map(p => {
-      return {
-        x: p.x - stageRect.width / 2 + stageWorldCoord.x,
-        y: p.y - stageRect.height / 2 + stageWorldCoord.y
-      }
-    })
-    return points1;
+    return points.map(p => ElementUtils.calcWorldPoint(p, stageRect, stageWorldCoord));
+  }
+
+  static calcWorldPoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint): IPoint {
+    return {
+      x: point.x - stageRect.width / 2 + stageWorldCoord.x,
+      y: point.y - stageRect.height / 2 + stageWorldCoord.y
+    }
   }
 
   /**
