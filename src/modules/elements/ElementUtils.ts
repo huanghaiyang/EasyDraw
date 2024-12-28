@@ -67,6 +67,25 @@ export default class ElementUtils {
   }
 
   /**
+   * 计算世界坐标
+   * 
+   * @param points 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @returns 
+   */
+  static calcWorldPoints(points: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
+    // 计算element坐标相对于画布的坐标
+    const points1 = points.map(p => {
+      return {
+        x: p.x - stageRect.width / 2 + stageWorldCoord.x,
+        y: p.y - stageRect.height / 2 + stageWorldCoord.y
+      }
+    })
+    return points1;
+  }
+
+  /**
    * 在绘制图形时补全缺省点
    * 
    * @param points 

@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
-import { action, makeObservable, observable, computed, reaction } from "mobx";
+import { action, makeObservable, observable, computed } from "mobx";
 import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
@@ -72,7 +72,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   get position(): IPoint {
     return this.calcPosition();
   }
-  
+
   @computed
   get status(): ElementStatus {
     return this._status;
@@ -546,17 +546,22 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     if (this._points.length === 4) {
       const index = this._transformers.findIndex(item => item.isActive);
       if (index !== -1) {
+        // 中心点坐标索引
         const centroidIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
+        // 中心点
         const centroidPoint = this.originalTransformerPoints[centroidIndex];
-        const targetOriginalPoint = this.originalTransformerPoints[index];
+        // 当前拖动的点的原始位置
+        const currentPointOriginal = this.originalTransformerPoints[index];
+        // 当前拖动的点
         const currentPoint = {
-          x: targetOriginalPoint.x + offset.x,
-          y: targetOriginalPoint.y + offset.y
+          x: currentPointOriginal.x + offset.x,
+          y: currentPointOriginal.y + offset.y
         }
+        // 翻转形变矩阵
         const matrix: number[][] = MathUtils.calcTransformMatrixOfCentroid(
           centroidPoint,
-          MathUtils.rotateRelativeCentroid(currentPoint, -this.model.angle, centroidPoint),
-          MathUtils.rotateRelativeCentroid(targetOriginalPoint, -this.model.angle, centroidPoint)
+          currentPoint,
+          currentPointOriginal
         );
         const centroidCoord = this.originalModelCoords[centroidIndex];
         this.originalModelCoords.forEach((coord, index) => {
