@@ -3,38 +3,38 @@ import {
   Creator,
   CreatorCategories,
   IPoint,
-  IStageDrawerProvisional,
-  IStageDrawerMask,
+  IDrawerProvisional,
+  IDrawerMask,
   IStageStore,
   IStageShield,
   IStageSelection,
-  IStageElement,
+  IElement,
   IStageCursor,
   IStageEvent,
   ShieldDispatcherNames,
   CreatorTypes,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
-import StageDrawerMask from "@/modules/stage/drawer/StageDrawerMask";
-import StageDrawerProvisional from "@/modules/stage/drawer/StageDrawerProvisional";
+import DrawerMask from "@/modules/stage/drawer/DrawerMask";
+import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
 import StageSelection from "@/modules/stage/StageSelection";
 import StageCursor from "@/modules/stage/StageCursor";
 import StageEvent from '@/modules/stage/StageEvent';
-import StageDrawerBase from "@/modules/stage/drawer/StageDrawerBase";
-import StageDrawerShieldRenderer from "@/modules/render/renderer/drawer/StageDrawerShieldRenderer";
+import DrawerBase from "@/modules/stage/drawer/DrawerBase";
+import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/ElementUtils";
 import { cloneDeep } from "lodash";
 
-export default class StageShield extends StageDrawerBase implements IStageShield {
+export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
   cursor: IStageCursor;
   // 遮罩画布用以绘制鼠标样式,工具图标等
-  mask: IStageDrawerMask;
+  mask: IDrawerMask;
   // 前景画板
-  provisional: IStageDrawerProvisional;
+  provisional: IDrawerProvisional;
   // 数据存储
   store: IStageStore;
   // 选区操作
@@ -135,10 +135,10 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     this.event = new StageEvent(this);
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);
-    this.provisional = new StageDrawerProvisional(this);
+    this.provisional = new DrawerProvisional(this);
     this.selection = new StageSelection(this);
-    this.mask = new StageDrawerMask(this);
-    this.renderer = new StageDrawerShieldRenderer(this);
+    this.mask = new DrawerMask(this);
+    this.renderer = new ShieldRenderer(this);
 
     this.refreshSize = this.refreshSize.bind(this);
     this.handleCursorMove = this.handleCursorMove.bind(this);
@@ -243,7 +243,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       } else if (this.isHandActive) {
         this._isStageMoving = true;
         this._refreshStageWorldCoord(e);
-        this.store.refreshStageElements();
+        this.store.refreshElements();
         funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())
@@ -274,7 +274,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
     let shouldClear = this.isDrawerActive;
 
     if (this.isMoveableActive) {
-      let sizeTransformerElement: IStageElement;
+      let sizeTransformerElement: IElement;
       const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
       if (targetRotateElement) {
         this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
@@ -332,7 +332,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
             // 刷新组件坐标数据
             this.store.keepOriginalProps(this.store.selectedElements);
             // 刷新组件坐标数据
-            this.store.refreshStageElementsPoints(this.store.selectedElements);
+            this.store.refreshElementsPoints(this.store.selectedElements);
             // 将拖动状态置为false
             this._isElementsDragging = false;
           } else if (this._isElementRotating) {
@@ -374,7 +374,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
       }
     } else if (this.isHandActive) {
       this._refreshStageWorldCoord(e);
-      this.store.refreshStageElements();
+      this.store.refreshElements();
       this._isStageMoving = false;
     }
     await Promise.all([
@@ -498,7 +498,7 @@ export default class StageShield extends StageDrawerBase implements IStageShield
    * 
    * @param e 
    */
-  creatingElementIfy(e: MouseEvent): IStageElement | null {
+  creatingElementIfy(e: MouseEvent): IElement | null {
     if (this.checkCursorPressMovedALittle(e)) {
       const element = this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
       if (element) {

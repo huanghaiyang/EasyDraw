@@ -1,17 +1,17 @@
-import { IStageDrawerMaskTaskSizeTransformer, IStageDrawerMaskTaskSizeTransformerModel, Directions } from "@/types";
-import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
+import { IMaskTransformer, IMaskTransformerModel, Directions } from "@/types";
+import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerStrokeWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
-export default class StageDrawerMaskTaskSizeTransformer extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskSizeTransformer {
-  constructor(model: IStageDrawerMaskTaskSizeTransformerModel, params?: any) {
+export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTransformer {
+  constructor(model: IMaskTransformerModel, params?: any) {
     super(model, params);
     this.model = model;
   }
 
-  get data(): IStageDrawerMaskTaskSizeTransformerModel {
-    return this.model as IStageDrawerMaskTaskSizeTransformerModel;
+  get data(): IMaskTransformerModel {
+    return this.model as IMaskTransformerModel;
   }
 
   /**

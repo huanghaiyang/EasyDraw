@@ -1,8 +1,8 @@
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
-import { IStageElement, IStageElementTask } from "@/types";
+import { IElement, IElementTask } from "@/types";
 
-export default abstract class StageElementTaskBase extends RenderTaskBase implements IStageElementTask {
-  element: IStageElement;
+export default abstract class ElementTaskBase extends RenderTaskBase implements IElementTask {
+  element: IElement;
   protected _canvas: HTMLCanvasElement;
 
   get node() {
@@ -13,7 +13,7 @@ export default abstract class StageElementTaskBase extends RenderTaskBase implem
     return this._canvas;
   }
 
-  constructor(element: IStageElement, params?: any) {
+  constructor(element: IElement, params?: any) {
     super();
     this.element = element;
     if (params) {

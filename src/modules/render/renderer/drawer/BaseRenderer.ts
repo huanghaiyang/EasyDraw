@@ -7,7 +7,7 @@ import {
 } from "@/types";
 import RenderQueue from "@/modules/render/RenderQueue";
 
-export default class StageDrawerBaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
+export default class BaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
 
   drawer: T;
   renderQueue: IRenderQueue;

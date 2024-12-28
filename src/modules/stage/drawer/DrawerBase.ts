@@ -1,7 +1,7 @@
 import { ISize, IStageDrawer, IStageRenderer } from "@/types";
 import { EventEmitter } from "events";
 
-export default class StageDrawerBase extends EventEmitter implements IStageDrawer {
+export default class DrawerBase extends EventEmitter implements IStageDrawer {
   canvas: HTMLCanvasElement;
   renderer: IStageRenderer;
 

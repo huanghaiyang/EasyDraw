@@ -1,28 +1,28 @@
 import {
   IRenderTask,
-  IStageDrawerMaskTask,
-  IStageDrawerMaskTaskCursorModel,
-  IStageDrawerMaskTaskSizeTransformerModel,
-  IStageDrawerMaskTaskSelectionModel,
-  IStageDrawerMaskRenderer,
-  StageDrawerMaskModelTypes,
-  IStageDrawerMask,
-  IStageElement,
-  IStageDrawerMaskTaskSizeIndicatorModel,
+  IMaskTask,
+  IMaskCursorModel,
+  IMaskTransformerModel,
+  IMaskSelectionModel,
+  IMaskRenderer,
+  DrawerMaskModelTypes,
+  IDrawerMask,
+  IElement,
+  IMaskSizeIndicatorModel,
 } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
-import StageDrawerMaskTaskSelection from "@/modules/render/mask/task/StageDrawerMaskTaskSelection";
-import StageDrawerMaskTaskCursor from "@/modules/render/mask/task/StageDrawerMaskTaskCursor";
-import StageDrawerMaskTaskClear from "@/modules/render/mask/task/StageDrawerMaskTaskClear";
-import StageDrawerMaskTaskSizeTransformer from "@/modules/render/mask/task/StageDrawerMaskTaskSizeTransformer";
-import StageDrawerBaseRenderer from "@/modules/render/renderer/drawer/StageDrawerBaseRenderer";
-import StageDrawerMaskTaskRotate from "@/modules/render/mask/task/StageDrawerMaskTaskRotate";
+import MaskTaskSelection from "@/modules/render/mask/task/MaskTaskSelection";
+import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
+import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
+import MaskTaskTransformer from "@/modules/render/mask/task/MaskTaskTransformer";
+import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
+import MaskTaskRotate from "@/modules/render/mask/task/MaskTaskRotate";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import StageDrawerMaskTaskSizeIndicator from "@/modules/render/mask/task/StageDrawerMaskTaskSizeIndicator";
+import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndicator";
 import { DefaultSelectionSizeIndicatorDistance } from "@/types/constants";
 
-export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<IStageDrawerMask> implements IStageDrawerMaskRenderer {
+export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
   private _lastCursorRendered = false;
   private _lastSelectionRendered = false;
@@ -38,8 +38,8 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     const selectionTasks = this.createMaskSelectionTasks();
     selectionTasks.forEach(task => {
       cargo.add(task);
-      if (((task as IStageDrawerMaskTask).data as IStageDrawerMaskTaskSelectionModel).type === StageDrawerMaskModelTypes.selection) {
-        cargo.addAll(this.createMaskSizeTransformerTasks((task as IStageDrawerMaskTask).model as IStageDrawerMaskTaskSelectionModel));
+      if (((task as IMaskTask).data as IMaskSelectionModel).type === DrawerMaskModelTypes.selection) {
+        cargo.addAll(this.createMaskSizeTransformerTasks((task as IMaskTask).model as IMaskSelectionModel));
       }
     });
     if (selectionTasks.length) {
@@ -68,7 +68,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     } else {
       // 解决光标移出舞台出现残留的问题
       if ((this._lastCursorRendered || this._lastSelectionRendered) && !selectionTasks.length && !cursorRendered) {
-        cargo.add(new StageDrawerMaskTaskClear(null, this.renderParams));
+        cargo.add(new MaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
         this._lastCursorRendered = false;
         this._lastSelectionRendered = false;
@@ -84,12 +84,12 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @returns 
    */
   private createMaskCursorTask(): IRenderTask {
-    const model: IStageDrawerMaskTaskCursorModel = {
+    const model: IMaskCursorModel = {
       point: this.drawer.shield.cursor.value,
-      type: StageDrawerMaskModelTypes.cursor,
+      type: DrawerMaskModelTypes.cursor,
       creatorCategory: this.drawer.shield.currentCreator.category
     }
-    const task = new StageDrawerMaskTaskCursor(model, this.renderParams);
+    const task = new MaskTaskCursor(model, this.renderParams);
     return task;
   }
 
@@ -100,9 +100,9 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const models: IStageDrawerMaskTaskSelectionModel[] = this.drawer.shield.selection.getSelectionModels();
+    const models: IMaskSelectionModel[] = this.drawer.shield.selection.getSelectionModels();
     models.forEach(model => {
-      const task = new StageDrawerMaskTaskSelection(model, this.renderParams);
+      const task = new MaskTaskSelection(model, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -114,7 +114,7 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @returns 
    */
   private createMaskClearTask(): IRenderTask {
-    const task = new StageDrawerMaskTaskClear(null, this.renderParams);
+    const task = new MaskTaskClear(null, this.renderParams);
     return task;
   }
 
@@ -124,16 +124,16 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @param selectionModel 
    * @returns 
    */
-  private createMaskSizeTransformerTasks(selectionModel: IStageDrawerMaskTaskSelectionModel): IRenderTask[] {
+  private createMaskSizeTransformerTasks(selectionModel: IMaskSelectionModel): IRenderTask[] {
     const tasks: IRenderTask[] = [];
     const { points = [], angle = 0 } = selectionModel;
     points.forEach((point, index) => {
-      const model: IStageDrawerMaskTaskSizeTransformerModel = {
+      const model: IMaskTransformerModel = {
         point,
-        type: StageDrawerMaskModelTypes.transformer,
+        type: DrawerMaskModelTypes.transformer,
         angle
       }
-      const task = new StageDrawerMaskTaskSizeTransformer(model, this.renderParams);
+      const task = new MaskTaskTransformer(model, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -145,8 +145,8 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * @param element 
    * @returns 
    */
-  private createMaskRotateTask(element: IStageElement): IRenderTask {
-    return new StageDrawerMaskTaskRotate(element.rotationModel, this.renderParams);
+  private createMaskRotateTask(element: IElement): IRenderTask {
+    return new MaskTaskRotate(element.rotationModel, this.renderParams);
   }
 
   /**
@@ -154,16 +154,16 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
    * 
    * @param element 
    */
-  private createMaskSizeIndicatorTask(element: IStageElement): IRenderTask {
+  private createMaskSizeIndicatorTask(element: IElement): IRenderTask {
     if (element.model.angle % 90 === 0) {
       const p1 = element.maxBoxPoints[3]
       const p2 = element.maxBoxPoints[2]
-      return new StageDrawerMaskTaskSizeIndicator({
+      return new MaskTaskSizeIndicator({
         point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
         angle: 0,
-        type: StageDrawerMaskModelTypes.sizeIndicator,
+        type: DrawerMaskModelTypes.sizeIndicator,
         text: `${element.width} x ${element.height}`,
-      } as IStageDrawerMaskTaskSizeIndicatorModel, this.renderParams);
+      } as IMaskSizeIndicatorModel, this.renderParams);
     }
     const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
     let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
@@ -171,13 +171,13 @@ export default class StageDrawerMaskRenderer extends StageDrawerBaseRenderer<ISt
     const point = leftAngle < rightAngle ? leftPoint : rightPoint;
     const [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
     const angle = MathUtils.calculateAngle(p1, p2);
-    const model: IStageDrawerMaskTaskSizeIndicatorModel = {
+    const model: IMaskSizeIndicatorModel = {
       point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
       angle,
-      type: StageDrawerMaskModelTypes.sizeIndicator,
+      type: DrawerMaskModelTypes.sizeIndicator,
       text: `${element.width} x ${element.height}`,
     }
-    return new StageDrawerMaskTaskSizeIndicator(model, this.renderParams);
+    return new MaskTaskSizeIndicator(model, this.renderParams);
   }
 
 }

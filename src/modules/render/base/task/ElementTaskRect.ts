@@ -1,12 +1,12 @@
-import { IStageElementReact, IStageElementTaskRect } from "@/types";
-import StageElementTaskBase from "@/modules/render/base/task/StageElementTaskBase";
+import { IElementReact, IElementTaskRect } from "@/types";
+import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { DefaultCreatorFillColor, DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/constants";
 
-export default class StageElementTaskRect extends StageElementTaskBase implements IStageElementTaskRect {
+export default class ElementTaskRect extends ElementTaskBase implements IElementTaskRect {
 
   get node() {
-    return this.element as IStageElementReact;
+    return this.element as IElementReact;
   }
 
   /**

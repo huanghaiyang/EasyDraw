@@ -2,9 +2,9 @@ import {
   ElementStatus,
   ElementObject,
   IPoint,
-  IStageElement,
-  IStageDrawerRotationModel,
-  StageDrawerMaskModelTypes,
+  IElement,
+  IRotationModel,
+  DrawerMaskModelTypes,
   IElementTransformer,
   BoxDirections
 } from "@/types";
@@ -18,16 +18,16 @@ import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
 
-export default class StageElement implements IStageElement, ILinkedNodeValue {
+export default class Element implements IElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
   _originalTransformerPoints: IPoint[];
   _originalModelCoords: IPoint[];
   _originalMatrix: number[][] = [];
 
-  rotationModel: IStageDrawerRotationModel = {
+  rotationModel: IRotationModel = {
     point: null,
-    type: StageDrawerMaskModelTypes.rotate,
+    type: DrawerMaskModelTypes.rotate,
     width: DefaultSelectionRotateSize,
     height: DefaultSelectionRotateSize,
     angle: -90,
@@ -578,8 +578,6 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
         const yScaleOriginal = this._originalMatrix[1][1];
         // 判断当前拖动点，在坐标系垂直轴的左边还是右边
         const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-        // 横轴缩放系数
-        const xScale = matrix[0][0];
         // 纵轴缩放系数
         const yScale = matrix[1][1];
         const newPoints = this._originalRotatePoints.map(point => {

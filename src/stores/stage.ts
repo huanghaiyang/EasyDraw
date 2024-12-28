@@ -1,7 +1,7 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import StageConfigure from "@/modules/StageConfigure";
-import { Creator, CreatorCategories, IPoint, IStageElement, ShieldDispatcherNames, StageInitParams } from "@/types";
+import { Creator, CreatorCategories, IPoint, IElement, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { MoveableCreator, RectangleCreator } from "@/types/constants";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
@@ -28,7 +28,7 @@ export const useStageStore = defineStore("stage", {
     }
   },
   getters: {
-    uniqSelectedElement(): IStageElement {
+    uniqSelectedElement(): IElement {
       return this.selectedElements.length === 1 ? this.selectedElements[0] : null;
     },
   },
@@ -80,7 +80,7 @@ export const useStageStore = defineStore("stage", {
      * 
      * @param selectedElements 
      */
-    onSelectedChanged(selectedElements: IStageElement[]) {
+    onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
         const element = this.selectedElements[0];
@@ -96,7 +96,7 @@ export const useStageStore = defineStore("stage", {
      * 
      * @param targetElements 
      */
-    onTargetChanged(targetElements: IStageElement[]) {
+    onTargetChanged(targetElements: IElement[]) {
       this.targetElements = targetElements;
     },
     /**
@@ -104,7 +104,7 @@ export const useStageStore = defineStore("stage", {
      * 
      * @param position 
      */
-    onPositionChanged(element: IStageElement, position: IPoint) {
+    onPositionChanged(element: IElement, position: IPoint) {
       if (position) {
         this.position = {
           x: position.x,
@@ -118,7 +118,7 @@ export const useStageStore = defineStore("stage", {
      * @param element 
      * @param width 
      */
-    onWidthChanged(element: IStageElement, width: number) {
+    onWidthChanged(element: IElement, width: number) {
       this.width = width;
     },
     /**
@@ -127,7 +127,7 @@ export const useStageStore = defineStore("stage", {
      * @param element 
      * @param height 
      */
-    onHeightChanged(element: IStageElement, height: number) {
+    onHeightChanged(element: IElement, height: number) {
       this.height = height;
     },
     /**
@@ -136,7 +136,7 @@ export const useStageStore = defineStore("stage", {
      * @param element 
      * @param angle 
      */
-    onAngleChanged(element: IStageElement, angle: number) {
+    onAngleChanged(element: IElement, angle: number) {
       this.angle = angle;
     },
   },

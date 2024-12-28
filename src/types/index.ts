@@ -43,8 +43,8 @@ export interface IStageShield extends IStageDrawer {
   cursor: IStageCursor;
   selection: IStageSelection;
   store: IStageStore;
-  mask: IStageDrawerMask;
-  provisional: IStageDrawerProvisional;
+  mask: IDrawerMask;
+  provisional: IDrawerProvisional;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
   stageRect: DOMRect;
@@ -65,36 +65,36 @@ export interface IStageShield extends IStageDrawer {
 
 // 用于维护舞台数据关系
 export interface IStageStore {
-  get creatingElements(): IStageElement[];
-  get provisionalElements(): IStageElement[];
-  get selectedElements(): IStageElement[];
-  get targetElements(): IStageElement[];
-  get stageElements(): IStageElement[];
-  get noneStageElements(): IStageElement[];
-  get rangeElements(): IStageElement[];
-  get uniqSelectedElement(): IStageElement;
-  get rotatingTargetElements(): IStageElement[];
+  get creatingElements(): IElement[];
+  get provisionalElements(): IElement[];
+  get selectedElements(): IElement[];
+  get targetElements(): IElement[];
+  get Elements(): IElement[];
+  get noneElements(): IElement[];
+  get rangeElements(): IElement[];
+  get uniqSelectedElement(): IElement;
+  get rotatingTargetElements(): IElement[];
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
-  addElement(element: IStageElement): IStageElement;
-  removeElement(id: string): IStageElement;
-  updateElementById(id: string, props: Partial<IStageElement>): IStageElement;
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[];
-  updateElementModel(id: string, data: Partial<ElementObject>): IStageElement;
-  updateElementsModel(elements: IStageElement[], props: Partial<ElementObject>): void;
+  addElement(element: IElement): IElement;
+  removeElement(id: string): IElement;
+  updateElementById(id: string, props: Partial<IElement>): IElement;
+  updateElements(elements: IElement[], props: Partial<IElement>): IElement[];
+  updateElementModel(id: string, data: Partial<ElementObject>): IElement;
+  updateElementsModel(elements: IElement[], props: Partial<ElementObject>): void;
   hasElement(id: string): boolean;
-  findElements(predicate: (node: IStageElement) => boolean): IStageElement[];
-  getElementById(id: string): IStageElement;
+  findElements(predicate: (node: IElement) => boolean): IElement[];
+  getElementById(id: string): IElement;
   getIndexById(id: string): number;
-  creatingElement(points: IPoint[]): IStageElement;
-  finishCreatingElement(): IStageElement;
+  creatingElement(points: IPoint[]): IElement;
+  finishCreatingElement(): IElement;
   updateSelectedElementsMovement(offset: IPoint): void;
   updateSelectedElementsRotation(point: IPoint): void;
   updateSelectedElementsTransform(point: IPoint): void;
   calcRotatingElementsCentroid(): void;
-  keepOriginalProps(elements: IStageElement[]): void;
-  refreshStageElementsPoints(elements: IStageElement[]): void;
-  forEach(callback: (element: IStageElement, index: number) => void): void;
-  refreshStageElements(): void;
+  keepOriginalProps(elements: IElement[]): void;
+  refreshElementsPoints(elements: IElement[]): void;
+  forEach(callback: (element: IElement, index: number) => void): void;
+  refreshElements(): void;
 }
 
 // 画板画布
@@ -124,18 +124,18 @@ export interface IStageDrawer extends IStageCanvas, EventEmitter {
   redraw(): Promise<void>;
 }
 
-export interface IStageHelperDrawer extends IStageDrawer {
+export interface IHelperDrawer extends IStageDrawer {
   shield: IStageShield;
 }
 
 // 辅助画布
-export interface IStageDrawerMask extends IStageHelperDrawer { }
+export interface IDrawerMask extends IHelperDrawer { }
 
 // 临时组件绘制画布
-export interface IStageDrawerProvisional extends IStageHelperDrawer { }
+export interface IDrawerProvisional extends IHelperDrawer { }
 
 // 辅助画布绘制任务类型
-export enum StageDrawerMaskModelTypes {
+export enum DrawerMaskModelTypes {
   selection = 0,
   transformer = 1,
   cursor = 2,
@@ -165,37 +165,37 @@ export const BoxDirections = [
 ]
 
 // 辅助画布绘制任务对象类型
-export interface IStageDrawerMaskTaskModel {
-  type: StageDrawerMaskModelTypes;
+export interface IMaskModel {
+  type: DrawerMaskModelTypes;
 }
 
 // 辅助画布绘制任务选区对象
-export interface IStageDrawerMaskTaskSelectionModel extends IStageDrawerMaskTaskModel {
+export interface IMaskSelectionModel extends IMaskModel {
   points: IPoint[];
-  type: StageDrawerMaskModelTypes;
+  type: DrawerMaskModelTypes;
   angle?: number;
 }
 
-export interface IStageDrawerMaskTaskSizeIndicatorModel extends IStageDrawerMaskTaskModel {
+export interface IMaskSizeIndicatorModel extends IMaskModel {
   point: IPoint;
   text: string;
   angle: number;
 }
 
 // 辅助画布绘制任务选区控制器对象
-export interface IStageDrawerMaskTaskSizeTransformerModel extends IStageDrawerMaskTaskModel {
+export interface IMaskTransformerModel extends IMaskModel {
   point: IPoint;
   angle?: number;
 }
 
 // 辅助画布绘制任务光标对象
-export interface IStageDrawerMaskTaskCursorModel extends IStageDrawerMaskTaskModel {
+export interface IMaskCursorModel extends IMaskModel {
   point: IPoint;
   creatorCategory: CreatorCategories;
 }
 
 // 组件旋转图标绘制任务对象
-export interface IStageDrawerRotationModel extends IStageDrawerMaskTaskModel {
+export interface IRotationModel extends IMaskModel {
   point: IPoint;
   width: number;
   height: number;
@@ -204,42 +204,42 @@ export interface IStageDrawerRotationModel extends IStageDrawerMaskTaskModel {
 }
 
 // 辅助画布绘制任务
-export interface IStageDrawerMaskTask extends IRenderTask {
-  get data(): IStageDrawerMaskTaskModel;
-  model: IStageDrawerMaskTaskModel;
+export interface IMaskTask extends IRenderTask {
+  get data(): IMaskModel;
+  model: IMaskModel;
 }
 
 // 辅助画布选区绘制任务
-export interface IStageDrawerMaskTaskSelection extends IStageDrawerMaskTask { }
+export interface IMaskSelection extends IMaskTask { }
 
 // 辅助画布选区控制器绘制任务
-export interface IStageDrawerMaskTaskSizeTransformer extends IStageDrawerMaskTask { }
+export interface IMaskTransformer extends IMaskTask { }
 
 // 辅助画布光标绘制任务
-export interface IStageDrawerMaskTaskCursor extends IStageDrawerMaskTask { }
+export interface IMaskCursor extends IMaskTask { }
 
 // 组件旋转图标绘制
-export interface IStageDrawerMaskTaskRotate extends IStageDrawerMaskTask { }
+export interface IMaskRotate extends IMaskTask { }
 
 // 辅助画布清除绘制任务
-export interface IStageDrawerMaskTaskClear extends IStageDrawerMaskTask { }
+export interface IMaskClear extends IMaskTask { }
 
 // 用于显示组件尺寸
-export interface IStageDrawerMaskTaskSizeIndicator extends IStageDrawerMaskTask { }
+export interface IMaskSizeIndicator extends IMaskTask { }
 
 // 舞台元素绘制任务
-export interface IStageElementTask extends IRenderTask {
-  element: IStageElement;
+export interface IElementTask extends IRenderTask {
+  element: IElement;
 }
 
 // 舞台元素绘制任务-矩形
-export interface IStageElementTaskRect extends IStageElementTask { }
+export interface IElementTaskRect extends IElementTask { }
 
 // 舞台元素绘制任务-圆形
-export interface IStageElementTaskCircle extends IStageElementTask { }
+export interface IElementTaskCircle extends IElementTask { }
 
 // 舞台元素清除绘制任务
-export interface IStageElementTaskClear extends IStageElementTask { }
+export interface IElementTaskClear extends IElementTask { }
 
 // 舞台事件处理器
 export interface IStageEvent extends EventEmitter {
@@ -252,14 +252,14 @@ export interface IStageSelection {
   get isRange(): boolean;
   setRange(points: IPoint[]): void;
   selectRange(): void;
-  getSelectionModels(): IStageDrawerMaskTaskSelectionModel[];
+  getSelectionModels(): IMaskSelectionModel[];
   selectTarget(): void;
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
-  checkTargetRotateElement(point: IPoint): IStageElement;
-  checkTransformerElement(point: IPoint): IStageElement;
+  checkTargetRotateElement(point: IPoint): IElement;
+  checkTransformerElement(point: IPoint): IElement;
   refreshRangeElements(rangePoints: IPoint[]): void;
-  getElementOnPoint(point: IPoint): IStageElement;
+  getElementOnPoint(point: IPoint): IElement;
   checkSelectContainsTarget(): boolean;
 }
 
@@ -296,10 +296,10 @@ export type ElementObject = {
 }
 
 // 舞台元素（组件）
-export interface IStageElement {
+export interface IElement {
   id: string;
   model: ElementObject;
-  rotationModel: IStageDrawerRotationModel;
+  rotationModel: IRotationModel;
   
   get width(): number;
   get height(): number;
@@ -371,10 +371,10 @@ export interface IStageElement {
 }
 
 // 舞台元素（组件）-React
-export interface IStageElementReact extends IStageElement { }
+export interface IElementReact extends IElement { }
 
 // 舞台元素（组件）-圆形
-export interface IStageElementCircle extends IStageElement { }
+export interface IElementCircle extends IElement { }
 
 // 创作工具
 export type Creator = {
@@ -385,27 +385,12 @@ export type Creator = {
   cursor: string,
 }
 
-// 画板鼠标按下时的用途
-export enum ShieldMouseDownUsage {
-  move = 0,
-  resize = 1,
-  select = 2,
-  drag = 3
-}
-
 // 舞台组件状态
 export enum ElementStatus {
   initialed = -1,
   startCreating = 0,
   creating = 1,
   finished = 2
-}
-
-// 选区绘制类型
-export enum SelectionRenderTypes {
-  none = 0,
-  rect = 1,
-  line = 2
 }
 
 // 渲染任务函数
@@ -445,13 +430,13 @@ export interface IStageRenderer {
 }
 
 // 辅助画布绘制器
-export interface IStageDrawerMaskRenderer extends IStageRenderer, IQueueRender { }
+export interface IMaskRenderer extends IStageRenderer, IQueueRender { }
 
 // 临时画布绘制器 
-export interface IStageDrawerProvisionalRenderer extends IStageRenderer, IQueueRender { }
+export interface IProvisionalRenderer extends IStageRenderer, IQueueRender { }
 
 // 主画布绘制器
-export interface IStageDrawerShieldRenderer extends IStageRenderer, IQueueRender { }
+export interface IShieldRenderer extends IStageRenderer, IQueueRender { }
 
 // 画板元素样式定义
 export type CanvasCreatorStyles = {

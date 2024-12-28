@@ -1,10 +1,10 @@
 import LinkedList from "@/modules/struct/LinkedList";
-import { IElementList, IStageElement } from "@/types";
+import { IElementList, IElement } from "@/types";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import { observable, reaction, runInAction } from "mobx";
 import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
 
-export default class ElementList extends LinkedList<IStageElement> implements IElementList {
+export default class ElementList extends LinkedList<IElement> implements IElementList {
 
   constructor() {
     super();
@@ -17,7 +17,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    * 
    * @param element 
    */
-  private _addElementObserve(node: ILinkedNode<IStageElement>): void {
+  private _addElementObserve(node: ILinkedNode<IElement>): void {
     Object.keys(ElementReactionPropNames).forEach(propName => {
       reaction(() => node.value[propName], () => {
         this.emit(propName, node.value, node.value[propName]);
@@ -30,7 +30,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    *
    * @param node 
    */
-  insert(node: ILinkedNode<IStageElement>): void {
+  insert(node: ILinkedNode<IElement>): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insert(node);
@@ -44,7 +44,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    * @param node 
    * @param target 
    */
-  insertBefore(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
+  insertBefore(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insertBefore(node, target);
@@ -58,7 +58,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    * @param node 
    * @param target 
    */
-  insertAfter(node: ILinkedNode<IStageElement>, target: ILinkedNode<IStageElement>): void {
+  insertAfter(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insertAfter(node, target);
@@ -71,7 +71,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    *
    * @param node 
    */
-  prepend(node: ILinkedNode<IStageElement>): void {
+  prepend(node: ILinkedNode<IElement>): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.prepend(node);
@@ -84,7 +84,7 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    *
    * @param node 
    */
-  remove(node: ILinkedNode<IStageElement>): void {
+  remove(node: ILinkedNode<IElement>): void {
     runInAction(() => {
       super.remove(node);
       this.emit(ElementListEventNames.removed, node);
@@ -96,8 +96,8 @@ export default class ElementList extends LinkedList<IStageElement> implements IE
    *
    * @param predicate 
    */
-  removeBy(predicate: (node: ILinkedNode<IStageElement>) => boolean): ILinkedNode<IStageElement>[] {
-    let result: ILinkedNode<IStageElement>[] = [];
+  removeBy(predicate: (node: ILinkedNode<IElement>) => boolean): ILinkedNode<IElement>[] {
+    let result: ILinkedNode<IElement>[] = [];
     runInAction(() => {
       result = super.removeBy(predicate);
       result.forEach(node => {

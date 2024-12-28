@@ -1,10 +1,10 @@
 import {
   IPoint,
-  IStageDrawerMaskTaskSelectionModel,
-  IStageElement,
+  IMaskSelectionModel,
+  IElement,
   IStageSelection,
   IStageShield,
-  StageDrawerMaskModelTypes
+  DrawerMaskModelTypes
 } from "@/types";
 import { every, includes } from "lodash";
 
@@ -42,14 +42,14 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getSelectionModels(): IStageDrawerMaskTaskSelectionModel[] {
-    const result: IStageDrawerMaskTaskSelectionModel[] = [];
+  getSelectionModels(): IMaskSelectionModel[] {
+    const result: IMaskSelectionModel[] = [];
 
     if (this.isRange) {
       this.shield.store.rangeElements.forEach(element => {
         result.push({
           points: element.rotatePathPoints,
-          type: StageDrawerMaskModelTypes.selection,
+          type: DrawerMaskModelTypes.selection,
         });
       });
     }
@@ -57,7 +57,7 @@ export default class StageSelection implements IStageSelection {
     this.shield.store.targetElements.forEach(element => {
       result.push({
         points: element.rotatePathPoints,
-        type: StageDrawerMaskModelTypes.highlight,
+        type: DrawerMaskModelTypes.highlight,
         angle: element.model.angle,
       });
     });
@@ -65,7 +65,7 @@ export default class StageSelection implements IStageSelection {
     this.shield.store.selectedElements.forEach(element => {
       result.push({
         points: element.rotatePathPoints,
-        type: StageDrawerMaskModelTypes.selection,
+        type: DrawerMaskModelTypes.selection,
         angle: element.model.angle,
       });
     });
@@ -73,7 +73,7 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
-        type: StageDrawerMaskModelTypes.highlight,
+        type: DrawerMaskModelTypes.highlight,
       });
     }
     return result;
@@ -92,8 +92,8 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    */
   hitTargetElements(point: IPoint): void {
-    for (let i = this.shield.store.stageElements.length - 1; i >= 0; i--) {
-      const element = this.shield.store.stageElements[i];
+    for (let i = this.shield.store.Elements.length - 1; i >= 0; i--) {
+      const element = this.shield.store.Elements[i];
       const isTarget = element.isContainsPoint(point);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
@@ -112,7 +112,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  checkTargetRotateElement(point: IPoint): IStageElement {
+  checkTargetRotateElement(point: IPoint): IElement {
     const element = this.shield.store.uniqSelectedElement;
     if (element && element.isRotationContainsPoint(point)) {
       return element;
@@ -124,7 +124,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  checkTransformerElement(point: IPoint): IStageElement {
+  checkTransformerElement(point: IPoint): IElement {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       const transformer = element.getTransformerByPoint(point);
@@ -151,7 +151,7 @@ export default class StageSelection implements IStageSelection {
    */
   refreshRangeElements(rangePoints: IPoint[]): void {
     if (rangePoints && rangePoints.length) {
-      this.shield.store.stageElements.forEach(element => {
+      this.shield.store.Elements.forEach(element => {
         this.shield.store.updateElementById(element.id, { isInRange: element.isPolygonOverlap(rangePoints) })
       });
     }
@@ -172,8 +172,8 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    * @returns 
    */
-  getElementOnPoint(point: IPoint): IStageElement {
-    return this.shield.store.stageElements.find(item => item.isContainsPoint(point));
+  getElementOnPoint(point: IPoint): IElement {
+    return this.shield.store.Elements.find(item => item.isContainsPoint(point));
   }
 
   /**

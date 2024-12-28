@@ -1,12 +1,12 @@
-import { IStageDrawerMaskTaskSizeIndicator, IStageDrawerMaskTaskSizeIndicatorModel } from "@/types";
-import StageDrawerMaskTaskBase from "@/modules/render/mask/task/StageDrawerMaskTaskBase";
+import { IMaskSizeIndicator, IMaskSizeIndicatorModel } from "@/types";
+import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { DefaultSelectionSizeIndicatorFillColor, DefaultSelectionSizeIndicatorFontFamily, DefaultSelectionSizeIndicatorFontSize } from "@/types/constants";
 
-export default class StageDrawerMaskTaskSizeIndicator extends StageDrawerMaskTaskBase implements IStageDrawerMaskTaskSizeIndicator {
+export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMaskSizeIndicator {
 
-  get data(): IStageDrawerMaskTaskSizeIndicatorModel {
-    return this.model as IStageDrawerMaskTaskSizeIndicatorModel;
+  get data(): IMaskSizeIndicatorModel {
+    return this.model as IMaskSizeIndicatorModel;
   }
 
   /**

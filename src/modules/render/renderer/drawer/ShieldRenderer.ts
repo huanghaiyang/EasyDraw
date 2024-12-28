@@ -1,10 +1,10 @@
-import { IStageDrawerShieldRenderer, IStageShield } from "@/types";
-import StageDrawerBaseRenderer from "./StageDrawerBaseRenderer";
+import { IShieldRenderer, IStageShield } from "@/types";
+import BaseRenderer from "./BaseRenderer";
 import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
 import ElementUtils from "@/modules/elements/ElementUtils";
-import StageElementTaskClear from "@/modules/render/base/task/StageElementTaskClear";
+import ElementTaskClear from "@/modules/render/base/task/ElementTaskClear";
 
-export default class StageDrawerShieldRenderer extends StageDrawerBaseRenderer<IStageShield> implements IStageDrawerShieldRenderer {
+export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
   async redraw(): Promise<void> {
     const cargo = new RenderTaskCargo([]);
     if (this.drawer.store.provisionalElements.length) {
@@ -20,8 +20,8 @@ export default class StageDrawerShieldRenderer extends StageDrawerBaseRenderer<I
       }
     }
     if (this.drawer.shouldRedraw) {
-      cargo.add(new StageElementTaskClear(null, this.renderParams));
-      this.drawer.store.stageElements.forEach((element) => {
+      cargo.add(new ElementTaskClear(null, this.renderParams));
+      this.drawer.store.Elements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

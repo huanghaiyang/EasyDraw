@@ -1,8 +1,8 @@
-import { CreatorTypes, ElementObject, IPoint, IStageElement, IStageElementTask } from "@/types";
-import StageElementTaskRect from "@/modules/render/base/task/StageElementTaskRect";
+import { CreatorTypes, ElementObject, IPoint, IElement, IElementTask } from "@/types";
+import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
-import StageElementRect from "@/modules/elements/StageElementRect";
-import StageElement from "@/modules/elements/StageElement";
+import ElementRect from "@/modules/elements/ElementRect";
+import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
 import { DefaultSelectionRotateDistance } from "@/types/constants";
 
@@ -35,11 +35,11 @@ export enum ElementListEventNames {
 }
 
 export default class ElementUtils {
-  static createElementTask(element: IStageElement, params?: any): IStageElementTask {
-    let task: IStageElementTask;
+  static createElementTask(element: IElement, params?: any): IElementTask {
+    let task: IElementTask;
     switch (element.model.type) {
       case CreatorTypes.rectangle:
-        task = new StageElementTaskRect(element, params);
+        task = new ElementTaskRect(element, params);
         break;
       default:
         break;
@@ -107,14 +107,14 @@ export default class ElementUtils {
    * @param model 
    * @returns 
    */
-  static createElement(model: ElementObject): IStageElement {
+  static createElement(model: ElementObject): IElement {
     const { type } = model;
     switch (type) {
       case CreatorTypes.rectangle: {
-        return new StageElementRect(model);
+        return new ElementRect(model);
       }
       default:
-        return new StageElement(model);
+        return new Element(model);
     }
   }
 
@@ -124,7 +124,7 @@ export default class ElementUtils {
    * @param elements 
    * @param point 
    */
-  static getTopAElementByPoint(elements: IStageElement[], point: IPoint): IStageElement {
+  static getTopAElementByPoint(elements: IElement[], point: IPoint): IElement {
     for (let i = elements.length - 1; i >= 0; i--) {
       const element = elements[i];
       if (element.isContainsPoint(point)) {
@@ -139,7 +139,7 @@ export default class ElementUtils {
    * @param element 
    * @returns 
    */
-  static calcElementRotatePoint(element: IStageElement): IPoint {
+  static calcElementRotatePoint(element: IElement): IPoint {
     const { pathPoints, centroid, rotationModel: { angle } } = element;
     const v1 = pathPoints[0];
     const v2 = pathPoints[3];

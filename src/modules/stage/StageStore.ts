@@ -4,7 +4,7 @@ import {
   ElementStatus,
   ElementObject,
   IPoint,
-  IStageElement,
+  IElement,
   IStageShield,
   IStageStore,
   ShieldDispatcherNames,
@@ -26,21 +26,21 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
-  private _elementMap = new ElementSortedMap<string, IStageElement>();
+  private _elementMap = new ElementSortedMap<string, IElement>();
   // 已渲染的组件映射关系
-  private _provisionalElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _provisionalElementsMap = new ElementSortedMap<string, IElement>();
   // 被选中的组件映射关系，加快查询
-  private _selectedElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _selectedElementsMap = new ElementSortedMap<string, IElement>();
   // 命中的组件映射关系，加快查询
-  private _targetElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _targetElementsMap = new ElementSortedMap<string, IElement>();
   // 舞台元素映射关系，加快查询
-  private _stageElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _ElementsMap = new ElementSortedMap<string, IElement>();
   // 未在舞台的元素映射关系，加快查询
-  private _noneStageElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _noneElementsMap = new ElementSortedMap<string, IElement>();
   // 选区元素映射关系，加快查询
-  private _rangeElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _rangeElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转目标元素映射关系，加快查询
-  private _rotatingTargetElementsMap = new ElementSortedMap<string, IStageElement>();
+  private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转组件中心点
   private _rotatingTargetElementsCentroid: IPoint;
 
@@ -55,8 +55,8 @@ export default class StageStore implements IStageStore {
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements)
     })
-    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
-    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._ElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._noneElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
@@ -65,7 +65,7 @@ export default class StageStore implements IStageStore {
   }
 
   // 当前创建并更新中的组件
-  get creatingElements(): IStageElement[] {
+  get creatingElements(): IElement[] {
     const element = this._elementMap.get(this._currentCreatingElementId);
     if (element) {
       return [element];
@@ -74,35 +74,35 @@ export default class StageStore implements IStageStore {
   }
 
   // 已经渲染到舞台的组件
-  get provisionalElements(): IStageElement[] {
+  get provisionalElements(): IElement[] {
     return this._provisionalElementsMap.valuesArray();
   }
 
-  get selectedElements(): IStageElement[] {
+  get selectedElements(): IElement[] {
     return this._selectedElementsMap.valuesArray();
   }
 
-  get targetElements(): IStageElement[] {
+  get targetElements(): IElement[] {
     return this._targetElementsMap.valuesArray();
   }
 
-  get stageElements(): IStageElement[] {
-    return this._stageElementsMap.valuesArray();
+  get Elements(): IElement[] {
+    return this._ElementsMap.valuesArray();
   }
 
-  get noneStageElements(): IStageElement[] {
-    return this._noneStageElementsMap.valuesArray();
+  get noneElements(): IElement[] {
+    return this._noneElementsMap.valuesArray();
   }
 
-  get rangeElements(): IStageElement[] {
+  get rangeElements(): IElement[] {
     return this._rangeElementsMap.valuesArray();
   }
 
-  get uniqSelectedElement(): IStageElement {
+  get uniqSelectedElement(): IElement {
     if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
   }
 
-  get rotatingTargetElements(): IStageElement[] {
+  get rotatingTargetElements(): IElement[] {
     return this._rotatingTargetElementsMap.valuesArray();
   }
 
@@ -110,7 +110,7 @@ export default class StageStore implements IStageStore {
    * 组件新增
    */
   private _reactionElementAdded(): void {
-    this._elementList.on(ElementListEventNames.added, (node: ILinkedNode<IStageElement>) => {
+    this._elementList.on(ElementListEventNames.added, (node: ILinkedNode<IElement>) => {
       const element = node.value;
       Object.keys(ElementReactionPropNames).forEach(propName => {
         this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
@@ -122,11 +122,11 @@ export default class StageStore implements IStageStore {
    * 组件删除
    */
   private _reactionElementRemoved(): void {
-    this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IStageElement>) => {
+    this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IElement>) => {
       const element = node.value;
       this._selectedElementsMap.delete(element.id);
-      this._stageElementsMap.delete(element.id);
-      this._noneStageElementsMap.delete(element.id);
+      this._ElementsMap.delete(element.id);
+      this._noneElementsMap.delete(element.id);
       this._provisionalElementsMap.delete(element.id);
       this._targetElementsMap.delete(element.id);
       this._rangeElementsMap.delete(element.id);
@@ -152,7 +152,7 @@ export default class StageStore implements IStageStore {
    * @param element 
    * @param value 
    */
-  private _reactionElementPropsChanged(propName: string, element: IStageElement, value: boolean | ElementStatus | IPoint): void {
+  private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
     switch (propName) {
       case ElementReactionPropNames.isSelected: {
         if (value) {
@@ -164,11 +164,11 @@ export default class StageStore implements IStageStore {
       }
       case ElementReactionPropNames.isOnStage: {
         if (value) {
-          this._stageElementsMap.set(element.id, element);
-          this._noneStageElementsMap.delete(element.id);
+          this._ElementsMap.set(element.id, element);
+          this._noneElementsMap.delete(element.id);
         } else {
-          this._stageElementsMap.delete(element.id);
-          this._noneStageElementsMap.set(element.id, element);
+          this._ElementsMap.delete(element.id);
+          this._noneElementsMap.set(element.id, element);
         }
         break;
       }
@@ -248,7 +248,7 @@ export default class StageStore implements IStageStore {
    * @param id 
    * @returns 
    */
-  getElementById(id: string): IStageElement {
+  getElementById(id: string): IElement {
     return this._elementMap.get(id);
   }
 
@@ -278,7 +278,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param element 
    */
-  addElement(element: IStageElement): IStageElement {
+  addElement(element: IElement): IElement {
     this._elementList.insert(new LinkedNode(element))
     this._elementMap.set(element.id, element);
     return element;
@@ -289,7 +289,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param id 
    */
-  removeElement(id: string): IStageElement {
+  removeElement(id: string): IElement {
     if (this.hasElement(id)) {
       const element = this._elementMap.get(id);
       this._elementList.removeBy(node => node.value.id === id);
@@ -306,7 +306,7 @@ export default class StageStore implements IStageStore {
    * @param isRefresh
    * @returns 
    */
-  updateElementById(id: string, props: Partial<IStageElement>): IStageElement {
+  updateElementById(id: string, props: Partial<IElement>): IElement {
     if (this.hasElement(id)) {
       const element = this._elementMap.get(id);
       Object.assign(element, props);
@@ -321,7 +321,7 @@ export default class StageStore implements IStageStore {
    * @param props 
    * @returns 
    */
-  updateElements(elements: IStageElement[], props: Partial<IStageElement>): IStageElement[] {
+  updateElements(elements: IElement[], props: Partial<IElement>): IElement[] {
     elements.forEach(element => {
       return this.updateElementById(element.id, props);
     })
@@ -334,7 +334,7 @@ export default class StageStore implements IStageStore {
    * @param id 
    * @param data 
    */
-  updateElementModel(id: string, data: Partial<ElementObject>): IStageElement {
+  updateElementModel(id: string, data: Partial<ElementObject>): IElement {
     if (this.hasElement(id)) {
       const element = this._elementMap.get(id);
       const modelId = element.model.id;
@@ -349,7 +349,7 @@ export default class StageStore implements IStageStore {
    * @param elements 
    * @param props 
    */
-  updateElementsModel(elements: IStageElement[], props: Partial<ElementObject>): void {
+  updateElementsModel(elements: IElement[], props: Partial<ElementObject>): void {
     elements.forEach(element => {
       this.updateElementModel(element.id, props);
     })
@@ -386,8 +386,8 @@ export default class StageStore implements IStageStore {
    * 
    * @param points
    */
-  creatingElement(points: IPoint[]): IStageElement {
-    let element: IStageElement;
+  creatingElement(points: IPoint[]): IElement {
+    let element: IElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
@@ -423,7 +423,7 @@ export default class StageStore implements IStageStore {
   /**
    * 完成创建元素
    */
-  finishCreatingElement(): IStageElement {
+  finishCreatingElement(): IElement {
     if (this._currentCreatingElementId) {
       const element = this.getElementById(this._currentCreatingElementId);
       if (element) {
@@ -443,7 +443,7 @@ export default class StageStore implements IStageStore {
    * @param predicate 
    * @returns 
    */
-  findElements(predicate: (node: IStageElement) => boolean): IStageElement[] {
+  findElements(predicate: (node: IElement) => boolean): IElement[] {
     const result = [];
     this._elementList.forEach(node => {
       if (predicate(node.value)) {
@@ -489,7 +489,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param callback 
    */
-  forEach(callback: (element: IStageElement, index: number) => void): void {
+  forEach(callback: (element: IElement, index: number) => void): void {
     this._elementList.forEach((node, index) => {
       callback(node.value, index);
     })
@@ -500,7 +500,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  keepOriginalProps(elements: IStageElement[]): void {
+  keepOriginalProps(elements: IElement[]): void {
     elements.forEach(element => {
       element.calcOriginalProps();
     })
@@ -510,7 +510,7 @@ export default class StageStore implements IStageStore {
    * 组件坐标更新
    * @param elements 
    */
-  refreshStageElementsPoints(elements: IStageElement[]): void {
+  refreshElementsPoints(elements: IElement[]): void {
     elements.forEach(element => {
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
@@ -519,7 +519,7 @@ export default class StageStore implements IStageStore {
   /**
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
-  refreshStageElements(): void {
+  refreshElements(): void {
     this._elementList.forEach(node => {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
