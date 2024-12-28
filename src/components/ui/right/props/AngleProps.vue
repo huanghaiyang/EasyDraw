@@ -21,12 +21,12 @@ watch(
       <div class="angle-props__row-item">
         <el-input v-model="aValue" placeholder="输入数字">
           <template #prepend>w</template>
-          <template #append>px</template>
+          <template #append>°</template>
         </el-input>
       </div>
 
       <div class="angle-props__row-item">
-        
+
       </div>
     </div>
   </div>

@@ -300,8 +300,6 @@ export interface IStageElement {
   id: string;
   model: ElementObject;
   rotationModel: IStageDrawerRotationModel;
-  originalTransformerPoints: IPoint[];
-  originalModelCoords: IPoint[];
   
   get width(): number;
   get height(): number;

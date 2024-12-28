@@ -46,7 +46,12 @@ export default class MathUtils {
    * @param point 移动点
    * @param originalPoint 缩放前的点
    */
-  static calcTransformMatrixOfCentroid(centroid: IPoint, point: IPoint, originalPoint: IPoint): number[][] {
+  static calcTransformMatrixOfCentroid(centroid: IPoint, point: IPoint, originalPoint: IPoint, angle?: number): number[][] {
+    // 如果坐标系旋转过，则需要重新计算给定的坐标
+    if (angle) {
+      point = MathUtils.rotateRelativeCentroid(point, -angle, centroid);
+      originalPoint = MathUtils.rotateRelativeCentroid(originalPoint, -angle, centroid);
+    }
     const originalWidth = originalPoint.x - centroid.x;
     const originalHeight = originalPoint.y - centroid.y;
     const newWidth = point.x - centroid.x;
@@ -74,6 +79,22 @@ export default class MathUtils {
       x: result.x + centroid.x,
       y: result.y + centroid.y
     }
+  }
+
+  /**
+   * 旋转垂直坐标系上的某一点（x右侧为正，顺时针为正角度）
+   * 
+   * @param point 
+   * @param angle 
+   * @returns 
+   */
+  static rotatePoint(point: IPoint, angle: number): IPoint {
+    const { x, y } = point;
+    const theta = MathUtils.degreesToRadians(angle);
+    // 计算新坐标
+    let xPrime = x * Math.cos(theta) - y * Math.sin(theta);
+    let yPrime = x * Math.sin(theta) + y * Math.cos(theta);
+    return { x: xPrime, y: yPrime };
   }
 
   /**
@@ -313,6 +334,7 @@ export default class MathUtils {
     }
     return angle;
   }
+
   /**
    * 计算两点之间的距离
    * 

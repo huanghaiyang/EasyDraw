@@ -21,8 +21,8 @@ import { multiply } from 'mathjs';
 export default class StageElement implements IStageElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
-  originalTransformerPoints: IPoint[];
-  originalModelCoords: IPoint[];
+  _originalTransformerPoints: IPoint[];
+  _originalModelCoords: IPoint[];
 
   rotationModel: IStageDrawerRotationModel = {
     point: null,
@@ -275,6 +275,9 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   protected _rotatePoints: IPoint[] = [];
   protected _rotatePathPoints: IPoint[] = [];
   protected _transformers: IElementTransformer[] = [];
+  protected _stageRect: DOMRect;
+  protected _stageWorldCoord: IPoint;
+  protected _originalCentroidCoord: IPoint;
 
   get points(): IPoint[] {
     return this._points;
@@ -403,6 +406,8 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 刷新坐标
    */
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+    this._stageRect = stageRect;
+    this._stageWorldCoord = stageWorldCoord;
     this.refreshElementPoints(stageRect, stageWorldCoord);
     this.refreshRotationModelPoints();
   }
@@ -496,7 +501,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 重新维护原始变形器坐标
    */
   calcOriginalTransformPoints() {
-    this.originalTransformerPoints = this.transformers.map(transformer => {
+    this._originalTransformerPoints = this.transformers.map(transformer => {
       const { x, y } = transformer;
       return {
         x,
@@ -509,13 +514,14 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * 重新维护原始坐标
    */
   calcOriginalModelCoords() {
-    this.originalModelCoords = this.model.coords.map(point => {
+    this._originalModelCoords = this.model.coords.map(point => {
       const { x, y } = point;
       return {
         x,
         y
       }
     })
+    this._originalCentroidCoord = MathUtils.calcPolygonCentroid(this._originalModelCoords);
   }
 
   /**
@@ -546,12 +552,12 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     if (this._points.length === 4) {
       const index = this._transformers.findIndex(item => item.isActive);
       if (index !== -1) {
-        // 中心点坐标索引
-        const centroidIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
-        // 中心点
-        const centroidPoint = this.originalTransformerPoints[centroidIndex];
+        // 不动点坐标索引
+        const lockIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
+        // 不动点
+        const lockPoint = this._originalTransformerPoints[lockIndex];
         // 当前拖动的点的原始位置
-        const currentPointOriginal = this.originalTransformerPoints[index];
+        const currentPointOriginal = this._originalTransformerPoints[index];
         // 当前拖动的点
         const currentPoint = {
           x: currentPointOriginal.x + offset.x,
@@ -559,18 +565,29 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
         }
         // 翻转形变矩阵
         const matrix: number[][] = MathUtils.calcTransformMatrixOfCentroid(
-          centroidPoint,
+          lockPoint,
           currentPoint,
-          currentPointOriginal
+          currentPointOriginal,
+          this.model.angle
         );
-        const centroidCoord = this.originalModelCoords[centroidIndex];
-        this.originalModelCoords.forEach((coord, index) => {
-          const [x, y] = multiply(matrix, [coord.x - centroidCoord.x, coord.y - centroidCoord.y, 1]);
-          this.model.coords[index] = {
-            x: x + centroidCoord.x,
-            y: y + centroidCoord.y
+        // 将不动点的舞台坐标转换为世界坐标
+        const lockCoord = MathUtils.rotateRelativeCentroid(ElementUtils.calcWorldPoints([lockPoint], this._stageRect, this._stageWorldCoord)[0], -this.model.angle, this._originalCentroidCoord);
+        // 将原始的舞台坐标按照不动点缩放
+        const coords = this._originalModelCoords.map(coord => {
+          // const result = MathUtils.rotateRelativeCentroid(coord, this.model.angle, this._originalCentroidCoord);
+          let [x, y] = multiply(matrix, [coord.x - lockCoord.x, coord.y - lockCoord.y, 1]);
+          x += lockCoord.x;
+          y += lockCoord.y;
+          return {
+            x,
+            y
           }
-        })
+        });
+        this.model.coords = coords;
+        // const newCentroidCoord = MathUtils.calcPolygonCentroid(coords);
+        // this.model.coords = coords.map(coord => {
+        //   return MathUtils.rotateRelativeCentroid(coord, -this.model.angle, newCentroidCoord);
+        // })
       }
     }
   }
