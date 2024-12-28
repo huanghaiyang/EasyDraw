@@ -8,7 +8,7 @@ import RightProps from "@/components/ui/right/props/RightProps.vue";
 </template>
 <style lang="less" scoped>
 .right-bar {
-  width: 200px;
+  width: 100%;
   height: 100%;
   background-color: #fefefe;
   overflow-y: auto;

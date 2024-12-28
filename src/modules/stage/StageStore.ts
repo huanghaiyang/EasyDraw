@@ -11,7 +11,7 @@ import {
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
-import { cloneDeep, flatten } from "lodash";
+import { flatten } from "lodash";
 import ElementList from "@/modules/elements/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -112,14 +112,9 @@ export default class StageStore implements IStageStore {
   private _reactionElementAdded(): void {
     this._elementList.on(ElementListEventNames.added, (node: ILinkedNode<IStageElement>) => {
       const element = node.value;
-      this._reactionElementPropsChanged(ElementReactionPropNames.isSelected, element, element.isSelected);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isOnStage, element, element.isOnStage);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isProvisional, element, element.isProvisional);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isTarget, element, element.isTarget);
-      this._reactionElementPropsChanged(ElementReactionPropNames.status, element, element.status);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isInRange, element, element.isInRange);
-      this._reactionElementPropsChanged(ElementReactionPropNames.isRotatingTarget, element, element.isRotatingTarget);
-      this._reactionElementPropsChanged(ElementReactionPropNames.position, element, element.position);
+      Object.keys(ElementReactionPropNames).forEach(propName => {
+        this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
+      })
     })
   }
 
@@ -217,6 +212,18 @@ export default class StageStore implements IStageStore {
       }
       case ElementReactionPropNames.position: {
         this.shield.emit(ShieldDispatcherNames.positionChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.angle: {
+        this.shield.emit(ShieldDispatcherNames.angleChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.width: {
+        this.shield.emit(ShieldDispatcherNames.widthChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.height: {
+        this.shield.emit(ShieldDispatcherNames.heightChanged, element, value)
         break;
       }
       default: {
@@ -538,10 +545,13 @@ export default class StageStore implements IStageStore {
    * @param point 
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    const angle = MathUtils.calculateAngle(this._rotatingTargetElementsCentroid, point);
+    let angle = Math.round(MathUtils.calculateAngle(this._rotatingTargetElementsCentroid, point)) + 90;
+    if (angle > 180) {
+      angle = angle - 360;
+    }
     this.rotatingTargetElements.forEach(element => {
       this.updateElementModel(element.id, {
-        angle: angle + 90,
+        angle,
       })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })

@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
-import { action, makeObservable, observable, computed } from "mobx";
+import { action, makeObservable, observable, computed, reaction } from "mobx";
 import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
@@ -49,12 +49,19 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   @observable _isOnStage: boolean = false;
   @observable _position: IPoint;
 
+  @computed
   get width(): number {
     return this.model.width;
   }
 
+  @computed
   get height(): number {
     return this.model.height;
+  }
+
+  @computed
+  get angle(): number {
+    return this.model.angle;
   }
 
   get centroid(): IPoint {
@@ -63,13 +70,9 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
 
   @computed
   get position(): IPoint {
-    return this._position;
+    return this.calcPosition();
   }
-
-  set position(value: IPoint) {
-    this._setPosition(value);
-  }
-
+  
   @computed
   get status(): ElementStatus {
     return this._status;
@@ -266,11 +269,6 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
     this._isInRange = value;
   }
 
-  @action
-  private _setPosition(value: IPoint): void {
-    this._position = value;
-  }
-
   protected _points: IPoint[] = [];
   protected _pathPoints: IPoint[] = [];
   protected _maxBoxPoints: IPoint[] = [];
@@ -303,7 +301,7 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
   }
 
   constructor(model: ElementObject) {
-    this.model = model;
+    this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
     this.calcOriginalProps();
     makeObservable(this);
@@ -416,7 +414,6 @@ export default class StageElement implements IStageElement, ILinkedNodeValue {
    * @param stageWorldCoord 
    */
   refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint) {
-    this.position = this.calcPosition();
     this._points = this.calcPoints(stageRect, stageWorldCoord);
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();

@@ -22,6 +22,9 @@ export enum ElementReactionPropNames {
   isOnStage = 'isOnStage',
   status = 'status',
   position = 'position',
+  width = 'width',
+  height = 'height',
+  angle = 'angle'
 }
 
 export enum ElementListEventNames {

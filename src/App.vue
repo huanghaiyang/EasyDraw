@@ -45,7 +45,7 @@ init().then(() => {
 .right {
   top: 30px;
   bottom: 0;
-  width: 200px;
+  width: 220px;
 }
 .left {
   left: 0;
@@ -57,7 +57,7 @@ init().then(() => {
   position: absolute;
   top: 30px;
   bottom: 0;
-  left: 200px;
-  right: 200px;
+  left: 220px;
+  right: 220px;
 }
 </style>

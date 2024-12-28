@@ -1,10 +1,12 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
+import StageConfigure from "@/modules/StageConfigure";
 import { Creator, CreatorCategories, IPoint, IStageElement, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { MoveableCreator, RectangleCreator } from "@/types/constants";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 
+new StageConfigure().config();
 const shield = new StageShield();
 const container = new StageContainer();
 
@@ -19,7 +21,10 @@ export const useStageStore = defineStore("stage", {
       position: {
         x: 0,
         y: 0
-      }
+      },
+      width: 0,
+      height: 0,
+      angle: 0,
     }
   },
   getters: {
@@ -43,6 +48,9 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
       shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
       shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -75,7 +83,12 @@ export const useStageStore = defineStore("stage", {
     onSelectedChanged(selectedElements: IStageElement[]) {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
-        this._setPosition(this.selectedElements[0]?.position);
+        const element = this.selectedElements[0];
+        const { position, width, height, angle } = element;
+        this.onPositionChanged(element, position);
+        this.onWidthChanged(element, width);
+        this.onHeightChanged(element, height);
+        this.onAngleChanged(element, angle);
       }
     },
     /**
@@ -87,11 +100,11 @@ export const useStageStore = defineStore("stage", {
       this.targetElements = targetElements;
     },
     /**
-     * 设置舞台组件坐标
+     * 组件坐标变化
      * 
      * @param position 
      */
-    _setPosition(position: IPoint) {
+    onPositionChanged(element: IStageElement, position: IPoint) {
       if (position) {
         this.position = {
           x: position.x,
@@ -100,12 +113,31 @@ export const useStageStore = defineStore("stage", {
       }
     },
     /**
-     * 组件坐标变化
+     * 组件宽度变化
      * 
-     * @param position 
+     * @param element 
+     * @param width 
      */
-    onPositionChanged(element: IStageElement, position: IPoint) {
-       this._setPosition(position);
+    onWidthChanged(element: IStageElement, width: number) {
+      this.width = width;
+    },
+    /**
+     * 组件高度变化
+     * 
+     * @param element 
+     * @param height 
+     */
+    onHeightChanged(element: IStageElement, height: number) {
+      this.height = height;
+    },
+    /**
+     * 组件角度变化
+     * 
+     * @param element 
+     * @param angle 
+     */
+    onAngleChanged(element: IStageElement, angle: number) {
+      this.angle = angle;
     },
   },
 });
