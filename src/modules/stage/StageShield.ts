@@ -25,6 +25,8 @@ import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/ElementUtils";
 import { cloneDeep } from "lodash";
+import StageConfigure from "@/modules/stage/StageConfigure";
+import IStageConfigure from "@/types/IStageConfigure";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -35,6 +37,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
   mask: IDrawerMask;
   // 前景画板
   provisional: IDrawerProvisional;
+  // 配置
+  configure: IStageConfigure;
   // 数据存储
   store: IStageStore;
   // 选区操作
@@ -132,6 +136,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
 
   constructor() {
     super();
+    this.configure = new StageConfigure();
     this.event = new StageEvent(this);
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);

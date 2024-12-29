@@ -48,7 +48,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
     // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
     if (this.drawer.shield.store.uniqSelectedElement) {
-      cargo.add(this.createMaskRotateTask(this.drawer.shield.store.uniqSelectedElement));
+      if (this.drawer.shield.configure.rotationIconEnable) {
+        cargo.add(this.createMaskRotateTask(this.drawer.shield.store.uniqSelectedElement));
+      }
       cargo.add(this.createMaskSizeIndicatorTask(this.drawer.shield.store.uniqSelectedElement));
     }
 

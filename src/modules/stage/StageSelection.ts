@@ -113,9 +113,11 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    */
   checkTargetRotateElement(point: IPoint): IElement {
-    const element = this.shield.store.uniqSelectedElement;
-    if (element && element.isRotationContainsPoint(point)) {
-      return element;
+    if (this.shield.configure.rotationIconEnable) {
+      const element = this.shield.store.uniqSelectedElement;
+      if (element && element.isRotationContainsPoint(point)) {
+        return element;
+      }
     }
   }
 

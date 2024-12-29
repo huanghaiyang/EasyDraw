@@ -1,4 +1,5 @@
 import { EventEmitter } from "events";
+import IStageConfigure from "@/types/IStageConfigure";
 
 // 创作工具类型,同时也是组件类型
 export enum CreatorTypes {
@@ -45,6 +46,7 @@ export interface IStageShield extends IStageDrawer {
   store: IStageStore;
   mask: IDrawerMask;
   provisional: IDrawerProvisional;
+  configure: IStageConfigure;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
   stageRect: DOMRect;

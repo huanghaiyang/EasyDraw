@@ -1,14 +1,13 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
-import StageConfigure from "@/modules/StageConfigure";
 import { Creator, CreatorCategories, IPoint, IElement, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { MoveableCreator, RectangleCreator } from "@/types/constants";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 
-new StageConfigure().config();
 const shield = new StageShield();
 const container = new StageContainer();
+shield.configure.config({ rotationIconEnable: false })
 
 export const useStageStore = defineStore("stage", {
   state: () => {
