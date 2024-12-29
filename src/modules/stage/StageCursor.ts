@@ -1,4 +1,6 @@
-import { IPoint, IStageCursor, IStageShield } from "@/types";
+import { IPoint } from "@/types";
+import IStageCursor from "@/types/IStageCursor";
+import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class StageCursor implements IStageCursor {

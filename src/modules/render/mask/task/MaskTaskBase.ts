@@ -1,5 +1,6 @@
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
-import { IMaskTask, IMaskModel } from "@/types";
+import { IMaskModel } from "@/types/IModel";
+import { IMaskTask } from "@/types/IRenderTask";
 
 export default abstract class MaskTaskBase extends RenderTaskBase implements IMaskTask {
   model: IMaskModel;

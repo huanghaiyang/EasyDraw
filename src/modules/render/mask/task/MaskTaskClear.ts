@@ -1,5 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { IMaskClear } from "@/types";
+import { IMaskClear } from "@/types/IRenderTask";
 
 export default class MaskTaskClear extends MaskTaskBase implements IMaskClear {
   async run(): Promise<void> {
