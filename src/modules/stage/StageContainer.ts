@@ -1,4 +1,4 @@
-import { IStageContainer } from "@/types";
+import IStageContainer from "@/types/IStageContainer";
 
 export default class StageContainer implements IStageContainer {
   el: HTMLDivElement;

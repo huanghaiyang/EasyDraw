@@ -1,10 +1,13 @@
-import { CreatorTypes, ElementObject, IPoint, IElement, IElementTask } from "@/types";
+import { IPoint } from "@/types";
 import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import { DefaultSelectionRotateDistance } from "@/types/constants";
+import { DefaultSelectionRotateDistance } from "@/types/Constants";
+import IElement, { ElementObject } from "@/types/IElement";
+import { IElementTask } from "@/types/IRenderTask";
+import { CreatorTypes } from "@/types/Creator";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',

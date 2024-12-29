@@ -1,5 +1,6 @@
 import Element from "@/modules/elements/Element";
-import { IPoint, IElementCircle } from "@/types";
+import { IPoint } from "@/types";
+import { IElementCircle } from "@/types/IElement";
 
 export default class ElementCircle extends Element implements IElementCircle {
 

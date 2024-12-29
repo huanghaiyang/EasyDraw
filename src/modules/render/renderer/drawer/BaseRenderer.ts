@@ -1,11 +1,7 @@
-import {
-  IStageRenderer,
-  IQueueRender,
-  IRenderQueue,
-  IStageDrawer,
-  IRenderTaskCargo,
-} from "@/types";
 import RenderQueue from "@/modules/render/RenderQueue";
+import { IQueueRender, IRenderQueue, IRenderTaskCargo } from "@/types/IRender";
+import { IStageDrawer } from "@/types/IStageDrawer";
+import { IStageRenderer } from "@/types/IStageRenderer";
 
 export default class BaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
 
@@ -34,7 +30,7 @@ export default class BaseRenderer<T extends IStageDrawer> implements IStageRende
   /**
    * 重绘蒙版
    */
-  async redraw(): Promise<void> {
+  async redraw(force?: boolean): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

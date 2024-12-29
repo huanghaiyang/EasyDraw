@@ -1,4 +1,6 @@
-import { ISize, IStageDrawer, IStageRenderer } from "@/types";
+import { ISize } from "@/types";
+import { IStageDrawer } from "@/types/IStageDrawer";
+import { IStageRenderer } from "@/types/IStageRenderer";
 import { EventEmitter } from "events";
 
 export default class DrawerBase extends EventEmitter implements IStageDrawer {
@@ -35,7 +37,7 @@ export default class DrawerBase extends EventEmitter implements IStageDrawer {
   /**
    * 重绘
    */
-  async redraw(): Promise<void> {
-    await this.renderer.redraw();
+  async redraw(force?: boolean): Promise<void> {
+    await this.renderer.redraw(force);
   }
 }

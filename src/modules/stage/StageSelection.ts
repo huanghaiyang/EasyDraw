@@ -1,11 +1,8 @@
-import {
-  IPoint,
-  IMaskSelectionModel,
-  IElement,
-  IStageSelection,
-  IStageShield,
-  DrawerMaskModelTypes
-} from "@/types";
+import { IPoint, DrawerMaskModelTypes } from "@/types";
+import IElement from "@/types/IElement";
+import { IMaskSelectionModel } from "@/types/IModel";
+import IStageSelection from "@/types/IStageSelection";
+import IStageShield from "@/types/IStageShield";
 import { every, includes } from "lodash";
 
 export default class StageSelection implements IStageSelection {

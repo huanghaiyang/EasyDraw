@@ -1,5 +1,6 @@
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
-import { IElement, IElementTask } from "@/types";
+import IElement from "@/types/IElement";
+import { IElementTask } from "@/types/IRenderTask";
 
 export default abstract class ElementTaskBase extends RenderTaskBase implements IElementTask {
   element: IElement;

@@ -1,5 +1,6 @@
 import DrawerBase from "@/modules/stage/drawer/DrawerBase";
-import { IHelperDrawer, IStageShield } from "@/types";
+import { IHelperDrawer } from "@/types/IStageDrawer";
+import IStageShield from "@/types/IStageShield";
 
 export default class HelperDrawer extends DrawerBase implements IHelperDrawer {
   shield: IStageShield;

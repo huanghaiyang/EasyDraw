@@ -1,4 +1,5 @@
-import { IRenderQueue, IRenderTask } from "@/types";
+import { IRenderQueue } from "@/types/IRender"
+import { IRenderTask } from "@/types/IRenderTask"
 
 export default class RenderQueue implements IRenderQueue {
   running: boolean

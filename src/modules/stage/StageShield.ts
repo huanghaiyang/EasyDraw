@@ -1,18 +1,8 @@
-import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/constants";
+import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/Constants";
 import {
-  Creator,
-  CreatorCategories,
   IPoint,
-  IDrawerProvisional,
-  IDrawerMask,
-  IStageStore,
-  IStageShield,
-  IStageSelection,
-  IElement,
-  IStageCursor,
   IStageEvent,
   ShieldDispatcherNames,
-  CreatorTypes,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
@@ -27,6 +17,13 @@ import ElementUtils from "@/modules/elements/ElementUtils";
 import { cloneDeep } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
+import IElement from "@/types/IElement";
+import IStageStore from "@/types/IStageStore";
+import IStageSelection from "@/types/IStageSelection";
+import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
+import IStageShield from "@/types/IStageShield";
+import IStageCursor from "@/types/IStageCursor";
+import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -63,8 +60,6 @@ export default class StageShield extends DrawerBase implements IStageShield {
     return CommonUtils.getBoxVertices(this.stageWorldCoord, this.stageRect);
   }
 
-  // 画布是否是第一次渲染
-  private _isFirstResizeRender: boolean = true;
   // 鼠标按下位置
   private _pressDownPosition: IPoint;
   // 鼠标按下时距离世界坐标中心点的偏移
@@ -145,7 +140,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.mask = new DrawerMask(this);
     this.renderer = new ShieldRenderer(this);
 
-    this.refreshSize = this.refreshSize.bind(this);
+    this._refreshSize = this._refreshSize.bind(this);
     this.handleCursorMove = this.handleCursorMove.bind(this);
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
@@ -163,7 +158,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.initCanvas(),
       this.event.init(),
     ])
-    this.event.on('resize', this.refreshSize)
+    this.event.on('resize', this._refreshSize)
     this.event.on('cursorMove', this.handleCursorMove)
     this.event.on('cursorLeave', this.handleCursorLeave)
     this.event.on('pressDown', this.handlePressDown)
@@ -363,30 +358,54 @@ export default class StageShield extends DrawerBase implements IStageShield {
               isTransforming: false,
             })
             // 将旋转状态置为false
-            this._isElementsTransforming= false;
+            this._isElementsTransforming = false;
           }
         } else {
-          // 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
-          const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
-          this.store.updateElements(this.store.selectedElements, { isSelected: false })
-          if (topAElement) {
-            this.store.updateElementById(topAElement.id, { isSelected: true });
-          }
+          this._excludeTopAElement(e);
         }
       } else {
-        this.selection.selectRange();
-        this.selection.setRange(null);
+        this._processRangeEmpty();
       }
     } else if (this.isHandActive) {
-      this._refreshStageWorldCoord(e);
-      this.store.refreshElements();
-      this._isStageMoving = false;
+      this._processHandCreatorMove(e)
     }
     await Promise.all([
       this.mask.redraw(),
       this.provisional.redraw(),
       this.renderCreatedElement()
     ])
+  }
+
+  /**
+   * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
+   * 
+   * @param e 
+   */
+  private _excludeTopAElement(e: MouseEvent): void {
+    const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
+    this.store.updateElements(this.store.selectedElements, { isSelected: false })
+    if (topAElement) {
+      this.store.updateElementById(topAElement.id, { isSelected: true });
+    }
+  }
+
+  /**
+   * 处理选区为空的情况
+   */
+  private _processRangeEmpty() {
+    this.selection.selectRange();
+    this.selection.setRange(null);
+  }
+
+  /**
+   * 处理手型工具移动事件
+   * 
+   * @param e 
+   */
+  private _processHandCreatorMove(e: MouseEvent): void {
+    this._refreshStageWorldCoord(e);
+    this.store.refreshElements();
+    this._isStageMoving = false;
   }
 
   /**
@@ -468,16 +487,35 @@ export default class StageShield extends DrawerBase implements IStageShield {
   /**
    * 刷新画布尺寸
    */
-  refreshSize(): void {
+  private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
     // TODO this.worldCenterCoord = ?
-    this.mask.updateCanvasSize(rect)
-    this.provisional.updateCanvasSize(rect);
-    this.updateCanvasSize(rect);
-    if (this._isFirstResizeRender) {
-      this._isFirstResizeRender = false;
-    }
+    this._refreshAllCanvasSize(rect);
+    this.store.refreshElements();
+    await this._redrawAll(true);
+  }
+
+  /**
+   * 更新所有画布尺寸
+   * 
+   * @param size 
+   */
+  private _refreshAllCanvasSize(size: DOMRect): void {
+    this.mask.updateCanvasSize(size);
+    this.provisional.updateCanvasSize(size);
+    this.updateCanvasSize(size);
+  }
+
+  /**
+   * 重新绘制所有内容
+   */
+  private async _redrawAll(force?: boolean): Promise<void> {
+    await Promise.all([
+      this.mask.redraw(force),
+      this.provisional.redraw(force),
+      this.redraw(force)
+    ])
   }
 
   /**

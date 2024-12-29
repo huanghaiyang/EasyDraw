@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { CursorCreators } from "@/types/constants";
+import { CursorCreators } from "@/types/Constants";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);

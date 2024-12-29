@@ -16,6 +16,11 @@ export default class StageConfigure implements IStageConfigure {
     })
   }
 
+  /**
+   * 配置
+   * 
+   * @param configs 
+   */
   config(configs: StageConfigs): void {
     Object.assign(this._configs, configs);
   }

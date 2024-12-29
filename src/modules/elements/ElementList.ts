@@ -1,8 +1,9 @@
 import LinkedList from "@/modules/struct/LinkedList";
-import { IElementList, IElement } from "@/types";
+import { IElementList } from "@/types";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import { observable, reaction, runInAction } from "mobx";
 import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
+import IElement from "@/types/IElement";
 
 export default class ElementList extends LinkedList<IElement> implements IElementList {
 

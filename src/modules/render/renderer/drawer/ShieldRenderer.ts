@@ -1,11 +1,18 @@
-import { IShieldRenderer, IStageShield } from "@/types";
 import BaseRenderer from "./BaseRenderer";
 import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
 import ElementUtils from "@/modules/elements/ElementUtils";
 import ElementTaskClear from "@/modules/render/base/task/ElementTaskClear";
+import IStageShield from "@/types/IStageShield";
+import { IShieldRenderer } from "@/types/IStageRenderer";
 
 export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
-  async redraw(): Promise<void> {
+  /**
+   * 绘制舞台内容
+   * 
+   * @param force 
+   * @returns 
+   */
+  async redraw(force?: boolean): Promise<void> {
     const cargo = new RenderTaskCargo([]);
     if (this.drawer.store.provisionalElements.length) {
       this.drawer.store.provisionalElements.forEach((element) => {
@@ -19,7 +26,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
         return;
       }
     }
-    if (this.drawer.shouldRedraw) {
+    if (force || this.drawer.shouldRedraw) {
       cargo.add(new ElementTaskClear(null, this.renderParams));
       this.drawer.store.Elements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);

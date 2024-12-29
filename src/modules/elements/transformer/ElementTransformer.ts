@@ -1,4 +1,5 @@
-import { Directions, IPoint, IElementTransformer } from "@/types";
+import { Directions, IPoint } from "@/types";
+import IElementTransformer from "@/types/IElementTransformer";
 import MathUtils from "@/utils/MathUtils";
 
 export default class ElementTransformer implements IElementTransformer {

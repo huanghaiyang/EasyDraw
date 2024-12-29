@@ -1,5 +1,5 @@
-import { CreatorCategories } from "@/types";
 import CrossSvg from '@/assets/svg/Cross.svg';
+import { CreatorCategories } from '@/types/Creator';
 
 export default class CursorUtils {
   static getCursorSvg(creatorCategory: CreatorCategories): string {

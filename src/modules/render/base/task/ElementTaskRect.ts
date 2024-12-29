@@ -1,7 +1,8 @@
-import { IElementReact, IElementTaskRect } from "@/types";
 import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { DefaultCreatorFillColor, DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/constants";
+import { DefaultCreatorFillColor, DefaultCreatorStrokeColor, DefaultCreatorStrokeWidth } from "@/types/Constants";
+import { IElementReact } from "@/types/IElement";
+import { IElementTaskRect } from "@/types/IRenderTask";
 
 export default class ElementTaskRect extends ElementTaskBase implements IElementTaskRect {
 

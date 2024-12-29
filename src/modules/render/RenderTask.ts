@@ -1,5 +1,5 @@
-import { ITaskFunc } from "@/types";
 import RenderTaskBase from "@/modules/render/RenderTaskBase";
+import { ITaskFunc } from "@/types/IRender";
 
 export default class RenderTask extends RenderTaskBase {
   private func: ITaskFunc;

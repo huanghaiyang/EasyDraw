@@ -1,7 +1,8 @@
-import { IMaskSelection, IMaskSelectionModel } from "@/types";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/constants";
+import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/Constants";
 import CanvasUtils from "@/utils/CanvasUtils";
+import { IMaskSelectionModel } from "@/types/IModel";
+import { IMaskSelection } from "@/types/IRenderTask";
 
 export default class MaskTaskSelection extends MaskTaskBase implements IMaskSelection {
 

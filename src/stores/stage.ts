@@ -1,7 +1,9 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
-import { Creator, CreatorCategories, IPoint, IElement, ShieldDispatcherNames, StageInitParams } from "@/types";
-import { MoveableCreator, RectangleCreator } from "@/types/constants";
+import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
+import { MoveableCreator, RectangleCreator } from "@/types/Constants";
+import { Creator, CreatorCategories } from "@/types/Creator";
+import IElement from "@/types/IElement";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 

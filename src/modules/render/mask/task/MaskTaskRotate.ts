@@ -1,7 +1,8 @@
-import { IMaskRotate, IRotationModel } from "@/types";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import RotateSvg from "@/assets/svg/rotate.svg";
+import { IRotationModel } from "@/types/IModel";
+import { IMaskRotate } from "@/types/IRenderTask";
 
 export default class MaskTaskRotate extends MaskTaskBase implements IMaskRotate {
 

@@ -1,7 +1,8 @@
-import { IMaskSizeIndicator, IMaskSizeIndicatorModel } from "@/types";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { DefaultSelectionSizeIndicatorFillColor, DefaultSelectionSizeIndicatorFontFamily, DefaultSelectionSizeIndicatorFontSize } from "@/types/constants";
+import { DefaultSelectionSizeIndicatorFillColor, DefaultSelectionSizeIndicatorFontFamily, DefaultSelectionSizeIndicatorFontSize } from "@/types/Constants";
+import { IMaskSizeIndicatorModel } from "@/types/IModel";
+import { IMaskSizeIndicator } from "@/types/IRenderTask";
 
 export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMaskSizeIndicator {
 

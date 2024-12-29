@@ -1,4 +1,4 @@
-import { Creator, CreatorCategories, CreatorTypes } from "@/types/index";
+import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator"
 
 export const StageDefaults = {
   slide: {

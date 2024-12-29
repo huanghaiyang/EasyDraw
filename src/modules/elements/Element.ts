@@ -1,11 +1,7 @@
 import {
   ElementStatus,
-  ElementObject,
   IPoint,
-  IElement,
-  IRotationModel,
   DrawerMaskModelTypes,
-  IElementTransformer,
   BoxDirections
 } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
@@ -14,9 +10,12 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/constants";
+import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/Constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
+import IElement, { ElementObject } from "@/types/IElement";
+import { IRotationModel } from "@/types/IModel";
+import IElementTransformer from "@/types/IElementTransformer";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;

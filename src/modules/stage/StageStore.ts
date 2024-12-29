@@ -1,12 +1,6 @@
 import {
-  CreatorCategories,
-  CreatorTypes,
   ElementStatus,
-  ElementObject,
   IPoint,
-  IElement,
-  IStageShield,
-  IStageStore,
   ShieldDispatcherNames,
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
@@ -16,7 +10,11 @@ import ElementList from "@/modules/elements/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/ElementSortedMap";
-import CreatorHelper from "@/types/helper";
+import CreatorHelper from "@/types/CreatorHelper";
+import IStageStore from "@/types/IStageStore";
+import IStageShield from "@/types/IStageShield";
+import IElement, { ElementObject } from "@/types/IElement";
+import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;

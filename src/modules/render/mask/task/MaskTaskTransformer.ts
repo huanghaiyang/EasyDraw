@@ -1,8 +1,9 @@
-import { IMaskTransformer, IMaskTransformerModel, Directions } from "@/types";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerStrokeWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/constants";
+import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerStrokeWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/Constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import { IMaskTransformerModel } from "@/types/IModel";
+import { IMaskTransformer } from "@/types/IRenderTask";
 
 export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTransformer {
   constructor(model: IMaskTransformerModel, params?: any) {

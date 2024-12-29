@@ -1,6 +1,7 @@
-import { IDrawerMask, IStageShield } from "@/types";
 import MaskRenderer from "@/modules/render/renderer/drawer/MaskRenderer";
 import HelperDrawer from "@/modules/stage/drawer/HelperDrawer";
+import { IDrawerMask } from "@/types/IStageDrawer";
+import IStageShield from "@/types/IStageShield";
 
 export default class DrawerMask extends HelperDrawer implements IDrawerMask {
   constructor(shield: IStageShield) {
