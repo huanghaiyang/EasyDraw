@@ -1,5 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerStrokeWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/Constants";
+import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerLineWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/Constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { IMaskTransformerModel } from "@/types/IModel";
@@ -24,7 +24,7 @@ export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTr
       height: DefaultSizeTransformerValue
     }, { angle: this.data.angle }), {
       strokeStyle: DefaultSizeTransformerStrokeColor,
-      lineWidth: DefaultSizeTransformerStrokeWidth,
+      lineWidth: DefaultSizeTransformerLineWidth,
       fillStyle: DefaultSizeTransformerFillColor
     });
   }

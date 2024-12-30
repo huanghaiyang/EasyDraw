@@ -10,7 +10,7 @@ export type ElementObject = {
   type: CreatorTypes;
   data: any;
   strokeColor?: string;
-  strokeWidth?: number;
+  LineWidth?: number;
   fillColor?: string;
   angle: number;
   name: string;

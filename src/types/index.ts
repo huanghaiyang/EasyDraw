@@ -1,5 +1,3 @@
-import { EventEmitter } from "events";
-
 // 尺寸
 export type ISize = {
   width: number;
@@ -66,16 +64,6 @@ export enum ElementStatus {
   finished = 2
 }
 
-// 画板元素样式定义
-export type CanvasCreatorStyles = {
-  strokeStyle?: string;
-  lineWidth?: number;
-  fillStyle?: string;
-  font?: string;
-  textAlign?: CanvasTextAlign;
-  textBaseline?: CanvasTextBaseline;
-}
-
 // 平移值
 export type TranslationValue = {
   dx: number;
@@ -99,5 +87,3 @@ export enum ShieldDispatcherNames {
   angleChanged = 6,
   scaleChanged = 7,
 }
-
-export interface IElementList extends EventEmitter { }

@@ -1,5 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { DefaultSelectionStrokeColor, DefaultSelectionStrokeWidth, DefaultSelectionFillColor } from "@/types/Constants";
+import { DefaultSelectionStrokeColor, DefaultSelectionLineWidth, DefaultSelectionFillColor } from "@/types/Constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IMaskSelectionModel } from "@/types/IModel";
 import { IMaskSelection } from "@/types/IRenderTask";
@@ -16,7 +16,7 @@ export default class MaskTaskSelection extends MaskTaskBase implements IMaskSele
   async run(): Promise<void> {
     CanvasUtils.drawPath(this.canvas, this.data.points, {
       strokeStyle: DefaultSelectionStrokeColor,
-      lineWidth: DefaultSelectionStrokeWidth,
+      lineWidth: DefaultSelectionLineWidth,
       fillStyle: DefaultSelectionFillColor
     });
   }

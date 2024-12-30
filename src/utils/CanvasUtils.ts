@@ -1,4 +1,5 @@
-import { CanvasCreatorStyles, IPoint } from "@/types";
+import { IPoint } from "@/types";
+import { CreatorStyles } from "@/types/Styles";
 import MathUtils from "@/utils/MathUtils";
 
 export default class CanvasUtils {
@@ -77,7 +78,7 @@ export default class CanvasUtils {
    * @param styles 
    * @param options 
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: CanvasCreatorStyles, options?: { angle: number }): void {
+  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: CreatorStyles, options?: { angle: number }): void {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     ctx.save();
@@ -98,7 +99,7 @@ export default class CanvasUtils {
    * @param points 
    * @param styles 
    */
-  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: CanvasCreatorStyles): void {
+  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: CreatorStyles): void {
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.strokeStyle = styles.strokeStyle;
