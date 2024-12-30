@@ -1,4 +1,4 @@
-import { IPoint } from "@/types";
+import { IPoint, ISize } from "@/types";
 import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
@@ -158,5 +158,17 @@ export default class ElementUtils {
     const v2 = pathPoints[3];
     const halfValue = MathUtils.distanceBetweenPoints(v1, v2) / 2;
     return MathUtils.calculateTargetPoint(centroid, halfValue + DefaultSelectionRotateDistance, angle);
+  }
+
+  /**
+   * 计算矩形尺寸
+   * 
+   * @param coords 
+   * @returns 
+   */
+  static calcRectangleSize(coords: IPoint[]): ISize {
+    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
+    return { width, height };
   }
 }

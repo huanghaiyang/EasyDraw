@@ -410,8 +410,7 @@ export default class StageStore implements IStageStore {
     }
     switch(type) {
       case CreatorTypes.rectangle:
-        model.width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
-        model.height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
+        Object.assign(model, ElementUtils.calcRectangleSize(coords));
         break;
     }
     return model;
