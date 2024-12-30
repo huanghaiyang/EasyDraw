@@ -1,12 +1,12 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
-import { MoveableCreator, RectangleCreator } from "@/types/Constants";
 import { Creator, CreatorCategories } from "@/types/Creator";
 import IElement from "@/types/IElement";
-import { DefaultElementStyle, StrokeTypes } from "@/types/Styles";
+import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
+import { MoveableCreator, RectangleCreator } from "@/types/CreatorDicts";
 
 const shield = new StageShield();
 const container = new StageContainer();
@@ -31,7 +31,13 @@ export const useStageStore = defineStore("stage", {
       strokeType: DefaultElementStyle.strokeType,
       strokeWidth: DefaultElementStyle.strokeWidth,
       strokeColor: DefaultElementStyle.strokeColor,
+      strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
       fillColor: DefaultElementStyle.fillColor,
+      fillColorOpacity: DefaultElementStyle.fillColorOpacity,
+      fontSize: DefaultElementStyle.fontSize,
+      fontFamily: DefaultElementStyle.fontFamily,
+      textAlign: DefaultElementStyle.textAlign,
+      textBaseline: DefaultElementStyle.textBaseline,
     }
   },
   getters: {
@@ -60,9 +66,15 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.strokeTypeChanged, throttle(this.onStrokeTypeChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.strokeColorOpacityChanged, throttle(this.onStrokeColorOpacityChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.strokeWidthChanged, throttle(this.onStrokeWidthChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.strokeColorChanged, throttle(this.onStrokeColorChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.fillColorChanged, throttle(this.onFillColorChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.fillColorOpacityChanged, throttle(this.onFillColorOpacityChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -195,6 +207,60 @@ export const useStageStore = defineStore("stage", {
      */
     onFillColorChanged(element: IElement, fillColor: string) {
       this.fillColor = fillColor;
+    },
+    /**
+     * 组件描边透明度变化
+     * 
+     * @param element 
+     * @param strokeColorOpacity 
+     */
+    onStrokeColorOpacityChanged(element: IElement, strokeColorOpacity: number) {
+      this.strokeColorOpacity = strokeColorOpacity;
+    },
+    /**
+     * 组件填充透明度变化
+     * 
+     * @param element 
+     * @param fillColorOpacity 
+     */
+    onFillColorOpacityChanged(element: IElement, fillColorOpacity: number) {
+      this.fillColorOpacity = fillColorOpacity;
+    },
+    /**
+     * 组件字体大小变化
+     * 
+     * @param element 
+     * @param fontSize 
+     */
+    onFontSizeChanged(element: IElement, fontSize: number) {
+      this.fontSize = fontSize;
+    },
+    /**
+     * 组件字体变化
+     * 
+     * @param element 
+     * @param fontFamily 
+     */
+    onFontFamilyChanged(element: IElement, fontFamily: string) {
+      this.fontFamily = fontFamily;
+    },
+    /**
+     * 组件字体对齐方式变化
+     * 
+     * @param element 
+     * @param textAlign 
+     */
+    onTextAlignChanged(element: IElement, textAlign: string) {
+      this.textAlign = textAlign;
+    },
+    /**
+     * 组件字体基线变化
+     * 
+     * @param element 
+     * @param textBaseline 
+     */
+    onTextBaselineChanged(element: IElement, textBaseline: string) {
+      this.textBaseline = textBaseline;
     },
   },
 });

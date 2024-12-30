@@ -18,9 +18,11 @@ export const StrokeTypesArray = [{
 // 画板元素样式定义
 export type ElementStyles = {
   strokeColor?: string;
+  strokeColorOpacity?: number;
   strokeType?: StrokeTypes;
   strokeWidth?: number;
   fillColor?: string;
+  fillColorOpacity?: number;
   fontSize?: number;
   fontFamily?: string;
   textAlign?: CanvasTextAlign;
@@ -28,8 +30,10 @@ export type ElementStyles = {
 }
 
 export const DefaultStrokeType = StrokeTypes.inside;
-export const DefaultStrokeColor = 'rgba(0, 0, 0, 0.05)';
-export const DefaultFillColor = 'rgba(0, 0, 0, 0.065)';
+export const DefaultStrokeColor = '#ffffff';
+export const DefaultStrokeColorOpacity = 0;
+export const DefaultFillColor = '#000000';
+export const DefaultFillColorOpacity = 0.05;
 export const DefaultLineWidth = 0;
 export const DefaultFontSize = 12;
 export const DefaultFontFamily = 'sans-serif';
@@ -38,9 +42,11 @@ export const DefaultTextBaseline = 'middle';
 
 export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,
+  strokeColorOpacity: DefaultStrokeColorOpacity,
   strokeType: DefaultStrokeType,
   strokeWidth: DefaultLineWidth,
   fillColor: DefaultFillColor,
+  fillColorOpacity: DefaultFillColorOpacity,
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
   textAlign: DefaultTextAlign,

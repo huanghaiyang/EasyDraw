@@ -4,10 +4,10 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import { DefaultSelectionRotateDistance } from "@/types/Constants";
 import IElement, { ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
+import { DefaultSelectionRotateDistance } from "@/types/MaskStyles";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',

@@ -2,7 +2,7 @@ import { ElementStatus, IPoint } from "@/types/index";
 import IElementTransformer from "@/types/IElementTransformer";
 import { IRotationModel } from "@/types/IModel";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, StrokeTypes } from "@/types/Styles";
+import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
 
 // 舞台元素数据模型
 export type ElementObject = {
@@ -31,7 +31,13 @@ export default interface IElement {
   get strokeType(): StrokeTypes;
   get strokeWidth(): number;
   get strokeColor(): string;
+  get strokeColorOpacity(): number;
   get fillColor(): string;
+  get fillColorOpacity(): number;
+  get textAlign(): CanvasTextAlign;
+  get textBaseline(): CanvasTextBaseline;
+  get fontSize(): number;
+  get fontFamily(): string;
 
   get originalModelCoords(): IPoint[];
   get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)

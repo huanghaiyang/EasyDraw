@@ -10,13 +10,13 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/Constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
 import { IRotationModel } from "@/types/IModel";
 import IElementTransformer from "@/types/IElementTransformer";
-import { StrokeTypes } from "@/types/Styles";
+import { StrokeTypes } from "@/types/ElementStyles";
+import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/MaskStyles";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -93,8 +93,38 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
+  get strokeColorOpacity(): number {
+    return this.model.styles.strokeColorOpacity;
+  }
+
+  @computed
   get fillColor(): string {
     return this.model.styles.fillColor;
+  }
+
+  @computed
+  get fillColorOpacity(): number {
+    return this.model.styles.fillColorOpacity;
+  }
+
+  @computed
+  get textAlign(): CanvasTextAlign {
+    return this.model.styles.textAlign;
+  }
+
+  @computed
+  get textBaseline(): CanvasTextBaseline {
+    return this.model.styles.textBaseline;
+  }
+
+  @computed
+  get fontSize(): number {
+    return this.model.styles.fontSize;
+  }
+
+  @computed
+  get fontFamily(): string {
+    return this.model.styles.fontFamily;
   }
 
   @computed

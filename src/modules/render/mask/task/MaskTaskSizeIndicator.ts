@@ -1,8 +1,8 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { DefaultSelectionSizeIndicatorFillColor, DefaultSelectionSizeIndicatorFontFamily, DefaultSelectionSizeIndicatorFontSize } from "@/types/Constants";
 import { IMaskSizeIndicatorModel } from "@/types/IModel";
 import { IMaskSizeIndicator } from "@/types/IRenderTask";
+import { DefaultSelectionSizeIndicatorStyle } from "@/types/MaskStyles";
 
 export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMaskSizeIndicator {
 
@@ -14,13 +14,7 @@ export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMask
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawRotateText(this.canvas, this.data.text, this.data.point, {
-      fontSize: DefaultSelectionSizeIndicatorFontSize,
-      fontFamily: DefaultSelectionSizeIndicatorFontFamily,
-      textAlign: 'center',
-      textBaseline: 'middle',
-      fillColor: DefaultSelectionSizeIndicatorFillColor
-    }, {
+    CanvasUtils.drawRotateText(this.canvas, this.data.text, this.data.point, DefaultSelectionSizeIndicatorStyle, {
       angle: this.data.angle
     });
   }

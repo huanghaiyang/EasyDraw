@@ -1,9 +1,9 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { DefaultSizeTransformerStrokeColor, DefaultSizeTransformerLineWidth, DefaultSizeTransformerFillColor, DefaultSizeTransformerValue } from "@/types/Constants";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTransformer } from "@/types/IRenderTask";
+import { DefaultSizeTransformerValue, DefaultTransformerStyle } from "@/types/MaskStyles";
 
 export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTransformer {
   constructor(model: IMaskTransformerModel, params?: any) {
@@ -22,10 +22,6 @@ export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTr
     CanvasUtils.drawPath(this.canvas, CommonUtils.get4BoxPoints(this.data.point, {
       width: DefaultSizeTransformerValue,
       height: DefaultSizeTransformerValue
-    }, { angle: this.data.angle }), {
-      strokeColor: DefaultSizeTransformerStrokeColor,
-      strokeWidth: DefaultSizeTransformerLineWidth,
-      fillColor: DefaultSizeTransformerFillColor
-    });
+    }, { angle: this.data.angle }), DefaultTransformerStyle);
   }
 }

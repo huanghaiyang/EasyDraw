@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultElementStyle, StrokeTypesArray } from "@/types/Styles";
+import { DefaultElementStyle, StrokeTypesArray } from "@/types/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();

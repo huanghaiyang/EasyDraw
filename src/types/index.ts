@@ -17,11 +17,11 @@ export type IPoint3D = IPoint & {
 
 // 辅助画布绘制任务类型
 export enum DrawerMaskModelTypes {
-  selection = 0,
-  transformer = 1,
-  cursor = 2,
-  highlight = 3,
-  rotate = 4,
+  selection,
+  transformer,
+  cursor,
+  highlight,
+  rotate,
   sizeIndicator,
 }
 
@@ -78,16 +78,22 @@ export type ScaleValue = {
 
 // 舞台通知名称
 export enum ShieldDispatcherNames {
-  elementCreated = 0,
-  selectedChanged = 1,
-  targetChanged = 2,
-  positionChanged = 3,
-  widthChanged = 4,
-  heightChanged = 5,
-  angleChanged = 6,
-  scaleChanged = 7,
-  strokeColorChanged = 8,
-  strokeWidthChanged = 9,
-  strokeTypeChanged = 10,
-  fillColorChanged = 11,
+  elementCreated,
+  selectedChanged,
+  targetChanged,
+  positionChanged,
+  widthChanged,
+  heightChanged,
+  angleChanged,
+  scaleChanged,
+  strokeColorChanged,
+  strokeColorOpacityChanged,
+  strokeWidthChanged,
+  strokeTypeChanged,
+  fillColorChanged,
+  fillColorOpacityChanged,
+  fontSizeChanged,
+  fontFamilyChanged,
+  textAlignChanged,
+  textBaselineChanged,
 }

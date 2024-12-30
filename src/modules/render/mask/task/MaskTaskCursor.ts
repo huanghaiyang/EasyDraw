@@ -1,9 +1,9 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { CursorCanvasSize } from "@/types/Constants";
 import CursorUtils from "@/utils/CursorUtils";
 import { IMaskCursorModel } from "@/types/IModel";
 import { IMaskCursor } from "@/types/IRenderTask";
+import { CursorCanvasSize } from "@/types/MaskStyles";
 
 export default class MaskTaskCursor extends MaskTaskBase implements IMaskCursor {
 

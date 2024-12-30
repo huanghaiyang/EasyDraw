@@ -1,6 +1,7 @@
 import { IPoint } from "@/types";
-import { ElementStyles } from "@/types/Styles";
+import { ElementStyles } from "@/types/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
+import StyleUtils from "./StyleUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -84,8 +85,8 @@ export default class CanvasUtils {
     ctx.save();
     ctx.translate(centroid.x * CanvasUtils.scale, centroid.y * CanvasUtils.scale);
     ctx.rotate(MathUtils.degreesToRadians(angle));
-    ctx.font = `${styles.fontSize}px ${styles.fontFamily}}`;
-    ctx.fillStyle = `${styles.fillColor}`;
+    ctx.font = StyleUtils.joinFont(styles);
+    ctx.fillStyle = StyleUtils.joinFillColor(styles);
     ctx.textAlign = styles.textAlign;
     ctx.textBaseline = styles.textBaseline;
     ctx.fillText(text, 0, 0);
@@ -102,8 +103,8 @@ export default class CanvasUtils {
   static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
     const ctx = target.getContext('2d');
     ctx.save();
-    ctx.strokeStyle = `${styles.strokeColor}`;
-    ctx.fillStyle = `${styles.fillColor}`;
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    ctx.fillStyle = StyleUtils.joinFillColor(styles);
     ctx.lineWidth = styles.strokeWidth;
     ctx.beginPath();
     points.forEach((point, index) => {

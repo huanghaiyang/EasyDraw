@@ -9,12 +9,12 @@ import MaskTaskRotate from "@/modules/render/mask/task/MaskTaskRotate";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndicator";
-import { DefaultSelectionSizeIndicatorDistance } from "@/types/Constants";
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskCursorModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
+import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
