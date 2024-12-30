@@ -23,9 +23,9 @@ export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTr
       width: DefaultSizeTransformerValue,
       height: DefaultSizeTransformerValue
     }, { angle: this.data.angle }), {
-      strokeStyle: DefaultSizeTransformerStrokeColor,
-      lineWidth: DefaultSizeTransformerLineWidth,
-      fillStyle: DefaultSizeTransformerFillColor
+      strokeColor: DefaultSizeTransformerStrokeColor,
+      strokeWidth: DefaultSizeTransformerLineWidth,
+      fillColor: DefaultSizeTransformerFillColor
     });
   }
 }

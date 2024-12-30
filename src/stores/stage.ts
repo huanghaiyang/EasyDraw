@@ -4,6 +4,7 @@ import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { MoveableCreator, RectangleCreator } from "@/types/Constants";
 import { Creator, CreatorCategories } from "@/types/Creator";
 import IElement from "@/types/IElement";
+import { DefaultElementStyle, StrokeTypes } from "@/types/Styles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 
@@ -27,6 +28,10 @@ export const useStageStore = defineStore("stage", {
       height: 0,
       angle: 0,
       scale: 1,
+      strokeType: DefaultElementStyle.strokeType,
+      strokeWidth: DefaultElementStyle.strokeWidth,
+      strokeColor: DefaultElementStyle.strokeColor,
+      fillColor: DefaultElementStyle.fillColor,
     }
   },
   getters: {
@@ -54,6 +59,10 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.strokeTypeChanged, throttle(this.onStrokeTypeChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.strokeWidthChanged, throttle(this.onStrokeWidthChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.strokeColorChanged, throttle(this.onStrokeColorChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.fillColorChanged, throttle(this.onFillColorChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -150,6 +159,42 @@ export const useStageStore = defineStore("stage", {
      */
     onScaleChanged(scale: number) {
       this.scale = scale;
+    },
+    /**
+     * 组件描边类型变化
+     * 
+     * @param element 
+     * @param strokeType 
+     */
+    onStrokeTypeChanged(element: IElement, strokeType: StrokeTypes) {
+      this.strokeType = strokeType;
+    },
+    /**
+     * 组件描边宽度变化
+     * 
+     * @param element 
+     * @param strokeWidth 
+     */
+    onStrokeWidthChanged(element: IElement, strokeWidth: number) {
+      this.strokeWidth = strokeWidth;
+    },
+    /**
+     * 组件描边颜色变化
+     * 
+     * @param element 
+     * @param strokeColor 
+     */
+    onStrokeColorChanged(element: IElement, strokeColor: string) {
+      this.strokeColor = strokeColor;
+    },
+    /**
+     * 组件填充颜色变化
+     * 
+     * @param element 
+     * @param fillColor 
+     */
+    onFillColorChanged(element: IElement, fillColor: string) {
+      this.fillColor = fillColor;
     },
   },
 });

@@ -86,4 +86,8 @@ export enum ShieldDispatcherNames {
   heightChanged = 5,
   angleChanged = 6,
   scaleChanged = 7,
+  strokeColorChanged = 8,
+  strokeWidthChanged = 9,
+  strokeTypeChanged = 10,
+  fillColorChanged = 11,
 }

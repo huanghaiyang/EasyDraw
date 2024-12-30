@@ -15,6 +15,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { ElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
+import { DefaultElementStyle } from "@/types/Styles";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -373,6 +374,7 @@ export default class StageStore implements IStageStore {
       data,
       angle: 0,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
+      styles: DefaultElementStyle
     }
     switch(type) {
       case CreatorTypes.rectangle:

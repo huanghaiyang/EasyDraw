@@ -15,9 +15,9 @@ export default class MaskTaskSelection extends MaskTaskBase implements IMaskSele
    */
   async run(): Promise<void> {
     CanvasUtils.drawPath(this.canvas, this.data.points, {
-      strokeStyle: DefaultSelectionStrokeColor,
-      lineWidth: DefaultSelectionLineWidth,
-      fillStyle: DefaultSelectionFillColor
+      strokeColor: DefaultSelectionStrokeColor,
+      strokeWidth: DefaultSelectionLineWidth,
+      fillColor: DefaultSelectionFillColor
     });
   }
 }

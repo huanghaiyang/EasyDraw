@@ -2,12 +2,14 @@
 import PositionProps from "@/modules/components/props/PositionProps.vue";
 import SizeProps from "@/modules/components/props/SizeProps.vue";
 import AngleProps from "@/modules/components/props/AngleProps.vue";
+import StrokeProps from "@/modules/components/props/StrokeProps.vue";
 </script>
 <template>
   <div class="props-right-panel">
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>
+    <stroke-props></stroke-props>
   </div>
 </template>
 <style lang="less" scoped>
@@ -21,7 +23,8 @@ import AngleProps from "@/modules/components/props/AngleProps.vue";
   width: 100%;
   .position-props,
   .size-props,
-  .angle-props {
+  .angle-props,
+  .stroke-props {
     &__title {
       font-size: 14px;
       font-weight: 500;
@@ -36,6 +39,7 @@ import AngleProps from "@/modules/components/props/AngleProps.vue";
       padding: 0 10px;
 
       &-item {
+        .el-select,
         .el-input {
           width: 96px;
           .el-input-group__prepend,

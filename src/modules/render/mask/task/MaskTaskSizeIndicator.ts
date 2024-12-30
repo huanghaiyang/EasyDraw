@@ -15,10 +15,11 @@ export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMask
    */
   async run(): Promise<void> {
     CanvasUtils.drawRotateText(this.canvas, this.data.text, this.data.point, {
-      font: `${DefaultSelectionSizeIndicatorFontSize}px ${DefaultSelectionSizeIndicatorFontFamily}`,
+      fontSize: DefaultSelectionSizeIndicatorFontSize,
+      fontFamily: DefaultSelectionSizeIndicatorFontFamily,
       textAlign: 'center',
       textBaseline: 'middle',
-      fillStyle: DefaultSelectionSizeIndicatorFillColor
+      fillColor: DefaultSelectionSizeIndicatorFillColor
     }, {
       angle: this.data.angle
     });

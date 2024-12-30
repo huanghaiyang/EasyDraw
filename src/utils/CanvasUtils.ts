@@ -1,5 +1,5 @@
 import { IPoint } from "@/types";
-import { CreatorStyles } from "@/types/Styles";
+import { ElementStyles } from "@/types/Styles";
 import MathUtils from "@/utils/MathUtils";
 
 export default class CanvasUtils {
@@ -78,14 +78,14 @@ export default class CanvasUtils {
    * @param styles 
    * @param options 
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: CreatorStyles, options?: { angle: number }): void {
+  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: ElementStyles, options?: { angle: number }): void {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.translate(centroid.x * CanvasUtils.scale, centroid.y * CanvasUtils.scale);
     ctx.rotate(MathUtils.degreesToRadians(angle));
-    ctx.font = styles.font;
-    ctx.fillStyle = styles.fillStyle;
+    ctx.font = `${styles.fontSize}px ${styles.fontFamily}}`;
+    ctx.fillStyle = `${styles.fillColor}`;
     ctx.textAlign = styles.textAlign;
     ctx.textBaseline = styles.textBaseline;
     ctx.fillText(text, 0, 0);
@@ -99,12 +99,12 @@ export default class CanvasUtils {
    * @param points 
    * @param styles 
    */
-  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: CreatorStyles): void {
+  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
     const ctx = target.getContext('2d');
     ctx.save();
-    ctx.strokeStyle = styles.strokeStyle;
-    ctx.fillStyle = styles.fillStyle;
-    ctx.lineWidth = styles.lineWidth;
+    ctx.strokeStyle = `${styles.strokeColor}`;
+    ctx.fillStyle = `${styles.fillColor}`;
+    ctx.lineWidth = styles.strokeWidth;
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {

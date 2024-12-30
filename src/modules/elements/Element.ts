@@ -16,6 +16,7 @@ import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
 import { IRotationModel } from "@/types/IModel";
 import IElementTransformer from "@/types/IElementTransformer";
+import { StrokeTypes } from "@/types/Styles";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -74,6 +75,26 @@ export default class Element implements IElement, ILinkedNodeValue {
   @computed
   get position(): IPoint {
     return this.calcPosition();
+  }
+
+  @computed
+  get strokeType(): StrokeTypes {
+    return this.model.styles.strokeType;
+  }
+
+  @computed
+  get strokeWidth(): number {
+    return this.model.styles.strokeWidth;
+  }
+
+  @computed
+  get strokeColor(): string {
+    return this.model.styles.strokeColor;
+  }
+
+  @computed
+  get fillColor(): string {
+    return this.model.styles.fillColor;
   }
 
   @computed
