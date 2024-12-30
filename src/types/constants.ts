@@ -1,18 +1,6 @@
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator"
 
-export const StageDefaults = {
-  slide: {
-    width: 1080,
-    height: 1920,
-    scale: 1
-  },
-}
-
-// 世界尺寸
-export const WorldSize = {
-  width: 1024 * 1024,
-  height: 1024 * 1024
-}
+export const RespectStageWidth = 1920;
 
 export const MoveableCreator: Creator = {
   type: CreatorTypes.moveable,
@@ -62,7 +50,7 @@ export const DefaultSelectionStrokeWidth = 1;
 export const DefaultSizeTransformerStrokeColor = '#0c8ce9';
 export const DefaultSizeTransformerFillColor = 'rgba(255,255,255,1)';
 export const DefaultSizeTransformerStrokeWidth = 1;
-export const DefaultSizeTransformerValue = 6;
+export const DefaultSizeTransformerValue = 10;
 export const DefaultSelectionRotateSize = 18;
 export const DefaultSelectionRotateDistance = 18;
 

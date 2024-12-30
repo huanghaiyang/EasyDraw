@@ -1,9 +1,9 @@
 import { CanvasCreatorStyles, IPoint } from "@/types";
-import MathUtils from "./MathUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class CanvasUtils {
-
   static ImageCaches = new Map();
+  static scale: number = 1;
 
   /**
    * 绘制图片或者canvas到canvas上
@@ -50,7 +50,11 @@ export default class CanvasUtils {
    * @param options 
    */
   static drawRotateImage(target: HTMLCanvasElement, svg: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): void {
-    const { x, y, width, height } = rect;
+    let { x, y, width, height } = rect;
+    x *= CanvasUtils.scale;
+    y *= CanvasUtils.scale;
+    width *= CanvasUtils.scale;
+    height *= CanvasUtils.scale;
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     if (angle) {
@@ -73,11 +77,11 @@ export default class CanvasUtils {
    * @param styles 
    * @param options 
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint , styles: CanvasCreatorStyles, options?: {  angle: number }): void {
+  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: CanvasCreatorStyles, options?: { angle: number }): void {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     ctx.save();
-    ctx.translate(centroid.x, centroid.y);
+    ctx.translate(centroid.x * CanvasUtils.scale, centroid.y * CanvasUtils.scale);
     ctx.rotate(MathUtils.degreesToRadians(angle));
     ctx.font = styles.font;
     ctx.fillStyle = styles.fillStyle;
@@ -103,9 +107,9 @@ export default class CanvasUtils {
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {
-        ctx.moveTo(point.x, point.y);
+        ctx.moveTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
       } else {
-        ctx.lineTo(point.x, point.y);
+        ctx.lineTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
       }
     });
     ctx.closePath();

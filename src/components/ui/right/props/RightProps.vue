@@ -40,7 +40,7 @@ import AngleProps from "@/modules/components/props/AngleProps.vue";
           width: 96px;
           .el-input-group__prepend,
           .el-input-group__append {
-            padding: 0 8px;
+            padding: 0 6px;
           }
         }
       }

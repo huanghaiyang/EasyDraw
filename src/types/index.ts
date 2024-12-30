@@ -97,6 +97,7 @@ export enum ShieldDispatcherNames {
   widthChanged = 4,
   heightChanged = 5,
   angleChanged = 6,
+  scaleChanged = 7,
 }
 
 export interface IElementList extends EventEmitter { }

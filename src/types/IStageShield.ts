@@ -20,6 +20,7 @@ export default interface IStageShield extends IStageDrawer {
   renderEl: HTMLDivElement;
   stageRect: DOMRect;
   stageWorldCoord: IPoint;
+  scale: number;
 
   get shouldRedraw(): boolean;
   get isElementsBusy(): boolean;

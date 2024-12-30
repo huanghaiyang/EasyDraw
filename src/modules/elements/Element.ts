@@ -47,7 +47,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isTarget: boolean = false;
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
-  @observable _position: IPoint;
 
   get originalModelCoords() {
     return this._originalModelCoords;

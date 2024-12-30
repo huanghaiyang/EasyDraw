@@ -2,6 +2,7 @@ import { IPoint } from "@/types";
 import IStageCursor from "@/types/IStageCursor";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -23,7 +24,9 @@ export default class StageCursor implements IStageCursor {
    * @returns 
    */
   transform(e: MouseEvent): IPoint {
-    this.value = CommonUtils.getEventPosition(e, this.shield.stageRect);
+    this.value = CommonUtils.getEventPosition(e, this.shield.stageRect, this.shield.scale);
+    this.value.x = MathUtils.toFixed(this.value.x);
+    this.value.y = MathUtils.toFixed(this.value.y);
     return this.value;
   }
 

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
+import MathUtils from "@/utils/MathUtils";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
@@ -11,8 +12,8 @@ watch(
   () => stageStore.position,
   (newValue) => {
     if (newValue) {
-      xValue.value = newValue.x;
-      yValue.value = newValue.y;
+      xValue.value = MathUtils.toFixed(newValue.x);
+      yValue.value = MathUtils.toFixed(newValue.y);
     }
   }
 );

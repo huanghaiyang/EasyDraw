@@ -1,8 +1,5 @@
-import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/Constants";
-import {
-  IPoint,
-  ShieldDispatcherNames,
-} from "@/types";
+import { MinCursorMoveXDistance, MinCursorMoveYDistance, RespectStageWidth } from "@/types/Constants";
+import { IPoint, ShieldDispatcherNames, } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
 import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
@@ -24,8 +21,10 @@ import IStageShield from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
+import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class StageShield extends DrawerBase implements IStageShield {
+  scale: number = 1;
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -307,10 +306,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
 
   /**
    * 鼠标离开画布事件
-   * 
-   * @param e 
    */
-  async handleCursorLeave(e: MouseEvent): Promise<void> {
+  async handleCursorLeave(): Promise<void> {
     this.cursor.clear();
     this.setCursorStyle('default');
     await this.mask.redraw();
@@ -414,7 +411,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
             this._isElementsTransforming = false;
           }
         } else {
-          this._excludeTopAElement(e);
+          this._excludeTopAElement();
         }
       } else {
         this._processRangeEmpty();
@@ -431,10 +428,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
 
   /**
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
-   * 
-   * @param e 
    */
-  private _excludeTopAElement(e: MouseEvent): void {
+  private _excludeTopAElement(): void {
     const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
     this.store.updateElements(this.store.selectedElements, { isSelected: false })
     if (topAElement) {
@@ -543,10 +538,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
   private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
-    // TODO this.worldCenterCoord = ?
+    this.scale = Number((rect.width / RespectStageWidth).toFixed(2));
+    CanvasUtils.scale = this.scale;
     this._refreshAllCanvasSize(rect);
     this.store.refreshElements();
     await this._redrawAll(true);
+    this.emit(ShieldDispatcherNames.scaleChanged, this.scale);
   }
 
   /**

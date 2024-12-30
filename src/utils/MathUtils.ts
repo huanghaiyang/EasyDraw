@@ -374,4 +374,15 @@ export default class MathUtils {
   static isSameSign(a: number, b: number): boolean {
     return (a * b) >= 0;
   }
+
+  /**
+   * 保留小数点后几位
+   * 
+   * @param num 
+   * @param precision 
+   * @returns 
+   */
+  static toFixed(num: number, precision: number = 2): number {
+    return parseFloat(num.toFixed(precision));
+  }
 }

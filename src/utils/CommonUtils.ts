@@ -46,10 +46,11 @@ export default class CommonUtils {
    * @param rect 
    * @returns 
    */
-  static getEventPosition(e: MouseEvent, rect: DOMRect): IPoint {
+  static getEventPosition(e: MouseEvent, rect: DOMRect, scale?: number): IPoint {
+    scale = scale || 1;
     return {
-      x: e.clientX - rect.x,
-      y: e.clientY - rect.y
+      x: (e.clientX - rect.x) / scale,
+      y: (e.clientY - rect.y) / scale
     }
   }
 
