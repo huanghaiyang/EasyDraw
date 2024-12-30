@@ -1,4 +1,4 @@
-import { IStageEvent } from "@/types";
+import IStageEvent from "@/types/IStageEvent";
 import IStageShield from "@/types/IStageShield";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from 'events';

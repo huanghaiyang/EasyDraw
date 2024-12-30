@@ -1,7 +1,6 @@
 import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/Constants";
 import {
   IPoint,
-  IStageEvent,
   ShieldDispatcherNames,
 } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
@@ -24,6 +23,7 @@ import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
 import IStageShield from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
+import IStageEvent from "@/types/IStageEvent";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具

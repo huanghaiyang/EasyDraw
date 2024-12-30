@@ -47,11 +47,6 @@ export const BoxDirections = [
   Directions.bottomLeft,
 ]
 
-// 舞台事件处理器
-export interface IStageEvent extends EventEmitter {
-  init(): void;
-}
-
 // 舞台初始化参数
 export type StageInitParams = {
   containerEl?: HTMLDivElement;

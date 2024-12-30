@@ -5,6 +5,7 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageStore from "@/types/IStageStore";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator } from '@/types/Creator';
+import IStageEvent from "@/types/IStageEvent";
 
 // 舞台主画板
 export default interface IStageShield extends IStageDrawer {
@@ -14,6 +15,7 @@ export default interface IStageShield extends IStageDrawer {
   mask: IDrawerMask;
   provisional: IDrawerProvisional;
   configure: IStageConfigure;
+  event: IStageEvent;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
   stageRect: DOMRect;
