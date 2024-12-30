@@ -31,10 +31,10 @@ export enum ElementReactionPropNames {
 }
 
 export enum ElementListEventNames {
-  added = 'added',
-  removed = 'removed',
-  updated = 'updated',
-  sizeChanged = 'sizeChanged',
+  added,
+  removed,
+  updated,
+  sizeChanged,
 }
 
 export default class ElementUtils {
