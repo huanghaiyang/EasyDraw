@@ -229,6 +229,38 @@ export default class StageStore implements IStageStore {
         this.shield.emit(ShieldDispatcherNames.heightChanged, element, value)
         break;
       }
+      case ElementReactionPropNames.strokeType: {
+        this.shield.emit(ShieldDispatcherNames.strokeTypeChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.strokeColor: {
+        this.shield.emit(ShieldDispatcherNames.strokeColorChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.strokeColorOpacity: {
+        this.shield.emit(ShieldDispatcherNames.strokeColorOpacityChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.strokeWidth: {
+        this.shield.emit(ShieldDispatcherNames.strokeWidthChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.fillColor: {
+        this.shield.emit(ShieldDispatcherNames.fillColorChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.fillColorOpacity: {
+        this.shield.emit(ShieldDispatcherNames.fillColorOpacityChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.textAlign: {
+        this.shield.emit(ShieldDispatcherNames.textAlignChanged, element, value)
+        break;
+      }
+      case ElementReactionPropNames.textBaseline: {
+        this.shield.emit(ShieldDispatcherNames.textBaselineChanged, element, value)
+        break;
+      }
       default: {
         break;
       }

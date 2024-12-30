@@ -27,7 +27,17 @@ export enum ElementReactionPropNames {
   position = 'position',
   width = 'width',
   height = 'height',
-  angle = 'angle'
+  angle = 'angle',
+  strokeType = 'strokeType',
+  strokeWidth = 'strokeWidth',
+  strokeColor = 'strokeColor',
+  strokeColorOpacity = 'strokeColorOpacity',
+  fillColor = 'fillColor',
+  fillColorOpacity = 'fillColorOpacity',
+  fontSize = 'fontSize',
+  fontFamily = 'fontFamily',
+  textAlign = 'textAlign',
+  textBaseline = 'textBaseline',
 }
 
 export enum ElementListEventNames {
