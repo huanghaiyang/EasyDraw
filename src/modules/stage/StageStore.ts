@@ -104,6 +104,10 @@ export default class StageStore implements IStageStore {
     return this._rotatingTargetElementsMap.valuesArray();
   }
 
+  get isSelectedEmpty(): boolean {
+    return this.selectedElements.length === 0;
+  }
+
   /**
    * 组件新增
    */

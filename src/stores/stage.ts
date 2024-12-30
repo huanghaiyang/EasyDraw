@@ -9,7 +9,7 @@ import { defineStore } from "pinia";
 
 const shield = new StageShield();
 const container = new StageContainer();
-shield.configure.config({ rotationIconEnable: false })
+shield.configure.config({ rotationIconEnable: true })
 
 export const useStageStore = defineStore("stage", {
   state: () => {

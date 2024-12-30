@@ -81,12 +81,16 @@ export default class StageShield extends DrawerBase implements IStageShield {
   // 是否正在调整组件大小
   private _isElementsTransforming: boolean = false;
   // 组件是否旋转中
-  private _isElementRotating: boolean = false;
+  private _isElementsRotating: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
 
-  get shouldRedraw() {
-    return this.isElementsDragging || this.isElementsTransforming || this.isStageMoving || this.isElementRotating || this.isElementsTransforming
+  get shouldRedraw(): boolean {
+    return this.isElementsDragging || this.isElementsTransforming || this.isStageMoving || this.isElementsRotating || this.isElementsTransforming
+  }
+
+  get isElementsBusy(): boolean {
+    return this.isElementsTransforming || this.isElementsRotating || this.isElementsTransforming
   }
 
   get isElementsDragging(): boolean {
@@ -125,8 +129,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
     return this.currentCreator.type === CreatorTypes.moveable;
   }
 
-  get isElementRotating(): boolean {
-    return this._isElementRotating;
+  get isElementsRotating(): boolean {
+    return this._isElementsRotating;
   }
 
   constructor() {
@@ -158,6 +162,13 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.initCanvas(),
       this.event.init(),
     ])
+    this._addEventListeners();
+  }
+
+  /**
+   * 添加事件监听
+   */
+  private _addEventListeners() {
     this.event.on('resize', this._refreshSize)
     this.event.on('cursorMove', this.handleCursorMove)
     this.event.on('cursorLeave', this.handleCursorLeave)
@@ -190,10 +201,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
+    let flag = false;
     this.cursor.transform(e);
     this.setCursorStyle(this.currentCreator.cursor);
 
-    if (this.isMoveableActive && !this.isElementRotating) {
+    // 只有在未对组件进行旋转/移动/形变的情况下才会启用组件命中逻辑
+    if (this.isMoveableActive && !this.isElementsBusy) {
       this.selection.hitTargetElements(this.cursor.value);
     }
 
@@ -203,53 +216,93 @@ export default class StageShield extends DrawerBase implements IStageShield {
       // 绘制模式
       if (this.isDrawerActive) {
         // 移动过程中创建元素
-        this.creatingElementIfy(e);
+        this._createOrUpdateElementOnMovement(e);
       } else if (this.isMoveableActive) { // 如果是选择模式
         // 如果不存在选中的元素
-        if (this.store.selectedElements.length === 0) {
-          // 计算选区
-          const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
-          // 更新选区，命中组件
-          this.selection.setRange(rangePoints);
-        } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget()) && !this._isElementsTransforming) {
+        if (this.store.isSelectedEmpty) {
+          this._createRange();
+        } else if (this._isElementsRotating) {
           if (this.checkCursorPressMovedALittle(e)) {
-            // 标记拖动
-            this._isElementsDragging = true;
-            // 标记组件正在拖动
-            this.store.updateElements(this.store.selectedElements, { isDragging: true });
-            // 更新元素位置
-            this.store.updateSelectedElementsMovement({
-              x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-              y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
-            })
-            funcs.push(() => this.redraw())
-          }
-        } else if (this._isElementRotating) {
-          if (this.checkCursorPressMovedALittle(e)) {
-            this.store.updateElements(this.store.selectedElements, { isRotating: true });
-            this.store.updateSelectedElementsRotation(this._pressMovePosition)
-            funcs.push(() => this.redraw())
+            this._rotateElements();
+            flag = true;
           }
         } else if (this._isElementsTransforming) {
           if (this.checkCursorPressMovedALittle(e)) {
-            this.store.updateElements(this.store.selectedElements, { isTransforming: true });
-            this.store.updateSelectedElementsTransform({
-              x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-              y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
-            })
-            funcs.push(() => this.redraw())
+            this._transformElements();
+            flag = true;
+          }
+        } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget())) {
+          if (this.checkCursorPressMovedALittle(e)) {
+            // 标记拖动
+            this._isElementsDragging = true;
+            this._dragElements();
+            flag = true;
           }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
-        this._refreshStageWorldCoord(e);
-        this.store.refreshElements();
+        this._dragStage(e);
+        flag = true;
+      }
+      if (flag) {
         funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())
     }
     funcs.push(() => this.mask.redraw());
     await Promise.all(funcs.map(func => func()));
+  }
+
+  /**
+   * 舞台拖动
+   * 
+   * @param e 
+   */
+  private _dragStage(e: MouseEvent): void {
+    this._refreshStageWorldCoord(e);
+    this.store.refreshElements();
+  }
+
+  /**
+   * 拖动组件移动
+   */
+  private _dragElements(): void {
+    // 标记组件正在拖动
+    this.store.updateElements(this.store.selectedElements, { isDragging: true });
+    // 更新元素位置
+    this.store.updateSelectedElementsMovement({
+      x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
+    })
+  }
+
+  /**
+   * 组件形变
+   */
+  private _transformElements(): void {
+    this.store.updateElements(this.store.selectedElements, { isTransforming: true });
+    this.store.updateSelectedElementsTransform({
+      x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y
+    })
+  }
+
+  /**
+   * 旋转组件
+   */
+  private _rotateElements(): void {
+    this.store.updateElements(this.store.selectedElements, { isRotating: true });
+    this.store.updateSelectedElementsRotation(this._pressMovePosition)
+  }
+
+  /**
+   * 创建选区
+   */
+  private _createRange(): void {
+    // 计算选区
+    const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
+    // 更新选区，命中组件
+    this.selection.setRange(rangePoints);
   }
 
   /**
@@ -279,7 +332,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       if (targetRotateElement) {
         this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCentroid();
-        this._isElementRotating = true;
+        this._isElementsRotating = true;
       } else {
         sizeTransformerElement = this.selection.checkTransformerElement(this.cursor.value);
         if (sizeTransformerElement) {
@@ -335,7 +388,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
             this.store.refreshElementsPoints(this.store.selectedElements);
             // 将拖动状态置为false
             this._isElementsDragging = false;
-          } else if (this._isElementRotating) {
+          } else if (this._isElementsRotating) {
             this.store.updateSelectedElementsRotation(this._pressUpPosition)
             // 刷新组件坐标数据
             this.store.keepOriginalProps(this.store.rotatingTargetElements);
@@ -345,7 +398,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
               isRotating: false,
             })
             // 将旋转状态置为false
-            this._isElementRotating = false;
+            this._isElementsRotating = false;
           } else if (this._isElementsTransforming) {
             this.store.updateSelectedElementsTransform({
               x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
@@ -541,7 +594,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param e 
    */
-  creatingElementIfy(e: MouseEvent): IElement | null {
+  _createOrUpdateElementOnMovement(e: MouseEvent): IElement | null {
     if (this.checkCursorPressMovedALittle(e)) {
       const element = this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
       if (element) {

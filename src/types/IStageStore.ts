@@ -13,6 +13,7 @@ export default interface IStageStore {
   get rangeElements(): IElement[];
   get uniqSelectedElement(): IElement;
   get rotatingTargetElements(): IElement[];
+  get isSelectedEmpty(): boolean;
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IElement): IElement;
   removeElement(id: string): IElement;

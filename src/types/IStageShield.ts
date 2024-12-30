@@ -20,7 +20,7 @@ export default interface IStageShield extends IStageDrawer {
   stageWorldCoord: IPoint;
 
   get shouldRedraw(): boolean;
-
+  get isElementsBusy(): boolean;
   get stageRectPoints(): IPoint[];
   get stageWordRectPoints(): IPoint[];
   get isElementsDragging(): boolean;
@@ -29,5 +29,5 @@ export default interface IStageShield extends IStageDrawer {
   get isDrawerActive(): boolean;
   get isMoveableActive(): boolean;
   get isHandActive(): boolean;
-  get isElementRotating(): boolean;
+  get isElementsRotating(): boolean;
 }
