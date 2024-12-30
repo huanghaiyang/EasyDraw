@@ -604,7 +604,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 刷新当前舞台世界坐标
    */
   private _refreshStageWorldCoord(e: MouseEvent): void {
-    const point = CommonUtils.getEventPosition(e, this.stageRect);
+    const point = CommonUtils.getEventPosition(e, this.stageRect, this.scale);
     this.stageWorldCoord = {
       x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
       y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y)
