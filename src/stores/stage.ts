@@ -295,7 +295,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsPosition(value: IPoint): void {
-      shield.setElementsPosition(this.store.selectedElements, value);
+      shield.setElementsPosition(this.selectedElements, value);
     },
 
     /**
@@ -305,7 +305,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsWidth(value: number): void {
-      shield.setElementsWidth(this.store.selectedElements, value);
+      shield.setElementsWidth(this.selectedElements, value);
     },
 
     /**
@@ -315,7 +315,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsHeight(value: number): void {
-      shield.setElementsHeight(this.store.selectedElements, value);
+      shield.setElementsHeight(this.selectedElements, value);
     },
 
     /**
@@ -325,7 +325,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsAngle(value: number): void {
-      shield.setElementsAngle(this.store.selectedElements, value);
+      shield.setElementsAngle(this.selectedElements, value);
     },
 
     /**
@@ -335,7 +335,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsStrokeType(value: StrokeTypes): void {
-      shield.setElementsStrokeType(this.store.selectedElements, value);
+      shield.setElementsStrokeType(this.selectedElements, value);
     },
 
     /**
@@ -345,7 +345,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsStrokeWidth(value: number): void {
-      shield.setElementsStrokeWidth(this.store.selectedElements, value);
+      shield.setElementsStrokeWidth(this.selectedElements, value);
     },
 
     /**
@@ -355,7 +355,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsStrokeColor(value: string): void {
-      shield.setElementsStrokeColor(this.store.selectedElements, value);
+      shield.setElementsStrokeColor(this.selectedElements, value);
     },
 
     /**
@@ -365,7 +365,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsStrokeColorOpacity(value: number): void {
-      shield.setElementsStrokeColorOpacity(this.store.selectedElements, value);
+      shield.setElementsStrokeColorOpacity(this.selectedElements, value);
     },
 
     /**
@@ -375,7 +375,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsFillColor(value: string): void {
-      shield.setElementsFillColor(this.store.selectedElements, value);
+      shield.setElementsFillColor(this.selectedElements, value);
     },
 
     /**
@@ -385,7 +385,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsFillColorOpacity(value: number): void {
-      shield.setElementsFillColorOpacity(this.store.selectedElements, value);
+      shield.setElementsFillColorOpacity(this.selectedElements, value);
     },
 
     /**
@@ -395,7 +395,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsTextAlign(value: CanvasTextAlign): void {
-      shield.setElementsTextAlign(this.store.selectedElements, value);
+      shield.setElementsTextAlign(this.selectedElements, value);
     },
 
     /**
@@ -405,7 +405,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
-      shield.setElementsTextBaseline(this.store.selectedElements, value);
+      shield.setElementsTextBaseline(this.selectedElements, value);
     },
 
     /**
@@ -415,7 +415,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsFontSize(value: number): void {
-      shield.setElementsFontSize(this.store.selectedElements, value);
+      shield.setElementsFontSize(this.selectedElements, value);
     },
 
     /**
@@ -425,7 +425,7 @@ export const useStageStore = defineStore("stage", {
      * @param value 
      */
     setElementsFontFamily(value: string): void {
-      shield.setElementsFontFamily(this.store.selectedElements, value);
+      shield.setElementsFontFamily(this.selectedElements, value);
     },
   },
 });

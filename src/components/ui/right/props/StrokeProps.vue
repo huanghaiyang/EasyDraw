@@ -28,7 +28,12 @@ watch(
 
     <div class="stroke-props__row">
       <div class="stroke-props__row-item">
-        <el-select v-model="strokeType" placeholder="描边类型" size="small">
+        <el-select
+          v-model="strokeType"
+          placeholder="描边类型"
+          size="small"
+          @change="stageStore.setElementsStrokeType"
+        >
           <el-option
             v-for="item in StrokeTypesArray"
             :key="item.type"
@@ -39,7 +44,13 @@ watch(
       </div>
 
       <div class="stroke-props__row-item">
-        <el-input v-model="strokeWidth" placeholder="输入数字">
+        <el-input
+          v-model="strokeWidth"
+          placeholder="输入数字"
+          type="number"
+          min="0"
+          @change="(value) => stageStore.setElementsStrokeWidth(Number(value))"
+        >
           <template #prepend>s</template>
           <template #append>px</template>
         </el-input>
