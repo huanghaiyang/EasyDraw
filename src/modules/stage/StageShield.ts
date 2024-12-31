@@ -157,8 +157,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsPosition(elements: IElement[], value: IPoint): void {
-    throw new Error("Method not implemented.");
+  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+    await this.store.setElementsPosition(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -167,8 +168,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsWidth(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsWidth(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsWidth(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -177,8 +179,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsHeight(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsHeight(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsHeight(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -187,8 +190,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsAngle(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsAngle(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsAngle(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -197,8 +201,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsStrokeType(elements: IElement[], value: StrokeTypes): void {
-    throw new Error("Method not implemented.");
+  async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
+    await this.store.setElementsStrokeType(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -207,8 +212,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsStrokeWidth(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsStrokeWidth(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -217,8 +223,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsStrokeColor(elements: IElement[], value: string): void {
-    throw new Error("Method not implemented.");
+  async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
+    await this.store.setElementsStrokeColor(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -227,8 +234,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsStrokeColorOpacity(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsStrokeColorOpacity(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -237,8 +245,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsFillColor(elements: IElement[], value: string): void {
-    throw new Error("Method not implemented.");
+  async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
+    await this.store.setElementsFillColor(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -247,8 +256,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsFillColorOpacity(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsFillColorOpacity(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -257,8 +267,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): void {
-    throw new Error("Method not implemented.");
+  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+    await this.store.setElementsTextAlign(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -267,8 +278,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): void {
-    throw new Error("Method not implemented.");
+  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+    await this.store.setElementsTextBaseline(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -277,8 +289,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsFontSize(elements: IElement[], value: number): void {
-    throw new Error("Method not implemented.");
+  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsFontSize(elements, value);
+    await this._redrawAll();
   }
 
   /**
@@ -287,8 +300,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    * @param value 
    */
-  setElementsFontFamily(elements: IElement[], value: string): void {
-    throw new Error("Method not implemented.");
+  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+    await this.store.setElementsFontFamily(elements, value);
+    await this._redrawAll();
   }
 
   /**

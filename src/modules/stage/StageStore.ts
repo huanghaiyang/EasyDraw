@@ -15,7 +15,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { ElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { DefaultElementStyle } from "@/types/ElementStyles";
+import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -268,6 +268,132 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+     * 设置组件位置
+     * 
+     * @param elements 
+     * @param value 
+     */
+  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+  }
+
+  /**
+   * 设置组件宽度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsWidth(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件高度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsHeight(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件角度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsAngle(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件边框类型
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
+  }
+
+  /**
+   * 设置组件边框宽度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件边框颜色
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
+  }
+
+  /**
+   * 设置组件边框颜色透明度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件填充颜色
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
+  }
+
+  /**
+   * 设置组件填充颜色透明度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件文本对齐方式
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+  }
+
+  /**
+   * 设置组件文本基线
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+  }
+
+  /**
+   * 设置组件字体大小
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+  }
+
+  /**
+   * 设置组件字体
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+  }
+
+  /**
    * 判断元素是否存在
    * 
    * @param id 
@@ -408,7 +534,7 @@ export default class StageStore implements IStageStore {
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
       styles: DefaultElementStyle
     }
-    switch(type) {
+    switch (type) {
       case CreatorTypes.rectangle:
         Object.assign(model, ElementUtils.calcRectangleSize(coords));
         break;

@@ -1,9 +1,10 @@
 import IElement, { ElementObject } from "@/types/IElement";
 import { IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
+import IStageSetter from "@/types/IStageSetter";
 
 // 用于维护舞台数据关系
-export default interface IStageStore {
+export default interface IStageStore extends IStageSetter {
   get creatingElements(): IElement[];
   get provisionalElements(): IElement[];
   get selectedElements(): IElement[];
@@ -14,6 +15,7 @@ export default interface IStageStore {
   get uniqSelectedElement(): IElement;
   get rotatingTargetElements(): IElement[];
   get isSelectedEmpty(): boolean;
+
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IElement): IElement;
   removeElement(id: string): IElement;
