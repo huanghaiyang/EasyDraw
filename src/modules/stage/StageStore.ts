@@ -16,6 +16,7 @@ import IStageShield from "@/types/IStageShield";
 import IElement, { ElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -301,6 +302,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { angle: value })
+      }
+    });
   }
 
   /**
@@ -310,6 +316,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { strokeType: value } })
+      }
+    });
   }
 
   /**
@@ -319,6 +330,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { strokeWidth: value } })
+      }
+    });
   }
 
   /**
@@ -328,6 +344,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { strokeColor: value } })
+      }
+    });
   }
 
   /**
@@ -337,6 +358,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { strokeColorOpacity: value } })
+      }
+    });
   }
 
   /**
@@ -346,6 +372,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { fillColor: value } })
+      }
+    });
   }
 
   /**
@@ -355,6 +386,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { fillColorOpacity: value } })
+      }
+    });
   }
 
   /**
@@ -364,6 +400,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { textAlign: value } })
+      }
+    });
   }
 
   /**
@@ -373,6 +414,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { textBaseline: value } })
+      }
+    });
   }
 
   /**
@@ -382,6 +428,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { fontSize: value } })
+      }
+    });
   }
 
   /**
@@ -391,6 +442,11 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        this.updateElementModel(element.id, { styles: { fontFamily: value } })
+      }
+    });
   }
 
   /**
@@ -499,7 +555,7 @@ export default class StageStore implements IStageStore {
     if (this.hasElement(id)) {
       const element = this._elementMap.get(id);
       const modelId = element.model.id;
-      Object.assign(element.model, data, { id: modelId });
+      LodashUtils.deepPlanObjectAssign(element.model, data, { id: modelId });
       return element;
     }
   }
