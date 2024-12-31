@@ -1,6 +1,6 @@
 import { IPoint } from "@/types";
-import CommonUtils from "./CommonUtils";
-import MathUtils from "./MathUtils";
+import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class PolygonUtils {
 
