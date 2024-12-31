@@ -19,11 +19,11 @@ export default class CanvasUtils {
   static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
     switch (strokeType) {
       case StrokeTypes.inside:
-        return PolygonUtils.getPolygonInnerVertices(points, strokeWidth);
+        return PolygonUtils.getPolygonInnerVertices(points, strokeWidth / 2);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return PolygonUtils.getPolygonOuterVertices(points, strokeWidth);
+        return PolygonUtils.getPolygonOuterVertices(points, strokeWidth / 2);
     }
   }
 

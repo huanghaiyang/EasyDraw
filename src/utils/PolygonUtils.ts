@@ -8,16 +8,16 @@ export default class PolygonUtils {
    * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
    * 
    * @param vertices 
-   * @param width 
+   * @param r 
    * @param innerOrOuter 
    * @returns 
    */
-  static getPolygonVertices(vertices: IPoint[], width: number, innerOrOuter: boolean): IPoint[] {
+  static getPolygonVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
     return vertices.map((ver, index) => {
       const prev = CommonUtils.getPrevOfArray(vertices, index);
       const next = CommonUtils.getNextOfArray(vertices, index);
       const angle = MathUtils.calculateTriangleAngle(prev, ver, next);
-      const hypotenuse = MathUtils.calculateTriangleHypotenuse(angle / 2, width / 2);
+      const hypotenuse = MathUtils.calculateTriangleHypotenuse(angle / 2, r);
       let nextAngle = MathUtils.calculateAngle(ver, next);
       if (nextAngle < 0) {
         nextAngle += 360;
@@ -33,8 +33,8 @@ export default class PolygonUtils {
    * @param points 多边形的顶点坐标集合
    * @param width 多边形的宽度
    */
-  static getPolygonInnerVertices(vertices: IPoint[], width: number): IPoint[] {
-    return PolygonUtils.getPolygonVertices(vertices, width, true);
+  static getPolygonInnerVertices(vertices: IPoint[], r: number): IPoint[] {
+    return PolygonUtils.getPolygonVertices(vertices, r, true);
   }
 
   /**
@@ -44,7 +44,7 @@ export default class PolygonUtils {
    * @param width 
    * @returns 
    */
-  static getPolygonOuterVertices(vertices: IPoint[], width: number): IPoint[] {
-    return PolygonUtils.getPolygonVertices(vertices, width, false);
+  static getPolygonOuterVertices(vertices: IPoint[], r: number): IPoint[] {
+    return PolygonUtils.getPolygonVertices(vertices, r, false);
   }
 }
