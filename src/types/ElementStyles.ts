@@ -29,12 +29,12 @@ export type ElementStyles = {
   textBaseline?: CanvasTextBaseline;
 }
 
-export const DefaultStrokeType = StrokeTypes.inside;
-export const DefaultStrokeColor = '#ffffff';
-export const DefaultStrokeColorOpacity = 0;
+export const DefaultStrokeType = StrokeTypes.middle;
+export const DefaultStrokeColor = '#000000';
+export const DefaultStrokeColorOpacity = 1;
 export const DefaultFillColor = '#000000';
 export const DefaultFillColorOpacity = 0.05;
-export const DefaultLineWidth = 0;
+export const DefaultStrokeWidth = 0;
 export const DefaultFontSize = 12;
 export const DefaultFontFamily = 'sans-serif';
 export const DefaultTextAlign = 'center';
@@ -44,7 +44,7 @@ export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,
   strokeColorOpacity: DefaultStrokeColorOpacity,
   strokeType: DefaultStrokeType,
-  strokeWidth: DefaultLineWidth,
+  strokeWidth: DefaultStrokeWidth,
   fillColor: DefaultFillColor,
   fillColorOpacity: DefaultFillColorOpacity,
   fontSize: DefaultFontSize,

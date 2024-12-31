@@ -115,7 +115,10 @@ export default class CanvasUtils {
       }
     });
     ctx.closePath();
-    ctx.stroke();
+    // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
+    if (styles.strokeWidth) {
+      ctx.stroke();
+    }
     ctx.fill();
     ctx.restore();
   }

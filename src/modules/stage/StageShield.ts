@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/ElementUtils";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement from "@/types/IElement";
@@ -159,7 +159,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     await this.store.setElementsPosition(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -170,7 +170,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsWidth(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -181,7 +181,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsHeight(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -192,7 +192,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsAngle(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -203,7 +203,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
     await this.store.setElementsStrokeType(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -214,7 +214,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -225,7 +225,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsStrokeColor(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -236,7 +236,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsStrokeColorOpacity(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -247,7 +247,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFillColor(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -258,7 +258,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFillColorOpacity(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -269,7 +269,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -280,7 +280,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -291,7 +291,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -302,7 +302,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
-    await this._redrawAll();
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -736,12 +736,20 @@ export default class StageShield extends DrawerBase implements IStageShield {
   /**
    * 重新绘制所有内容
    */
-  private async _redrawAll(force?: boolean): Promise<void> {
-    await Promise.all([
-      this.mask.redraw(force),
-      this.provisional.redraw(force),
-      this.redraw(force)
-    ])
+  private async _redrawAll(force?: boolean | { mask?: boolean, provisional?: boolean, shield?: boolean }): Promise<void> {
+    if (isBoolean(force)) {
+      await Promise.all([
+        this.mask.redraw(force),
+        this.provisional.redraw(force),
+        this.redraw(force)
+      ])
+    } else {
+      await Promise.all([
+        this.mask.redraw(force.mask),
+        this.provisional.redraw(force.provisional),
+        this.redraw(force.shield)
+      ])
+    }
   }
 
   /**
