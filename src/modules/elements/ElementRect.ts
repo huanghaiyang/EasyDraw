@@ -1,7 +1,7 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
 import { IElementReact } from "@/types/IElement";
-import ElementUtils from "./ElementUtils";
+import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class ElementRect extends Element implements IElementReact {
   /**

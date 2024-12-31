@@ -170,6 +170,19 @@ export default class CommonUtils {
     }
     return result;
   }
+
+  /**
+   * 获取数组中前一个元素
+   * 
+   * @param array 
+   * @param index 
+   * @param step 
+   * @returns 
+   */
+  static getPrevOfArray(array: any[], index: number, step: number = 1) {
+    return array[CommonUtils.getPrevIndexOfArray(array.length, index, step)];
+  }
+
   /**
    * 获取数组中后一个索引
    * 
@@ -182,7 +195,7 @@ export default class CommonUtils {
     while (true) {
       result = index + step;
       if (result >= length) {
-        result = result - length ;
+        result = result - length;
       }
       if (result < length) {
         break;
@@ -197,7 +210,7 @@ export default class CommonUtils {
    * @param index 
    * @returns 
    */
-  static getNextOfArray(array: any[], index: number) {
-    return array[index + 1 < array.length ? index + 1 : 0];
+  static getNextOfArray(array: any[], index: number, step: number = 1) {
+    return array[CommonUtils.getNextIndexOfArray(array.length, index, step)];
   }
 }

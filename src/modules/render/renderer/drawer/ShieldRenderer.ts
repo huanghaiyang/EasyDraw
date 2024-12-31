@@ -1,4 +1,4 @@
-import BaseRenderer from "./BaseRenderer";
+import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
 import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
 import ElementUtils from "@/modules/elements/ElementUtils";
 import ElementTaskClear from "@/modules/render/base/task/ElementTaskClear";

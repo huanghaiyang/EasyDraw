@@ -276,7 +276,7 @@ export default class MathUtils {
    * 
    * @param center 
    * @param distance 
-   * @param angleDeg 
+   * @param angleDeg 值如果小于0，请加上360在传递给此方法
    * @returns 
    */
   static calculateTargetPoint(center: IPoint, distance: number, angleDeg: number) {
@@ -289,7 +289,7 @@ export default class MathUtils {
   }
 
   /**
-   * 计算两个点至今的夹角
+   * 计算两个点之间的夹角，以x轴正方向为0度，逆时针为负，顺时针为正，角度绝对值不超过180
    * 
    * @param p1 
    * @param p2 
@@ -384,5 +384,68 @@ export default class MathUtils {
    */
   static toFixed(num: number, precision: number = 2): number {
     return parseFloat(num.toFixed(precision));
+  }
+
+  /**
+   * 给定三角形的三个坐标点a,b,c计算b的夹角
+   */
+  static calculateTriangleAngle(a: IPoint, b: IPoint, c: IPoint): number {
+    // 计算向量AB和BC
+    let AB = { x: b.x - a.x, y: b.y - a.y };
+    let BC = { x: c.x - b.x, y: c.y - b.y };
+    // 计算向量的点积
+    let dotProduct = AB.x * BC.x + AB.y * BC.y;
+    // 计算向量的模（长度）
+    let magnitudeAB = Math.sqrt(AB.x * AB.x + AB.y * AB.y);
+    let magnitudeBC = Math.sqrt(BC.x * BC.x + BC.y * BC.y);
+    // 计算夹角的余弦值
+    let cosTheta = dotProduct / (magnitudeAB * magnitudeBC);
+    // 计算夹角（以弧度为单位）
+    let angleRadians = Math.acos(cosTheta);
+    // 将弧度转换为度
+    let angleDegrees = angleRadians * (180 / Math.PI);
+    return angleDegrees;
+  }
+
+  /**
+   * 给定a向量和b向量，其中b垂直于a，且a+b=c,求向量c的坐标
+   */
+  static calculateVectorC(a: IPoint, b: IPoint): IPoint {
+    const cx = a.x + b.x;
+    const cy = a.y + b.y;
+    return { x: cx, y: cy };
+  }
+
+  /**
+   * 给定原点以及坐标，计算向量
+   */
+  static calculateVector(origin: IPoint, point: IPoint): IPoint {
+    const dx = point.x - origin.x;
+    const dy = point.y - origin.y;
+    return { x: dx, y: dy };
+  }
+
+  /**
+   * 给定角度和对边边长，计算直角三角形的临边边长
+   * 
+   * @param angle 
+   * @param oppositeSide 
+   * @returns 
+   */
+  static calculateTriangleAdjacentSide(angle: number, oppositeSide: number): number {
+    const radians = angle * (Math.PI / 180);
+    return oppositeSide / Math.tan(radians);
+  }
+
+  /**
+   * 给定角度和对边边长，计算直角三角形的斜边边长
+   * 
+   * @param angle 
+   * @param oppositeSide 
+   * @returns 
+   */
+  static calculateTriangleHypotenuse(angle: number, oppositeSide: number): number {
+    const radians = angle * (Math.PI / 180);
+    return oppositeSide / Math.sin(radians);
   }
 }

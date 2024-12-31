@@ -1,5 +1,5 @@
 import { ElementStyles } from "@/types/ElementStyles";
-import ColorUtils from "./ColorUtils";
+import ColorUtils from "@/utils/ColorUtils";
 
 export default class StyleUtils {
   static joinFillColor(style: ElementStyles): string {

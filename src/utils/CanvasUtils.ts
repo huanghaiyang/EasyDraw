@@ -1,11 +1,31 @@
 import { IPoint } from "@/types";
-import { ElementStyles } from "@/types/ElementStyles";
+import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
-import StyleUtils from "./StyleUtils";
+import StyleUtils from "@/utils/StyleUtils";
+import PolygonUtils from "@/utils/PolygonUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
+
+  /**
+   * 根据线型转换点坐标
+   * 
+   * @param points 
+   * @param strokeType 
+   * @param strokeWidth 
+   * @returns 
+   */
+  static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+    switch (strokeType) {
+      case StrokeTypes.inside:
+        return PolygonUtils.getPolygonInnerVertices(points, strokeWidth);
+      case StrokeTypes.middle:
+        return points;
+      case StrokeTypes.outside:
+        return PolygonUtils.getPolygonOuterVertices(points, strokeWidth);
+    }
+  }
 
   /**
    * 绘制图片或者canvas到canvas上

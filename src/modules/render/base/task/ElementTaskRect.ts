@@ -4,7 +4,6 @@ import { IElementReact } from "@/types/IElement";
 import { IElementTaskRect } from "@/types/IRenderTask";
 
 export default class ElementTaskRect extends ElementTaskBase implements IElementTaskRect {
-
   get node() {
     return this.element as IElementReact;
   }
@@ -13,7 +12,14 @@ export default class ElementTaskRect extends ElementTaskBase implements IElement
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(this.canvas, this.node.rotatePathPoints, this.node.model.styles);
+    CanvasUtils.drawPath(
+      this.canvas,
+      CanvasUtils.convertPointsByStrokeType(
+        this.node.rotatePathPoints,
+        this.node.model.styles.strokeType,
+        this.node.model.styles.strokeWidth
+      ),
+      this.node.model.styles
+    );
   }
-
 }
