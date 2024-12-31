@@ -17,13 +17,15 @@ export default class CanvasUtils {
    * @returns 
    */
   static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+    // 需要考虑下舞台缩放
+    const r = (strokeWidth / 2) / this.scale;
     switch (strokeType) {
       case StrokeTypes.inside:
-        return PolygonUtils.getPolygonInnerVertices(points, strokeWidth / 2);
+        return PolygonUtils.getPolygonInnerVertices(points, r);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return PolygonUtils.getPolygonOuterVertices(points, strokeWidth / 2);
+        return PolygonUtils.getPolygonOuterVertices(points, r);
     }
   }
 
