@@ -20,7 +20,7 @@ export const DefaultSizeTransformerLineWidth = 1;
 export const DefaultSizeTransformerValue = 10;
 export const DefaultSelectionRotateSize = 18;
 export const DefaultSelectionRotateDistance = 18;
-export const DefaultSelectionSizeIndicatorDistance = 10;
+export const DefaultSelectionSizeIndicatorDistance = 16;
 // 尺寸指示文本
 export const DefaultSelectionSizeIndicatorFillColor = '#0c8ce9';
 export const DefaultSelectionSizeIndicatorFillColorOpacity = 1;

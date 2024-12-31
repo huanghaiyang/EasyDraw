@@ -17,12 +17,12 @@ export default class PolygonUtils {
       const prev = CommonUtils.getPrevOfArray(vertices, index);
       const next = CommonUtils.getNextOfArray(vertices, index);
       const angle = MathUtils.calculateTriangleAngle(prev, ver, next);
+      const hypotenuse = MathUtils.calculateTriangleHypotenuse(angle / 2, width / 2);
       let nextAngle = MathUtils.calculateAngle(ver, next);
       if (nextAngle < 0) {
         nextAngle += 360;
       }
       let finalAngle = nextAngle + angle / 2;
-      const hypotenuse = MathUtils.calculateTriangleHypotenuse(finalAngle % 90, width / 2);
       const point = MathUtils.calculateTargetPoint(ver, hypotenuse, innerOrOuter ? finalAngle : finalAngle + 180);
       return point;
     });
