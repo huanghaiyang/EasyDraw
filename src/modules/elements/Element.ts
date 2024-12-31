@@ -74,7 +74,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   @computed
   get position(): IPoint {
-    return this.calcPosition();
+    return {
+      x: this.model.left,
+      y: this.model.top
+    }
   }
 
   @computed
@@ -367,15 +370,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 计算坐标
-   * 
-   * @returns 
-   */
-  calcPosition(): IPoint {
-    return CommonUtils.getBoxPoints(this.model.coords)[0];
-  }
-
-  /**
    * 计算舞台坐标
    * 
    * @param stageRect 
@@ -602,6 +596,26 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 更新坐标
+   */
+  private _reCalcPosition(): void {
+    const { x, y } = ElementUtils.calcPosition(this.model);
+    this.model.left = x;
+    this.model.top = y;
+  }
+
+  /**
+   * 角度修正
+   */
+  private _fixAngle(): void {
+    if (this.model.angle > 0) {
+      this.model.angle = this.model.angle - 180;
+    } else {
+      this.model.angle = this.model.angle + 180;
+    }
+  }
+
+  /**
    * 形变
    * 
    * @param offset 
@@ -647,13 +661,10 @@ export default class Element implements IElement, ILinkedNodeValue {
           return point;
         })
         this.model.coords = coords;
+        this._reCalcPosition();
         // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
         if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
-          if (this.model.angle > 0) {
-            this.model.angle = this.model.angle - 180;
-          } else {
-            this.model.angle = this.model.angle + 180;
-          }
+          this._fixAngle();
           this._originalMatrix = matrix;
         }
       }

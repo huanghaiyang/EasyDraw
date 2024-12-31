@@ -1,6 +1,7 @@
 import {
   ElementStatus,
   IPoint,
+  ISize,
   ShieldDispatcherNames,
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
@@ -581,19 +582,26 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
+    let size: ISize;
+    let position: IPoint;
+    switch (type) {
+      case CreatorTypes.rectangle:
+        size = ElementUtils.calcRectangleSize(coords);
+        position = ElementUtils.calcPosition({ type, coords });
+        break;
+    }
     const model: ElementObject = {
       id: CommonUtils.getRandomDateId(),
       type,
       coords,
       data,
       angle: 0,
+      width: size.width,
+      height: size.height,
+      left: position.x,
+      top: position.y,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
       styles: DefaultElementStyle
-    }
-    switch (type) {
-      case CreatorTypes.rectangle:
-        Object.assign(model, ElementUtils.calcRectangleSize(coords));
-        break;
     }
     return model;
   }
@@ -677,14 +685,9 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
-      this.updateElementModel(element.id, {
-        coords: element.originalModelCoords.map(point => {
-          return {
-            x: point.x + offset.x,
-            y: point.y + offset.y,
-          }
-        })
-      })
+      const coords = ElementUtils.translateCoords(element.originalModelCoords, offset);
+      const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
+      this.updateElementModel(element.id, { coords, left: x, top: y })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
   }

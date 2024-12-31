@@ -12,10 +12,12 @@ export type ElementObject = {
   data: any;
   angle: number;
   name: string;
-  width?: number;
-  height?: number;
+  width: number;
+  height: number;
   length?: number;
   styles: ElementStyles;
+  left: number;
+  top: number;
 }
 
 // 舞台元素（组件）
@@ -85,7 +87,6 @@ export default interface IElement {
   isModelPolygonOverlap(points: IPoint[]): boolean;
   isRotationContainsPoint(point: IPoint): boolean;
 
-  calcPosition(): IPoint;
   calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[];
   calcPathPoints(): IPoint[];
   calcRotatePoints(): IPoint[];

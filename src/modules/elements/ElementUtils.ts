@@ -171,4 +171,34 @@ export default class ElementUtils {
     const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
     return { width, height };
   }
+
+  /**
+   * 计算组件位置
+   * 
+   * @param element 
+   * @returns 
+   */
+  static calcPosition(model: Partial<ElementObject>): IPoint {
+    switch (model.type) {
+      case CreatorTypes.rectangle: {
+        return CommonUtils.getBoxPoints(model.coords)[0]
+      }
+    }
+  }
+
+  /**
+   * 移动坐标
+   * 
+   * @param coords 
+   * @param offset 
+   * @returns 
+   */
+  static translateCoords(coords: IPoint[], offset: IPoint): IPoint[] {
+    return coords.map(p => {
+      return {
+        x: p.x + offset.x,
+        y: p.y + offset.y
+      }
+    })
+  }
 }
