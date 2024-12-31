@@ -108,11 +108,36 @@ export const useStageStore = defineStore("stage", {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
         const element = this.selectedElements[0];
-        const { position, width, height, angle } = element;
+        const {
+          position,
+          width,
+          height,
+          angle,
+          strokeType,
+          strokeWidth,
+          strokeColor,
+          strokeColorOpacity,
+          fillColor,
+          fillColorOpacity,
+          fontSize,
+          fontFamily,
+          textAlign,
+          textBaseline
+        } = element;
         this.onPositionChanged(element, position);
         this.onWidthChanged(element, width);
         this.onHeightChanged(element, height);
         this.onAngleChanged(element, angle);
+        this.onStrokeTypeChanged(element, strokeType);
+        this.onStrokeWidthChanged(element, strokeWidth);
+        this.onStrokeColorChanged(element, strokeColor);
+        this.onStrokeColorOpacityChanged(element, strokeColorOpacity);
+        this.onFillColorChanged(element, fillColor);
+        this.onFillColorOpacityChanged(element, fillColorOpacity);
+        this.onFontSizeChanged(element, fontSize);
+        this.onFontFamilyChanged(element, fontFamily);
+        this.onTextAlignChanged(element, textAlign);
+        this.onTextBaselineChanged(element, textBaseline);
       }
     },
     /**
@@ -261,6 +286,146 @@ export const useStageStore = defineStore("stage", {
      */
     onTextBaselineChanged(element: IElement, textBaseline: string) {
       this.textBaseline = textBaseline;
+    },
+    //-----------------------------------属性设置---------------------------------------//
+    /**
+     * 设置组件位置
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsPosition(value: IPoint): void {
+      shield.setElementsPosition(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件宽度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsWidth(value: number): void {
+      shield.setElementsWidth(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件高度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsHeight(value: number): void {
+      shield.setElementsHeight(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件角度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsAngle(value: number): void {
+      shield.setElementsAngle(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件边框类型
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsStrokeType(value: StrokeTypes): void {
+      shield.setElementsStrokeType(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件边框宽度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsStrokeWidth(value: number): void {
+      shield.setElementsStrokeWidth(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件边框颜色
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsStrokeColor(value: string): void {
+      shield.setElementsStrokeColor(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件边框颜色透明度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsStrokeColorOpacity(value: number): void {
+      shield.setElementsStrokeColorOpacity(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件填充颜色
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsFillColor(value: string): void {
+      shield.setElementsFillColor(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件填充颜色透明度
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsFillColorOpacity(value: number): void {
+      shield.setElementsFillColorOpacity(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件文本对齐方式
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsTextAlign(value: CanvasTextAlign): void {
+      shield.setElementsTextAlign(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件文本基线
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsTextBaseline(value: CanvasTextBaseline): void {
+      shield.setElementsTextBaseline(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件字体大小
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsFontSize(value: number): void {
+      shield.setElementsFontSize(this.store.selectedElements, value);
+    },
+
+    /**
+     * 设置组件字体
+     * 
+     * @param elements 
+     * @param value 
+     */
+    setElementsFontFamily(value: string): void {
+      shield.setElementsFontFamily(this.store.selectedElements, value);
     },
   },
 });

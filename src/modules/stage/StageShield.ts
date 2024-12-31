@@ -22,6 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
+import { StrokeTypes } from "@/types/ElementStyles";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   scale: number = 1;
@@ -148,6 +149,146 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
     this.handlePressUp = this.handlePressUp.bind(this);
+  }
+
+  /**
+   * 设置组件位置
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsPosition(elements: IElement[], value: IPoint): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件宽度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsWidth(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件高度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsHeight(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件角度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsAngle(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件边框类型
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsStrokeType(elements: IElement[], value: StrokeTypes): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件边框宽度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsStrokeWidth(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件边框颜色
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsStrokeColor(elements: IElement[], value: string): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件边框颜色透明度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsStrokeColorOpacity(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件填充颜色
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsFillColor(elements: IElement[], value: string): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件填充颜色透明度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsFillColorOpacity(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件文本对齐方式
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件文本基线
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件字体大小
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsFontSize(elements: IElement[], value: number): void {
+    throw new Error("Method not implemented.");
+  }
+
+  /**
+   * 设置组件字体
+   * 
+   * @param elements 
+   * @param value 
+   */
+  setElementsFontFamily(elements: IElement[], value: string): void {
+    throw new Error("Method not implemented.");
   }
 
   /**
@@ -372,41 +513,15 @@ export default class StageShield extends DrawerBase implements IStageShield {
         if (this.checkCursorPressUpALittle(e)) {
           // 如果当前是在拖动中
           if (this._isElementsDragging) {
-            // 更新组件的坐标位置
-            this.store.updateSelectedElementsMovement({
-              x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-              y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
-            })
-            // 取消组件拖动状态
-            this.store.updateElements(this.store.selectedElements, { isDragging: false });
-            // 刷新组件坐标数据
-            this.store.keepOriginalProps(this.store.selectedElements);
-            // 刷新组件坐标数据
-            this.store.refreshElementsPoints(this.store.selectedElements);
+            this._endElementsDrag();
             // 将拖动状态置为false
             this._isElementsDragging = false;
           } else if (this._isElementsRotating) {
-            this.store.updateSelectedElementsRotation(this._pressUpPosition)
-            // 刷新组件坐标数据
-            this.store.keepOriginalProps(this.store.rotatingTargetElements);
-            // 更新组件状态
-            this.store.updateElements(this.store.rotatingTargetElements, {
-              isRotatingTarget: false,
-              isRotating: false,
-            })
+            this._endElementsRotate();
             // 将旋转状态置为false
             this._isElementsRotating = false;
           } else if (this._isElementsTransforming) {
-            this.store.updateSelectedElementsTransform({
-              x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-              y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
-            })
-            // 刷新组件坐标数据
-            this.store.keepOriginalProps(this.store.selectedElements);
-            // 更新组件状态
-            this.store.updateElements(this.store.selectedElements, {
-              isTransforming: false,
-            })
+            this._endElementsTransform();
             // 将旋转状态置为false
             this._isElementsTransforming = false;
           }
@@ -424,6 +539,53 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.provisional.redraw(),
       this.renderCreatedElement()
     ])
+  }
+
+  /**
+   * 结束组件拖拽操作
+   */
+  private _endElementsDrag() {
+    // 更新组件的坐标位置
+    this.store.updateSelectedElementsMovement({
+      x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
+    })
+    // 取消组件拖动状态
+    this.store.updateElements(this.store.selectedElements, { isDragging: false });
+    // 刷新组件坐标数据
+    this.store.keepOriginalProps(this.store.selectedElements);
+    // 刷新组件坐标数据
+    this.store.refreshElementsPoints(this.store.selectedElements);
+  }
+
+  /**
+   * 结束组件旋转操作
+   */
+  private _endElementsRotate() {
+    this.store.updateSelectedElementsRotation(this._pressUpPosition)
+    // 刷新组件坐标数据
+    this.store.keepOriginalProps(this.store.rotatingTargetElements);
+    // 更新组件状态
+    this.store.updateElements(this.store.rotatingTargetElements, {
+      isRotatingTarget: false,
+      isRotating: false,
+    })
+  }
+
+  /**
+   * 结束组件变换操作
+   */
+  private _endElementsTransform() {
+    this.store.updateSelectedElementsTransform({
+      x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
+    })
+    // 刷新组件坐标数据
+    this.store.keepOriginalProps(this.store.selectedElements);
+    // 更新组件状态
+    this.store.updateElements(this.store.selectedElements, {
+      isTransforming: false,
+    })
   }
 
   /**

@@ -14,7 +14,7 @@ export const DefaultSelectionLineWidth = 1;
 export const DefaultSizeTransformerStrokeColor = '#0c8ce9';
 export const DefaultSizeTransformerStrokeColorOpacity = 1;
 export const DefaultSizeTransformerFillColor = '#ffffff';
-export const DefaultSizeTransformerFillColorOpacity = 0.2;
+export const DefaultSizeTransformerFillColorOpacity = 1;
 export const DefaultSizeTransformerLineWidth = 1;
 
 export const DefaultSizeTransformerValue = 10;
