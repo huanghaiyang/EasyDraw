@@ -12,9 +12,11 @@ import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndica
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskCursorModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
+import { IMaskCursorModel, IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
 import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
+import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
+import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
@@ -52,6 +54,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     if (this.drawer.shield.isDrawerActive) {
       if (this.drawer.shield.cursor.value) {
         cargo.add(this.createMaskCursorTask());
+        cargo.add(this.createMaskCursorPositionTask());
         cursorRendered = true;
         this._lastCursorRendered = true;
       }
@@ -86,6 +89,26 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       creatorCategory: this.drawer.shield.currentCreator.category
     }
     const task = new MaskTaskCursor(model, this.renderParams);
+    return task;
+  }
+
+  /**
+   * 绘制当前鼠标位置的文字任务
+   * 
+   * @returns 
+   */
+  private createMaskCursorPositionTask(): IRenderTask {
+    const point = this.drawer.shield.cursor.value;
+    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageRect, this.drawer.shield.stageWorldCoord);
+    const model: IMaskCursorPositionModel = {
+      point: {
+        x: point.x + 20,
+        y: point.y + 20
+      },
+      type: DrawerMaskModelTypes.cursorPosition,
+      text: `${coord.x},${coord.y}`
+    }
+    const task = new MaskTaskCursorPosition(model, this.renderParams);
     return task;
   }
 

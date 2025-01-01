@@ -21,7 +21,7 @@ export const RectangleCreator: Creator = {
   name: '矩形',
   category: CreatorCategories.shapes,
   icon: 'icon-verbise-Rectangle',
-  cursor: 'crosshair'
+  cursor: 'none'
 }
 
 export const CursorCreators: Creator[] = [

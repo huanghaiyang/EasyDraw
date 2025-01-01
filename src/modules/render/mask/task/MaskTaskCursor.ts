@@ -3,7 +3,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import CursorUtils from "@/utils/CursorUtils";
 import { IMaskCursorModel } from "@/types/IModel";
 import { IMaskCursor } from "@/types/IRenderTask";
-import { CursorCanvasSize } from "@/types/MaskStyles";
+import { CursorSize } from "@/types/MaskStyles";
 
 export default class MaskTaskCursor extends MaskTaskBase implements IMaskCursor {
 
@@ -17,10 +17,10 @@ export default class MaskTaskCursor extends MaskTaskBase implements IMaskCursor 
   async run(): Promise<void> {
     if (this.canvas) {
       await CanvasUtils.drawImgLike(this.canvas, CursorUtils.getCursorSvg(this.data.creatorCategory), {
-        x: this.data.point.x - CursorCanvasSize / 2,
-        y: this.data.point.y - CursorCanvasSize / 2,
-        width: CursorCanvasSize,
-        height: CursorCanvasSize,
+        x: this.data.point.x - CursorSize / 2,
+        y: this.data.point.y - CursorSize / 2,
+        width: CursorSize,
+        height: CursorSize,
       })
     }
   }

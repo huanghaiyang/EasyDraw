@@ -23,6 +23,9 @@ export interface IMaskTransformer extends IMaskTask { }
 // 辅助画布光标绘制任务
 export interface IMaskCursor extends IMaskTask { }
 
+// 光标位置绘制任务
+export interface IMaskCursorPosition extends IMaskTask { }
+
 // 组件旋转图标绘制
 export interface IMaskRotate extends IMaskTask { }
 

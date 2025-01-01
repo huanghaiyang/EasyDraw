@@ -31,6 +31,11 @@ export interface IMaskCursorModel extends IMaskModel {
   creatorCategory: CreatorCategories;
 }
 
+export interface IMaskCursorPositionModel extends IMaskModel {
+  point: IPoint;
+  text: string;
+}
+
 // 组件旋转图标绘制任务对象
 export interface IRotationModel extends IMaskModel {
   point: IPoint;
