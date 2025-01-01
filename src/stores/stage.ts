@@ -44,6 +44,9 @@ export const useStageStore = defineStore("stage", {
     uniqSelectedElement(): IElement {
       return this.selectedElements.length === 1 ? this.selectedElements[0] : null;
     },
+    inputDisabled(): boolean {
+      return !this.uniqSelectedElement;
+    },
   },
   actions: {
     /**

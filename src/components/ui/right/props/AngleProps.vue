@@ -3,7 +3,6 @@ import { useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-
 const aValue = ref(0);
 
 watch(
@@ -19,7 +18,7 @@ watch(
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="aValue" placeholder="输入数字">
+        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled">
           <template #prepend>a</template>
           <template #append>°</template>
         </el-input>

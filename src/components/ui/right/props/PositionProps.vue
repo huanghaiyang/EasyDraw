@@ -24,14 +24,22 @@ watch(
 
     <div class="position-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="xValue" placeholder="输入数字">
+        <el-input
+          v-model="xValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled"
+        >
           <template #prepend>x</template>
           <template #append>px</template>
         </el-input>
       </div>
 
       <div class="angle-props__row-item">
-        <el-input v-model="yValue" placeholder="输入数字">
+        <el-input
+          v-model="yValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled"
+        >
           <template #prepend>y</template>
           <template #append>px</template>
         </el-input>

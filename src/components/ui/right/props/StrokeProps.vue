@@ -53,8 +53,11 @@ const toggleColorPickerVisible = () => {
           v-model="strokeColor"
           @change="stageStore.setElementsStrokeColor"
           ref="colorPickerRef"
+          :disabled="stageStore.inputDisabled"
         />
-        <el-tag type="info" @click="toggleColorPickerVisible">{{ strokeColor }}</el-tag>
+        <el-tag type="info" @click="toggleColorPickerVisible">{{
+          strokeColor
+        }}</el-tag>
       </div>
 
       <div class="stroke-props__row-item">
@@ -67,6 +70,7 @@ const toggleColorPickerVisible = () => {
           @change="
             (value) => stageStore.setElementsStrokeColorOpacity(Number(value))
           "
+          :disabled="stageStore.inputDisabled"
         >
           <template #prepend>o</template>
         </el-input>
@@ -80,6 +84,7 @@ const toggleColorPickerVisible = () => {
           placeholder="描边类型"
           size="small"
           @change="stageStore.setElementsStrokeType"
+          :disabled="stageStore.inputDisabled"
         >
           <el-option
             v-for="item in StrokeTypesArray"
@@ -97,6 +102,7 @@ const toggleColorPickerVisible = () => {
           type="number"
           min="0"
           @change="(value) => stageStore.setElementsStrokeWidth(Number(value))"
+          :disabled="stageStore.inputDisabled"
         >
           <template #prepend>s</template>
           <template #append>px</template>

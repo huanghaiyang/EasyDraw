@@ -37,8 +37,11 @@ const toggleColorPickerVisible = () => {
           v-model="fillColor"
           @change="stageStore.setElementsFillColor"
           ref="colorPickerRef"
+          :disabled="stageStore.inputDisabled"
         />
-        <el-tag type="info" @click="toggleColorPickerVisible">{{ fillColor }}</el-tag>
+        <el-tag type="info" @click="toggleColorPickerVisible">{{
+          fillColor
+        }}</el-tag>
       </div>
 
       <div class="fill-props__row-item">
@@ -51,6 +54,7 @@ const toggleColorPickerVisible = () => {
           @change="
             (value) => stageStore.setElementsFillColorOpacity(Number(value))
           "
+          :disabled="stageStore.inputDisabled"
         >
           <template #prepend>o</template>
         </el-input>
