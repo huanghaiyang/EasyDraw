@@ -1,5 +1,6 @@
-import { multiply } from "mathjs";
+import { multiply, cos, sin, add } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
+import { divide } from "lodash";
 
 export default class MathUtils {
   /**
@@ -29,7 +30,7 @@ export default class MathUtils {
    */
   static rotate(coord: IPoint, angle: number): IPoint {
     const theta = MathUtils.degreesToRadians(angle); // 将角度转换为弧度
-    const rotationMatrix = [[Math.cos(theta), -Math.sin(theta), 0], [Math.sin(theta), Math.cos(theta), 0], [0, 0, 1]];
+    const rotationMatrix = [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
     const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
@@ -52,12 +53,12 @@ export default class MathUtils {
       point = MathUtils.rotateRelativeCentroid(point, -angle, centroid);
       originalPoint = MathUtils.rotateRelativeCentroid(originalPoint, -angle, centroid);
     }
-    const originalWidth = originalPoint.x - centroid.x;
-    const originalHeight = originalPoint.y - centroid.y;
-    const newWidth = point.x - centroid.x;
-    const newHeight = point.y - centroid.y;
-    const scaleX = newWidth / originalWidth;
-    const scaleY = newHeight / originalHeight;
+    const originalWidth = add(originalPoint.x, -centroid.x);
+    const originalHeight = add(originalPoint.y, - centroid.y);
+    const newWidth = add(point.x, - centroid.x);
+    const newHeight = add(point.y, - centroid.y);
+    const scaleX = divide(newWidth, originalWidth);
+    const scaleY = divide(newHeight, originalHeight);
     return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
   }
 
@@ -71,13 +72,13 @@ export default class MathUtils {
    */
   static rotateRelativeCentroid(coord: IPoint, angle: number, centroid: IPoint): IPoint {
     const point = {
-      x: coord.x - centroid.x,
-      y: coord.y - centroid.y
+      x: add(coord.x, - centroid.x),
+      y: add(coord.y, - centroid.y)
     };
     const result = MathUtils.rotate(point, angle);
     return {
-      x: result.x + centroid.x,
-      y: result.y + centroid.y
+      x: add(result.x, centroid.x),
+      y: add(result.y, centroid.y)
     }
   }
 
@@ -92,8 +93,8 @@ export default class MathUtils {
     const { x, y } = point;
     const theta = MathUtils.degreesToRadians(angle);
     // 计算新坐标
-    let xPrime = x * Math.cos(theta) - y * Math.sin(theta);
-    let yPrime = x * Math.sin(theta) + y * Math.cos(theta);
+    let xPrime = add(multiply(x, cos(theta)), - multiply(y, sin(theta)));
+    let yPrime = add(multiply(x, sin(theta)), multiply(y, cos(theta)));
     return { x: xPrime, y: yPrime };
   }
 
@@ -283,8 +284,8 @@ export default class MathUtils {
     // 将角度转换为弧度
     const angleRad = MathUtils.degreesToRadians(angleDeg);
     // 计算目标点的坐标
-    const targetX = center.x + distance * Math.cos(angleRad);
-    const targetY = center.y + distance * Math.sin(angleRad);
+    const targetX = center.x + distance * cos(angleRad);
+    const targetY = center.y + distance * sin(angleRad);
     return { x: targetX, y: targetY };
   }
 
@@ -446,7 +447,7 @@ export default class MathUtils {
    */
   static calculateTriangleHypotenuse(angle: number, oppositeSide: number): number {
     const radians = angle * (Math.PI / 180);
-    return oppositeSide / Math.sin(radians);
+    return oppositeSide / sin(radians);
   }
 
   /**

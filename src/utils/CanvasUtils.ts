@@ -17,6 +17,7 @@ export default class CanvasUtils {
    * @returns 
    */
   static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+    if(!strokeWidth) return points;
     // 需要考虑下舞台缩放
     const r = (strokeWidth / 2) / this.scale;
     switch (strokeType) {

@@ -1,6 +1,7 @@
 import { IPoint } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import { evaluate } from 'mathjs';
 
 export default class PolygonUtils {
 
@@ -18,13 +19,14 @@ export default class PolygonUtils {
       const prev = CommonUtils.getPrevOfArray(sortedVertices, index);
       const next = CommonUtils.getNextOfArray(sortedVertices, index);
       const angle = MathUtils.calculateTriangleAngle(prev, ver, next);
-      const hypotenuse = MathUtils.calculateTriangleHypotenuse(angle / 2, r);
+      const halfAngle = evaluate('angle / 2', { angle });
+      const hypotenuse = MathUtils.calculateTriangleHypotenuse(halfAngle, r);
       let nextAngle = MathUtils.calculateAngle(ver, next);
       if (nextAngle < 0) {
         nextAngle += 360;
       }
-      let finalAngle = nextAngle + angle / 2;
-      const point = MathUtils.calculateTargetPoint(ver, hypotenuse, innerOrOuter ? finalAngle : finalAngle + 180);
+      let finalAngle = evaluate('halfAngle + nextAngle', { halfAngle, nextAngle });
+      const point = MathUtils.calculateTargetPoint(ver, hypotenuse, innerOrOuter ? finalAngle : evaluate('finalAngle + 180', { finalAngle }));
       return point;
     });
   }

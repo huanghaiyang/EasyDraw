@@ -9,7 +9,7 @@ export const StrokeTypesArray = [{
   name: '内描边'
 }, {
   type: StrokeTypes.middle,
-  name: '平分宽度'
+  name: '平分线宽'
 }, {
   type: StrokeTypes.outside,
   name: '外描边'
