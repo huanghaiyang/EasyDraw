@@ -2,6 +2,7 @@
 import PositionProps from "@/modules/components/props/PositionProps.vue";
 import SizeProps from "@/modules/components/props/SizeProps.vue";
 import AngleProps from "@/modules/components/props/AngleProps.vue";
+import FillProps from "@/modules/components/props/FillProps.vue";
 import StrokeProps from "@/modules/components/props/StrokeProps.vue";
 </script>
 <template>
@@ -9,6 +10,7 @@ import StrokeProps from "@/modules/components/props/StrokeProps.vue";
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>
+    <fill-props></fill-props>
     <stroke-props></stroke-props>
   </div>
 </template>
@@ -24,7 +26,8 @@ import StrokeProps from "@/modules/components/props/StrokeProps.vue";
   .position-props,
   .size-props,
   .angle-props,
-  .stroke-props {
+  .stroke-props,
+  .fill-props {
     &__title {
       font-size: 14px;
       font-weight: 500;
