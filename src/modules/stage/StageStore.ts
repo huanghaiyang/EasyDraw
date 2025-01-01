@@ -306,6 +306,7 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         this.updateElementModel(element.id, { angle: value })
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
       }
     });
   }

@@ -31,6 +31,7 @@ watch(
           v-model="wValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
+          min="1"
         >
           <template #prepend>w</template>
           <template #append>px</template>
@@ -41,6 +42,7 @@ watch(
           v-model="hValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
+          min="1"
         >
           <template #prepend>h</template>
           <template #append>px</template>

@@ -11,6 +11,23 @@ watch(
     aValue.value = newValue;
   }
 );
+
+/**
+ * 设置旋转角度
+ * 
+ * @param value 
+ */
+function setElementsAngle(value: string) {
+  let val = Number(value);
+  if (val > 180) {
+    val = 180 - val;
+  }
+  if (val < -180) {
+    val = -180 - val;
+  }
+  stageStore.setElementsAngle(val);
+}
+
 </script>
 <template>
   <div class="angle-props right-props">
@@ -18,15 +35,19 @@ watch(
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled">
+        <el-input
+          v-model="aValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled"
+          type="number"
+          @change="setElementsAngle"
+        >
           <template #prepend>a</template>
           <template #append>°</template>
         </el-input>
       </div>
 
-      <div class="angle-props__row-item">
-
-      </div>
+      <div class="angle-props__row-item"></div>
     </div>
   </div>
 </template>
