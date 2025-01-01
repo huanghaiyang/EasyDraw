@@ -448,4 +448,32 @@ export default class MathUtils {
     const radians = angle * (Math.PI / 180);
     return oppositeSide / Math.sin(radians);
   }
+
+  /**
+   * 将多边形的顶点按照顺时针方向排序
+   * 
+   * @param vertices 
+   * @returns 
+   */
+  static sortVerticesClockwise(vertices: IPoint[]) {
+    // 计算质心
+    let centroid = MathUtils.calcPolygonCentroid(vertices);
+    // 计算每个顶点与质心之间的角度
+    let angles = vertices.map((vertex, index) => {
+      let angle = Math.atan2(vertex.y - centroid.y, vertex.x - centroid.x);
+      return { index, angle };
+    });
+
+    // 根据角度进行排序
+    angles.sort((a, b) => a.angle - b.angle);
+
+    // 创建一个新的按顺时针排序的顶点数组
+    let sortedVertices = [];
+    for (let i = 0; i < angles.length; i++) {
+      sortedVertices.push(vertices[angles[i].index]);
+    }
+
+    return sortedVertices;
+  }
+
 }

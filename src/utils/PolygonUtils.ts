@@ -13,9 +13,10 @@ export default class PolygonUtils {
    * @returns 
    */
   static getPolygonVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
-    return vertices.map((ver, index) => {
-      const prev = CommonUtils.getPrevOfArray(vertices, index);
-      const next = CommonUtils.getNextOfArray(vertices, index);
+    const sortedVertices = MathUtils.sortVerticesClockwise(vertices);
+    return sortedVertices.map((ver, index) => {
+      const prev = CommonUtils.getPrevOfArray(sortedVertices, index);
+      const next = CommonUtils.getNextOfArray(sortedVertices, index);
       const angle = MathUtils.calculateTriangleAngle(prev, ver, next);
       const hypotenuse = MathUtils.calculateTriangleHypotenuse(angle / 2, r);
       let nextAngle = MathUtils.calculateAngle(ver, next);
