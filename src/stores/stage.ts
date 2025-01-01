@@ -302,6 +302,30 @@ export const useStageStore = defineStore("stage", {
     },
 
     /**
+     * 设置横坐标
+     * 
+     * @param value 
+     */
+    setElementsLeft(value: number): void {
+      shield.setElementsPosition(this.selectedElements, {
+        x: value,
+        y: this.position.y
+      });
+    },
+
+    /**
+     * 设置纵坐标
+     * 
+     * @param value 
+     */
+    setElementsTop(value: number): void {
+      shield.setElementsPosition(this.selectedElements, {
+        x: this.position.x,
+        y: value
+      });
+    },
+
+    /**
      * 设置组件宽度
      * 
      * @param elements 

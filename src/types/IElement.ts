@@ -79,6 +79,7 @@ export default interface IElement {
   set isInRange(value: boolean);
   set status(value: ElementStatus);
 
+  refreshPosition(): void;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
 
   isInPolygon(points: IPoint[]): boolean;

@@ -181,7 +181,7 @@ export default class ElementUtils {
   static calcPosition(model: Partial<ElementObject>): IPoint {
     switch (model.type) {
       case CreatorTypes.rectangle: {
-        return CommonUtils.getBoxPoints(model.coords)[0]
+        return MathUtils.calcPolygonCentroid(model.coords);
       }
     }
   }

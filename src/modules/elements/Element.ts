@@ -598,7 +598,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 更新坐标
    */
-  private _reCalcPosition(): void {
+  refreshPosition(): void {
     const { x, y } = ElementUtils.calcPosition(this.model);
     this.model.left = x;
     this.model.top = y;
@@ -621,52 +621,49 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   transform(offset: IPoint): void {
-    if (this._points.length === 4) {
-      const index = this._transformers.findIndex(item => item.isActive);
-      if (index !== -1) {
-        // 不动点坐标索引
-        const lockIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
-        // 不动点
-        const lockPoint = this._originalTransformerPoints[lockIndex];
-        // 当前拖动的点的原始位置
-        const currentPointOriginal = this._originalTransformerPoints[index];
-        // 当前拖动的点当前的位置
-        const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
-        // 判断是否已经计算过原始矩阵
-        if (!this._originalMatrix.length) {
-          // 计算原始矩阵
-          this._originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
-        }
-        // 原始的纵轴缩放系数
-        const yScaleOriginal = this._originalMatrix[1][1];
-        // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-        const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-        // 纵轴缩放系数
-        const yScale = matrix[1][1];
-        const newPoints = this._originalRotatePoints.map(point => {
-          // 先旋转回角度0
-          point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
-          // 以不动点为圆心，计算形变
-          const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
-          // 重新计算坐标
-          point = { x: x + lockPoint.x, y: y + lockPoint.y }
-          // 坐标重新按照角度偏转
-          point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
-          return point;
-        });
-        const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
-        const coords = newPoints.map(point => {
-          point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
-          point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord);
-          return point;
-        })
-        this.model.coords = coords;
-        this._reCalcPosition();
-        // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
-        if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
-          this._fixAngle();
-          this._originalMatrix = matrix;
-        }
+    const index = this._transformers.findIndex(item => item.isActive);
+    if (index !== -1) {
+      // 不动点坐标索引
+      const lockIndex = CommonUtils.getPrevIndexOfArray(this._transformers.length, index, 2);
+      // 不动点
+      const lockPoint = this._originalTransformerPoints[lockIndex];
+      // 当前拖动的点的原始位置
+      const currentPointOriginal = this._originalTransformerPoints[index];
+      // 当前拖动的点当前的位置
+      const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+      // 判断是否已经计算过原始矩阵
+      if (!this._originalMatrix.length) {
+        // 计算原始矩阵
+        this._originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
+      }
+      // 原始的纵轴缩放系数
+      const yScaleOriginal = this._originalMatrix[1][1];
+      // 判断当前拖动点，在坐标系垂直轴的左边还是右边
+      const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+      // 纵轴缩放系数
+      const yScale = matrix[1][1];
+      const newPoints = this._originalRotatePoints.map(point => {
+        // 先旋转回角度0
+        point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
+        // 以不动点为圆心，计算形变
+        const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
+        // 重新计算坐标
+        point = { x: x + lockPoint.x, y: y + lockPoint.y }
+        // 坐标重新按照角度偏转
+        point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
+        return point;
+      });
+      const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
+      const coords = newPoints.map(point => {
+        point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
+        point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord);
+        return point;
+      })
+      this.model.coords = coords;
+      // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
+      if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
+        this._fixAngle();
+        this._originalMatrix = matrix;
       }
     }
   }

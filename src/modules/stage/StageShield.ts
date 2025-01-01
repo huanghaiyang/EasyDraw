@@ -414,7 +414,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   private _dragStage(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
-    this.store.refreshElements();
+    this.store.refreshStageElements();
   }
 
   /**
@@ -628,7 +628,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   private _processHandCreatorMove(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
-    this.store.refreshElements();
+    this.store.refreshStageElements();
     this._isStageMoving = false;
   }
 
@@ -717,7 +717,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.scale = Number((rect.width / RespectStageWidth).toFixed(2));
     CanvasUtils.scale = this.scale;
     this._refreshAllCanvasSize(rect);
-    this.store.refreshElements();
+    this.store.refreshStageElements();
     await this._redrawAll(true);
     this.emit(ShieldDispatcherNames.scaleChanged, this.scale);
   }

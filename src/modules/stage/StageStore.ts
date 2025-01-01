@@ -276,6 +276,15 @@ export default class StageStore implements IStageStore {
      * @param value 
      */
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        const { coords, left: prevLeft, top: prevTop } = element.model;
+        const { x, y } = value;
+        this.updateElementModel(element.id, { left: x, top: y, coords: coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })) })
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+        // console.log(element.model.coords, element.model.left, element.model.top)
+      }
+    });
   }
 
   /**
@@ -702,6 +711,7 @@ export default class StageStore implements IStageStore {
     this.selectedElements.forEach(element => {
       element.transform(offset);
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshPosition();
     })
   }
 
@@ -734,19 +744,18 @@ export default class StageStore implements IStageStore {
   refreshElementsPoints(elements: IElement[]): void {
     elements.forEach(element => {
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshPosition();
     })
   }
 
   /**
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
-  refreshElements(): void {
+  refreshStageElements(): void {
     this._elementList.forEach(node => {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
-      this.updateElementById(element.id, {
-        isOnStage,
-      })
+      this.updateElementById(element.id, { isOnStage })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
     })
   }
@@ -771,10 +780,9 @@ export default class StageStore implements IStageStore {
       angle = angle - 360;
     }
     this.rotatingTargetElements.forEach(element => {
-      this.updateElementModel(element.id, {
-        angle,
-      })
+      this.updateElementModel(element.id, { angle, })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshPosition();
     })
   }
 }

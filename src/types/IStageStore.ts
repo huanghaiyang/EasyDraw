@@ -36,5 +36,5 @@ export default interface IStageStore extends IStageSetter {
   keepOriginalProps(elements: IElement[]): void;
   refreshElementsPoints(elements: IElement[]): void;
   forEach(callback: (element: IElement, index: number) => void): void;
-  refreshElements(): void;
+  refreshStageElements(): void;
 }

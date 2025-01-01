@@ -28,6 +28,11 @@ watch(
           v-model="xValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
+          type="number"
+          @change="
+            (value) =>
+              stageStore.setElementsPosition({ x: Number(value), y: yValue })
+          "
         >
           <template #prepend>x</template>
           <template #append>px</template>
@@ -39,6 +44,11 @@ watch(
           v-model="yValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
+          type="number"
+          @change="
+            (value) =>
+              stageStore.setElementsPosition({ x: xValue, y: Number(value) })
+          "
         >
           <template #prepend>y</template>
           <template #append>px</template>
