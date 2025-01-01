@@ -38,10 +38,19 @@ import StrokeProps from "@/modules/components/props/StrokeProps.vue";
       align-items: center;
       padding: 0 10px;
 
+      .el-tag {
+        height: 24px;
+        width: 70px;
+      }
+
       &-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 96px;
         .el-select,
         .el-input {
-          width: 96px;
+          width: 100%;
           .el-input-group__prepend,
           .el-input-group__append {
             padding: 0 6px;
