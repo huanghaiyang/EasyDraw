@@ -624,6 +624,34 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 根据矩阵和中心点计算新的坐标
+   * 
+   * @param matrix 
+   * @param lockPoint 
+   * @returns 
+   */
+  private _calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
+    const newPoints = this._originalRotatePoints.map(point => {
+      // 先旋转回角度0
+      point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
+      // 以不动点为圆心，计算形变
+      const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
+      // 重新计算坐标
+      point = { x: x + lockPoint.x, y: y + lockPoint.y }
+      // 坐标重新按照角度偏转
+      point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
+      return point;
+    });
+    const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
+    const coords = newPoints.map(point => {
+      point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
+      point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord, this._stageScale);
+      return point;
+    })
+    return coords;
+  }
+
+  /**
    * 形变
    * 
    * @param offset 
@@ -639,6 +667,10 @@ export default class Element implements IElement, ILinkedNodeValue {
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 当前拖动的点当前的位置
       const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+      // 判断当前拖动点，在坐标系垂直轴的左边还是右边
+      const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+      const coords = this._calcTransformCoords(matrix, lockPoint);
+      this.model.coords = coords;
       // 判断是否已经计算过原始矩阵
       if (!this._originalMatrix.length) {
         // 计算原始矩阵
@@ -646,33 +678,53 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
       // 原始的纵轴缩放系数
       const yScaleOriginal = this._originalMatrix[1][1];
-      // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-      const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
       // 纵轴缩放系数
       const yScale = matrix[1][1];
-      const newPoints = this._originalRotatePoints.map(point => {
-        // 先旋转回角度0
-        point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
-        // 以不动点为圆心，计算形变
-        const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
-        // 重新计算坐标
-        point = { x: x + lockPoint.x, y: y + lockPoint.y }
-        // 坐标重新按照角度偏转
-        point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
-        return point;
-      });
-      const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
-      const coords = newPoints.map(point => {
-        point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
-        point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord, this._stageScale);
-        return point;
-      })
-      this.model.coords = coords;
       // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
       if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
         this._fixAngle();
         this._originalMatrix = matrix;
       }
     }
+  }
+
+  /**
+   * 设置组件宽度
+   * 
+   * @param value 
+   */
+  setWidth(value: number): void {
+    const lockPoint = this._originalTransformerPoints[0];
+    const currentPointOriginal = this._originalTransformerPoints[2];
+    const xValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
+    const yValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value);
+    const originXValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this.model.width);
+    const originYValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this.model.width);
+    const offset = { x: xValue - originXValue, y: yValue - originYValue };
+    const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+    const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const coords = this._calcTransformCoords(matrix, lockPoint);
+    this.model.coords = coords;
+    this.model.width = value;
+  }
+
+  /**
+   * 设置组件高度
+   * 
+   * @param value 
+   */
+  setHeight(value: number): void {
+    const lockPoint = this._originalTransformerPoints[0];
+    const currentPointOriginal = this._originalTransformerPoints[2];
+    const xValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value)
+    const yValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
+    const originXValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this.model.height)
+    const originYValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this.model.height);
+    const offset = { x: originXValue - xValue, y: yValue - originYValue };
+    const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+    const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const coords = this._calcTransformCoords(matrix, lockPoint);
+    this.model.coords = coords;
+    this.model.height = value;
   }
 }

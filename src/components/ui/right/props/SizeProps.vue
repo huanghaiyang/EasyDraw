@@ -31,7 +31,9 @@ watch(
           v-model="wValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
-          min="1"
+          min="2"
+          type="number"
+          @change="(value) => stageStore.setElementsWidth(Number(value))"
         >
           <template #prepend>w</template>
           <template #append>px</template>
@@ -42,7 +44,9 @@ watch(
           v-model="hValue"
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
-          min="1"
+          min="2"
+          type="number"
+          @change="(value) => stageStore.setElementsHeight(Number(value))"
         >
           <template #prepend>h</template>
           <template #append>px</template>

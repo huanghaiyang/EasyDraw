@@ -79,6 +79,9 @@ export default interface IElement {
   set isInRange(value: boolean);
   set status(value: ElementStatus);
 
+  setWidth(value: number): void;
+  setHeight(value: number): void;
+
   refreshPosition(): void;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void;
 

@@ -294,6 +294,13 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setWidth(value);
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      }
+    });
+    this.alterOriginalProps(elements);
   }
 
   /**
@@ -303,6 +310,13 @@ export default class StageStore implements IStageStore {
    * @param value 
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setHeight(value);
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      }
+    });
+    this.alterOriginalProps(elements);
   }
 
   /**

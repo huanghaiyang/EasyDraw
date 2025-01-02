@@ -451,6 +451,25 @@ export default class MathUtils {
   }
 
   /**
+   * 给定角度和斜边长，求临边长度
+   * 
+   * @param angle 
+   * @param hypotenuse 
+   */
+  static calculateTriangleOppositeSideByHypotenuse(angle: number, hypotenuse: number): number {
+    const radians = angle * (Math.PI / 180);
+    return hypotenuse * cos(radians);
+  }
+
+  /**
+   * 给定角度和斜边长，求对边长
+   */
+  static calculateTriangleHypotenuseByHypotenuse(angle: number, hypotenuse: number): number {
+    const radians = angle * (Math.PI / 180);
+    return hypotenuse * sin(radians);
+  }
+
+  /**
    * 将多边形的顶点按照顺时针方向排序
    * 
    * @param vertices 
