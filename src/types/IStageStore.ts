@@ -33,7 +33,7 @@ export default interface IStageStore extends IStageSetter {
   updateSelectedElementsRotation(point: IPoint): void;
   updateSelectedElementsTransform(point: IPoint): void;
   calcRotatingElementsCentroid(): void;
-  keepOriginalProps(elements: IElement[]): void;
+  alterOriginalProps(elements: IElement[]): void;
   refreshElementsPoints(elements: IElement[]): void;
   forEach(callback: (element: IElement, index: number) => void): void;
   refreshStageElements(): void;

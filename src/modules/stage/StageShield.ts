@@ -568,7 +568,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     // 取消组件拖动状态
     this.store.updateElements(this.store.selectedElements, { isDragging: false });
     // 刷新组件坐标数据
-    this.store.keepOriginalProps(this.store.selectedElements);
+    this.store.alterOriginalProps(this.store.selectedElements);
     // 刷新组件坐标数据
     this.store.refreshElementsPoints(this.store.selectedElements);
   }
@@ -579,7 +579,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
   private _endElementsRotate() {
     this.store.updateSelectedElementsRotation(this._pressUpPosition)
     // 刷新组件坐标数据
-    this.store.keepOriginalProps(this.store.rotatingTargetElements);
+    this.store.alterOriginalProps(this.store.rotatingTargetElements);
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,
@@ -596,7 +596,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
     })
     // 刷新组件坐标数据
-    this.store.keepOriginalProps(this.store.selectedElements);
+    this.store.alterOriginalProps(this.store.selectedElements);
     // 更新组件状态
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,

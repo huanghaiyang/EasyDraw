@@ -284,7 +284,7 @@ export default class StageStore implements IStageStore {
         element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
-    this.keepOriginalProps(elements);
+    this.alterOriginalProps(elements);
   }
 
   /**
@@ -318,7 +318,7 @@ export default class StageStore implements IStageStore {
         element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
-    this.keepOriginalProps(elements);
+    this.alterOriginalProps(elements);
   }
 
   /**
@@ -732,7 +732,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  keepOriginalProps(elements: IElement[]): void {
+  alterOriginalProps(elements: IElement[]): void {
     elements.forEach(element => {
       element.calcOriginalProps();
     })
