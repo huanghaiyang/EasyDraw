@@ -14,9 +14,9 @@ import ElementTransformer from "@/modules/elements/transformer/ElementTransforme
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
 import { IRotationModel } from "@/types/IModel";
-import IElementTransformer from "@/types/IElementTransformer";
+import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/types/ElementStyles";
-import { DefaultSelectionRotateSize, DefaultSizeTransformerValue } from "@/types/MaskStyles";
+import { DefaultSelectionRotateSize, DefaultTransformerValue } from "@/types/MaskStyles";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -49,7 +49,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
-  get originalModelCoords() {
+  get borderTransformEnable(): boolean {
+    return false;
+  }
+
+  get originalModelCoords(): IPoint[] {
     return this._originalModelCoords;
   }
 
@@ -332,6 +336,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rotatePoints: IPoint[] = [];
   protected _rotatePathPoints: IPoint[] = [];
   protected _transformers: IElementTransformer[] = [];
+  protected _borderTransformers: IElementBorderTransformer[] = [];
   protected _stageRect: DOMRect;
   protected _stageWorldCoord: IPoint;
   protected _stageScale: number;
@@ -361,6 +366,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get transformers(): IElementTransformer[] {
     return this._transformers;
+  }
+
+  get borderTransformers(): IElementBorderTransformer[] {
+    return this._borderTransformers;
   }
 
   constructor(model: ElementObject) {
@@ -436,8 +445,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result = this._rotatePathPoints.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
-        width: DefaultSizeTransformerValue,
-        height: DefaultSizeTransformerValue
+        width: DefaultTransformerValue,
+        height: DefaultTransformerValue
       }, {
         angle: this.model.angle
       });
@@ -547,12 +556,23 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取变换器
    * 
    * @param point 
    * @returns 
    */
   getTransformerByPoint(point: IPoint): IElementTransformer {
     return this.transformers.find(item => item.isContainsPoint(point));
+  }
+
+  /**
+   * 获取边框变换器
+   * 
+   * @param point 
+   * @returns 
+   */
+  getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer {
+    return this.borderTransformers.find(item => item.isClosest(point));
   }
 
   /**
@@ -600,6 +620,17 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeTransformer(transformer: ElementTransformer): void {
     this._transformers.forEach(item => {
       item.isActive = item.direction === transformer.direction;
+    });
+  }
+
+  /**
+   * 激活边框变形器
+   * 
+   * @param transformer 
+   */
+  activeBorderTransformer(transformer: IElementBorderTransformer): void {
+    this._borderTransformers.forEach(item => {
+      item.isActive = item.id === transformer.id;
     });
   }
 

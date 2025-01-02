@@ -1,5 +1,5 @@
 import { ElementStatus, IPoint } from "@/types/index";
-import IElementTransformer from "@/types/IElementTransformer";
+import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { IRotationModel } from "@/types/IModel";
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
@@ -26,6 +26,7 @@ export default interface IElement {
   model: ElementObject;
   rotationModel: IRotationModel;
 
+  get borderTransformEnable(): boolean;
   get width(): number;
   get height(): number;
   get angle(): number;
@@ -49,6 +50,7 @@ export default interface IElement {
   get rotatePathPoints(): IPoint[];
   get centroid(): IPoint;
   get transformers(): IElementTransformer[];
+  get borderTransformers(): IElementBorderTransformer[];
 
   get isSelected(): boolean;
   get isVisible(): boolean;
@@ -100,7 +102,9 @@ export default interface IElement {
   calcTransformers(): IPoint[];
 
   getTransformerByPoint(point: IPoint): IElementTransformer;
+  getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer;
   activeTransformer(transformer: IElementTransformer): void;
+  activeBorderTransformer(transformer: IElementBorderTransformer): void;
   transform(offset: IPoint): void;
 
   calcOriginalElementProps(): void;

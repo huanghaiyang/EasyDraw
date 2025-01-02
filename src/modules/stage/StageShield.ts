@@ -480,18 +480,22 @@ export default class StageShield extends DrawerBase implements IStageShield {
     let shouldClear = this.isDrawerActive;
 
     if (this.isMoveableActive) {
-      let sizeTransformerElement: IElement;
       const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
       if (targetRotateElement) {
         this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCentroid();
         this._isElementsRotating = true;
       } else {
-        sizeTransformerElement = this.selection.checkTransformerElement(this.cursor.value);
-        if (sizeTransformerElement) {
+        const transformerElement = this.selection.checkTransformerElement(this.cursor.value);
+        if (transformerElement) {
           this._isElementsTransforming = true;
-        } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
-          shouldClear = true;
+        } else {
+          const borderTransformerElement = this.selection.checkBorderTransformerElement(this.cursor.value);
+          if (borderTransformerElement) {
+            this._isElementsTransforming = true;
+          } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
+            shouldClear = true;
+          }
         }
       }
     }

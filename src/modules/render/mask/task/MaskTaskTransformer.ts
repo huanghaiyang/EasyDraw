@@ -3,7 +3,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTransformer } from "@/types/IRenderTask";
-import { DefaultSizeTransformerValue, DefaultTransformerStyle } from "@/types/MaskStyles";
+import { DefaultTransformerValue, DefaultTransformerStyle } from "@/types/MaskStyles";
 
 export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTransformer {
   constructor(model: IMaskTransformerModel, params?: any) {
@@ -20,8 +20,8 @@ export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTr
    */
   async run(): Promise<void> {
     CanvasUtils.drawPath(this.canvas, CommonUtils.get4BoxPoints(this.data.point, {
-      width: DefaultSizeTransformerValue,
-      height: DefaultSizeTransformerValue
+      width: DefaultTransformerValue,
+      height: DefaultTransformerValue
     }, { angle: this.data.angle }), DefaultTransformerStyle);
   }
 }

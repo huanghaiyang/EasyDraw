@@ -135,6 +135,25 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 检测鼠标是否在组件的边框上，如果是，可以拖动边框改变宽高
+   * 
+   * @param point 
+   * @returns 
+   */
+  checkBorderTransformerElement(point: IPoint): IElement {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element) {
+      if (element.borderTransformEnable) {
+        const transformer = element.getBorderTransformerByPoint(point);
+        if (transformer) {
+          element.activeBorderTransformer(transformer);
+          return element;
+        }
+      }
+    }
+  }
+
+  /**
    * 刷新选区
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态

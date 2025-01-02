@@ -1,9 +1,9 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4781741 */
-  src: url('iconfont.woff2?t=1735011993848') format('woff2'),
-       url('iconfont.woff?t=1735011993848') format('woff'),
-       url('iconfont.ttf?t=1735011993848') format('truetype'),
-       url('iconfont.svg?t=1735011993848#iconfont') format('svg');
+  src: url('iconfont.woff2?t=1735814930441') format('woff2'),
+       url('iconfont.woff?t=1735814930441') format('woff'),
+       url('iconfont.ttf?t=1735814930441') format('truetype'),
+       url('iconfont.svg?t=1735814930441#iconfont') format('svg');
 }
 
 .iconfont {
@@ -12,6 +12,10 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-verbise-split-v:before {
+  content: "\ecdc";
 }
 
 .icon-verbise-arrow_down:before {

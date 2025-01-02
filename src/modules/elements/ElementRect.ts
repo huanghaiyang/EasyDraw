@@ -4,6 +4,10 @@ import { IElementReact } from "@/types/IElement";
 import ElementUtils from "@/modules/elements/ElementUtils";
 
 export default class ElementRect extends Element implements IElementReact {
+
+  get borderTransformEnable(): boolean {
+    return true;
+  }
   /**
    * 形变
    * 

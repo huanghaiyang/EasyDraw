@@ -40,6 +40,15 @@ export default class CommonUtils {
   }
 
   /**
+   * 生成一个随机的id
+   * 
+   * @returns 
+   */
+  static getRandomId() {
+    return nanoid(8)
+  }
+
+  /**
    * 获取事件触发时相对于给定盒模型的坐标
    * 
    * @param e 

@@ -35,7 +35,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     selectionTasks.forEach(task => {
       cargo.add(task);
       if (((task as IMaskTask).data as IMaskSelectionModel).type === DrawerMaskModelTypes.selection) {
-        cargo.addAll(this.createMaskSizeTransformerTasks((task as IMaskTask).model as IMaskSelectionModel));
+        cargo.addAll(this.createMaskTransformerTasks((task as IMaskTask).model as IMaskSelectionModel));
       }
     });
     if (selectionTasks.length) {
@@ -143,7 +143,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param selectionModel 
    * @returns 
    */
-  private createMaskSizeTransformerTasks(selectionModel: IMaskSelectionModel): IRenderTask[] {
+  private createMaskTransformerTasks(selectionModel: IMaskSelectionModel): IRenderTask[] {
     const tasks: IRenderTask[] = [];
     const { points = [], angle = 0 } = selectionModel;
     points.forEach((point, index) => {

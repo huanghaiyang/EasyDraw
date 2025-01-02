@@ -11,13 +11,13 @@ export const DefaultSelectionFillColor = '#000000';
 export const DefaultSelectionFillColorOpacity = 0;
 export const DefaultSelectionLineWidth = 1;
 
-export const DefaultSizeTransformerStrokeColor = '#0c8ce9';
-export const DefaultSizeTransformerStrokeColorOpacity = 1;
-export const DefaultSizeTransformerFillColor = '#ffffff';
-export const DefaultSizeTransformerFillColorOpacity = 1;
-export const DefaultSizeTransformerLineWidth = 1;
+export const DefaultTransformerStrokeColor = '#0c8ce9';
+export const DefaultTransformerStrokeColorOpacity = 1;
+export const DefaultTransformerFillColor = '#ffffff';
+export const DefaultTransformerFillColorOpacity = 1;
+export const DefaultTransformerLineWidth = 1;
 
-export const DefaultSizeTransformerValue = 10;
+export const DefaultTransformerValue = 10;
 export const DefaultSelectionRotateSize = 18;
 export const DefaultSelectionRotateDistance = 18;
 export const DefaultSelectionSizeIndicatorDistance = 16;
@@ -39,11 +39,11 @@ export const DefaultSelectionStyle: ElementStyles = {
 }
 
 export const DefaultTransformerStyle: ElementStyles = {
-  strokeColor: DefaultSizeTransformerStrokeColor,
-  strokeColorOpacity: DefaultSizeTransformerStrokeColorOpacity,
-  strokeWidth: DefaultSizeTransformerLineWidth,
-  fillColor: DefaultSizeTransformerFillColor,
-  fillColorOpacity: DefaultSizeTransformerFillColorOpacity,
+  strokeColor: DefaultTransformerStrokeColor,
+  strokeColorOpacity: DefaultTransformerStrokeColorOpacity,
+  strokeWidth: DefaultTransformerLineWidth,
+  fillColor: DefaultTransformerFillColor,
+  fillColorOpacity: DefaultTransformerFillColorOpacity,
 }
 
 export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
