@@ -334,6 +334,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _transformers: IElementTransformer[] = [];
   protected _stageRect: DOMRect;
   protected _stageWorldCoord: IPoint;
+  protected _stageScale: number;
   protected _originalCentroidCoord: IPoint;
   protected _originalRotatePoints: IPoint[] = [];
   protected _originalAngle: number = 0;
@@ -374,10 +375,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param stageRect 
    * @param stageWorldCoord 
+   * @param stageScale
    * @returns 
    */
-  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
-    return ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord);
+  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
+    return ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord, stageScale);
   }
 
   /**
@@ -454,11 +456,16 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 刷新坐标
+   * 
+   * @param stageRect
+   * @param stageWorldCoord
+   * @param stageScale
    */
-  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void {
+  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void {
     this._stageRect = stageRect;
     this._stageWorldCoord = stageWorldCoord;
-    this.refreshElementPoints(stageRect, stageWorldCoord);
+    this._stageScale = stageScale;
+    this.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
     this.refreshRotationModelPoints();
   }
 
@@ -467,9 +474,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param stageRect 
    * @param stageWorldCoord 
+   * @param stageScale
    */
-  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint) {
-    this._points = this.calcPoints(stageRect, stageWorldCoord);
+  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number) {
+    this._points = this.calcPoints(stageRect, stageWorldCoord, stageScale);
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
@@ -656,7 +664,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
       const coords = newPoints.map(point => {
         point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
-        point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord);
+        point = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord, this._stageScale);
         return point;
       })
       this.model.coords = coords;

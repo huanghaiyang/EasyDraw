@@ -25,7 +25,6 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { StrokeTypes } from "@/types/ElementStyles";
 
 export default class StageShield extends DrawerBase implements IStageShield {
-  scale: number = 1;
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -42,15 +41,17 @@ export default class StageShield extends DrawerBase implements IStageShield {
   selection: IStageSelection;
   // 事件处理中心
   event: IStageEvent;
+  // 舞台缩放比例
+  stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
   stageWorldCoord: IPoint = {
     x: 0,
     y: 0
   };
-  // canvas渲染容器
-  renderEl: HTMLDivElement;
   // 画布容器尺寸
   stageRect: DOMRect;
+  // canvas渲染容器
+  renderEl: HTMLDivElement;
 
   get stageRectPoints(): IPoint[] {
     return CommonUtils.getRectVertices(this.stageRect);
@@ -702,10 +703,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param pos 
    */
   calcWorldCoord(pos: IPoint): IPoint {
-    return {
-      x: pos.x - this.stageRect.width / 2 + this.stageWorldCoord.x,
-      y: pos.y - this.stageRect.height / 2 + this.stageWorldCoord.y
-    }
+    return ElementUtils.calcWorldPoint(pos, this.stageRect, this.stageWorldCoord, this.stageScale);
   }
 
   /**
@@ -714,12 +712,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
   private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
-    this.scale = Number((rect.width / RespectStageWidth).toFixed(2));
-    CanvasUtils.scale = this.scale;
+    this.stageScale = Number((rect.width / RespectStageWidth).toFixed(2));
+    CanvasUtils.scale = this.stageScale;
     this._refreshAllCanvasSize(rect);
     this.store.refreshStageElements();
     await this._redrawAll(true);
-    this.emit(ShieldDispatcherNames.scaleChanged, this.scale);
+    this.emit(ShieldDispatcherNames.scaleChanged, this.stageScale);
   }
 
   /**
@@ -788,7 +786,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 刷新当前舞台世界坐标
    */
   private _refreshStageWorldCoord(e: MouseEvent): void {
-    const point = CommonUtils.getEventPosition(e, this.stageRect, this.scale);
+    const point = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
     this.stageWorldCoord = {
       x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
       y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y)

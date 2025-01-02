@@ -68,14 +68,23 @@ export default class ElementUtils {
    * @param stageWorldCoord 
    * @returns 
    */
-  static calcStageRelativePoints(worldCoords: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
-    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, stageRect, stageWorldCoord));
+  static calcStageRelativePoints(worldCoords: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
+    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, stageRect, stageWorldCoord, stageScale));
   }
 
-  static calcStageRelativePoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint): IPoint {
+  /**
+   * 计算世界坐标在画布坐标系下的坐标
+   * 
+   * @param worldCoord 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @param stageScale 
+   * @returns 
+   */
+  static calcStageRelativePoint(worldCoord: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
     return {
-      x: point.x + stageRect.width / 2 - stageWorldCoord.x,
-      y: point.y + stageRect.height / 2 - stageWorldCoord.y
+      x: MathUtils.toFixed(worldCoord.x + (stageRect.width / 2) / stageScale - stageWorldCoord.x, 2),
+      y: MathUtils.toFixed(worldCoord.y + (stageRect.height / 2) / stageScale - stageWorldCoord.y, 2)
     }
   }
 
@@ -87,14 +96,23 @@ export default class ElementUtils {
    * @param stageWorldCoord 
    * @returns 
    */
-  static calcWorldPoints(points: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[] {
-    return points.map(p => ElementUtils.calcWorldPoint(p, stageRect, stageWorldCoord));
+  static calcWorldPoints(points: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
+    return points.map(p => ElementUtils.calcWorldPoint(p, stageRect, stageWorldCoord, stageScale));
   }
 
-  static calcWorldPoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint): IPoint {
+  /**
+   * 计算世界坐标
+   * 
+   * @param point 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @param stageScale 
+   * @returns 
+   */
+  static calcWorldPoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
     return {
-      x: point.x - stageRect.width / 2 + stageWorldCoord.x,
-      y: point.y - stageRect.height / 2 + stageWorldCoord.y
+      x: MathUtils.toFixed(point.x - (stageRect.width / 2) / stageScale + stageWorldCoord.x, 2),
+      y: MathUtils.toFixed(point.y - (stageRect.height / 2) / stageScale + stageWorldCoord.y, 2)
     }
   }
 

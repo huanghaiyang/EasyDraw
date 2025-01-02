@@ -99,7 +99,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskCursorPositionTask(): IRenderTask {
     const point = this.drawer.shield.cursor.value;
-    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageRect, this.drawer.shield.stageWorldCoord);
+    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageRect, this.drawer.shield.stageWorldCoord, this.drawer.shield.stageScale);
     const model: IMaskCursorPositionModel = {
       point: {
         x: point.x + 20,

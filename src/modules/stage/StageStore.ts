@@ -281,7 +281,7 @@ export default class StageStore implements IStageStore {
         const { coords, left: prevLeft, top: prevTop } = element.model;
         const { x, y } = value;
         this.updateElementModel(element.id, { left: x, top: y, coords: coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })) })
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
     this.keepOriginalProps(elements);
@@ -315,7 +315,7 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         this.updateElementModel(element.id, { angle: value })
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
     this.keepOriginalProps(elements);
@@ -620,14 +620,14 @@ export default class StageStore implements IStageStore {
   /**
    * 在当前鼠标位置创建临时元素
    * 
-   * @param points
+   * @param coords
    */
-  creatingElement(points: IPoint[]): IElement {
+  creatingElement(coords: IPoint[]): IElement {
     let element: IElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(points, type))
+        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type))
         if (this._currentCreatingElementId) {
           element = this.updateElementModel(this._currentCreatingElementId, model);
           this.updateElementById(element.id, {
@@ -651,7 +651,7 @@ export default class StageStore implements IStageStore {
       this.updateElementById(element.id, {
         isSelected: true,
       })
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     }
     return element;
   }
@@ -699,7 +699,7 @@ export default class StageStore implements IStageStore {
       const coords = ElementUtils.translateCoords(element.originalModelCoords, offset);
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
       this.updateElementModel(element.id, { coords, left: x, top: y })
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     })
   }
 
@@ -711,7 +711,7 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsTransform(offset: IPoint): void {
     this.selectedElements.forEach(element => {
       element.transform(offset);
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       element.refreshPosition();
     })
   }
@@ -744,7 +744,7 @@ export default class StageStore implements IStageStore {
    */
   refreshElementsPoints(elements: IElement[]): void {
     elements.forEach(element => {
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       element.refreshPosition();
     })
   }
@@ -757,7 +757,7 @@ export default class StageStore implements IStageStore {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
       this.updateElementById(element.id, { isOnStage })
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     })
   }
 
@@ -782,7 +782,7 @@ export default class StageStore implements IStageStore {
     }
     this.rotatingTargetElements.forEach(element => {
       this.updateElementModel(element.id, { angle, })
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
+      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       element.refreshPosition();
     })
   }

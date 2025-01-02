@@ -80,7 +80,7 @@ export default interface IElement {
   set status(value: ElementStatus);
 
   refreshPosition(): void;
-  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint): void;
+  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void;
 
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;
@@ -88,7 +88,7 @@ export default interface IElement {
   isModelPolygonOverlap(points: IPoint[]): boolean;
   isRotationContainsPoint(point: IPoint): boolean;
 
-  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint): IPoint[];
+  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[];
   calcPathPoints(): IPoint[];
   calcRotatePoints(): IPoint[];
   calcRotatePathPoints(): IPoint[];
