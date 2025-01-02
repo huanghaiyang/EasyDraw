@@ -282,9 +282,9 @@ export default class StageStore implements IStageStore {
         const { x, y } = value;
         this.updateElementModel(element.id, { left: x, top: y, coords: coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })) })
         element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
-        // console.log(element.model.coords, element.model.left, element.model.top)
       }
     });
+    this.keepOriginalProps(elements);
   }
 
   /**
@@ -318,6 +318,7 @@ export default class StageStore implements IStageStore {
         element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord);
       }
     });
+    this.keepOriginalProps(elements);
   }
 
   /**
