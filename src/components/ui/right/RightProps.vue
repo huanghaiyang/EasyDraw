@@ -1,9 +1,9 @@
-<script lang="ts">
-import PositionProps from "@/modules/components/props/PositionProps.vue";
-import SizeProps from "@/modules/components/props/SizeProps.vue";
-import AngleProps from "@/modules/components/props/AngleProps.vue";
-import FillProps from "@/modules/components/props/FillProps.vue";
-import StrokeProps from "@/modules/components/props/StrokeProps.vue";
+<script lang="ts" setup>
+import PositionProps from "@/components/ui/right/props/PositionProps.vue";
+import SizeProps from "@/components/ui/right/props/SizeProps.vue";
+import AngleProps from "@/components/ui/right/props/AngleProps.vue";
+import FillProps from "@/components/ui/right/props/FillProps.vue";
+import StrokeProps from "@/components/ui/right/props/StrokeProps.vue";
 </script>
 <template>
   <div class="props-right-panel">
