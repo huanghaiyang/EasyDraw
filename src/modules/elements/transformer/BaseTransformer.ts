@@ -7,6 +7,10 @@ export default class BaseTransformer implements ITransformer {
   id: string;
   isActive: boolean;
 
+  get angle(): number {
+    return 0;
+  }
+
   constructor(element: IElement) {
     this.element = element;
     this.id = CommonUtils.getRandomId();

@@ -6,9 +6,10 @@ import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
-import MaskTaskBorderSplitter from "@/modules/render/mask/task/MaskTaskBorderSplitter";
-import { DefaultBorderTransformerIconSize } from "@/types/MaskStyles";
-import { IElementBorderTransformer } from "@/types/IElementTransformer";
+import MaskTaskBorderTransformerCursor from "@/modules/render/mask/task/MaskTaskBorderTransformerCursor";
+import { DefaultCursorSize } from "@/types/MaskStyles";
+import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
+import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -49,7 +50,7 @@ export default class StageCursor implements IStageCursor {
    * 更新鼠标样式
    */
   updateStyle(e: MouseEvent): void {
-    if (this.shield.selection.getActiveElementBorderTransformer() || this.shield.isDrawerActive) {
+    if (this.shield.selection.getActiveElementBorderTransformer() || this.shield.selection.getActiveElementTransformer() || this.shield.isDrawerActive) {
       this.setStyle('none')
     } else if (this.shield.isHandActive) {
       this.setStyle('grab');
@@ -69,11 +70,11 @@ export default class StageCursor implements IStageCursor {
     } else if (this.shield.isMoveableActive) {
       const transformer = this.shield.selection.getActiveElementTransformer();
       if (transformer) {
-
+        return this.createMaskTransformerCursorTask(transformer);
       } else {
         const borderTransformer = this.shield.selection.getActiveElementBorderTransformer();
         if (borderTransformer) {
-          return this.createMaskBorderTransformerTask(borderTransformer);
+          return this.createMaskBorderTransformerCursorTask(borderTransformer);
         }
       }
     }
@@ -101,16 +102,35 @@ export default class StageCursor implements IStageCursor {
    * @param borderTransformer 
    * @returns 
    */
-  private createMaskBorderTransformerTask(borderTransformer: IElementBorderTransformer): IMaskCursor {
+  private createMaskBorderTransformerCursorTask(borderTransformer: IElementBorderTransformer): IMaskCursor {
     if (!this.value) return;
     const model: IIconModel = {
       point: this.value,
       type: DrawerMaskModelTypes.cursor,
-      width: DefaultBorderTransformerIconSize,
-      height: DefaultBorderTransformerIconSize,
+      width: DefaultCursorSize,
+      height: DefaultCursorSize,
       angle: borderTransformer.angle,
     }
-    const task = new MaskTaskBorderSplitter(model, { canvas: this.shield.mask.canvas });
+    const task = new MaskTaskBorderTransformerCursor(model, { canvas: this.shield.mask.canvas });
+    return task;
+  }
+
+  /**
+   * 创建一个变换光标任务
+   * 
+   * @param transformer 
+   * @returns 
+   */
+  private createMaskTransformerCursorTask(transformer: IElementTransformer): IMaskCursor {
+    if (!this.value) return;
+    const model: IIconModel = {
+      point: this.value,
+      type: DrawerMaskModelTypes.cursor,
+      width: DefaultCursorSize,
+      height: DefaultCursorSize,
+      angle: transformer.angle,
+    }
+    const task = new MaskTaskTransformerCursor(model, { canvas: this.shield.mask.canvas });
     return task;
   }
 

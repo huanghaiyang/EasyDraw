@@ -1,7 +1,6 @@
 import { ElementStyles } from "@/types/ElementStyles";
 
 // 鼠标样式画布尺寸
-export const CursorSize = 40;
 export const MinCursorMoveXDistance = 2;
 export const MinCursorMoveYDistance = 2;
 
@@ -57,4 +56,4 @@ export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
 
 export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
 
-export const DefaultBorderTransformerIconSize = 30;
+export const DefaultCursorSize = 30;

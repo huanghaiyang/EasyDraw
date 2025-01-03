@@ -2,9 +2,9 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import SplitV from "@/assets/svg/split-v.svg";
 import { IIconModel } from "@/types/IModel";
-import { IMaskBorderSplitter } from "@/types/IRenderTask";
+import { IMaskBorderTransformerCursor } from "@/types/IRenderTask";
 
-export default class MaskTaskBorderSplitter extends MaskTaskBase implements IMaskBorderSplitter {
+export default class MaskTaskBorderTransformerCursor extends MaskTaskBase implements IMaskBorderTransformerCursor {
 
   get data(): IIconModel {
     return this.model as IIconModel;

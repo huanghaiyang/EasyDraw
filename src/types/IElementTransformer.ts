@@ -5,6 +5,7 @@ export interface ITransformer {
   element: IElement;
   id: string;
   isActive: boolean;
+  get angle(): number;
 }
 
 // 方位坐标
@@ -17,6 +18,5 @@ export default interface IElementTransformer extends ITransformer, IPoint {
 export interface IElementBorderTransformer extends ITransformer {
   start: IPoint;
   end: IPoint;
-  get angle(): number;
   isClosest(point: IPoint): boolean;
 }

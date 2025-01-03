@@ -10,6 +10,11 @@ export default class ElementTransformer extends BaseTransformer implements IElem
   direction?: Directions;
   points: IPoint[];
 
+  get angle(): number {
+    const angle =  MathUtils.calculateAngle(this.element.centroid, { x: this.x, y: this.y });
+    return angle + 90;
+  }
+
   constructor(element: IElement, x: number, y: number, points: IPoint[], direction?: Directions) {
     super(element);
     this.x = x;
