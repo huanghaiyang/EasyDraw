@@ -1,7 +1,6 @@
 import {
   ElementStatus,
   IPoint,
-  DrawerMaskModelTypes,
   BoxDirections
 } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
@@ -13,28 +12,20 @@ import { action, makeObservable, observable, computed } from "mobx";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
-import { IRotationModel } from "@/types/IModel";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/types/ElementStyles";
-import { DefaultSelectionRotateSize, DefaultTransformerValue } from "@/types/MaskStyles";
+import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
+import IElementRotation from "@/types/IElementRotation";
+import ElementRotation from "./rotation/ElementRotation";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
+  rotation: IElementRotation;
   _originalTransformerPoints: IPoint[];
   _originalModelCoords: IPoint[];
   _originalMatrix: number[][] = [];
-
-  // 旋转组件的数据模型
-  rotationModel: IRotationModel = {
-    point: null,
-    type: DrawerMaskModelTypes.rotate,
-    width: DefaultSelectionRotateSize,
-    height: DefaultSelectionRotateSize,
-    angle: -90,
-    vertices: []
-  };
 
   @observable _status: ElementStatus = ElementStatus.initialed;
   @observable _isSelected: boolean = false;
@@ -377,6 +368,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   constructor(model: ElementObject) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
+    this.rotation = new ElementRotation(this);
     this.calcOriginalProps();
     makeObservable(this);
   }
@@ -495,7 +487,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._stageWorldCoord = stageWorldCoord;
     this._stageScale = stageScale;
     this.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
-    this.refreshRotationModelPoints();
+    this.rotation.refresh();
   }
 
   /**
@@ -516,18 +508,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 刷新旋转句柄在舞台的坐标
-   */
-  refreshRotationModelPoints() {
-    this.rotationModel.angle = this.model.angle - 90;
-    this.rotationModel.point = ElementUtils.calcElementRotatePoint(this);
-    this.rotationModel.vertices = CommonUtils.getBoxVertices(this.rotationModel.point, {
-      width: this.rotationModel.width,
-      height: this.rotationModel.height
-    }).map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.rotationModel.point))
-  }
-
-  /**
    * 判断是否在矩形内
    * 
    * @param rect 
@@ -543,17 +523,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   isContainsPoint(point: IPoint): boolean {
     return MathUtils.isPointInPolygonByRayCasting(point, this.rotatePathPoints);
-  }
-
-  /**
-   * 旋转区域是否包含点
-   * 
-   * @param point 
-   * @returns 
-   */
-  isRotationContainsPoint(point: IPoint): boolean {
-    const { rotationModel: { vertices } } = this;
-    return MathUtils.isPointInPolygonByRayCasting(point, vertices);
   }
 
   /**

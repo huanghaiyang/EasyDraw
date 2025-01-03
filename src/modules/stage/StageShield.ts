@@ -405,7 +405,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       funcs.push(() => this.provisional.redraw())
     } else {
       if (this.isMoveableActive) {
-        const element = this.selection.checkTargetRotateElement(this.cursor.value);
+        const element = this.selection.tryActiveElementRotation(this.cursor.value);
         if (!element) {
           const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
           if (!transformer) {
@@ -490,7 +490,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     let shouldClear = this.isDrawerActive;
 
     if (this.isMoveableActive) {
-      const targetRotateElement = this.selection.checkTargetRotateElement(this.cursor.value);
+      const targetRotateElement = this.selection.tryActiveElementRotation(this.cursor.value);
       if (targetRotateElement) {
         this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCentroid();

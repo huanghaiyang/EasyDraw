@@ -171,7 +171,7 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { pathPoints, centroid, rotationModel: { angle } } = element;
+    const { pathPoints, centroid, rotation: { model: { angle } } } = element;
     const v1 = pathPoints[0];
     const v2 = pathPoints[3];
     const halfValue = MathUtils.distanceBetweenPoints(v1, v2) / 2;

@@ -13,7 +13,7 @@ export default interface IStageSelection {
   selectTarget(): void;
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
-  checkTargetRotateElement(point: IPoint): IElement;
+  tryActiveElementRotation(point: IPoint): IElement;
   tryActiveElementTransformer(point: IPoint): IElementTransformer;
   tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer;
   getActiveElementTransformer(): IElementTransformer;

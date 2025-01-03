@@ -1,8 +1,8 @@
 import { ElementStatus, IPoint } from "@/types/index";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
-import { IRotationModel } from "@/types/IModel";
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
+import IElementRotation from "@/types/IElementRotation";
 
 // 舞台元素数据模型
 export type ElementObject = {
@@ -24,7 +24,7 @@ export type ElementObject = {
 export default interface IElement {
   id: string;
   model: ElementObject;
-  rotationModel: IRotationModel;
+  rotation: IElementRotation;
 
   get borderTransformEnable(): boolean;
   get width(): number;
@@ -91,7 +91,6 @@ export default interface IElement {
   isContainsPoint(point: IPoint): boolean;
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
-  isRotationContainsPoint(point: IPoint): boolean;
 
   calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[];
   calcPathPoints(): IPoint[];

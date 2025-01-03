@@ -151,7 +151,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns 
    */
   private createMaskRotateTask(element: IElement): IRenderTask {
-    return new MaskTaskRotate(element.rotationModel, this.renderParams);
+    return new MaskTaskRotate(element.rotation.model, this.renderParams);
   }
 
   /**
