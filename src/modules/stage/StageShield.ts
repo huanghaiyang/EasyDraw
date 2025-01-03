@@ -358,7 +358,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     const funcs = [];
     let flag = false;
     this.cursor.transform(e);
-    this.cursor.setStyle(this.currentCreator.cursor);
+    this.cursor.updateStyle(e);
 
     // 只有在未对组件进行旋转/移动/形变的情况下才会启用组件命中逻辑
     if (this.isMoveableActive && !this.isElementsBusy) {
