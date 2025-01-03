@@ -1,11 +1,14 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types";
-import { IMaskCursorModel } from "@/types/IModel";
+import { IIconModel, IMaskCursorModel } from "@/types/IModel";
 import { IMaskCursor } from "@/types/IRenderTask";
 import IStageCursor from "@/types/IStageCursor";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
+import MaskTaskBorderSplitter from "@/modules/render/mask/task/MaskTaskBorderSplitter";
+import { DefaultBorderTransformerIconSize } from "@/types/MaskStyles";
+import { IElementBorderTransformer } from "@/types/IElementTransformer";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -50,6 +53,16 @@ export default class StageCursor implements IStageCursor {
   getTask(): IMaskCursor {
     if (this.shield.isDrawerActive) {
       return this.createMaskCursorTask();
+    } else if (this.shield.isMoveableActive) {
+      const transformer = this.shield.selection.getActiveElementTransformer();
+      if (transformer) {
+
+      } else {
+        const borderTransformer = this.shield.selection.getActiveElementBorderTransformer();
+        if (borderTransformer) {
+          return this.createMaskBorderTransformerTask(borderTransformer);
+        }
+      }
     }
   }
 
@@ -66,6 +79,25 @@ export default class StageCursor implements IStageCursor {
       creatorCategory: this.shield.currentCreator.category
     }
     const task = new MaskTaskCursor(model, { canvas: this.shield.mask.canvas });
+    return task;
+  }
+
+  /**
+   * 创建一个边框变换光标任务
+   * 
+   * @param borderTransformer 
+   * @returns 
+   */
+  private createMaskBorderTransformerTask(borderTransformer: IElementBorderTransformer): IMaskCursor {
+    if (!this.value) return;
+    const model: IIconModel = {
+      point: this.value,
+      type: DrawerMaskModelTypes.cursor,
+      width: DefaultBorderTransformerIconSize,
+      height: DefaultBorderTransformerIconSize,
+      angle: borderTransformer.angle,
+    }
+    const task = new MaskTaskBorderSplitter(model, { canvas: this.shield.mask.canvas });
     return task;
   }
 

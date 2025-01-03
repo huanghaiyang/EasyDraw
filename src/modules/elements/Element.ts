@@ -458,7 +458,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         transformer.x = x;
         transformer.y = y;
       } else {
-        transformer = new ElementTransformer(x, y, points, BoxDirections[index]);
+        transformer = new ElementTransformer(this, x, y, points, BoxDirections[index]);
       }
       return transformer;
     })
@@ -476,7 +476,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         borderTransformer.start = point;
         borderTransformer.end = nextPoint;
       } else {
-        borderTransformer = new ElementBorderTransformer(point, nextPoint);
+        borderTransformer = new ElementBorderTransformer(this, point, nextPoint);
       }
       return borderTransformer;
     })
@@ -594,6 +594,24 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer {
     return this.borderTransformers.find(item => item.isClosest(point));
+  }
+
+  /**
+   * 获取处于激活状态的变换器
+   * 
+   * @returns 
+   */
+  getActiveElementTransformer(): IElementTransformer {
+    return this.transformers.find(item => item.isActive);
+  }
+
+  /**
+   * 获取处于激活状态的边框变换器
+   * 
+   * @returns 
+   */
+  getActiveElementBorderTransformer(): IElementBorderTransformer {
+    return this.borderTransformers.find(item => item.isActive);
   }
 
   /**

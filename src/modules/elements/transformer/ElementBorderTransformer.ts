@@ -1,20 +1,23 @@
 import { IPoint } from "@/types";
 import { DefaultBorderTransformerDistance } from "@/types/Constants";
-import { IElementBorderTransformer } from "@/types/IElementTransformer";
-import CommonUtils from "@/utils/CommonUtils";
+import IElement from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
+import BaseTransformer from "@/modules/elements/transformer/BaseTransformer";
+import { IElementBorderTransformer } from "@/types/IElementTransformer";
 
-export default class ElementBorderTransformer implements IElementBorderTransformer {
-  id: string;
+export default class ElementBorderTransformer extends BaseTransformer implements IElementBorderTransformer {
   start: IPoint;
   end: IPoint;
-  isActive: boolean;
 
-  constructor(start: IPoint, end: IPoint) {
-    this.id = CommonUtils.getRandomId();
+  get angle(): number {
+    const result = MathUtils.calculateAngleBetweenPointAndSegment(this.element.centroid, this.start, this.end);
+    return result + 90;
+  }
+
+  constructor(element: IElement, start: IPoint, end: IPoint) {
+    super(element);
     this.start = start;
     this.end = end;
-    this.isActive = false;
   }
 
   /**

@@ -16,6 +16,8 @@ export default interface IStageSelection {
   checkTargetRotateElement(point: IPoint): IElement;
   tryActiveElementTransformer(point: IPoint): IElementTransformer;
   tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer;
+  getActiveElementTransformer(): IElementTransformer;
+  getActiveElementBorderTransformer(): IElementBorderTransformer;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IElement;
   checkSelectContainsTarget(): boolean;

@@ -29,6 +29,9 @@ export interface IMaskCursorPosition extends IMaskTask { }
 // 组件旋转图标绘制
 export interface IMaskRotate extends IMaskTask { }
 
+// 组件边框分割线绘制任务
+export interface IMaskBorderSplitter extends IMaskTask { }
+
 // 辅助画布清除绘制任务
 export interface IMaskClear extends IMaskTask { }
 

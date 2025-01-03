@@ -159,6 +159,30 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 获取处于激活状态的变形器
+   * 
+   * @returns 
+   */
+  getActiveElementTransformer(): IElementTransformer {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element) {
+      return element.getActiveElementTransformer();
+    }
+  }
+
+  /**
+   * 获取处于激活状态的边框变形器
+   * 
+   * @returns 
+   */
+  getActiveElementBorderTransformer(): IElementBorderTransformer {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element) {
+      return element.getActiveElementBorderTransformer();
+    }
+  }
+
+  /**
    * 刷新选区
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态

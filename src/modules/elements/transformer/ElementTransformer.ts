@@ -1,23 +1,21 @@
 import { Directions, IPoint } from "@/types";
+import IElement from "@/types/IElement";
 import IElementTransformer from "@/types/IElementTransformer";
-import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import BaseTransformer from "@/modules/elements/transformer/BaseTransformer";
 
-export default class ElementTransformer implements IElementTransformer {
-  id: string;
+export default class ElementTransformer extends BaseTransformer implements IElementTransformer {
   x: number;
   y: number;
   direction?: Directions;
   points: IPoint[];
-  isActive: boolean;
 
-  constructor(x: number, y: number, points: IPoint[], direction?: Directions) {
-    this.id = CommonUtils.getRandomId();
+  constructor(element: IElement, x: number, y: number, points: IPoint[], direction?: Directions) {
+    super(element);
     this.x = x;
     this.y = y;
     this.points = points;
     this.direction = direction;
-    this.isActive = false;
   }
 
   /**

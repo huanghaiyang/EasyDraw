@@ -551,4 +551,16 @@ export default class MathUtils {
     return sortedVertices;
   }
 
+  /**
+   * 计算点到线段中点的角度
+   * 
+   * @param point 
+   * @param segmentStart 
+   * @param segmentEnd 
+   */
+  static calculateAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
+    const centroid = MathUtils.calcPolygonCentroid([segmentStart, segmentEnd]);
+    return MathUtils.calculateAngle(point, centroid);
+  }
+
 }

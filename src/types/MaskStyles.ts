@@ -56,3 +56,5 @@ export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
 }
 
 export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
+
+export const DefaultBorderTransformerIconSize = 30;

@@ -36,11 +36,14 @@ export interface IMaskCursorPositionModel extends IMaskModel {
   text: string;
 }
 
-// 组件旋转图标绘制任务对象
-export interface IRotationModel extends IMaskModel {
+export interface IIconModel extends IMaskModel {
   point: IPoint;
   width: number;
   height: number;
   angle: number;
+}
+
+// 组件旋转图标绘制任务对象
+export interface IRotationModel extends IIconModel {
   vertices: IPoint[];
 }
