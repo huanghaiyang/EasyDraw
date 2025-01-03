@@ -403,6 +403,16 @@ export default class StageShield extends DrawerBase implements IStageShield {
         funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())
+    } else {
+      if (this.isMoveableActive) {
+        const element = this.selection.checkTargetRotateElement(this.cursor.value);
+        if (!element) {
+          const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
+          if (!transformer) {
+            this.selection.tryActiveElementBorderTransformer(this.cursor.value);
+          }
+        }
+      }
     }
     funcs.push(() => this.mask.redraw());
     await Promise.all(funcs.map(func => func()));
@@ -486,12 +496,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
         this.store.calcRotatingElementsCentroid();
         this._isElementsRotating = true;
       } else {
-        const transformerElement = this.selection.checkTransformerElement(this.cursor.value);
-        if (transformerElement) {
+        const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
+        if (transformer) {
           this._isElementsTransforming = true;
         } else {
-          const borderTransformerElement = this.selection.checkBorderTransformerElement(this.cursor.value);
-          if (borderTransformerElement) {
+          const borderTransformer = this.selection.tryActiveElementBorderTransformer(this.cursor.value);
+          if (borderTransformer) {
             this._isElementsTransforming = true;
           } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
             shouldClear = true;

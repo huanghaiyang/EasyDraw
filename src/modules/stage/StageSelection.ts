@@ -1,5 +1,6 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
+import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { IMaskSelectionModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
@@ -123,13 +124,15 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  checkTransformerElement(point: IPoint): IElement {
+  tryActiveElementTransformer(point: IPoint): IElementTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       const transformer = element.getTransformerByPoint(point);
       if (transformer) {
         element.activeTransformer(transformer);
-        return element;
+        return transformer;
+      } else {
+        element.deActiveAllTransformers();
       }
     }
   }
@@ -140,14 +143,16 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    * @returns 
    */
-  checkBorderTransformerElement(point: IPoint): IElement {
+  tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       if (element.borderTransformEnable) {
-        const transformer = element.getBorderTransformerByPoint(point);
-        if (transformer) {
-          element.activeBorderTransformer(transformer);
-          return element;
+        const borderTransformer = element.getBorderTransformerByPoint(point);
+        if (borderTransformer) {
+          element.activeBorderTransformer(borderTransformer);
+          return borderTransformer;
+        } else {
+          element.deActiveAllBorderTransformers();
         }
       }
     }

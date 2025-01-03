@@ -11,8 +11,8 @@ export default interface IElementTransformer extends IPoint {
 
 export interface IElementBorderTransformer {
   id: string;
-  start: IPoint,
-  end: IPoint,
-  isActive: boolean,
+  start: IPoint;
+  end: IPoint;
+  isActive: boolean;
   isClosest(point: IPoint): boolean;
 }

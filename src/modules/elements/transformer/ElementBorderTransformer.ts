@@ -1,6 +1,8 @@
 import { IPoint } from "@/types";
+import { DefaultBorderTransformerDistance } from "@/types/Constants";
 import { IElementBorderTransformer } from "@/types/IElementTransformer";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class ElementBorderTransformer implements IElementBorderTransformer {
   id: string;
@@ -22,6 +24,7 @@ export default class ElementBorderTransformer implements IElementBorderTransform
    * @returns 
    */
   isClosest(point: IPoint): boolean {
-    return false;
+    const result = MathUtils.isPointClosestSegment(point, this.start, this.end, DefaultBorderTransformerDistance);
+    return result;
   }
 }

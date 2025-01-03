@@ -324,6 +324,61 @@ export default class MathUtils {
   }
 
   /**
+   * 计算点到直线的距离
+   * 
+   * @param point
+   * @param a 
+   * @param b
+   */
+  static calcDistancePointToLine(p: IPoint, a: IPoint, b: IPoint): number {
+    const Abx = b.x - a.x;
+    const Aby = b.y - a.y;
+    const Apx = p.x - a.x;
+    const Apy = p.y - a.y;
+    const ab_sq = Abx * Abx + Aby * Aby;
+    const t = (Apx * Abx + Apy * Aby) / ab_sq;
+    const closetX = a.x + t * Abx;
+    const closetY = a.y + t * Aby;
+    return Math.sqrt((p.x - closetX) * (p.x - closetX) + (p.y - closetY) * (p.y - closetY));
+  }
+
+  /**
+   * 判断点在线段的射影是否在线段上
+   * 
+   * @param p 
+   * @param a 
+   * @param b
+   */
+  static isProjectionOnSegment(p: IPoint, a: IPoint, b: IPoint): boolean {
+    // 计算向量AB和AP
+    const Abx = b.x - a.x;
+    const Aby = b.y - a.y;
+    const Apx = p.x - a.x;
+    const Apy = p.y - a.y;
+    // 计算向量AB的长度平方
+    const ab_sq = Abx * Abx + Aby * Aby;
+    // 计算点P在向量AB上的投影长度比例t
+    const t = (Apx * Abx + Apy * Aby) / ab_sq;
+    // 如果t在0到1之间，则投影在线段上
+    return t >= 0 && t <= 1;
+  }
+
+
+  /**
+   * 判断点是否在给定的线段附近位置上
+   * 
+   * @param point 
+   * @param a 
+   * @param b 
+   * @param maxDistance 
+   * @returns 
+   */
+  static isPointClosestSegment(point: IPoint, a: IPoint, b: IPoint, maxDistance: number): boolean {
+    if (!MathUtils.isProjectionOnSegment(point, a, b)) return false;
+    return MathUtils.calcDistancePointToLine(point, a, b) < maxDistance;
+  }
+
+  /**
    * 将大于90度的钝角转换为锐角
    * 
    * @param angle 

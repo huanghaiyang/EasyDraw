@@ -1,6 +1,7 @@
 import { IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
 import { IMaskSelectionModel } from "@/types/IModel";
+import IElementTransformer, { IElementBorderTransformer } from '@/types/IElementTransformer';
 
 // 舞台选区
 export default interface IStageSelection {
@@ -13,8 +14,8 @@ export default interface IStageSelection {
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
   checkTargetRotateElement(point: IPoint): IElement;
-  checkTransformerElement(point: IPoint): IElement;
-  checkBorderTransformerElement(point: IPoint): IElement
+  tryActiveElementTransformer(point: IPoint): IElementTransformer;
+  tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IElement;
   checkSelectContainsTarget(): boolean;

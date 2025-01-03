@@ -17,6 +17,7 @@ import { IRotationModel } from "@/types/IModel";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/types/ElementStyles";
 import { DefaultSelectionRotateSize, DefaultTransformerValue } from "@/types/MaskStyles";
+import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -25,6 +26,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   _originalModelCoords: IPoint[];
   _originalMatrix: number[][] = [];
 
+  // 旋转组件的数据模型
   rotationModel: IRotationModel = {
     point: null,
     type: DrawerMaskModelTypes.rotate,
@@ -464,6 +466,24 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算边框变换器
+   */
+  calcBorderTransformers(): IElementBorderTransformer[] {
+    const result = this._rotatePathPoints.map((point, index) => {
+      const nextPoint = CommonUtils.getNextOfArray(this._rotatePathPoints, index);
+      let borderTransformer = this._borderTransformers[index];
+      if (borderTransformer) {
+        borderTransformer.start = point;
+        borderTransformer.end = nextPoint;
+      } else {
+        borderTransformer = new ElementBorderTransformer(point, nextPoint);
+      }
+      return borderTransformer;
+    })
+    return result;
+  }
+
+  /**
    * 刷新坐标
    * 
    * @param stageRect
@@ -491,6 +511,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
     this._transformers = this.calcTransformers();
+    this._borderTransformers = this.calcBorderTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
   }
 
@@ -631,6 +652,24 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeBorderTransformer(transformer: IElementBorderTransformer): void {
     this._borderTransformers.forEach(item => {
       item.isActive = item.id === transformer.id;
+    });
+  }
+
+  /**
+   * 将所有变形器设置为未激活状态
+   */
+  deActiveAllTransformers(): void {
+    this._transformers.forEach(item => {
+      item.isActive = false;
+    });
+  }
+
+  /**
+   * 将所有边框变形器设置为未激活状态
+   */
+  deActiveAllBorderTransformers(): void {
+    this._borderTransformers.forEach(item => {
+      item.isActive = false;
     });
   }
 
