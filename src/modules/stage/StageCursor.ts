@@ -59,8 +59,9 @@ export default class StageCursor implements IStageCursor {
    * @returns 
    */
   private createMaskCursorTask(): IMaskCursor {
+    if (!this.value) return;
     const model: IMaskCursorModel = {
-      point: this.shield.cursor.value,
+      point: this.value,
       type: DrawerMaskModelTypes.cursor,
       creatorCategory: this.shield.currentCreator.category
     }
