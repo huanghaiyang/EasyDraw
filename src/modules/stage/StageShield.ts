@@ -358,7 +358,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     const funcs = [];
     let flag = false;
     this.cursor.transform(e);
-    this.setCursorStyle(this.currentCreator.cursor);
+    this.cursor.setStyle(this.currentCreator.cursor);
 
     // 只有在未对组件进行旋转/移动/形变的情况下才会启用组件命中逻辑
     if (this.isMoveableActive && !this.isElementsBusy) {
@@ -475,7 +475,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async handleCursorLeave(): Promise<void> {
     this.cursor.clear();
-    this.setCursorStyle('default');
+    this.cursor.setStyle('default');
     await this.mask.redraw();
   }
 
@@ -771,15 +771,6 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async setCreator(creator: Creator): Promise<void> {
     this.currentCreator = creator;
-  }
-
-  /**
-   * 设置画布鼠标样式
-   * 
-   * @param cursor 
-   */
-  setCursorStyle(cursor: string): void {
-    this.canvas.style.cursor = cursor;
   }
 
   /**

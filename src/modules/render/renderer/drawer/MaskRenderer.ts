@@ -1,7 +1,6 @@
 import { DrawerMaskModelTypes, } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import MaskTaskSelection from "@/modules/render/mask/task/MaskTaskSelection";
-import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
 import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
 import MaskTaskTransformer from "@/modules/render/mask/task/MaskTaskTransformer";
 import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
@@ -12,7 +11,7 @@ import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndica
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskCursorModel, IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
+import { IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
 import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
@@ -51,13 +50,14 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
 
     // 绘制光标
+    const task = this.drawer.shield.cursor.getTask();
+    if (task) {
+      cargo.add(task);
+      this._lastCursorRendered = true;
+      cursorRendered = true;
+    }
     if (this.drawer.shield.isDrawerActive) {
-      if (this.drawer.shield.cursor.value) {
-        cargo.add(this.createMaskCursorTask());
-        cargo.add(this.createMaskCursorPositionTask());
-        cursorRendered = true;
-        this._lastCursorRendered = true;
-      }
+      cargo.add(this.createMaskCursorPositionTask());
     }
 
     // 如果有绘制任务，则添加一个清除任务到队列头部
@@ -75,21 +75,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         cargo = null;
       }
     }
-  }
-
-  /**
-   * 创建一个绘制mask光标的任务
-   * 
-   * @returns 
-   */
-  private createMaskCursorTask(): IRenderTask {
-    const model: IMaskCursorModel = {
-      point: this.drawer.shield.cursor.value,
-      type: DrawerMaskModelTypes.cursor,
-      creatorCategory: this.drawer.shield.currentCreator.category
-    }
-    const task = new MaskTaskCursor(model, this.renderParams);
-    return task;
   }
 
   /**
