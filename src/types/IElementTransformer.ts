@@ -1,7 +1,8 @@
 import { Directions, IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
+import IController from "@/types/IController";
 
-export interface ITransformer {
+export interface ITransformer extends IController {
   element: IElement;
   id: string;
   isActive: boolean;

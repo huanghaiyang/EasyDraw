@@ -23,6 +23,10 @@ import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { StrokeTypes } from "@/types/ElementStyles";
+import IController from "@/types/IController";
+import ElementRotation from "../elements/rotation/ElementRotation";
+import ElementTransformer from "../elements/transformer/ElementTransformer";
+import ElementBorderTransformer from "../elements/transformer/ElementBorderTransformer";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -405,17 +409,28 @@ export default class StageShield extends DrawerBase implements IStageShield {
       funcs.push(() => this.provisional.redraw())
     } else {
       if (this.isMoveableActive) {
-        const element = this.selection.tryActiveElementRotation(this.cursor.value);
-        if (!element) {
-          const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
-          if (!transformer) {
-            this.selection.tryActiveElementBorderTransformer(this.cursor.value);
-          }
-        }
+        this._tryActiveController();
       }
     }
     funcs.push(() => this.mask.redraw());
     await Promise.all(funcs.map(func => func()));
+  }
+
+  /**
+   * 尝试激活控制器
+   * 
+   * @returns 
+   */
+  private _tryActiveController(): IController {
+    // 尝试激活旋转控制器
+    const rotation = this.selection.tryActiveElementRotation(this.cursor.value);
+    if (rotation) return rotation;
+    // 尝试激活形变控制器
+    const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
+    if (transformer) return transformer;
+    // 尝试激活边形控制器
+    const borderTransformer = this.selection.tryActiveElementBorderTransformer(this.cursor.value);
+    if (borderTransformer) return borderTransformer;
   }
 
   /**
@@ -490,23 +505,17 @@ export default class StageShield extends DrawerBase implements IStageShield {
     let shouldClear = this.isDrawerActive;
 
     if (this.isMoveableActive) {
-      const targetRotateElement = this.selection.tryActiveElementRotation(this.cursor.value);
-      if (targetRotateElement) {
-        this.store.updateElementById(targetRotateElement.id, { isRotatingTarget: true })
+      const controller = this._tryActiveController();
+      if (controller instanceof ElementRotation) {
+        this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCentroid();
         this._isElementsRotating = true;
-      } else {
-        const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
-        if (transformer) {
-          this._isElementsTransforming = true;
-        } else {
-          const borderTransformer = this.selection.tryActiveElementBorderTransformer(this.cursor.value);
-          if (borderTransformer) {
-            this._isElementsTransforming = true;
-          } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
-            shouldClear = true;
-          }
-        }
+      } else if (controller instanceof ElementTransformer) {
+        this._isElementsTransforming = true;
+      } else if (controller instanceof ElementBorderTransformer) {
+        this._isElementsTransforming = true;
+      } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
+        shouldClear = true;
       }
     }
     if (shouldClear) {
