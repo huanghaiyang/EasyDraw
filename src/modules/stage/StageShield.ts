@@ -24,9 +24,9 @@ import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { StrokeTypes } from "@/types/ElementStyles";
 import IController from "@/types/IController";
-import ElementRotation from "../elements/rotation/ElementRotation";
-import ElementTransformer from "../elements/transformer/ElementTransformer";
-import ElementBorderTransformer from "../elements/transformer/ElementBorderTransformer";
+import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
+import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
