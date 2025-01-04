@@ -1,5 +1,6 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
+import IElementRotation from "@/types/IElementRotation";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import { IMaskSelectionModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
@@ -110,11 +111,11 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  tryActiveElementRotation(point: IPoint): IElement {
+  tryActiveElementRotation(point: IPoint): IElementRotation {
     if (this.shield.configure.rotationIconEnable) {
       const element = this.shield.store.uniqSelectedElement;
       if (element && element.rotation.isContainsPoint(point)) {
-        return element;
+        return element.rotation;
       }
     }
   }
