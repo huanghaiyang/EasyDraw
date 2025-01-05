@@ -1,4 +1,4 @@
-import { DrawerMaskModelTypes, } from "@/types";
+import { DrawerMaskModelTypes, IPoint, } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import MaskTaskSelection from "@/modules/render/mask/task/MaskTaskSelection";
 import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
@@ -16,6 +16,7 @@ import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
 import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/ElementUtils";
+import { CreatorTypes } from "@/types/Creator";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
@@ -161,11 +162,21 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param element 
    */
   private createMaskSizeIndicatorTask(element: IElement): IRenderTask {
-    const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints, element.angle);
-    let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
-    let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
-    const point = leftAngle < rightAngle ? leftPoint : rightPoint;
-    const [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
+    let p1: IPoint, p2: IPoint;
+    switch (element.model.type) {
+      case CreatorTypes.line: {
+        [p1, p2] = element.rotatePathPoints.sort((a, b) => a.x - b.x);
+        break;
+      }
+      default: {
+        const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints, element.angle);
+        let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
+        let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
+        const point = leftAngle < rightAngle ? leftPoint : rightPoint;
+        [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
+        break;
+      }
+    }
     const angle = MathUtils.calculateAngle(p1, p2);
     const model: IMaskSizeIndicatorModel = {
       point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
