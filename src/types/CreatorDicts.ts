@@ -21,13 +21,26 @@ export const RectangleCreator: Creator = {
   icon: 'icon-verbise-Rectangle',
 }
 
+export const LineRectangleCreator: Creator = {
+  type: CreatorTypes.line,
+  name: '直线',
+  category: CreatorCategories.shapes,
+  icon: 'icon-verbise-line',
+}
+
 export const CursorCreators: Creator[] = [
   MoveableCreator,
   HandCreator
 ]
 
+export const ShapeCreators: Creator[] = [
+  RectangleCreator,
+  LineRectangleCreator
+]
+
 export const Creators: Creator[] = [
   MoveableCreator,
   ...CursorCreators,
-  RectangleCreator
+  RectangleCreator,
+  ...ShapeCreators
 ]

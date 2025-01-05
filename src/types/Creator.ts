@@ -1,14 +1,15 @@
 // 创作工具类型,同时也是组件类型
 export enum CreatorTypes {
-  moveable = 0,
-  rectangle = 1,
-  hand = 2,
+  moveable = 'moveable',
+  rectangle = 'rectangle',
+  hand = 'hand',
+  line = 'line',
 }
 
 // 创作工具分类
 export enum CreatorCategories {
-  cursor = 0,
-  shapes = 1,
+  cursor = 'cursor',
+  shapes = 'shapes',
 }
 
 // 创作工具

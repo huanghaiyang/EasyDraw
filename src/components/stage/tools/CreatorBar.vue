@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { CursorCreators } from "@/types/CreatorDicts";
+import { CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -25,33 +25,7 @@ const select = (item) => {
       <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
     </div>
 
-    <el-dropdown>
-      <div class="tool-dropdown">
-        <el-icon class="icon-verbise-arrow_down iconfont"></el-icon>
-      </div>
-
-      <template #dropdown>
-        <el-dropdown-menu>
-          <el-dropdown-item
-            v-for="creator in CursorCreators"
-            :key="creator.type"
-            :class="[
-              {
-                selected: creator.type === currentCreator.type,
-              },
-            ]"
-            @click="select(creator)"
-          >
-            <div class="creator-menu__item">
-              <div class="create-menu__item-text">{{ creator.name }}</div>
-              <div class="create-menu__item-icon">
-                <el-icon :class="['iconfont', creator.icon]"></el-icon>
-              </div>
-            </div>
-          </el-dropdown-item>
-        </el-dropdown-menu>
-      </template>
-    </el-dropdown>
+    <creator-dropdown :creators="CursorCreators" :current-creator="currentCreator" :select="select"/>
 
     <div
       :class="[
@@ -62,6 +36,8 @@ const select = (item) => {
     >
       <el-icon :class="['iconfont', currentShapeCreator.icon]"></el-icon>
     </div>
+
+    <creator-dropdown :creators="ShapeCreators" :current-creator="currentCreator" :select="select"/>
   </div>
 </template>
 <style lang="less" scoped>
@@ -76,6 +52,7 @@ const select = (item) => {
   position: absolute;
   bottom: 10px;
   left: calc(50% - 100px);
+  padding: 0 5px;
   .tool-item {
     width: 30px;
     height: 30px;
@@ -97,23 +74,6 @@ const select = (item) => {
       }
     }
   }
-  .tool-dropdown {
-    width: 10px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 4px;
-    transition: all 0.2s;
-    margin: 0 0 0 2px;
-    &:focus-visible {
-      outline: none;
-    }
-    .iconfont {
-      font-size: 8px;
-    }
-  }
-  padding: 0 5px;
 }
 </style>
 <style lang="less">
