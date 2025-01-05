@@ -26,6 +26,9 @@ export default interface IElement {
   model: ElementObject;
   rotation: IElementRotation;
 
+  get rotationEnable(): boolean;
+  get verticesRotationEnable(): boolean;
+  get verticesTransformEnable(): boolean;
   get borderTransformEnable(): boolean;
   get width(): number;
   get height(): number;
@@ -122,3 +125,6 @@ export interface IElementReact extends IElement { }
 
 // 舞台元素（组件）-圆形
 export interface IElementCircle extends IElement { }
+
+// 舞台元素（组件）-线段
+export interface IElementLine extends IElement { }

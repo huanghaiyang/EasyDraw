@@ -17,7 +17,7 @@ export default class CanvasUtils {
    * @returns 
    */
   static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
-    if(!strokeWidth) return points;
+    if (!strokeWidth) return points;
     // 需要考虑下舞台缩放
     const r = (strokeWidth / 2) / this.scale;
     switch (strokeType) {
@@ -128,7 +128,7 @@ export default class CanvasUtils {
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
-    ctx.lineWidth = styles.strokeWidth;
+    ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {
@@ -143,6 +143,30 @@ export default class CanvasUtils {
       ctx.stroke();
     }
     ctx.fill();
+    ctx.restore();
+  }
+
+  /**
+   * 绘制线段
+   * 
+   * @param ctx 
+   * @param points 
+   * @param styles 
+   */
+  static drawLine(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.beginPath();
+    ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+      } else {
+        ctx.lineTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+      }
+    })
+    ctx.stroke();
     ctx.restore();
   }
 }

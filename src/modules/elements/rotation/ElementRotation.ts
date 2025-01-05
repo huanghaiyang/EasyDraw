@@ -29,6 +29,7 @@ export default class ElementRotation implements IElementRotation {
    * 刷新数据
    */
   refresh(): void {
+    if (!this.element.rotationEnable) return;
     this.model.angle = this.element.angle - 90;
     this.model.point = ElementUtils.calcElementRotatePoint(this.element);
     this.model.vertices = CommonUtils.getBoxVertices(this.model.point, {
@@ -44,6 +45,9 @@ export default class ElementRotation implements IElementRotation {
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointInPolygonByRayCasting(point, this.model.vertices);
+    if (this.element.rotationEnable) {
+      return MathUtils.isPointInPolygonByRayCasting(point, this.model.vertices);
+    }
+    return false;
   }
 }

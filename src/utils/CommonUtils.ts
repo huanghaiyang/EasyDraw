@@ -234,4 +234,16 @@ export default class CommonUtils {
     const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
     return { width, height };
   }
+
+  /**
+   * 计算直线尺寸
+   * 
+   * @param coords 
+   * @returns 
+   */
+  static calcLineSize(coords: IPoint[]): ISize {
+    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[1].y));
+    return { width, height };
+  }
 }

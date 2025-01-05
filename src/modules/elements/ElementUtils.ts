@@ -1,4 +1,4 @@
-import { IPoint, ISize } from "@/types";
+import { IPoint } from "@/types";
 import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
@@ -8,6 +8,8 @@ import IElement, { ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { DefaultSelectionRotateDistance } from "@/types/MaskStyles";
+import ElementLine from "@/modules/elements/ElementLine";
+import ElementTaskLine from "@/modules/render/base/task/ElementTaskLine";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -54,6 +56,10 @@ export default class ElementUtils {
       case CreatorTypes.rectangle:
         task = new ElementTaskRect(element, params);
         break;
+      case CreatorTypes.line: {
+        task = new ElementTaskLine(element, params);
+        break;
+      }
       default:
         break;
     }
@@ -127,6 +133,7 @@ export default class ElementUtils {
     switch (creatorType) {
       case CreatorTypes.rectangle:
         return CommonUtils.getBoxPoints(points);
+      case CreatorTypes.line:
       default:
         return points;
     }
@@ -143,6 +150,9 @@ export default class ElementUtils {
     switch (type) {
       case CreatorTypes.rectangle: {
         return new ElementRect(model);
+      }
+      case CreatorTypes.line: {
+        return new ElementLine(model);
       }
       default:
         return new Element(model);
@@ -186,7 +196,8 @@ export default class ElementUtils {
    */
   static calcPosition(model: Partial<ElementObject>): IPoint {
     switch (model.type) {
-      case CreatorTypes.rectangle: {
+      case CreatorTypes.rectangle:
+      case CreatorTypes.line: {
         return MathUtils.calcPolygonCentroid(model.coords);
       }
     }

@@ -42,8 +42,20 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
+  get rotationEnable(): boolean {
+    return true;
+  }
+
+  get verticesRotationEnable(): boolean {
+    return true;
+  }
+
+  get verticesTransformEnable(): boolean {
+    return true;
+  }
+
   get borderTransformEnable(): boolean {
-    return false;
+    return true;
   }
 
   get originalModelCoords(): IPoint[] {
@@ -728,6 +740,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   transformByVertices(offset: IPoint): void {
+    if (!this.verticesTransformEnable) return;
+
     const index = this._transformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -765,6 +779,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   transformByBorder(offset: IPoint): void {
+    if (!this.borderTransformEnable) return;
+
     const index = this._borderTransformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引

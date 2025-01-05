@@ -5,9 +5,6 @@ import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementReact {
 
-  get borderTransformEnable(): boolean {
-    return true;
-  }
   /**
    * 形变
    * 
