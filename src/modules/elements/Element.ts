@@ -17,7 +17,7 @@ import { StrokeTypes } from "@/types/ElementStyles";
 import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
-import ElementRotation from "./rotation/ElementRotation";
+import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
