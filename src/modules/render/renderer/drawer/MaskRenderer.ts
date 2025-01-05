@@ -161,17 +161,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param element 
    */
   private createMaskSizeIndicatorTask(element: IElement): IRenderTask {
-    if (element.model.angle % 90 === 0) {
-      const p1 = element.maxBoxPoints[3]
-      const p2 = element.maxBoxPoints[2]
-      return new MaskTaskSizeIndicator({
-        point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
-        angle: 0,
-        type: DrawerMaskModelTypes.sizeIndicator,
-        text: `${element.width} x ${element.height}`,
-      } as IMaskSizeIndicatorModel, this.renderParams);
-    }
-    const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
+    const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints, element.angle);
     let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
     let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
     const point = leftAngle < rightAngle ? leftPoint : rightPoint;
