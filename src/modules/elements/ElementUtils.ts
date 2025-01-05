@@ -179,18 +179,6 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算矩形尺寸
-   * 
-   * @param coords 
-   * @returns 
-   */
-  static calcRectangleSize(coords: IPoint[]): ISize {
-    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
-    return { width, height };
-  }
-
-  /**
    * 计算组件位置
    * 
    * @param element 

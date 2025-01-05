@@ -611,7 +611,7 @@ export default class StageStore implements IStageStore {
     let position: IPoint;
     switch (type) {
       case CreatorTypes.rectangle:
-        size = ElementUtils.calcRectangleSize(coords);
+        size = CommonUtils.calcRectangleSize(coords);
         position = ElementUtils.calcPosition({ type, coords });
         break;
     }

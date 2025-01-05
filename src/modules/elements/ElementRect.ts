@@ -1,7 +1,7 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
 import { IElementReact } from "@/types/IElement";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementReact {
 
@@ -15,6 +15,6 @@ export default class ElementRect extends Element implements IElementReact {
    */
   transform(offset: IPoint): void {
     super.transform(offset);
-    Object.assign(this.model, ElementUtils.calcRectangleSize(this.model.coords))
+    Object.assign(this.model, CommonUtils.calcRectangleSize(this.model.coords))
   }
 }

@@ -222,4 +222,16 @@ export default class CommonUtils {
   static getNextOfArray(array: any[], index: number, step: number = 1) {
     return array[CommonUtils.getNextIndexOfArray(array.length, index, step)];
   }
+
+  /**
+   * 计算矩形尺寸
+   * 
+   * @param coords 
+   * @returns 
+   */
+  static calcRectangleSize(coords: IPoint[]): ISize {
+    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
+    return { width, height };
+  }
 }
