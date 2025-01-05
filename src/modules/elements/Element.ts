@@ -714,6 +714,20 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   transform(offset: IPoint): void {
+    if (this.getActiveElementTransformer()) {
+      this.transformByVertices(offset);
+    } else if (this.getActiveElementBorderTransformer()) {
+      this.transformByBorder(offset);
+    }
+  }
+
+  /**
+   * 按顶点形变
+   * 
+   * @param offset 
+   * @returns 
+   */
+  transformByVertices(offset: IPoint): void {
     const index = this._transformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -742,6 +756,37 @@ export default class Element implements IElement, ILinkedNodeValue {
         this._fixAngle();
         this._originalMatrix = matrix;
       }
+    }
+  }
+
+  /**
+   * 按边框形变
+   * 
+   * @param offset 
+   */
+  transformByBorder(offset: IPoint): void {
+    const index = this._borderTransformers.findIndex(item => item.isActive);
+    if (index !== -1) {
+      // 不动点坐标索引
+      const lockIndex = CommonUtils.getPrevIndexOfArray(this._borderTransformers.length, index, 2);
+      // 不动点
+      const lockPoint = this._originalTransformerPoints[lockIndex];
+      // 当前拖动的点的原始位置
+      const currentPointOriginal = this._originalTransformerPoints[index];
+      // 当前拖动的点当前的位置
+      const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+      // 判断当前拖动点，在坐标系垂直轴的左边还是右边
+      const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+      if (index === 0 || index === 2) {
+        matrix[0][0] = 1;
+      } else if (index === 1 || index === 3) {
+        matrix[1][1] = 1;
+      }
+      const coords = this._calcTransformCoords(matrix, lockPoint);
+      this.model.coords = coords;
+      const { width, height } = ElementUtils.calcRectangleSize(coords);
+      this.model.width = width;
+      this.model.height = height;
     }
   }
 

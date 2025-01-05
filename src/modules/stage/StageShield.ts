@@ -360,7 +360,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
-    let flag = false;
+    let shouldRedraw = false;
     this.cursor.transform(e);
     this.cursor.updateStyle(e);
 
@@ -383,27 +383,27 @@ export default class StageShield extends DrawerBase implements IStageShield {
         } else if (this._isElementsRotating) {
           if (this.checkCursorPressMovedALittle(e)) {
             this._rotateElements();
-            flag = true;
+            shouldRedraw = true;
           }
         } else if (this._isElementsTransforming) {
           if (this.checkCursorPressMovedALittle(e)) {
             this._transformElements();
-            flag = true;
+            shouldRedraw = true;
           }
         } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget())) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
             this._dragElements();
-            flag = true;
+            shouldRedraw = true;
           }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
         this._dragStage(e);
-        flag = true;
+        shouldRedraw = true;
       }
-      if (flag) {
+      if (shouldRedraw) {
         funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())

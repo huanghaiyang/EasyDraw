@@ -109,6 +109,8 @@ export default interface IElement {
   getActiveElementTransformer(): IElementTransformer;
   getActiveElementBorderTransformer(): IElementBorderTransformer;
   transform(offset: IPoint): void;
+  transformByVertices(offset: IPoint): void;
+  transformByBorder(offset: IPoint): void;
 
   calcOriginalElementProps(): void;
   calcOriginalModelCoords(): void;
