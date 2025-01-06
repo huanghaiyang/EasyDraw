@@ -1,12 +1,8 @@
 <script lang="ts" setup>
-import PositionProps from "@/components/ui/right/props/PositionProps.vue";
-import SizeProps from "@/components/ui/right/props/SizeProps.vue";
-import AngleProps from "@/components/ui/right/props/AngleProps.vue";
-import FillProps from "@/components/ui/right/props/FillProps.vue";
-import StrokeProps from "@/components/ui/right/props/StrokeProps.vue";
 </script>
 <template>
   <div class="props-right-panel">
+    <scale-setting></scale-setting>
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>

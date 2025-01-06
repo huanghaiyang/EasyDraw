@@ -16,10 +16,10 @@ export const DefaultTransformerFillColor = '#ffffff';
 export const DefaultTransformerFillColorOpacity = 1;
 export const DefaultTransformerLineWidth = 1;
 
-export const DefaultTransformerValue = 10;
-export const DefaultSelectionRotateSize = 18;
-export const DefaultSelectionRotateDistance = 18;
-export const DefaultSelectionSizeIndicatorDistance = 16;
+export const DefaultTransformerValue = 8;
+export const DefaultSelectionRotateSize = 12;
+export const DefaultSelectionRotateDistance = 12;
+export const DefaultSelectionSizeIndicatorDistance = 12;
 // 尺寸指示文本
 export const DefaultSelectionSizeIndicatorFillColor = '#0c8ce9';
 export const DefaultSelectionSizeIndicatorFillColorOpacity = 1;
@@ -56,4 +56,4 @@ export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
 
 export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
 
-export const DefaultCursorSize = 30;
+export const DefaultCursorSize = 20;

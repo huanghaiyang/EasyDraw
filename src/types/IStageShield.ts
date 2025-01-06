@@ -34,4 +34,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isMoveableActive(): boolean;
   get isHandActive(): boolean;
   get isElementsRotating(): boolean;
+
+  setScale(value: number): void;
 }

@@ -757,6 +757,7 @@ export default class StageStore implements IStageStore {
       const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
       this.updateElementById(element.id, { isOnStage })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      element.refreshOriginalProps();
     })
   }
 

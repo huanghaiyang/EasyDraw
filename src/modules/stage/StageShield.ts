@@ -1,4 +1,4 @@
-import { MinCursorMoveXDistance, MinCursorMoveYDistance, RespectStageWidth } from "@/types/Constants";
+import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/Constants";
 import { IPoint, ShieldDispatcherNames, } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
@@ -735,12 +735,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
   private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
-    this.stageScale = Number((rect.width / RespectStageWidth).toFixed(2));
-    CanvasUtils.scale = this.stageScale;
     this._setCanvasSize(rect);
     this.store.refreshStageElements();
     await this._redrawAll(true);
-    this.emit(ShieldDispatcherNames.scaleChanged, this.stageScale);
   }
 
   /**
@@ -805,6 +802,19 @@ export default class StageShield extends DrawerBase implements IStageShield {
       x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
       y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y)
     }
+  }
+
+  /**
+   * 设置缩放
+   * 
+   * @param value 
+   */
+  setScale(value: number): void {
+    this.stageScale = value;
+    CanvasUtils.scale = value;
+    this.store.refreshStageElements();
+    this._redrawAll(true);
+    this.emit(ShieldDispatcherNames.scaleChanged, value);
   }
 
 }

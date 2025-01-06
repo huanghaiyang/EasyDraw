@@ -1,0 +1,1 @@
+export const StageScales = [0.5, 1, 2]

@@ -1,10 +1,6 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
-import TopBar from "@/components/ui/TopBar.vue";
-import LeftBar from "@/components/ui/LeftBar.vue";
-import RightBar from "@/components/ui/RightBar.vue";
-import StageContainer from "@/components/stage/Container.vue";
 
 const { locale: i18nLocale } = useI18n();
 const appStore = useAppStore();
@@ -15,9 +11,6 @@ init().then(() => {
 </script>
 
 <template>
-  <div class="top">
-    <top-bar />
-  </div>
   <div class="left">
     <left-bar />
   </div>
@@ -25,25 +18,18 @@ init().then(() => {
     <right-bar />
   </div>
   <div class="stage">
-    <stage-container />
+    <container />
   </div>
 </template>
 
 <style scoped lang="less">
-.top,
 .left,
 .right {
   position: absolute;
 }
-.top {
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1;
-}
 .left,
 .right {
-  top: 30px;
+  top: 0;
   bottom: 0;
   width: 220px;
 }
@@ -55,7 +41,7 @@ init().then(() => {
 }
 .stage {
   position: absolute;
-  top: 30px;
+  top: 0;
   bottom: 0;
   left: 220px;
   right: 220px;

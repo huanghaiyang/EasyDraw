@@ -454,5 +454,13 @@ export const useStageStore = defineStore("stage", {
     setElementsFontFamily(value: string): void {
       shield.setElementsFontFamily(this.selectedElements, value);
     },
+    /**
+     * 设置舞台缩放
+     * 
+     * @param value 
+     */
+    setScale(value: number): void {
+      shield.setScale(value);
+    }
   },
 });

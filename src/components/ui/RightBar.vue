@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import RightProps from "@/components/ui/right/RightProps.vue";
 </script>
 <template>
   <div class="right-bar">
