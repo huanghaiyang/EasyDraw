@@ -88,9 +88,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.height;
   }
 
+  /**
+   * 获取显示角度
+   * 
+   * @returns 
+   */
+  protected getAngle(): number {
+    return this.model.angle;
+  }
+
   @computed
   get angle(): number {
-    return this.model.angle;
+    return this.getAngle();
   }
 
   get centroid(): IPoint {
@@ -623,7 +632,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
     })
     this._originalRotatePoints = cloneDeep(this._rotatePoints);
-    this._originalAngle = this.angle;
+    this._originalAngle = this.model.angle;
   }
 
   /**
@@ -709,7 +718,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 角度修正
    */
-  protected fixAngle(): void {
+  protected flipAngle(): void {
     if (this.model.angle > 0) {
       this.model.angle = this.model.angle - 180;
     } else {
@@ -813,7 +822,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const yScale = matrix[1][1];
     // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
     if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
-      this.fixAngle();
+      this.flipAngle();
       this._originalMatrix = matrix;
     }
   }

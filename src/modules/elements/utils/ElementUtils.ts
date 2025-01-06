@@ -240,4 +240,17 @@ export default class ElementUtils {
       }
     }
   }
+
+  /**
+   * 修正旋转角度
+   * 
+   * @param angle 
+   * @returns 
+   */
+  static fixAngle(angle: number): number {
+    if (angle > 180) {
+      angle = angle - 360;
+    }
+    return angle;
+  }
 }

@@ -4,6 +4,7 @@ import { DefaultLineElementClosestDistance } from "@/types/Constants";
 import { IElementLine } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementLine extends Element implements IElementLine {
 
@@ -29,6 +30,23 @@ export default class ElementLine extends Element implements IElementLine {
 
   get endRotatePathPoint(): IPoint {
     return this.rotatePathPoints[1];
+  }
+
+  get startCoord(): IPoint {
+    return this.model.coords[0];
+  }
+
+  get endCoord(): IPoint {
+    return this.model.coords[1];
+  }
+
+  /**
+   * 获取显示角度
+   * 
+   * @returns 
+   */
+  protected getAngle(): number {
+    return ElementUtils.fixAngle(MathUtils.calculateAngle(this.startCoord, this.endCoord) + 90);
   }
 
   /**
@@ -64,5 +82,16 @@ export default class ElementLine extends Element implements IElementLine {
    */
   protected getTransformPointForSizeChange(): IPoint {
     return this._originalTransformerPoints[1];
+  }
+
+  /**
+   * 设置宽度
+   * 
+   * @param value 
+   */
+  setWidth(value: number): void {
+    const newCoord = MathUtils.calculateTargetPoint(this.startCoord, value, this.angle - 90);
+    this.model.coords[1] = newCoord;
+    this.model.width = value;
   }
 }
