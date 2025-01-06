@@ -91,8 +91,8 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    */
   hitTargetElements(point: IPoint): void {
-    for (let i = this.shield.store.Elements.length - 1; i >= 0; i--) {
-      const element = this.shield.store.Elements[i];
+    for (let i = this.shield.store.stageElements.length - 1; i >= 0; i--) {
+      const element = this.shield.store.stageElements[i];
       const isTarget = element.isContainsPoint(point);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
@@ -199,7 +199,7 @@ export default class StageSelection implements IStageSelection {
    */
   refreshRangeElements(rangePoints: IPoint[]): void {
     if (rangePoints && rangePoints.length) {
-      this.shield.store.Elements.forEach(element => {
+      this.shield.store.stageElements.forEach(element => {
         this.shield.store.updateElementById(element.id, { isInRange: element.isPolygonOverlap(rangePoints) })
       });
     }
@@ -221,7 +221,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getElementOnPoint(point: IPoint): IElement {
-    return this.shield.store.Elements.find(item => item.isContainsPoint(point));
+    return this.shield.store.stageElements.find(item => item.isContainsPoint(point));
   }
 
   /**
@@ -230,8 +230,8 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   checkSelectContainsTarget(): boolean {
+    if (this.shield.store.targetElements.length === 0) return false;
     const targetIds = this.shield.store.targetElements.map(item => item.id);
-    if (targetIds.length === 0) return false;
     const selectedIds = this.shield.store.selectedElements.map(item => item.id);
     return every(targetIds, item => includes(selectedIds, item))
   }

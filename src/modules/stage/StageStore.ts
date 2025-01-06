@@ -27,7 +27,7 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
-  private _elementMap = new ElementSortedMap<string, IElement>();
+  private _elementsMap = new ElementSortedMap<string, IElement>();
   // 已渲染的组件映射关系
   private _provisionalElementsMap = new ElementSortedMap<string, IElement>();
   // 被选中的组件映射关系，加快查询
@@ -35,9 +35,9 @@ export default class StageStore implements IStageStore {
   // 命中的组件映射关系，加快查询
   private _targetElementsMap = new ElementSortedMap<string, IElement>();
   // 舞台元素映射关系，加快查询
-  private _ElementsMap = new ElementSortedMap<string, IElement>();
+  private _stageElementsMap = new ElementSortedMap<string, IElement>();
   // 未在舞台的元素映射关系，加快查询
-  private _noneElementsMap = new ElementSortedMap<string, IElement>();
+  private _noneStageElementsMap = new ElementSortedMap<string, IElement>();
   // 选区元素映射关系，加快查询
   private _rangeElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转目标元素映射关系，加快查询
@@ -56,8 +56,8 @@ export default class StageStore implements IStageStore {
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements)
     })
-    this._ElementsMap.on(ElementSortedMapEventNames.changed, () => { })
-    this._noneElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
+    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
@@ -67,7 +67,7 @@ export default class StageStore implements IStageStore {
 
   // 当前创建并更新中的组件
   get creatingElements(): IElement[] {
-    const element = this._elementMap.get(this._currentCreatingElementId);
+    const element = this._elementsMap.get(this._currentCreatingElementId);
     if (element) {
       return [element];
     }
@@ -87,12 +87,12 @@ export default class StageStore implements IStageStore {
     return this._targetElementsMap.valuesArray();
   }
 
-  get Elements(): IElement[] {
-    return this._ElementsMap.valuesArray();
+  get stageElements(): IElement[] {
+    return this._stageElementsMap.valuesArray();
   }
 
-  get noneElements(): IElement[] {
-    return this._noneElementsMap.valuesArray();
+  get noneStageElements(): IElement[] {
+    return this._noneStageElementsMap.valuesArray();
   }
 
   get rangeElements(): IElement[] {
@@ -129,9 +129,9 @@ export default class StageStore implements IStageStore {
   private _reactionElementRemoved(): void {
     this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IElement>) => {
       const element = node.value;
+      this._stageElementsMap.delete(element.id);
       this._selectedElementsMap.delete(element.id);
-      this._ElementsMap.delete(element.id);
-      this._noneElementsMap.delete(element.id);
+      this._noneStageElementsMap.delete(element.id);
       this._provisionalElementsMap.delete(element.id);
       this._targetElementsMap.delete(element.id);
       this._rangeElementsMap.delete(element.id);
@@ -169,11 +169,11 @@ export default class StageStore implements IStageStore {
       }
       case ElementReactionPropNames.isOnStage: {
         if (value) {
-          this._ElementsMap.set(element.id, element);
-          this._noneElementsMap.delete(element.id);
+          this._stageElementsMap.set(element.id, element);
+          this._noneStageElementsMap.delete(element.id);
         } else {
-          this._ElementsMap.delete(element.id);
-          this._noneElementsMap.set(element.id, element);
+          this._stageElementsMap.delete(element.id);
+          this._noneStageElementsMap.set(element.id, element);
         }
         break;
       }
@@ -482,7 +482,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   hasElement(id: string): boolean {
-    return this._elementMap.has(id);
+    return this._elementsMap.has(id);
   }
 
   /**
@@ -492,7 +492,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   getElementById(id: string): IElement {
-    return this._elementMap.get(id);
+    return this._elementsMap.get(id);
   }
 
   /**
@@ -523,7 +523,7 @@ export default class StageStore implements IStageStore {
    */
   addElement(element: IElement): IElement {
     this._elementList.insert(new LinkedNode(element))
-    this._elementMap.set(element.id, element);
+    this._elementsMap.set(element.id, element);
     return element;
   }
 
@@ -534,9 +534,9 @@ export default class StageStore implements IStageStore {
    */
   removeElement(id: string): IElement {
     if (this.hasElement(id)) {
-      const element = this._elementMap.get(id);
+      const element = this._elementsMap.get(id);
       this._elementList.removeBy(node => node.value.id === id);
-      this._elementMap.delete(id);
+      this._elementsMap.delete(id);
       return element;
     }
   }
@@ -551,7 +551,7 @@ export default class StageStore implements IStageStore {
    */
   updateElementById(id: string, props: Partial<IElement>): IElement {
     if (this.hasElement(id)) {
-      const element = this._elementMap.get(id);
+      const element = this._elementsMap.get(id);
       Object.assign(element, props);
       return element;
     }
@@ -579,7 +579,7 @@ export default class StageStore implements IStageStore {
    */
   updateElementModel(id: string, data: Partial<ElementObject>): IElement {
     if (this.hasElement(id)) {
-      const element = this._elementMap.get(id);
+      const element = this._elementsMap.get(id);
       const modelId = element.model.id;
       LodashUtils.deepPlanObjectAssign(element.model, data, { id: modelId });
       return element;

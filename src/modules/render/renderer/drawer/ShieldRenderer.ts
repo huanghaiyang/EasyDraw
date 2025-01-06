@@ -28,7 +28,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
     }
     if (force || this.drawer.shouldRedraw) {
       cargo.add(new ElementTaskClear(null, this.renderParams));
-      this.drawer.store.Elements.forEach((element) => {
+      this.drawer.store.stageElements.forEach((element) => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

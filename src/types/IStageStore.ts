@@ -9,8 +9,8 @@ export default interface IStageStore extends IStageSetter {
   get provisionalElements(): IElement[];
   get selectedElements(): IElement[];
   get targetElements(): IElement[];
-  get Elements(): IElement[];
-  get noneElements(): IElement[];
+  get stageElements(): IElement[];
+  get noneStageElements(): IElement[];
   get rangeElements(): IElement[];
   get uniqSelectedElement(): IElement;
   get rotatingTargetElements(): IElement[];

@@ -234,7 +234,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return {
-          width: MathUtils.distanceBetweenPoints(coords[0], coords[1]),
+          width: MathUtils.toFixed(MathUtils.distanceBetweenPoints(coords[0], coords[1]), 2),
           height: 0,
         }
       }
