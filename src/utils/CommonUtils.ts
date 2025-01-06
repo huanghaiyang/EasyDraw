@@ -110,9 +110,8 @@ export default class CommonUtils {
    * 给定一个多边形，取最左侧，最下侧，最右侧三个点
    * 
    * @param points 
-   * @param angle
    */
-  static getLBRPoints(points: IPoint[], angle: number): IPoint[] {
+  static getLBRPoints(points: IPoint[]): IPoint[] {
     let leftIndex, bottomIndex, rightIndex;
     points.forEach((point, index) => {
       if (leftIndex === undefined || point.x <= points[leftIndex].x) {
