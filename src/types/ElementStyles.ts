@@ -1,4 +1,4 @@
-import { CreatorTypes } from "./Creator";
+import { CreatorTypes } from "@/types/Creator";
 
 export enum StrokeTypes {
   inside = 0,
