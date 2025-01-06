@@ -33,7 +33,7 @@ export default interface IElement {
   get verticesTransformEnable(): boolean;
   get borderTransformEnable(): boolean;
   get fillEnabled(): boolean;
-  get strokeEnable() : boolean;
+  get strokeEnable(): boolean;
 
   get width(): number;
   get height(): number;
@@ -56,6 +56,7 @@ export default interface IElement {
   get maxBoxPoints(): IPoint[];
   get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
+  get rotateOutlinePathPoints(): IPoint[];
   get centroid(): IPoint;
   get transformers(): IElementTransformer[];
   get borderTransformers(): IElementBorderTransformer[];
@@ -89,9 +90,20 @@ export default interface IElement {
   set isInRange(value: boolean);
   set status(value: ElementStatus);
 
+  setPosition(x: number, y: number, coords: IPoint[]): void;
   setWidth(value: number): void;
   setHeight(value: number): void;
   setAngle(value: number): void;
+  setStrokeType(value: StrokeTypes): void;
+  setStrokeWidth(value: number): void;
+  setStrokeColor(value: string): void;
+  setStrokeColorOpacity(value: number): void;
+  setFillColor(value: string): void;
+  setFillColorOpacity(value: number): void;
+  setFontSize(value: number): void;
+  setFontFamily(value: string): void;
+  setTextAlign(value: CanvasTextAlign): void;
+  setTextBaseline(value: CanvasTextBaseline): void;
 
   refreshSize(): void;
   refreshPosition(): void;
@@ -106,6 +118,7 @@ export default interface IElement {
   calcPathPoints(): IPoint[];
   calcRotatePoints(): IPoint[];
   calcRotatePathPoints(): IPoint[];
+  calcRotateOutlinePathPoints(): IPoint[];
   calcMaxBoxPoints(): IPoint[];
   calcCentroid(): IPoint;
   calcTransformers(): IPoint[];
@@ -122,9 +135,9 @@ export default interface IElement {
   transformByVertices(offset: IPoint): void;
   transformByBorder(offset: IPoint): void;
 
-  calcOriginalElementProps(): void;
-  calcOriginalModelCoords(): void;
-  calcOriginalProps(): void;
+  refreshOriginalElementProps(): void;
+  refreshOriginalModelCoords(): void;
+  refreshOriginalProps(): void;
 }
 
 // 舞台元素（组件）-React

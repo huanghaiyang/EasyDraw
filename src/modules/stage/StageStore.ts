@@ -280,11 +280,9 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id)) {
         const { coords, left: prevLeft, top: prevTop } = element.model;
         const { x, y } = value;
-        this.updateElementModel(element.id, { left: x, top: y, coords: coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })) })
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+        element.setPosition(x, y, coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })));
       }
     });
-    this.alterOriginalProps(elements);
   }
 
   /**
@@ -297,10 +295,8 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setWidth(value);
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
-    this.alterOriginalProps(elements);
   }
 
   /**
@@ -313,10 +309,8 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setHeight(value);
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
-    this.alterOriginalProps(elements);
   }
 
   /**
@@ -329,10 +323,8 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setAngle(value);
-        element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });
-    this.alterOriginalProps(elements);
   }
 
   /**
@@ -344,7 +336,7 @@ export default class StageStore implements IStageStore {
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { strokeType: value } })
+        element.setStrokeType(value);
       }
     });
   }
@@ -358,7 +350,7 @@ export default class StageStore implements IStageStore {
   async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { strokeWidth: value } })
+        element.setStrokeWidth(value);
       }
     });
   }
@@ -372,7 +364,7 @@ export default class StageStore implements IStageStore {
   async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { strokeColor: value } })
+        element.setStrokeColor(value);
       }
     });
   }
@@ -386,7 +378,7 @@ export default class StageStore implements IStageStore {
   async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { strokeColorOpacity: value } })
+        element.setStrokeColorOpacity(value);
       }
     });
   }
@@ -400,7 +392,7 @@ export default class StageStore implements IStageStore {
   async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { fillColor: value } })
+        element.setFillColor(value);
       }
     });
   }
@@ -414,7 +406,7 @@ export default class StageStore implements IStageStore {
   async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { fillColorOpacity: value } })
+        element.setFillColorOpacity(value);
       }
     });
   }
@@ -428,7 +420,7 @@ export default class StageStore implements IStageStore {
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { textAlign: value } })
+        element.setTextAlign(value);
       }
     });
   }
@@ -442,7 +434,7 @@ export default class StageStore implements IStageStore {
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { textBaseline: value } })
+        element.setTextBaseline(value);
       }
     });
   }
@@ -456,7 +448,7 @@ export default class StageStore implements IStageStore {
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { fontSize: value } })
+        element.setFontSize(value);
       }
     });
   }
@@ -470,7 +462,7 @@ export default class StageStore implements IStageStore {
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { styles: { fontFamily: value } })
+        element.setFontFamily(value);
       }
     });
   }
@@ -675,7 +667,7 @@ export default class StageStore implements IStageStore {
         this.updateElementById(element.id, {
           status: ElementStatus.finished,
         })
-        element.calcOriginalProps();
+        element.refreshOriginalProps();
         return element;
       }
     }
@@ -719,9 +711,6 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsTransform(offset: IPoint): void {
     this.selectedElements.forEach(element => {
       element.transform(offset);
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      element.refreshSize();
-      element.refreshPosition();
     })
   }
 
@@ -741,17 +730,18 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  alterOriginalProps(elements: IElement[]): void {
+  restoreElementsOriginalProps(elements: IElement[]): void {
     elements.forEach(element => {
-      element.calcOriginalProps();
+      element.refreshOriginalProps();
     })
   }
 
   /**
-   * 组件坐标更新
+   * 舞台位置移动时，实时更新组件坐标
+   * 
    * @param elements 
    */
-  refreshElementsPoints(elements: IElement[]): void {
+  refreshElementsPosition(elements: IElement[]): void {
     elements.forEach(element => {
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       element.refreshPosition();
@@ -790,9 +780,7 @@ export default class StageStore implements IStageStore {
       angle = angle - 360;
     }
     this.rotatingTargetElements.forEach(element => {
-      this.updateElementModel(element.id, { angle, })
-      element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      element.refreshPosition();
+      element.setAngle(angle);
     })
   }
 }

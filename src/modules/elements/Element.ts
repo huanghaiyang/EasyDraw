@@ -18,6 +18,7 @@ import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import PolygonUtils from "@/utils/PolygonUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -365,6 +366,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _maxBoxPoints: IPoint[] = [];
   protected _rotatePoints: IPoint[] = [];
   protected _rotatePathPoints: IPoint[] = [];
+  protected _rotateOutlinePathPoints: IPoint[] = [];
   protected _transformers: IElementTransformer[] = [];
   protected _borderTransformers: IElementBorderTransformer[] = [];
   protected _stageRect: DOMRect;
@@ -394,6 +396,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotatePathPoints;
   }
 
+  get rotateOutlinePathPoints(): IPoint[] {
+    return this._rotateOutlinePathPoints;
+  }
+
   get transformers(): IElementTransformer[] {
     return this._transformers;
   }
@@ -406,7 +412,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
     this.rotation = new ElementRotation(this);
-    this.calcOriginalProps();
+    this.refreshOriginalProps();
     makeObservable(this);
   }
 
@@ -447,6 +453,23 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotatePathPoints(): IPoint[] {
     return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid));
+  }
+
+  /**
+   * 计算组件包含外边框宽度的坐标
+   * 
+   * @returns 
+   */
+  calcRotateOutlinePathPoints(): IPoint[] {
+    const { strokeType, strokeWidth } = this.model.styles;
+    if (strokeWidth && strokeType !== StrokeTypes.inside) {
+      let r = strokeWidth / 2;
+      if (strokeType === StrokeTypes.outside) {
+        r = strokeWidth;
+      }
+      return PolygonUtils.getPolygonOuterVertices(this._rotatePathPoints, r);
+    }
+    return this._rotatePathPoints;
   }
 
   /**
@@ -539,6 +562,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
+    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
     this._transformers = this.calcTransformers();
     this._borderTransformers = this.calcBorderTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
@@ -550,7 +574,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param rect 
    */
   isInPolygon(points: IPoint[]): boolean {
-    return every(this.rotatePathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
+    return every(this.rotateOutlinePathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
   }
 
   /**
@@ -559,7 +583,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointInPolygonByRayCasting(point, this.rotatePathPoints);
+    return MathUtils.isPointInPolygonByRayCasting(point, this.rotateOutlinePathPoints);
   }
 
   /**
@@ -569,10 +593,12 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return MathUtils.polygonsOverlap(this.rotatePathPoints, points);
+    return MathUtils.polygonsOverlap(this.rotateOutlinePathPoints, points);
   }
   /**
    * 判断世界模型是否与多边形相交、
+   * 
+   * TODO
    * 
    * @param points 
    * @returns 
@@ -623,7 +649,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始变形器坐标
    */
-  calcOriginalElementProps() {
+  refreshOriginalElementProps() {
     this._originalTransformerPoints = this.transformers.map(transformer => {
       const { x, y } = transformer;
       return {
@@ -638,7 +664,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始坐标
    */
-  calcOriginalModelCoords() {
+  refreshOriginalModelCoords() {
     this._originalModelCoords = this.model.coords.map(point => {
       const { x, y } = point;
       return {
@@ -652,9 +678,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始属性，用于组件的移动、旋转、大小变换
    */
-  calcOriginalProps(): void {
-    this.calcOriginalModelCoords();
-    this.calcOriginalElementProps();
+  refreshOriginalProps(): void {
+    this.refreshOriginalModelCoords();
+    this.refreshOriginalElementProps();
   }
 
   /**
@@ -765,6 +791,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else if (this.getActiveElementBorderTransformer()) {
       this.transformByBorder(offset);
     }
+    this.refreshStagePoints(this._stageRect, this._stageWorldCoord, this._stageScale);
+    this.refreshSize();
+    this.refreshPosition();
   }
 
   /**
@@ -884,6 +913,16 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新组件必要数据
+   */
+  protected refreshInternalProps(): void {
+    this.refreshStagePoints(this._stageRect, this._stageWorldCoord, this._stageScale);
+    this.refreshSize();
+    this.refreshPosition();
+    this.refreshOriginalProps();
+  }
+
+  /**
    * 设置组件宽度
    * 
    * @param value 
@@ -901,6 +940,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.width = value;
+    this.refreshInternalProps();
   }
 
   /**
@@ -921,6 +961,21 @@ export default class Element implements IElement, ILinkedNodeValue {
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.height = value;
+    this.refreshInternalProps();
+  }
+
+  /**
+   * 设置坐标
+   * 
+   * @param x 
+   * @param y 
+   * @param coords 
+   */
+  setPosition(x: number, y: number, coords: IPoint[]): void {
+    this.model.left = x;
+    this.model.top = y;
+    this.model.coords = coords;
+    this.refreshInternalProps();
   }
 
   /**
@@ -930,5 +985,92 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setAngle(value: number): void {
     this.model.angle = value;
+    this.refreshInternalProps();
+  }
+
+  /**
+   * 设置边框样式
+   * 
+   * @param value 
+   */
+  setStrokeType(value: StrokeTypes): void {
+    this.model.styles.strokeType = value;
+    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+  }
+
+  /**
+   * 设置边框颜色
+   * 
+   * @param value 
+   */
+  setStrokeColor(value: string): void {
+    this.model.styles.strokeColor = value;
+  }
+
+  /**
+   * 设置边框透明度
+   * 
+   * @param value 
+   */
+  setStrokeColorOpacity(value: number): void {
+    this.model.styles.strokeColorOpacity = value;
+  }
+
+  /**
+   * 设置边框宽度
+   * 
+   * @param value 
+   */
+  setStrokeWidth(value: number): void {
+    this.model.styles.strokeWidth = value;
+    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+  }
+
+  /**
+   * 设置填充颜色
+   * @param value 
+   */
+  setFillColor(value: string): void {
+    this.model.styles.fillColor = value;
+  }
+
+  /**
+   * 设置填充颜色透明度
+   * @param value 
+   */
+  setFillColorOpacity(value: number): void {
+    this.model.styles.fillColorOpacity = value;
+  }
+
+  /**
+   * 设置字体大小
+   * @param value 
+   */
+  setFontSize(value: number): void {
+    this.model.styles.fontSize = value;
+  }
+
+  /**
+   * 设置字体样式
+   * @param value 
+   */
+  setFontFamily(value: string): void {
+    this.model.styles.fontFamily = value;
+  }
+
+  /**
+   * 设置字体对齐方式
+   * @param value 
+   */
+  setTextAlign(value: CanvasTextAlign): void {
+    this.model.styles.textAlign = value;
+  }
+
+  /**
+   * 设置字体基线
+   * @param value 
+   */
+  setTextBaseline(value: CanvasTextBaseline): void {
+    this.model.styles.textBaseline = value;
   }
 }

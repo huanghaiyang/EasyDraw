@@ -591,9 +591,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
     // 取消组件拖动状态
     this.store.updateElements(this.store.selectedElements, { isDragging: false });
     // 刷新组件坐标数据
-    this.store.alterOriginalProps(this.store.selectedElements);
+    this.store.restoreElementsOriginalProps(this.store.selectedElements);
     // 刷新组件坐标数据
-    this.store.refreshElementsPoints(this.store.selectedElements);
+    this.store.refreshElementsPosition(this.store.selectedElements);
   }
 
   /**
@@ -602,7 +602,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
   private _endElementsRotate() {
     this.store.updateSelectedElementsRotation(this._pressUpPosition)
     // 刷新组件坐标数据
-    this.store.alterOriginalProps(this.store.rotatingTargetElements);
+    this.store.restoreElementsOriginalProps(this.store.rotatingTargetElements);
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,
@@ -619,7 +619,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
     })
     // 刷新组件坐标数据
-    this.store.alterOriginalProps(this.store.selectedElements);
+    this.store.restoreElementsOriginalProps(this.store.selectedElements);
     // 更新组件状态
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
@@ -737,7 +737,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.stageRect = rect;
     this.stageScale = Number((rect.width / RespectStageWidth).toFixed(2));
     CanvasUtils.scale = this.stageScale;
-    this._refreshAllCanvasSize(rect);
+    this._setCanvasSize(rect);
     this.store.refreshStageElements();
     await this._redrawAll(true);
     this.emit(ShieldDispatcherNames.scaleChanged, this.stageScale);
@@ -748,7 +748,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param size 
    */
-  private _refreshAllCanvasSize(size: DOMRect): void {
+  private _setCanvasSize(size: DOMRect): void {
     this.mask.updateCanvasSize(size);
     this.provisional.updateCanvasSize(size);
     this.updateCanvasSize(size);
