@@ -857,13 +857,31 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取设置尺寸变换的不动点
+   * 
+   * @returns 
+   */
+  protected getLockPointForSizeChange(): IPoint {
+    return this._originalTransformerPoints[0];
+  }
+
+  /**
+   * 获取设置尺寸变换的变换点
+   * 
+   * @returns 
+   */
+  protected getTransformPointForSizeChange(): IPoint {
+    return this._originalTransformerPoints[2];
+  }
+
+  /**
    * 设置组件宽度
    * 
    * @param value 
    */
   setWidth(value: number): void {
-    const lockPoint = this._originalTransformerPoints[0];
-    const currentPointOriginal = this._originalTransformerPoints[2];
+    const lockPoint = this.getLockPointForSizeChange();
+    const currentPointOriginal = this.getTransformPointForSizeChange();
     const xValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
     const yValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value);
     const originXValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this.model.width);
@@ -882,8 +900,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param value 
    */
   setHeight(value: number): void {
-    const lockPoint = this._originalTransformerPoints[0];
-    const currentPointOriginal = this._originalTransformerPoints[2];
+    const lockPoint = this.getLockPointForSizeChange();
+    const currentPointOriginal = this.getTransformPointForSizeChange();
     const xValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value)
     const yValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
     const originXValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this.model.height)

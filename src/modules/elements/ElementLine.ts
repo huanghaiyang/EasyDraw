@@ -56,4 +56,13 @@ export default class ElementLine extends Element implements IElementLine {
       this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
     }
   }
+
+  /**
+   * 获取设置尺寸变换的变换点
+   * 
+   * @returns 
+   */
+  protected getTransformPointForSizeChange(): IPoint {
+    return this._originalTransformerPoints[1];
+  }
 }

@@ -54,11 +54,11 @@ export default class MathUtils {
       originalPoint = MathUtils.rotateRelativeCentroid(originalPoint, -angle, centroid);
     }
     const originalWidth = add(originalPoint.x, -centroid.x);
-    const originalHeight = add(originalPoint.y, - centroid.y);
+    const originalHeight = add(originalPoint.y, -centroid.y);
     const newWidth = add(point.x, - centroid.x);
     const newHeight = add(point.y, - centroid.y);
-    const scaleX = divide(newWidth, originalWidth);
-    const scaleY = divide(newHeight, originalHeight);
+    const scaleX = originalWidth === 0 ? 1 : divide(newWidth, originalWidth);
+    const scaleY = originalHeight === 0 ? 1 : divide(newHeight, originalHeight);
     return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
   }
 
