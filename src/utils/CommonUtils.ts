@@ -114,12 +114,16 @@ export default class CommonUtils {
   static getLBRPoints(points: IPoint[]): IPoint[] {
     let leftIndex, bottomIndex, rightIndex;
     points.forEach((point, index) => {
-      if (leftIndex === undefined || point.x <= points[leftIndex].x) {
+      if (leftIndex === undefined || point.x < points[leftIndex].x) {
         leftIndex = index;
       }
+      if (bottomIndex === undefined || point.y > points[bottomIndex].y) {
+        bottomIndex = index;
+      }
+      if (rightIndex === undefined || point.x > points[rightIndex].x) {
+        rightIndex = index;
+      }
     });
-    bottomIndex = CommonUtils.getPrevIndexOfArray(points.length, leftIndex, 1);
-    rightIndex = CommonUtils.getPrevIndexOfArray(points.length, leftIndex, 2);
     return [points[leftIndex], points[bottomIndex], points[rightIndex]];
   }
 

@@ -94,4 +94,16 @@ export default class ElementLine extends Element implements IElementLine {
     this.model.coords[1] = newCoord;
     this.model.width = value;
   }
+
+  /**
+   * 设置角度，注意直线的角度始终为0，属性菜单显示的角度是通过开始坐标和结束坐标计算出来的
+   * 
+   * @param value 
+   */
+  setAngle(value: number): void {
+    const centroid = MathUtils.calcPolygonCentroid(this.model.coords);
+    const startCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value + 90);
+    const endCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value - 90);
+    this.model.coords = [startCoord, endCoord];
+  }
 }

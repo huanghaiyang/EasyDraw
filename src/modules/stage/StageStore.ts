@@ -328,7 +328,7 @@ export default class StageStore implements IStageStore {
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        this.updateElementModel(element.id, { angle: value })
+        element.setAngle(value);
         element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       }
     });

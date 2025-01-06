@@ -91,6 +91,7 @@ export default interface IElement {
 
   setWidth(value: number): void;
   setHeight(value: number): void;
+  setAngle(value: number): void;
 
   refreshSize(): void;
   refreshPosition(): void;

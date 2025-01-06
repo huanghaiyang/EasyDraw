@@ -922,4 +922,13 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = coords;
     this.model.height = value;
   }
+
+  /**
+   * 设置角度
+   * 
+   * @param value 
+   */
+  setAngle(value: number): void {
+    this.model.angle = value;
+  }
 }
