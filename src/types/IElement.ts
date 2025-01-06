@@ -26,10 +26,15 @@ export default interface IElement {
   model: ElementObject;
   rotation: IElementRotation;
 
+  get widthModifyEnable(): boolean;
+  get heightModifyEnable(): boolean;
   get rotationEnable(): boolean;
   get verticesRotationEnable(): boolean;
   get verticesTransformEnable(): boolean;
   get borderTransformEnable(): boolean;
+  get fillEnabled(): boolean;
+  get strokeEnable() : boolean;
+
   get width(): number;
   get height(): number;
   get angle(): number;

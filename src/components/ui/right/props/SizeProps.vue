@@ -43,7 +43,7 @@ watch(
         <el-input
           v-model="hValue"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.uniqSelectedElement?.heightModifyEnable"
           min="2"
           type="number"
           @change="(value) => stageStore.setElementsHeight(Number(value))"

@@ -7,11 +7,19 @@ import MathUtils from "@/utils/MathUtils";
 
 export default class ElementLine extends Element implements IElementLine {
 
+  get heightModifyEnable(): boolean {
+    return false;
+  }
+
   get rotationEnable(): boolean {
     return false;
   }
 
   get borderTransformEnable(): boolean {
+    return false;
+  }
+
+  get fillEnabled(): boolean {
     return false;
   }
 

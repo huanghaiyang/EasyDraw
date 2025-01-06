@@ -42,6 +42,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
+  get widthModifyEnable(): boolean {
+    return true;
+  }
+
+  get heightModifyEnable(): boolean {
+    return true;
+  }
+
   get rotationEnable(): boolean {
     return true;
   }
@@ -55,6 +63,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get borderTransformEnable(): boolean {
+    return true;
+  }
+
+  get fillEnabled(): boolean {
+    return true;
+  }
+
+  get strokeEnable(): boolean {
     return true;
   }
 
