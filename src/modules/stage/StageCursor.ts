@@ -6,10 +6,10 @@ import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
-import MaskTaskBorderTransformerCursor from "@/modules/render/mask/task/MaskTaskBorderTransformerCursor";
 import { DefaultCursorSize } from "@/types/MaskStyles";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
 import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
+import { TransformTypes } from "@/types/Stage";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -91,7 +91,8 @@ export default class StageCursor implements IStageCursor {
     const model: IMaskCursorModel = {
       point: this.value,
       type: DrawerMaskModelTypes.cursor,
-      creatorCategory: this.shield.currentCreator.category
+      creatorCategory: this.shield.currentCreator.category,
+      scale: 1 / this.shield.stageScale
     }
     const task = new MaskTaskCursor(model, { canvas: this.shield.mask.canvas });
     return task;
@@ -111,8 +112,9 @@ export default class StageCursor implements IStageCursor {
       width: DefaultCursorSize,
       height: DefaultCursorSize,
       angle: borderTransformer.angle,
+      scale: 1 / this.shield.stageScale
     }
-    const task = new MaskTaskBorderTransformerCursor(model, { canvas: this.shield.mask.canvas });
+    const task = new MaskTaskTransformerCursor(model, TransformTypes.border, { canvas: this.shield.mask.canvas });
     return task;
   }
 
@@ -130,8 +132,9 @@ export default class StageCursor implements IStageCursor {
       width: DefaultCursorSize,
       height: DefaultCursorSize,
       angle: transformer.angle,
+      scale: 1 / this.shield.stageScale
     }
-    const task = new MaskTaskTransformerCursor(model, { canvas: this.shield.mask.canvas });
+    const task = new MaskTaskTransformerCursor(model, TransformTypes.vertices, { canvas: this.shield.mask.canvas });
     return task;
   }
 

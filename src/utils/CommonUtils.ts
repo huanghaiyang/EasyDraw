@@ -246,4 +246,29 @@ export default class CommonUtils {
     const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[1].y));
     return { width, height };
   }
+
+  /**
+   * 缩放点
+   * 
+   * @param point 
+   * @param scale 
+   * @returns 
+   */
+  static scalePoint(point: IPoint, scale: number) {
+    return {
+      x: point.x * scale,
+      y: point.y * scale
+    }
+  }
+
+  /**
+   * 缩放点数组
+   * 
+   * @param points 
+   * @param scale 
+   * @returns 
+   */
+  static scalePoints(points: IPoint[], scale: number) {
+    return points.map(point => CommonUtils.scalePoint(point, scale))
+  }
 }

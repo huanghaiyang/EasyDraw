@@ -123,15 +123,15 @@ export default class StageShield extends DrawerBase implements IStageShield {
   }
 
   get isDrawerActive(): boolean {
-    return [CreatorCategories.shapes].includes(this.currentCreator.category);
+    return [CreatorCategories.shapes].includes(this.currentCreator?.category);
   }
 
   get isHandActive(): boolean {
-    return this.currentCreator.type === CreatorTypes.hand;
+    return this.currentCreator?.type === CreatorTypes.hand;
   }
 
   get isMoveableActive(): boolean {
-    return this.currentCreator.type === CreatorTypes.moveable;
+    return this.currentCreator?.type === CreatorTypes.moveable;
   }
 
   get isElementsRotating(): boolean {

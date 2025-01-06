@@ -4,6 +4,7 @@ import { CreatorCategories } from "@/types/Creator";
 // 辅助画布绘制任务对象类型
 export interface IMaskModel {
   type: DrawerMaskModelTypes;
+  scale?: number;
 }
 
 // 辅助画布绘制任务选区对象
@@ -41,6 +42,7 @@ export interface IIconModel extends IMaskModel {
   width: number;
   height: number;
   angle: number;
+  scale?: number;
 }
 
 // 组件旋转图标绘制任务对象

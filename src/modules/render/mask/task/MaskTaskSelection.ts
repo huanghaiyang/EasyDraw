@@ -14,6 +14,9 @@ export default class MaskTaskSelection extends MaskTaskBase implements IMaskSele
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(this.canvas, this.data.points, DefaultSelectionStyle);
+    const { strokeWidth } = DefaultSelectionStyle;
+    CanvasUtils.drawPath(this.canvas, this.data.points, Object.assign({}, DefaultSelectionStyle, {
+      strokeWidth: strokeWidth * this.data.scale
+    }));
   }
 }

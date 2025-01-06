@@ -90,8 +90,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageRect, this.drawer.shield.stageWorldCoord, this.drawer.shield.stageScale);
     const model: IMaskCursorPositionModel = {
       point: {
-        x: point.x + 20,
-        y: point.y + 20
+        x: point.x + 20 / this.drawer.shield.stageScale,
+        y: point.y + 20 / this.drawer.shield.stageScale
       },
       type: DrawerMaskModelTypes.cursorPosition,
       text: `${coord.x},${coord.y}`
@@ -109,7 +109,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const tasks: IRenderTask[] = [];
     const models: IMaskSelectionModel[] = this.drawer.shield.selection.getSelectionModels();
     models.forEach(model => {
-      const task = new MaskTaskSelection(model, this.renderParams);
+      const task = new MaskTaskSelection({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -138,7 +138,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       const model: IMaskTransformerModel = {
         point,
         type: DrawerMaskModelTypes.transformer,
-        angle
+        angle,
+        scale: 1 / this.drawer.shield.stageScale
       }
       const task = new MaskTaskTransformer(model, this.renderParams);
       tasks.push(task);
@@ -184,7 +185,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
     const angle = MathUtils.calculateAngle(p1, p2);
     const model: IMaskSizeIndicatorModel = {
-      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance),
+      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.sizeIndicator,
       text: `${element.width} x ${element.height}`,

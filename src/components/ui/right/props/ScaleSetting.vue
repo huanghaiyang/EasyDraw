@@ -7,7 +7,7 @@ const stageStore = useStageStore();
 </script>
 <template>
   <div class="scale-setting">
-    <div class="scale-setting__item">
+    <div class="scale-setting__item factor">
       <el-dropdown trigger="click">
         <span class="el-dropdown-link">
           {{ stageStore.scale * 100 + "%" }}
@@ -39,6 +39,9 @@ const stageStore = useStageStore();
   border-bottom: 1px solid var(--el-border-color);
   &__item {
     padding: 0 8px;
+    &.factor {
+      cursor: pointer;
+    }
   }
 }
 </style>

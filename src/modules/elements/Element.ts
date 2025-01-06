@@ -499,8 +499,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result = this._rotatePathPoints.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
-        width: DefaultTransformerValue,
-        height: DefaultTransformerValue
+        width: DefaultTransformerValue / this._stageScale,
+        height: DefaultTransformerValue / this._stageScale,
       }, {
         angle: this.model.angle
       });
@@ -547,6 +547,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._stageWorldCoord = stageWorldCoord;
     this._stageScale = stageScale;
     this.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
+    this.rotation.model.scale = 1 / stageScale;
     this.rotation.refresh();
   }
 

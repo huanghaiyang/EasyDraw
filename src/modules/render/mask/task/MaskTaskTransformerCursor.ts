@@ -1,13 +1,32 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import ResizeV from "@/assets/svg/resize-v.svg";
-import { IIconModel } from "@/types/IModel";
+import { IIconModel, IMaskModel } from "@/types/IModel";
 import { IMaskTransformerCursor } from "@/types/IRenderTask";
+import { TransformTypes } from "@/types/Stage";
+import SplitV from '@/assets/svg/split-v.svg';
 
 export default class MaskTaskTransformerCursor extends MaskTaskBase implements IMaskTransformerCursor {
+  type: TransformTypes = TransformTypes.vertices;
 
   get data(): IIconModel {
     return this.model as IIconModel;
+  }
+
+  get img(): string {
+    switch (this.type) {
+      case TransformTypes.vertices: {
+        return ResizeV;
+      }
+      case TransformTypes.border: {
+        return SplitV;
+      }
+    }
+  }
+
+  constructor(model: IMaskModel, type: TransformTypes, params?: any) {
+    super(model, params);
+    this.type = type;
   }
 
   /**
@@ -15,8 +34,10 @@ export default class MaskTaskTransformerCursor extends MaskTaskBase implements I
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      const { point: { x, y }, width, height } = this.data;
-      await CanvasUtils.drawImgLike(this.canvas, ResizeV, {
+      let { point: { x, y }, width, height } = this.data;
+      width *= this.data.scale;
+      height *= this.data.scale;
+      await CanvasUtils.drawImgLike(this.canvas, this.img, {
         x: x - width / 2,
         y: y - height / 2,
         width,
