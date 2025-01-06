@@ -5,12 +5,12 @@ import {
   ShieldDispatcherNames,
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
-import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
+import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
 import { flatten } from "lodash";
-import ElementList from "@/modules/elements/ElementList";
+import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/ElementSortedMap";
+import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/helpers/ElementSortedMap";
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";

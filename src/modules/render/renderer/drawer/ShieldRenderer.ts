@@ -1,6 +1,6 @@
 import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
 import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskClear from "@/modules/render/base/task/ElementTaskClear";
 import IStageShield from "@/types/IStageShield";
 import { IShieldRenderer } from "@/types/IStageRenderer";

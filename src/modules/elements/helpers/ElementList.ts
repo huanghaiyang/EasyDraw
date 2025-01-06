@@ -1,7 +1,7 @@
 import LinkedList from "@/modules/struct/LinkedList";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import { observable, reaction, runInAction } from "mobx";
-import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/ElementUtils";
+import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
 import IElement from "@/types/IElement";
 import IElementList from "@/types/IElementList";
 

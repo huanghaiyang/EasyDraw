@@ -4,7 +4,7 @@ import {
   BoxDirections
 } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, every } from "lodash";

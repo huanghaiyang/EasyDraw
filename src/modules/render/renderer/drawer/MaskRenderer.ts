@@ -15,7 +15,7 @@ import { IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel,
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
 import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorTypes } from "@/types/Creator";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {

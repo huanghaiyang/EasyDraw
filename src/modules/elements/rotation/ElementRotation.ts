@@ -3,7 +3,7 @@ import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import { IRotationModel } from "@/types/IModel";
 import { DefaultSelectionRotateSize } from "@/types/MaskStyles";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 

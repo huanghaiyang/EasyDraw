@@ -9,7 +9,7 @@ import StageEvent from '@/modules/stage/StageEvent';
 import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
-import ElementUtils from "@/modules/elements/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
