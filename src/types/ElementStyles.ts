@@ -1,10 +1,17 @@
+import { CreatorTypes } from "./Creator";
+
 export enum StrokeTypes {
   inside = 0,
   middle = 1,
   outside = 2
 }
 
-export const StrokeTypesArray = [{
+type StrokeTypePair = {
+  type: StrokeTypes,
+  name: string
+}
+
+export const StrokeTypesArray: StrokeTypePair[] = [{
   type: StrokeTypes.inside,
   name: '内描边'
 }, {
@@ -14,6 +21,24 @@ export const StrokeTypesArray = [{
   type: StrokeTypes.outside,
   name: '外描边'
 }]
+
+export const LineStrokeTypes: StrokeTypePair[] = [{
+  type: StrokeTypes.middle,
+  name: '平分线宽'
+}]
+
+export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
+  switch (type) {
+    case CreatorTypes.rectangle: {
+      return StrokeTypesArray;
+    }
+    case CreatorTypes.line: {
+      return LineStrokeTypes;
+    }
+    default:
+      return StrokeTypesArray;
+  }
+}
 
 // 画板元素样式定义
 export type ElementStyles = {

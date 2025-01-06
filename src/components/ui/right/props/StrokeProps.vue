@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultElementStyle, StrokeTypesArray } from "@/types/ElementStyles";
+import { CreatorTypes } from "@/types/Creator";
+import {
+  DefaultElementStyle,
+  getStokeTypes,
+} from "@/types/ElementStyles";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();
@@ -36,6 +40,14 @@ watch(
   () => stageStore.strokeType,
   (newValue) => {
     strokeType.value = newValue;
+  }
+);
+
+const strokeTypes = ref([]);
+watch(
+  () => stageStore.uniqSelectedElement?.model.type,
+  (strokeType: CreatorTypes) => {
+    strokeTypes.value = getStokeTypes(strokeType);
   }
 );
 
@@ -87,7 +99,7 @@ const toggleColorPickerVisible = () => {
           :disabled="stageStore.inputDisabled"
         >
           <el-option
-            v-for="item in StrokeTypesArray"
+            v-for="item in strokeTypes"
             :key="item.type"
             :label="item.name"
             :value="item.type"

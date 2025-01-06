@@ -40,6 +40,8 @@ function setElementsAngle(value: string) {
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
           type="number"
+          min="-180"
+          max="180"
           @change="setElementsAngle"
         >
           <template #prepend>a</template>
