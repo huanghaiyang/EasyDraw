@@ -127,4 +127,7 @@ export interface IElementReact extends IElement { }
 export interface IElementCircle extends IElement { }
 
 // 舞台元素（组件）-线段
-export interface IElementLine extends IElement { }
+export interface IElementLine extends IElement {
+  get startRotatePathPoint(): IPoint;
+  get endRotatePathPoint(): IPoint;
+}

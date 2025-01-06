@@ -7,7 +7,7 @@ const i18n = createI18n({
 });
 
 async function loadLocaleMessages() {
-  const modules = import.meta.glob('./locales/*.json');
+  const modules = import.meta.glob('@/locales/*.json');
 
   for (const path in modules) {
     const locale = path.match(/\/([A-Za-z0-9-_]+)\.json$/)[1];
