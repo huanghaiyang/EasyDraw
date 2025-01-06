@@ -1,4 +1,4 @@
-import { IPoint } from "@/types";
+import { IPoint, ISize } from "@/types";
 import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
@@ -217,5 +217,27 @@ export default class ElementUtils {
         y: p.y + offset.y
       }
     })
+  }
+
+  /**
+   * 计算组件尺寸
+   * 
+   * @param coords 
+   * @param type 
+   * @returns 
+   */
+  static calcSize(model: Partial<ElementObject>): ISize {
+    const { coords, type } = model;
+    switch (type) {
+      case CreatorTypes.rectangle: {
+        return CommonUtils.calcRectangleSize(coords);
+      }
+      case CreatorTypes.line: {
+        return {
+          width: MathUtils.distanceBetweenPoints(coords[0], coords[1]),
+          height: 0,
+        }
+      }
+    }
   }
 }

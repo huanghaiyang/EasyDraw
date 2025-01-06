@@ -800,7 +800,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
       const coords = this._calcTransformCoords(matrix, lockPoint);
       this.model.coords = coords;
-      const { width, height } = CommonUtils.calcRectangleSize(coords);
+      const { width, height } = ElementUtils.calcSize(this.model);
       this.model.width = width;
       this.model.height = height;
     }

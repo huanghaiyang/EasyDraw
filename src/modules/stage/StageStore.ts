@@ -607,17 +607,8 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
-    let size: ISize;
-    let position: IPoint = ElementUtils.calcPosition({ type, coords });
-    switch (type) {
-      case CreatorTypes.rectangle: {
-        size = CommonUtils.calcRectangleSize(coords);
-        break;
-      }
-      case CreatorTypes.line: {
-        size = CommonUtils.calcLineSize(coords);
-      }
-    }
+    const size: ISize = ElementUtils.calcSize({ coords, type });
+    const position: IPoint = ElementUtils.calcPosition({ type, coords });
     const model: ElementObject = {
       id: CommonUtils.getRandomDateId(),
       type,
