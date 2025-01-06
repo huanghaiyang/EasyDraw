@@ -87,6 +87,7 @@ export default interface IElement {
   setWidth(value: number): void;
   setHeight(value: number): void;
 
+  refreshSize(): void;
   refreshPosition(): void;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void;
 

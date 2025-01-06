@@ -673,6 +673,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 更新尺寸
+   */
+  refreshSize(): void {
+    const { width, height } = ElementUtils.calcSize(this.model);
+    this.model.width = width;
+    this.model.height = height;
+  }
+
+  /**
    * 更新坐标
    */
   refreshPosition(): void {
@@ -684,7 +693,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 角度修正
    */
-  private _fixAngle(): void {
+  protected fixAngle(): void {
     if (this.model.angle > 0) {
       this.model.angle = this.model.angle - 180;
     } else {
@@ -699,7 +708,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param lockPoint 
    * @returns 
    */
-  private _calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
+  protected calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
     const newPoints = this._originalRotatePoints.map(point => {
       // 先旋转回角度0
       point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
@@ -741,7 +750,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   transformByVertices(offset: IPoint): void {
     if (!this.verticesTransformEnable) return;
+    this.doVerticesTransform(offset);
+  }
 
+  /**
+   * 按顶点变换
+   * 
+   * @param offset 
+   */
+  protected doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -750,26 +767,38 @@ export default class Element implements IElement, ILinkedNodeValue {
       const lockPoint = this._originalTransformerPoints[lockIndex];
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
-      // 当前拖动的点当前的位置
-      const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
-      // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-      const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-      const coords = this._calcTransformCoords(matrix, lockPoint);
-      this.model.coords = coords;
-      // 判断是否已经计算过原始矩阵
-      if (!this._originalMatrix.length) {
-        // 计算原始矩阵
-        this._originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
-      }
-      // 原始的纵轴缩放系数
-      const yScaleOriginal = this._originalMatrix[1][1];
-      // 纵轴缩放系数
-      const yScale = matrix[1][1];
-      // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
-      if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
-        this._fixAngle();
-        this._originalMatrix = matrix;
-      }
+      // 根据不动点进行形变
+      this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
+    }
+  }
+
+  /**
+   * 根据不动点进行顶点变换
+   * 
+   * @param lockPoint 
+   * @param currentPointOriginal 
+   * @param offset 
+   */
+  protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint): void {
+    // 当前拖动的点当前的位置
+    const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
+    // 判断当前拖动点，在坐标系垂直轴的左边还是右边
+    const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const coords = this.calcTransformCoords(matrix, lockPoint);
+    this.model.coords = coords;
+    // 判断是否已经计算过原始矩阵
+    if (!this._originalMatrix.length) {
+      // 计算原始矩阵
+      this._originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
+    }
+    // 原始的纵轴缩放系数
+    const yScaleOriginal = this._originalMatrix[1][1];
+    // 纵轴缩放系数
+    const yScale = matrix[1][1];
+    // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
+    if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
+      this.fixAngle();
+      this._originalMatrix = matrix;
     }
   }
 
@@ -780,7 +809,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   transformByBorder(offset: IPoint): void {
     if (!this.borderTransformEnable) return;
+    this.doBorderTransform(offset);
+  }
 
+  /**
+   * 按边框变换
+   * 
+   * @param offset 
+   */
+  protected doBorderTransform(offset: IPoint): void {
     const index = this._borderTransformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -798,11 +835,8 @@ export default class Element implements IElement, ILinkedNodeValue {
       } else if (index === 1 || index === 3) {
         matrix[1][1] = 1;
       }
-      const coords = this._calcTransformCoords(matrix, lockPoint);
+      const coords = this.calcTransformCoords(matrix, lockPoint);
       this.model.coords = coords;
-      const { width, height } = ElementUtils.calcSize(this.model);
-      this.model.width = width;
-      this.model.height = height;
     }
   }
 
@@ -821,7 +855,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const offset = { x: xValue - originXValue, y: yValue - originYValue };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-    const coords = this._calcTransformCoords(matrix, lockPoint);
+    const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.width = value;
   }
@@ -841,7 +875,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const offset = { x: originXValue - xValue, y: yValue - originYValue };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-    const coords = this._calcTransformCoords(matrix, lockPoint);
+    const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.height = value;
   }

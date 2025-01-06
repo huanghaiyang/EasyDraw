@@ -720,6 +720,7 @@ export default class StageStore implements IStageStore {
     this.selectedElements.forEach(element => {
       element.transform(offset);
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      element.refreshSize();
       element.refreshPosition();
     })
   }

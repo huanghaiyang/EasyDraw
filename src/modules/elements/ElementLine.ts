@@ -2,15 +2,12 @@ import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
 import { DefaultLineElementClosestDistance } from "@/types/Constants";
 import { IElementLine } from "@/types/IElement";
+import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 
 export default class ElementLine extends Element implements IElementLine {
 
   get rotationEnable(): boolean {
-    return false;
-  }
-
-  get verticesTransformEnable(): boolean {
     return false;
   }
 
@@ -34,5 +31,21 @@ export default class ElementLine extends Element implements IElementLine {
    */
   isContainsPoint(point: IPoint): boolean {
     return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, DefaultLineElementClosestDistance);
+  }
+
+  /**
+   * 按顶点变换
+   * 
+   * @param offset 
+   */
+  protected doVerticesTransform(offset: IPoint): void {
+    const index = this._transformers.findIndex(transformer => transformer.isActive);
+    if (index !== -1) {
+      const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
+      // 当前拖动的点的原始位置
+      const currentPointOriginal = this._originalTransformerPoints[index];
+      // 根据不动点进行形变
+      this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
+    }
   }
 }
