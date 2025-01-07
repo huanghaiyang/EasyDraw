@@ -27,7 +27,7 @@ export default class ElementBorderTransformer extends BaseTransformer implements
    * @returns 
    */
   isClosest(point: IPoint): boolean {
-    const result = MathUtils.isPointClosestSegment(point, this.start, this.end, DefaultBorderTransformerDistance);
+    const result = MathUtils.isPointClosestSegment(point, this.start, this.end, DefaultBorderTransformerDistance * this.element.coordScale);
     return result;
   }
 }

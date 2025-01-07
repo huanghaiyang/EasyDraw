@@ -235,4 +235,20 @@ export default class StageSelection implements IStageSelection {
     const selectedIds = this.shield.store.selectedElements.map(item => item.id);
     return every(targetIds, item => includes(selectedIds, item))
   }
+
+  /**
+   * 取消所有选中组件的变换器
+   */
+  deActiveElementsTransformers(): void {
+    const element = this.shield.store.uniqSelectedElement;
+    element?.deActiveAllTransformers();
+  }
+
+  /**
+   * 取消所有选中元素的边框变换器
+   */
+  deActiveElementsBorderTransformers(): void {
+    const element = this.shield.store.uniqSelectedElement;
+    element?.deActiveAllBorderTransformers();
+  }
 }

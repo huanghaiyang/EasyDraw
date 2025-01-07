@@ -17,6 +17,8 @@ export default interface IStageSelection {
   tryActiveElementRotation(point: IPoint): IElementRotation;
   tryActiveElementTransformer(point: IPoint): IElementTransformer;
   tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer;
+  deActiveElementsTransformers(): void;
+  deActiveElementsBorderTransformers(): void;
   getActiveElementTransformer(): IElementTransformer;
   getActiveElementBorderTransformer(): IElementBorderTransformer;
   refreshRangeElements(rangePoints: IPoint[]): void;

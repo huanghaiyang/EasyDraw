@@ -34,6 +34,7 @@ export default interface IElement {
   get borderTransformEnable(): boolean;
   get fillEnabled(): boolean;
   get strokeEnable(): boolean;
+  get coordScale(): number;
 
   get width(): number;
   get height(): number;

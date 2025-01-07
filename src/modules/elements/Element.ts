@@ -82,6 +82,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  get coordScale(): number {
+    return 1 / this._stageScale;
+  }
+
   // 获取变形/移动/旋转操作之前的原始坐标
   get originalModelCoords(): IPoint[] {
     return this._originalModelCoords;
@@ -546,8 +550,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result = this._rotatePathPoints.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
-        width: DefaultTransformerValue / this._stageScale,
-        height: DefaultTransformerValue / this._stageScale,
+        width: DefaultTransformerValue * this.coordScale,
+        height: DefaultTransformerValue * this.coordScale,
       }, {
         angle: this.model.angle
       });
@@ -594,7 +598,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._stageWorldCoord = stageWorldCoord;
     this._stageScale = stageScale;
     this.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
-    this.rotation.model.scale = 1 / stageScale;
+    this.rotation.model.scale = this.coordScale;
     this.rotation.refresh();
   }
 
