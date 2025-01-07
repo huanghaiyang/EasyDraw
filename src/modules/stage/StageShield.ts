@@ -61,8 +61,11 @@ export default class StageShield extends DrawerBase implements IStageShield {
     return CommonUtils.getRectVertices(this.stageRect);
   }
 
-  get stageWordRectPoints(): IPoint[] {
-    return CommonUtils.getBoxVertices(this.stageWorldCoord, this.stageRect);
+  get stageWordRectCoords(): IPoint[] {
+    let { width, height } = this.stageRect;
+    width /= this.stageScale;
+    height /= this.stageScale;
+    return CommonUtils.getBoxVertices(this.stageWorldCoord, { width, height });
   }
 
   // 鼠标按下位置

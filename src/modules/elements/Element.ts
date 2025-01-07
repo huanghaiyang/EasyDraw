@@ -18,7 +18,6 @@ import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
-import PolygonUtils from "@/utils/PolygonUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -43,38 +42,47 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
+  // 是否可以修改宽度
   get widthModifyEnable(): boolean {
     return true;
   }
 
+  // 是否可以修改高度
   get heightModifyEnable(): boolean {
     return true;
   }
 
+  // 是否可以旋转
   get rotationEnable(): boolean {
     return true;
   }
 
+  // 是否可以通过顶点旋转
   get verticesRotationEnable(): boolean {
     return true;
   }
 
+  // 是否可以通过顶点变形
   get verticesTransformEnable(): boolean {
     return true;
   }
 
+  // 是否可以通过边框变形
   get borderTransformEnable(): boolean {
     return true;
   }
 
+  // 是否可以填充颜色
   get fillEnabled(): boolean {
     return true;
   }
 
+  // 是否可以描边
   get strokeEnable(): boolean {
     return true;
   }
 
+  // 获取变形/移动/旋转操作之前的原始坐标
   get originalModelCoords(): IPoint[] {
     return this._originalModelCoords;
   }
@@ -105,6 +113,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get centroid(): IPoint {
     return this.calcCentroid();
+  }
+
+  get centroidCoord(): IPoint {
+    return this.calcCentroidCoord();
   }
 
   @computed
@@ -367,6 +379,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rotatePoints: IPoint[] = [];
   protected _rotatePathPoints: IPoint[] = [];
   protected _rotateOutlinePathPoints: IPoint[] = [];
+  protected _maxOutlineBoxPoints: IPoint[] = [];
+  protected _rotateOutlinePathCoords: IPoint[] = [];
   protected _transformers: IElementTransformer[] = [];
   protected _borderTransformers: IElementBorderTransformer[] = [];
   protected _stageRect: DOMRect;
@@ -388,6 +402,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._maxBoxPoints;
   }
 
+  get maxOutlineBoxPoints(): IPoint[] {
+    return this._maxOutlineBoxPoints;
+  }
+
   get rotatePoints(): IPoint[] {
     return this._rotatePoints;
   }
@@ -398,6 +416,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get rotateOutlinePathPoints(): IPoint[] {
     return this._rotateOutlinePathPoints;
+  }
+
+  get rotateOutlinePathCoords(): IPoint[] {
+    return this._rotateOutlinePathCoords;
   }
 
   get transformers(): IElementTransformer[] {
@@ -443,7 +465,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePoints(): IPoint[] {
-    return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, MathUtils.calcPolygonCentroid(this._points)))
+    const centroid = MathUtils.calcPolygonCentroid(this._points)
+    return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, centroid))
   }
 
   /**
@@ -452,7 +475,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePathPoints(): IPoint[] {
-    return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, this.centroid));
+    const centroid = this.calcCentroid();
+    return this._pathPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, centroid));
   }
 
   /**
@@ -462,14 +486,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateOutlinePathPoints(): IPoint[] {
     const { strokeType, strokeWidth } = this.model.styles;
-    if (strokeWidth && strokeType !== StrokeTypes.inside) {
-      let r = strokeWidth / 2;
-      if (strokeType === StrokeTypes.outside) {
-        r = strokeWidth;
-      }
-      return PolygonUtils.getPolygonOuterVertices(this._rotatePathPoints, r);
-    }
-    return this._rotatePathPoints;
+    return ElementUtils.calcOutlinePoints(this._rotatePathPoints, strokeType, strokeWidth);
   }
 
   /**
@@ -482,12 +499,42 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算带边框的最大盒模型
+   * 
+   * @returns 
+   */
+  calcMaxOutlineBoxPoints(): IPoint[] {
+    return CommonUtils.getBoxPoints(this._rotateOutlinePathPoints)
+  }
+
+  /**
+   * 计算世界坐标下的旋转边框坐标
+   * 
+   * @returns 
+   */
+  calcRotateOutlinePathCoords(): IPoint[] {
+    const centroidCoord = this.calcCentroidCoord();
+    const rotateCoords = this.model.coords.map(coord => MathUtils.rotateRelativeCentroid(coord, this.model.angle, centroidCoord))
+    const result = ElementUtils.calcOutlinePoints(rotateCoords, this.model.styles.strokeType, this.model.styles.strokeWidth);
+    return result;
+  }
+
+  /**
    * 计算中心点
    * 
    * @returns 
    */
   calcCentroid(): IPoint {
     return MathUtils.calcPolygonCentroid(this.pathPoints);
+  }
+
+  /**
+   * 计算世界坐标中心点
+   * 
+   * @returns 
+   */
+  calcCentroidCoord(): IPoint {
+    return MathUtils.calcPolygonCentroid(this.model.coords);
   }
 
   /**
@@ -563,10 +610,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
-    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
     this._transformers = this.calcTransformers();
     this._borderTransformers = this.calcBorderTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
+    this._refreshOutline();
   }
 
   /**
@@ -599,14 +646,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 判断世界模型是否与多边形相交、
    * 
-   * TODO
-   * 
-   * @param points 
+   * @param coords 
    * @returns 
    */
-  isModelPolygonOverlap(points: IPoint[]): boolean {
-    const modelRotatePathPoints = this.model.coords.map(point => MathUtils.rotate(point, this.model.angle))
-    return MathUtils.polygonsOverlap(modelRotatePathPoints, points);
+  isModelPolygonOverlap(coords: IPoint[]): boolean {
+    return MathUtils.polygonsOverlap(this._rotateOutlinePathCoords, coords);
   }
 
   /**
@@ -924,6 +968,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新与边框设置相关的坐标
+   */
+  protected _refreshOutline(): void {
+    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+    this._rotateOutlinePathCoords = this.calcRotateOutlinePathCoords();
+    this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
+  }
+
+  /**
    * 设置组件宽度
    * 
    * @param value 
@@ -996,7 +1049,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes): void {
     this.model.styles.strokeType = value;
-    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+    this._refreshOutline();
   }
 
   /**
@@ -1024,7 +1077,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeWidth(value: number): void {
     this.model.styles.strokeWidth = value;
-    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+    this._refreshOutline();
   }
 
   /**

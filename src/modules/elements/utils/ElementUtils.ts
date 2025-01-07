@@ -10,6 +10,8 @@ import { CreatorTypes } from "@/types/Creator";
 import { DefaultSelectionRotateDistance } from "@/types/MaskStyles";
 import ElementLine from "@/modules/elements/ElementLine";
 import ElementTaskLine from "@/modules/render/base/task/ElementTaskLine";
+import { StrokeTypes } from "@/types/ElementStyles";
+import PolygonUtils from "@/utils/PolygonUtils";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -252,5 +254,24 @@ export default class ElementUtils {
       angle = angle - 360;
     }
     return angle;
+  }
+
+  /**
+   * 计算组件包含外边框宽度的坐标
+   * 
+   * @param points
+   * @param strokeType
+   * @param strokeWidth
+   * @returns
+   */
+  static calcOutlinePoints(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+    if (strokeWidth && strokeType !== StrokeTypes.inside) {
+      let r = strokeWidth / 2;
+      if (strokeType === StrokeTypes.outside) {
+        r = strokeWidth;
+      }
+      return PolygonUtils.getPolygonOuterVertices(points, r);
+    }
+    return points;
   }
 }

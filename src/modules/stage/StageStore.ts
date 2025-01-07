@@ -752,9 +752,10 @@ export default class StageStore implements IStageStore {
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
   refreshStageElements(): void {
+    const stageWordRectCoords = this.shield.stageWordRectCoords;
     this._elementList.forEach(node => {
       const element = node.value;
-      const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectPoints);
+      const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage })
       element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       element.refreshOriginalProps();

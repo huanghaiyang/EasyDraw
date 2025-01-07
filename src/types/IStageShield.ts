@@ -26,7 +26,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get shouldRedraw(): boolean;
   get isElementsBusy(): boolean;
   get stageRectPoints(): IPoint[];
-  get stageWordRectPoints(): IPoint[];
+  get stageWordRectCoords(): IPoint[];
   get isElementsDragging(): boolean;
   get isElementsTransforming(): boolean;
   get isStageMoving(): boolean;
