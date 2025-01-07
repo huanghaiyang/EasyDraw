@@ -3,6 +3,7 @@ import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -124,24 +125,63 @@ export default class CanvasUtils {
    * @param styles 
    */
   static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
+    if (styles.fillColorOpacity) {
+      const innerPoints = PolygonUtils.getPolygonInnerVertices(points, (styles.strokeWidth / 2) * CanvasUtils.scale);
+      CanvasUtils.drawPathFill(target, innerPoints, styles);
+    }
+    if (styles.strokeWidth && styles.strokeColorOpacity) {
+      CanvasUtils.drawPathStroke(target, points, styles);
+    }
+  }
+
+  /**
+   * 绘制描边形状
+   * 
+   * @param target 
+   * @param points 
+   * @param styles 
+   */
+  static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
-    ctx.fillStyle = StyleUtils.joinFillColor(styles);
-    ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {
-        ctx.moveTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+        ctx.moveTo(point.x, point.y);
       } else {
-        ctx.lineTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+        ctx.lineTo(point.x, point.y);
       }
     });
     ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (styles.strokeWidth) {
+      ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
       ctx.stroke();
     }
+    ctx.restore();
+  }
+
+  /**
+   * 绘制填充形状
+   * 
+   * @param target 
+   * @param points 
+   * @param styles 
+   */
+  static drawPathFill(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.fillStyle = StyleUtils.joinFillColor(styles);
+    ctx.beginPath();
+    points.forEach((point, index) => {
+      if (index === 0) {
+        ctx.moveTo(point.x, point.y);
+      } else {
+        ctx.lineTo(point.x, point.y);
+      }
+    });
     ctx.fill();
     ctx.restore();
   }
