@@ -2,6 +2,7 @@
 import { ArrowDown } from "@element-plus/icons-vue";
 import { useStageStore } from "@/stores/stage";
 import { StageScales } from "@/types/Stage";
+import MathUtils from "@/utils/MathUtils";
 
 const stageStore = useStageStore();
 </script>
@@ -10,7 +11,7 @@ const stageStore = useStageStore();
     <div class="scale-setting__item factor">
       <el-dropdown trigger="click">
         <span class="el-dropdown-link">
-          {{ stageStore.scale * 100 + "%" }}
+          {{ MathUtils.preciseToFixed(stageStore.scale * 100, 0) + "%" }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -22,7 +23,7 @@ const stageStore = useStageStore();
               :key="value"
               @click="stageStore.setScale(value)"
             >
-              缩放{{ value * 100 + "%" }}
+              缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>

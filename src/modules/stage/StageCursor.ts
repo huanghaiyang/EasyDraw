@@ -35,8 +35,8 @@ export default class StageCursor implements IStageCursor {
   transform(e: MouseEvent): IPoint {
     if (!this.shield.stageRect) return { x: 0, y: 0 };
     this.value = CommonUtils.getEventPosition(e, this.shield.stageRect, this.shield.stageScale);
-    this.value.x = MathUtils.toFixed(this.value.x, 0);
-    this.value.y = MathUtils.toFixed(this.value.y, 0);
+    this.value.x = MathUtils.preciseToFixed(this.value.x, 0);
+    this.value.y = MathUtils.preciseToFixed(this.value.y, 0);
     return this.value;
   }
 

@@ -91,8 +91,8 @@ export default class ElementUtils {
    */
   static calcStageRelativePoint(worldCoord: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
     return {
-      x: MathUtils.toFixed(worldCoord.x + (stageRect.width / 2) / stageScale - stageWorldCoord.x, 2),
-      y: MathUtils.toFixed(worldCoord.y + (stageRect.height / 2) / stageScale - stageWorldCoord.y, 2)
+      x: MathUtils.preciseToFixed(worldCoord.x + (stageRect.width / 2) / stageScale - stageWorldCoord.x, 2),
+      y: MathUtils.preciseToFixed(worldCoord.y + (stageRect.height / 2) / stageScale - stageWorldCoord.y, 2)
     }
   }
 
@@ -119,8 +119,8 @@ export default class ElementUtils {
    */
   static calcWorldPoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
     return {
-      x: MathUtils.toFixed(point.x - (stageRect.width / 2) / stageScale + stageWorldCoord.x, 2),
-      y: MathUtils.toFixed(point.y - (stageRect.height / 2) / stageScale + stageWorldCoord.y, 2)
+      x: MathUtils.preciseToFixed(point.x - (stageRect.width / 2) / stageScale + stageWorldCoord.x, 2),
+      y: MathUtils.preciseToFixed(point.y - (stageRect.height / 2) / stageScale + stageWorldCoord.y, 2)
     }
   }
 
@@ -236,7 +236,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return {
-          width: MathUtils.toFixed(MathUtils.distanceBetweenPoints(coords[0], coords[1]), 2),
+          width: MathUtils.preciseToFixed(MathUtils.distanceBetweenPoints(coords[0], coords[1]), 2),
           height: 0,
         }
       }

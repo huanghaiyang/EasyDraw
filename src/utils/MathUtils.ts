@@ -438,10 +438,31 @@ export default class MathUtils {
    * @param precision 
    * @returns 
    */
-  static toFixed(num: number, precision: number = 2): number {
-    return parseFloat(num.toFixed(precision));
-  }
+  static preciseToFixed(number: number, digits: number = 2): number {
+    if (typeof number !== 'number' || typeof digits !== 'number') {
+      throw new TypeError('Both arguments must be numbers');
+    }
 
+    // Handle edge cases for very small or very large numbers
+    if (!isFinite(number)) {
+      return number;
+    }
+
+    const factor = Math.pow(10, digits);
+    const roundedNumber = Math.round(number * factor);
+    const resultString = roundedNumber / factor;
+
+    // Ensure the result has the correct number of decimal places
+    const resultArray = resultString.toString().split('.');
+    if (resultArray.length === 1) {
+      resultArray.push(''); // No decimal part
+    }
+    while (resultArray[1].length < digits) {
+      resultArray[1] += '0'; // Add trailing zeros if necessary
+    }
+
+    return Number(resultArray.join('.'));
+  }
   /**
    * 给定三角形的三个坐标点a,b,c计算b的夹角
    */

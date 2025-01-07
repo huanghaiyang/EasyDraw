@@ -2,9 +2,21 @@ import IStageEvent from "@/types/IStageEvent";
 import IStageShield from "@/types/IStageShield";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from 'events';
+import isHotkey from "is-hotkey";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
+
+  private _isCtrl: boolean;
+  private _isCtrlWheel: boolean;
+
+  get isCtrl(): boolean {
+    return this._isCtrl;
+  }
+
+  get isCtrlWheel(): boolean {
+    return this._isCtrlWheel;
+  }
 
   constructor(shield: IStageShield) {
     super();
@@ -12,6 +24,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   }
 
   init(): void {
+    this._isCtrl = false;
+    this._isCtrlWheel = false;
     this.initEvents();
   }
 
@@ -50,6 +64,22 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     })
     this.shield.canvas.addEventListener('mouseup', e => {
       this.emit('pressUp', e)
+    })
+    this.shield.canvas.addEventListener('wheel', e => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      this._isCtrlWheel = this._isCtrl;
+      if (this._isCtrlWheel) {
+        this.emit('wheelScale', -e.deltaY / 200);
+      }
+    })
+
+    document.addEventListener('keydown', e =>{
+      this._isCtrl = isHotkey('ctrl')(e);
+    })
+    document.addEventListener('keyup', e =>{
+      this._isCtrl = false;
     })
   }
 }

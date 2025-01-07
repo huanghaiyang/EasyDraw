@@ -230,8 +230,8 @@ export default class CommonUtils {
    * @returns 
    */
   static calcRectangleSize(coords: IPoint[]): ISize {
-    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[3].y));
+    const width = MathUtils.preciseToFixed(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.preciseToFixed(Math.abs(coords[0].y - coords[3].y));
     return { width, height };
   }
 
@@ -242,8 +242,8 @@ export default class CommonUtils {
    * @returns 
    */
   static calcLineSize(coords: IPoint[]): ISize {
-    const width = MathUtils.toFixed(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.toFixed(Math.abs(coords[0].y - coords[1].y));
+    const width = MathUtils.preciseToFixed(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.preciseToFixed(Math.abs(coords[0].y - coords[1].y));
     return { width, height };
   }
 

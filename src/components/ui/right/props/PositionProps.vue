@@ -12,8 +12,8 @@ watch(
   () => stageStore.position,
   (newValue) => {
     if (newValue) {
-      xValue.value = MathUtils.toFixed(newValue.x);
-      yValue.value = MathUtils.toFixed(newValue.y);
+      xValue.value = MathUtils.preciseToFixed(newValue.x);
+      yValue.value = MathUtils.preciseToFixed(newValue.y);
     }
   }
 );

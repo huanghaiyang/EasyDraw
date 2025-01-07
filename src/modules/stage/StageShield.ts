@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { cloneDeep, isBoolean } from "lodash";
+import { clamp, cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement from "@/types/IElement";
@@ -27,6 +27,7 @@ import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
+import MathUtils from "@/utils/MathUtils";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -157,6 +158,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.handleCursorLeave = this.handleCursorLeave.bind(this);
     this.handlePressDown = this.handlePressDown.bind(this);
     this.handlePressUp = this.handlePressUp.bind(this);
+    this.handleWheelScale = this.handleWheelScale.bind(this);
   }
 
   /**
@@ -336,6 +338,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('cursorLeave', this.handleCursorLeave)
     this.event.on('pressDown', this.handlePressDown)
     this.event.on('pressUp', this.handlePressUp)
+    this.event.on('wheelScale', this.handleWheelScale)
   }
 
   /**
@@ -825,6 +828,22 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.store.refreshStageElements();
     this._redrawAll(true);
     this.emit(ShieldDispatcherNames.scaleChanged, value);
+  }
+
+  /**
+   * 滚轮缩放
+   * 
+   * @param deltaScale 
+   */
+  private handleWheelScale(deltaScale: number): void {
+    let value = clamp(this.stageScale + deltaScale, 0.02, 100);
+    value = MathUtils.preciseToFixed(value, 2);
+    if (this.stageScale === 0.02) {
+      if (deltaScale > 0) {
+        value = 0.1;
+      }
+    }
+    this.setScale(value);
   }
 
 }
