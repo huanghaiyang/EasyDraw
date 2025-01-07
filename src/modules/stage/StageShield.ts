@@ -834,8 +834,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 滚轮缩放
    * 
    * @param deltaScale 
+   * @param e
    */
-  private handleWheelScale(deltaScale: number): void {
+  private handleWheelScale(deltaScale: number, e: MouseEvent): void {
+    const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
+    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageRect, this.stageWorldCoord, this.stageScale);
+
     let value = clamp(this.stageScale + deltaScale, 0.02, 100);
     value = MathUtils.preciseToFixed(value, 2);
     if (this.stageScale === 0.02) {
@@ -843,6 +847,18 @@ export default class StageShield extends DrawerBase implements IStageShield {
         value = 0.1;
       }
     }
+
+    const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
+    const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;
+    const stageRectCoordX = cursorCoord.x - cursorCoordOffsetX;
+    const stageRectCoordY = cursorCoord.y - cursorCoordOffsetY;
+    const stageWorldCoordX = stageRectCoordX + this.stageRect.width / 2 / value;
+    const stageWorldCoordY = stageRectCoordY + this.stageRect.height / 2 / value;
+    this.stageWorldCoord = {
+      x: stageWorldCoordX,
+      y: stageWorldCoordY
+    };
+
     this.setScale(value);
   }
 
