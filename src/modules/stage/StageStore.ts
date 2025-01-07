@@ -16,7 +16,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { ElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
+import { getDefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 
 export default class StageStore implements IStageStore {
@@ -612,7 +612,7 @@ export default class StageStore implements IStageStore {
       left: position.x,
       top: position.y,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
-      styles: DefaultElementStyle
+      styles: getDefaultElementStyle(type)
     }
     return model;
   }

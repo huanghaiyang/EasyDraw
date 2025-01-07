@@ -112,7 +112,7 @@ const toggleColorPickerVisible = () => {
           v-model="strokeWidth"
           placeholder="输入数字"
           type="number"
-          min="0"
+          :min="stageStore.uniqSelectedElement?.model.type === CreatorTypes.line? 1: 0"
           @change="(value) => stageStore.setElementsStrokeWidth(Number(value))"
           :disabled="stageStore.inputDisabled"
         >

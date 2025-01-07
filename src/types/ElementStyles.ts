@@ -64,6 +64,7 @@ export const DefaultFontSize = 12;
 export const DefaultFontFamily = 'sans-serif';
 export const DefaultTextAlign = 'center';
 export const DefaultTextBaseline = 'middle';
+export const DefaultLineStrokeWidth = 1;
 
 export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,
@@ -76,4 +77,21 @@ export const DefaultElementStyle: ElementStyles = {
   fontFamily: DefaultFontFamily,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline
+}
+
+export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
+  switch (type) {
+    case CreatorTypes.line: {
+      return {
+        ...DefaultElementStyle,
+        strokeWidth: DefaultLineStrokeWidth
+      }
+    }
+    case CreatorTypes.rectangle:
+    default: {
+      return {
+        ...DefaultElementStyle,
+      }
+    }
+  }
 }
