@@ -185,7 +185,7 @@ export default class MathUtils {
    * @param points2 
    * @returns 
    */
-  static polygonsOverlap(points1: IPoint[], points2: IPoint[]) {
+  static isPolygonsOverlap(points1: IPoint[], points2: IPoint[]) {
     const poly1 = points1.map(p => [p.x, p.y]);
     const poly2 = points2.map(p => [p.x, p.y]);
 

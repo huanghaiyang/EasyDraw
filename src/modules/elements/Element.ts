@@ -512,15 +512,22 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算旋转后的坐标
+   * 
+   * @returns 
+   */
+  calcRotateCoords(): IPoint[] {
+    const centroidCoord = this.calcCentroidCoord();
+    return this.model.coords.map(coord => MathUtils.rotateRelativeCentroid(coord, this.model.angle, centroidCoord))
+  }
+
+  /**
    * 计算世界坐标下的旋转边框坐标
    * 
    * @returns 
    */
   calcRotateOutlinePathCoords(): IPoint[] {
-    const centroidCoord = this.calcCentroidCoord();
-    const rotateCoords = this.model.coords.map(coord => MathUtils.rotateRelativeCentroid(coord, this.model.angle, centroidCoord))
-    const result = ElementUtils.calcOutlinePoints(rotateCoords, this.model.styles.strokeType, this.model.styles.strokeWidth);
-    return result;
+    return ElementUtils.calcOutlinePoints(this.calcRotateCoords(), this.model.styles.strokeType, this.model.styles.strokeWidth);
   }
 
   /**
@@ -617,7 +624,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._transformers = this.calcTransformers();
     this._borderTransformers = this.calcBorderTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
-    this._refreshOutline();
+    this.refreshOutline();
   }
 
   /**
@@ -645,7 +652,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return MathUtils.polygonsOverlap(this.rotateOutlinePathPoints, points);
+    return MathUtils.isPolygonsOverlap(this.rotateOutlinePathPoints, points);
   }
   /**
    * 判断世界模型是否与多边形相交、
@@ -654,7 +661,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return MathUtils.polygonsOverlap(this._rotateOutlinePathCoords, coords);
+    return MathUtils.isPolygonsOverlap(this._rotateOutlinePathCoords, coords);
   }
 
   /**
@@ -953,7 +960,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 获取设置尺寸变换的变换点
+   * 获取设置尺寸变换的变换点（设置宽度的时候使用）
    * 
    * @returns 
    */
@@ -974,7 +981,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新与边框设置相关的坐标
    */
-  protected _refreshOutline(): void {
+  protected refreshOutline(): void {
     this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
     this._rotateOutlinePathCoords = this.calcRotateOutlinePathCoords();
     this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
@@ -1053,7 +1060,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes): void {
     this.model.styles.strokeType = value;
-    this._refreshOutline();
+    this.refreshOutline();
   }
 
   /**
@@ -1081,7 +1088,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeWidth(value: number): void {
     this.model.styles.strokeWidth = value;
-    this._refreshOutline();
+    this.refreshOutline();
   }
 
   /**

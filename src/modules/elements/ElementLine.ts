@@ -5,6 +5,7 @@ import { IElementLine } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import PolygonUtils from "@/utils/PolygonUtils";
 
 export default class ElementLine extends Element implements IElementLine {
 
@@ -40,6 +41,61 @@ export default class ElementLine extends Element implements IElementLine {
     return this.model.coords[1];
   }
 
+  private _outerPathPoints: IPoint[] = [];
+  private _outerPathCoords: IPoint[] = [];
+
+  get outerPathPoints(): IPoint[] {
+    return this._outerPathPoints;
+  }
+
+  get outerPathCoords(): IPoint[] {
+    return this._outerPathCoords;
+  }
+
+  private refreshBentOutline() {
+    this._outerPathPoints = this.calcOuterPathPoints();
+    this._outerPathCoords = this.calcOuterPathCoords();
+  }
+
+  /**
+   * 刷新舞台坐标
+   * 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @param stageScale
+   */
+  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void {
+    super.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
+    this.refreshBentOutline();
+  }
+
+  /**
+   * 计算外轮廓
+   * 
+   * @returns 
+   */
+  calcOuterPathPoints(): IPoint[] {
+    return PolygonUtils.calcBentLineOuterVertices(this.rotatePathPoints, this.model.styles.strokeWidth / 2);
+  }
+
+  /**
+   * 计算外轮廓坐标
+   * 
+   * @returns 
+   */
+  calcOuterPathCoords(): IPoint[] {
+    const rotateCoords = this.calcRotateCoords();
+    return PolygonUtils.calcBentLineOuterVertices(rotateCoords, this.model.styles.strokeWidth);
+  }
+
+  /**
+   * 刷新轮廓坐标
+   */
+  protected refreshOutline(): void {
+    super.refreshOutline();
+    this.refreshBentOutline();
+  }
+
   /**
    * 获取显示角度
    * 
@@ -56,7 +112,26 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, (DefaultLineElementClosestDistance + this.model.styles.strokeWidth) * this.coordScale);
+    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, (DefaultLineElementClosestDistance + this.model.styles.strokeWidth / 2) / this.coordScale);
+  }
+
+  /**
+   * 是否与多边形相交
+   * 
+   * @param points 
+   */
+  isPolygonOverlap(points: IPoint[]): boolean {
+    return MathUtils.isPolygonsOverlap(this.outerPathPoints, points);
+  }
+
+  /**
+   * 判断直线外轮廓是否与给定的多边形相交
+   * 
+   * @param coords 
+   * @returns 
+   */
+  isModelPolygonOverlap(coords: IPoint[]): boolean {
+    return MathUtils.isPolygonsOverlap(this._outerPathCoords, coords);
   }
 
   /**
@@ -76,7 +151,7 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   /**
-   * 获取设置尺寸变换的变换点
+   * 获取设置尺寸变换的变换点（设置宽度的时候使用）
    * 
    * @returns 
    */

@@ -129,6 +129,7 @@ export default interface IElement {
   calcCentroid(): IPoint;
   calcCentroidCoord(): IPoint;
   calcTransformers(): IPoint[];
+  calcRotateCoords(): IPoint[];
 
   getTransformerByPoint(point: IPoint): IElementTransformer;
   getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer;
@@ -157,4 +158,9 @@ export interface IElementCircle extends IElement { }
 export interface IElementLine extends IElement {
   get startRotatePathPoint(): IPoint;
   get endRotatePathPoint(): IPoint;
+  get outerPathPoints(): IPoint[];
+  get outerPathCoords(): IPoint[];
+
+  calcOuterPathPoints(): IPoint[];
+  calcOuterPathCoords(): IPoint[];
 }

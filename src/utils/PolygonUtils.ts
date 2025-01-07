@@ -50,4 +50,44 @@ export default class PolygonUtils {
   static getPolygonOuterVertices(vertices: IPoint[], r: number): IPoint[] {
     return PolygonUtils.getPolygonVertices(vertices, r, false);
   }
+
+  /**
+   * 计算连续的线段的外顶点坐标
+   * 
+   * @param points 
+   * @param r 
+   */
+  static calcBentLineOuterVertices(points: IPoint[], r: number): IPoint[] {
+    const result: IPoint[] = [];
+    result.push(...PolygonUtils.calcBentLineClockWisePoints(points, r, true));
+    result.push(...PolygonUtils.calcBentLineClockWisePoints(points.reverse(), r, true));
+    return result;
+  }
+
+  /**
+   * 计算线段的平行线
+   * 
+   * @param points 
+   * @param r 
+   * @param isClockWise 
+   * @returns 
+   */
+  static calcBentLineClockWisePoints(points: IPoint[], r: number, isClockWise: boolean): IPoint[] {
+    const result: IPoint[] = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      let angle = MathUtils.calculateAngle(p1, p2);
+      if (isClockWise) {
+        angle = angle + 90;
+      } else {
+        angle = angle - 90;
+      }
+      result.push(MathUtils.calculateTargetPoint(p1, r, angle));
+      if (i === points.length - 2) {
+        result.push(MathUtils.calculateTargetPoint(p2, r, angle));
+      }
+    }
+    return result;
+  }
 }
