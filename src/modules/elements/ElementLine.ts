@@ -112,7 +112,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, (DefaultLineElementClosestDistance + this.model.styles.strokeWidth / 2) / this.coordScale);
+    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, DefaultLineElementClosestDistance + (this.model.styles.strokeWidth / 2) * this.coordScale);
   }
 
   /**
