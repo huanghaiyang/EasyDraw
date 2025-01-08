@@ -52,9 +52,13 @@ export default class ElementLine extends Element implements IElementLine {
     return this._outerPathCoords;
   }
 
+  /**
+   * 刷新 bent 外轮廓
+   */
   private refreshBentOutline() {
     this._outerPathPoints = this.calcOuterPathPoints();
     this._outerPathCoords = this.calcOuterPathCoords();
+    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(this.outerPathPoints);
   }
 
   /**

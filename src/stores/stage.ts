@@ -461,6 +461,12 @@ export const useStageStore = defineStore("stage", {
      */
     setScale(value: number): void {
       shield.setScale(value);
-    }
+    },
+    /**
+     * 自适应缩放
+     */
+    setAutoFit(): void {
+      shield.setAutoFit();
+    },
   },
 });

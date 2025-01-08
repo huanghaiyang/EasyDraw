@@ -271,4 +271,18 @@ export default class CommonUtils {
   static scalePoints(points: IPoint[], scale: number) {
     return points.map(point => CommonUtils.scalePoint(point, scale))
   }
+
+  /**
+   * 将源矩形缩放至目标矩形内部计算缩放比例
+   * 
+   * @param targetRect 
+   * @param sourceRect 
+   * @param padding 
+   * @returns 
+   */
+  static calcScale(targetRect: DOMRect | ISize, sourceRect: DOMRect | ISize, padding: number = 0): number {
+    const widthScale = (targetRect.width - padding * 2) / sourceRect.width;
+    const heightScale = (targetRect.height - padding * 2) / sourceRect.height;
+    return Math.min(widthScale, heightScale);
+  }
 }

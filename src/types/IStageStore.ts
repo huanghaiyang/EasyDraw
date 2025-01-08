@@ -5,6 +5,7 @@ import IStageSetter from "@/types/IStageSetter";
 
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
+  get visibleElements(): IElement[];
   get creatingElements(): IElement[];
   get provisionalElements(): IElement[];
   get selectedElements(): IElement[];

@@ -4,3 +4,5 @@ export enum TransformTypes {
   vertices,
   border
 }
+
+export const DefaultAutoFitPadding = 100

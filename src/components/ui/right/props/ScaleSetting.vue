@@ -9,7 +9,7 @@ const stageStore = useStageStore();
 <template>
   <div class="scale-setting">
     <div class="scale-setting__item factor">
-      <el-dropdown trigger="click">
+      <el-dropdown trigger="click" popper-class="scale-setting__dropdown">
         <span class="el-dropdown-link">
           {{ MathUtils.preciseToFixed(stageStore.scale * 100, 0) + "%" }}
           <el-icon class="el-icon--right">
@@ -18,6 +18,10 @@ const stageStore = useStageStore();
         </span>
         <template #dropdown>
           <el-dropdown-menu>
+            <el-dropdown-item @click="stageStore.setAutoFit">
+              自适应缩放
+            </el-dropdown-item>
+            <el-divider>预置缩放</el-divider>
             <el-dropdown-item
               v-for="value in StageScales"
               :key="value"
@@ -42,6 +46,24 @@ const stageStore = useStageStore();
     padding: 0 8px;
     &.factor {
       cursor: pointer;
+    }
+  }
+}
+</style>
+<style lang="less">
+.scale-setting__dropdown {
+  width: 200px;
+  color: #000;
+  .el-dropdown-menu {
+    width: 100%;
+  }
+  .el-divider--horizontal {
+    margin: 5px 0;
+    .el-divider__text  {
+      font-size: 12px;
+      color: gray;
+      padding: 0 2px;
+      margin: 0;
     }
   }
 }

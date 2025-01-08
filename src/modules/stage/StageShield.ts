@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, cloneDeep, isBoolean } from "lodash";
+import { clamp, cloneDeep, flatten, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement from "@/types/IElement";
@@ -28,6 +28,7 @@ import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import MathUtils from "@/utils/MathUtils";
+import { DefaultAutoFitPadding } from "@/types/Stage";
 
 export default class StageShield extends DrawerBase implements IStageShield {
   // 当前正在使用的创作工具
@@ -860,6 +861,25 @@ export default class StageShield extends DrawerBase implements IStageShield {
     };
 
     this.setScale(value);
+  }
+
+  /**
+   * 舞台自适应
+   */
+  setAutoFit(): void {
+    if (this.store.visibleElements.length) {
+      const centroid = MathUtils.calcPolygonCentroid(flatten(this.store.visibleElements.map(element => element.model.coords)))
+      this.stageWorldCoord = centroid;
+      this.store.refreshStageElements();
+      
+      const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map(element => element.maxOutlineBoxPoints)))
+      const { width, height } = CommonUtils.calcRectangleSize(elementsBox);
+      const scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding), 2);
+      this.setScale(scale);
+    } else {
+      this.stageWorldCoord = { x: 0, y: 0 }
+      this.setScale(1);
+    }
   }
 
 }

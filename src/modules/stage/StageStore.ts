@@ -38,6 +38,8 @@ export default class StageStore implements IStageStore {
   private _stageElementsMap = new ElementSortedMap<string, IElement>();
   // 未在舞台的元素映射关系，加快查询
   private _noneStageElementsMap = new ElementSortedMap<string, IElement>();
+  // 可见元素映射关系，加快查询
+  private _visibleElementsMap = new ElementSortedMap<string, IElement>();
   // 选区元素映射关系，加快查询
   private _rangeElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转目标元素映射关系，加快查询
@@ -52,14 +54,9 @@ export default class StageStore implements IStageStore {
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
 
-    this._provisionalElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements)
     })
-    this._stageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
-    this._noneStageElementsMap.on(ElementSortedMapEventNames.changed, () => { })
-    this._rangeElementsMap.on(ElementSortedMapEventNames.changed, () => { })
-    this._rotatingTargetElementsMap.on(ElementSortedMapEventNames.changed, () => { })
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements)
     })
@@ -99,6 +96,10 @@ export default class StageStore implements IStageStore {
     return this._rangeElementsMap.valuesArray();
   }
 
+  get visibleElements(): IElement[] {
+    return this._visibleElementsMap.valuesArray();
+  }
+
   get uniqSelectedElement(): IElement {
     if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
   }
@@ -135,6 +136,7 @@ export default class StageStore implements IStageStore {
       this._provisionalElementsMap.delete(element.id);
       this._targetElementsMap.delete(element.id);
       this._rangeElementsMap.delete(element.id);
+      this._visibleElementsMap.delete(element.id);
       this._rotatingTargetElementsMap.delete(element.id);
     })
   }
@@ -198,6 +200,14 @@ export default class StageStore implements IStageStore {
           this._rangeElementsMap.set(element.id, element);
         } else {
           this._rangeElementsMap.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isVisible: {
+        if (value) {
+          this._visibleElementsMap.set(element.id, element);
+        } else {
+          this._visibleElementsMap.delete(element.id);
         }
         break;
       }
