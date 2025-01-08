@@ -360,4 +360,24 @@ export default class CommonUtils {
       { x: left, y: top + height },
     ];
   }
+
+  /**
+   * 缩放盒模型
+   * 
+   * @param rect 
+   * @param scale 
+   * @returns 
+   */
+  static scaleRect(rect: Partial<DOMRect>, scale: number): Partial<DOMRect> {
+    const result: Partial<DOMRect> = {};
+    for (const key in rect) {
+      if (Object.prototype.hasOwnProperty.call(rect, key)) {
+        const value = rect[key];
+        if (typeof value === 'number') {
+          result[key] = MathUtils.preciseToFixed(value * scale, 2);
+        }
+      }
+    }
+    return result;
+  }
 }
