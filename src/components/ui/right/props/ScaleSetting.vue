@@ -9,7 +9,11 @@ const stageStore = useStageStore();
 <template>
   <div class="scale-setting">
     <div class="scale-setting__item factor">
-      <el-dropdown trigger="click" popper-class="scale-setting__dropdown">
+      <el-dropdown
+        trigger="click"
+        popper-class="scale-setting__dropdown"
+        :hide-on-click="false"
+      >
         <span class="el-dropdown-link">
           {{ MathUtils.preciseToFixed(stageStore.scale * 100, 0) + "%" }}
           <el-icon class="el-icon--right">
@@ -19,7 +23,16 @@ const stageStore = useStageStore();
         <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item @click="stageStore.setAutoFit">
-              自适应缩放
+              <span>自适应缩放</span>
+              <span>shift + 1</span>
+            </el-dropdown-item>
+            <el-dropdown-item @click="stageStore.setScaleReduce">
+              <span>缩小</span>
+              <span>ctrl + -</span>
+            </el-dropdown-item>
+            <el-dropdown-item @click="stageStore.setScaleIncrease">
+              <span>放大</span>
+              <span>ctrl + +</span>
             </el-dropdown-item>
             <el-divider>预置缩放</el-divider>
             <el-dropdown-item
@@ -27,7 +40,10 @@ const stageStore = useStageStore();
               :key="value"
               @click="stageStore.setScale(value)"
             >
-              缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}
+              <span
+                >缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}</span
+              >
+              <span>{{ value === 1 ? "ctrl + 0" : "" }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -56,10 +72,15 @@ const stageStore = useStageStore();
   color: #000;
   .el-dropdown-menu {
     width: 100%;
+    user-select: none;
+    &__item {
+      display: flex;
+      justify-content: space-between;
+    }
   }
   .el-divider--horizontal {
     margin: 5px 0;
-    .el-divider__text  {
+    .el-divider__text {
       font-size: 12px;
       color: gray;
       padding: 0 2px;

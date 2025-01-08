@@ -153,13 +153,6 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.selection = new StageSelection(this);
     this.mask = new DrawerMask(this);
     this.renderer = new ShieldRenderer(this);
-
-    this._refreshSize = this._refreshSize.bind(this);
-    this.handleCursorMove = this.handleCursorMove.bind(this);
-    this.handleCursorLeave = this.handleCursorLeave.bind(this);
-    this.handlePressDown = this.handlePressDown.bind(this);
-    this.handlePressUp = this.handlePressUp.bind(this);
-    this.handleWheelScale = this.handleWheelScale.bind(this);
   }
 
   /**
@@ -334,12 +327,16 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 添加事件监听
    */
   private _addEventListeners() {
-    this.event.on('resize', this._refreshSize)
-    this.event.on('cursorMove', this.handleCursorMove)
-    this.event.on('cursorLeave', this.handleCursorLeave)
-    this.event.on('pressDown', this.handlePressDown)
-    this.event.on('pressUp', this.handlePressUp)
-    this.event.on('wheelScale', this.handleWheelScale)
+    this.event.on('resize', this._refreshSize.bind(this))
+    this.event.on('cursorMove', this._handleCursorMove.bind(this))
+    this.event.on('cursorLeave', this._handleCursorLeave.bind(this))
+    this.event.on('pressDown', this._handlePressDown.bind(this))
+    this.event.on('pressUp', this._handlePressUp.bind(this))
+    this.event.on('wheelScale', this._handleWheelScale.bind(this))
+    this.event.on('scaleReduce', this._handleScaleReduce.bind(this))
+    this.event.on('scaleIncrease', this._handleScaleIncrease.bind(this))
+    this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
+    this.event.on('scale100', this._handleScale100.bind(this))
   }
 
   /**
@@ -365,7 +362,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param e 
    */
-  async handleCursorMove(e: MouseEvent): Promise<void> {
+  async _handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
     let shouldRedraw = false;
     this.cursor.transform(e);
@@ -502,7 +499,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
   /**
    * 鼠标离开画布事件
    */
-  async handleCursorLeave(): Promise<void> {
+  async _handleCursorLeave(): Promise<void> {
     this.cursor.clear();
     this.cursor.setStyle('default');
     await this.mask.redraw();
@@ -513,7 +510,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param e 
    */
-  async handlePressDown(e: MouseEvent): Promise<void> {
+  async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
     let shouldClear = this.isDrawerActive;
@@ -552,7 +549,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param e 
    */
-  async handlePressUp(e: MouseEvent): Promise<void> {
+  async _handlePressUp(e: MouseEvent): Promise<void> {
     this._isPressDown = false;
     this.calcPressUp(e);
     // 如果是绘制模式，则完成元素的绘制
@@ -819,6 +816,23 @@ export default class StageShield extends DrawerBase implements IStageShield {
   }
 
   /**
+   *  检查缩放值
+   * 
+   * @param deltaScale 
+   * @returns 
+   */
+  private _checkScale(deltaScale: number): number {
+    let value = clamp(this.stageScale + deltaScale, 0.02, 100);
+    value = MathUtils.preciseToFixed(value, 2);
+    if (this.stageScale === 0.02) {
+      if (deltaScale > 0) {
+        value = 0.1;
+      }
+    }
+    return value;
+  }
+
+  /**
    * 设置缩放
    * 
    * @param value 
@@ -837,18 +851,10 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param deltaScale 
    * @param e
    */
-  private handleWheelScale(deltaScale: number, e: MouseEvent): void {
+  private _handleWheelScale(deltaScale: number, e: MouseEvent): void {
     const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
     const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageRect, this.stageWorldCoord, this.stageScale);
-
-    let value = clamp(this.stageScale + deltaScale, 0.02, 100);
-    value = MathUtils.preciseToFixed(value, 2);
-    if (this.stageScale === 0.02) {
-      if (deltaScale > 0) {
-        value = 0.1;
-      }
-    }
-
+    const value = this._checkScale(deltaScale);
     const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
     const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;
     const stageRectCoordX = cursorCoord.x - cursorCoordOffsetX;
@@ -871,7 +877,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       const centroid = MathUtils.calcPolygonCentroid(flatten(this.store.visibleElements.map(element => element.model.coords)))
       this.stageWorldCoord = centroid;
       this.store.refreshStageElements();
-      
+
       const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map(element => element.maxOutlineBoxPoints)))
       const { width, height } = CommonUtils.calcRectangleSize(elementsBox);
       const scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding), 2);
@@ -880,6 +886,57 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.stageWorldCoord = { x: 0, y: 0 }
       this.setScale(1);
     }
+  }
+
+  /**
+   * 舞台缩小
+   */
+  setScaleReduce(): void {
+    const value = this._checkScale(-0.1);
+    this.setScale(value);
+  }
+
+  /**
+   * 舞台放大
+   */
+  setScaleIncrease(): void {
+    const value = this._checkScale(0.1);
+    this.setScale(value);
+  }
+
+  /**
+   * 舞台100%缩放
+   */
+  setScale100(): void {
+    this.setScale(1);
+  }
+
+  /**
+   * 处理缩小
+   */
+  _handleScaleReduce(): void {
+    this.setScaleReduce();
+  }
+
+  /**
+   * 处理放大
+   */
+  _handleScaleIncrease(): void {
+    this.setScaleIncrease();
+  }
+
+  /**
+   * 处理自适应
+   */
+  _handleScaleAutoFit(): void {
+    this.setAutoFit();
+  }
+
+  /**
+   * 处理100%缩放
+   */
+  _handleScale100(): void {
+    this.setScale100();
   }
 
 }

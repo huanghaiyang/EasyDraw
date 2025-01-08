@@ -36,5 +36,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isElementsRotating(): boolean;
 
   setScale(value: number): void;
+  setScale100(): void;
   setAutoFit(): void;
+  setScaleReduce(): void;
+  setScaleIncrease(): void;
 }
