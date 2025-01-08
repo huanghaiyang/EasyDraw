@@ -29,7 +29,8 @@ export const LineStrokeTypes: StrokeTypePair[] = [{
 
 export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   switch (type) {
-    case CreatorTypes.rectangle: {
+    case CreatorTypes.rectangle:
+    case CreatorTypes.image: {
       return StrokeTypesArray;
     }
     case CreatorTypes.line: {

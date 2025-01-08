@@ -14,10 +14,12 @@ import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { ElementObject, ImageElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
+import { DefaultImageStagePadding } from "@/types/Stage";
+import ImageUtils from "@/utils/ImageUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -794,5 +796,60 @@ export default class StageStore implements IStageStore {
     this.rotatingTargetElements.forEach(element => {
       element.setAngle(angle);
     })
+  }
+
+  /**
+   * 创建图片组件
+   * 
+   * @param image 
+   * @param options
+   */
+  async createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement> {
+    const { colorSpace } = options;
+    const { width, height } = image;
+    const coords = ElementUtils.calcRectangleCoordsInStage(width, height, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale, DefaultImageStagePadding);
+    const centroid = MathUtils.calcPolygonCentroid(coords);
+    const object: ImageElementObject = {
+      id: CommonUtils.getRandomDateId(),
+      coords,
+      type: CreatorTypes.image,
+      data: image,
+      angle: 0,
+      name: 'image',
+      left: centroid.x,
+      top: centroid.y,
+      width: width,
+      height: height,
+      length: 0,
+      styles: getDefaultElementStyle(CreatorTypes.image),
+      colorSpace,
+      naturalWidth: width,
+      naturalHeight: height,
+    }
+    const element = ElementUtils.createElement(object);
+    return element;
+  }
+
+  /**
+   * 创建并插入图片组件
+   * 
+   * @param image 
+   */
+  async insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement> {
+    let colorSpace;
+    if (image instanceof ImageData) {
+      colorSpace = image.colorSpace;
+      image = ImageUtils.createImageFromImageData(image);
+      await ImageUtils.waitForImageLoad(image);
+    }
+    const element = await this.createImageElement(image, { colorSpace });
+    this.addElement(element);
+    this.updateElementById(element.id, {
+      isOnStage: true,
+      status: ElementStatus.finished,
+      isSelected: true,
+    });
+    element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    return element;
   }
 }

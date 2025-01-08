@@ -1,6 +1,7 @@
 import IStageEvent from "@/types/IStageEvent";
 import IStageShield from "@/types/IStageShield";
 import EventUtils from "@/utils/EventUtils";
+import ImageUtils from "@/utils/ImageUtils";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from 'events';
 import isHotkey from "is-hotkey";
@@ -108,6 +109,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     })
     document.addEventListener('keyup', e => {
       this._isCtrl = false;
+    })
+    document.addEventListener('paste', e => {
+      ImageUtils.getImageDataFromClipboard(e).then(imageData => {
+        if (imageData) {
+          this.emit('imagePasted', imageData);
+        }
+      })
     })
   }
 }

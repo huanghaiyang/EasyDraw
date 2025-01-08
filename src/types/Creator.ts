@@ -4,6 +4,7 @@ export enum CreatorTypes {
   rectangle = 'rectangle',
   hand = 'hand',
   line = 'line',
+  image = 'image',
 }
 
 // 创作工具分类

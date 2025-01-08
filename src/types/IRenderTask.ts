@@ -46,6 +46,9 @@ export interface IElementTask extends IRenderTask {
 // 舞台元素绘制任务-矩形
 export interface IElementTaskRect extends IElementTask { }
 
+// 舞台元素绘制任务-图片
+export interface IElementTaskImage extends IElementTask { }
+
 // 舞台元素绘制任务-圆形
 export interface IElementTaskCircle extends IElementTask { }
 

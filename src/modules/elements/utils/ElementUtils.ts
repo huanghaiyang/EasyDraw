@@ -12,6 +12,8 @@ import ElementLine from "@/modules/elements/ElementLine";
 import ElementTaskLine from "@/modules/render/base/task/ElementTaskLine";
 import { StrokeTypes } from "@/types/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
+import ElementImage from "@/modules/elements/ElementImage";
+import ElementTaskImage from "@/modules/render/base/task/ElementTaskImage";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -58,6 +60,10 @@ export default class ElementUtils {
       case CreatorTypes.rectangle:
         task = new ElementTaskRect(element, params);
         break;
+      case CreatorTypes.image: {
+        task = new ElementTaskImage(element, params);
+        break;
+      }
       case CreatorTypes.line: {
         task = new ElementTaskLine(element, params);
         break;
@@ -134,6 +140,7 @@ export default class ElementUtils {
   static calcCreatorPoints(points: IPoint[], creatorType: CreatorTypes) {
     switch (creatorType) {
       case CreatorTypes.rectangle:
+      case CreatorTypes.image:
         return CommonUtils.getBoxPoints(points);
       case CreatorTypes.line:
       default:
@@ -155,6 +162,9 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return new ElementLine(model);
+      }
+      case CreatorTypes.image: {
+        return new ElementImage(model);
       }
       default:
         return new Element(model);
@@ -199,6 +209,7 @@ export default class ElementUtils {
   static calcPosition(model: Partial<ElementObject>): IPoint {
     switch (model.type) {
       case CreatorTypes.rectangle:
+      case CreatorTypes.image:
       case CreatorTypes.line: {
         return MathUtils.calcPolygonCentroid(model.coords);
       }
@@ -231,7 +242,8 @@ export default class ElementUtils {
   static calcSize(model: Partial<ElementObject>): ISize {
     const { coords, type } = model;
     switch (type) {
-      case CreatorTypes.rectangle: {
+      case CreatorTypes.rectangle:
+      case CreatorTypes.image: {
         return CommonUtils.calcRectangleSize(coords);
       }
       case CreatorTypes.line: {
@@ -273,5 +285,21 @@ export default class ElementUtils {
       return PolygonUtils.getPolygonOuterVertices(points, r);
     }
     return points;
+  }
+
+  /**
+   * 给定一个矩形的宽高，将其完全放入舞台中，计算世界坐标
+   * 
+   * @param width 
+   * @param height 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @param stageScale 
+   * @param padding 
+   * @returns 
+   */
+  static calcRectangleCoordsInStage(width: number, height: number, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number, padding: number = 0): IPoint[] {
+    const points = CommonUtils.calcRectanglePointsInRect(width, height, stageRect, padding);
+    return ElementUtils.calcWorldPoints(points, stageRect, stageWorldCoord, stageScale);
   }
 }

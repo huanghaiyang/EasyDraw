@@ -337,6 +337,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('scaleIncrease', this._handleScaleIncrease.bind(this))
     this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
     this.event.on('scale100', this._handleScale100.bind(this))
+    this.event.on('imagePasted', this._handleImagePasted.bind(this))
   }
 
   /**
@@ -530,18 +531,25 @@ export default class StageShield extends DrawerBase implements IStageShield {
       }
     }
     if (shouldClear) {
-      // 清空所有组件的选中状态
-      this.selection.clearSelects();
-      // 将处于命中状态的组件转换为被选中状态
-      this.selection.selectTarget();
-      // 清空选区
-      this.selection.setRange([]);
+      this._clearStageSelects();
     }
     // 判断是否是要拖动舞台
     if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
     }
     this.mask.redraw();
+  }
+
+  /**
+   * 清除舞台组件状态
+   */
+  private _clearStageSelects(): void {
+    // 清空所有组件的选中状态
+    this.selection.clearSelects();
+    // 将处于命中状态的组件转换为被选中状态
+    this.selection.selectTarget();
+    // 清空选区
+    this.selection.setRange([]);
   }
 
   /**
@@ -937,6 +945,17 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   _handleScale100(): void {
     this.setScale100();
+  }
+
+  /**
+   * 处理图片粘贴
+   * 
+   * @param imageData 
+   */
+  async _handleImagePasted(imageData: ImageData): Promise<void> {
+    this._clearStageSelects();
+    await this.store.insertImageElement(imageData);
+    this._redrawAll(true);
   }
 
 }

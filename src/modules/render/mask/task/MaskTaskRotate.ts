@@ -16,11 +16,9 @@ export default class MaskTaskRotate extends MaskTaskBase implements IMaskRotate 
   async run(): Promise<void> {
     if (this.canvas) {
       let { point: { x, y }, width, height, scale } = this.data;
-      width *= scale;
-      height *= scale;
       await CanvasUtils.drawImgLike(this.canvas, RotateSvg, {
-        x: x - width / 2,
-        y: y - height / 2,
+        x: (x - width * scale / 2) / scale,
+        y: (y - height * scale / 2) / scale,
         width,
         height,
       }, {

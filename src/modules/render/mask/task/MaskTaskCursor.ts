@@ -16,12 +16,14 @@ export default class MaskTaskCursor extends MaskTaskBase implements IMaskCursor 
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      const size = DefaultCursorSize * this.data.scale;
+      const { point: { x, y }, scale } = this.data;
+      const width = DefaultCursorSize;
+      const height = DefaultCursorSize;
       await CanvasUtils.drawImgLike(this.canvas, CursorUtils.getCursorSvg(this.data.creatorCategory), {
-        x: this.data.point.x - size / 2,
-        y: this.data.point.y - size / 2,
-        width: size,
-        height: size,
+        x: (x - width * scale / 2) / scale,
+        y: (y - height * scale / 2) / scale,
+        width,
+        height,
       })
     }
   }

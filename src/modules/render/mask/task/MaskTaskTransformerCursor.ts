@@ -34,12 +34,10 @@ export default class MaskTaskTransformerCursor extends MaskTaskBase implements I
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      let { point: { x, y }, width, height } = this.data;
-      width *= this.data.scale;
-      height *= this.data.scale;
+      let { point: { x, y }, width, height, scale } = this.data;
       await CanvasUtils.drawImgLike(this.canvas, this.img, {
-        x: x - width / 2,
-        y: y - height / 2,
+        x: (x - width * scale / 2) / scale,
+        y: (y - height * scale / 2) / scale,
         width,
         height,
       }, {

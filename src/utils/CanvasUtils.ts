@@ -35,31 +35,36 @@ export default class CanvasUtils {
    * 绘制图片或者canvas到canvas上
    * 
    * @param target 
-   * @param svg 
+   * @param data 
    * @param options 
    * @param options
    * @returns 
    */
-  static async drawImgLike(target: HTMLCanvasElement, svg: string | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): Promise<void> {
+  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: Partial<DOMRect>, options?: { angle: number }): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (typeof svg === 'string') {
-        if (CanvasUtils.ImageCaches.has(svg)) {
-          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(svg), rect, options);
+      if (data instanceof ImageData) {
+        data = CanvasUtils.getCanvasByImageData(data).toDataURL();
+      }
+      if (typeof data === 'string') {
+        if (CanvasUtils.ImageCaches.has(data)) {
+          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(data), rect, options);
           resolve();
           return;
         }
         const img = new Image();
-        img.src = svg;
+        img.src = data;
         img.onload = () => {
-          CanvasUtils.ImageCaches.set(svg, img);
+          CanvasUtils.ImageCaches.set(data, img);
           CanvasUtils.drawRotateImage(target, img, rect, options);
           resolve();
         }
         img.onerror = () => {
           reject();
         }
-      } else if (svg instanceof HTMLCanvasElement) {
-        CanvasUtils.drawRotateImage(target, svg, rect, options);
+      } else if (data instanceof HTMLCanvasElement || data instanceof HTMLImageElement) {
+        CanvasUtils.drawRotateImage(target, data, rect, options);
+        resolve();
+      } else {
         resolve();
       }
     })
@@ -71,25 +76,45 @@ export default class CanvasUtils {
    * canvas是以x的正方向为0，顺时针为正角度旋转的
    * 
    * @param target 
-   * @param svg 
+   * @param data 
    * @param rect 
    * @param options 
    */
-  static drawRotateImage(target: HTMLCanvasElement, svg: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): void {
+  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): void {
     let { x, y, width, height } = rect;
-    x *= CanvasUtils.scale;
-    y *= CanvasUtils.scale;
-    width *= CanvasUtils.scale;
-    height *= CanvasUtils.scale;
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     if (angle) {
       ctx.save()
       ctx.translate(x + width / 2, y + height / 2);
       ctx.rotate(MathUtils.degreesToRadians(angle));
-      ctx.drawImage(svg, -width / 2, -height / 2, width, height);
+      ctx.drawImage(img, -width / 2, -height / 2, width, height);
     } else {
-      ctx.drawImage(svg, x, y, width, height);
+      ctx.drawImage(img, x, y, width, height);
+    }
+    ctx.restore();
+  }
+
+  /**
+   * 绘制图片
+   * 
+   * @param target 
+   * @param imageData 
+   * @param rect 
+   * @param options 
+   */
+  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: Partial<DOMRect>, options?: { angle: number }) {
+    let { x, y, width, height } = rect;
+    const { angle } = options || { angle: 0 };
+    const ctx = target.getContext('2d');
+    const img = CanvasUtils.getCanvasByImageData(imageData); // 频繁调用有性能问题
+    if (angle) {
+      ctx.save()
+      ctx.translate(x + width / 2, y + height / 2);
+      ctx.rotate(MathUtils.degreesToRadians(angle));
+      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    } else {
+      ctx.drawImage(img, x, y, width, height);
     }
     ctx.restore();
   }
@@ -208,5 +233,66 @@ export default class CanvasUtils {
     })
     ctx.stroke();
     ctx.restore();
+  }
+
+  /**
+   * 将blob转换为ImageData
+   * 
+   * @param blob 
+   * @returns 
+   */
+  static getImageDataFromBlob(blob: Blob): Promise<ImageData> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        resolve(imageData);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(blob);
+    });
+  }
+
+  /**
+   * 从图片元素中提取ImageData
+   * 
+   * @param image 
+   * @returns 
+   */
+  static getImageDataFromImage(image: HTMLImageElement): Promise<ImageData> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        resolve(ctx.getImageData(0, 0, image.width, image.height));
+      } else {
+        reject(new Error('Failed to get 2d context from canvas'));
+      }
+    });
+  }
+
+  /**
+   * 将ImageData转换为canvas
+   * 
+   * @param imageData 
+   * @returns 
+   */
+  static getCanvasByImageData(imageData: ImageData): HTMLCanvasElement {
+    const canvas = document.createElement('canvas');
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.putImageData(imageData, 0, 0);
+    }
+    return canvas;
   }
 }

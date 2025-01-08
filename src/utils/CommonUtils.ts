@@ -5,6 +5,26 @@ import MathUtils from "@/utils/MathUtils";
 export default class CommonUtils {
 
   /**
+   * 计算点的最小X坐标
+   * 
+   * @param points 
+   * @returns 
+   */
+  static getMinX(points: IPoint[]): number {
+    return Math.min(...points.map(point => point.x));
+  }
+
+  /**
+   * 计算点的最小Y坐标
+   * 
+   * @param points 
+   * @returns 
+   */
+  static getMinY(points: IPoint[]): number {
+    return Math.min(...points.map(point => point.y));
+  }
+
+  /**
    * 给定点计算边界坐标
    * 
    * @param points 
@@ -28,6 +48,32 @@ export default class CommonUtils {
       { x: maxX, y: maxY },
       { x: minX, y: maxY },
     ];
+  }
+
+  /**
+   * 给定点集，返回盒模型
+   * 
+   * @param points 
+   * @returns 
+   */
+  static getRect(points: IPoint[]): Partial<DOMRect> {
+    let minX = Number.MAX_SAFE_INTEGER,
+      minY = Number.MAX_SAFE_INTEGER,
+      maxX = Number.MIN_SAFE_INTEGER,
+      maxY = Number.MIN_SAFE_INTEGER;
+
+    points.forEach((point) => {
+      minX = Math.min(minX, point.x);
+      minY = Math.min(minY, point.y);
+      maxX = Math.max(maxX, point.x);
+      maxY = Math.max(maxY, point.y);
+    });
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
   }
 
   /**
@@ -284,5 +330,34 @@ export default class CommonUtils {
     const widthScale = (targetRect.width - padding * 2) / sourceRect.width;
     const heightScale = (targetRect.height - padding * 2) / sourceRect.height;
     return Math.min(widthScale, heightScale);
+  }
+
+  /**
+   * 给定矩形的宽度和高度，将矩形放置到舞台中央且不能超出舞台，计算坐标
+   * 
+   * @param width 
+   * @param height 
+   * @param stageRect 
+   */
+  static calcRectanglePointsInRect(width: number, height: number, stageRect: DOMRect, padding: number = 0): IPoint[] {
+    if (width > stageRect.width + padding * 2 || height > stageRect.height + padding * 2) {
+      const ratio = MathUtils.preciseToFixed(width / height, 2);
+      const rectRatio = MathUtils.preciseToFixed(stageRect.width / stageRect.height, 2);
+      if (ratio > rectRatio) {
+        width = stageRect.width - padding * 2;
+        height = MathUtils.preciseToFixed(width / ratio, 2);
+      } else {
+        height = stageRect.height - padding * 2;
+        width = MathUtils.preciseToFixed(height * ratio, 2);
+      }
+    }
+    const left = MathUtils.preciseToFixed(stageRect.width / 2 - width / 2, 2);
+    const top = MathUtils.preciseToFixed(stageRect.height / 2 - height / 2, 2);
+    return [
+      { x: left, y: top },
+      { x: left + width, y: top },
+      { x: left + width, y: top + height },
+      { x: left, y: top + height },
+    ];
   }
 }

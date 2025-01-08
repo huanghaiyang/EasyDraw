@@ -20,6 +20,13 @@ export type ElementObject = {
   top: number;
 }
 
+// 图片元素数据模型
+export type ImageElementObject = ElementObject & {
+  colorSpace: string;
+  naturalWidth: number;
+  naturalHeight: number;
+}
+
 // 舞台元素（组件）
 export default interface IElement {
   id: string;
@@ -64,6 +71,7 @@ export default interface IElement {
   get centroidCoord(): IPoint;
   get transformers(): IElementTransformer[];
   get borderTransformers(): IElementBorderTransformer[];
+  get rect(): Partial<DOMRect>;
 
   get isSelected(): boolean;
   get isVisible(): boolean;
@@ -130,6 +138,7 @@ export default interface IElement {
   calcCentroidCoord(): IPoint;
   calcTransformers(): IPoint[];
   calcRotateCoords(): IPoint[];
+  calcRect(): Partial<DOMRect>;
 
   getTransformerByPoint(point: IPoint): IElementTransformer;
   getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer;
@@ -153,6 +162,9 @@ export interface IElementReact extends IElement { }
 
 // 舞台元素（组件）-圆形
 export interface IElementCircle extends IElement { }
+
+// 舞台元素（组件）-图片
+export interface IElementImage extends IElementReact { }
 
 // 舞台元素（组件）-线段
 export interface IElementLine extends IElement {

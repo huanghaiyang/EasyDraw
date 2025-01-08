@@ -385,6 +385,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rotateOutlinePathPoints: IPoint[] = [];
   protected _maxOutlineBoxPoints: IPoint[] = [];
   protected _rotateOutlinePathCoords: IPoint[] = [];
+  protected _rect: Partial<DOMRect> = {};
   protected _transformers: IElementTransformer[] = [];
   protected _borderTransformers: IElementBorderTransformer[] = [];
   protected _stageRect: DOMRect;
@@ -432,6 +433,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get borderTransformers(): IElementBorderTransformer[] {
     return this._borderTransformers;
+  }
+
+  get rect(): Partial<DOMRect> {
+    return this._rect;
   }
 
   constructor(model: ElementObject) {
@@ -594,6 +599,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算未旋转之前的盒模型
+   * 
+   * @returns 
+   */
+  calcRect(): Partial<DOMRect> {
+    return CommonUtils.getRect(this._pathPoints);
+  }
+
+  /**
    * 刷新坐标
    * 
    * @param stageRect
@@ -624,6 +638,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._transformers = this.calcTransformers();
     this._borderTransformers = this.calcBorderTransformers();
     this._maxBoxPoints = this.calcMaxBoxPoints();
+    this._rect = this.calcRect();
     this.refreshOutline();
   }
 
