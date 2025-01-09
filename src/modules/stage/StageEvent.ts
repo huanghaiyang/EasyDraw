@@ -16,6 +16,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isCtrlReduceEvent: (e: KeyboardEvent) => boolean;
   private _isCtrl0Event: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
+  private _isDeleteEvent: (e: KeyboardEvent) => boolean;
 
 
   get isCtrl(): boolean {
@@ -39,6 +40,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isCtrlReduceEvent = isHotkey('ctrl+-');
     this._isCtrl0Event = isHotkey('ctrl+0');
     this._isShift1Event = isHotkey('shift+1');
+    this._isDeleteEvent = isHotkey('backspace');
     this.initEvents();
   }
 
@@ -105,6 +107,10 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       if (this._isShift1Event(e)) {
         EventUtils.stopPP(e)
         this.emit('scaleAutoFit')
+      }
+      if (this._isDeleteEvent(e)) {
+        EventUtils.stopPP(e)
+        this.emit('deleteSelects')
       }
     })
     document.addEventListener('keyup', e => {

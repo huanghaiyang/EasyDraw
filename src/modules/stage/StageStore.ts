@@ -861,4 +861,13 @@ export default class StageStore implements IStageStore {
   private refreshElementStagePoints(element: IElement): void {
     element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
   }
+
+  /**
+   * 删除选中元素
+   */
+  deleteSelects(): void {
+    this._selectedElementsMap.keysArray().forEach((id) => {
+      this.removeElement(id);
+    });
+  }
 }

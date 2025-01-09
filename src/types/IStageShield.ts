@@ -40,4 +40,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   setScaleAutoFit(): void;
   setScaleReduce(): void;
   setScaleIncrease(): void;
+  
+  deleteSelectElements(): void;
 }

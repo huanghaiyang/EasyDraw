@@ -338,6 +338,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
     this.event.on('scale100', this._handleScale100.bind(this))
     this.event.on('imagePasted', this._handleImagePasted.bind(this))
+    this.event.on('deleteSelects', this._handleSelectsDelete.bind(this))
   }
 
   /**
@@ -957,6 +958,24 @@ export default class StageShield extends DrawerBase implements IStageShield {
     await this.store.insertImageElement(imageData);
     this.setScaleAutoFit();
     this._redrawAll(true);
+  }
+
+  /**
+   * 删除选中元素
+   */
+  deleteSelectElements(): void {
+    if (this.store.isSelectedEmpty) {
+      return;
+    }
+    this.store.deleteSelects();
+    this._redrawAll(true);
+  }
+
+  /**
+   * 处理选中元素删除
+   */
+  _handleSelectsDelete(): void {
+    this.deleteSelectElements();
   }
 
 }
