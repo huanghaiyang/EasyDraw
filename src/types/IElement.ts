@@ -18,6 +18,7 @@ export type ElementObject = {
   styles: ElementStyles;
   left: number;
   top: number;
+  isRatioLocked: boolean;
 }
 
 // 图片元素数据模型
@@ -86,6 +87,7 @@ export default interface IElement {
   get isTarget(): boolean;
   get isOnStage(): boolean;
   get isInRange(): boolean;
+  get isRatioLocked(): boolean;
   get status(): ElementStatus;
 
   set isSelected(value: boolean);
@@ -116,6 +118,7 @@ export default interface IElement {
   setFontFamily(value: string): void;
   setTextAlign(value: CanvasTextAlign): void;
   setTextBaseline(value: CanvasTextBaseline): void;
+  setRatioLocked(value: boolean): void;
 
   refreshSize(): void;
   refreshPosition(): void;

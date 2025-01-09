@@ -44,6 +44,7 @@ export enum ElementReactionPropNames {
   fontFamily = 'fontFamily',
   textAlign = 'textAlign',
   textBaseline = 'textBaseline',
+  isRatioLocked = 'isRatioLocked',
 }
 
 export enum ElementListEventNames {

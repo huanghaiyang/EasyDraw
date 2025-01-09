@@ -17,4 +17,5 @@ export default interface IStageSetter {
   setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void>;
   setElementsFontSize(elements: IElement[], value: number): Promise<void>;
   setElementsFontFamily(elements: IElement[], value: string): Promise<void>;
+  setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void>;
 }

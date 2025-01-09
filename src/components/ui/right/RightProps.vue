@@ -25,10 +25,24 @@
   .stroke-props,
   .fill-props {
     &__title {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
       color: #000000;
       padding: 10px;
+      display: flex;
+      align-items: center;
+      &-text {
+        display: flex;
+        align-items: center;
+        vertical-align: middle;
+        line-height: 12px;
+      }
+      .el-icon {
+        &:hover {
+          color: #007be5;
+          cursor: pointer;
+        }
+      }
     }
 
     &__row {

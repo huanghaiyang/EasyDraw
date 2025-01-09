@@ -307,6 +307,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsOnStage(value);
   }
 
+  @computed
+  get isRatioLocked(): boolean {
+    return this.model.isRatioLocked;
+  }
+
   @action
   private _setStatus(status: ElementStatus): void {
     this._status = status;
@@ -1152,5 +1157,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextBaseline(value: CanvasTextBaseline): void {
     this.model.styles.textBaseline = value;
+  }
+
+  /**
+   * 锁定比例
+   * 
+   * @param value 
+   */
+  setRatioLocked(value: boolean): void {
+    this.model.isRatioLocked = value;
   }
 }

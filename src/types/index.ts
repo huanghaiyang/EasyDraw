@@ -97,4 +97,5 @@ export enum ShieldDispatcherNames {
   fontFamilyChanged,
   textAlignChanged,
   textBaselineChanged,
+  ratioLockedChanged,
 }

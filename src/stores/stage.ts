@@ -38,6 +38,7 @@ export const useStageStore = defineStore("stage", {
       fontFamily: DefaultElementStyle.fontFamily,
       textAlign: DefaultElementStyle.textAlign,
       textBaseline: DefaultElementStyle.textBaseline,
+      isRatioLocked: false,
     }
   },
   getters: {
@@ -78,6 +79,7 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -110,7 +112,7 @@ export const useStageStore = defineStore("stage", {
     onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
-        const element = this.selectedElements[0];
+        const element: IElement = this.selectedElements[0];
         const {
           position,
           width,
@@ -125,7 +127,8 @@ export const useStageStore = defineStore("stage", {
           fontSize,
           fontFamily,
           textAlign,
-          textBaseline
+          textBaseline,
+          isRatioLocked,
         } = element;
         this.onPositionChanged(element, position);
         this.onWidthChanged(element, width);
@@ -141,6 +144,7 @@ export const useStageStore = defineStore("stage", {
         this.onFontFamilyChanged(element, fontFamily);
         this.onTextAlignChanged(element, textAlign);
         this.onTextBaselineChanged(element, textBaseline);
+        this.onRatioLockedChanged(element, isRatioLocked);
       }
     },
     /**
@@ -289,6 +293,15 @@ export const useStageStore = defineStore("stage", {
      */
     onTextBaselineChanged(element: IElement, textBaseline: string) {
       this.textBaseline = textBaseline;
+    },
+    /**
+     * 组件锁定比例变更
+     * 
+     * @param element 
+     * @param ratioLocked 
+     */
+    onRatioLockedChanged(element: IElement, isRatioLocked: boolean) {
+      this.isRatioLocked = isRatioLocked;
     },
     //-----------------------------------属性设置---------------------------------------//
     /**
@@ -479,6 +492,14 @@ export const useStageStore = defineStore("stage", {
      */
     setScaleReduce(): void {
       shield.setScaleReduce();
+    },
+    /**
+     * 锁定比例
+     * 
+     * @param value 
+     */
+    setRatioLocked(value: boolean): void {
+      shield.setElementsRatioLocked(this.selectedElements, value);
     },
   },
 });

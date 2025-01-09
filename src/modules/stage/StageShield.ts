@@ -310,6 +310,16 @@ export default class StageShield extends DrawerBase implements IStageShield {
   }
 
   /**
+   * 锁定比例
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
+    await this.store.setElementsRatioLocked(elements, value);
+  }
+
+  /**
    * 初始化
    * 
    * @param renderEl 

@@ -275,6 +275,10 @@ export default class StageStore implements IStageStore {
         this.shield.emit(ShieldDispatcherNames.textBaselineChanged, element, value)
         break;
       }
+      case ElementReactionPropNames.isRatioLocked: {
+        this.shield.emit(ShieldDispatcherNames.ratioLockedChanged, element, value)
+        break;
+      }
       default: {
         break;
       }
@@ -480,6 +484,20 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 锁定比例
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setRatioLocked(value);
+      }
+    })
+  }
+
+  /**
    * 判断元素是否存在
    * 
    * @param id 
@@ -624,7 +642,8 @@ export default class StageStore implements IStageStore {
       left: position.x,
       top: position.y,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
-      styles: getDefaultElementStyle(type)
+      styles: getDefaultElementStyle(type),
+      isRatioLocked: false,
     }
     return model;
   }
@@ -825,6 +844,7 @@ export default class StageStore implements IStageStore {
       colorSpace,
       naturalWidth: width,
       naturalHeight: height,
+      isRatioLocked: false,
     }
     const element = ElementUtils.createElement(object);
     return element;
