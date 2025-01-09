@@ -82,7 +82,7 @@ export default class StageSelection implements IStageSelection {
    * 清空选区
    */
   clearSelects(): void {
-    this.shield.store.updateElements(this.shield.store.selectedElements, { isSelected: false });
+    this.shield.store.deSelectElements(this.shield.store.selectedElements);
   }
 
   /**

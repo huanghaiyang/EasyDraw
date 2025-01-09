@@ -349,6 +349,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('scale100', this._handleScale100.bind(this))
     this.event.on('imagePasted', this._handleImagePasted.bind(this))
     this.event.on('deleteSelects', this._handleSelectsDelete.bind(this))
+    this.event.on('selectAll', this._handleSelectAll.bind(this))
   }
 
   /**
@@ -661,9 +662,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   private _excludeTopAElement(): void {
     const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
-    this.store.updateElements(this.store.selectedElements, { isSelected: false })
+    this.store.deSelectElements(this.store.selectedElements);
     if (topAElement) {
-      this.store.updateElementById(topAElement.id, { isSelected: true });
+      this.store.selectElement(topAElement);
     }
   }
 
@@ -986,6 +987,21 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   _handleSelectsDelete(): void {
     this.deleteSelectElements();
+  }
+
+  /**
+   * 选中所有元素
+   */
+  selectAll(): void {
+    this.store.selectAll();
+    this._redrawAll(true);
+  }
+
+  /**
+   * 处理全选
+   */
+  _handleSelectAll(): void {
+    this.selectAll();
   }
 
 }

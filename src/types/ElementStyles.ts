@@ -88,6 +88,13 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
         strokeWidth: DefaultLineStrokeWidth
       }
     }
+    case CreatorTypes.image: {
+      return {
+        ...DefaultElementStyle,
+        fillColor: '',
+        fillColorOpacity: 0,
+      }
+    }
     case CreatorTypes.rectangle:
     default: {
       return {

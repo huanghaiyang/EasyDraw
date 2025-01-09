@@ -41,4 +41,10 @@ export default interface IStageStore extends IStageSetter {
   createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement>;
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   deleteSelects(): void;
+  selectAll(): void;
+  deSelectAll(): void;
+  selectElement(element: IElement): void;
+  deSelectElement(element: IElement): void;
+  selectElements(elements: IElement[]): void;
+  deSelectElements(elements: IElement[]): void;
 }

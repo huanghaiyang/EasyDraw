@@ -679,9 +679,7 @@ export default class StageStore implements IStageStore {
         break;
     }
     if (element) {
-      this.updateElementById(element.id, {
-        isSelected: true,
-      })
+      this.selectElement(element);
       this.refreshElementStagePoints(element);
     }
     return element;
@@ -888,6 +886,64 @@ export default class StageStore implements IStageStore {
   deleteSelects(): void {
     this._selectedElementsMap.keysArray().forEach((id) => {
       this.removeElement(id);
+    });
+  }
+
+  /**
+   * 选中组件
+   * 
+   * @param element 
+   */
+  selectElement(element: IElement): void {
+    this.updateElementById(element.id, { isSelected: true });
+  }
+
+  /**
+   * 取消选中组件
+   * 
+   * @param element 
+   */
+  deSelectElement(element: IElement): void {
+    this.updateElementById(element.id, { isSelected: false });
+  }
+
+  /**
+   * 批量选中组件
+   * 
+   * @param elements 
+   */
+  selectElements(elements: IElement[]): void {
+    elements.forEach((element) => {
+      this.selectElement(element);
+    });
+  }
+
+  /**
+   * 批量取消选中组件
+   * 
+   * @param elements 
+   */
+  deSelectElements(elements: IElement[]): void {
+    elements.forEach((element) => {
+      this.deSelectElement(element);
+    });
+  }
+
+  /**
+   * 全选
+   */
+  selectAll(): void {
+    this._elementList.forEach((node) => {
+      this.selectElement(node.value);
+    });
+  }
+
+  /**
+   * 取消全选
+   */
+  deSelectAll(): void {
+    this._elementList.forEach((node) => {
+      this.deSelectElement(node.value);
     });
   }
 }
