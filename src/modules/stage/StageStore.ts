@@ -114,6 +114,14 @@ export default class StageStore implements IStageStore {
     return this.selectedElements.length === 0;
   }
 
+  get isVisibleEmpty(): boolean {
+    return this.visibleElements.length === 0;
+  }
+
+  get isEmpty(): boolean {
+    return this._elementList.length === 0;
+  }
+
   /**
    * 组件新增
    */

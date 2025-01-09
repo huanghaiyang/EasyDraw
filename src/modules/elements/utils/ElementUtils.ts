@@ -300,7 +300,7 @@ export default class ElementUtils {
    * @returns 
    */
   static calcRectangleCoordsInStage(width: number, height: number, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number, padding: number = 0): IPoint[] {
-    const points = CommonUtils.calcRectanglePointsInRect(width, height, stageRect, padding);
+    const points = CommonUtils.calcRectanglePointsInRect(width, height, CommonUtils.scaleRect(stageRect, 1 / stageScale), padding);
     return ElementUtils.calcWorldPoints(points, stageRect, stageWorldCoord, stageScale);
   }
 }

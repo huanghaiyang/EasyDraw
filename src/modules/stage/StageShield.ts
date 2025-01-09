@@ -577,7 +577,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
-      if (this.store.selectedElements.length) {
+      if (this.store.isSelectedEmpty) {
         // 检查位移是否有效
         if (this.checkCursorPressUpALittle(e)) {
           // 如果当前是在拖动中
@@ -893,8 +893,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 舞台自适应
    */
   setScaleAutoFit(): void {
-    if (this.store.visibleElements.length) {
-      const centroid = MathUtils.calcPolygonCentroid(flatten(this.store.visibleElements.map(element => element.model.coords)))
+    if (this.store.isVisibleEmpty) {
+      const centroid = MathUtils.calcCentroid(flatten(this.store.visibleElements.map(element => element.rotateOutlinePathCoords)))
       this.stageWorldCoord = centroid;
       this.store.refreshStageElements();
 
@@ -966,6 +966,9 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async _handleImagePasted(imageData: ImageData): Promise<void> {
     this._clearStageSelects();
+    if (this.store.isEmpty) {
+      this.setScaleAutoFit();
+    }
     await this.store.insertImageElement(imageData);
     this.setScaleAutoFit();
     this._redrawAll(true);

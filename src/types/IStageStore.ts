@@ -16,6 +16,8 @@ export default interface IStageStore extends IStageSetter {
   get uniqSelectedElement(): IElement;
   get rotatingTargetElements(): IElement[];
   get isSelectedEmpty(): boolean;
+  get isEmpty(): boolean;
+  get isVisibleEmpty(): boolean;
 
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   addElement(element: IElement): IElement;

@@ -1,6 +1,7 @@
 import { multiply, cos, sin, add } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import { divide } from "lodash";
+import CommonUtils from '@/utils/CommonUtils';
 
 export default class MathUtils {
   /**
@@ -268,6 +269,17 @@ export default class MathUtils {
     centroidY /= numPoints;
 
     return { x: centroidX, y: centroidY };
+  }
+
+  /**
+   * 计算中心点
+   * 
+   * @param points 
+   * @returns 
+   */
+  static calcCentroid(points: IPoint[]): IPoint {
+    const box = CommonUtils.getBoxPoints(points);
+    return MathUtils.calcPolygonCentroid(box);
   }
 
   /**
