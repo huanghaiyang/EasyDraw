@@ -893,7 +893,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 舞台自适应
    */
   setScaleAutoFit(): void {
-    if (this.store.isVisibleEmpty) {
+    if (!this.store.isVisibleEmpty) {
       const centroid = MathUtils.calcCentroid(flatten(this.store.visibleElements.map(element => element.rotateOutlinePathCoords)))
       this.stageWorldCoord = centroid;
       this.store.refreshStageElements();
