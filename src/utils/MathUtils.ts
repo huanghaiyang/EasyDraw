@@ -597,34 +597,15 @@ export default class MathUtils {
   }
 
   /**
-   * 计算矩阵中y的等比缩放值
+   * 赋值但保留符号
    * 
-   * @param matrix
-   */
-  static calcMatrixYY(matrix: number[][]): number {
-    let y = matrix[1][1];
-    const syl = isPositive(y);
-    y = Math.abs(matrix[0][0]);
-    if (!syl) {
-      y = -y;
-    }
-    return y;
-  }
-
-  /**
-   * 计算矩阵中x的等比缩放值
-   * 
-   * @param matrix 
+   * @param value 
+   * @param referValue 
    * @returns 
    */
-  static calcMatrixXX(matrix: number[][]): number {
-    let x = matrix[0][0];
-    const sxl = isPositive(x);
-    x = Math.abs(matrix[0][0]);
-    if (!sxl) {
-      x = -x;
-    }
-    return x;
+  static resignValue(value: number, referValue: number): number {
+    const isPst = isPositive(value);
+    return isPst ? Math.abs(referValue) : -Math.abs(referValue);
   }
 
 }

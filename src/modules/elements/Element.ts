@@ -87,6 +87,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  // 是否应该锁定比例变换尺寸
+  get shouldRatioLockResize(): boolean {
+    return this.ratioLockedEnable && this.isRatioLocked;
+  }
+
   get coordScale(): number {
     return 1 / this._stageScale;
   }
@@ -404,6 +409,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _originalCentroidCoord: IPoint;
   protected _originalRotatePoints: IPoint[] = [];
   protected _originalAngle: number = 0;
+  protected _originalRect: Partial<DOMRect> = {};
 
   get points(): IPoint[] {
     return this._points;
@@ -740,6 +746,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     })
     this._originalRotatePoints = cloneDeep(this._rotatePoints);
     this._originalAngle = this.model.angle;
+    this._originalRect = this.calcRect();
   }
 
   /**
@@ -919,8 +926,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
-    if (this.ratioLockedEnable && this.isRatioLocked) {
-      matrix[1][1] = MathUtils.calcMatrixYY(matrix);
+    if (this.shouldRatioLockResize) {
+      matrix[1][1] = MathUtils.resignValue(matrix[1][1], matrix[0][0]);
     }
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
@@ -983,9 +990,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 判断当前拖动点，在坐标系垂直轴的左边还是右边
       const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
       if (index === 0 || index === 2) {
-        matrix[0][0] = 1;
+        matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
       } else if (index === 1 || index === 3) {
-        matrix[1][1] = 1;
+        matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
       }
       const coords = this.calcTransformCoords(matrix, lockPoint);
       this.model.coords = coords;
@@ -1039,11 +1046,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPointOriginal = this.getTransformPointForSizeChange();
     const xValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
     const yValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value);
-    const originXValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this.model.width);
-    const originYValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this.model.width);
+    const originXValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this._originalRect.width);
+    const originYValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this._originalRect.width);
     const offset = { x: xValue - originXValue, y: yValue - originYValue };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.width = value;
@@ -1060,11 +1068,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPointOriginal = this.getTransformPointForSizeChange();
     const xValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value)
     const yValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
-    const originXValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this.model.height)
-    const originYValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this.model.height);
+    const originXValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this._originalRect.height)
+    const originYValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this._originalRect.height);
     const offset = { x: originXValue - xValue, y: yValue - originYValue };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     this.model.height = value;

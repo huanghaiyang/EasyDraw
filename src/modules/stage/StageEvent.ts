@@ -56,6 +56,16 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     ])
   }
 
+  /**
+   * 判断是否为输入事件
+   * 
+   * @param e 
+   * @returns 
+   */
+  private _isInputEvent(e: Event): boolean {
+    return e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+  }
+
 
   /**
    * 初始化画布容器尺寸变更监听
@@ -110,13 +120,15 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         EventUtils.stopPP(e)
         this.emit('scaleAutoFit')
       }
-      if (this._isDeleteEvent(e)) {
-        EventUtils.stopPP(e)
-        this.emit('deleteSelects')
-      }
-      if (this._isCtrlAEvent(e)) {
-        EventUtils.stopPP(e)
-        this.emit('selectAll')
+      if (!this._isInputEvent(e)) {
+        if (this._isDeleteEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('deleteSelects')
+        }
+        if (this._isCtrlAEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('selectAll')
+        }
       }
     })
     document.addEventListener('keyup', e => {

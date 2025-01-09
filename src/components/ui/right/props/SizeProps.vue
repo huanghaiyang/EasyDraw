@@ -26,7 +26,7 @@ watch(
   <div class="size-props right-props">
     <div class="size-props__title">
       <span class="size-props__title-text">尺寸</span>
-      <el-icon v-if="!!stageStore.uniqSelectedElement">
+      <el-icon v-if="!!stageStore.uniqSelectedElement && stageStore.uniqSelectedElement.ratioLockedEnable">
         <Unlock v-if="!stageStore.isRatioLocked" @click="stageStore.setRatioLocked(true)"/>
         <Lock v-else @click="stageStore.setRatioLocked(false)"/>
       </el-icon>

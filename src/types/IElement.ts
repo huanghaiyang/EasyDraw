@@ -45,6 +45,7 @@ export default interface IElement {
   get strokeEnable(): boolean;
   get coordScale(): number;
   get ratioLockedEnable(): boolean;
+  get shouldRatioLockResize(): boolean;
 
   get width(): number;
   get height(): number;
