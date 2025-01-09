@@ -15,7 +15,7 @@ export default class MaskTaskCursorPosition extends MaskTaskBase implements IMas
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      await CanvasUtils.drawRotateText(this.canvas, this.data.text, this.data.point, DefaultCursorPositionStyle)
+      await CanvasUtils.drawRotateTextWithScale(this.canvas, this.data.text, this.data.point, DefaultCursorPositionStyle)
     }
   }
 

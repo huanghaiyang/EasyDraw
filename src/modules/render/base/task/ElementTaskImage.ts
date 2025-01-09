@@ -16,10 +16,11 @@ export default class ElementTaskImage extends ElementTaskBase implements IElemen
     CanvasUtils.drawImgLike(this.canvas, this.node.model.data, CommonUtils.scaleRect(this.node.rect, 1 / this.node.coordScale), {
       angle: this.node.angle
     });
-    CanvasUtils.drawPathStroke(this.canvas, CanvasUtils.convertPointsByStrokeType(
-      this.node.rotatePathPoints,
-      this.node.model.styles.strokeType,
-      this.node.model.styles.strokeWidth
-    ), this.node.model.styles);
+    CanvasUtils.drawPathStokeWidthScale(this.canvas,
+      CanvasUtils.convertPointsByStrokeType(
+        this.node.rotatePathPoints,
+        this.node.model.styles.strokeType,
+        this.node.model.styles.strokeWidth
+      ), this.node.model.styles);
   }
 }

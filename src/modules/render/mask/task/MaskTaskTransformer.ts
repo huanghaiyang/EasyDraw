@@ -20,7 +20,7 @@ export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTr
    */
   async run(): Promise<void> {
     const { strokeWidth } = DefaultTransformerStyle;
-    CanvasUtils.drawPath(this.canvas, CommonUtils.get4BoxPoints(this.data.point, {
+    CanvasUtils.drawPathWithScale(this.canvas, CommonUtils.get4BoxPoints(this.data.point, {
       width: DefaultTransformerValue * this.data.scale,
       height: DefaultTransformerValue * this.data.scale
     }, { angle: this.data.angle }), Object.assign({}, DefaultTransformerStyle, {

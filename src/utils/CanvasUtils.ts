@@ -132,7 +132,7 @@ export default class CanvasUtils {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     ctx.save();
-    ctx.translate(centroid.x * CanvasUtils.scale, centroid.y * CanvasUtils.scale);
+    ctx.translate(centroid.x, centroid.y);
     ctx.rotate(MathUtils.degreesToRadians(angle));
     ctx.font = StyleUtils.joinFont(styles);
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
@@ -143,21 +143,63 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制中心点需要缩放的文本
+   * 
+   * @param target 
+   * @param text 
+   * @param centroid 
+   * @param styles 
+   * @param options 
+   */
+  static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: ElementStyles, options?: { angle: number }) {
+    centroid = {
+      x: centroid.x * CanvasUtils.scale,
+      y: centroid.y * CanvasUtils.scale
+    }
+    CanvasUtils.drawRotateText(target, text, centroid, styles, options);
+  }
+
+  /**
+   * 参数缩放
+   * 
+   * @param points 
+   * @param styles 
+   * @returns 
+   */
+  static transParamsWithScale(points: IPoint[], styles: ElementStyles): [IPoint[], ElementStyles] {
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
+    styles = { ...styles, strokeWidth: styles.strokeWidth * CanvasUtils.scale }
+    return [points, styles]
+  }
+
+  /**
    * 绘制路径
    * 
    * @param target 
    * @param points 
    * @param styles 
    */
-  static drawPath(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
-    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
+  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
+    [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
     if (styles.fillColorOpacity) {
-      const innerPoints = PolygonUtils.getPolygonInnerVertices(points, (styles.strokeWidth / 2) * CanvasUtils.scale);
+      const innerPoints = PolygonUtils.getPolygonInnerVertices(points, styles.strokeWidth / 2);
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {
       CanvasUtils.drawPathStroke(target, points, styles);
     }
+  }
+
+  /**
+   * 绘制描边
+   * 
+   * @param target 
+   * @param points 
+   * @param styles 
+   */
+  static drawPathStokeWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+    [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
+    CanvasUtils.drawPathStroke(target, points, styles);
   }
 
   /**
@@ -182,7 +224,7 @@ export default class CanvasUtils {
     ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (styles.strokeWidth) {
-      ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
+      ctx.lineWidth = styles.strokeWidth;
       ctx.stroke();
     }
     ctx.restore();
@@ -222,17 +264,29 @@ export default class CanvasUtils {
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.beginPath();
-    ctx.lineWidth = styles.strokeWidth * CanvasUtils.scale;
+    ctx.lineWidth = styles.strokeWidth;
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
     points.forEach((point, index) => {
       if (index === 0) {
-        ctx.moveTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+        ctx.moveTo(point.x, point.y);
       } else {
-        ctx.lineTo(point.x * CanvasUtils.scale, point.y * CanvasUtils.scale);
+        ctx.lineTo(point.x, point.y);
       }
     })
     ctx.stroke();
     ctx.restore();
+  }
+
+  /**
+   * 绘制线段
+   * 
+   * @param target 
+   * @param points 
+   * @param styles 
+   */
+  static drawLineWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+    [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
+    CanvasUtils.drawLine(target, points, styles);
   }
 
   /**

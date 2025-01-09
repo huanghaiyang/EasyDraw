@@ -12,7 +12,7 @@ export default class ElementTaskLine extends ElementTaskBase implements IElement
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawLine(
+    CanvasUtils.drawLineWidthScale(
       this.canvas,
       CanvasUtils.convertPointsByStrokeType(
         this.node.rotatePathPoints,

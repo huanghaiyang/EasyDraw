@@ -12,7 +12,7 @@ export default class ElementTaskRect extends ElementTaskBase implements IElement
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPath(
+    CanvasUtils.drawPathWithScale(
       this.canvas,
       CanvasUtils.convertPointsByStrokeType(
         this.node.rotatePathPoints,
