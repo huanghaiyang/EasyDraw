@@ -82,6 +82,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  // 是否可以锁定比例
+  get ratioLockedEnable(): boolean {
+    return true;
+  }
+
   get coordScale(): number {
     return 1 / this._stageScale;
   }
@@ -914,6 +919,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    if (this.ratioLockedEnable && this.isRatioLocked) {
+      matrix[1][1] = MathUtils.calcMatrixYY(matrix, this.model.ratio);
+    }
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
     // 判断是否已经计算过原始矩阵
@@ -943,6 +951,22 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取边形形变锁定点
+   * 
+   * @param index 
+   * @returns 
+   */
+  private getBorderTransformLockPoint(index: number): IPoint {
+    // 不动边的点1索引
+    const lockIndex = CommonUtils.getPrevIndexOfArray(this._borderTransformers.length, index, 2);
+    // 不动边的点2索引
+    const lockNextIndex = CommonUtils.getNextIndexOfArray(this._borderTransformers.length, index, 3);
+    // 不动点
+    const lockPoint = MathUtils.calcCentroid([this._originalTransformerPoints[lockIndex], this._originalTransformerPoints[lockNextIndex]]);
+    return lockPoint;
+  }
+
+  /**
    * 按边框变换
    * 
    * @param offset 
@@ -950,10 +974,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected doBorderTransform(offset: IPoint): void {
     const index = this._borderTransformers.findIndex(item => item.isActive);
     if (index !== -1) {
-      // 不动点坐标索引
-      const lockIndex = CommonUtils.getPrevIndexOfArray(this._borderTransformers.length, index, 2);
       // 不动点
-      const lockPoint = this._originalTransformerPoints[lockIndex];
+      const lockPoint = this.getBorderTransformLockPoint(index);
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 当前拖动的点当前的位置
@@ -1166,5 +1188,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setRatioLocked(value: boolean): void {
     this.model.isRatioLocked = value;
+    if (value) {
+      this.model.ratio = this.model.width / this.model.height;
+    } else {
+      this.model.ratio = null;
+    }
   }
 }

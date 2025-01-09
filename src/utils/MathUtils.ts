@@ -1,4 +1,4 @@
-import { multiply, cos, sin, add } from "mathjs";
+import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import { divide } from "lodash";
 import CommonUtils from '@/utils/CommonUtils';
@@ -594,6 +594,39 @@ export default class MathUtils {
   static calculateAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
     const centroid = MathUtils.calcPolygonCentroid([segmentStart, segmentEnd]);
     return MathUtils.calculateAngle(point, centroid);
+  }
+
+  /**
+   * 计算矩阵中y的等比缩放值
+   * 
+   * @param matrix
+   * @param ratio 
+   */
+  static calcMatrixYY(matrix: number[][], ratio: number): number {
+    let y = matrix[1][1];
+    const syl = isPositive(y);
+    y = Math.abs(matrix[0][0] * ratio);
+    if (!syl) {
+      y = -y;
+    }
+    return y;
+  }
+
+  /**
+   * 计算矩阵中x的等比缩放值
+   * 
+   * @param matrix 
+   * @param ratio 
+   * @returns 
+   */
+  static calcMatrixXX(matrix: number[][], ratio: number): number {
+    let x = matrix[0][0];
+    const sxl = isPositive(x);
+    x = Math.abs(matrix[0][0] / ratio);
+    if (!sxl) {
+      x = -x;
+    }
+    return x;
   }
 
 }

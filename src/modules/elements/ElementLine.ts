@@ -25,6 +25,10 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
+  get ratioLockedEnable(): boolean {
+    return false;
+  }
+
   get startRotatePathPoint(): IPoint {
     return this.rotatePathPoints[0];
   }

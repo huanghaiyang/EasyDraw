@@ -19,6 +19,7 @@ export type ElementObject = {
   left: number;
   top: number;
   isRatioLocked: boolean;
+  ratio?: number;
 }
 
 // 图片元素数据模型
@@ -43,6 +44,7 @@ export default interface IElement {
   get fillEnabled(): boolean;
   get strokeEnable(): boolean;
   get coordScale(): number;
+  get ratioLockedEnable(): boolean;
 
   get width(): number;
   get height(): number;
