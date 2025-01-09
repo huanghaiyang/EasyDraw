@@ -747,6 +747,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._originalRotatePoints = cloneDeep(this._rotatePoints);
     this._originalAngle = this.model.angle;
     this._originalRect = this.calcRect();
+    this._originalMatrix = [];
   }
 
   /**
