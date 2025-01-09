@@ -880,7 +880,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
   /**
    * 舞台自适应
    */
-  setAutoFit(): void {
+  setScaleAutoFit(): void {
     if (this.store.visibleElements.length) {
       const centroid = MathUtils.calcPolygonCentroid(flatten(this.store.visibleElements.map(element => element.model.coords)))
       this.stageWorldCoord = centroid;
@@ -937,7 +937,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 处理自适应
    */
   _handleScaleAutoFit(): void {
-    this.setAutoFit();
+    this.setScaleAutoFit();
   }
 
   /**
@@ -955,6 +955,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
   async _handleImagePasted(imageData: ImageData): Promise<void> {
     this._clearStageSelects();
     await this.store.insertImageElement(imageData);
+    this.setScaleAutoFit();
     this._redrawAll(true);
   }
 

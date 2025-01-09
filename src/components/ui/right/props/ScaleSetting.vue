@@ -22,7 +22,7 @@ const stageStore = useStageStore();
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="stageStore.setAutoFit">
+            <el-dropdown-item @click="stageStore.setScaleAutoFit">
               <span>自适应缩放</span>
               <span>shift + 1</span>
             </el-dropdown-item>

@@ -1,6 +1,7 @@
 import { IPoint, ISize } from "@/types";
 import { nanoid } from "nanoid";
 import MathUtils from "@/utils/MathUtils";
+import { isNumber } from "lodash";
 
 export default class CommonUtils {
 
@@ -339,7 +340,7 @@ export default class CommonUtils {
    * @param height 
    * @param stageRect 
    */
-  static calcRectanglePointsInRect(width: number, height: number, stageRect: DOMRect, padding: number = 0): IPoint[] {
+  static calcRectanglePointsInRect(width: number, height: number, stageRect: Partial<DOMRect>, padding: number = 0): IPoint[] {
     if (width > stageRect.width + padding * 2 || height > stageRect.height + padding * 2) {
       const ratio = MathUtils.preciseToFixed(width / height, 2);
       const rectRatio = MathUtils.preciseToFixed(stageRect.width / stageRect.height, 2);
@@ -370,14 +371,12 @@ export default class CommonUtils {
    */
   static scaleRect(rect: Partial<DOMRect>, scale: number): Partial<DOMRect> {
     const result: Partial<DOMRect> = {};
-    for (const key in rect) {
-      if (Object.prototype.hasOwnProperty.call(rect, key)) {
-        const value = rect[key];
-        if (typeof value === 'number') {
-          result[key] = MathUtils.preciseToFixed(value * scale, 2);
-        }
+    ['x', 'y', 'width', 'height', 'left', 'top', 'right', 'bottom'].forEach(key => {
+      const value = rect[key as keyof Partial<DOMRect>];
+      if (isNumber(value)) {
+        result[key] = MathUtils.preciseToFixed(value * scale);
       }
-    }
+    });
     return result;
   }
 }
