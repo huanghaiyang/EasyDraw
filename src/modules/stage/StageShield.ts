@@ -577,7 +577,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
-      if (this.store.isSelectedEmpty) {
+      if (!this.store.isSelectedEmpty) {
         // 检查位移是否有效
         if (this.checkCursorPressUpALittle(e)) {
           // 如果当前是在拖动中
