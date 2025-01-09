@@ -920,7 +920,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
     if (this.ratioLockedEnable && this.isRatioLocked) {
-      matrix[1][1] = MathUtils.calcMatrixYY(matrix, this.model.ratio);
+      matrix[1][1] = MathUtils.calcMatrixYY(matrix);
     }
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;

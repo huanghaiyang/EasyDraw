@@ -600,12 +600,11 @@ export default class MathUtils {
    * 计算矩阵中y的等比缩放值
    * 
    * @param matrix
-   * @param ratio 
    */
-  static calcMatrixYY(matrix: number[][], ratio: number): number {
+  static calcMatrixYY(matrix: number[][]): number {
     let y = matrix[1][1];
     const syl = isPositive(y);
-    y = Math.abs(matrix[0][0] * ratio);
+    y = Math.abs(matrix[0][0]);
     if (!syl) {
       y = -y;
     }
@@ -616,13 +615,12 @@ export default class MathUtils {
    * 计算矩阵中x的等比缩放值
    * 
    * @param matrix 
-   * @param ratio 
    * @returns 
    */
-  static calcMatrixXX(matrix: number[][], ratio: number): number {
+  static calcMatrixXX(matrix: number[][]): number {
     let x = matrix[0][0];
     const sxl = isPositive(x);
-    x = Math.abs(matrix[0][0] / ratio);
+    x = Math.abs(matrix[0][0]);
     if (!sxl) {
       x = -x;
     }
