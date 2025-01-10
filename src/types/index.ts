@@ -24,6 +24,7 @@ export enum DrawerMaskModelTypes {
   highlight,
   rotate,
   sizeIndicator,
+  range,
 }
 
 // 方位

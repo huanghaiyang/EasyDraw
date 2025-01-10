@@ -72,7 +72,7 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
-        type: DrawerMaskModelTypes.highlight,
+        type: DrawerMaskModelTypes.range,
       });
     }
     return result;
