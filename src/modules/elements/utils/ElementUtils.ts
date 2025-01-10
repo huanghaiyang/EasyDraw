@@ -300,7 +300,10 @@ export default class ElementUtils {
    * @returns 
    */
   static calcRectangleCoordsInStage(width: number, height: number, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number, padding: number = 0): IPoint[] {
-    const points = CommonUtils.calcRectanglePointsInRect(width, height, CommonUtils.scaleRect(stageRect, 1 / stageScale), padding);
+    let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(stageRect, 1 / stageScale), padding / stageScale);
+    innerWidth = MathUtils.preciseToFixed(innerWidth * stageScale, 2);
+    innerHeight = MathUtils.preciseToFixed(innerHeight * stageScale, 2);
+    const points = CommonUtils.calcCentroidInnerRectPoints({ width: innerWidth, height: innerHeight }, stageRect);
     return ElementUtils.calcWorldPoints(points, stageRect, stageWorldCoord, stageScale);
   }
 }

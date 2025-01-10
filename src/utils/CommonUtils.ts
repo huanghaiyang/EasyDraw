@@ -340,26 +340,54 @@ export default class CommonUtils {
    * @param height 
    * @param stageRect 
    */
-  static calcRectanglePointsInRect(width: number, height: number, stageRect: Partial<DOMRect>, padding: number = 0): IPoint[] {
-    if (width > stageRect.width + padding * 2 || height > stageRect.height + padding * 2) {
+  static calcRectangleSizeInRect(width: number, height: number, stageRect: Partial<DOMRect>, padding: number = 0): ISize {
+    const innerWidth = stageRect.width - padding * 2;
+    const innerHeight = stageRect.height - padding * 2;
+    if (width > innerWidth || height > innerHeight) {
       const ratio = MathUtils.preciseToFixed(width / height, 2);
       const rectRatio = MathUtils.preciseToFixed(stageRect.width / stageRect.height, 2);
       if (ratio > rectRatio) {
-        width = stageRect.width - padding * 2;
+        width = innerWidth;
         height = MathUtils.preciseToFixed(width / ratio, 2);
       } else {
-        height = stageRect.height - padding * 2;
+        height = innerHeight;
         width = MathUtils.preciseToFixed(height * ratio, 2);
       }
     }
-    const left = MathUtils.preciseToFixed(stageRect.width / 2 - width / 2, 2);
-    const top = MathUtils.preciseToFixed(stageRect.height / 2 - height / 2, 2);
+    return {
+      width,
+      height
+    }
+  }
+
+  /**
+   * 计算矩形中心点在矩形内部的四个顶点
+   * 
+   * @param innerRect 
+   * @param outerRect 
+   * @returns 
+   */
+  static calcCentroidInnerRectPoints(innerRect: ISize, outerRect: ISize): IPoint[] {
+    const { width, height } = innerRect;
+    const { width: outerWidth, height: outerHeight } = outerRect;
     return [
-      { x: left, y: top },
-      { x: left + width, y: top },
-      { x: left + width, y: top + height },
-      { x: left, y: top + height },
-    ];
+      {
+        x: MathUtils.preciseToFixed(outerWidth / 2 - width / 2),
+        y: MathUtils.preciseToFixed(outerHeight / 2 - height / 2),
+      },
+      {
+        x: MathUtils.preciseToFixed(outerWidth / 2 + width / 2),
+        y: MathUtils.preciseToFixed(outerHeight / 2 - height / 2),
+      },
+      {
+        x: MathUtils.preciseToFixed(outerWidth / 2 + width / 2),
+        y: MathUtils.preciseToFixed(outerHeight / 2 + height / 2),
+      },
+      {
+        x: MathUtils.preciseToFixed(outerWidth / 2 - width / 2),
+        y: MathUtils.preciseToFixed(outerHeight / 2 + height / 2),
+      },
+    ]
   }
 
   /**

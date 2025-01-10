@@ -18,7 +18,6 @@ import IElement, { ElementObject, ImageElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
-import { DefaultImageStagePadding } from "@/types/Stage";
 import ImageUtils from "@/utils/ImageUtils";
 
 export default class StageStore implements IStageStore {
@@ -832,7 +831,7 @@ export default class StageStore implements IStageStore {
   async createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement> {
     const { colorSpace } = options;
     const { width, height } = image;
-    const coords = ElementUtils.calcRectangleCoordsInStage(width, height, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale, DefaultImageStagePadding);
+    const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, { width, height });
     const centroid = MathUtils.calcPolygonCentroid(coords);
     const object: ImageElementObject = {
       id: CommonUtils.getRandomDateId(),

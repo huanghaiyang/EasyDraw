@@ -6,4 +6,3 @@ export enum TransformTypes {
 }
 
 export const DefaultAutoFitPadding = 100;
-export const DefaultImageStagePadding = 40;
