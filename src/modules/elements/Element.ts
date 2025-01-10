@@ -936,17 +936,32 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
+    // 判断是否需要翻转角度
+    this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
+  }
+
+  /**
+   * 尝试翻转角度
+   * 
+   * @param lockPoint 
+   * @param currentPointOriginal 
+   * @param matrix 
+   */
+  private _tryFlipAngle(lockPoint: IPoint, currentPointOriginal: IPoint, matrix: number[][]): void {
     // 判断是否已经计算过原始矩阵
     if (!this._originalMatrix.length) {
       // 计算原始矩阵
       this._originalMatrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
     }
     // 原始的纵轴缩放系数
+    const xScaleOriginal = this._originalMatrix[0][0];
     const yScaleOriginal = this._originalMatrix[1][1];
     // 纵轴缩放系数
+    const xScale = matrix[0][0];
     const yScale = matrix[1][1];
+
     // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
-    if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
+    if (!MathUtils.isSameSign(yScale, yScaleOriginal) && !MathUtils.isSameSign(xScale, xScaleOriginal)) {
       this.flipAngle();
       this._originalMatrix = matrix;
     }
