@@ -7,6 +7,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator } from '@/types/Creator';
 import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
+import IElement from "@/types/IElement";
 
 // 舞台主画板
 export default interface IStageShield extends IStageDrawer, IStageSetter {
@@ -35,6 +36,9 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isHandActive(): boolean;
   get isElementsRotating(): boolean;
 
+  calcScaleAutoFitValueByBox(box: IPoint[]): number;
+  calcScaleAutoFitValue(): number;
+  calcElementAutoFitValue(element: IElement): number;
   setScale(value: number): void;
   setScale100(): void;
   setScaleAutoFit(): void;

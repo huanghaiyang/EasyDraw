@@ -890,6 +890,39 @@ export default class StageShield extends DrawerBase implements IStageShield {
   }
 
   /**
+   * 给定矩形计算自动适应缩放值
+   * 
+   * @param box 
+   * @returns 
+   */
+  calcScaleAutoFitValueByBox(box: IPoint[]): number {
+    const { width, height } = CommonUtils.calcRectangleSize(box);
+    let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding * this.stageScale), 2);
+    scale = clamp(scale, 0.02, 1);
+    return scale;
+  }
+
+  /**
+   * 计算自动适应缩放值
+   * 
+   * @returns 
+   */
+  calcScaleAutoFitValue(): number {
+    const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map(element => element.maxOutlineBoxPoints)))
+    return this.calcScaleAutoFitValueByBox(elementsBox);
+  }
+
+  /**
+   * 计算某个组件的自动适应缩放值
+   * 
+   * @param element 
+   * @returns 
+   */
+  calcElementAutoFitValue(element: IElement): number {
+    return this.calcScaleAutoFitValueByBox(element.maxOutlineBoxPoints);
+  }
+
+  /**
    * 舞台自适应
    */
   setScaleAutoFit(): void {
@@ -897,12 +930,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
       const centroid = MathUtils.calcCentroid(flatten(this.store.visibleElements.map(element => element.rotateOutlinePathCoords)))
       this.stageWorldCoord = centroid;
       this.store.refreshStageElements();
-
-      const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map(element => element.maxOutlineBoxPoints)))
-      const { width, height } = CommonUtils.calcRectangleSize(elementsBox);
-      let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding), 2);
-      scale = clamp(scale, 0.02, 1);
-      this.setScale(scale);
+      this.setScale(this.calcScaleAutoFitValue());
     } else {
       this.stageWorldCoord = { x: 0, y: 0 }
       this.setScale(1);
@@ -967,12 +995,13 @@ export default class StageShield extends DrawerBase implements IStageShield {
    */
   async _handleImagePasted(imageData: ImageData): Promise<void> {
     this._clearStageSelects();
-    if (this.store.isEmpty) {
-      this.setScaleAutoFit();
+    const element = await this.store.insertImageElement(imageData);
+    const nextScale = this.calcElementAutoFitValue(element);
+    if (this.stageScale  > nextScale) {
+      this.setScale(nextScale);
+    } else {
+      this._redrawAll(true);
     }
-    await this.store.insertImageElement(imageData);
-    this.setScaleAutoFit();
-    this._redrawAll(true);
   }
 
   /**
