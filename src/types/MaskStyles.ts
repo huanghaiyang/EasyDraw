@@ -7,7 +7,7 @@ export const MinCursorMoveYDistance = 2;
 export const DefaultSelectionStrokeColor = '#0c8ce9';
 export const DefaultSelectionStrokeColorOpacity = 1;
 export const DefaultSelectionFillColor = '#0c8ce9';
-export const DefaultSelectionFillColorOpacity = 0.05;
+export const DefaultSelectionFillColorOpacity = 0.025;
 export const DefaultSelectionLineWidth = 1;
 
 export const DefaultTransformerStrokeColor = '#0c8ce9';

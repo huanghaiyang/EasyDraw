@@ -5,6 +5,8 @@ import ImageUtils from "@/utils/ImageUtils";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from 'events';
 import isHotkey from "is-hotkey";
+import { TaskQueue } from "@/modules/render/RenderQueue";
+import { QueueTask } from "@/modules/render/RenderTask";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
@@ -131,14 +133,27 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         }
       }
     })
+
     document.addEventListener('keyup', e => {
       this._isCtrl = false;
     })
+
     document.addEventListener('paste', e => {
-      ImageUtils.getImageDataFromClipboard(e).then(imageData => {
-        if (imageData) {
-          this.emit('imagePasted', imageData);
+      ImageUtils.getImageDataFromClipboard(e).then(imageDataList => {
+        if (imageDataList && imageDataList.length) {
+          let taskQueue = new TaskQueue();
+          imageDataList.forEach((imageData, index) => {
+            taskQueue.add(new QueueTask(async () => {
+              await new Promise((resolve) => this.emit('pasteImage', imageData, resolve))
+              if (index === imageDataList.length - 1) {
+                await taskQueue.destroy()
+                taskQueue = null;
+              }
+            }))
+          });
         }
+      }).catch(e => {
+        e && console.warn(e)
       })
     })
   }

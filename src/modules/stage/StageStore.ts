@@ -849,7 +849,7 @@ export default class StageStore implements IStageStore {
       colorSpace,
       naturalWidth: width,
       naturalHeight: height,
-      isRatioLocked: false,
+      isRatioLocked: true,
     }
     const element = ElementUtils.createElement(object);
     return element;
@@ -875,6 +875,7 @@ export default class StageStore implements IStageStore {
       isSelected: true,
     });
     this.refreshElementStagePoints(element);
+    element.refreshOriginalProps();
     return element;
   }
 

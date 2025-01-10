@@ -130,6 +130,7 @@ export default interface IElement {
   refreshSize(): void;
   refreshPosition(): void;
   refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void;
+  refreshInternalProps(): void;
 
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;

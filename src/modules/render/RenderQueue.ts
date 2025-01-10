@@ -49,4 +49,22 @@ export default class RenderQueue implements IRenderQueue {
       this.run();
     });
   }
+
+  /**
+   * 销毁队列
+   */
+  async destroy(): Promise<void> {
+    while (this.queue.length > 0) {
+      let task = this.queue.shift();
+      if (task) {
+        await task.destroy();
+        task = null;
+        this.queue = null;
+        this.running = false;
+        return;
+      }
+    }
+  }
 }
+
+export class TaskQueue extends RenderQueue { }

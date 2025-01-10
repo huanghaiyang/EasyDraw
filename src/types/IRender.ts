@@ -27,6 +27,7 @@ export interface IRenderQueue {
   queue: IRenderTask[];
   add(task: IRenderTask): Promise<void>;
   run(): Promise<void>;
+  destroy(): Promise<void>;
 }
 
 export type RenderParams = { angle: number, flipX: boolean, flipY: boolean }

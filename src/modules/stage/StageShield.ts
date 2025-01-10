@@ -347,7 +347,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('scaleIncrease', this._handleScaleIncrease.bind(this))
     this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
     this.event.on('scale100', this._handleScale100.bind(this))
-    this.event.on('imagePasted', this._handleImagePasted.bind(this))
+    this.event.on('pasteImage', this._handleImagePasted.bind(this))
     this.event.on('deleteSelects', this._handleSelectsDelete.bind(this))
     this.event.on('selectAll', this._handleSelectAll.bind(this))
   }
@@ -857,12 +857,12 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 
    * @param value 
    */
-  setScale(value: number): void {
+  async setScale(value: number): Promise<void> {
     this.stageScale = value;
     CanvasUtils.scale = value;
-    this.store.refreshStageElements();
-    this._redrawAll(true);
     this.emit(ShieldDispatcherNames.scaleChanged, value);
+    this.store.refreshStageElements();
+    await this._redrawAll(true);
   }
 
   /**
@@ -992,16 +992,18 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 处理图片粘贴
    * 
    * @param imageData 
+   * @param callback
    */
-  async _handleImagePasted(imageData: ImageData): Promise<void> {
+  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
     if (this.stageScale  > nextScale) {
-      this.setScale(nextScale);
+      await this.setScale(nextScale);
     } else {
-      this._redrawAll(true);
+      await this._redrawAll(true);
     }
+    callback && callback();
   }
 
   /**

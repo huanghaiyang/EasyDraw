@@ -26,3 +26,5 @@ export default class RenderTask extends RenderTaskBase {
   }
 
 }
+
+export class QueueTask extends RenderTask { }

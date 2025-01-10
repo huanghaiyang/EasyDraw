@@ -1042,7 +1042,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新组件必要数据
    */
-  protected refreshInternalProps(): void {
+  refreshInternalProps(): void {
     this.refreshStagePoints(this._stageRect, this._stageWorldCoord, this._stageScale);
     this.refreshSize();
     this.refreshPosition();

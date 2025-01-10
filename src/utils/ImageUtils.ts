@@ -7,26 +7,28 @@ export default class ImageUtils {
    * @param e 
    * @returns 
    */
-  static getImageDataFromClipboard(e: ClipboardEvent): Promise<ImageData> {
+  static getImageDataFromClipboard(e: ClipboardEvent): Promise<ImageData[]> {
     return new Promise((resolve, reject) => {
       const items = e.clipboardData?.items;
       if (!items) {
-        reject(new Error('No items in clipboard'));
-        return;
+        console.warn('No clipboard data');
+        return reject();
       }
-      const item = Array.from(items).find(item => item.type.startsWith('image/'));
-      if (!item) {
-        reject(new Error('No image in clipboard'));
-        return;
+      const images = Array.from(items).filter(item => item.type.startsWith('image/'));
+      if (!images.length) {
+        console.warn('No image in clipboard');
+        return reject();
       }
-      const blob = item.getAsFile();
-      if (!blob) {
-        reject(new Error('No image in clipboard'));
-        return;
-      }
-      CanvasUtils.getImageDataFromBlob(blob).then(data => {
-        resolve(data);
-      });
+      const result = Promise.all(images.map(item => {
+        const blob = item.getAsFile();
+        if (!blob) {
+          console.warn('No blob in clipboard');
+          reject();
+          return;
+        }
+        return CanvasUtils.getImageDataFromBlob(blob);
+      }))
+      resolve(result);
     })
   }
 
