@@ -1024,6 +1024,12 @@ export default class Element implements IElement, ILinkedNodeValue {
       } else if (index === 1 || index === 3) {
         matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
       }
+      if ([1,3].includes(index) && matrix[1][1] < 0) {
+        matrix[1][1] = Math.abs(matrix[1][1]);
+      }
+      if ([0,2].includes(index) && matrix[0][0] < 0) {
+        matrix[0][0] = Math.abs(matrix[0][0]);
+      }
       const coords = this.calcTransformCoords(matrix, lockPoint);
       this.model.coords = coords;
       this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);

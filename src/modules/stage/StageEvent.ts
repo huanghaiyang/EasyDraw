@@ -100,7 +100,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
 
       this._isCtrlWheel = this._isCtrl;
       if (this._isCtrlWheel) {
-        this.emit('wheelScale', -e.deltaY / 1000, e);
+        this.emit('wheelScale', -e.deltaY / 2000, e);
       }
     })
 
