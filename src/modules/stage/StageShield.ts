@@ -941,7 +941,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 舞台缩小
    */
   setScaleReduce(): void {
-    const value = this._checkScale(-0.1);
+    const value = this._checkScale(-0.05);
     this.setScale(value);
   }
 
@@ -949,7 +949,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * 舞台放大
    */
   setScaleIncrease(): void {
-    const value = this._checkScale(0.1);
+    const value = this._checkScale(0.05);
     this.setScale(value);
   }
 
