@@ -900,7 +900,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
 
       const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map(element => element.maxOutlineBoxPoints)))
       const { width, height } = CommonUtils.calcRectangleSize(elementsBox);
-      const scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding), 2);
+      let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding), 2);
+      scale = clamp(scale, 0.02, 1);
       this.setScale(scale);
     } else {
       this.stageWorldCoord = { x: 0, y: 0 }
