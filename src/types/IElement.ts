@@ -20,6 +20,7 @@ export type ElementObject = {
   top: number;
   isRatioLocked: boolean;
   ratio?: number;
+  matrix?: number[][];
 }
 
 // 图片元素数据模型
@@ -106,6 +107,9 @@ export default interface IElement {
   set isOnStage(value: boolean);
   set isInRange(value: boolean);
   set status(value: ElementStatus);
+
+  get flipX(): boolean;
+  get flipY(): boolean;
 
   setPosition(x: number, y: number, coords: IPoint[]): void;
   setWidth(value: number): void;

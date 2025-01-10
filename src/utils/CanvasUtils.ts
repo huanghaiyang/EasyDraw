@@ -4,6 +4,7 @@ import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import { DefaultRenderParams, RenderParams } from "@/types/IRender";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -40,7 +41,7 @@ export default class CanvasUtils {
    * @param options
    * @returns 
    */
-  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: Partial<DOMRect>, options?: { angle: number }): Promise<void> {
+  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: Partial<DOMRect>, options?: RenderParams): Promise<void> {
     return new Promise((resolve, reject) => {
       if (data instanceof ImageData) {
         data = CanvasUtils.getCanvasByImageData(data).toDataURL();
@@ -80,18 +81,24 @@ export default class CanvasUtils {
    * @param rect 
    * @param options 
    */
-  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: { angle: number }): void {
+  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options?: RenderParams): void {
     let { x, y, width, height } = rect;
-    const { angle } = options || { angle: 0 };
+    const { angle, flipX, flipY } = options || DefaultRenderParams;
     const ctx = target.getContext('2d');
-    if (angle) {
-      ctx.save()
-      ctx.translate(x + width / 2, y + height / 2);
-      ctx.rotate(MathUtils.degreesToRadians(angle));
-      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    const radian = MathUtils.degreesToRadians(angle);
+    ctx.save()
+    ctx.translate(x + width / 2, y + height / 2);
+    if (flipX && !flipY) {
+      ctx.scale(-1, 1);
+      ctx.rotate(-radian)
+    } else if (flipY && !flipX) {
+      ctx.scale(1, -1);
+      ctx.rotate(MathUtils.degreesToRadians(180) - radian)
     } else {
-      ctx.drawImage(img, x, y, width, height);
+      ctx.scale(1, 1);
+      ctx.rotate(radian);
     }
+    ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();
   }
 

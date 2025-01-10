@@ -13,14 +13,19 @@ export default class ElementTaskImage extends ElementTaskBase implements IElemen
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawImgLike(this.canvas, this.node.model.data, CommonUtils.scaleRect(this.node.rect, 1 / this.node.coordScale), {
-      angle: this.node.angle
+    const { model, rect, coordScale, angle, flipX, flipY, rotatePathPoints } = this.node;
+    CanvasUtils.drawImgLike(this.canvas, model.data, CommonUtils.scaleRect(rect, 1 / coordScale), {
+      angle,
+      flipX,
+      flipY
     });
     CanvasUtils.drawPathStokeWidthScale(this.canvas,
       CanvasUtils.convertPointsByStrokeType(
-        this.node.rotatePathPoints,
-        this.node.model.styles.strokeType,
-        this.node.model.styles.strokeWidth
-      ), this.node.model.styles);
+        rotatePathPoints,
+        model.styles.strokeType,
+        model.styles.strokeWidth
+      ),
+      model.styles
+    );
   }
 }

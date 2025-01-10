@@ -28,3 +28,6 @@ export interface IRenderQueue {
   add(task: IRenderTask): Promise<void>;
   run(): Promise<void>;
 }
+
+export type RenderParams = { angle: number, flipX: boolean, flipY: boolean }
+export const DefaultRenderParams: RenderParams = { angle: 0, flipX: false, flipY: false };

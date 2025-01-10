@@ -42,6 +42,16 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
 
+  get flipX(): boolean {
+    const refers = CommonUtils.sortPointsByY([this.transformers[0], this.transformers[3]])
+    return !MathUtils.pointSideOfLine(this.centroid, refers[0], refers[1]);
+  }
+
+  get flipY(): boolean {
+    const refers = CommonUtils.sortPointsByX([this.transformers[3], this.transformers[2]])
+    return !MathUtils.pointSideOfLine(this.centroid, refers[0], refers[1]);
+  }
+
   // 是否可以修改宽度
   get widthModifyEnable(): boolean {
     return true;
@@ -961,7 +971,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const yScale = matrix[1][1];
 
     // 判断横轴缩放系数是否与原始的相同，如果不同，则旋转角度
-    if (!MathUtils.isSameSign(yScale, yScaleOriginal) && !MathUtils.isSameSign(xScale, xScaleOriginal)) {
+    if (!MathUtils.isSameSign(yScale, yScaleOriginal)) {
       this.flipAngle();
       this._originalMatrix = matrix;
     }
@@ -1016,6 +1026,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
       const coords = this.calcTransformCoords(matrix, lockPoint);
       this.model.coords = coords;
+      this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
     }
   }
 

@@ -407,4 +407,25 @@ export default class CommonUtils {
     });
     return result;
   }
+
+  /**
+   * 按纵坐标排序
+   * 
+   * @param points 
+   * @returns 
+   */
+  static sortPointsByY(points: IPoint[]) {
+    return points.sort((a, b) => a.y - b.y);
+  }
+
+  /**
+   * 按横坐标排序
+   * 
+   * @param points 
+   * @returns 
+   */
+  static sortPointsByX(points: IPoint[]) {
+    return points.sort((a, b) => a.x - b.x);
+  }
+
 }
