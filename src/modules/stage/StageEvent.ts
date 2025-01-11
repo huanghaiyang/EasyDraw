@@ -122,7 +122,10 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       if (this._isCtrlWheel) {
         this.emit('wheelScale', -e.deltaY / 2000, e);
       } else {
-        this.emit('wheelMove', -e.deltaY, e);
+        this.emit('wheelMove', {
+          x: e.deltaX,
+          y: e.deltaY
+        }, e);
       }
     })
     this.shield.canvas.addEventListener('dragover', (e) => {

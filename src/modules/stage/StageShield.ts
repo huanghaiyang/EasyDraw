@@ -343,7 +343,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('pressDown', this._handlePressDown.bind(this))
     this.event.on('pressUp', this._handlePressUp.bind(this))
     this.event.on('wheelScale', this._handleWheelScale.bind(this))
-    this.event.on('wheelMove', this._handleWheelMove.bind(this) )
+    this.event.on('wheelMove', this._handleWheelMove.bind(this))
     this.event.on('scaleReduce', this._handleScaleReduce.bind(this))
     this.event.on('scaleIncrease', this._handleScaleIncrease.bind(this))
     this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
@@ -893,10 +893,11 @@ export default class StageShield extends DrawerBase implements IStageShield {
   /**
    * 舞台滚动
    * 
-   * @param deltaValue 
+   * @param delta
    */
-  private _handleWheelMove(deltaValue: number): void {
-    this.stageWorldCoord.y += -deltaValue / 2 / this.stageScale;
+  private _handleWheelMove(delta: IPoint): void {
+    this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
+    this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
     this._redrawAll(true);
   }
@@ -1010,7 +1011,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
-    if (this.stageScale  > nextScale) {
+    if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
     } else {
       await this._redrawAll(true);
