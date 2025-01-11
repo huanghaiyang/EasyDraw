@@ -13,6 +13,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
 
   private _isCtrl: boolean;
   private _isCtrlWheel: boolean;
+  private _isShift: boolean;
   private _isCtrlEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlPlusEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlReduceEvent: (e: KeyboardEvent) => boolean;
@@ -29,6 +30,10 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
 
   get isCtrlWheel(): boolean {
     return this._isCtrlWheel;
+  }
+
+  get isShift(): boolean {
+    return this._isShift;
   }
 
   constructor(shield: IStageShield) {
@@ -116,8 +121,12 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this.shield.canvas.addEventListener('mouseup', e => {
       this.emit('pressUp', e)
     })
+
+    // 滚轮事件
     this.shield.canvas.addEventListener('wheel', e => {
       EventUtils.stopPP(e)
+
+      // 如果为ctrl+滚轮事件，则缩放，否则移动舞台
       this._isCtrlWheel = this._isCtrl;
       if (this._isCtrlWheel) {
         this.emit('wheelScale', -e.deltaY / 2000, e);
@@ -128,11 +137,17 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         }, e);
       }
     })
+
+    // 拖拽over事件需要阻止默认事件，否则无法触发drop事件
     this.shield.canvas.addEventListener('dragover', (e) => {
       EventUtils.stopPP(e)
     })
+
+    // 拖拽解析数据
     this.shield.canvas.addEventListener('drop', e => {
       EventUtils.stopPP(e)
+
+      // 解析图片
       FileUtils.getImageDataFromFileTransfer(e).then(imageDataList => {
         this._createImages(imageDataList);
       }).catch(e => {
@@ -140,29 +155,46 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       })
     })
 
+    // 键盘事件
     document.addEventListener('keydown', e => {
       this._isCtrl = this._isCtrlEvent(e);
+
+      // 放大操作
       if (this._isCtrlPlusEvent(e)) {
         EventUtils.stopPP(e)
         this.emit('scaleIncrease')
       }
+
+      // 缩小操作
       if (this._isCtrlReduceEvent(e)) {
         EventUtils.stopPP(e)
         this.emit('scaleReduce')
       }
+
+      // 还原缩放到100%
       if (this._isCtrl0Event(e)) {
         EventUtils.stopPP(e)
         this.emit('scale100')
       }
+
+      // 舞台自适应操作
       if (this._isShift1Event(e)) {
         EventUtils.stopPP(e)
         this.emit('scaleAutoFit')
+      } else if (this._isShiftEvent(e)) {
+        this._isShift = true;
+      } else {
+        this._isShift = false;
       }
+
+      // 非输入操作
       if (!this._isInputEvent(e)) {
+        // 监听组件删除操作
         if (this._isDeleteEvent(e)) {
           EventUtils.stopPP(e)
           this.emit('deleteSelects')
         }
+        // 监听组件全选操作
         if (this._isCtrlAEvent(e)) {
           EventUtils.stopPP(e)
           this.emit('selectAll')
@@ -170,11 +202,19 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       }
     })
 
+    // 键盘弹起事件监听
     document.addEventListener('keyup', e => {
-      this._isCtrl = false;
+      if (this._isCtrlEvent(e)) {
+        this._isCtrl = false;
+      }
+      if (this._isShiftEvent(e)) {
+        this._isShift = false;
+      }
     })
 
+    // 粘贴操作
     document.addEventListener('paste', e => {
+      // 解析图片
       FileUtils.getImageDataFromClipboard(e).then(imageDataList => {
         this._createImages(imageDataList);
       }).catch(e => {

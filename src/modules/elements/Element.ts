@@ -101,7 +101,7 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否应该锁定比例变换尺寸
   get shouldRatioLockResize(): boolean {
-    return this.ratioLockedEnable && this.isRatioLocked;
+    return this.ratioLockedEnable && (this.isRatioLocked || this.shield.event.isShift);
   }
 
   // 获取变形/移动/旋转操作之前的原始坐标

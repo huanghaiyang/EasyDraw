@@ -7,6 +7,7 @@ export default interface IStageEvent extends EventEmitter {
 
   get isCtrl(): boolean;
   get isCtrlWheel(): boolean;
+  get isShift(): boolean;
 
   init(): void;
 }
