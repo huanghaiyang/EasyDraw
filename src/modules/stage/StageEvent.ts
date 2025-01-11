@@ -1,12 +1,12 @@
 import IStageEvent from "@/types/IStageEvent";
 import IStageShield from "@/types/IStageShield";
 import EventUtils from "@/utils/EventUtils";
-import ImageUtils from "@/utils/ImageUtils";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from 'events';
 import isHotkey from "is-hotkey";
 import { TaskQueue } from "@/modules/render/RenderQueue";
 import { QueueTask } from "@/modules/render/RenderTask";
+import FileUtils from "@/utils/FileUtils";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
@@ -79,6 +79,26 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   }
 
   /**
+   * 创建图片组件
+   * 
+   * @param imageDataList 
+   */
+  private _createImages(imageDataList: ImageData[]): void {
+    if (imageDataList && imageDataList.length) {
+      let taskQueue = new TaskQueue();
+      imageDataList.forEach((imageData, index) => {
+        taskQueue.add(new QueueTask(async () => {
+          await new Promise((resolve) => this.emit('pasteImage', imageData, resolve))
+          if (index === imageDataList.length - 1) {
+            await taskQueue.destroy()
+            taskQueue = null;
+          }
+        }))
+      });
+    }
+  }
+
+  /**
    * 初始化鼠标事件
    */
   async initMouseEvents(): Promise<void> {
@@ -95,13 +115,22 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       this.emit('pressUp', e)
     })
     this.shield.canvas.addEventListener('wheel', e => {
-      e.preventDefault()
-      e.stopPropagation()
-
+      EventUtils.stopPP(e)
       this._isCtrlWheel = this._isCtrl;
       if (this._isCtrlWheel) {
         this.emit('wheelScale', -e.deltaY / 2000, e);
       }
+    })
+    this.shield.canvas.addEventListener('dragover', (e) => {
+      EventUtils.stopPP(e)
+    })
+    this.shield.canvas.addEventListener('drop', e => {
+      EventUtils.stopPP(e)
+      FileUtils.getImageDataFromFileTransfer(e).then(imageDataList => {
+        this._createImages(imageDataList);
+      }).catch(e => {
+        e && console.warn(e)
+      })
     })
 
     document.addEventListener('keydown', e => {
@@ -139,19 +168,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     })
 
     document.addEventListener('paste', e => {
-      ImageUtils.getImageDataFromClipboard(e).then(imageDataList => {
-        if (imageDataList && imageDataList.length) {
-          let taskQueue = new TaskQueue();
-          imageDataList.forEach((imageData, index) => {
-            taskQueue.add(new QueueTask(async () => {
-              await new Promise((resolve) => this.emit('pasteImage', imageData, resolve))
-              if (index === imageDataList.length - 1) {
-                await taskQueue.destroy()
-                taskQueue = null;
-              }
-            }))
-          });
-        }
+      FileUtils.getImageDataFromClipboard(e).then(imageDataList => {
+        this._createImages(imageDataList);
       }).catch(e => {
         e && console.warn(e)
       })
