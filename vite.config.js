@@ -26,4 +26,17 @@ export default defineConfig({
       scss: { api: "modern-compiler" },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vue: ["vue", "vuex", "pinia", "vue-i18n"],
+          element: ["element-plus"],
+          lodash: ["lodash"],
+          mathjs: ["mathjs"],
+          mobx: ["mobx"],
+        }
+      }
+    }
+  }
 });
