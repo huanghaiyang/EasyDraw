@@ -3,6 +3,7 @@ import IElementTransformer, { IElementBorderTransformer } from "@/types/IElement
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
+import IStageShield from "@/types/IStageShield";
 
 // 舞台元素数据模型
 export type ElementObject = {
@@ -35,6 +36,7 @@ export default interface IElement {
   id: string;
   model: ElementObject;
   rotation: IElementRotation;
+  shield: IStageShield;
 
   get widthModifyEnable(): boolean;
   get heightModifyEnable(): boolean;
@@ -44,7 +46,6 @@ export default interface IElement {
   get borderTransformEnable(): boolean;
   get fillEnabled(): boolean;
   get strokeEnable(): boolean;
-  get coordScale(): number;
   get ratioLockedEnable(): boolean;
   get shouldRatioLockResize(): boolean;
 
@@ -129,7 +130,7 @@ export default interface IElement {
 
   refreshSize(): void;
   refreshPosition(): void;
-  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void;
+  refreshStagePoints(): void;
   refreshInternalProps(): void;
 
   isInPolygon(points: IPoint[]): boolean;
@@ -137,7 +138,7 @@ export default interface IElement {
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
 
-  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[];
+  calcPoints(): IPoint[];
   calcPathPoints(): IPoint[];
   calcRotatePoints(): IPoint[];
   calcRotatePathPoints(): IPoint[];

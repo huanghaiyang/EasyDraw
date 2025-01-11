@@ -674,7 +674,7 @@ export default class StageStore implements IStageStore {
             isProvisional: true,
           })
         } else {
-          element = ElementUtils.createElement(model);
+          element = ElementUtils.createElement(model, this.shield);
           this.updateElementById(element.id, {
             status: ElementStatus.startCreating,
           })
@@ -687,7 +687,7 @@ export default class StageStore implements IStageStore {
     }
     if (element) {
       this.selectElement(element);
-      this.refreshElementStagePoints(element);
+      element.refreshStagePoints();
     }
     return element;
   }
@@ -735,7 +735,7 @@ export default class StageStore implements IStageStore {
       const coords = ElementUtils.translateCoords(element.originalModelCoords, offset);
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
       this.updateElementModel(element.id, { coords, left: x, top: y })
-      this.refreshElementStagePoints(element);
+      element.refreshStagePoints();
     })
   }
 
@@ -779,7 +779,7 @@ export default class StageStore implements IStageStore {
    */
   refreshElementsPosition(elements: IElement[]): void {
     elements.forEach(element => {
-      this.refreshElementStagePoints(element);
+      element.refreshStagePoints();
       element.refreshPosition();
     })
   }
@@ -793,7 +793,7 @@ export default class StageStore implements IStageStore {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage })
-      this.refreshElementStagePoints(element);
+      element.refreshStagePoints();
       element.refreshOriginalProps();
     })
   }
@@ -851,7 +851,7 @@ export default class StageStore implements IStageStore {
       naturalHeight: height,
       isRatioLocked: true,
     }
-    const element = ElementUtils.createElement(object);
+    const element = ElementUtils.createElement(object, this.shield);
     return element;
   }
 
@@ -874,18 +874,9 @@ export default class StageStore implements IStageStore {
       status: ElementStatus.finished,
       isSelected: true,
     });
-    this.refreshElementStagePoints(element);
+    element.refreshStagePoints();
     element.refreshOriginalProps();
     return element;
-  }
-
-  /**
-   * 刷新组件坐标
-   * 
-   * @param element 
-   */
-  private refreshElementStagePoints(element: IElement): void {
-    element.refreshStagePoints(this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
   }
 
   /**

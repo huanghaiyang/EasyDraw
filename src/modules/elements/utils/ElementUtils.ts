@@ -14,6 +14,7 @@ import { StrokeTypes } from "@/types/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/base/task/ElementTaskImage";
+import IStageShield from "@/types/IStageShield";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -155,20 +156,20 @@ export default class ElementUtils {
    * @param model 
    * @returns 
    */
-  static createElement(model: ElementObject): IElement {
+  static createElement(model: ElementObject, shield: IStageShield): IElement {
     const { type } = model;
     switch (type) {
       case CreatorTypes.rectangle: {
-        return new ElementRect(model);
+        return new ElementRect(model, shield);
       }
       case CreatorTypes.line: {
-        return new ElementLine(model);
+        return new ElementLine(model, shield);
       }
       case CreatorTypes.image: {
-        return new ElementImage(model);
+        return new ElementImage(model, shield);
       }
       default:
-        return new Element(model);
+        return new Element(model, shield);
     }
   }
 

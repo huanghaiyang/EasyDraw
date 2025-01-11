@@ -896,7 +896,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param deltaValue 
    */
   private _handleWheelMove(deltaValue: number): void {
-    this.stageWorldCoord.y += deltaValue / 2;
+    this.stageWorldCoord.y += -deltaValue / 2 / this.stageScale;
     this.store.refreshStageElements();
     this._redrawAll(true);
   }

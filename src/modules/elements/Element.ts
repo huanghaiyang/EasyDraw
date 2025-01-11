@@ -18,11 +18,13 @@ import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import IStageShield from "@/types/IStageShield";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
   model: ElementObject;
   rotation: IElementRotation;
+  shield: IStageShield;
   _originalTransformerPoints: IPoint[];
   _originalModelCoords: IPoint[];
   _originalMatrix: number[][] = [];
@@ -100,10 +102,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否应该锁定比例变换尺寸
   get shouldRatioLockResize(): boolean {
     return this.ratioLockedEnable && this.isRatioLocked;
-  }
-
-  get coordScale(): number {
-    return 1 / this._stageScale;
   }
 
   // 获取变形/移动/旋转操作之前的原始坐标
@@ -413,9 +411,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rect: Partial<DOMRect> = {};
   protected _transformers: IElementTransformer[] = [];
   protected _borderTransformers: IElementBorderTransformer[] = [];
-  protected _stageRect: DOMRect;
-  protected _stageWorldCoord: IPoint;
-  protected _stageScale: number;
   protected _originalCentroidCoord: IPoint;
   protected _originalRotatePoints: IPoint[] = [];
   protected _originalAngle: number = 0;
@@ -466,10 +461,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rect;
   }
 
-  constructor(model: ElementObject) {
+  constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
     this.rotation = new ElementRotation(this);
+    this.shield = shield;
     this.refreshOriginalProps();
     makeObservable(this);
   }
@@ -477,13 +473,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 计算舞台坐标
    * 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale
    * @returns 
    */
-  calcPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
-    return ElementUtils.calcStageRelativePoints(this.model.coords, stageRect, stageWorldCoord, stageScale);
+  calcPoints(): IPoint[] {
+    return ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
   }
 
   /**
@@ -589,8 +582,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result = this._rotatePathPoints.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
-        width: DefaultTransformerValue * this.coordScale,
-        height: DefaultTransformerValue * this.coordScale,
+        width: DefaultTransformerValue / this.shield.stageScale,
+        height: DefaultTransformerValue / this.shield.stageScale,
       }, {
         angle: this.model.angle
       });
@@ -636,29 +629,18 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 刷新坐标
-   * 
-   * @param stageRect
-   * @param stageWorldCoord
-   * @param stageScale
    */
-  refreshStagePoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void {
-    this._stageRect = stageRect;
-    this._stageWorldCoord = stageWorldCoord;
-    this._stageScale = stageScale;
-    this.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
-    this.rotation.model.scale = this.coordScale;
+  refreshStagePoints(): void {
+    this.refreshElementPoints();
+    this.rotation.model.scale = 1 / this.shield.stageScale;
     this.rotation.refresh();
   }
 
   /**
    * 刷新舞台坐标
-   * 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale
    */
-  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number) {
-    this._points = this.calcPoints(stageRect, stageWorldCoord, stageScale);
+  refreshElementPoints() {
+    this._points = this.calcPoints();
     this._pathPoints = this.calcPathPoints();
     this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
@@ -877,7 +859,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
     const coords = newPoints.map(point => {
       point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
-      const coord = ElementUtils.calcWorldPoint(point, this._stageRect, this._stageWorldCoord, this._stageScale);
+      const coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       return coord;
     })
     return coords;
@@ -894,7 +876,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else if (this.getActiveElementBorderTransformer()) {
       this.transformByBorder(offset);
     }
-    this.refreshStagePoints(this._stageRect, this._stageWorldCoord, this._stageScale);
+    this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
   }
@@ -1024,10 +1006,10 @@ export default class Element implements IElement, ILinkedNodeValue {
       } else if (index === 1 || index === 3) {
         matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
       }
-      if ([1,3].includes(index) && matrix[1][1] < 0) {
+      if ([1, 3].includes(index) && matrix[1][1] < 0) {
         matrix[1][1] = Math.abs(matrix[1][1]);
       }
-      if ([0,2].includes(index) && matrix[0][0] < 0) {
+      if ([0, 2].includes(index) && matrix[0][0] < 0) {
         matrix[0][0] = Math.abs(matrix[0][0]);
       }
       const coords = this.calcTransformCoords(matrix, lockPoint);
@@ -1049,7 +1031,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新组件必要数据
    */
   refreshInternalProps(): void {
-    this.refreshStagePoints(this._stageRect, this._stageWorldCoord, this._stageScale);
+    this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
     this.refreshOriginalProps();

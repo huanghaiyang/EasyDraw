@@ -18,6 +18,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isCtrlReduceEvent: (e: KeyboardEvent) => boolean;
   private _isCtrl0Event: (e: KeyboardEvent) => boolean;
   private _isCtrlAEvent: (e: KeyboardEvent) => boolean;
+  private _isShiftEvent: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
   private _isDeleteEvent: (e: KeyboardEvent) => boolean;
 
@@ -42,6 +43,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isCtrlPlusEvent = isHotkey('ctrl+=');
     this._isCtrlReduceEvent = isHotkey('ctrl+-');
     this._isCtrl0Event = isHotkey('ctrl+0');
+    this._isShiftEvent = isHotkey('shift');
     this._isShift1Event = isHotkey('shift+1');
     this._isDeleteEvent = isHotkey('backspace');
     this._isCtrlAEvent = isHotkey('ctrl+a');

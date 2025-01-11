@@ -13,8 +13,8 @@ export default class ElementTaskImage extends ElementTaskBase implements IElemen
    * 运行任务
    */
   async run(): Promise<void> {
-    const { model, rect, coordScale, angle, flipX, flipY, rotatePathPoints } = this.node;
-    CanvasUtils.drawImgLike(this.canvas, model.data, CommonUtils.scaleRect(rect, 1 / coordScale), {
+    const { model, rect, angle, flipX, flipY, rotatePathPoints } = this.node;
+    CanvasUtils.drawImgLike(this.canvas, model.data, CommonUtils.scaleRect(rect, this.node.shield.stageScale), {
       angle,
       flipX,
       flipY

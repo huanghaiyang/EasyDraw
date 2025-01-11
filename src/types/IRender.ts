@@ -30,5 +30,5 @@ export interface IRenderQueue {
   destroy(): Promise<void>;
 }
 
-export type RenderParams = { angle: number, flipX: boolean, flipY: boolean }
+export type RenderParams = { angle: number, flipX?: boolean, flipY?: boolean }
 export const DefaultRenderParams: RenderParams = { angle: 0, flipX: false, flipY: false };

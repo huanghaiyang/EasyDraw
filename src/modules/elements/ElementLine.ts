@@ -67,13 +67,9 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 刷新舞台坐标
-   * 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale
    */
-  refreshElementPoints(stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): void {
-    super.refreshElementPoints(stageRect, stageWorldCoord, stageScale);
+  refreshElementPoints(): void {
+    super.refreshElementPoints();
     this.refreshBentOutline();
   }
 
@@ -120,7 +116,10 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, DefaultLineElementClosestDistance + (this.model.styles.strokeWidth / 2) * this.coordScale);
+    return MathUtils.isPointClosestSegment(
+      point,
+      this.startRotatePathPoint, this.endRotatePathPoint, DefaultLineElementClosestDistance + (this.model.styles.strokeWidth / 2) / this.shield.stageScale
+    );
   }
 
   /**
