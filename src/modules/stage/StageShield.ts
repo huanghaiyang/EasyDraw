@@ -343,6 +343,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.event.on('pressDown', this._handlePressDown.bind(this))
     this.event.on('pressUp', this._handlePressUp.bind(this))
     this.event.on('wheelScale', this._handleWheelScale.bind(this))
+    this.event.on('wheelMove', this._handleWheelMove.bind(this) )
     this.event.on('scaleReduce', this._handleScaleReduce.bind(this))
     this.event.on('scaleIncrease', this._handleScaleIncrease.bind(this))
     this.event.on('scaleAutoFit', this._handleScaleAutoFit.bind(this))
@@ -887,6 +888,17 @@ export default class StageShield extends DrawerBase implements IStageShield {
     };
 
     this.setScale(value);
+  }
+
+  /**
+   * 舞台滚动
+   * 
+   * @param deltaValue 
+   */
+  private _handleWheelMove(deltaValue: number): void {
+    this.stageWorldCoord.y += deltaValue / 2;
+    this.store.refreshStageElements();
+    this._redrawAll(true);
   }
 
   /**
