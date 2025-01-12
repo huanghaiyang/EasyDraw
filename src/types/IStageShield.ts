@@ -8,6 +8,7 @@ import { Creator } from '@/types/Creator';
 import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
+import IStageAlign from "@/types/IStageAlign";
 
 // 舞台主画板
 export default interface IStageShield extends IStageDrawer, IStageSetter {
@@ -18,6 +19,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   provisional: IDrawerProvisional;
   configure: IStageConfigure;
   event: IStageEvent;
+  align: IStageAlign;
   currentCreator: Creator;
   renderEl: HTMLDivElement;
   stageRect: DOMRect;

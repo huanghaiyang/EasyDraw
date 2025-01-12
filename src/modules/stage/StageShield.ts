@@ -29,8 +29,10 @@ import ElementTransformer from "@/modules/elements/transformer/ElementTransforme
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import MathUtils from "@/utils/MathUtils";
 import { DefaultAutoFitPadding } from "@/types/Stage";
+import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
+import StageAlign from "@/modules/stage/StageAlign";
 
-export default class StageShield extends DrawerBase implements IStageShield {
+export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -47,6 +49,8 @@ export default class StageShield extends DrawerBase implements IStageShield {
   selection: IStageSelection;
   // 事件处理中心
   event: IStageEvent;
+  // 对齐
+  align: IStageAlign;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -151,6 +155,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.cursor = new StageCursor(this);
     this.provisional = new DrawerProvisional(this);
     this.selection = new StageSelection(this);
+    this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
     this.renderer = new ShieldRenderer(this);
   }
@@ -1058,7 +1063,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignLeft(elements: IElement[]): void {
-    this.store.setElementsAlignLeft(elements);
+    this.align.setElementsAlignLeft(elements);
     this._redrawAll(true);
   }
 
@@ -1068,7 +1073,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignRight(elements: IElement[]): void {
-    this.store.setElementsAlignRight(elements);
+    this.align.setElementsAlignRight(elements);
     this._redrawAll(true);
   }
 
@@ -1078,7 +1083,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignTop(elements: IElement[]): void {
-    this.store.setElementsAlignTop(elements);
+    this.align.setElementsAlignTop(elements);
     this._redrawAll(true);
   }
 
@@ -1088,7 +1093,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignBottom(elements: IElement[]): void {
-    this.store.setElementsAlignBottom(elements);
+    this.align.setElementsAlignBottom(elements);
     this._redrawAll(true);
   }
 
@@ -1098,7 +1103,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignCenter(elements: IElement[]): void {
-    this.store.setElementsAlignCenter(elements);
+    this.align.setElementsAlignCenter(elements);
     this._redrawAll(true);
   }
 
@@ -1108,7 +1113,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAlignMiddle(elements: IElement[]): void {
-    this.store.setElementsAlignMiddle(elements);
+    this.align.setElementsAlignMiddle(elements);
     this._redrawAll(true);
   }
 
@@ -1118,7 +1123,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAverageRow(elements: IElement[]): void {
-    this.store.setElementsAverageRow(elements);
+    this.align.setElementsAverageRow(elements);
     this._redrawAll(true);
   }
 
@@ -1128,7 +1133,7 @@ export default class StageShield extends DrawerBase implements IStageShield {
    * @param elements 
    */
   setElementsAverageCol(elements: IElement[]): void {
-    this.store.setElementsAverageCol(elements);
+    this.align.setElementsAverageCol(elements);
     this._redrawAll(true);
   }
 

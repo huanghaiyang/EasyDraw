@@ -18,12 +18,4 @@ export default interface IStageSetter {
   setElementsFontSize(elements: IElement[], value: number): Promise<void>;
   setElementsFontFamily(elements: IElement[], value: string): Promise<void>;
   setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void>;
-  setElementsAlignLeft(elements: IElement[]): void;
-  setElementsAlignRight(elements: IElement[]): void;
-  setElementsAlignTop(elements: IElement[]): void;
-  setElementsAlignBottom(elements: IElement[]): void;
-  setElementsAlignCenter(elements: IElement[]): void;
-  setElementsAlignMiddle(elements: IElement[]): void;
-  setElementsAverageRow(elements: IElement[]): void;
-  setElementsAverageCol(elements: IElement[]): void;
 }
