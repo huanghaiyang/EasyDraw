@@ -31,19 +31,20 @@ init().then(() => {
 .right {
   top: 0;
   bottom: 0;
-  width: 220px;
 }
 .left {
   left: 0;
+  width: 220px;
 }
 .right {
   right: 0;
+  width: 240px;
 }
 .stage {
   position: absolute;
   top: 0;
   bottom: 0;
   left: 220px;
-  right: 220px;
+  right: 240px;
 }
 </style>

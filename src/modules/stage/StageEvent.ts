@@ -7,6 +7,7 @@ import isHotkey from "is-hotkey";
 import { TaskQueue } from "@/modules/render/RenderQueue";
 import { QueueTask } from "@/modules/render/RenderTask";
 import FileUtils from "@/utils/FileUtils";
+import TimeUtils from "@/utils/TimerUtils";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
@@ -95,7 +96,12 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       let taskQueue = new TaskQueue();
       imageDataList.forEach((imageData, index) => {
         taskQueue.add(new QueueTask(async () => {
-          await new Promise((resolve) => this.emit('pasteImage', imageData, resolve))
+          await new Promise((resolve) => {
+            this.emit('pasteImage', imageData, async () => {
+              await TimeUtils.wait(100);
+              resolve(true);
+            })
+          })
           if (index === imageDataList.length - 1) {
             await taskQueue.destroy()
             taskQueue = null;

@@ -50,9 +50,9 @@
 
     &__row {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
-      padding: 0 10px;
+      padding: 0 4px;
 
       .el-tag {
         height: 24px;
@@ -64,6 +64,7 @@
         align-items: center;
         justify-content: space-between;
         width: 96px;
+        margin-right: 8px;
         .el-select,
         .el-input {
           width: 100%;
