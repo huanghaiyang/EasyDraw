@@ -1,11 +1,17 @@
 <script lang="ts" setup>
+import { Warning } from "@element-plus/icons-vue";
 import { useStageStore } from "@/stores/stage";
 
 const stageStore = useStageStore();
 </script>
 <template>
   <div :class="['align-props right-props']">
-    <div class="align-props__title">对齐</div>
+    <div class="align-props__title">
+      <span class="align-props__title-text">对齐</span>
+      <el-icon title="按住shift支持组件外轮廓对齐操作">
+        <Warning />
+      </el-icon>
+    </div>
     <div class="align-props__row">
       <el-icon
         :class="[

@@ -953,7 +953,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   private _getElementsCoordsRect(elements: IElement[]): Partial<DOMRect> {
-    return CommonUtils.getRect(flatten(elements.map(element => element.rotateOutlinePathCoords)));
+    return CommonUtils.getRect(flatten(elements.map(element => this._getElementAlignCoords(element))));
   }
 
   /**
@@ -965,7 +965,7 @@ export default class StageStore implements IStageStore {
   private _calcElementsAllWidth(elements: IElement[]): number {
     let allWidth = 0;
     elements.forEach(element => {
-      const elementRect = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const elementRect = CommonUtils.getRect(this._getElementAlignCoords(element));
       allWidth += elementRect.width;
     })
     return allWidth;
@@ -980,7 +980,7 @@ export default class StageStore implements IStageStore {
   private _calcElementsAllHeight(elements: IElement[]): number {
     let allHeight = 0;
     elements.forEach(element => {
-      const elementRect = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const elementRect = CommonUtils.getRect(this._getElementAlignCoords(element));
       allHeight += elementRect.height;
     })
     return allHeight;
@@ -993,7 +993,7 @@ export default class StageStore implements IStageStore {
    */
   private _sortElementsByX(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
-      return CommonUtils.getRect(element.rotateOutlinePathCoords).x;
+      return CommonUtils.getRect(this._getElementAlignCoords(element)).x;
     });
   }
 
@@ -1005,7 +1005,7 @@ export default class StageStore implements IStageStore {
    */
   private _sortElementsByXW(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
-      const { x, width } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { x, width } = CommonUtils.getRect(this._getElementAlignCoords(element));
       return x + width;
     });
   }
@@ -1017,7 +1017,7 @@ export default class StageStore implements IStageStore {
    */
   private _sortElementsByY(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
-      return CommonUtils.getRect(element.rotateOutlinePathCoords).y;
+      return CommonUtils.getRect(this._getElementAlignCoords(element)).y;
     });
   }
 
@@ -1029,9 +1029,20 @@ export default class StageStore implements IStageStore {
    */
   private _sortElementsByYH(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
-      const { y, height } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { y, height } = CommonUtils.getRect(this._getElementAlignCoords(element));
       return y + height;
     });
+  }
+
+  /**
+   * 获取组件对齐操作的坐标
+   * 
+   * @param element 
+   * @returns 
+   */
+  private _getElementAlignCoords(element: IElement): IPoint[] {
+    if (this.shield.event.isShift) return element.rotateOutlinePathCoords;
+    return element.rotatePathPoints;
   }
 
   /**
@@ -1058,7 +1069,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignLeft(elements: IElement[]): void {
     const { x } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { x: eX } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { x: eX } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x - eX;
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
@@ -1074,7 +1085,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignRight(elements: IElement[]): void {
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { x: eX, width: eWidth } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x + width - eX - eWidth;
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
@@ -1090,7 +1101,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignTop(elements: IElement[]): void {
     const { y } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { y: eY } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { y: eY } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y - eY;
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
@@ -1106,7 +1117,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignBottom(elements: IElement[]): void {
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { y: eY, height: eHeight } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y + height - eY - eHeight;
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
@@ -1122,7 +1133,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignCenter(elements: IElement[]): void {
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { x: eX, width: eWidth } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x + width / 2 - (eX + eWidth / 2);
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
@@ -1138,7 +1149,7 @@ export default class StageStore implements IStageStore {
   setElementsAlignMiddle(elements: IElement[]): void {
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
-      const { y: eY, height: eHeight } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+      const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y + height / 2 - (eY + eHeight / 2);
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
@@ -1154,14 +1165,14 @@ export default class StageStore implements IStageStore {
   setElementsAverageRow(elements: IElement[]): void {
     elements = this._sortElementsByY(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
-    const firstElementRect = CommonUtils.getRect(elements[0].rotateOutlinePathCoords);
+    const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));
     let prevY = y + firstElementRect.height;
     const allHeight = this._calcElementsAllHeight(elements);
     const margin = (height - allHeight) / (elements.length - 1);
     elements = this._sortElementsByYH(elements.slice(1));
     elements.forEach((element, index) => {
       if (index !== elements.length - 1) {
-        const { y: eY, height: eHeight } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+        const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
         const offsetY = prevY + margin - eY;
         if (offsetY !== 0) {
           this._setElementPositionByOffset(element, 0, offsetY);
@@ -1179,14 +1190,14 @@ export default class StageStore implements IStageStore {
   setElementsAverageCol(elements: IElement[]): void {
     elements = this._sortElementsByX(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
-    const firstElementRect = CommonUtils.getRect(elements[0].rotateOutlinePathCoords);
+    const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));
     let prevX = x + firstElementRect.width;
     const allWidth = this._calcElementsAllWidth(elements);
     const margin = (width - allWidth) / (elements.length - 1);
     elements = this._sortElementsByXW(elements.slice(1));
     elements.forEach((element, index) => {
       if (index !== elements.length - 1) {
-        const { x: eX, width: eWidth } = CommonUtils.getRect(element.rotateOutlinePathCoords);
+        const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
         const offsetX = prevX + margin - eX;
         if (offsetX !== 0) {
           this._setElementPositionByOffset(element, offsetX, 0);

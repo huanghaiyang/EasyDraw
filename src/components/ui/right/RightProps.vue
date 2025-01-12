@@ -38,6 +38,7 @@
         align-items: center;
         vertical-align: middle;
         line-height: 12px;
+        margin: 0 4px 0 0;
       }
       .el-icon {
         &:hover {
