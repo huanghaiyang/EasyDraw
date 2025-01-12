@@ -175,7 +175,7 @@ export default class ElementLine extends Element implements IElementLine {
     const newCoord = MathUtils.calculateTargetPoint(this.startCoord, value, this.angle - 90);
     this.model.coords[1] = newCoord;
     this.model.width = value;
-    this.refreshInternalProps();
+    this.refresh();
   }
 
   /**
@@ -188,6 +188,6 @@ export default class ElementLine extends Element implements IElementLine {
     const startCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value + 90);
     const endCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value - 90);
     this.model.coords = [startCoord, endCoord];
-    this.refreshInternalProps();
+    this.refresh();
   }
 }

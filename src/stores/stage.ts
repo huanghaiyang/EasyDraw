@@ -48,6 +48,12 @@ export const useStageStore = defineStore("stage", {
     inputDisabled(): boolean {
       return !this.uniqSelectedElement;
     },
+    alignEnable(): boolean {
+      return this.selectedElements?.length >= 2
+    },
+    averageEnable(): boolean {
+      return this.selectedElements?.length >= 3
+    },
   },
   actions: {
     /**
@@ -500,6 +506,62 @@ export const useStageStore = defineStore("stage", {
      */
     setRatioLocked(value: boolean): void {
       shield.setElementsRatioLocked(this.selectedElements, value);
+    },
+    /**
+     * 左侧对齐
+     */
+    setElementsAlignLeft(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignLeft(this.selectedElements);
+    },
+    /**
+     * 水平居中对齐
+     */
+    setElementsAlignCenter(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignCenter(this.selectedElements);
+    },
+    /**
+     * 右侧对齐
+     */
+    setElementsAlignRight(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignRight(this.selectedElements);
+    },
+    /**
+     * 顶部对齐
+     */
+    setElementsAlignTop(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignTop(this.selectedElements);
+    },
+    /**
+     * 垂直居中对齐
+     */
+    setElementsAlignMiddle(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignMiddle(this.selectedElements);
+    },
+    /**
+     * 底部对齐
+     */
+    setElementsAlignBottom(): void {
+      if (!this.alignEnable) return;
+      shield.setElementsAlignBottom(this.selectedElements);
+    },
+    /**
+     * 水平均分对齐
+     */
+    setElementsAverageRow(): void {
+      if (!this.averageEnable) return;
+      shield.setElementsAverageRow(this.selectedElements);
+    },
+    /**
+     * 垂直平均分对齐
+     */
+    setElementsAverageCol(): void {
+      if (!this.averageEnable) return;
+      shield.setElementsAverageCol(this.selectedElements);
     },
   },
 });

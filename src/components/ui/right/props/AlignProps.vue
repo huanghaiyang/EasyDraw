@@ -1,20 +1,76 @@
 <script lang="ts" setup>
-import { useStageStore } from '@/stores/stage';
+import { useStageStore } from "@/stores/stage";
 
 const stageStore = useStageStore();
 </script>
 <template>
-  <div :class="['align-props right-props', {
-    disabled: stageStore.selectedElements?.length < 2
-  }]">
+  <div :class="['align-props right-props']">
     <div class="align-props__title">对齐</div>
     <div class="align-props__row">
-      <el-icon :class="['iconfont', 'icon-verbise-align-left']"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-align-horizontal-center']"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-align-right']"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-align-top']"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-align-vertical-center']"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-align-bottom']"></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-left',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignLeft"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-horizontal-center',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignCenter"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-right',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignRight"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-top',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignTop"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-vertical-center',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignMiddle"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-align-bottom',
+          { disabled: !stageStore.alignEnable },
+        ]"
+        @click="stageStore.setElementsAlignBottom"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-average-col',
+          { disabled: !stageStore.averageEnable },
+        ]"
+        @click="stageStore.setElementsAverageCol"
+      ></el-icon>
+      <el-icon
+        :class="[
+          'iconfont',
+          'icon-verbise-average-row',
+          { disabled: !stageStore.averageEnable },
+        ]"
+        @click="stageStore.setElementsAverageRow"
+      ></el-icon>
     </div>
   </div>
 </template>
@@ -28,10 +84,8 @@ const stageStore = useStageStore();
       color: #1890ff;
       cursor: pointer;
     }
-  }
 
-  &.disabled {
-    .iconfont {
+    &.disabled {
       color: rgba(0, 0, 0, 0.65);
       cursor: not-allowed;
 

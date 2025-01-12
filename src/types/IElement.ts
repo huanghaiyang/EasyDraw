@@ -131,7 +131,7 @@ export default interface IElement {
   refreshSize(): void;
   refreshPosition(): void;
   refreshStagePoints(): void;
-  refreshInternalProps(): void;
+  refresh(): void;
 
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;

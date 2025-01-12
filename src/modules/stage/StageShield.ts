@@ -1052,4 +1052,84 @@ export default class StageShield extends DrawerBase implements IStageShield {
     this.selectAll();
   }
 
+  /**
+   * 左对齐
+   * 
+   * @param elements 
+   */
+  setElementsAlignLeft(elements: IElement[]): void {
+    this.store.setElementsAlignLeft(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 右对齐
+   * 
+   * @param elements 
+   */
+  setElementsAlignRight(elements: IElement[]): void {
+    this.store.setElementsAlignRight(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 顶部对齐
+   * 
+   * @param elements 
+   */
+  setElementsAlignTop(elements: IElement[]): void {
+    this.store.setElementsAlignTop(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 底部对齐
+   * 
+   * @param elements 
+   */
+  setElementsAlignBottom(elements: IElement[]): void {
+    this.store.setElementsAlignBottom(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 水平居中
+   * 
+   * @param elements 
+   */
+  setElementsAlignCenter(elements: IElement[]): void {
+    this.store.setElementsAlignCenter(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 垂直居中
+   * 
+   * @param elements 
+   */
+  setElementsAlignMiddle(elements: IElement[]): void {
+    this.store.setElementsAlignMiddle(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 水平平均分布
+   * 
+   * @param elements 
+   */
+  setElementsAverageRow(elements: IElement[]): void {
+    this.store.setElementsAverageRow(elements);
+    this._redrawAll(true);
+  }
+
+  /**
+   * 垂直平均分布
+   * 
+   * @param elements 
+   */
+  setElementsAverageCol(elements: IElement[]): void {
+    this.store.setElementsAverageCol(elements);
+    this._redrawAll(true);
+  }
+
 }

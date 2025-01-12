@@ -1030,7 +1030,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新组件必要数据
    */
-  refreshInternalProps(): void {
+  refresh(): void {
     this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
@@ -1064,7 +1064,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
-    this.refreshInternalProps();
+    this.refresh();
   }
 
   /**
@@ -1085,7 +1085,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     const coords = this.calcTransformCoords(matrix, lockPoint);
     this.model.coords = coords;
-    this.refreshInternalProps();
+    this.refresh();
   }
 
   /**
@@ -1099,7 +1099,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.left = x;
     this.model.top = y;
     this.model.coords = coords;
-    this.refreshInternalProps();
+    this.refresh();
   }
 
   /**
@@ -1109,7 +1109,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setAngle(value: number): void {
     this.model.angle = value;
-    this.refreshInternalProps();
+    this.refresh();
   }
 
   /**
