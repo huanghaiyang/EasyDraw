@@ -61,29 +61,16 @@ const toggleColorPickerVisible = () => {
 
     <div class="stroke-props__row color">
       <div class="stroke-props__row-item">
-        <el-color-picker
-          v-model="strokeColor"
-          @change="stageStore.setElementsStrokeColor"
-          ref="colorPickerRef"
-          :disabled="stageStore.inputDisabled"
-        />
+        <el-color-picker v-model="strokeColor" @change="stageStore.setElementsStrokeColor" ref="colorPickerRef"
+          :disabled="stageStore.inputDisabled" />
         <el-tag type="info" @click="toggleColorPickerVisible">{{
           strokeColor
         }}</el-tag>
       </div>
 
       <div class="stroke-props__row-item">
-        <el-input
-          v-model="strokeColorOpacity"
-          placeholder="输入数字"
-          type="number"
-          min="0"
-          max="1"
-          @change="
-            (value) => stageStore.setElementsStrokeColorOpacity(Number(value))
-          "
-          :disabled="stageStore.inputDisabled"
-        >
+        <el-input v-model="strokeColorOpacity" placeholder="输入数字" type="number" min="0" max="1" @change="(value) => stageStore.setElementsStrokeColorOpacity(Number(value))
+          " :disabled="stageStore.inputDisabled">
           <template #prepend>o</template>
         </el-input>
       </div>
@@ -91,31 +78,16 @@ const toggleColorPickerVisible = () => {
 
     <div class="stroke-props__row">
       <div class="stroke-props__row-item">
-        <el-select
-          v-model="strokeType"
-          placeholder="描边类型"
-          size="small"
-          @change="stageStore.setElementsStrokeType"
-          :disabled="stageStore.inputDisabled"
-        >
-          <el-option
-            v-for="item in strokeTypes"
-            :key="item.type"
-            :label="item.name"
-            :value="item.type"
-          />
+        <el-select v-model="strokeType" placeholder="描边类型" size="small" @change="stageStore.setElementsStrokeType"
+          :disabled="stageStore.inputDisabled">
+          <el-option v-for="item in strokeTypes" :key="item.type" :label="item.name" :value="item.type" />
         </el-select>
       </div>
 
       <div class="stroke-props__row-item">
-        <el-input
-          v-model="strokeWidth"
-          placeholder="输入数字"
-          type="number"
-          :min="stageStore.uniqSelectedElement?.model.type === CreatorTypes.line? 1: 0"
-          @change="(value) => stageStore.setElementsStrokeWidth(Number(value))"
-          :disabled="stageStore.inputDisabled"
-        >
+        <el-input v-model="strokeWidth" placeholder="输入数字" type="number"
+          :min="stageStore.uniqSelectedElement?.model.type === CreatorTypes.line ? 1 : 0"
+          @change="(value) => stageStore.setElementsStrokeWidth(Number(value))" :disabled="stageStore.inputDisabled">
           <template #prepend>s</template>
           <template #append>px</template>
         </el-input>

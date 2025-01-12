@@ -35,15 +35,8 @@ function setElementsAngle(value: string) {
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input
-          v-model="aValue"
-          placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
-          type="number"
-          min="-180"
-          max="180"
-          @change="setElementsAngle"
-        >
+        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-180"
+          max="180" @change="setElementsAngle">
           <template #prepend>a</template>
           <template #append>°</template>
         </el-input>

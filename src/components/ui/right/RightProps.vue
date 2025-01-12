@@ -3,6 +3,7 @@
 <template>
   <div class="props-right-panel">
     <scale-setting></scale-setting>
+    <align-props></align-props>
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>
@@ -20,6 +21,7 @@
 .right-props {
   width: 100%;
   .position-props,
+  .align-props,
   .size-props,
   .angle-props,
   .stroke-props,

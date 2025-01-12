@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "11802995",
+      "name": "align-bottom",
+      "font_class": "align-bottom",
+      "unicode": "e7e4",
+      "unicode_decimal": 59364
+    },
+    {
+      "icon_id": "11802996",
+      "name": "align-vertical",
+      "font_class": "align-horizontal-center",
+      "unicode": "e7e5",
+      "unicode_decimal": 59365
+    },
+    {
+      "icon_id": "11802997",
+      "name": "align-left",
+      "font_class": "align-left",
+      "unicode": "e7e6",
+      "unicode_decimal": 59366
+    },
+    {
+      "icon_id": "11802998",
+      "name": "align-right",
+      "font_class": "align-right",
+      "unicode": "e7e7",
+      "unicode_decimal": 59367
+    },
+    {
+      "icon_id": "11802999",
+      "name": "align-center",
+      "font_class": "align-vertical-center",
+      "unicode": "e7e8",
+      "unicode_decimal": 59368
+    },
+    {
+      "icon_id": "11803000",
+      "name": "align-top",
+      "font_class": "align-top",
+      "unicode": "e7e9",
+      "unicode_decimal": 59369
+    },
+    {
       "icon_id": "21096821",
       "name": "split-v",
       "font_class": "split-v",

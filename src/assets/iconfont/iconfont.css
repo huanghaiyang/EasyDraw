@@ -1,9 +1,9 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4781741 */
-  src: url('iconfont.woff2?t=1735814930441') format('woff2'),
-       url('iconfont.woff?t=1735814930441') format('woff'),
-       url('iconfont.ttf?t=1735814930441') format('truetype'),
-       url('iconfont.svg?t=1735814930441#iconfont') format('svg');
+  src: url('iconfont.woff2?t=1736646223053') format('woff2'),
+       url('iconfont.woff?t=1736646223053') format('woff'),
+       url('iconfont.ttf?t=1736646223053') format('truetype'),
+       url('iconfont.svg?t=1736646223053#iconfont') format('svg');
 }
 
 .iconfont {
@@ -12,6 +12,30 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-verbise-align-bottom:before {
+  content: "\e7e4";
+}
+
+.icon-verbise-align-horizontal-center:before {
+  content: "\e7e5";
+}
+
+.icon-verbise-align-left:before {
+  content: "\e7e6";
+}
+
+.icon-verbise-align-right:before {
+  content: "\e7e7";
+}
+
+.icon-verbise-align-vertical-center:before {
+  content: "\e7e8";
+}
+
+.icon-verbise-align-top:before {
+  content: "\e7e9";
 }
 
 .icon-verbise-split-v:before {
