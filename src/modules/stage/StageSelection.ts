@@ -2,7 +2,7 @@ import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
-import { IMaskSelectionModel } from "@/types/IModel";
+import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { every, includes } from "lodash";
@@ -42,7 +42,7 @@ export default class StageSelection implements IStageSelection {
    * @param element 
    * @returns 
    */
-  private _getElementMaskModelProps(element: IElement): Partial<IMaskSelectionModel> {
+  private _getElementMaskModelProps(element: IElement): Partial<IMaskModel> {
     const { rotatePathPoints, model: { angle, isPointsClosed }, transformerType } = element;
     return {
       points: rotatePathPoints,
@@ -59,8 +59,8 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getSelectionModels(): IMaskSelectionModel[] {
-    const result: Partial<IMaskSelectionModel>[] = [];
+  getSelectionModels(): IMaskModel[] {
+    const result: Partial<IMaskModel>[] = [];
 
     if (this.isRange) {
       this.shield.store.rangeElements.forEach(element => {
@@ -91,7 +91,7 @@ export default class StageSelection implements IStageSelection {
         type: DrawerMaskModelTypes.range,
       });
     }
-    return result as IMaskSelectionModel[];
+    return result as IMaskModel[];
   }
 
   /**

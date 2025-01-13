@@ -1,6 +1,6 @@
 import { IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
-import { IMaskSelectionModel } from "@/types/IModel";
+import { IMaskModel } from "@/types/IModel";
 import IElementTransformer, { IElementBorderTransformer } from '@/types/IElementTransformer';
 import IElementRotation from "@/types/IElementRotation";
 
@@ -10,7 +10,7 @@ export default interface IStageSelection {
   get isRange(): boolean;
   setRange(points: IPoint[]): void;
   selectRange(): void;
-  getSelectionModels(): IMaskSelectionModel[];
+  getSelectionModels(): IMaskModel[];
   selectTarget(): void;
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;

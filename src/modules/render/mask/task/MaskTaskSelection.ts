@@ -1,17 +1,11 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IMaskSelectionModel } from "@/types/IModel";
 import { IMaskSelection } from "@/types/IRenderTask";
 import { DefaultSelectionStyle } from "@/types/MaskStyles";
 import { DrawerMaskModelTypes } from "@/types";
 import { ElementStyles } from "@/types/ElementStyles";
 
 export default class MaskTaskSelection extends MaskTaskBase implements IMaskSelection {
-
-  get data(): IMaskSelectionModel {
-    return this.model as IMaskSelectionModel;
-  }
-
   /**
    * 运行任务
    */
@@ -23,6 +17,6 @@ export default class MaskTaskSelection extends MaskTaskBase implements IMaskSele
     }
     CanvasUtils.drawPathWithScale(this.canvas, this.data.points, Object.assign({}, { ...DefaultSelectionStyle, ...specialStyles }, {
       strokeWidth: strokeWidth * this.data.scale
-    }), this.data.element.isPointsClosed);
+    }), this.data.element?.isPointsClosed);
   }
 }

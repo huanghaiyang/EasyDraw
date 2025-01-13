@@ -11,7 +11,7 @@ import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndica
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskCircleModel, IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
+import { IMaskModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
 import { DefaultArbitraryControllerRadius, DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
@@ -36,8 +36,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const selectionTasks = this.createMaskSelectionTasks();
     selectionTasks.forEach(task => {
       cargo.add(task);
-      if (((task as IMaskTask).data as IMaskSelectionModel).type === DrawerMaskModelTypes.selection) {
-        cargo.addAll(this.createMaskTransformerTasks((task as IMaskTask).model as IMaskSelectionModel));
+      if ((task as IMaskTask).data.type === DrawerMaskModelTypes.selection) {
+        cargo.addAll(this.createMaskTransformerTasks((task as IMaskTask).model));
       }
     });
     if (selectionTasks.length) {
@@ -91,7 +91,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const point = this.drawer.shield.cursor.value;
     if (!point) return;
     const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageRect, this.drawer.shield.stageWorldCoord, this.drawer.shield.stageScale);
-    const model: IMaskCursorPositionModel = {
+    const model: IMaskModel = {
       point: {
         x: point.x + 20 / this.drawer.shield.stageScale,
         y: point.y + 20 / this.drawer.shield.stageScale
@@ -110,9 +110,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const models: IMaskSelectionModel[] = this.drawer.shield.selection.getSelectionModels();
+    const models: IMaskModel[] = this.drawer.shield.selection.getSelectionModels();
     models.forEach(model => {
-      const task = new MaskTaskSelection({ ...(model as IMaskSelectionModel), scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
+      const task = new MaskTaskSelection({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -134,13 +134,13 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param selectionModel 
    * @returns 
    */
-  private createMaskTransformerTasks(selectionModel: IMaskSelectionModel): IRenderTask[] {
+  private createMaskTransformerTasks(selectionModel: IMaskModel): IRenderTask[] {
     const tasks: IRenderTask[] = [];
     const { points = [], angle = 0, element: { transformerType } } = selectionModel;
     switch (transformerType) {
       case TransformerTypes.rect: {
         points.forEach((point) => {
-          const model: IMaskTransformerModel = {
+          const model: IMaskModel = {
             point,
             type: DrawerMaskModelTypes.transformer,
             angle,
@@ -153,7 +153,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       }
       case TransformerTypes.circle: {
         points.forEach((point) => {
-          const model: IMaskCircleModel = {
+          const model: IMaskModel = {
             point,
             type: DrawerMaskModelTypes.transformer,
             radius: DefaultArbitraryControllerRadius,
@@ -204,7 +204,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       }
     }
     const angle = MathUtils.calculateAngle(p1, p2);
-    const model: IMaskSizeIndicatorModel = {
+    const model: IMaskModel = {
       point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.sizeIndicator,
@@ -220,7 +220,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
     if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
-      const model: IMaskCircleModel = {
+      const model: IMaskModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultArbitraryControllerRadius,
