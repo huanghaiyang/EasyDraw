@@ -31,6 +31,7 @@ export default interface IStageStore extends IStageSetter {
   getElementById(id: string): IElement;
   getIndexById(id: string): number;
   creatingElement(points: IPoint[]): IElement;
+  creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement;
   finishCreatingElement(): IElement;
   updateSelectedElementsMovement(offset: IPoint): void;
   updateSelectedElementsRotation(point: IPoint): void;

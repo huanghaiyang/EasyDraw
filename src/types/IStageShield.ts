@@ -37,6 +37,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isMoveableActive(): boolean;
   get isHandActive(): boolean;
   get isElementsRotating(): boolean;
+  get isArbitraryDrawing(): boolean;
 
   calcScaleAutoFitValueByBox(box: IPoint[]): number;
   calcScaleAutoFitValue(): number;

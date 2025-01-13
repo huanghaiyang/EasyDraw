@@ -1,5 +1,5 @@
 import { ElementStatus, IPoint } from "@/types/index";
-import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
+import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -22,6 +22,7 @@ export type ElementObject = {
   isRatioLocked: boolean;
   ratio?: number;
   matrix?: number[][];
+  isPointsClosed?: boolean; // 是否闭合
 }
 
 // 图片元素数据模型
@@ -77,6 +78,7 @@ export default interface IElement {
   get centroidCoord(): IPoint;
   get transformers(): IElementTransformer[];
   get borderTransformers(): IElementBorderTransformer[];
+  get transformerType(): TransformerTypes;
   get rect(): Partial<DOMRect>;
 
   get isSelected(): boolean;
@@ -190,4 +192,9 @@ export interface IElementLine extends IElement {
 
   calcOuterPathPoints(): IPoint[];
   calcOuterPathCoords(): IPoint[];
+}
+
+// 舞台元素（组件）-任意多边形&线条
+export interface IElementArbitrary extends IElement {
+  createdCoordIndex: number;
 }

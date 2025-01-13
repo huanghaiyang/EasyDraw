@@ -60,3 +60,6 @@ export interface IElementTaskClear extends IElementTask { }
 
 // 舞台元素绘制任务-线段
 export interface IElementTaskLine extends IElementTask { }
+
+// 舞台元素绘制任务-自由线段
+export interface IElementTaskArbitrary extends IElementTask { }

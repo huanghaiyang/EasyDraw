@@ -23,6 +23,6 @@ export default class MaskTaskSelection extends MaskTaskBase implements IMaskSele
     }
     CanvasUtils.drawPathWithScale(this.canvas, this.data.points, Object.assign({}, { ...DefaultSelectionStyle, ...specialStyles }, {
       strokeWidth: strokeWidth * this.data.scale
-    }));
+    }), this.data.element.isPointsClosed);
   }
 }

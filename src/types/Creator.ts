@@ -6,7 +6,7 @@ export enum CreatorTypes {
   line = 'line',
   image = 'image',
   polygon = 'polygon',
-  pen = 'pen',
+  arbitrary = 'arbitrary',
   pencil = 'pencil',
 }
 
@@ -14,7 +14,7 @@ export enum CreatorTypes {
 export enum CreatorCategories {
   cursor = 'cursor',
   shapes = 'shapes',
-  arbitrary = 'arbitrary',
+  freedom = 'freedom',
 }
 
 // 创作工具

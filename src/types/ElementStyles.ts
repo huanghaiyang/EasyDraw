@@ -30,6 +30,7 @@ export const LineStrokeTypes: StrokeTypePair[] = [{
 export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   switch (type) {
     case CreatorTypes.rectangle:
+    case CreatorTypes.arbitrary:
     case CreatorTypes.image: {
       return StrokeTypesArray;
     }
@@ -93,6 +94,14 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
         ...DefaultElementStyle,
         fillColor: '',
         fillColorOpacity: 0,
+      }
+    }
+    case CreatorTypes.arbitrary: {
+      return {
+        ...DefaultElementStyle,
+        fillColor: '',
+        fillColorOpacity: 0,
+        strokeWidth: DefaultLineStrokeWidth
       }
     }
     case CreatorTypes.rectangle:

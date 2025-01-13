@@ -102,7 +102,7 @@ export const useStageStore = defineStore("stage", {
       if (creator.category === CreatorCategories.shapes) {
         this.currentShapeCreator = creator;
       }
-      if (creator.category === CreatorCategories.arbitrary) {
+      if (creator.category === CreatorCategories.freedom) {
         this.currentArbitraryCreator = creator;
       }
     },

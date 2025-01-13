@@ -15,6 +15,8 @@ import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/base/task/ElementTaskImage";
 import IStageShield from "@/types/IStageShield";
+import ElementTaskArbitrary from "@/modules/render/base/task/ElementTaskArbitrary";
+import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -69,6 +71,9 @@ export default class ElementUtils {
       case CreatorTypes.line: {
         task = new ElementTaskLine(element, params);
         break;
+      }
+      case CreatorTypes.arbitrary: {
+        task = new ElementTaskArbitrary(element, params);
       }
       default:
         break;
@@ -143,8 +148,8 @@ export default class ElementUtils {
     switch (creatorType) {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
+      case CreatorTypes.arbitrary:
         return CommonUtils.getBoxPoints(points);
-      case CreatorTypes.line:
       default:
         return points;
     }
@@ -167,6 +172,9 @@ export default class ElementUtils {
       }
       case CreatorTypes.image: {
         return new ElementImage(model, shield);
+      }
+      case CreatorTypes.arbitrary: {
+        return new ElementArbitrary(model, shield);
       }
       default:
         return new Element(model, shield);
@@ -195,10 +203,8 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { pathPoints, centroid, rotation: { model: { angle, scale } } } = element;
-    const v1 = pathPoints[0];
-    const v2 = pathPoints[3];
-    const halfValue = MathUtils.distanceBetweenPoints(v1, v2) / 2;
+    const { centroid, rotation: { model: { angle, scale } }, rect } = element;
+    const halfValue = rect.height / 2;
     return MathUtils.calculateTargetPoint(centroid, halfValue + DefaultSelectionRotateDistance * scale, angle);
   }
 
@@ -212,7 +218,8 @@ export default class ElementUtils {
     switch (model.type) {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
-      case CreatorTypes.line: {
+      case CreatorTypes.line:
+      case CreatorTypes.arbitrary: {
         return MathUtils.calcPolygonCentroid(model.coords);
       }
     }
@@ -252,6 +259,20 @@ export default class ElementUtils {
         return {
           width: MathUtils.preciseToFixed(MathUtils.distanceBetweenPoints(coords[0], coords[1]), 2),
           height: 0,
+        }
+      }
+      case CreatorTypes.arbitrary: {
+        if (coords.length === 1) {
+          return {
+            width: 0,
+            height: 0,
+          }
+        } else {
+          const { width, height } = CommonUtils.getRect(coords);
+          return {
+            width,
+            height,
+          }
         }
       }
     }

@@ -18,6 +18,7 @@ import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPos
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
+import { TransformerTypes } from "@/types/IElementTransformer";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
@@ -111,7 +112,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const tasks: IRenderTask[] = [];
     const models: IMaskSelectionModel[] = this.drawer.shield.selection.getSelectionModels();
     models.forEach(model => {
-      const task = new MaskTaskSelection({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
+      const task = new MaskTaskSelection({ ...(model as IMaskSelectionModel), scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -135,17 +136,34 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskTransformerTasks(selectionModel: IMaskSelectionModel): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const { points = [], angle = 0 } = selectionModel;
-    points.forEach((point, index) => {
-      const model: IMaskTransformerModel = {
-        point,
-        type: DrawerMaskModelTypes.transformer,
-        angle,
-        scale: 1 / this.drawer.shield.stageScale
+    const { points = [], angle = 0, element: { transformerType } } = selectionModel;
+    switch (transformerType) {
+      case TransformerTypes.rect: {
+        points.forEach((point) => {
+          const model: IMaskTransformerModel = {
+            point,
+            type: DrawerMaskModelTypes.transformer,
+            angle,
+            scale: 1 / this.drawer.shield.stageScale
+          }
+          const task = new MaskTaskTransformer(model, this.renderParams);
+          tasks.push(task);
+        });
+        break;
       }
-      const task = new MaskTaskTransformer(model, this.renderParams);
-      tasks.push(task);
-    });
+      case TransformerTypes.circle: {
+        points.forEach((point) => {
+          const model: IMaskCircleModel = {
+            point,
+            type: DrawerMaskModelTypes.transformer,
+            radius: DefaultArbitraryControllerRadius,
+          }
+          const task = new MaskTaskCircleTransformer(model, this.renderParams);
+          tasks.push(task);
+        });
+        break;
+      }
+    }
     return tasks;
   }
 
@@ -201,7 +219,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns 
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    if (this.drawer.shield.currentCreator.category === CreatorCategories.arbitrary) {
+    if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
       const model: IMaskCircleModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,

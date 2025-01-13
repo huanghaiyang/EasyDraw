@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { ArbitraryCreators, CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
+import { FreedomCreators, CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -50,7 +50,7 @@ const select = (item) => {
       <el-icon :class="['iconfont', currentArbitraryCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown :creators="ArbitraryCreators" :current-creator="currentCreator" :select="select"/>
+    <creator-dropdown :creators="FreedomCreators" :current-creator="currentCreator" :select="select"/>
   </div>
 </template>
 <style lang="less" scoped>

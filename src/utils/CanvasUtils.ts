@@ -185,15 +185,16 @@ export default class CanvasUtils {
    * @param target 
    * @param points 
    * @param styles 
+   * @param close
    */
-  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles): void {
+  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, close: boolean = true): void {
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
     if (styles.fillColorOpacity) {
       const innerPoints = PolygonUtils.getPolygonInnerVertices(points, styles.strokeWidth / 2);
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {
-      CanvasUtils.drawPathStroke(target, points, styles);
+      CanvasUtils.drawPathStroke(target, points, styles, close);
     }
   }
 
@@ -204,9 +205,9 @@ export default class CanvasUtils {
    * @param points 
    * @param styles 
    */
-  static drawPathStokeWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+  static drawPathStokeWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, close: boolean = true) {
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
-    CanvasUtils.drawPathStroke(target, points, styles);
+    CanvasUtils.drawPathStroke(target, points, styles, close);
   }
 
   /**
@@ -215,8 +216,9 @@ export default class CanvasUtils {
    * @param target 
    * @param points 
    * @param styles 
+   * @param close
    */
-  static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+  static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, close: boolean = true) {
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
@@ -228,7 +230,9 @@ export default class CanvasUtils {
         ctx.lineTo(point.x, point.y);
       }
     });
-    ctx.closePath();
+    if (close) {
+      ctx.closePath();
+    }
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (styles.strokeWidth) {
       ctx.lineWidth = styles.strokeWidth;

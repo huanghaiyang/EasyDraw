@@ -37,35 +37,51 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 根据组件获取选区对象的属性
+   * 
+   * @param element 
+   * @returns 
+   */
+  private _getElementMaskModelProps(element: IElement): Partial<IMaskSelectionModel> {
+    const { rotatePathPoints, model: { angle, isPointsClosed }, transformerType } = element;
+    return {
+      points: rotatePathPoints,
+      angle,
+      element: {
+        transformerType,
+        isPointsClosed,
+      }
+    };
+  }
+
+  /**
    * 获取选区对象
    * 
    * @returns 
    */
   getSelectionModels(): IMaskSelectionModel[] {
-    const result: IMaskSelectionModel[] = [];
+    const result: Partial<IMaskSelectionModel>[] = [];
 
     if (this.isRange) {
       this.shield.store.rangeElements.forEach(element => {
         result.push({
-          points: element.rotatePathPoints,
           type: DrawerMaskModelTypes.selection,
+          ...this._getElementMaskModelProps(element),
         });
       });
     }
 
     this.shield.store.targetElements.forEach(element => {
       result.push({
-        points: element.rotatePathPoints,
         type: DrawerMaskModelTypes.highlight,
-        angle: element.model.angle,
+        ...this._getElementMaskModelProps(element),
       });
     });
 
     this.shield.store.selectedElements.forEach(element => {
       result.push({
-        points: element.rotatePathPoints,
         type: DrawerMaskModelTypes.selection,
-        angle: element.model.angle,
+        ...this._getElementMaskModelProps(element),
       });
     });
 
@@ -75,7 +91,7 @@ export default class StageSelection implements IStageSelection {
         type: DrawerMaskModelTypes.range,
       });
     }
-    return result;
+    return result as IMaskSelectionModel[];
   }
 
   /**

@@ -2,6 +2,11 @@ import { Directions, IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
 import IController from "@/types/IController";
 
+export enum TransformerTypes {
+  rect,
+  circle
+}
+
 export interface ITransformer extends IController {
   element: IElement;
   id: string;

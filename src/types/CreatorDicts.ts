@@ -43,16 +43,16 @@ export const ImageCreator: Creator = {
 }
 
 export const PenCreator: Creator = {
-  type: CreatorTypes.pen,
+  type: CreatorTypes.arbitrary,
   name: '线条',
-  category: CreatorCategories.arbitrary,
+  category: CreatorCategories.freedom,
   icon: 'icon-verbise-pen',
 }
 
 export const PencilCreator: Creator = {
   type: CreatorTypes.pencil,
   name: '画笔',
-  category: CreatorCategories.arbitrary,
+  category: CreatorCategories.freedom,
   icon: 'icon-verbise-pencil',
 }
 
@@ -68,7 +68,7 @@ export const ShapeCreators: Creator[] = [
   ImageCreator
 ]
 
-export const ArbitraryCreators: Creator[] = [
+export const FreedomCreators: Creator[] = [
   PenCreator,
   PencilCreator
 ]
@@ -79,5 +79,5 @@ export const Creators: Creator[] = [
   RectangleCreator,
   ...ShapeCreators,
   PenCreator,
-  ...ArbitraryCreators,
+  ...FreedomCreators,
 ]

@@ -1,5 +1,6 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types/index";
 import { CreatorCategories } from "@/types/Creator";
+import { TransformerTypes } from "@/types/IElementTransformer";
 
 // 辅助画布绘制任务对象类型
 export interface IMaskModel {
@@ -10,8 +11,11 @@ export interface IMaskModel {
 // 辅助画布绘制任务选区对象
 export interface IMaskSelectionModel extends IMaskModel {
   points: IPoint[];
-  type: DrawerMaskModelTypes;
   angle?: number;
+  element?: {
+    transformerType?: TransformerTypes;
+    isPointsClosed?: boolean;
+  }
 }
 
 export interface IMaskSizeIndicatorModel extends IMaskModel {

@@ -12,10 +12,15 @@ import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransf
 import { TransformTypes } from "@/types/Stage";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
   shield: IStageShield;
+
+  get worldValue(): IPoint {
+    return ElementUtils.calcWorldPoint(this.value, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+  }
 
   constructor(shield: IStageShield) {
     this.shield = shield;

@@ -100,11 +100,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _originalStageWorldCoord: IPoint;
 
   get shouldRedraw(): boolean {
-    return this.isElementsDragging || this.isElementsTransforming || this.isStageMoving || this.isElementsRotating || this.isElementsTransforming
+    return this.isElementsDragging || this.isElementsRotating || this.isElementsTransforming || this.isStageMoving
   }
 
   get isElementsBusy(): boolean {
-    return this.isElementsTransforming || this.isElementsRotating || this.isElementsTransforming
+    return this.isElementsRotating || this.isElementsTransforming
   }
 
   get isElementsDragging(): boolean {
@@ -132,7 +132,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   get isDrawerActive(): boolean {
-    return [CreatorCategories.shapes, CreatorCategories.arbitrary].includes(this.currentCreator?.category);
+    return [CreatorCategories.shapes, CreatorCategories.freedom].includes(this.currentCreator?.category);
   }
 
   get isHandActive(): boolean {
@@ -145,6 +145,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   get isElementsRotating(): boolean {
     return this._isElementsRotating;
+  }
+
+  get isArbitraryDrawing(): boolean {
+    return this.currentCreator?.type === CreatorTypes.arbitrary;
   }
 
   constructor() {
@@ -383,7 +387,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async _handleCursorMove(e: MouseEvent): Promise<void> {
     const funcs = [];
-    let shouldRedraw = false;
+    let flag = false;
     this.cursor.transform(e);
     this.cursor.updateStyle(e);
 
@@ -395,10 +399,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 判断鼠标是否按下
     if (this._isPressDown) {
       this.calcPressMove(e);
-      // 绘制模式
-      if (this.isDrawerActive) {
+      if (this.isArbitraryDrawing) {
         // 移动过程中创建元素
-        this._createOrUpdateElementOnMovement(e);
+        this._updatingArbitraryElementOnMovement(e);
+      } else if (this.isDrawerActive) {
+        // 移动过程中创建元素
+        this._creatingElementOnMovement(e);
       } else if (this.isMoveableActive) { // 如果是选择模式
         // 如果不存在选中的元素
         if (this.store.isSelectedEmpty) {
@@ -406,27 +412,27 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         } else if (this._isElementsRotating) {
           if (this.checkCursorPressMovedALittle(e)) {
             this._rotateElements();
-            shouldRedraw = true;
+            flag = true;
           }
         } else if (this._isElementsTransforming) {
           if (this.checkCursorPressMovedALittle(e)) {
             this._transformElements();
-            shouldRedraw = true;
+            flag = true;
           }
         } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget())) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
             this._dragElements();
-            shouldRedraw = true;
+            flag = true;
           }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
         this._dragStage(e);
-        shouldRedraw = true;
+        flag = true;
       }
-      if (shouldRedraw) {
+      if (flag) {
         funcs.push(() => this.redraw())
       }
       funcs.push(() => this.provisional.redraw())
@@ -551,6 +557,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (shouldClear) {
       this._clearStageSelects();
     }
+    if (this.isArbitraryDrawing) {
+      this.store.creatingArbitraryElement(this.cursor.worldValue, true);
+    }
     // 判断是否是要拖动舞台
     if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
@@ -579,7 +588,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._isPressDown = false;
     this.calcPressUp(e);
     // 如果是绘制模式，则完成元素的绘制
-    if (this.isDrawerActive) {
+    if (this.isArbitraryDrawing) {
+      this._isPressDown = true;
+    } else if (this.isDrawerActive) {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
@@ -609,11 +620,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e)
     }
-    await Promise.all([
-      this.mask.redraw(),
-      this.provisional.redraw(),
-      this.renderCreatedElement()
-    ])
+    if (!this.isArbitraryDrawing) {
+      await Promise.all([
+        this.mask.redraw(),
+        this.provisional.redraw(),
+        this.redraw(),
+        this.renderCreatedElement()
+      ])
+    }
   }
 
   /**
@@ -697,7 +711,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 提交绘制
    */
   async renderCreatedElement(): Promise<void> {
-    await this.redraw();
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
       this.store.updateElements(provisionalElements, { isProvisional: false, isOnStage: true });
@@ -821,12 +834,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 
    * @param e 
    */
-  _createOrUpdateElementOnMovement(e: MouseEvent): IElement | null {
+  _creatingElementOnMovement(e: MouseEvent): IElement {
     if (this.checkCursorPressMovedALittle(e)) {
-      const element = this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
-      if (element) {
-        return element;
-      }
+      return this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
+    }
+  }
+
+  /**
+   * 更新自由绘制组件
+   * 
+   * @param e 
+   * @returns 
+   */
+  _updatingArbitraryElementOnMovement(e: MouseEvent): IElement {
+    if (this.checkCursorPressMovedALittle(e)) {
+      return this.store.creatingArbitraryElement(this._pressMoveStageWorldCoord, false);
     }
   }
 

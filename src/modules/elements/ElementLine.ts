@@ -6,6 +6,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
+import { TransformerTypes } from "@/types/IElementTransformer";
 
 export default class ElementLine extends Element implements IElementLine {
 
@@ -54,6 +55,10 @@ export default class ElementLine extends Element implements IElementLine {
 
   get outerPathCoords(): IPoint[] {
     return this._outerPathCoords;
+  }
+
+  get transformerType(): TransformerTypes {
+    return TransformerTypes.circle;
   }
 
   /**

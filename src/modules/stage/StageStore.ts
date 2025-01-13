@@ -14,11 +14,12 @@ import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { ElementObject, ImageElementObject } from "@/types/IElement";
+import IElement, { ElementObject, IElementArbitrary, ImageElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
+import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -656,6 +657,46 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件状态为创建中
+   * 
+   * @param element 
+   */
+  private _setElementProvisionalCreating(element: IElement): void {
+    this.updateElementById(element.id, {
+      status: ElementStatus.creating,
+      isOnStage: true,
+      isProvisional: true,
+    })
+  }
+
+  /**
+   * 创建一个临时组件
+   * 
+   * @param model 
+   */
+  private _createProvisionalElement(model: ElementObject): IElement {
+    const element = ElementUtils.createElement(model, this.shield);
+    this.updateElementById(element.id, {
+      status: ElementStatus.startCreating,
+    })
+    this.addElement(element);
+    this._currentCreatingElementId = element.id;
+    return element;
+  }
+
+  /**
+   * 选中并刷新元素
+   * 
+   * @param element 
+   */
+  private _selectAndRefreshProvisionalElement(element: IElement): void {
+    if (element) {
+      this.selectElement(element);
+      element.refreshStagePoints();
+    }
+  }
+
+  /**
    * 在当前鼠标位置创建临时元素
    * 
    * @param coords
@@ -664,32 +705,53 @@ export default class StageStore implements IStageStore {
     let element: IElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
-      case CreatorCategories.shapes:
-      case CreatorCategories.arbitrary: {
+      case CreatorCategories.shapes: {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type))
         if (this._currentCreatingElementId) {
           element = this.updateElementModel(this._currentCreatingElementId, model);
-          this.updateElementById(element.id, {
-            status: ElementStatus.creating,
-            isOnStage: true,
-            isProvisional: true,
-          })
+          this._setElementProvisionalCreating(element);
         } else {
-          element = ElementUtils.createElement(model, this.shield);
-          this.updateElementById(element.id, {
-            status: ElementStatus.startCreating,
-          })
-          this.addElement(element);
-          this._currentCreatingElementId = element.id;
+          element = this._createProvisionalElement(model);
         }
       }
       default:
         break;
     }
-    if (element) {
-      this.selectElement(element);
-      element.refreshStagePoints();
+    this._selectAndRefreshProvisionalElement(element);
+    return element;
+  }
+
+  /**
+   * 创建一个自由绘制的组件
+   * 
+   * @param coord 
+   * @param tailAppend true表示追加节点，false表示更新尾部节点
+   * @returns 
+   */
+  creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement {
+    let element: IElementArbitrary;
+    let model: ElementObject;
+    if (this._currentCreatingElementId) {
+      element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
+      model = element.model;
+      if (tailAppend) {
+        model.coords.splice(model.coords.length - 1, 0, coord);
+        element.createdCoordIndex = model.coords.length - 1;
+      } else {
+        if (element.createdCoordIndex + 1 === model.coords.length) {
+          model.coords.push(coord);
+        } else {
+          model.coords.splice(element.createdCoordIndex + 1, 1, coord);
+        }
+      }
+      this._setElementProvisionalCreating(element);
+    } else {
+      model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
+      model.isPointsClosed = false;
+      element = this._createProvisionalElement(model) as ElementArbitrary;
+      element.createdCoordIndex = 0;
     }
+    this._selectAndRefreshProvisionalElement(element);
     return element;
   }
 

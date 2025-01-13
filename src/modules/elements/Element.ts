@@ -12,7 +12,7 @@ import { action, makeObservable, observable, computed } from "mobx";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
-import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
+import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/types/ElementStyles";
 import { DefaultTransformerValue } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
@@ -455,6 +455,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get borderTransformers(): IElementBorderTransformer[] {
     return this._borderTransformers;
+  }
+
+  get transformerType(): TransformerTypes {
+    return TransformerTypes.rect;
   }
 
   get rect(): Partial<DOMRect> {
