@@ -210,12 +210,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
 
     // 键盘弹起事件监听
     document.addEventListener('keyup', e => {
-      if (this._isCtrlEvent(e)) {
-        this._isCtrl = false;
-      }
-      if (this._isShiftEvent(e)) {
-        this._isShift = false;
-      }
+      this._isCtrl = e.ctrlKey;
+      this._isShift = e.shiftKey;
     })
 
     // 粘贴操作
