@@ -45,15 +45,39 @@ export default class FileUtils {
         console.warn('No files in drag event');
         return reject();
       }
-      const images = Array.from(files).filter(file => file.type.startsWith('image/'));
-      if (!images.length) {
-        console.warn('No image in drag event');
-        return reject();
-      }
-      const result = Promise.all(images.map(file => {
-        return CanvasUtils.getImageDataFromBlob(file);
-      }))
-      resolve(result);
+      FileUtils.parseImageFiles(Array.from(files), resolve, reject);
     })
+  }
+
+  /**
+   * 从文件中提取图片
+   * 
+   * @param files 
+   * @returns 
+   */
+  static getImageDataFromFiles(files: File[]): Promise<ImageData[]> {
+    return new Promise((resolve, reject) => {
+      return FileUtils.parseImageFiles(files, resolve, reject);
+    })
+  }
+
+  /**
+   * 从文件中解析图片
+   * 
+   * @param files 
+   * @param resolve 
+   * @param reject 
+   * @returns 
+   */
+  static parseImageFiles(files: File[], resolve: Function, reject: Function): Promise<void> {
+    const images = Array.from(files).filter(file => file.type.startsWith('image/'));
+    if (!images.length) {
+      console.warn('No image in files');
+      return reject();
+    }
+    const result = Promise.all(images.map(file => {
+      return CanvasUtils.getImageDataFromBlob(file);
+    }))
+    resolve(result);
   }
 }

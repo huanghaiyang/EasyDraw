@@ -1,12 +1,29 @@
 <script lang="ts" setup>
-import { Creator } from "@/types/Creator";
-import { PropType } from "vue";
+import { useStageStore } from "@/stores/stage";
+import { Creator, CreatorTypes } from "@/types/Creator";
+import { debounce } from "lodash";
+import { PropType, ref } from "vue";
 
 const { creators, currentCreator, select } = defineProps({
   creators: Array as PropType<Creator[]>,
   currentCreator: Object as PropType<Creator>,
   select: Function as PropType<(creator: Creator) => void>,
 });
+
+const stageStore = useStageStore();
+
+const fileList = ref([]);
+
+const uploadImages = debounce(async () => {
+  stageStore.uploadImages(fileList.value);
+  fileList.value = [];
+}, 500);
+
+const onBeforeUpload = (file: File) => {
+  fileList.value.push(file);
+  uploadImages();
+  return false;
+};
 </script>
 <template>
   <el-dropdown>
@@ -25,12 +42,16 @@ const { creators, currentCreator, select } = defineProps({
           ]"
           @click="select(creator)"
         >
-          <div class="creator-menu__item">
-            <div class="create-menu__item-text">{{ creator.name }}</div>
-            <div class="create-menu__item-icon">
-              <el-icon :class="['iconfont', creator.icon]"></el-icon>
-            </div>
-          </div>
+          <el-upload
+            v-if="creator.type === CreatorTypes.image"
+            action=""
+            multiple
+            accept="image/*"
+            :before-upload="onBeforeUpload"
+          >
+            <creator-drop-down-item :creator="creator" />
+          </el-upload>
+          <creator-drop-down-item :creator="creator" v-else />
         </el-dropdown-item>
       </el-dropdown-menu>
     </template>

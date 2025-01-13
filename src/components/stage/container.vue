@@ -2,8 +2,8 @@
 import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
 import StageShieldVue from "@/components/stage/Shield.vue";
-import CreatorBar from "@/components/stage/tools/CreatorBar.vue";
 import { StageShieldInstance } from "@/types";
+import { CreatorTypes } from "@/types/Creator";
 
 const stageStore = useStageStore();
 const stageRef = ref<HTMLElement | null>(null);
@@ -11,7 +11,10 @@ const stageShieldRef = ref<
   InstanceType<typeof StageShieldVue> & StageShieldInstance
 >();
 const handleCreatorSelect = (creator) => {
-  stageStore.setCreator(creator);
+  const { type } = creator;
+  if (type !== CreatorTypes.image) {
+    stageStore.setCreator(creator);
+  }
 }
 
 onMounted(async () => {

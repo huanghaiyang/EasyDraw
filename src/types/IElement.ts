@@ -178,6 +178,9 @@ export interface IElementCircle extends IElement { }
 // 舞台元素（组件）-图片
 export interface IElementImage extends IElementReact { }
 
+// 舞台元素（组件）-任意多边形&线条
+export interface IElementPolygon extends IElement { }
+
 // 舞台元素（组件）-线段
 export interface IElementLine extends IElement {
   get startRotatePathPoint(): IPoint;

@@ -228,4 +228,16 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       })
     })
   }
+
+  /**
+   * 上传图片
+   * 
+   * @param images 
+   */
+  async onImagesUpload(images: File[]): Promise<void> {
+    if (images.length) {
+      const imageDataList = await FileUtils.getImageDataFromFiles(images);
+      this._createImages(imageDataList);
+    }
+  }
 }

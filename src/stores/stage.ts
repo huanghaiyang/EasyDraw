@@ -563,5 +563,15 @@ export const useStageStore = defineStore("stage", {
       if (!this.averageEnable) return;
       shield.setElementsAverageCol(this.selectedElements);
     },
+    /**
+     * 上传图片
+     * 
+     * @param files 
+     */
+    uploadImages(files: File[]): void {
+      if (files.length) {
+        shield.uploadImages(files);
+      }
+    }
   },
 });

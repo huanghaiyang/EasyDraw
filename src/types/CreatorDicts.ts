@@ -28,6 +28,20 @@ export const LineRectangleCreator: Creator = {
   icon: 'icon-verbise-line',
 }
 
+export const PolygonCreator: Creator = {
+  type: CreatorTypes.polygon,
+  name: '多边形',
+  category: CreatorCategories.shapes,
+  icon: 'icon-verbise-polygon',
+}
+
+export const ImageCreator: Creator = {
+  type: CreatorTypes.image,
+  name: '图片',
+  category: CreatorCategories.shapes,
+  icon: 'icon-verbise-Image',
+}
+
 export const CursorCreators: Creator[] = [
   MoveableCreator,
   HandCreator
@@ -35,7 +49,9 @@ export const CursorCreators: Creator[] = [
 
 export const ShapeCreators: Creator[] = [
   RectangleCreator,
-  LineRectangleCreator
+  LineRectangleCreator,
+  PolygonCreator,
+  ImageCreator
 ]
 
 export const Creators: Creator[] = [

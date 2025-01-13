@@ -1025,6 +1025,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 图片上传
+   * 
+   * @param images 
+   */
+  async uploadImages(images: File[]): Promise<void> {
+    if (images.length) {
+      await this.event.onImagesUpload(images);
+    }
+  }
+
+  /**
    * 删除选中元素
    */
   deleteSelectElements(): void {

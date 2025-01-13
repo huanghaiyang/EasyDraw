@@ -49,4 +49,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   
   deleteSelectElements(): void;
   selectAll(): void;
+
+  uploadImages(images: File[]): Promise<void>;
 }

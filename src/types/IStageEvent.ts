@@ -10,4 +10,5 @@ export default interface IStageEvent extends EventEmitter {
   get isShift(): boolean;
 
   init(): void;
+  onImagesUpload(images: File[]): Promise<void>;
 }
