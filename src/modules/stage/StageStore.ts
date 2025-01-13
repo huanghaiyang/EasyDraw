@@ -664,7 +664,8 @@ export default class StageStore implements IStageStore {
     let element: IElement;
     const { category, type } = this.shield.currentCreator;
     switch (category) {
-      case CreatorCategories.shapes: {
+      case CreatorCategories.shapes:
+      case CreatorCategories.arbitrary: {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type))
         if (this._currentCreatingElementId) {
           element = this.updateElementModel(this._currentCreatingElementId, model);

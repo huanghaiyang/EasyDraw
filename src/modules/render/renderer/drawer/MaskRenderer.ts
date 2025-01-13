@@ -11,12 +11,13 @@ import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndica
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
+import { IMaskCircleModel, IMaskCursorPositionModel, IMaskSelectionModel, IMaskSizeIndicatorModel, IMaskTransformerModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
-import { DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
+import { DefaultArbitraryControllerRadius, DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { CreatorTypes } from "@/types/Creator";
+import { CreatorCategories, CreatorTypes } from "@/types/Creator";
+import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 
@@ -60,6 +61,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
     if (this.drawer.shield.isDrawerActive) {
       cargo.add(this.createMaskCursorPositionTask());
+      cargo.add(this.createMaskArbitraryCursorTask())
     }
 
     // 如果有绘制任务，则添加一个清除任务到队列头部
@@ -191,6 +193,22 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       text: `${element.width} x ${element.height}`,
     }
     return new MaskTaskSizeIndicator(model, this.renderParams);
+  }
+
+  /**
+   * 创建一个光标圆
+   * 
+   * @returns 
+   */
+  private createMaskArbitraryCursorTask(): IRenderTask {
+    if (this.drawer.shield.currentCreator.category === CreatorCategories.arbitrary) {
+      const model: IMaskCircleModel = {
+        point: this.drawer.shield.cursor.value,
+        type: DrawerMaskModelTypes.cursor,
+        radius: DefaultArbitraryControllerRadius,
+      }
+      return new MaskTaskCircleTransformer(model, this.renderParams);
+    }
   }
 
 }

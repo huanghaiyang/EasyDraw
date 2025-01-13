@@ -261,6 +261,68 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制填充圆形
+   * 
+   * @param target 
+   * @param point 
+   * @param radius 
+   * @param styles 
+   */
+  static drawCircleFill(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.fillStyle = StyleUtils.joinFillColor(styles);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /**
+   * 绘制描边圆形
+   * 
+   * @param target 
+   * @param point 
+   * @param radius 
+   * @param styles 
+   */
+  static drawCircleStroke(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+    const ctx = target.getContext('2d');
+    ctx.save();
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /**
+   * 需要缩放的圆形描边
+   * 
+   * @param target 
+   * @param point 
+   * @param radius 
+   * @param styles 
+   */
+  static drawCircleStrokeWithScale(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+    const [points, scaleStyles] = CanvasUtils.transParamsWithScale([point], styles);
+    CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
+  }
+
+  /**
+   * 需要缩放的圆形填充
+   * 
+   * @param target 
+   * @param point 
+   * @param radius 
+   * @param styles 
+   */
+  static drawCircleFillWithScale(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+    const [points, scaleStyles] = CanvasUtils.transParamsWithScale([point], styles);
+    CanvasUtils.drawCircleFill(target, points[0], radius, scaleStyles);
+  }
+
+  /**
    * 绘制线段
    * 
    * @param ctx 

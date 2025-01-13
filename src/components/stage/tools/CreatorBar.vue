@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
+import { ArbitraryCreators, CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -8,6 +8,7 @@ const stageStore = useStageStore();
 const currentCreator = computed(() => stageStore.currentCreator);
 const currentCursorCreator = computed(() => stageStore.currentCursorCreator);
 const currentShapeCreator = computed(() => stageStore.currentShapeCreator);
+const currentArbitraryCreator = computed(() => stageStore.currentArbitraryCreator);
 
 const select = (item) => {
   emits("select", item);
@@ -38,6 +39,18 @@ const select = (item) => {
     </div>
 
     <creator-dropdown :creators="ShapeCreators" :current-creator="currentCreator" :select="select"/>
+
+    <div
+      :class="[
+        'tool-item',
+        { selected: currentArbitraryCreator.category === currentCreator.category },
+      ]"
+      @click="select(currentArbitraryCreator)"
+    >
+      <el-icon :class="['iconfont', currentArbitraryCreator.icon]"></el-icon>
+    </div>
+
+    <creator-dropdown :creators="ArbitraryCreators" :current-creator="currentCreator" :select="select"/>
   </div>
 </template>
 <style lang="less" scoped>

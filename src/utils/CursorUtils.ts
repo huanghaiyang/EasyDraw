@@ -5,6 +5,7 @@ export default class CursorUtils {
   static getCursorSvg(creatorCategory: CreatorCategories): string {
     switch (creatorCategory) {
       case CreatorCategories.shapes:
+      case CreatorCategories.arbitrary:
         return CrossSvg;
       default:
         return CrossSvg;

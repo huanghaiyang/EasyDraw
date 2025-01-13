@@ -6,12 +6,15 @@ export enum CreatorTypes {
   line = 'line',
   image = 'image',
   polygon = 'polygon',
+  pen = 'pen',
+  pencil = 'pencil',
 }
 
 // 创作工具分类
 export enum CreatorCategories {
   cursor = 'cursor',
   shapes = 'shapes',
+  arbitrary = 'arbitrary',
 }
 
 // 创作工具

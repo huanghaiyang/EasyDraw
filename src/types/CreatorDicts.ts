@@ -42,6 +42,20 @@ export const ImageCreator: Creator = {
   icon: 'icon-verbise-Image',
 }
 
+export const PenCreator: Creator = {
+  type: CreatorTypes.pen,
+  name: '线条',
+  category: CreatorCategories.arbitrary,
+  icon: 'icon-verbise-pen',
+}
+
+export const PencilCreator: Creator = {
+  type: CreatorTypes.pencil,
+  name: '画笔',
+  category: CreatorCategories.arbitrary,
+  icon: 'icon-verbise-pencil',
+}
+
 export const CursorCreators: Creator[] = [
   MoveableCreator,
   HandCreator
@@ -54,9 +68,16 @@ export const ShapeCreators: Creator[] = [
   ImageCreator
 ]
 
+export const ArbitraryCreators: Creator[] = [
+  PenCreator,
+  PencilCreator
+]
+
 export const Creators: Creator[] = [
   MoveableCreator,
   ...CursorCreators,
   RectangleCreator,
-  ...ShapeCreators
+  ...ShapeCreators,
+  PenCreator,
+  ...ArbitraryCreators,
 ]

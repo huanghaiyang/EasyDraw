@@ -37,7 +37,7 @@ export const DefaultSelectionStyle: ElementStyles = {
   fillColorOpacity: DefaultSelectionFillColorOpacity,
 }
 
-export const DefaultTransformerStyle: ElementStyles = {
+export const DefaultControllerStyle: ElementStyles = {
   strokeColor: DefaultTransformerStrokeColor,
   strokeColorOpacity: DefaultTransformerStrokeColorOpacity,
   strokeWidth: DefaultTransformerLineWidth,
@@ -57,3 +57,5 @@ export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
 export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
 
 export const DefaultCursorSize = 20;
+
+export const DefaultArbitraryControllerRadius = 5;

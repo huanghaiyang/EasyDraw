@@ -20,6 +20,9 @@ export interface IMaskSelection extends IMaskTask { }
 // 辅助画布选区控制器绘制任务
 export interface IMaskTransformer extends IMaskTask { }
 
+// 辅助画布圆形绘制任务
+export interface IMaskCircleTransformer extends IMaskTransformer { }
+
 // 辅助画布光标绘制任务
 export interface IMaskCursor extends IMaskTask { }
 

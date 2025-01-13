@@ -26,6 +26,12 @@ export interface IMaskTransformerModel extends IMaskModel {
   angle?: number;
 }
 
+// 辅助画布绘制任务圆形对象
+export interface IMaskCircleModel extends IMaskModel {
+  point: IPoint;
+  radius: number;
+}
+
 // 辅助画布绘制任务光标对象
 export interface IMaskCursorModel extends IMaskModel {
   point: IPoint;

@@ -6,7 +6,7 @@ import IElement from "@/types/IElement";
 import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
-import { MoveableCreator, RectangleCreator } from "@/types/CreatorDicts";
+import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 
 const shield = new StageShield();
 const container = new StageContainer();
@@ -18,6 +18,7 @@ export const useStageStore = defineStore("stage", {
       currentCreator: MoveableCreator,
       currentCursorCreator: MoveableCreator,
       currentShapeCreator: RectangleCreator,
+      currentArbitraryCreator: PenCreator,
       selectedElements: [],
       targetElements: [],
       position: {
@@ -100,6 +101,9 @@ export const useStageStore = defineStore("stage", {
       }
       if (creator.category === CreatorCategories.shapes) {
         this.currentShapeCreator = creator;
+      }
+      if (creator.category === CreatorCategories.arbitrary) {
+        this.currentArbitraryCreator = creator;
       }
     },
     /**
