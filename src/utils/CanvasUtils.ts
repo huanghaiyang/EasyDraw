@@ -159,9 +159,11 @@ export default class CanvasUtils {
    * @param options 
    */
   static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: ElementStyles, options?: { angle: number }) {
-    centroid = {
-      x: centroid.x * CanvasUtils.scale,
-      y: centroid.y * CanvasUtils.scale
+    if (CanvasUtils.scale !== 1) {
+      centroid = {
+        x: centroid.x * CanvasUtils.scale,
+        y: centroid.y * CanvasUtils.scale
+      }
     }
     CanvasUtils.drawRotateText(target, text, centroid, styles, options);
   }
