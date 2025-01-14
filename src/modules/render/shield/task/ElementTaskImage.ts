@@ -1,4 +1,4 @@
-import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
+import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementImage } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";

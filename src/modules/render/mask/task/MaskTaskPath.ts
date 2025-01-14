@@ -4,14 +4,14 @@ import { SelectionStyle } from "@/types/MaskStyles";
 import { DrawerMaskModelTypes } from "@/types";
 import { ElementStyles } from "@/types/ElementStyles";
 
-export default class MaskTaskSelection extends MaskTaskBase {
+export default class MaskTaskPath extends MaskTaskBase {
   /**
    * 运行任务
    */
   async run(): Promise<void> {
     const { strokeWidth } = SelectionStyle;
     const specialStyles: ElementStyles = {};
-    if (this.data.type === DrawerMaskModelTypes.selection || this.data.type === DrawerMaskModelTypes.highlight) {
+    if (this.data.type === DrawerMaskModelTypes.path || this.data.type === DrawerMaskModelTypes.highlight) {
       specialStyles.fillColorOpacity = 0;
     }
     CanvasUtils.drawPathWithScale(this.canvas, this.data.points, Object.assign({}, { ...SelectionStyle, ...specialStyles }, {

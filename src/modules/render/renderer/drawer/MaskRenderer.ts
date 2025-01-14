@@ -1,13 +1,13 @@
 import { DrawerMaskModelTypes, ElementStatus, IPoint, } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
-import MaskTaskSelection from "@/modules/render/mask/task/MaskTaskSelection";
+import MaskTaskPath from "@/modules/render/mask/task/MaskTaskPath";
 import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
 import MaskTaskTransformer from "@/modules/render/mask/task/MaskTaskTransformer";
 import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
 import MaskTaskRotate from "@/modules/render/mask/task/MaskTaskRotate";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import MaskTaskSizeIndicator from "@/modules/render/mask/task/MaskTaskSizeIndicator";
+import MaskTaskIndicator from "@/modules/render/mask/task/MaskTaskIndicator";
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
@@ -36,7 +36,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const selectionTasks = this.createMaskSelectionTasks();
     selectionTasks.forEach(task => {
       cargo.add(task);
-      if ((task as IMaskTask).data.type === DrawerMaskModelTypes.selection) {
+      if ((task as IMaskTask).data.type === DrawerMaskModelTypes.path) {
         cargo.addAll(this.createMaskTransformerTasks((task as IMaskTask).model));
       }
     });
@@ -50,7 +50,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
         cargo.add(this.createMaskRotateTask(element));
       }
-      cargo.add(this.createMaskSizeIndicatorTask(element));
+      cargo.add(this.createMaskIndicatorTask(element));
     }
 
     // 绘制光标
@@ -112,7 +112,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const tasks: IRenderTask[] = [];
     const models: IMaskModel[] = this.drawer.shield.selection.getSelectionModels();
     models.forEach(model => {
-      const task = new MaskTaskSelection({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
+      const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
       tasks.push(task);
     });
     return tasks;
@@ -182,7 +182,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * 
    * @param element 
    */
-  private createMaskSizeIndicatorTask(element: IElement): IRenderTask {
+  private createMaskIndicatorTask(element: IElement): IRenderTask {
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
@@ -207,10 +207,10 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const model: IMaskModel = {
       point: MathUtils.calcSegmentLineCentroidCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,
-      type: DrawerMaskModelTypes.sizeIndicator,
+      type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
     }
-    return new MaskTaskSizeIndicator(model, this.renderParams);
+    return new MaskTaskIndicator(model, this.renderParams);
   }
 
   /**

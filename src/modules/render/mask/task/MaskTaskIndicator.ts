@@ -2,7 +2,7 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { SelectionIndicatorStyle } from "@/types/MaskStyles";
 
-export default class MaskTaskSizeIndicator extends MaskTaskBase {
+export default class MaskTaskIndicator extends MaskTaskBase {
   /**
    * 运行任务
    */

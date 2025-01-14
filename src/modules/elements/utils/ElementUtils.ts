@@ -1,5 +1,5 @@
 import { IPoint, ISize } from "@/types";
-import ElementTaskRect from "@/modules/render/base/task/ElementTaskRect";
+import ElementTaskRect from "@/modules/render/shield/task/ElementTaskRect";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
@@ -9,13 +9,13 @@ import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/types/MaskStyles";
 import ElementLine from "@/modules/elements/ElementLine";
-import ElementTaskLine from "@/modules/render/base/task/ElementTaskLine";
+import ElementTaskLine from "@/modules/render/shield/task/ElementTaskLine";
 import { StrokeTypes } from "@/types/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
-import ElementTaskImage from "@/modules/render/base/task/ElementTaskImage";
+import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
 import IStageShield from "@/types/IStageShield";
-import ElementTaskArbitrary from "@/modules/render/base/task/ElementTaskArbitrary";
+import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 
 export enum ElementReactionPropNames {

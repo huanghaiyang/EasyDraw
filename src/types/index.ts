@@ -17,13 +17,13 @@ export type IPoint3D = IPoint & {
 
 // 辅助画布绘制任务类型
 export enum DrawerMaskModelTypes {
-  selection,
+  path,
   transformer,
   cursor,
   cursorPosition,
   highlight,
   rotate,
-  sizeIndicator,
+  indicator,
   range,
 }
 

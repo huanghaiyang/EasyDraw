@@ -65,7 +65,7 @@ export default class StageSelection implements IStageSelection {
     if (this.isRange) {
       this.shield.store.rangeElements.forEach(element => {
         result.push({
-          type: DrawerMaskModelTypes.selection,
+          type: DrawerMaskModelTypes.path,
           ...this._getElementMaskModelProps(element),
         });
       });
@@ -80,7 +80,7 @@ export default class StageSelection implements IStageSelection {
 
     this.shield.store.selectedElements.forEach(element => {
       result.push({
-        type: DrawerMaskModelTypes.selection,
+        type: DrawerMaskModelTypes.path,
         ...this._getElementMaskModelProps(element),
       });
     });
