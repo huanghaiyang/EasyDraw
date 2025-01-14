@@ -1,9 +1,8 @@
 import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementLine } from "@/types/IElement";
-import { IElementTaskLine } from "@/types/IRenderTask";
 
-export default class ElementTaskLine extends ElementTaskBase implements IElementTaskLine {
+export default class ElementTaskLine extends ElementTaskBase {
   get node() {
     return this.element as IElementLine;
   }

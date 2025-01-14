@@ -1,9 +1,8 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IMaskSizeIndicator } from "@/types/IRenderTask";
 import { SelectionIndicatorStyle } from "@/types/MaskStyles";
 
-export default class MaskTaskSizeIndicator extends MaskTaskBase implements IMaskSizeIndicator {
+export default class MaskTaskSizeIndicator extends MaskTaskBase {
   /**
    * 运行任务
    */

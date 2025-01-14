@@ -1,11 +1,9 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { IMaskModel } from "@/types/IModel";
-import { IMaskTransformer } from "@/types/IRenderTask";
 import { TransformerSize, ControllerStyle } from "@/types/MaskStyles";
 
-export default class MaskTaskTransformer extends MaskTaskBase implements IMaskTransformer {
+export default class MaskTaskTransformer extends MaskTaskBase {
   /**
    * 运行任务
    */

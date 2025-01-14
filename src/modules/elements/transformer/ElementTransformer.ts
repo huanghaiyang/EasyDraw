@@ -1,4 +1,4 @@
-import { Directions, IPoint } from "@/types";
+import { IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import IElementTransformer from "@/types/IElementTransformer";
 import MathUtils from "@/utils/MathUtils";
@@ -7,7 +7,6 @@ import BaseTransformer from "@/modules/elements/transformer/BaseTransformer";
 export default class ElementTransformer extends BaseTransformer implements IElementTransformer {
   x: number;
   y: number;
-  direction?: Directions;
   points: IPoint[];
 
   get angle(): number {
@@ -15,12 +14,11 @@ export default class ElementTransformer extends BaseTransformer implements IElem
     return angle + 90;
   }
 
-  constructor(element: IElement, x: number, y: number, points: IPoint[], direction?: Directions) {
+  constructor(element: IElement, x: number, y: number, points: IPoint[]) {
     super(element);
     this.x = x;
     this.y = y;
     this.points = points;
-    this.direction = direction;
   }
 
   /**

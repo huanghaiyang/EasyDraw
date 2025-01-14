@@ -1,9 +1,8 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { IMaskCircleTransformer } from "@/types/IRenderTask";
 import { ControllerStyle } from "@/types/MaskStyles";
 import CanvasUtils from "@/utils/CanvasUtils";
 
-export default class MaskTaskCircleTransformer extends MaskTaskBase implements IMaskCircleTransformer {
+export default class MaskTaskCircleTransformer extends MaskTaskBase {
   /**
    * 运行任务
    */

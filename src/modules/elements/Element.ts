@@ -1,8 +1,4 @@
-import {
-  ElementStatus,
-  IPoint,
-  BoxDirections
-} from "@/types";
+import { ElementStatus, IPoint } from "@/types";
 import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -583,7 +579,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         transformer.x = x;
         transformer.y = y;
       } else {
-        transformer = new ElementTransformer(this, x, y, points, BoxDirections[index]);
+        transformer = new ElementTransformer(this, x, y, points);
       }
       return transformer;
     })
@@ -772,7 +768,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   activeTransformer(transformer: ElementTransformer): void {
     this._transformers.forEach(item => {
-      item.isActive = item.direction === transformer.direction;
+      item.isActive = item.id === transformer.id;
     });
   }
 

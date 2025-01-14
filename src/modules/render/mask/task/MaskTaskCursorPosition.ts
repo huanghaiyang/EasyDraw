@@ -1,9 +1,8 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IMaskCursorPosition } from "@/types/IRenderTask";
 import { CursorPositionStyle } from "@/types/MaskStyles";
 
-export default class MaskTaskCursorPosition extends MaskTaskBase implements IMaskCursorPosition {
+export default class MaskTaskCursorPosition extends MaskTaskBase {
   /**
    * 运行绘制任务
    */

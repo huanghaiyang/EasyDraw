@@ -1,4 +1,4 @@
-import { DrawerMaskModelTypes, ElementStatus, IPoint } from "@/types";
+import { DrawerMaskModelTypes, IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import { IRotationModel } from "@/types/IModel";

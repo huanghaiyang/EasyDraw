@@ -2,11 +2,10 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import ResizeV from "@/assets/svg/resize-v.svg";
 import { IIconModel, IMaskModel } from "@/types/IModel";
-import { IMaskTransformerCursor } from "@/types/IRenderTask";
 import { TransformTypes } from "@/types/Stage";
 import SplitV from '@/assets/svg/split-v.svg';
 
-export default class MaskTaskTransformerCursor extends MaskTaskBase implements IMaskTransformerCursor {
+export default class MaskTaskTransformerCursor extends MaskTaskBase {
   type: TransformTypes = TransformTypes.vertices;
 
   get data(): IIconModel {

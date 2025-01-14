@@ -1,11 +1,10 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IMaskSelection } from "@/types/IRenderTask";
 import { SelectionStyle } from "@/types/MaskStyles";
 import { DrawerMaskModelTypes } from "@/types";
 import { ElementStyles } from "@/types/ElementStyles";
 
-export default class MaskTaskSelection extends MaskTaskBase implements IMaskSelection {
+export default class MaskTaskSelection extends MaskTaskBase {
   /**
    * 运行任务
    */

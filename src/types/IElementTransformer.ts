@@ -1,4 +1,4 @@
-import { Directions, IPoint } from "@/types/index";
+import { IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
 import IController from "@/types/IController";
 
@@ -16,7 +16,6 @@ export interface ITransformer extends IController {
 
 // 方位坐标
 export default interface IElementTransformer extends ITransformer, IPoint {
-  direction?: Directions;
   points: IPoint[];
   isContainsPoint(point: IPoint): boolean;
 }

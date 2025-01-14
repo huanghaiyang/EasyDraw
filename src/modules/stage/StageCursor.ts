@@ -1,6 +1,6 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types";
 import { IIconModel, IMaskCursorModel } from "@/types/IModel";
-import { IMaskCursor } from "@/types/IRenderTask";
+import { IMaskTask } from "@/types/IRenderTask";
 import IStageCursor from "@/types/IStageCursor";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
@@ -72,7 +72,7 @@ export default class StageCursor implements IStageCursor {
    * 
    * @returns 
    */
-  getTask(): IMaskCursor {
+  getTask(): IMaskTask {
     if (this.shield.isDrawerActive) {
       return this.createMaskCursorTask();
     } else if (this.shield.isMoveableActive) {
@@ -107,7 +107,7 @@ export default class StageCursor implements IStageCursor {
    * 
    * @returns 
    */
-  private createMaskCursorTask(): IMaskCursor {
+  private createMaskCursorTask(): IMaskTask {
     if (!this.value) return;
     const model: IMaskCursorModel = {
       point: this.value,
@@ -125,7 +125,7 @@ export default class StageCursor implements IStageCursor {
    * @param borderTransformer 
    * @returns 
    */
-  private createMaskBorderTransformerCursorTask(borderTransformer: IElementBorderTransformer): IMaskCursor {
+  private createMaskBorderTransformerCursorTask(borderTransformer: IElementBorderTransformer): IMaskTask {
     if (!this.value) return;
     const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(borderTransformer), TransformTypes.border, { canvas: this.shield.mask.canvas });
     return task;
@@ -137,7 +137,7 @@ export default class StageCursor implements IStageCursor {
    * @param transformer 
    * @returns 
    */
-  private createMaskTransformerCursorTask(transformer: IElementTransformer): IMaskCursor {
+  private createMaskTransformerCursorTask(transformer: IElementTransformer): IMaskTask {
     if (!this.value) return;
     const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(transformer), TransformTypes.vertices, { canvas: this.shield.mask.canvas });
     return task;

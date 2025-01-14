@@ -1,10 +1,9 @@
 import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementImage } from "@/types/IElement";
-import { IElementTaskImage } from "@/types/IRenderTask";
 import CommonUtils from "@/utils/CommonUtils";
 
-export default class ElementTaskImage extends ElementTaskBase implements IElementTaskImage {
+export default class ElementTaskImage extends ElementTaskBase {
   get node() {
     return this.element as IElementImage;
   }

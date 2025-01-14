@@ -1,9 +1,8 @@
 import ElementTaskBase from "@/modules/render/base/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementReact } from "@/types/IElement";
-import { IElementTaskArbitrary } from "@/types/IRenderTask";
 
-export default class ElementTaskArbitrary extends ElementTaskBase implements IElementTaskArbitrary {
+export default class ElementTaskArbitrary extends ElementTaskBase {
   get node() {
     return this.element as IElementReact;
   }

@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { IMaskCursor } from "@/types/IRenderTask";
+import { IMaskTask } from "@/types/IRenderTask";
 
 // 舞台光标
 export default interface IStageCursor {
@@ -11,5 +11,5 @@ export default interface IStageCursor {
   transform(e: MouseEvent): IPoint;
   setStyle(cursor: string): void;
   updateStyle(e: MouseEvent): void;
-  getTask(): IMaskCursor;
+  getTask(): IMaskTask;
 }

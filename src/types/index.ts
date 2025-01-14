@@ -27,26 +27,6 @@ export enum DrawerMaskModelTypes {
   range,
 }
 
-// 方位
-export enum Directions {
-  topLeft = 0,
-  topCenter = 1,
-  topRight = 2,
-  rightCenter = 3,
-  bottomRight = 4,
-  bottomCenter = 5,
-  bottomLeft = 6,
-  leftCenter = 7,
-  freedom = 8
-}
-
-export const BoxDirections = [
-  Directions.topLeft,
-  Directions.topRight,
-  Directions.bottomRight,
-  Directions.bottomLeft,
-]
-
 // 舞台初始化参数
 export type StageInitParams = {
   containerEl?: HTMLDivElement;
