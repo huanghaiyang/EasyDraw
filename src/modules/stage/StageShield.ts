@@ -634,7 +634,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.mask.redraw(),
       this.provisional.redraw(),
       this.redraw(),
-      this.renderCreatedElement()
+      this.triggerElementCreated()
     ])
   }
 
@@ -718,7 +718,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 提交绘制
    */
-  async renderCreatedElement(): Promise<void> {
+  async triggerElementCreated(): Promise<void> {
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
       this.store.updateElements(provisionalElements, { isProvisional: false, isOnStage: true });

@@ -784,7 +784,7 @@ export default class StageStore implements IStageStore {
           }
         }
         this.updateElementById(element.id, { status: ElementStatus.finished })
-        element.refreshOriginalProps();
+        element.refresh();
         return element;
       }
     }
