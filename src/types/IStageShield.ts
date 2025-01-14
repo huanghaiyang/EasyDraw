@@ -52,4 +52,5 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   selectAll(): void;
 
   uploadImages(images: File[]): Promise<void>;
+  commitArbitraryDrawing(): Promise<void>;
 }

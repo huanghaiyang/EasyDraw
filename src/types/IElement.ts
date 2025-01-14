@@ -194,5 +194,5 @@ export interface IElementLine extends IElement {
 
 // 舞台元素（组件）-任意多边形&线条
 export interface IElementArbitrary extends IElement {
-  createdCoordIndex: number;
+  tailCoordIndex: number;
 }

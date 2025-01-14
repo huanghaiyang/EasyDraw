@@ -23,6 +23,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isShiftEvent: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
   private _isDeleteEvent: (e: KeyboardEvent) => boolean;
+  private _isEscEvent: (e: KeyboardEvent) => boolean;
 
 
   get isCtrl(): boolean {
@@ -53,6 +54,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isShift1Event = isHotkey('shift+1');
     this._isDeleteEvent = isHotkey('backspace');
     this._isCtrlAEvent = isHotkey('ctrl+a');
+    this._isEscEvent = isHotkey('esc');
     this.initEvents();
   }
 
@@ -204,6 +206,11 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         if (this._isCtrlAEvent(e)) {
           EventUtils.stopPP(e)
           this.emit('selectAll')
+        }
+        // 监听esc键
+        if (this._isEscEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('cancel')
         }
       }
     })

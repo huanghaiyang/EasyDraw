@@ -332,6 +332,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   @action
   protected _setStatus(status: ElementStatus): void {
+    this.__setStatus(status);
+  }
+
+  protected __setStatus(status: ElementStatus): void {
     this._status = status;
   }
 

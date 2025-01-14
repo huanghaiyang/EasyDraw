@@ -360,6 +360,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on('pasteImage', this._handleImagePasted.bind(this))
     this.event.on('deleteSelects', this._handleSelectsDelete.bind(this))
     this.event.on('selectAll', this._handleSelectAll.bind(this))
+    this.event.on('cancel', this._handleCancel.bind(this))
   }
 
   /**
@@ -621,13 +622,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._processHandCreatorMove(e)
     }
     if (!this.isArbitraryDrawing) {
-      await Promise.all([
-        this.mask.redraw(),
-        this.provisional.redraw(),
-        this.redraw(),
-        this.renderCreatedElement()
-      ])
+      this._redrawAfterCreated();
     }
+  }
+
+  /**
+   * 绘制完成之后的重绘
+   */
+  private async _redrawAfterCreated(): Promise<void> {
+    await Promise.all([
+      this.mask.redraw(),
+      this.provisional.redraw(),
+      this.redraw(),
+      this.renderCreatedElement()
+    ])
   }
 
   /**
@@ -1091,6 +1099,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 操作取消的处理
+   */
+  _handleCancel(): void {
+    if (this.isArbitraryDrawing) {
+      this.commitArbitraryDrawing();
+    }
+  }
+
+  /**
    * 左对齐
    * 
    * @param elements 
@@ -1168,6 +1185,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAverageCol(elements: IElement[]): void {
     this.align.setElementsAverageCol(elements);
     this._redrawAll(true);
+  }
+
+  /**
+   * 提交自由绘制
+   */
+  async commitArbitraryDrawing(): Promise<void> {
+    if (this.isArbitraryDrawing) {
+      this._isPressDown = false;
+      this.store.finishCreatingElement();
+      await this._redrawAfterCreated();
+    }
   }
 
 }

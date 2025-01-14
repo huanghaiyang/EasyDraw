@@ -735,13 +735,13 @@ export default class StageStore implements IStageStore {
       element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
       model = element.model;
       if (tailAppend) {
-        model.coords.splice(model.coords.length - 1, 0, coord);
-        element.createdCoordIndex = model.coords.length - 1;
+        model.coords.splice(model.coords.length - 1, 1, coord);
+        element.tailCoordIndex = model.coords.length - 1;
       } else {
-        if (element.createdCoordIndex + 1 === model.coords.length) {
+        if (element.tailCoordIndex + 1 === model.coords.length) {
           model.coords.push(coord);
         } else {
-          model.coords.splice(element.createdCoordIndex + 1, 1, coord);
+          model.coords.splice(element.tailCoordIndex + 1, 1, coord);
         }
       }
       this._setElementProvisionalCreating(element);
@@ -749,10 +749,23 @@ export default class StageStore implements IStageStore {
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
       model.isPointsClosed = false;
       element = this._createProvisionalElement(model) as ElementArbitrary;
-      element.createdCoordIndex = 0;
+      element.tailCoordIndex = 0;
     }
     this._selectAndRefreshProvisionalElement(element);
     return element;
+  }
+
+  /**
+   * 完成创建自由绘制元素
+   * 
+   * @param element 
+   */
+  private _finishArbitraryElement(element: ElementArbitrary): void {
+    const tailCoordIndex = element.tailCoordIndex;
+    element.tailCoordIndex = -1;
+    if (tailCoordIndex < element.model.coords.length - 1) {
+      element.model.coords = element.model.coords.slice(0, tailCoordIndex + 1);
+    }
   }
 
   /**
@@ -760,12 +773,17 @@ export default class StageStore implements IStageStore {
    */
   finishCreatingElement(): IElement {
     if (this._currentCreatingElementId) {
-      const element = this.getElementById(this._currentCreatingElementId);
+      let element = this.getElementById(this._currentCreatingElementId);
       if (element) {
         this._currentCreatingElementId = null;
-        this.updateElementById(element.id, {
-          status: ElementStatus.finished,
-        })
+        const { model: { type } } = element;
+        switch (type) {
+          case CreatorTypes.arbitrary: {
+            this._finishArbitraryElement(element as ElementArbitrary);
+            break;
+          }
+        }
+        this.updateElementById(element.id, { status: ElementStatus.finished })
         element.refreshOriginalProps();
         return element;
       }

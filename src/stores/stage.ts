@@ -1,7 +1,7 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
-import { Creator, CreatorCategories } from "@/types/Creator";
+import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
 import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
 import { throttle } from "lodash";
@@ -54,6 +54,9 @@ export const useStageStore = defineStore("stage", {
     },
     averageEnable(): boolean {
       return this.selectedElements?.length >= 3
+    },
+    arbitraryVisible(): boolean {
+      return this.currentCreator?.type === CreatorTypes.arbitrary;
     },
   },
   actions: {
@@ -576,6 +579,12 @@ export const useStageStore = defineStore("stage", {
       if (files.length) {
         shield.uploadImages(files);
       }
+    },
+    /**
+     * 提交自由绘制
+     */
+    commitArbitraryDrawing(): void {
+      shield.commitArbitraryDrawing();
     }
   },
 });
