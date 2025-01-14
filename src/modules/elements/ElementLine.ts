@@ -111,7 +111,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns 
    */
   protected getAngle(): number {
-    return ElementUtils.fixAngle(MathUtils.calculateAngle(this.startCoord, this.endCoord) + 90);
+    return ElementUtils.fixAngle(MathUtils.calcAngle(this.startCoord, this.endCoord) + 90);
   }
 
   /**
@@ -177,7 +177,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @param value 
    */
   setWidth(value: number): void {
-    const newCoord = MathUtils.calculateTargetPoint(this.startCoord, value, this.angle - 90);
+    const newCoord = MathUtils.calcTargetPoint(this.startCoord, value, this.angle - 90);
     this.model.coords[1] = newCoord;
     this.model.width = value;
     this.refresh();
@@ -190,8 +190,8 @@ export default class ElementLine extends Element implements IElementLine {
    */
   setAngle(value: number): void {
     const centroid = MathUtils.calcPolygonCentroid(this.model.coords);
-    const startCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value + 90);
-    const endCoord = MathUtils.calculateTargetPoint(centroid, this.width / 2, value - 90);
+    const startCoord = MathUtils.calcTargetPoint(centroid, this.width / 2, value + 90);
+    const endCoord = MathUtils.calcTargetPoint(centroid, this.width / 2, value - 90);
     this.model.coords = [startCoord, endCoord];
     this.refresh();
   }

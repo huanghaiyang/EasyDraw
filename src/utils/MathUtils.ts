@@ -292,7 +292,7 @@ export default class MathUtils {
    * @param angleDeg 值如果小于0，请加上360在传递给此方法
    * @returns 
    */
-  static calculateTargetPoint(center: IPoint, distance: number, angleDeg: number) {
+  static calcTargetPoint(center: IPoint, distance: number, angleDeg: number) {
     // 将角度转换为弧度
     const angleRad = MathUtils.degreesToRadians(angleDeg);
     // 计算目标点的坐标
@@ -308,7 +308,7 @@ export default class MathUtils {
    * @param p2 
    * @returns 
    */
-  static calculateAngle(p1: IPoint, p2: IPoint): number {
+  static calcAngle(p1: IPoint, p2: IPoint): number {
     // 计算两点之间的差值
     const dx = p2.x - p1.x;
     const dy = p2.y - p1.y;
@@ -329,10 +329,10 @@ export default class MathUtils {
    * @param isClockwise 
    * @param distance 
    */
-  static calculateSegmentLineCentroidCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
+  static calcSegmentLineCentroidCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
     const centroid = MathUtils.calcPolygonCentroid([p1, p2]);
-    const angle = MathUtils.calculateAngle(p1, p2);
-    return MathUtils.calculateTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
+    const angle = MathUtils.calcAngle(p1, p2);
+    return MathUtils.calcTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
   }
 
   /**
@@ -478,7 +478,7 @@ export default class MathUtils {
   /**
    * 给定三角形的三个坐标点a,b,c计算b的夹角
    */
-  static calculateTriangleAngle(a: IPoint, b: IPoint, c: IPoint): number {
+  static calcTriangleAngle(a: IPoint, b: IPoint, c: IPoint): number {
     // 计算向量AB和BC
     let AB = { x: b.x - a.x, y: b.y - a.y };
     let BC = { x: c.x - b.x, y: c.y - b.y };
@@ -499,7 +499,7 @@ export default class MathUtils {
   /**
    * 给定a向量和b向量，其中b垂直于a，且a+b=c,求向量c的坐标
    */
-  static calculateVectorC(a: IPoint, b: IPoint): IPoint {
+  static calcVectorC(a: IPoint, b: IPoint): IPoint {
     const cx = a.x + b.x;
     const cy = a.y + b.y;
     return { x: cx, y: cy };
@@ -508,7 +508,7 @@ export default class MathUtils {
   /**
    * 给定原点以及坐标，计算向量
    */
-  static calculateVector(origin: IPoint, point: IPoint): IPoint {
+  static calcVector(origin: IPoint, point: IPoint): IPoint {
     const dx = point.x - origin.x;
     const dy = point.y - origin.y;
     return { x: dx, y: dy };
@@ -521,7 +521,7 @@ export default class MathUtils {
    * @param oppositeSide 
    * @returns 
    */
-  static calculateTriangleAdjacentSide(angle: number, oppositeSide: number): number {
+  static calcTriangleSide1By2(angle: number, oppositeSide: number): number {
     const radians = angle * (Math.PI / 180);
     return oppositeSide / Math.tan(radians);
   }
@@ -533,7 +533,7 @@ export default class MathUtils {
    * @param oppositeSide 
    * @returns 
    */
-  static calculateTriangleHypotenuse(angle: number, oppositeSide: number): number {
+  static calcTriangleSide3By2(angle: number, oppositeSide: number): number {
     const radians = angle * (Math.PI / 180);
     return oppositeSide / sin(radians);
   }
@@ -544,7 +544,7 @@ export default class MathUtils {
    * @param angle 
    * @param hypotenuse 
    */
-  static calculateTriangleOppositeSideByHypotenuse(angle: number, hypotenuse: number): number {
+  static calcTriangleSide1By3(angle: number, hypotenuse: number): number {
     const radians = angle * (Math.PI / 180);
     return hypotenuse * cos(radians);
   }
@@ -552,7 +552,7 @@ export default class MathUtils {
   /**
    * 给定角度和斜边长，求对边长
    */
-  static calculateTriangleHypotenuseByHypotenuse(angle: number, hypotenuse: number): number {
+  static calcTriangleSide2By3(angle: number, hypotenuse: number): number {
     const radians = angle * (Math.PI / 180);
     return hypotenuse * sin(radians);
   }
@@ -591,9 +591,9 @@ export default class MathUtils {
    * @param segmentStart 
    * @param segmentEnd 
    */
-  static calculateAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
+  static calcAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
     const centroid = MathUtils.calcPolygonCentroid([segmentStart, segmentEnd]);
-    return MathUtils.calculateAngle(point, centroid);
+    return MathUtils.calcAngle(point, centroid);
   }
 
   /**

@@ -205,7 +205,7 @@ export default class ElementUtils {
   static calcElementRotatePoint(element: IElement): IPoint {
     const { centroid, rotation: { model: { angle, scale } }, rect } = element;
     const halfValue = rect.height / 2;
-    return MathUtils.calculateTargetPoint(centroid, halfValue + SelectionRotationMargin * scale, angle);
+    return MathUtils.calcTargetPoint(centroid, halfValue + SelectionRotationMargin * scale, angle);
   }
 
   /**

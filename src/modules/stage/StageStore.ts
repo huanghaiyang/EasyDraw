@@ -894,7 +894,7 @@ export default class StageStore implements IStageStore {
    * @param point 
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    let angle = MathUtils.preciseToFixed(MathUtils.calculateAngle(this._rotatingTargetElementsCentroid, point) + 90);
+    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCentroid, point) + 90);
     if (angle > 180) {
       angle = angle - 360;
     }

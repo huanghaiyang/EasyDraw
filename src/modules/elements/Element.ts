@@ -1051,10 +1051,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   setWidth(value: number): void {
     const lockPoint = this._originalCentroid;
     const currentPointOriginal = this.getTransformPointForSizeChange();
-    const xValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
-    const yValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value);
-    const originXValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this._originalRect.width);
-    const originYValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this._originalRect.width);
+    const xValue = MathUtils.calcTriangleSide1By3(this.model.angle, value);
+    const yValue = MathUtils.calcTriangleSide2By3(this.model.angle, value);
+    const originXValue = MathUtils.calcTriangleSide1By3(this.model.angle, this._originalRect.width);
+    const originYValue = MathUtils.calcTriangleSide2By3(this.model.angle, this._originalRect.width);
     const offset = { x: (xValue - originXValue) / 2, y: (yValue - originYValue) / 2 };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
@@ -1072,10 +1072,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   setHeight(value: number): void {
     const lockPoint = this._originalCentroid;
     const currentPointOriginal = this.getTransformPointForSizeChange();
-    const xValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, value)
-    const yValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, value);
-    const originXValue = MathUtils.calculateTriangleHypotenuseByHypotenuse(this.model.angle, this._originalRect.height)
-    const originYValue = MathUtils.calculateTriangleOppositeSideByHypotenuse(this.model.angle, this._originalRect.height);
+    const xValue = MathUtils.calcTriangleSide2By3(this.model.angle, value)
+    const yValue = MathUtils.calcTriangleSide1By3(this.model.angle, value);
+    const originXValue = MathUtils.calcTriangleSide2By3(this.model.angle, this._originalRect.height)
+    const originYValue = MathUtils.calcTriangleSide1By3(this.model.angle, this._originalRect.height);
     const offset = { x: (xValue - originXValue) / 2, y: (yValue - originYValue) / 2 };
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCentroid(lockPoint, currentPoint, currentPointOriginal, this.model.angle);

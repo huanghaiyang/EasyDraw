@@ -195,17 +195,17 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
           p2 = element.maxBoxPoints[2];
         } else {
           const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
-          let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, leftPoint) + 180);
-          let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calculateAngle(bottomPoint, rightPoint) + 180);
+          let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
+          let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, rightPoint) + 180);
           const point = leftAngle < rightAngle ? leftPoint : rightPoint;
           [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
         }
         break;
       }
     }
-    const angle = MathUtils.calculateAngle(p1, p2);
+    const angle = MathUtils.calcAngle(p1, p2);
     const model: IMaskModel = {
-      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
+      point: MathUtils.calcSegmentLineCentroidCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.sizeIndicator,
       text: `${element.width} x ${element.height}`,

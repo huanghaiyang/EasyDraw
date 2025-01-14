@@ -10,7 +10,7 @@ export default class ElementBorderTransformer extends BaseTransformer implements
   end: IPoint;
 
   get angle(): number {
-    const result = MathUtils.calculateAngleBetweenPointAndSegment(this.element.centroid, this.start, this.end);
+    const result = MathUtils.calcAngleBetweenPointAndSegment(this.element.centroid, this.start, this.end);
     return result + 90;
   }
 
