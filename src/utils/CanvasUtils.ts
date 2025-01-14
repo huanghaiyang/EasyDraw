@@ -232,9 +232,7 @@ export default class CanvasUtils {
         ctx.lineTo(point.x, point.y);
       }
     });
-    if (close) {
-      ctx.closePath();
-    }
+    close && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (styles.strokeWidth) {
       ctx.lineWidth = styles.strokeWidth;
@@ -262,6 +260,7 @@ export default class CanvasUtils {
         ctx.lineTo(point.x, point.y);
       }
     });
+    ctx.closePath();
     ctx.fill();
     ctx.restore();
   }
@@ -280,6 +279,7 @@ export default class CanvasUtils {
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.closePath();
     ctx.fill();
     ctx.restore();
   }
@@ -298,6 +298,7 @@ export default class CanvasUtils {
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.closePath();
     ctx.stroke();
     ctx.restore();
   }
@@ -348,6 +349,7 @@ export default class CanvasUtils {
         ctx.lineTo(point.x, point.y);
       }
     })
+    ctx.closePath();
     ctx.stroke();
     ctx.restore();
   }

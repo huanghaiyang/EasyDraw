@@ -27,6 +27,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 重绘蒙版
+   * 
+   * TODO 需要优化，光标只要移动就会重绘
    */
   async redraw(): Promise<void> {
     let cargo = new RenderTaskCargo([]);
