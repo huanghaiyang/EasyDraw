@@ -11,7 +11,6 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    this.canvas.getContext('2d').clearRect(0,0,this.canvas.width, this.canvas.height)
     CanvasUtils.drawPathWithScale(
       this.canvas,
       CanvasUtils.convertPointsByStrokeType(
