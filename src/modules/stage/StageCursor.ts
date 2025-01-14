@@ -6,7 +6,7 @@ import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
-import { DefaultCursorSize } from "@/types/MaskStyles";
+import { CursorSize } from "@/types/MaskStyles";
 import IElementTransformer, { IElementBorderTransformer, ITransformer } from "@/types/IElementTransformer";
 import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
 import { TransformTypes } from "@/types/Stage";
@@ -153,8 +153,8 @@ export default class StageCursor implements IStageCursor {
     return {
       point: this.value,
       type: DrawerMaskModelTypes.cursor,
-      width: DefaultCursorSize,
-      height: DefaultCursorSize,
+      width: CursorSize,
+      height: CursorSize,
       angle: transformer.angle,
       scale: 1 / this.shield.stageScale
     }

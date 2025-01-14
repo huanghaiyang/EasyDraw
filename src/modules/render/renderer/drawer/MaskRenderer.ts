@@ -13,7 +13,7 @@ import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel } from "@/types/IModel";
 import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
-import { DefaultArbitraryControllerRadius, DefaultSelectionSizeIndicatorDistance } from "@/types/MaskStyles";
+import { ArbitraryControllerRadius, SelectionIndicatorMargin } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
@@ -156,7 +156,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
           const model: IMaskModel = {
             point,
             type: DrawerMaskModelTypes.transformer,
-            radius: DefaultArbitraryControllerRadius,
+            radius: ArbitraryControllerRadius,
           }
           const task = new MaskTaskCircleTransformer(model, this.renderParams);
           tasks.push(task);
@@ -205,7 +205,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
     const angle = MathUtils.calculateAngle(p1, p2);
     const model: IMaskModel = {
-      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, DefaultSelectionSizeIndicatorDistance / this.drawer.shield.stageScale),
+      point: MathUtils.calculateSegmentLineCentroidCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.sizeIndicator,
       text: `${element.width} x ${element.height}`,
@@ -223,7 +223,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       const model: IMaskModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,
-        radius: DefaultArbitraryControllerRadius,
+        radius: ArbitraryControllerRadius,
       }
       return new MaskTaskCircleTransformer(model, this.renderParams);
     }

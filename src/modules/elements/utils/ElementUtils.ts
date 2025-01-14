@@ -7,7 +7,7 @@ import MathUtils from "@/utils/MathUtils";
 import IElement, { ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
-import { DefaultSelectionRotateDistance } from "@/types/MaskStyles";
+import { SelectionRotationMargin } from "@/types/MaskStyles";
 import ElementLine from "@/modules/elements/ElementLine";
 import ElementTaskLine from "@/modules/render/base/task/ElementTaskLine";
 import { StrokeTypes } from "@/types/ElementStyles";
@@ -205,7 +205,7 @@ export default class ElementUtils {
   static calcElementRotatePoint(element: IElement): IPoint {
     const { centroid, rotation: { model: { angle, scale } }, rect } = element;
     const halfValue = rect.height / 2;
-    return MathUtils.calculateTargetPoint(centroid, halfValue + DefaultSelectionRotateDistance * scale, angle);
+    return MathUtils.calculateTargetPoint(centroid, halfValue + SelectionRotationMargin * scale, angle);
   }
 
   /**

@@ -1,61 +1,61 @@
 import { ElementStyles } from "@/types/ElementStyles";
 
 // 鼠标样式画布尺寸
-export const MinCursorMoveXDistance = 2;
-export const MinCursorMoveYDistance = 2;
+export const MinCursorMXD = 2;
+export const MinCursorMYD = 2;
 
-export const DefaultSelectionStrokeColor = '#0c8ce9';
-export const DefaultSelectionStrokeColorOpacity = 1;
-export const DefaultSelectionFillColor = '#0c8ce9';
-export const DefaultSelectionFillColorOpacity = 0.025;
-export const DefaultSelectionLineWidth = 1;
+export const SelectionStrokeColor = '#0c8ce9';
+export const SelectionStrokeColorOpacity = 1;
+export const SelectionFillColor = '#0c8ce9';
+export const SelectionFillColorOpacity = 0.025;
+export const SelectionLineWidth = 1;
 
-export const DefaultTransformerStrokeColor = '#0c8ce9';
-export const DefaultTransformerStrokeColorOpacity = 1;
-export const DefaultTransformerFillColor = '#ffffff';
-export const DefaultTransformerFillColorOpacity = 1;
-export const DefaultTransformerLineWidth = 1;
+export const TransformerStrokeColor = '#0c8ce9';
+export const TransformerStrokeColorOpacity = 1;
+export const TransformerFillColor = '#ffffff';
+export const TransformerFillColorOpacity = 1;
+export const TransformerLineWidth = 1;
 
-export const DefaultTransformerValue = 6;
-export const DefaultSelectionRotateSize = 12;
-export const DefaultSelectionRotateDistance = 12;
-export const DefaultSelectionSizeIndicatorDistance = 12;
+export const TransformerSize = 6;
+export const SelectionRotationSize = 12;
+export const SelectionRotationMargin = 12;
+export const SelectionIndicatorMargin = 12;
 // 尺寸指示文本
-export const DefaultSelectionSizeIndicatorFillColor = '#0c8ce9';
-export const DefaultSelectionSizeIndicatorFillColorOpacity = 1;
-export const DefaultSelectionSizeIndicatorTextColor = '#000000';
-export const DefaultSelectionSizeIndicatorFontSize = 12;
-export const DefaultSelectionSizeIndicatorFontFamily = 'Arial';
-export const DefaultSelectionSizeIndicatorTextAlign = 'center';
-export const DefaultSelectionSizeIndicatorTextBaseline = 'middle';
+export const SelectionIndicatorFillColor = '#0c8ce9';
+export const SelectionIndicatorFillColorOpacity = 1;
+export const SelectionIndicatorTextColor = '#000000';
+export const SelectionIndicatorFontSize = 12;
+export const SelectionIndicatorFontFamily = 'Arial';
+export const SelectionIndicatorTextAlign = 'center';
+export const SelectionIndicatorTextBaseline = 'middle';
 
-export const DefaultSelectionStyle: ElementStyles = {
-  strokeColor: DefaultSelectionStrokeColor,
-  strokeColorOpacity: DefaultSelectionStrokeColorOpacity,
-  strokeWidth: DefaultSelectionLineWidth,
-  fillColor: DefaultSelectionFillColor,
-  fillColorOpacity: DefaultSelectionFillColorOpacity,
+export const SelectionStyle: ElementStyles = {
+  strokeColor: SelectionStrokeColor,
+  strokeColorOpacity: SelectionStrokeColorOpacity,
+  strokeWidth: SelectionLineWidth,
+  fillColor: SelectionFillColor,
+  fillColorOpacity: SelectionFillColorOpacity,
 }
 
-export const DefaultControllerStyle: ElementStyles = {
-  strokeColor: DefaultTransformerStrokeColor,
-  strokeColorOpacity: DefaultTransformerStrokeColorOpacity,
-  strokeWidth: DefaultTransformerLineWidth,
-  fillColor: DefaultTransformerFillColor,
-  fillColorOpacity: DefaultTransformerFillColorOpacity,
+export const ControllerStyle: ElementStyles = {
+  strokeColor: TransformerStrokeColor,
+  strokeColorOpacity: TransformerStrokeColorOpacity,
+  strokeWidth: TransformerLineWidth,
+  fillColor: TransformerFillColor,
+  fillColorOpacity: TransformerFillColorOpacity,
 }
 
-export const DefaultSelectionSizeIndicatorStyle: ElementStyles = {
-  fontSize: DefaultSelectionSizeIndicatorFontSize,
-  fontFamily: DefaultSelectionSizeIndicatorFontFamily,
-  fillColor: DefaultSelectionSizeIndicatorFillColor,
-  fillColorOpacity: DefaultSelectionSizeIndicatorFillColorOpacity,
-  textAlign: DefaultSelectionSizeIndicatorTextAlign,
-  textBaseline: DefaultSelectionSizeIndicatorTextBaseline,
+export const SelectionIndicatorStyle: ElementStyles = {
+  fontSize: SelectionIndicatorFontSize,
+  fontFamily: SelectionIndicatorFontFamily,
+  fillColor: SelectionIndicatorFillColor,
+  fillColorOpacity: SelectionIndicatorFillColorOpacity,
+  textAlign: SelectionIndicatorTextAlign,
+  textBaseline: SelectionIndicatorTextBaseline,
 }
 
-export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
+export const CursorPositionStyle = SelectionIndicatorStyle;
 
-export const DefaultCursorSize = 20;
+export const CursorSize = 20;
 
-export const DefaultArbitraryControllerRadius = 3;
+export const ArbitraryControllerRadius = 3;

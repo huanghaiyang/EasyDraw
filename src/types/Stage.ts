@@ -5,4 +5,4 @@ export enum TransformTypes {
   border
 }
 
-export const DefaultAutoFitPadding = 100;
+export const AutoFitPadding = 100;

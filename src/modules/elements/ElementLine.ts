@@ -1,6 +1,6 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
-import { DefaultLineElementClosestDistance } from "@/types/Constants";
+import { LineClosestMargin } from "@/types/Constants";
 import { IElementLine } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -123,7 +123,7 @@ export default class ElementLine extends Element implements IElementLine {
   isContainsPoint(point: IPoint): boolean {
     return MathUtils.isPointClosestSegment(
       point,
-      this.startRotatePathPoint, this.endRotatePathPoint, DefaultLineElementClosestDistance + (this.model.styles.strokeWidth / 2) / this.shield.stageScale
+      this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + (this.model.styles.strokeWidth / 2) / this.shield.stageScale
     );
   }
 

@@ -1,4 +1,4 @@
-export const MinCursorMoveXDistance = 2;
-export const MinCursorMoveYDistance = 2;
-export const DefaultBorderTransformerDistance = 4;
-export const DefaultLineElementClosestDistance = 4;
+export const MinCursorMXD = 2;
+export const MinCursorMYD = 2;
+export const BorderTransformerMargin = 4;
+export const LineClosestMargin = 4;

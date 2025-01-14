@@ -2,7 +2,7 @@ import { DrawerMaskModelTypes, ElementStatus, IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import { IRotationModel } from "@/types/IModel";
-import { DefaultSelectionRotateSize } from "@/types/MaskStyles";
+import { SelectionRotationSize } from "@/types/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -13,8 +13,8 @@ export default class ElementRotation implements IElementRotation {
   model: IRotationModel = {
     point: null,
     type: DrawerMaskModelTypes.rotate,
-    width: DefaultSelectionRotateSize,
-    height: DefaultSelectionRotateSize,
+    width: SelectionRotationSize,
+    height: SelectionRotationSize,
     angle: -90,
     vertices: []
   };

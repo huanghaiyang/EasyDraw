@@ -1,4 +1,4 @@
-import { MinCursorMoveXDistance, MinCursorMoveYDistance } from "@/types/Constants";
+import { MinCursorMXD, MinCursorMYD } from "@/types/Constants";
 import { IPoint, ShieldDispatcherNames, } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
@@ -28,7 +28,7 @@ import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import MathUtils from "@/utils/MathUtils";
-import { DefaultAutoFitPadding } from "@/types/Stage";
+import { AutoFitPadding } from "@/types/Stage";
 import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
 import StageAlign from "@/modules/stage/StageAlign";
 
@@ -755,8 +755,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns 
    */
   checkCursorPressMovedALittle(e: MouseEvent): boolean {
-    return Math.abs(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
-      || Math.abs(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
+    return Math.abs(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD
+      || Math.abs(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD;
   }
 
   /**
@@ -766,8 +766,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns 
    */
   checkCursorPressUpALittle(e: MouseEvent): boolean {
-    return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMoveXDistance
-      || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMoveYDistance;
+    return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD
+      || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD;
   }
 
   /**
@@ -937,7 +937,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
-    let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, DefaultAutoFitPadding * this.stageScale), 2);
+    let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, AutoFitPadding * this.stageScale), 2);
     scale = clamp(scale, 0.02, 1);
     return scale;
   }

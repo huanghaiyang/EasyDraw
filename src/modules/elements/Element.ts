@@ -14,7 +14,7 @@ import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
 import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/types/ElementStyles";
-import { DefaultTransformerValue } from "@/types/MaskStyles";
+import { TransformerSize } from "@/types/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -568,8 +568,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result = this._rotatePathPoints.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
-        width: DefaultTransformerValue / this.shield.stageScale,
-        height: DefaultTransformerValue / this.shield.stageScale,
+        width: TransformerSize / this.shield.stageScale,
+        height: TransformerSize / this.shield.stageScale,
       }, {
         angle: this.model.angle
       });
