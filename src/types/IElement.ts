@@ -65,11 +65,10 @@ export default interface IElement {
   get fontSize(): number;
   get fontFamily(): string;
 
+  get activePointIndex(): number;
   get originalModelCoords(): IPoint[];
-  get points(): IPoint[]; // 相对于舞台画布的坐标(此坐标是绘制是鼠标的路径坐标)
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get maxBoxPoints(): IPoint[];
-  get rotatePoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get rotateOutlinePathPoints(): IPoint[];
   get maxOutlineBoxPoints(): IPoint[];
@@ -140,9 +139,7 @@ export default interface IElement {
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
 
-  calcPoints(): IPoint[];
   calcPathPoints(): IPoint[];
-  calcRotatePoints(): IPoint[];
   calcRotatePathPoints(): IPoint[];
   calcRotateOutlinePathPoints(): IPoint[];
   calcMaxBoxPoints(): IPoint[];
@@ -166,6 +163,7 @@ export default interface IElement {
   transformByVertices(offset: IPoint): void;
   transformByBorder(offset: IPoint): void;
 
+  refreshRotation(): void;
   refreshOriginalElementProps(): void;
   refreshOriginalModelCoords(): void;
   refreshOriginalProps(): void;

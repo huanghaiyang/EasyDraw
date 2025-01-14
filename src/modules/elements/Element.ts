@@ -331,79 +331,77 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @action
-  private _setStatus(status: ElementStatus): void {
+  protected _setStatus(status: ElementStatus): void {
     this._status = status;
   }
 
   @action
-  private _setIsSelected(value: boolean): void {
+  protected _setIsSelected(value: boolean): void {
     this._isSelected = value;
   }
 
   @action
-  private _setIsVisible(value: boolean): void {
+  protected _setIsVisible(value: boolean): void {
     this._isVisible = value;
   }
 
   @action
-  private _setIsEditing(value: boolean): void {
+  protected _setIsEditing(value: boolean): void {
     this._isEditing = value;
   }
 
   @action
-  private _setIsLocked(value: boolean): void {
+  protected _setIsLocked(value: boolean): void {
     this._isLocked = value;
   }
 
   @action
-  private _setIsMoving(value: boolean): void {
+  protected _setIsMoving(value: boolean): void {
     this._isMoving = value;
   }
 
   @action
-  private _setIsTransforming(value: boolean): void {
+  protected _setIsTransforming(value: boolean): void {
     this._isTransforming = value;
   }
 
   @action
-  private _setIsRotating(value: boolean): void {
+  protected _setIsRotating(value: boolean): void {
     this._isRotating = value;
   }
 
   @action
-  private _setIsRotatingTarget(value: boolean): void {
+  protected _setIsRotatingTarget(value: boolean): void {
     this._isRotatingTarget = value;
   }
 
   @action
-  private _setIsDragging(value: boolean): void {
+  protected _setIsDragging(value: boolean): void {
     this._isDragging = value;
   }
 
   @action
-  private _setIsRendered(value: boolean): void {
+  protected _setIsRendered(value: boolean): void {
     this._isProvisional = value;
   }
 
   @action
-  private _setIsTarget(value: boolean): void {
+  protected _setIsTarget(value: boolean): void {
     this._isTarget = value;
   }
 
   @action
-  private _setIsOnStage(value: boolean): void {
+  protected _setIsOnStage(value: boolean): void {
     this._isOnStage = value;
   }
 
   @action
-  private _setIsInRange(value: boolean): void {
+  protected _setIsInRange(value: boolean): void {
     this._isInRange = value;
   }
 
-  protected _points: IPoint[] = [];
   protected _pathPoints: IPoint[] = [];
   protected _maxBoxPoints: IPoint[] = [];
-  protected _rotatePoints: IPoint[] = [];
   protected _rotatePathPoints: IPoint[] = [];
   protected _rotateOutlinePathPoints: IPoint[] = [];
   protected _maxOutlineBoxPoints: IPoint[] = [];
@@ -412,14 +410,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _transformers: IElementTransformer[] = [];
   protected _borderTransformers: IElementBorderTransformer[] = [];
   protected _originalCentroidCoord: IPoint;
-  protected _originalRotatePoints: IPoint[] = [];
+  protected _originalRotatePathPoints: IPoint[] = [];
   protected _originalAngle: number = 0;
   protected _originalRect: Partial<DOMRect> = {};
   protected _originalCentroid: IPoint;
-
-  get points(): IPoint[] {
-    return this._points;
-  }
 
   get pathPoints(): IPoint[] {
     return this._pathPoints;
@@ -431,10 +425,6 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get maxOutlineBoxPoints(): IPoint[] {
     return this._maxOutlineBoxPoints;
-  }
-
-  get rotatePoints(): IPoint[] {
-    return this._rotatePoints;
   }
 
   get rotatePathPoints(): IPoint[] {
@@ -465,6 +455,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rect;
   }
 
+  get activePointIndex(): number {
+    return -1;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -479,27 +473,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcPoints(): IPoint[] {
-    return ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-  }
-
-  /**
-   * 计算路径坐标
-   * 
-   * @returns 
-   */
   calcPathPoints(): IPoint[] {
-    return cloneDeep(this._points)
-  }
-
-  /**
-   * 计算旋转坐标
-   * 
-   * @returns 
-   */
-  calcRotatePoints(): IPoint[] {
-    const centroid = MathUtils.calcPolygonCentroid(this._points)
-    return this._points.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, centroid))
+    let points = this._pathPoints;
+    if (this.activePointIndex !== -1) {
+      const newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activePointIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      points[this.activePointIndex] = newCoord;
+    } else {
+      points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    }
+    return points;
   }
 
   /**
@@ -632,24 +614,31 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新旋转坐标
+   */
+  refreshRotation(): void {
+    this.rotation.model.scale = 1 / this.shield.stageScale;
+    this.rotation.refresh();
+  }
+
+  /**
    * 刷新坐标
    */
   refreshStagePoints(): void {
     this.refreshElementPoints();
-    this.rotation.model.scale = 1 / this.shield.stageScale;
-    this.rotation.refresh();
+    this.refreshRotation();
   }
 
   /**
    * 刷新舞台坐标
    */
   refreshElementPoints() {
-    this._points = this.calcPoints();
     this._pathPoints = this.calcPathPoints();
-    this._rotatePoints = this.calcRotatePoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
     this._transformers = this.calcTransformers();
-    this._borderTransformers = this.calcBorderTransformers();
+    if (this.borderTransformEnable) {
+      this._borderTransformers = this.calcBorderTransformers();
+    }
     this._maxBoxPoints = this.calcMaxBoxPoints();
     this._rect = this.calcRect();
     this.refreshOutline();
@@ -741,7 +730,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         y
       }
     })
-    this._originalRotatePoints = cloneDeep(this._rotatePoints);
+    this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
     this._originalAngle = this.model.angle;
     this._originalRect = this.calcRect();
     this._originalMatrix = [];
@@ -849,7 +838,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
-    const newPoints = this._originalRotatePoints.map(point => {
+    const newPoints = this._originalRotatePathPoints.map(point => {
       // 先旋转回角度0
       point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, lockPoint)
       // 以不动点为圆心，计算形变
@@ -943,7 +932,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param currentPointOriginal 
    * @param matrix 
    */
-  private _tryFlipAngle(lockPoint: IPoint, currentPointOriginal: IPoint, matrix: number[][]): void {
+  protected _tryFlipAngle(lockPoint: IPoint, currentPointOriginal: IPoint, matrix: number[][]): void {
     // 判断是否已经计算过原始矩阵
     if (!this._originalMatrix.length) {
       // 计算原始矩阵
@@ -979,7 +968,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index 
    * @returns 
    */
-  private getBorderTransformLockPoint(index: number): IPoint {
+  protected getBorderTransformLockPoint(index: number): IPoint {
     // 不动边的点1索引
     const lockIndex = CommonUtils.getPrevIndexOfArray(this._borderTransformers.length, index, 2);
     // 不动边的点2索引

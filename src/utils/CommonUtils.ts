@@ -316,6 +316,7 @@ export default class CommonUtils {
    * @returns 
    */
   static scalePoints(points: IPoint[], scale: number) {
+    if (scale === 1) return points;
     return points.map(point => CommonUtils.scalePoint(point, scale))
   }
 

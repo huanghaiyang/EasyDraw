@@ -16,7 +16,7 @@ export const DefaultTransformerFillColor = '#ffffff';
 export const DefaultTransformerFillColorOpacity = 1;
 export const DefaultTransformerLineWidth = 1;
 
-export const DefaultTransformerValue = 8;
+export const DefaultTransformerValue = 6;
 export const DefaultSelectionRotateSize = 12;
 export const DefaultSelectionRotateDistance = 12;
 export const DefaultSelectionSizeIndicatorDistance = 12;
@@ -58,4 +58,4 @@ export const DefaultCursorPositionStyle = DefaultSelectionSizeIndicatorStyle;
 
 export const DefaultCursorSize = 20;
 
-export const DefaultArbitraryControllerRadius = 5;
+export const DefaultArbitraryControllerRadius = 3;

@@ -1,4 +1,4 @@
-import { DrawerMaskModelTypes, IPoint, } from "@/types";
+import { DrawerMaskModelTypes, ElementStatus, IPoint, } from "@/types";
 import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
 import MaskTaskSelection from "@/modules/render/mask/task/MaskTaskSelection";
 import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
@@ -47,7 +47,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
     const element = this.drawer.shield.store.uniqSelectedElement;
     if (element) {
-      if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable) {
+      if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
         cargo.add(this.createMaskRotateTask(element));
       }
       cargo.add(this.createMaskSizeIndicatorTask(element));
