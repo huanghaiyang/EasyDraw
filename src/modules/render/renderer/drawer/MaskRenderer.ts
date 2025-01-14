@@ -196,7 +196,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
           p1 = element.maxBoxPoints[3];
           p2 = element.maxBoxPoints[2];
         } else {
-          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotatePathPoints);
+          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints);
           let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
           let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, rightPoint) + 180);
           const point = leftAngle < rightAngle ? leftPoint : rightPoint;

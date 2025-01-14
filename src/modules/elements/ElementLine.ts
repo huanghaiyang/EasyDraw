@@ -10,6 +10,14 @@ import { TransformerTypes } from "@/types/IElementTransformer";
 
 export default class ElementLine extends Element implements IElementLine {
 
+  get verticesTransformEnable(): boolean {
+    return true;
+  }
+
+  get boxVerticesTransformEnable(): boolean {
+    return false;
+  }
+
   get heightModifyEnable(): boolean {
     return false;
   }
@@ -100,8 +108,8 @@ export default class ElementLine extends Element implements IElementLine {
   /**
    * 刷新轮廓坐标
    */
-  protected refreshOutline(): void {
-    super.refreshOutline();
+  protected _refreshOutlinePoints(): void {
+    super._refreshOutlinePoints();
     this.refreshBentOutline();
   }
 

@@ -44,6 +44,7 @@ export default interface IElement {
   get rotationEnable(): boolean;
   get verticesRotationEnable(): boolean;
   get verticesTransformEnable(): boolean;
+  get boxVerticesTransformEnable(): boolean;
   get borderTransformEnable(): boolean;
   get fillEnabled(): boolean;
   get strokeEnable(): boolean;
@@ -71,6 +72,7 @@ export default interface IElement {
   get maxBoxPoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
   get rotateOutlinePathPoints(): IPoint[];
+  get rotateBoxPoints(): IPoint[];
   get maxOutlineBoxPoints(): IPoint[];
   get rotateOutlinePathCoords(): IPoint[];
   get centroid(): IPoint;
@@ -145,9 +147,12 @@ export default interface IElement {
   calcMaxBoxPoints(): IPoint[];
   calcMaxOutlineBoxPoints(): IPoint[];
   calcRotateOutlinePathCoords(): IPoint[];
+  calcRotateBoxPoints(): IPoint[];
   calcCentroid(): IPoint;
   calcCentroidCoord(): IPoint;
   calcTransformers(): IPoint[];
+  calcVerticesTransformers(): IPoint[];
+  calcBoxVerticesTransformers(): IPoint[];
   calcRotateCoords(): IPoint[];
   calcRect(): Partial<DOMRect>;
 

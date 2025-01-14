@@ -72,6 +72,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否可以通过顶点变形
   get verticesTransformEnable(): boolean {
+    return false;
+  }
+
+  get boxVerticesTransformEnable(): boolean {
     return true;
   }
 
@@ -400,19 +404,35 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._isInRange = value;
   }
 
+  // 坐标-舞台坐标系
   protected _pathPoints: IPoint[] = [];
+  // 最大盒模型-舞台坐标系
   protected _maxBoxPoints: IPoint[] = [];
+  // 旋转坐标-舞台坐标系
   protected _rotatePathPoints: IPoint[] = [];
+  // 旋转外框线坐标-舞台坐标系
   protected _rotateOutlinePathPoints: IPoint[] = [];
+  // 旋转盒模型-舞台坐标系
+  protected _rotateBoxPoints: IPoint[] = [];
+  // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
   protected _maxOutlineBoxPoints: IPoint[] = [];
+  // 旋转外框线坐标-世界坐标系
   protected _rotateOutlinePathCoords: IPoint[] = [];
+  // 盒模型，同_maxBoxPoints-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
+  // 顶点变换器-舞台坐标系
   protected _transformers: IElementTransformer[] = [];
+  // 边框变换器-舞台坐标系
   protected _borderTransformers: IElementBorderTransformer[] = [];
+  // 原始中心点-世界坐标系
   protected _originalCentroidCoord: IPoint;
+  // 原始旋转的组件坐标-世界坐标系
   protected _originalRotatePathPoints: IPoint[] = [];
+  // 原始角度-舞台坐标系&世界坐标系
   protected _originalAngle: number = 0;
+  // 原始盒模型-舞台坐标系
   protected _originalRect: Partial<DOMRect> = {};
+  // 原始中心点-舞台坐标系
   protected _originalCentroid: IPoint;
 
   get pathPoints(): IPoint[] {
@@ -433,6 +453,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get rotateOutlinePathPoints(): IPoint[] {
     return this._rotateOutlinePathPoints;
+  }
+
+  get rotateBoxPoints(): IPoint[] {
+    return this._rotateBoxPoints;
   }
 
   get rotateOutlinePathCoords(): IPoint[] {
@@ -505,6 +529,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算旋转后的盒模型坐标
+   */
+  calcRotateBoxPoints(): IPoint[] {
+    const boxPoints = CommonUtils.getBoxPoints(this._pathPoints);
+    const centroid = this.calcCentroid();
+    return boxPoints.map(point => MathUtils.rotateRelativeCentroid(point, this.model.angle, centroid));
+  }
+
+  /**
    * 计算非旋转的最大盒模型
    * 
    * @returns 
@@ -560,12 +593,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 计算大小变换器坐标
+   * 根据给定的点坐标生成变换器
    * 
+   * @param points 
    * @returns 
    */
-  calcTransformers(): IElementTransformer[] {
-    const result = this._rotatePathPoints.map((point, index) => {
+  private calcTransformersByPoints(points: IPoint[]): IElementTransformer[] {
+    const result = points.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
         width: TransformerSize / this.shield.stageScale,
@@ -587,11 +621,41 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 计算边框变换器坐标
+   */
+  calcBoxVerticesTransformers(): IElementTransformer[] {
+    return this.calcTransformersByPoints(this._rotateBoxPoints);
+  }
+
+  /**
+   * 计算大小变换器坐标
+   * 
+   * @returns 
+   */
+  calcVerticesTransformers(): IElementTransformer[] {
+    return this.calcTransformersByPoints(this._rotatePathPoints);
+  }
+
+  /**
+   * 直线允许顶点变换，但是其他组件仅允许根据盒模型顶点变换
+   * 
+   * @returns 
+   */
+  calcTransformers(): IElementTransformer[] {
+    if (this.verticesTransformEnable) {
+      return this.calcVerticesTransformers();
+    }
+    if (this.boxVerticesTransformEnable) {
+      return this.calcBoxVerticesTransformers();
+    }
+  }
+
+  /**
    * 计算边框变换器
    */
   calcBorderTransformers(): IElementBorderTransformer[] {
-    const result = this._rotatePathPoints.map((point, index) => {
-      const nextPoint = CommonUtils.getNextOfArray(this._rotatePathPoints, index);
+    const result = this._rotateBoxPoints.map((point, index) => {
+      const nextPoint = CommonUtils.getNextOfArray(this._rotateBoxPoints, index);
       let borderTransformer = this._borderTransformers[index];
       if (borderTransformer) {
         borderTransformer.start = point;
@@ -635,13 +699,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshElementPoints() {
     this._pathPoints = this.calcPathPoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
+    this._rotateBoxPoints = this.calcRotateBoxPoints();
     this._transformers = this.calcTransformers();
     if (this.borderTransformEnable) {
       this._borderTransformers = this.calcBorderTransformers();
     }
     this._maxBoxPoints = this.calcMaxBoxPoints();
     this._rect = this.calcRect();
-    this.refreshOutline();
+    this._refreshOutlinePoints();
   }
 
   /**
@@ -881,7 +946,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   transformByVertices(offset: IPoint): void {
-    if (!this.verticesTransformEnable) return;
+    if (!this.verticesTransformEnable && !this.boxVerticesTransformEnable) return;
     this.doVerticesTransform(offset);
   }
 
@@ -1033,7 +1098,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新与边框设置相关的坐标
    */
-  protected refreshOutline(): void {
+  protected _refreshOutlinePoints(): void {
     this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
     this._rotateOutlinePathCoords = this.calcRotateOutlinePathCoords();
     this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
@@ -1112,7 +1177,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes): void {
     this.model.styles.strokeType = value;
-    this.refreshOutline();
+    this._refreshOutlinePoints();
   }
 
   /**
@@ -1140,7 +1205,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeWidth(value: number): void {
     this.model.styles.strokeWidth = value;
-    this.refreshOutline();
+    this._refreshOutlinePoints();
   }
 
   /**
