@@ -118,8 +118,8 @@ export default class StageSelection implements IStageSelection {
   getTransformerModels(): IMaskModel[] {
     const length = this.shield.store.selectedElements.length;
     if (length === 1) {
-      const { rotatePathPoints, transformerType, model: { angle } } = this.shield.store.selectedElements[0]
-      return this.getTransformerModelsByPoints(rotatePathPoints, angle, transformerType);
+      const { transformerType, model: { angle }, transformers, verticesTransformEnable } = this.shield.store.selectedElements[0]
+      return this.getTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
     } else if (length >= 2) {
       const selectionModel = this.getSelectionModel();
       return this.getTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);

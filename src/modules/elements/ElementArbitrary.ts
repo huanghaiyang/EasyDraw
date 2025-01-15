@@ -15,6 +15,14 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return false;
   }
 
+  get verticesTransformEnable(): boolean {
+    return this.status !== ElementStatus.finished;
+  }
+
+  get boxVerticesTransformEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   get activePointIndex(): number {
     if (this.status !== ElementStatus.finished) {
       if (this.model.coords.length > this.tailCoordIndex + 1) {
