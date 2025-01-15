@@ -1,4 +1,4 @@
-import { IPoint, DrawerMaskModelTypes } from "@/types";
+import { IPoint, DrawerMaskModelTypes, ElementStatus } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
@@ -102,10 +102,16 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getSelectionModel(): IMaskModel {
-    if (this.shield.store.selectedElements.length >= 2) {
+    const elements = this.shield.store.selectedElements.filter(element => element.status === ElementStatus.finished);
+    if (elements.length === 1) {
       return {
         type: DrawerMaskModelTypes.selection,
-        points: CommonUtils.getBoxPoints(flatten(this.shield.store.selectedElements.map(element => element.maxBoxPoints))),
+        points: elements[0].rotateBoxPoints,
+      };
+    } else if (elements.length >= 2) {
+      return {
+        type: DrawerMaskModelTypes.selection,
+        points: CommonUtils.getBoxPoints(flatten(elements.map(element => element.rotateBoxPoints))),
       };
     }
   }
