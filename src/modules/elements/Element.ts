@@ -896,6 +896,26 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 根据矩阵计算新的坐标
+   * 
+   * @param point 
+   * @param matrix 
+   * @param lockPoint 
+   * @returns 
+   */
+  private _calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint): IPoint {
+    // 先旋转回角度0
+    point = MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint);
+    // 以不动点为圆心，计算形变
+    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
+    // 重新计算坐标
+    point = { x: x + lockPoint.x, y: y + lockPoint.y };
+    // 坐标重新按照角度偏转
+    point = MathUtils.rotateRelativeCenter(point, this.model.angle, lockPoint);
+    return point;
+  }
+
+  /**
    * 根据矩阵和中心点计算新的坐标
    * 
    * @param matrix 
@@ -903,20 +923,12 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
-    const newPoints = this._originalRotatePathPoints.map(point => {
-      // 先旋转回角度0
-      point = MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint)
-      // 以不动点为圆心，计算形变
-      const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1])
-      // 重新计算坐标
-      point = { x: x + lockPoint.x, y: y + lockPoint.y }
-      // 坐标重新按照角度偏转
-      point = MathUtils.rotateRelativeCenter(point, this.model.angle, lockPoint)
-      return point;
+    const points = this._originalRotatePathPoints.map(point => {
+      return this._calcMatrixPoint(point, matrix, lockPoint);
     });
-    const newCenterPoint = MathUtils.calcCenter(newPoints);
-    const coords = newPoints.map(point => {
-      point = MathUtils.rotateRelativeCenter(point, -this.model.angle, newCenterPoint);
+    const center = this._calcMatrixPoint(this._originalCenter, matrix, lockPoint);
+    const coords = points.map(point => {
+      point = MathUtils.rotateRelativeCenter(point, -this.model.angle, center);
       const coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       return coord;
     })
