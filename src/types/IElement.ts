@@ -75,8 +75,8 @@ export default interface IElement {
   get rotateBoxPoints(): IPoint[];
   get maxOutlineBoxPoints(): IPoint[];
   get rotateOutlinePathCoords(): IPoint[];
-  get centroid(): IPoint;
-  get centroidCoord(): IPoint;
+  get center(): IPoint;
+  get centerCoord(): IPoint;
   get transformers(): IElementTransformer[];
   get borderTransformers(): IElementBorderTransformer[];
   get transformerType(): TransformerTypes;
@@ -148,8 +148,8 @@ export default interface IElement {
   calcMaxOutlineBoxPoints(): IPoint[];
   calcRotateOutlinePathCoords(): IPoint[];
   calcRotateBoxPoints(): IPoint[];
-  calcCentroid(): IPoint;
-  calcCentroidCoord(): IPoint;
+  calcCenter(): IPoint;
+  calcCenterCoord(): IPoint;
   calcTransformers(): IPoint[];
   calcVerticesTransformers(): IPoint[];
   calcBoxVerticesTransformers(): IPoint[];

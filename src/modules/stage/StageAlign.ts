@@ -120,7 +120,7 @@ export default class StageAlign implements IStageAlign {
    * @param offsetY 
    */
   private _setElementPositionByOffset(element: IElement, offsetX: number, offsetY: number): void {
-    element.setPosition(element.centroidCoord.x + offsetX, element.centroidCoord.y + offsetY, element.model.coords.map(coord => {
+    element.setPosition(element.centerCoord.x + offsetX, element.centerCoord.y + offsetY, element.model.coords.map(coord => {
       return {
         x: coord.x + offsetX,
         y: coord.y + offsetY

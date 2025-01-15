@@ -47,7 +47,7 @@ export default class StageStore implements IStageStore {
   // 旋转目标元素映射关系，加快查询
   private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转组件中心点
-  private _rotatingTargetElementsCentroid: IPoint;
+  private _rotatingTargetElementsCenter: IPoint;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -882,9 +882,9 @@ export default class StageStore implements IStageStore {
   /**
    * 计算旋转组件的中心点
    */
-  calcRotatingElementsCentroid(): IPoint {
-    const point = MathUtils.calcCentroid(flatten(this.selectedElements.map(element => element.pathPoints)))
-    this._rotatingTargetElementsCentroid = point;
+  calcRotatingElementsCenter(): IPoint {
+    const point = MathUtils.calcCenter(flatten(this.selectedElements.map(element => element.pathPoints)))
+    this._rotatingTargetElementsCenter = point;
     return point;
   }
 
@@ -894,7 +894,7 @@ export default class StageStore implements IStageStore {
    * @param point 
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCentroid, point) + 90);
+    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCenter, point) + 90);
     if (angle > 180) {
       angle = angle - 360;
     }
@@ -913,7 +913,7 @@ export default class StageStore implements IStageStore {
     const { colorSpace } = options;
     const { width, height } = image;
     const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, { width, height });
-    const centroid = MathUtils.calcCentroid(coords);
+    const center = MathUtils.calcCenter(coords);
     const object: ImageElementObject = {
       id: CommonUtils.getRandomDateId(),
       coords,
@@ -921,8 +921,8 @@ export default class StageStore implements IStageStore {
       data: image,
       angle: 0,
       name: 'image',
-      left: centroid.x,
-      top: centroid.y,
+      left: center.x,
+      top: center.y,
       width: width,
       height: height,
       length: 0,

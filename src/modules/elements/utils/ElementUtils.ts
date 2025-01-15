@@ -203,9 +203,9 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { centroid, rotation: { model: { angle, scale } }, rect } = element;
+    const { center, rotation: { model: { angle, scale } }, rect } = element;
     const halfValue = rect.height / 2;
-    return MathUtils.calcTargetPoint(centroid, halfValue + SelectionRotationMargin * scale, angle);
+    return MathUtils.calcTargetPoint(center, halfValue + SelectionRotationMargin * scale, angle);
   }
 
   /**
@@ -220,7 +220,7 @@ export default class ElementUtils {
       case CreatorTypes.image:
       case CreatorTypes.line:
       case CreatorTypes.arbitrary: {
-        return MathUtils.calcCentroid(model.coords);
+        return MathUtils.calcCenter(model.coords);
       }
     }
   }
@@ -325,7 +325,7 @@ export default class ElementUtils {
     let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(stageRect, 1 / stageScale), padding / stageScale);
     innerWidth = MathUtils.preciseToFixed(innerWidth * stageScale, 2);
     innerHeight = MathUtils.preciseToFixed(innerHeight * stageScale, 2);
-    const points = CommonUtils.calcCentroidInnerRectPoints({ width: innerWidth, height: innerHeight }, stageRect);
+    const points = CommonUtils.calcCenterInnerRectPoints({ width: innerWidth, height: innerHeight }, stageRect);
     return ElementUtils.calcWorldPoints(points, stageRect, stageWorldCoord, stageScale);
   }
 }

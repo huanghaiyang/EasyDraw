@@ -545,7 +545,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const controller = this._tryActiveController();
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
-        this.store.calcRotatingElementsCentroid();
+        this.store.calcRotatingElementsCenter();
         this._isElementsRotating = true;
       } else if (controller instanceof ElementTransformer) {
         this._isElementsTransforming = true;
@@ -975,8 +975,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
-      const centroid = MathUtils.calcCentroid(flatten(this.store.visibleElements.map(element => element.rotateOutlinePathCoords)))
-      this.stageWorldCoord = centroid;
+      const center = MathUtils.calcCenter(flatten(this.store.visibleElements.map(element => element.rotateOutlinePathCoords)))
+      this.stageWorldCoord = center;
       this.store.refreshStageElements();
       this.setScale(this.calcScaleAutoFitValue());
     } else {

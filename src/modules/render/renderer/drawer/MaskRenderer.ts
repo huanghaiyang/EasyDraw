@@ -190,7 +190,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
     const angle = MathUtils.calcAngle(p1, p2);
     const model: IMaskModel = {
-      point: MathUtils.calcSegmentLineCentroidCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
+      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,

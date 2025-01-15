@@ -44,20 +44,20 @@ export default class MathUtils {
    * 
    * 旋转角度为0的情况下
    * 
-   * @param centroid 旋转中心点
+   * @param center 旋转中心点
    * @param point 移动点
    * @param originalPoint 缩放前的点
    */
-  static calcTransformMatrixOfCentroid(centroid: IPoint, point: IPoint, originalPoint: IPoint, angle?: number): number[][] {
+  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angle?: number): number[][] {
     // 如果坐标系旋转过，则需要重新计算给定的坐标
     if (angle) {
-      point = MathUtils.rotateRelativeCentroid(point, -angle, centroid);
-      originalPoint = MathUtils.rotateRelativeCentroid(originalPoint, -angle, centroid);
+      point = MathUtils.rotateRelativeCenter(point, -angle, center);
+      originalPoint = MathUtils.rotateRelativeCenter(originalPoint, -angle, center);
     }
-    const originalWidth = add(originalPoint.x, -centroid.x);
-    const originalHeight = add(originalPoint.y, -centroid.y);
-    const newWidth = add(point.x, - centroid.x);
-    const newHeight = add(point.y, - centroid.y);
+    const originalWidth = add(originalPoint.x, -center.x);
+    const originalHeight = add(originalPoint.y, -center.y);
+    const newWidth = add(point.x, - center.x);
+    const newHeight = add(point.y, - center.y);
     const scaleX = originalWidth === 0 ? 1 : divide(newWidth, originalWidth);
     const scaleY = originalHeight === 0 ? 1 : divide(newHeight, originalHeight);
     return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
@@ -68,18 +68,18 @@ export default class MathUtils {
    * 
    * @param coord 
    * @param angle 
-   * @param centroid 
+   * @param center 
    * @returns 
    */
-  static rotateRelativeCentroid(coord: IPoint, angle: number, centroid: IPoint): IPoint {
+  static rotateRelativeCenter(coord: IPoint, angle: number, center: IPoint): IPoint {
     const point = {
-      x: add(coord.x, - centroid.x),
-      y: add(coord.y, - centroid.y)
+      x: add(coord.x, - center.x),
+      y: add(coord.y, - center.y)
     };
     const result = MathUtils.rotate(point, angle);
     return {
-      x: add(result.x, centroid.x),
-      y: add(result.y, centroid.y)
+      x: add(result.x, center.x),
+      y: add(result.y, center.y)
     }
   }
 
@@ -256,19 +256,19 @@ export default class MathUtils {
       throw new Error("顶点数组不能为空");
     }
 
-    let centroidX = 0;
-    let centroidY = 0;
+    let centerX = 0;
+    let centerY = 0;
     const numPoints = points.length;
 
     for (let i = 0; i < numPoints; i++) {
-      centroidX += points[i].x;
-      centroidY += points[i].y;
+      centerX += points[i].x;
+      centerY += points[i].y;
     }
 
-    centroidX /= numPoints;
-    centroidY /= numPoints;
+    centerX /= numPoints;
+    centerY /= numPoints;
 
-    return { x: centroidX, y: centroidY };
+    return { x: centerX, y: centerY };
   }
 
   /**
@@ -277,7 +277,7 @@ export default class MathUtils {
    * @param points 
    * @returns 
    */
-  static calcCentroid(points: IPoint[]): IPoint {
+  static calcCenter(points: IPoint[]): IPoint {
     const box = CommonUtils.getBoxPoints(points);
     return MathUtils.calcPolygonCentroid(box);
   }
@@ -329,10 +329,10 @@ export default class MathUtils {
    * @param isClockwise 
    * @param distance 
    */
-  static calcSegmentLineCentroidCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
-    const centroid = MathUtils.calcCentroid([p1, p2]);
+  static calcSegmentLineCenterCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
+    const center = MathUtils.calcCenter([p1, p2]);
     const angle = MathUtils.calcAngle(p1, p2);
-    return MathUtils.calcTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
+    return MathUtils.calcTargetPoint(center, distance, isClockwise ? angle + 90 : angle - 90);
   }
 
   /**
@@ -565,10 +565,10 @@ export default class MathUtils {
    */
   static sortVerticesClockwise(vertices: IPoint[]) {
     // 计算质心
-    let centroid = MathUtils.calcCentroid(vertices);
+    let center = MathUtils.calcCenter(vertices);
     // 计算每个顶点与质心之间的角度
     let angles = vertices.map((vertex, index) => {
-      let angle = Math.atan2(vertex.y - centroid.y, vertex.x - centroid.x);
+      let angle = Math.atan2(vertex.y - center.y, vertex.x - center.x);
       return { index, angle };
     });
 
@@ -592,8 +592,8 @@ export default class MathUtils {
    * @param segmentEnd 
    */
   static calcAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
-    const centroid = MathUtils.calcCentroid([segmentStart, segmentEnd]);
-    return MathUtils.calcAngle(point, centroid);
+    const center = MathUtils.calcCenter([segmentStart, segmentEnd]);
+    return MathUtils.calcAngle(point, center);
   }
 
   /**

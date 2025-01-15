@@ -131,15 +131,15 @@ export default class CanvasUtils {
    * 
    * @param target 
    * @param text 
-   * @param centroid 
+   * @param center 
    * @param styles 
    * @param options 
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: ElementStyles, options?: { angle: number }): void {
+  static drawRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options?: { angle: number }): void {
     const { angle } = options || { angle: 0 };
     const ctx = target.getContext('2d');
     ctx.save();
-    ctx.translate(centroid.x, centroid.y);
+    ctx.translate(center.x, center.y);
     ctx.rotate(MathUtils.degreesToRadians(angle));
     ctx.font = StyleUtils.joinFont(styles);
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
@@ -154,18 +154,18 @@ export default class CanvasUtils {
    * 
    * @param target 
    * @param text 
-   * @param centroid 
+   * @param center 
    * @param styles 
    * @param options 
    */
-  static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, centroid: IPoint, styles: ElementStyles, options?: { angle: number }) {
+  static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options?: { angle: number }) {
     if (CanvasUtils.scale !== 1) {
-      centroid = {
-        x: centroid.x * CanvasUtils.scale,
-        y: centroid.y * CanvasUtils.scale
+      center = {
+        x: center.x * CanvasUtils.scale,
+        y: center.y * CanvasUtils.scale
       }
     }
-    CanvasUtils.drawRotateText(target, text, centroid, styles, options);
+    CanvasUtils.drawRotateText(target, text, center, styles, options);
   }
 
   /**

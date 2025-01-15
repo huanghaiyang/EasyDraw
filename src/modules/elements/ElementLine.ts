@@ -197,9 +197,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @param value 
    */
   setAngle(value: number): void {
-    const centroid = MathUtils.calcCentroid(this.model.coords);
-    const startCoord = MathUtils.calcTargetPoint(centroid, this.width / 2, value + 90);
-    const endCoord = MathUtils.calcTargetPoint(centroid, this.width / 2, value - 90);
+    const center = MathUtils.calcCenter(this.model.coords);
+    const startCoord = MathUtils.calcTargetPoint(center, this.width / 2, value + 90);
+    const endCoord = MathUtils.calcTargetPoint(center, this.width / 2, value - 90);
     this.model.coords = [startCoord, endCoord];
     this.refresh();
   }

@@ -35,7 +35,7 @@ export default class ElementRotation implements IElementRotation {
     this.model.vertices = CommonUtils.getBoxVertices(this.model.point, {
       width: this.model.width,
       height: this.model.height
-    }).map(point => MathUtils.rotateRelativeCentroid(point, this.element.angle, this.model.point))
+    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.angle, this.model.point))
   }
 
   /**

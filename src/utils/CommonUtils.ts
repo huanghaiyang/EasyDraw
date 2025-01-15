@@ -202,7 +202,7 @@ export default class CommonUtils {
       },
     ];
     points.forEach((point) => {
-      Object.assign(point, MathUtils.rotateRelativeCentroid(point, number, center));
+      Object.assign(point, MathUtils.rotateRelativeCenter(point, number, center));
     });
     return points;
   }
@@ -368,7 +368,7 @@ export default class CommonUtils {
    * @param outerRect 
    * @returns 
    */
-  static calcCentroidInnerRectPoints(innerRect: ISize, outerRect: ISize): IPoint[] {
+  static calcCenterInnerRectPoints(innerRect: ISize, outerRect: ISize): IPoint[] {
     const { width, height } = innerRect;
     const { width: outerWidth, height: outerHeight } = outerRect;
     return [
