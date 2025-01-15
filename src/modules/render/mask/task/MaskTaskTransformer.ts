@@ -14,6 +14,8 @@ export default class MaskTaskTransformer extends MaskTaskBase {
       height: TransformerSize * this.data.scale
     }, { angle: this.data.angle }), Object.assign({}, ControllerStyle, {
       strokeWidth: strokeWidth * this.data.scale
-    }));
+    }), {
+      calcVertices: false
+    });
   }
 }

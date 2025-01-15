@@ -497,6 +497,22 @@ export default class MathUtils {
   }
 
   /**
+   * 给定三角形的三个坐标点a,b,c计算b的内测夹角
+   */
+  static calcTriangleAngle2(a: IPoint, b: IPoint, c: IPoint): number {
+    const angle = Math.acos((Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)) / (Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2)));
+    return angle * (180 / Math.PI);
+  }
+
+  /**
+   * 给定三角形的三个坐标点a,b,c计算b的外侧夹角
+   */
+  static calcTriangleAngle3(a: IPoint, b: IPoint, c: IPoint): number {
+    const angle = Math.acos((Math.pow(b.x - c.x, 2) + Math.pow(b.y - c.y, 2)) / (Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)));
+    return angle * (180 / Math.PI);
+  }
+
+  /**
    * 给定a向量和b向量，其中b垂直于a，且a+b=c,求向量c的坐标
    */
   static calcVectorC(a: IPoint, b: IPoint): IPoint {

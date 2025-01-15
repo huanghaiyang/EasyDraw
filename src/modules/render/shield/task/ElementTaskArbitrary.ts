@@ -19,7 +19,9 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
         this.node.model.styles.strokeWidth
       ),
       this.node.model.styles,
-      this.node.model.isPointsClosed,
+      {
+        close: this.node.model.isPointsClosed
+      },
     );
   }
 }
