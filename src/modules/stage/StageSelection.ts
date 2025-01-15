@@ -120,8 +120,9 @@ export default class StageSelection implements IStageSelection {
     if (length === 1) {
       const { rotatePathPoints, transformerType, model: { angle } } = this.shield.store.selectedElements[0]
       return this.getTransformerModelsByPoints(rotatePathPoints, angle, transformerType);
-    } else if (length === 2) {
-
+    } else if (length >= 2) {
+      const selectionModel = this.getSelectionModel();
+      return this.getTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
     }
     return [];
   }
