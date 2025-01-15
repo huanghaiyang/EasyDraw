@@ -330,7 +330,7 @@ export default class MathUtils {
    * @param distance 
    */
   static calcSegmentLineCentroidCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
-    const centroid = MathUtils.calcPolygonCentroid([p1, p2]);
+    const centroid = MathUtils.calcCentroid([p1, p2]);
     const angle = MathUtils.calcAngle(p1, p2);
     return MathUtils.calcTargetPoint(centroid, distance, isClockwise ? angle + 90 : angle - 90);
   }
@@ -565,7 +565,7 @@ export default class MathUtils {
    */
   static sortVerticesClockwise(vertices: IPoint[]) {
     // 计算质心
-    let centroid = MathUtils.calcPolygonCentroid(vertices);
+    let centroid = MathUtils.calcCentroid(vertices);
     // 计算每个顶点与质心之间的角度
     let angles = vertices.map((vertex, index) => {
       let angle = Math.atan2(vertex.y - centroid.y, vertex.x - centroid.x);
@@ -592,7 +592,7 @@ export default class MathUtils {
    * @param segmentEnd 
    */
   static calcAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
-    const centroid = MathUtils.calcPolygonCentroid([segmentStart, segmentEnd]);
+    const centroid = MathUtils.calcCentroid([segmentStart, segmentEnd]);
     return MathUtils.calcAngle(point, centroid);
   }
 
