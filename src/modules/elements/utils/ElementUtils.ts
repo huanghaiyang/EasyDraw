@@ -203,8 +203,7 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { rotation: { model: { angle, scale } }, rect } = element;
-    const centroid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+    const { centroid, rotation: { model: { angle, scale } }, rect } = element;
     const halfValue = rect.height / 2;
     return MathUtils.calcTargetPoint(centroid, halfValue + SelectionRotationMargin * scale, angle);
   }
