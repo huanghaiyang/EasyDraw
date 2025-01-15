@@ -11,7 +11,7 @@ export default class MaskTaskPath extends MaskTaskBase {
   async run(): Promise<void> {
     const { strokeWidth } = SelectionStyle;
     const specialStyles: ElementStyles = {};
-    if (this.data.type === DrawerMaskModelTypes.path || this.data.type === DrawerMaskModelTypes.highlight) {
+    if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.data.type)) {
       specialStyles.fillColorOpacity = 0;
     }
     CanvasUtils.drawPathWithScale(this.canvas, this.data.points, Object.assign({}, { ...SelectionStyle, ...specialStyles }, {

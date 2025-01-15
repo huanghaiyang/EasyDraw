@@ -10,7 +10,9 @@ export default interface IStageSelection {
   get isRange(): boolean;
   setRange(points: IPoint[]): void;
   selectRange(): void;
-  getSelectionModels(): IMaskModel[];
+  getModels(): IMaskModel[];
+  getSelectionModel(): IMaskModel;
+  getTransformerModels(): IMaskModel[];
   selectTarget(): void;
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;

@@ -1,11 +1,13 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
-import IElementTransformer, { IElementBorderTransformer } from "@/types/IElementTransformer";
+import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
-import { every, includes } from "lodash";
+import { ArbitraryControllerRadius } from "@/types/MaskStyles";
+import CommonUtils from "@/utils/CommonUtils";
+import { every, flatten, includes } from "lodash";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
@@ -40,26 +42,26 @@ export default class StageSelection implements IStageSelection {
    * 根据组件获取选区对象的属性
    * 
    * @param element 
+   * @param boxRender
    * @returns 
    */
-  private _getElementMaskModelProps(element: IElement): Partial<IMaskModel> {
-    const { rotatePathPoints, model: { angle, isPointsClosed }, transformerType } = element;
+  private _getElementMaskModelProps(element: IElement, boxRender?: boolean): Partial<IMaskModel> {
+    const { rotatePathPoints, rotateBoxPoints, model: { angle, isPointsClosed } } = element;
     return {
-      points: rotatePathPoints,
+      points: boxRender ? rotateBoxPoints : rotatePathPoints,
       angle,
       element: {
-        transformerType,
         isPointsClosed,
       }
     };
   }
 
   /**
-   * 获取选区对象
+   * 获取高亮对象
    * 
    * @returns 
    */
-  getSelectionModels(): IMaskModel[] {
+  getModels(): IMaskModel[] {
     const result: Partial<IMaskModel>[] = [];
 
     if (this.isRange) {
@@ -73,7 +75,7 @@ export default class StageSelection implements IStageSelection {
 
     this.shield.store.targetElements.forEach(element => {
       result.push({
-        type: DrawerMaskModelTypes.highlight,
+        type: DrawerMaskModelTypes.path,
         ...this._getElementMaskModelProps(element),
       });
     });
@@ -92,6 +94,60 @@ export default class StageSelection implements IStageSelection {
       });
     }
     return result as IMaskModel[];
+  }
+
+  /**
+   * 获取选区对象
+   * 
+   * @returns 
+   */
+  getSelectionModel(): IMaskModel {
+    if (this.shield.store.selectedElements.length >= 2) {
+      return {
+        type: DrawerMaskModelTypes.selection,
+        points: CommonUtils.getBoxPoints(flatten(this.shield.store.selectedElements.map(element => element.maxBoxPoints))),
+      };
+    }
+  }
+
+  /**
+   * 获取变换控制器对象
+   * 
+   * @returns 
+   */
+  getTransformerModels(): IMaskModel[] {
+    const length = this.shield.store.selectedElements.length;
+    if (length === 1) {
+      const { rotatePathPoints, transformerType, model: { angle } } = this.shield.store.selectedElements[0]
+      return this.getTransformerModelsByPoints(rotatePathPoints, angle, transformerType);
+    } else if (length === 2) {
+
+    }
+    return [];
+  }
+
+  /**
+   * 获取变换控制器对象
+   * 
+   * @param points 
+   * @param angle 
+   * @param transformerType 
+   * @returns 
+   */
+  private getTransformerModelsByPoints(points: IPoint[], angle: number, transformerType: TransformerTypes): IMaskModel[] {
+    return points.map((point) => {
+      const model: IMaskModel = {
+        point,
+        type: DrawerMaskModelTypes.transformer,
+        angle,
+        scale: 1 / this.shield.stageScale,
+        element: {
+          transformerType,
+        },
+        radius: ArbitraryControllerRadius,
+      }
+      return model;
+    });
   }
 
   /**

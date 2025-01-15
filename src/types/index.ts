@@ -21,7 +21,7 @@ export enum DrawerMaskModelTypes {
   transformer,
   cursor,
   cursorPosition,
-  highlight,
+  selection,
   rotate,
   indicator,
   range,

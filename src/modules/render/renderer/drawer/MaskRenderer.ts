@@ -12,7 +12,7 @@ import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel } from "@/types/IModel";
-import { IMaskTask, IRenderTask } from "@/types/IRenderTask";
+import { IRenderTask } from "@/types/IRenderTask";
 import { ArbitraryControllerRadius, SelectionIndicatorMargin } from "@/types/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -38,12 +38,13 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const selectionTasks = this.createMaskSelectionTasks();
     selectionTasks.forEach(task => {
       cargo.add(task);
-      if ((task as IMaskTask).data.type === DrawerMaskModelTypes.path) {
-        cargo.addAll(this.createMaskTransformerTasks((task as IMaskTask).model));
-      }
     });
     if (selectionTasks.length) {
       this._lastSelectionRendered = true;
+    }
+    const transformerTasks = this.createMaskTransformerTasks();
+    if (transformerTasks.length) {
+      cargo.addAll(transformerTasks);
     }
 
     // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
@@ -112,10 +113,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const models: IMaskModel[] = this.drawer.shield.selection.getSelectionModels();
+    const models: IMaskModel[] = [...this.drawer.shield.selection.getModels(), this.drawer.shield.selection.getSelectionModel()];
     models.forEach(model => {
-      const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
-      tasks.push(task);
+      if (model) {
+        const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
+        tasks.push(task);
+      }
     });
     return tasks;
   }
@@ -133,40 +136,20 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   /**
    * 创建选区handler绘制任务
    * 
-   * @param selectionModel 
    * @returns 
    */
-  private createMaskTransformerTasks(selectionModel: IMaskModel): IRenderTask[] {
-    const tasks: IRenderTask[] = [];
-    const { points = [], angle = 0, element: { transformerType } } = selectionModel;
-    switch (transformerType) {
-      case TransformerTypes.rect: {
-        points.forEach((point) => {
-          const model: IMaskModel = {
-            point,
-            type: DrawerMaskModelTypes.transformer,
-            angle,
-            scale: 1 / this.drawer.shield.stageScale
-          }
-          const task = new MaskTaskTransformer(model, this.renderParams);
-          tasks.push(task);
-        });
-        break;
+  private createMaskTransformerTasks(): IRenderTask[] {
+    const models: IMaskModel[] = this.drawer.shield.selection.getTransformerModels();
+    return models.map(model => {
+      switch(model.element.transformerType) {
+        case TransformerTypes.circle: {
+          return new MaskTaskCircleTransformer(model, this.renderParams);
+        }
+        case TransformerTypes.rect: {
+          return new MaskTaskTransformer(model, this.renderParams);
+        }
       }
-      case TransformerTypes.circle: {
-        points.forEach((point) => {
-          const model: IMaskModel = {
-            point,
-            type: DrawerMaskModelTypes.transformer,
-            radius: ArbitraryControllerRadius,
-          }
-          const task = new MaskTaskCircleTransformer(model, this.renderParams);
-          tasks.push(task);
-        });
-        break;
-      }
-    }
-    return tasks;
+    });
   }
 
   /**
