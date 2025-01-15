@@ -883,7 +883,7 @@ export default class StageStore implements IStageStore {
    * 计算旋转组件的中心点
    */
   calcRotatingElementsCentroid(): IPoint {
-    const point = MathUtils.calcPolygonCentroid(flatten(this.selectedElements.map(element => element.pathPoints)))
+    const point = MathUtils.calcCentroid(flatten(this.selectedElements.map(element => element.pathPoints)))
     this._rotatingTargetElementsCentroid = point;
     return point;
   }
@@ -913,7 +913,7 @@ export default class StageStore implements IStageStore {
     const { colorSpace } = options;
     const { width, height } = image;
     const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, { width, height });
-    const centroid = MathUtils.calcPolygonCentroid(coords);
+    const centroid = MathUtils.calcCentroid(coords);
     const object: ImageElementObject = {
       id: CommonUtils.getRandomDateId(),
       coords,

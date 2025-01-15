@@ -220,7 +220,7 @@ export default class ElementUtils {
       case CreatorTypes.image:
       case CreatorTypes.line:
       case CreatorTypes.arbitrary: {
-        return MathUtils.calcPolygonCentroid(model.coords);
+        return MathUtils.calcCentroid(model.coords);
       }
     }
   }

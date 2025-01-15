@@ -103,7 +103,7 @@ export default class StageSelection implements IStageSelection {
    */
   getSelectionModel(): IMaskModel {
     const elements = this.shield.store.selectedElements.filter(element => element.status === ElementStatus.finished);
-    if (elements.length === 1) {
+    if (elements.length === 1 && elements[0].boxVerticesTransformEnable) {
       return {
         type: DrawerMaskModelTypes.selection,
         points: elements[0].rotateBoxPoints,

@@ -246,7 +246,7 @@ export default class MathUtils {
   }
 
   /**
-   * 计算多边形的中心节点（几何法）
+   * 计算多边形的质心（几何法）
    * 
    * @param points 
    * @returns 

@@ -11,10 +11,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return TransformerTypes.circle;
   }
 
-  get borderTransformEnable(): boolean {
-    return false;
-  }
-
   get verticesTransformEnable(): boolean {
     return this.status !== ElementStatus.finished;
   }

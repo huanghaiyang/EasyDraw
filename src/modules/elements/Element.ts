@@ -580,7 +580,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcCentroid(): IPoint {
-    return MathUtils.calcPolygonCentroid(this.pathPoints);
+    return MathUtils.calcCentroid(this.pathPoints);
   }
 
   /**
@@ -589,7 +589,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcCentroidCoord(): IPoint {
-    return MathUtils.calcPolygonCentroid(this.model.coords);
+    return MathUtils.calcCentroid(this.model.coords);
   }
 
   /**
@@ -815,7 +815,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         y
       }
     })
-    this._originalCentroidCoord = MathUtils.calcPolygonCentroid(this._originalModelCoords);
+    this._originalCentroidCoord = MathUtils.calcCentroid(this._originalModelCoords);
   }
 
   /**
@@ -914,7 +914,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       point = MathUtils.rotateRelativeCentroid(point, this.model.angle, lockPoint)
       return point;
     });
-    const newCentroidPoint = MathUtils.calcPolygonCentroid(newPoints);
+    const newCentroidPoint = MathUtils.calcCentroid(newPoints);
     const coords = newPoints.map(point => {
       point = MathUtils.rotateRelativeCentroid(point, -this.model.angle, newCentroidPoint);
       const coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
