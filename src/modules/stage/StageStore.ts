@@ -302,9 +302,9 @@ export default class StageStore implements IStageStore {
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        const { coords, left: prevLeft, top: prevTop } = element.model;
+        const { left: prevLeft, top: prevTop } = element.model;
         const { x, y } = value;
-        element.setPosition(x, y, coords.map(coord => ({ x: coord.x + x - prevLeft, y: coord.y + y - prevTop })));
+        element.setPosition(x, y, { x: x - prevLeft, y: y - prevTop });
       }
     });
   }
@@ -643,6 +643,7 @@ export default class StageStore implements IStageStore {
       id: CommonUtils.getRandomDateId(),
       type,
       coords,
+      boxCoords: CommonUtils.getBoxPoints(coords),
       data,
       angle: 0,
       width: size.width,
@@ -744,6 +745,7 @@ export default class StageStore implements IStageStore {
           model.coords.splice(element.tailCoordIndex + 1, 1, coord);
         }
       }
+      element.refreshBoxCoords();
       this._setElementProvisionalCreating(element);
     } else {
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
@@ -765,6 +767,7 @@ export default class StageStore implements IStageStore {
     element.tailCoordIndex = -1;
     if (tailCoordIndex < element.model.coords.length - 1) {
       element.model.coords = element.model.coords.slice(0, tailCoordIndex + 1);
+      element.refreshBoxCoords();
     }
   }
 
@@ -814,8 +817,9 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
       const coords = ElementUtils.translateCoords(element.originalModelCoords, offset);
+      const boxCoords = ElementUtils.translateCoords(element.originalModelBoxCoords, offset);
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
-      this.updateElementModel(element.id, { coords, left: x, top: y })
+      this.updateElementModel(element.id, { coords, boxCoords, left: x, top: y })
       element.refreshStagePoints();
     })
   }
@@ -917,6 +921,7 @@ export default class StageStore implements IStageStore {
     const object: ImageElementObject = {
       id: CommonUtils.getRandomDateId(),
       coords,
+      boxCoords: CommonUtils.getBoxPoints(coords),
       type: CreatorTypes.image,
       data: image,
       angle: 0,

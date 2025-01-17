@@ -10,6 +10,14 @@ import { TransformerTypes } from "@/types/IElementTransformer";
 
 export default class ElementLine extends Element implements IElementLine {
 
+  get flipXEnable(): boolean {
+    return false;
+  }
+
+  get flipYEnable(): boolean {
+    return false;
+  }
+
   get verticesTransformEnable(): boolean {
     return true;
   }

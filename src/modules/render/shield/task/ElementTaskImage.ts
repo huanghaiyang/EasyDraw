@@ -22,7 +22,11 @@ export default class ElementTaskImage extends ElementTaskBase {
       CanvasUtils.convertPointsByStrokeType(
         rotatePathPoints,
         model.styles.strokeType,
-        model.styles.strokeWidth
+        model.styles.strokeWidth,
+        {
+          flipX: this.node.flipX,
+          flipY: this.node.flipY
+        }
       ),
       model.styles
     );

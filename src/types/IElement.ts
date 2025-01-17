@@ -9,6 +9,7 @@ import IStageShield from "@/types/IStageShield";
 export type ElementObject = {
   id: string;
   coords: IPoint[]; // 相对于世界中心的坐标
+  boxCoords?: IPoint[]; // 盒模型->盒模型顶点坐标
   type: CreatorTypes;
   data: any;
   angle: number;
@@ -50,6 +51,8 @@ export default interface IElement {
   get strokeEnable(): boolean;
   get ratioLockedEnable(): boolean;
   get shouldRatioLockResize(): boolean;
+  get flipXEnable(): boolean;
+  get flipYEnable(): boolean;
 
   get width(): number;
   get height(): number;
@@ -68,6 +71,7 @@ export default interface IElement {
 
   get activePointIndex(): number;
   get originalModelCoords(): IPoint[];
+  get originalModelBoxCoords(): IPoint[];
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get maxBoxPoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
@@ -115,7 +119,7 @@ export default interface IElement {
   get flipX(): boolean;
   get flipY(): boolean;
 
-  setPosition(x: number, y: number, coords: IPoint[]): void;
+  setPosition(x: number, y: number, offset: IPoint): void;
   setWidth(value: number): void;
   setHeight(value: number): void;
   setAngle(value: number): void;
@@ -135,6 +139,7 @@ export default interface IElement {
   refreshPosition(): void;
   refreshStagePoints(): void;
   refresh(): void;
+  refreshBoxCoords(): void;
 
   isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;

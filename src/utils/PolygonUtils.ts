@@ -6,6 +6,28 @@ import { evaluate } from 'mathjs';
 export default class PolygonUtils {
 
   /**
+   * 计算内外顶点坐标
+   * 
+   * @param current 
+   * @param next 
+   * @param angle 
+   * @param r 
+   * @param innerOrOuter 
+   * @returns 
+   */
+  static calcIOPoint(current: IPoint, next: IPoint, angle: number, r: number, innerOrOuter: boolean): IPoint {
+    const halfAngle = evaluate('angle / 2', { angle });
+    const hypotenuse = MathUtils.calcTriangleSide3By2(halfAngle, r);
+    let nextAngle = MathUtils.calcAngle(current, next);
+    if (nextAngle < 0) {
+      nextAngle += 360;
+    }
+    let finalAngle = evaluate('halfAngle + nextAngle', { halfAngle, nextAngle });
+    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate('finalAngle + 180', { finalAngle }));
+    return point;
+  }
+
+  /**
    * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
    * 
    * @param vertices 
@@ -19,17 +41,33 @@ export default class PolygonUtils {
       const prev = CommonUtils.getPrevOfArray(sortedVertices, index);
       const next = CommonUtils.getNextOfArray(sortedVertices, index);
       const angle = MathUtils.calcTriangleAngle(prev, ver, next);
-      const halfAngle = evaluate('angle / 2', { angle });
-      const hypotenuse = MathUtils.calcTriangleSide3By2(halfAngle, r);
-      let nextAngle = MathUtils.calcAngle(ver, next);
-      if (nextAngle < 0) {
-        nextAngle += 360;
-      }
-      let finalAngle = evaluate('halfAngle + nextAngle', { halfAngle, nextAngle });
-      const point = MathUtils.calcTargetPoint(ver, hypotenuse, innerOrOuter ? finalAngle : evaluate('finalAngle + 180', { finalAngle }));
-      return point;
+      return PolygonUtils.calcIOPoint(ver, next, angle, r, innerOrOuter);
     });
   }
+
+  /**
+   * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
+   * 
+   * @param vertices 
+   * @param r 
+   * @param innerOrOuter 
+   * @returns 
+   */
+  static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
+    return vertices.map((ver, index) => {
+      const prev = CommonUtils.getPrevOfArray(vertices, index);
+      const next = CommonUtils.getNextOfArray(vertices, index);
+      const isPos = MathUtils.pointSideOfLine(next, prev, ver);
+      let angle = MathUtils.calcTriangleAngle(prev, ver, next);
+      if (isPos) {
+        angle = 180 + angle;
+      } else {
+        angle = 180 - angle;
+      }
+      return PolygonUtils.calcIOPoint(ver, next, angle, r, innerOrOuter);
+    });
+  }
+
   /**
    * 获取对边形内顶点坐标
    * 
@@ -49,6 +87,28 @@ export default class PolygonUtils {
    */
   static getPolygonOuterVertices(vertices: IPoint[], r: number): IPoint[] {
     return PolygonUtils.getPolygonVertices(vertices, r, false);
+  }
+
+  /**
+   * 获取自由边形内顶点坐标
+   * 
+   * @param vertices 
+   * @param r 
+   * @returns 
+   */
+  static getArbitraryInnerVertices(vertices: IPoint[], r: number): IPoint[] {
+    return PolygonUtils.getArbitraryVertices(vertices, r, true);
+  }
+
+  /**
+   * 获取自由边形外顶点坐标
+   * 
+   * @param vertices 
+   * @param r 
+   * @returns 
+   */
+  static getArbitraryOuterVertices(vertices: IPoint[], r: number): IPoint[] {
+    return PolygonUtils.getArbitraryVertices(vertices, r, false);
   }
 
   /**

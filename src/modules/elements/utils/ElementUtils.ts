@@ -17,6 +17,7 @@ import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
 import IStageShield from "@/types/IStageShield";
 import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
+import { RenderParams } from "@/types/IRender";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -297,15 +298,17 @@ export default class ElementUtils {
    * @param points
    * @param strokeType
    * @param strokeWidth
+   * @param options
    * @returns
    */
-  static calcOutlinePoints(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+  static calcOutlinePoints(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
     if (strokeWidth && strokeType !== StrokeTypes.inside) {
       let r = strokeWidth / 2;
       if (strokeType === StrokeTypes.outside) {
         r = strokeWidth;
       }
-      return PolygonUtils.getPolygonOuterVertices(points, r);
+      const { flipX, flipY } = options;
+      return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r) : PolygonUtils.getArbitraryOuterVertices(points, r);
     }
     return points;
   }

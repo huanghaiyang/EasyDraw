@@ -23,6 +23,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   shield: IStageShield;
   _originalTransformerPoints: IPoint[];
   _originalModelCoords: IPoint[];
+  _originalModelBoxCoords: IPoint[];
   _originalMatrix: number[][] = [];
 
   @observable _status: ElementStatus = ElementStatus.initialed;
@@ -41,13 +42,23 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isOnStage: boolean = false;
 
   get flipX(): boolean {
+    if (!this.flipXEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByY([this.transformers[0], this.transformers[3]])
     return !MathUtils.pointSideOfLine(this.center, refers[0], refers[1]);
   }
 
   get flipY(): boolean {
+    if (!this.flipYEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByX([this.transformers[3], this.transformers[2]])
     return !MathUtils.pointSideOfLine(this.center, refers[0], refers[1]);
+  }
+
+  get flipXEnable(): boolean {
+    return true;
+  }
+
+  get flipYEnable(): boolean {
+    return true;
   }
 
   // 是否可以修改宽度
@@ -107,6 +118,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 获取变形/移动/旋转操作之前的原始坐标
   get originalModelCoords(): IPoint[] {
     return this._originalModelCoords;
+  }
+
+  get originalModelBoxCoords(): IPoint[] {
+    return this._originalModelBoxCoords;
   }
 
   @computed
@@ -428,6 +443,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _originalCenterCoord: IPoint;
   // 原始旋转的组件坐标-世界坐标系
   protected _originalRotatePathPoints: IPoint[] = [];
+  // 原始的盒模型坐标
+  protected _originalRotateBoxPoints: IPoint[] = [];
   // 原始角度-舞台坐标系&世界坐标系
   protected _originalAngle: number = 0;
   // 原始盒模型-舞台坐标系
@@ -525,16 +542,22 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateOutlinePathPoints(): IPoint[] {
     const { strokeType, strokeWidth } = this.model.styles;
-    return ElementUtils.calcOutlinePoints(this._rotatePathPoints, strokeType, strokeWidth);
+    return ElementUtils.calcOutlinePoints(this._rotatePathPoints, strokeType, strokeWidth, {
+      flipX: this.flipX,
+      flipY: this.flipY
+    });
   }
 
   /**
    * 计算旋转后的盒模型坐标
    */
   calcRotateBoxPoints(): IPoint[] {
-    const boxPoints = CommonUtils.getBoxPoints(this._pathPoints);
+    if (!this.model.boxCoords?.length) return [];
     const center = this.calcCenter();
-    return boxPoints.map(point => MathUtils.rotateRelativeCenter(point, this.model.angle, center));
+    return this.model.boxCoords.map(coord => {
+      const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      return MathUtils.rotateRelativeCenter(point, this.model.angle, center)
+    });
   }
 
   /**
@@ -571,7 +594,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotateOutlinePathCoords(): IPoint[] {
-    return ElementUtils.calcOutlinePoints(this.calcRotateCoords(), this.model.styles.strokeType, this.model.styles.strokeWidth);
+    return ElementUtils.calcOutlinePoints(this.calcRotateCoords(), this.model.styles.strokeType, this.model.styles.strokeWidth, {
+      flipX: this.flipX,
+      flipY: this.flipY
+    });
   }
 
   /**
@@ -796,6 +822,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
     })
     this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
+    this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
     this._originalAngle = this.model.angle;
     this._originalRect = this.calcRect();
     this._originalMatrix = [];
@@ -808,13 +835,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始坐标
    */
   refreshOriginalModelCoords() {
-    this._originalModelCoords = this.model.coords.map(point => {
-      const { x, y } = point;
-      return {
-        x,
-        y
-      }
-    })
+    this._originalModelCoords = cloneDeep(this.model.coords);
+    this._originalModelBoxCoords = cloneDeep(this.model.boxCoords);
     this._originalCenterCoord = MathUtils.calcCenter(this._originalModelCoords);
   }
 
@@ -885,6 +907,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新盒模型坐标
+   */
+  refreshBoxCoords(): void {
+    this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
+  }
+
+  /**
    * 角度修正
    */
   protected flipAngle(): void {
@@ -922,8 +951,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param lockPoint 
    * @returns 
    */
-  protected calcTransformCoords(matrix: number[][], lockPoint: IPoint): IPoint[] {
-    const points = this._originalRotatePathPoints.map(point => {
+  protected calcTransformCoords(points: IPoint[], matrix: number[][], lockPoint: IPoint): IPoint[] {
+    points = points.map(point => {
       return this._calcMatrixPoint(point, matrix, lockPoint);
     });
     const center = this._calcMatrixPoint(this._originalCenter, matrix, lockPoint);
@@ -996,8 +1025,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (this.shouldRatioLockResize) {
       matrix[1][1] = MathUtils.resignValue(matrix[1][1], matrix[0][0]);
     }
-    const coords = this.calcTransformCoords(matrix, lockPoint);
-    this.model.coords = coords;
+    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
+    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
     // 判断是否需要翻转角度
     this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
   }
@@ -1082,8 +1111,8 @@ export default class Element implements IElement, ILinkedNodeValue {
       if ([0, 2].includes(index) && matrix[0][0] < 0) {
         matrix[0][0] = Math.abs(matrix[0][0]);
       }
-      const coords = this.calcTransformCoords(matrix, lockPoint);
-      this.model.coords = coords;
+      this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
+      this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
       this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
     }
   }
@@ -1132,8 +1161,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
     matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
-    const coords = this.calcTransformCoords(matrix, lockPoint);
-    this.model.coords = coords;
+    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
+    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
     this.refresh();
   }
 
@@ -1153,8 +1182,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
     matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
-    const coords = this.calcTransformCoords(matrix, lockPoint);
-    this.model.coords = coords;
+    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
+    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
     this.refresh();
   }
 
@@ -1163,12 +1192,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param x 
    * @param y 
-   * @param coords 
+   * @param offset 
    */
-  setPosition(x: number, y: number, coords: IPoint[]): void {
+  setPosition(x: number, y: number, offset: IPoint): void {
     this.model.left = x;
     this.model.top = y;
-    this.model.coords = coords;
+    this.model.coords = ElementUtils.translateCoords(this.model.coords, offset);
+    this.model.boxCoords = ElementUtils.translateCoords(this.model.boxCoords, offset);
     this.refresh();
   }
 

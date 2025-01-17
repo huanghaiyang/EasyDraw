@@ -16,7 +16,8 @@ export default class ElementTaskLine extends ElementTaskBase {
       CanvasUtils.convertPointsByStrokeType(
         this.node.rotatePathPoints,
         this.node.model.styles.strokeType,
-        this.node.model.styles.strokeWidth
+        this.node.model.styles.strokeWidth,
+        {}
       ),
       this.node.model.styles
     );

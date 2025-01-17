@@ -18,17 +18,18 @@ export default class CanvasUtils {
    * @param strokeWidth 
    * @returns 
    */
-  static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number): IPoint[] {
+  static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
     if (!strokeWidth) return points;
+    const { flipX, flipY } = options;
     // 需要考虑下舞台缩放
     const r = (strokeWidth / 2);
     switch (strokeType) {
       case StrokeTypes.inside:
-        return PolygonUtils.getPolygonInnerVertices(points, r);
+        return flipX !== flipY ? PolygonUtils.getArbitraryOuterVertices(points, r) : PolygonUtils.getArbitraryInnerVertices(points, r);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return PolygonUtils.getPolygonOuterVertices(points, r);
+        return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r) : PolygonUtils.getArbitraryOuterVertices(points, r);
     }
   }
 
@@ -198,7 +199,7 @@ export default class CanvasUtils {
     const { calcVertices = true } = options;
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
     if (styles.fillColorOpacity && calcVertices) {
-      const innerPoints = PolygonUtils.getPolygonInnerVertices(points, styles.strokeWidth / 2);
+      const innerPoints = PolygonUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2);
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {

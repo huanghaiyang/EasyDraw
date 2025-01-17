@@ -29,11 +29,11 @@ export const LineStrokeTypes: StrokeTypePair[] = [{
 
 export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   switch (type) {
+    case CreatorTypes.arbitrary:
     case CreatorTypes.rectangle:
     case CreatorTypes.image: {
       return StrokeTypesArray;
     }
-    case CreatorTypes.arbitrary:
     case CreatorTypes.line: {
       return LineStrokeTypes;
     }
@@ -56,7 +56,7 @@ export type ElementStyles = {
   textBaseline?: CanvasTextBaseline;
 }
 
-export const DefaultStrokeType = StrokeTypes.middle;
+export const DefaultStrokeType = StrokeTypes.inside;
 export const DefaultStrokeColor = '#000000';
 export const DefaultStrokeColorOpacity = 1;
 export const DefaultFillColor = '#000000';
@@ -66,7 +66,7 @@ export const DefaultFontSize = 12;
 export const DefaultFontFamily = 'sans-serif';
 export const DefaultTextAlign = 'center';
 export const DefaultTextBaseline = 'middle';
-export const DefaultLineStrokeWidth = 1;
+export const DefaultLineStrokeWidth = 10;
 
 export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,
