@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { StrokeTypes } from "@/types/ElementStyles";
+import { StrokeTypes } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 
 export default interface IStageSetter {

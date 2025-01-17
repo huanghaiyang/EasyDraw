@@ -1,4 +1,4 @@
-import { ElementStyles } from "@/types/ElementStyles";
+import { ElementStyles } from "@/styles/ElementStyles";
 
 // 鼠标样式画布尺寸
 export const MinCursorMXD = 2;

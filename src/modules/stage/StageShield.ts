@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { StrokeTypes } from "@/types/ElementStyles";
+import { StrokeTypes } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";

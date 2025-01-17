@@ -1,7 +1,7 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { TransformerSize, ControllerStyle } from "@/types/MaskStyles";
+import { TransformerSize, ControllerStyle } from "@/styles/MaskStyles";
 
 export default class MaskTaskTransformer extends MaskTaskBase {
   /**

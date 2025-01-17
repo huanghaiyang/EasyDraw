@@ -9,8 +9,8 @@ import ElementTransformer from "@/modules/elements/transformer/ElementTransforme
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
 import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
-import { StrokeTypes } from "@/types/ElementStyles";
-import { TransformerSize } from "@/types/MaskStyles";
+import { StrokeTypes } from "@/styles/ElementStyles";
+import { TransformerSize } from "@/styles/MaskStyles";
 import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";

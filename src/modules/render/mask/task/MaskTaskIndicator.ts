@@ -1,6 +1,6 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { SelectionIndicatorStyle } from "@/types/MaskStyles";
+import { SelectionIndicatorStyle } from "@/styles/MaskStyles";
 
 export default class MaskTaskIndicator extends MaskTaskBase {
   /**

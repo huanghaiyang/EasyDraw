@@ -1,8 +1,8 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { SelectionStyle } from "@/types/MaskStyles";
+import { SelectionStyle } from "@/styles/MaskStyles";
 import { DrawerMaskModelTypes } from "@/types";
-import { ElementStyles } from "@/types/ElementStyles";
+import { ElementStyles } from "@/styles/ElementStyles";
 
 export default class MaskTaskPath extends MaskTaskBase {
   /**

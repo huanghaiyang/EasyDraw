@@ -16,7 +16,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { ElementObject, IElementArbitrary, ImageElementObject } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { getDefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
+import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";

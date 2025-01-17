@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint } from "@/types/index";
 import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
+import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 

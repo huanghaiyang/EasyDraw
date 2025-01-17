@@ -6,7 +6,7 @@ import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
-import { CursorSize } from "@/types/MaskStyles";
+import { CursorSize } from "@/styles/MaskStyles";
 import IElementTransformer, { IElementBorderTransformer, ITransformer } from "@/types/IElementTransformer";
 import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
 import { TransformTypes } from "@/types/Stage";

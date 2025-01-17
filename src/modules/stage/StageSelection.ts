@@ -5,7 +5,7 @@ import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from
 import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
-import { ArbitraryControllerRadius } from "@/types/MaskStyles";
+import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { every, flatten, includes } from "lodash";
 

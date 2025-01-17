@@ -1,5 +1,5 @@
 import { IPoint } from "@/types";
-import { ElementStyles, StrokeTypes } from "@/types/ElementStyles";
+import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
@@ -20,7 +20,7 @@ export default class CanvasUtils {
    */
   static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
     if (!strokeWidth) return points;
-    const { flipX, flipY } = options;
+    const { flipX = false, flipY = false } = options;
     // 需要考虑下舞台缩放
     const r = (strokeWidth / 2);
     switch (strokeType) {

@@ -13,7 +13,7 @@ import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
-import { ArbitraryControllerRadius, SelectionIndicatorMargin } from "@/types/MaskStyles";
+import { ArbitraryControllerRadius, SelectionIndicatorMargin } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";

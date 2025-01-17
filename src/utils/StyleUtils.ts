@@ -1,4 +1,4 @@
-import { ElementStyles } from "@/types/ElementStyles";
+import { ElementStyles } from "@/styles/ElementStyles";
 import ColorUtils from "@/utils/ColorUtils";
 
 export default class StyleUtils {

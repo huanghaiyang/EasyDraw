@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultElementStyle } from "@/types/ElementStyles";
+import { DefaultElementStyle } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();

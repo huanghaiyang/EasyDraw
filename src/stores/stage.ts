@@ -3,7 +3,7 @@ import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
-import { DefaultElementStyle, StrokeTypes } from "@/types/ElementStyles";
+import { DefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";

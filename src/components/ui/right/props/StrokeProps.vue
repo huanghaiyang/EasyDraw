@@ -4,7 +4,7 @@ import { CreatorTypes } from "@/types/Creator";
 import {
   DefaultElementStyle,
   getStokeTypes,
-} from "@/types/ElementStyles";
+} from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();

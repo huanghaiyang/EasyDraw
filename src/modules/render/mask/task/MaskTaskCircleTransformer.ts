@@ -1,5 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { ControllerStyle } from "@/types/MaskStyles";
+import { ControllerStyle } from "@/styles/MaskStyles";
 import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class MaskTaskCircleTransformer extends MaskTaskBase {

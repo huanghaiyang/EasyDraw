@@ -2,7 +2,7 @@ import { DrawerMaskModelTypes, IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import { IRotationModel } from "@/types/IModel";
-import { SelectionRotationSize } from "@/types/MaskStyles";
+import { SelectionRotationSize } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
