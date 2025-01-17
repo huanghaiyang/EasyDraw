@@ -46,12 +46,12 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   private _getElementMaskModelProps(element: IElement, boxRender?: boolean): Partial<IMaskModel> {
-    const { rotatePathPoints, rotateBoxPoints, model: { angle, isPointsClosed } } = element;
+    const { rotatePathPoints, rotateBoxPoints, model: { angle, isFold } } = element;
     return {
       points: boxRender ? rotateBoxPoints : rotatePathPoints,
       angle,
       element: {
-        isPointsClosed,
+        isFold,
       }
     };
   }

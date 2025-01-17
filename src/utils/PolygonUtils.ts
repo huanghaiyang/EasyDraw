@@ -1,4 +1,5 @@
 import { IPoint } from "@/types";
+import { RenderParams } from "@/types/IRender";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { evaluate } from 'mathjs';
@@ -53,7 +54,7 @@ export default class PolygonUtils {
    * @param innerOrOuter 
    * @returns 
    */
-  static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
+  static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean, options: RenderParams): IPoint[] {
     return vertices.map((ver, index) => {
       const prev = CommonUtils.getPrevOfArray(vertices, index);
       const next = CommonUtils.getNextOfArray(vertices, index);
@@ -96,8 +97,8 @@ export default class PolygonUtils {
    * @param r 
    * @returns 
    */
-  static getArbitraryInnerVertices(vertices: IPoint[], r: number): IPoint[] {
-    return PolygonUtils.getArbitraryVertices(vertices, r, true);
+  static getArbitraryInnerVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
+    return PolygonUtils.getArbitraryVertices(vertices, r, true, options);
   }
 
   /**
@@ -107,8 +108,8 @@ export default class PolygonUtils {
    * @param r 
    * @returns 
    */
-  static getArbitraryOuterVertices(vertices: IPoint[], r: number): IPoint[] {
-    return PolygonUtils.getArbitraryVertices(vertices, r, false);
+  static getArbitraryOuterVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
+    return PolygonUtils.getArbitraryVertices(vertices, r, false, options);
   }
 
   /**

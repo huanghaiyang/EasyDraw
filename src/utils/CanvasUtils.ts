@@ -25,11 +25,11 @@ export default class CanvasUtils {
     const r = (strokeWidth / 2);
     switch (strokeType) {
       case StrokeTypes.inside:
-        return flipX !== flipY ? PolygonUtils.getArbitraryOuterVertices(points, r) : PolygonUtils.getArbitraryInnerVertices(points, r);
+        return flipX !== flipY ? PolygonUtils.getArbitraryOuterVertices(points, r, options) : PolygonUtils.getArbitraryInnerVertices(points, r, options);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r) : PolygonUtils.getArbitraryOuterVertices(points, r);
+        return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r, options) : PolygonUtils.getArbitraryOuterVertices(points, r, options);
     }
   }
 
@@ -193,13 +193,13 @@ export default class CanvasUtils {
    * @param target 
    * @param points 
    * @param styles 
-   * @param close
+   * @param options
    */
   static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}): void {
     const { calcVertices = true } = options;
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
     if (styles.fillColorOpacity && calcVertices) {
-      const innerPoints = PolygonUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2);
+      const innerPoints = PolygonUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2, options);
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {
@@ -225,10 +225,10 @@ export default class CanvasUtils {
    * @param target 
    * @param points 
    * @param styles 
-   * @param close
+   * @param options
    */
   static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}) {
-    const { close = true } = options;
+    const { isFold = true } = options;
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
@@ -240,7 +240,7 @@ export default class CanvasUtils {
         ctx.lineTo(point.x, point.y);
       }
     });
-    close && ctx.closePath();
+    isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (styles.strokeWidth) {
       ctx.lineWidth = styles.strokeWidth;

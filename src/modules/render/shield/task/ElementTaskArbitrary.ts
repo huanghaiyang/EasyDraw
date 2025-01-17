@@ -24,7 +24,7 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
       ),
       this.node.model.styles,
       {
-        close: this.node.model.isPointsClosed
+        isFold: this.node.model.isFold
       },
     );
   }

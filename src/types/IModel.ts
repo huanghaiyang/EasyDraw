@@ -13,7 +13,7 @@ export interface IMaskModel {
   radius?: number;
   element?: {
     transformerType?: TransformerTypes;
-    isPointsClosed?: boolean;
+    isFold?: boolean;
   }
 }
 

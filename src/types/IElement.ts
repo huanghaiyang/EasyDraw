@@ -23,7 +23,7 @@ export type ElementObject = {
   isRatioLocked: boolean;
   ratio?: number;
   matrix?: number[][];
-  isPointsClosed?: boolean; // 是否闭合
+  isFold?: boolean; // 是否闭合
 }
 
 // 图片元素数据模型

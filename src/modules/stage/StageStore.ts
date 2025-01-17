@@ -749,7 +749,7 @@ export default class StageStore implements IStageStore {
       this._setElementProvisionalCreating(element);
     } else {
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
-      model.isPointsClosed = false;
+      model.isFold = false;
       element = this._createProvisionalElement(model) as ElementArbitrary;
       element.tailCoordIndex = 0;
     }

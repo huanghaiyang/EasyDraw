@@ -308,7 +308,7 @@ export default class ElementUtils {
         r = strokeWidth;
       }
       const { flipX, flipY } = options;
-      return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r) : PolygonUtils.getArbitraryOuterVertices(points, r);
+      return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r, options) : PolygonUtils.getArbitraryOuterVertices(points, r, options);
     }
     return points;
   }

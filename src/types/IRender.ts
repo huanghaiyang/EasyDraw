@@ -30,4 +30,4 @@ export interface IRenderQueue {
   destroy(): Promise<void>;
 }
 
-export type RenderParams = { angle?: number, flipX?: boolean, flipY?: boolean, close?: boolean, calcVertices?: boolean }
+export type RenderParams = { angle?: number, flipX?: boolean, flipY?: boolean, isFold?: boolean, calcVertices?: boolean }
