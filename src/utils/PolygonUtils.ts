@@ -65,7 +65,18 @@ export default class PolygonUtils {
       } else {
         angle = 180 - angle;
       }
-      return PolygonUtils.calcIOPoint(ver, next, angle, r, innerOrOuter);
+      const { isFold } = options;
+      if (!isFold && [0, vertices.length - 1].includes(index)) {
+        let vnAngle;
+        if (index === 0) {
+          vnAngle = MathUtils.calcAngle(ver, next) + 90;
+        } else {
+          vnAngle = MathUtils.calcAngle(ver, prev) - 90;
+        }
+        return MathUtils.calcTargetPoint(ver, r, vnAngle);
+      } else {
+        return PolygonUtils.calcIOPoint(ver, next, angle, r, innerOrOuter);
+      }
     });
   }
 
