@@ -65,7 +65,7 @@ export default class PolygonUtils {
       } else {
         angle = 180 - angle;
       }
-      const { isFold } = options;
+      const { isFold = true } = options;
       if (!isFold && [0, vertices.length - 1].includes(index)) {
         let vnAngle;
         if (index === 0) {
