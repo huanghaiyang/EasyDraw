@@ -66,7 +66,8 @@ export const DefaultFontSize = 12;
 export const DefaultFontFamily = 'sans-serif';
 export const DefaultTextAlign = 'center';
 export const DefaultTextBaseline = 'middle';
-export const DefaultLineStrokeWidth = 1;
+export const DefaultLineStrokeWidth = 20;
+export const DefaultLineMeterLimit = 4;
 
 export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,

@@ -15,6 +15,7 @@ import ElementBorderTransformer from "@/modules/elements/transformer/ElementBord
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import IStageShield from "@/types/IStageShield";
+import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   id: string;
@@ -40,6 +41,18 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isTarget: boolean = false;
   @observable _isInRange: boolean = false;
   @observable _isOnStage: boolean = false;
+
+  get strokePathPoints(): IPoint[] {
+    return CanvasUtils.convertPointsByStrokeType(
+      this.rotatePathPoints,
+      this.model.styles.strokeType,
+      this.model.styles.strokeWidth,
+      {
+        flipX: this.flipX,
+        flipY: this.flipY
+      }
+    )
+  }
 
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;

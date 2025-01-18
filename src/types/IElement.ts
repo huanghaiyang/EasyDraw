@@ -79,6 +79,7 @@ export default interface IElement {
   get rotateBoxPoints(): IPoint[];
   get maxOutlineBoxPoints(): IPoint[];
   get rotateOutlinePathCoords(): IPoint[];
+  get strokePathPoints(): IPoint[];
   get center(): IPoint;
   get centerCoord(): IPoint;
   get transformers(): IElementTransformer[];
@@ -205,4 +206,10 @@ export interface IElementLine extends IElement {
 // 舞台元素（组件）-任意多边形&线条
 export interface IElementArbitrary extends IElement {
   tailCoordIndex: number;
+
+  get outerPaths(): IPoint[][];
+  get outerWorldPaths(): IPoint[][];
+
+  calcOuterPaths(): IPoint[][];
+  calcOuterWorldPaths(): IPoint[][];
 }

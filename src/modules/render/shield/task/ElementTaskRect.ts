@@ -11,18 +11,6 @@ export default class ElementTaskRect extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPathWithScale(
-      this.canvas,
-      CanvasUtils.convertPointsByStrokeType(
-        this.node.rotatePathPoints,
-        this.node.model.styles.strokeType,
-        this.node.model.styles.strokeWidth,
-        {
-          flipX: this.node.flipX,
-          flipY: this.node.flipY
-        }
-      ),
-      this.node.model.styles
-    );
+    CanvasUtils.drawPathWithScale(this.canvas, this.node.strokePathPoints, this.node.model.styles);
   }
 }

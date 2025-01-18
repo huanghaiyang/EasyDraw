@@ -228,9 +228,12 @@ export default class CanvasUtils {
    * @param options
    */
   static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}) {
-    const { isFold = true } = options;
+    const { isFold = true, miterLimit } = options;
     const ctx = target.getContext('2d');
     ctx.save();
+    if (miterLimit) {
+      ctx.miterLimit = miterLimit;
+    }
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
     ctx.beginPath();
     points.forEach((point, index) => {

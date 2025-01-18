@@ -636,4 +636,22 @@ export default class MathUtils {
     return crossProduct > 0;
   }
 
+  /**
+   * 计算两条直线的交点
+   */
+  static calcLineCrossPoint(line1Start: IPoint, line1End: IPoint, line2Start: IPoint, line2End: IPoint): IPoint | null {
+    const denominator = (line2End.y - line2Start.y) * (line1End.x - line1Start.x) - (line2End.x - line2Start.x) * (line1End.y - line1Start.y);
+    if (denominator === 0) {
+      // 两条直线平行
+      return null;
+    }
+
+    const u = ((line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y- line2Start.y) * (line1Start.x - line1End.x));
+    if (u === 0 || u === denominator) {
+      // 两条直线重合
+      return null;
+    }
+    return { x: (line1Start.x + u * (line1End.x - line1Start.x)) / denominator, y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator };
+  }
+
 }

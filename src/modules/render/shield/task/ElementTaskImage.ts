@@ -12,23 +12,12 @@ export default class ElementTaskImage extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    const { model, rect, angle, flipX, flipY, rotatePathPoints } = this.node;
+    const { model, rect, angle, flipX, flipY } = this.node;
     CanvasUtils.drawImgLike(this.canvas, model.data, CommonUtils.scaleRect(rect, this.node.shield.stageScale), {
       angle,
       flipX,
       flipY
     });
-    CanvasUtils.drawPathStokeWidthScale(this.canvas,
-      CanvasUtils.convertPointsByStrokeType(
-        rotatePathPoints,
-        model.styles.strokeType,
-        model.styles.strokeWidth,
-        {
-          flipX: this.node.flipX,
-          flipY: this.node.flipY
-        }
-      ),
-      model.styles
-    );
+    CanvasUtils.drawPathStokeWidthScale(this.canvas, this.node.strokePathPoints, model.styles);
   }
 }
