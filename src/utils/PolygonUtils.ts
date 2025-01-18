@@ -55,6 +55,10 @@ export default class PolygonUtils {
    * @returns 
    */
   static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean, options: RenderParams): IPoint[] {
+    if (vertices.length === 1) return vertices;
+    if (vertices.length === 2) {
+      return PolygonUtils.calcBentLineClockWisePoints(vertices, r, innerOrOuter);
+    }
     return vertices.map((ver, index) => {
       const prev = CommonUtils.getPrevOfArray(vertices, index);
       const next = CommonUtils.getNextOfArray(vertices, index);

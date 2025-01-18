@@ -49,7 +49,8 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.model.styles.strokeWidth,
       {
         flipX: this.flipX,
-        flipY: this.flipY
+        flipY: this.flipY,
+        isFold: this.model.isFold,
       }
     )
   }

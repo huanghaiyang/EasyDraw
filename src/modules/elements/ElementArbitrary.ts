@@ -72,13 +72,13 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   calcOuterPaths(): IPoint[][] {
     const { strokeWidth } = this.model.styles;
     const result: IPoint[][] = [];
-    const strokePathPoints = this.strokePathPoints;
-    strokePathPoints.forEach((current, index) => {
-      if (index < strokePathPoints.length - 1) {
-        const next = strokePathPoints[index + 1];
-        result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth));
+    const points = this.strokePathPoints;
+    points.forEach((current, index) => {
+      if (index < points.length - 1) {
+        const next = points[index + 1];
+        result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth / 2));
         if (index !== 0) {
-          const prev = strokePathPoints[index - 1];
+          const prev = points[index - 1];
           const angle = MathUtils.calcTriangleAngle(prev, current, next);
           // 角度小于150需要计算线段连接处的斜接区域坐标
           if (angle <= 150) {

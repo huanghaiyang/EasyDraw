@@ -110,7 +110,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   calcOuterPathCoords(): IPoint[] {
     const rotateCoords = this.calcRotateCoords();
-    return PolygonUtils.calcBentLineOuterVertices(rotateCoords, this.model.styles.strokeWidth);
+    return PolygonUtils.calcBentLineOuterVertices(rotateCoords, this.model.styles.strokeWidth / 2);
   }
 
   /**
