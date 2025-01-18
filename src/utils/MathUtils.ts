@@ -1,4 +1,4 @@
-import { multiply, cos, sin, add, isPositive } from "mathjs";
+import { multiply, cos, sin, add, isPositive, tan } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import { divide } from "lodash";
 import CommonUtils from '@/utils/CommonUtils';
