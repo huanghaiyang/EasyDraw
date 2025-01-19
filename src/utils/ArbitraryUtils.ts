@@ -45,7 +45,7 @@ export default class ArbitraryUtils {
       const next = CommonUtils.getNextOfArray(vertices, index);
       const isClockwise = MathUtils.isPointClockwise(next, prev, ver);
       let angle = MathUtils.calcTriangleAngle(prev, ver, next);
-      if (isClockwise) {
+      if (!isClockwise) {
         angle = 180 + angle;
       } else {
         angle = 180 - angle;
