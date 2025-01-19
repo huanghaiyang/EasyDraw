@@ -10,6 +10,9 @@ import ElementUtils from "./utils/ElementUtils";
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   tailCoordIndex: number;
 
+  private _outerPaths: IPoint[][] = [];
+  private _outerWorldPaths: IPoint[][] = [];
+
   get transformerType(): TransformerTypes {
     return TransformerTypes.circle;
   }
@@ -34,10 +37,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     }
     return -1;
   }
-
-  private _outerPaths: IPoint[][] = [];
-
-  private _outerWorldPaths: IPoint[][] = [];
 
   get outerPaths(): IPoint[][] {
     return this._outerPaths;
@@ -140,6 +139,15 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return some(this.outerWorldPaths, (paths) => {
       return MathUtils.isPolygonsOverlap(paths, coords);
     })
+  }
+
+  /**
+   * 计算外轮廓舞台坐标
+   * 
+   * @returns 
+   */
+  calcRotateOutlinePathPoints(): IPoint[] {
+    return flatten(this._outerPaths);
   }
 
   /**

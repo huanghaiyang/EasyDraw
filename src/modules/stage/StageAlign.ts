@@ -108,8 +108,8 @@ export default class StageAlign implements IStageAlign {
    * @returns 
    */
   private _getElementAlignCoords(element: IElement): IPoint[] {
-    if (this.shield.event.isShift) return element.rotateOutlinePathCoords;
-    return element.rotatePathPoints;
+    if (this.shield.event.isShift) return element.alignOutlineCoords;
+    return element.alignCoords;
   }
 
   /**

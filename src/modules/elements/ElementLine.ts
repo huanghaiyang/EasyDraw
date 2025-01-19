@@ -77,6 +77,14 @@ export default class ElementLine extends Element implements IElementLine {
     return TransformerTypes.circle;
   }
 
+  get alignOutlinePoints(): IPoint[] {
+    return this._outerPathPoints;
+  }
+
+  get alignOutlineCoords(): IPoint[] {
+    return this._outerPathCoords;
+  }
+
   /**
    * 刷新 bent 外轮廓
    */

@@ -515,6 +515,22 @@ export default class Element implements IElement, ILinkedNodeValue {
     return -1;
   }
 
+  get alignPoints(): IPoint[] {
+    return this._rotatePathPoints;
+  }
+
+  get alignCoords(): IPoint[] {
+    return this._rotatePathCoords;
+  }
+
+  get alignOutlinePoints(): IPoint[] {
+    return this._rotateOutlinePathPoints;
+  }
+
+  get alignOutlineCoords(): IPoint[] {
+    return this._rotateOutlinePathCoords;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();

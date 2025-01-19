@@ -88,6 +88,10 @@ export default interface IElement {
   get borderTransformers(): IElementBorderTransformer[];
   get transformerType(): TransformerTypes;
   get rect(): Partial<DOMRect>;
+  get alignPoints(): IPoint[];
+  get alignCoords(): IPoint[];
+  get alignOutlinePoints(): IPoint[];
+  get alignOutlineCoords(): IPoint[];
 
   get isSelected(): boolean;
   get isVisible(): boolean;
