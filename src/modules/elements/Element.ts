@@ -772,15 +772,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 判断是否在矩形内
-   * 
-   * @param rect 
-   */
-  isInPolygon(points: IPoint[]): boolean {
-    return every(this.rotateOutlinePathPoints.map(point => MathUtils.isPointInPolygonByRayCasting(point, points)))
-  }
-
-  /**
    * 判断是否包含点
    * 
    * @param point 

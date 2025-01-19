@@ -144,7 +144,6 @@ export default interface IElement {
   refresh(): void;
   refreshBoxCoords(): void;
 
-  isInPolygon(points: IPoint[]): boolean;
   isContainsPoint(point: IPoint): boolean;
   isPolygonOverlap(points: IPoint[]): boolean;
   isModelPolygonOverlap(points: IPoint[]): boolean;
