@@ -659,9 +659,9 @@ export default class MathUtils {
    * @param lineStart 
    * @param lineEnd 
    */
-  static pointSideOfLine(point: IPoint, lineStart: IPoint, lineEnd: IPoint): boolean {
+  static isPointClockwise(point: IPoint, lineStart: IPoint, lineEnd: IPoint): boolean {
     const crossProduct = (point.x - lineStart.x) * (lineEnd.y - lineStart.y) - (point.y - lineStart.y) * (lineEnd.x - lineStart.x);
-    return crossProduct > 0;
+    return crossProduct < 0;
   }
 
   /**

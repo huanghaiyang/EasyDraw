@@ -53,13 +53,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByY([this.transformers[0], this.transformers[3]])
-    return !MathUtils.pointSideOfLine(this.center, refers[0], refers[1]);
+    return !MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
   }
 
   get flipY(): boolean {
     if (!this.flipYEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByX([this.transformers[3], this.transformers[2]])
-    return !MathUtils.pointSideOfLine(this.center, refers[0], refers[1]);
+    return !MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
   }
 
   get flipXEnable(): boolean {

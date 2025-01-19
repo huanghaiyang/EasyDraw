@@ -43,9 +43,9 @@ export default class ArbitraryUtils {
     return vertices.map((ver, index) => {
       const prev = CommonUtils.getPrevOfArray(vertices, index);
       const next = CommonUtils.getNextOfArray(vertices, index);
-      const isPos = MathUtils.pointSideOfLine(next, prev, ver);
+      const isClockwise = MathUtils.isPointClockwise(next, prev, ver);
       let angle = MathUtils.calcTriangleAngle(prev, ver, next);
-      if (isPos) {
+      if (isClockwise) {
         angle = 180 + angle;
       } else {
         angle = 180 - angle;

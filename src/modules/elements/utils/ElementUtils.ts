@@ -401,11 +401,12 @@ export default class ElementUtils {
    */
   static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, styles: ElementStyles): IPoint[] {
     const { strokeWidth } = styles;
+    const isClockwise = MathUtils.isPointClockwise(next, prev, current);
     const angle = MathUtils.calcTriangleAngle(prev, current, next);
     const aAngle = (180 - angle) / 2;
     const pcAngle = MathUtils.calcAngle(prev, current);
     const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
-    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle - aAngle);
+    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle + (isClockwise? -aAngle: aAngle));
     const region: IPoint[] = [];
     region.push(current);
     region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));
