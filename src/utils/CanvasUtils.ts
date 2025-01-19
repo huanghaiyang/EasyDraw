@@ -2,9 +2,9 @@ import { IPoint } from "@/types";
 import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
-import PolygonUtils from "@/utils/PolygonUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { RenderParams } from "@/types/IRender";
+import ArbitraryUtils from "@/utils/ArbitraryUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -25,11 +25,11 @@ export default class CanvasUtils {
     const r = (strokeWidth / 2);
     switch (strokeType) {
       case StrokeTypes.inside:
-        return flipX !== flipY ? PolygonUtils.getArbitraryOuterVertices(points, r, options) : PolygonUtils.getArbitraryInnerVertices(points, r, options);
+        return flipX !== flipY ? ArbitraryUtils.getArbitraryOuterVertices(points, r, options) : ArbitraryUtils.getArbitraryInnerVertices(points, r, options);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r, options) : PolygonUtils.getArbitraryOuterVertices(points, r, options);
+        return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options) : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
     }
   }
 
@@ -199,7 +199,7 @@ export default class CanvasUtils {
     const { calcVertices = true } = options;
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles)
     if (styles.fillColorOpacity && calcVertices) {
-      const innerPoints = PolygonUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2, options);
+      const innerPoints = ArbitraryUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2, options);
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {

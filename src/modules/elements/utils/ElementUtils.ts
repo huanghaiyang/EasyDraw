@@ -10,7 +10,7 @@ import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
 import ElementLine from "@/modules/elements/ElementLine";
 import ElementTaskLine from "@/modules/render/shield/task/ElementTaskLine";
-import { DefaultLineMeterLimit, ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
@@ -18,6 +18,7 @@ import IStageShield from "@/types/IStageShield";
 import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { RenderParams } from "@/types/IRender";
+import ArbitraryUtils from "@/utils/ArbitraryUtils";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -308,7 +309,7 @@ export default class ElementUtils {
         r = strokeWidth;
       }
       const { flipX, flipY } = options;
-      return flipX !== flipY ? PolygonUtils.getArbitraryInnerVertices(points, r, options) : PolygonUtils.getArbitraryOuterVertices(points, r, options);
+      return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options) : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
     }
     return points;
   }

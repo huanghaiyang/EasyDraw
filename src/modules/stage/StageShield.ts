@@ -556,9 +556,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       }
     }
 
-    if (this.isArbitraryDrawing) {
-      this._handleArbitraryPressDown();
-    } else if (shouldClear) {
+    // 自由绘制过程中不需要清除选区
+    if (shouldClear && !this.isArbitraryDrawing) {
       this._clearStageSelects();
     }
     // 判断是否是要拖动舞台
@@ -604,6 +603,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 如果是绘制模式，则完成元素的绘制
     if (this.isArbitraryDrawing) {
       this._isPressDown = true;
+      this._handleArbitraryPressDown();
     } else if (this.isDrawerActive) {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
@@ -629,7 +629,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           this._excludeTopAElement();
         }
       } else {
-        this._processRangeEmpty();
+        this._makeRangeEmpty();
       }
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e)
@@ -712,7 +712,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理选区为空的情况
    */
-  private _processRangeEmpty() {
+  private _makeRangeEmpty() {
     this.selection.selectRange();
     this.selection.setRange(null);
   }
