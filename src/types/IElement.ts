@@ -75,11 +75,13 @@ export default interface IElement {
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标
   get maxBoxPoints(): IPoint[];
   get rotatePathPoints(): IPoint[];
+  get rotatePathCoords(): IPoint[];
   get rotateOutlinePathPoints(): IPoint[];
   get rotateBoxPoints(): IPoint[];
   get maxOutlineBoxPoints(): IPoint[];
   get rotateOutlinePathCoords(): IPoint[];
   get strokePathPoints(): IPoint[];
+  get strokePathCoords(): IPoint[];
   get center(): IPoint;
   get centerCoord(): IPoint;
   get transformers(): IElementTransformer[];
@@ -159,7 +161,7 @@ export default interface IElement {
   calcTransformers(): IPoint[];
   calcVerticesTransformers(): IPoint[];
   calcBoxVerticesTransformers(): IPoint[];
-  calcRotateCoords(): IPoint[];
+  calcRotatePathCoords(): IPoint[];
   calcRect(): Partial<DOMRect>;
 
   getTransformerByPoint(point: IPoint): IElementTransformer;

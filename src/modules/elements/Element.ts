@@ -43,16 +43,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isOnStage: boolean = false;
 
   get strokePathPoints(): IPoint[] {
-    return CanvasUtils.convertPointsByStrokeType(
-      this.rotatePathPoints,
-      this.model.styles.strokeType,
-      this.model.styles.strokeWidth,
-      {
-        flipX: this.flipX,
-        flipY: this.flipY,
-        isFold: this.model.isFold,
-      }
-    )
+    return this.convertPointsByStrokeType(this._rotatePathPoints);
+  }
+
+  get strokePathCoords(): IPoint[] {
+    return this.convertPointsByStrokeType(this._rotatePathCoords);
   }
 
   get flipX(): boolean {
@@ -439,6 +434,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _maxBoxPoints: IPoint[] = [];
   // 旋转坐标-舞台坐标系
   protected _rotatePathPoints: IPoint[] = [];
+  // 旋转坐标-世界坐标系
+  protected _rotatePathCoords: IPoint[] = [];
   // 旋转外框线坐标-舞台坐标系
   protected _rotateOutlinePathPoints: IPoint[] = [];
   // 旋转盒模型-舞台坐标系
@@ -482,6 +479,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotatePathPoints;
   }
 
+  get rotatePathCoords(): IPoint[] {
+    return this._rotatePathCoords;
+  }
+
   get rotateOutlinePathPoints(): IPoint[] {
     return this._rotateOutlinePathPoints;
   }
@@ -521,6 +522,25 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.shield = shield;
     this.refreshOriginalProps();
     makeObservable(this);
+  }
+
+  /**
+   * 将坐标根据描边类型进行转换
+   * 
+   * @param points 
+   * @returns 
+   */
+  private convertPointsByStrokeType(points: IPoint[]): IPoint[] {
+    return CanvasUtils.convertPointsByStrokeType(
+      points,
+      this.model.styles.strokeType,
+      this.model.styles.strokeWidth,
+      {
+        flipX: this.flipX,
+        flipY: this.flipY,
+        isFold: this.model.isFold,
+      }
+    )
   }
 
   /**
@@ -597,7 +617,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcRotateCoords(): IPoint[] {
+  calcRotatePathCoords(): IPoint[] {
     const centerCoord = this.calcCenterCoord();
     return this.model.coords.map(coord => MathUtils.rotateRelativeCenter(coord, this.model.angle, centerCoord))
   }
@@ -608,9 +628,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotateOutlinePathCoords(): IPoint[] {
-    return ElementUtils.calcOutlinePoints(this.calcRotateCoords(), this.model.styles.strokeType, this.model.styles.strokeWidth, {
+    return ElementUtils.calcOutlinePoints(this._rotatePathCoords, this.model.styles.strokeType, this.model.styles.strokeWidth, {
       flipX: this.flipX,
-      flipY: this.flipY
+      flipY: this.flipY,
+      isFold: this.model.isFold,
     });
   }
 
@@ -739,6 +760,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshElementPoints() {
     this._pathPoints = this.calcPathPoints();
     this._rotatePathPoints = this.calcRotatePathPoints();
+    this._rotatePathCoords = this.calcRotatePathCoords();
     this._rotateBoxPoints = this.calcRotateBoxPoints();
     this._transformers = this.calcTransformers();
     if (this.borderTransformEnable) {

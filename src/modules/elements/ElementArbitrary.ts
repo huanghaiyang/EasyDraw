@@ -3,9 +3,9 @@ import Element from "@/modules/elements/Element";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/IElementTransformer";
 import { ElementStatus, IPoint } from "@/types";
-import PolygonUtils from "@/utils/PolygonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { some } from "lodash";
+import ElementUtils from "./utils/ElementUtils";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   tailCoordIndex: number;
@@ -70,33 +70,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   calcOuterPaths(): IPoint[][] {
-    const { strokeWidth } = this.model.styles;
-    const result: IPoint[][] = [];
-    const points = this.strokePathPoints;
-    points.forEach((current, index) => {
-      if (index < points.length - 1) {
-        const next = points[index + 1];
-        result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth / 2));
-        if (index !== 0) {
-          const prev = points[index - 1];
-          const angle = MathUtils.calcTriangleAngle(prev, current, next);
-          // 角度小于150需要计算线段连接处的斜接区域坐标
-          if (angle <= 150) {
-            const aAngle = (180 - angle) / 2;
-            const pcAngle = MathUtils.calcAngle(prev, current);
-            const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
-            const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle - aAngle);
-            const region: IPoint[] = [];
-            region.push(current);
-            region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));
-            region.push(point);
-            region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, MathUtils.calcAngle(next, current) + 90));
-            result.push(region);
-          }
-        }
-      }
-    })
-    return result;
+    return ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, this.model.styles);
   }
 
   /**
@@ -105,8 +79,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   calcOuterWorldPaths(): IPoint[][] {
-    const result: IPoint[][] = [];
-    return result;
+    return ElementUtils.calcArbitraryBorderRegions(this.strokePathCoords, this.model.styles);
   }
 
   /**
@@ -156,4 +129,17 @@ export default class ElementArbitrary extends Element implements IElementArbitra
       return MathUtils.isPolygonsOverlap(paths, points);
     })
   }
+
+  /**
+   * 判断当前组件是否与世界区块相交
+   * 
+   * @param coords 
+   * @returns 
+   */
+  isModelPolygonOverlap(coords: IPoint[]): boolean {
+    return some(this.outerWorldPaths, (paths) => {
+      return MathUtils.isPolygonsOverlap(paths, coords);
+    })
+  }
+
 }
