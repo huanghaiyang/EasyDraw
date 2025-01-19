@@ -70,7 +70,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   calcOuterPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, this.model.styles);
+    return ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, this.model.styles, this.model.isFold);
   }
 
   /**
@@ -79,7 +79,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   calcOuterWorldPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(this.strokePathCoords, this.model.styles);
+    return ElementUtils.calcArbitraryBorderRegions(this.strokePathCoords, this.model.styles, this.model.isFold);
   }
 
   /**

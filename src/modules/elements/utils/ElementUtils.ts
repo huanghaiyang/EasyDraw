@@ -334,13 +334,14 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算自由绘制线框区块
+   * 计算自由绘制非闭合线框区块
    * 
    * @param points 
    * @param styles 
+   * @param isFold
    * @returns 
    */
-  static calcArbitraryBorderRegions(points: IPoint[], styles: ElementStyles): IPoint[][] {
+  static calcNoFoldArbitraryBorderRegions(points: IPoint[], styles: ElementStyles): IPoint[][] {
     const { strokeWidth } = styles;
     const result: IPoint[][] = [];
     points.forEach((current, index) => {
@@ -349,20 +350,67 @@ export default class ElementUtils {
         result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth / 2));
         if (index !== 0) {
           const prev = points[index - 1];
-          const angle = MathUtils.calcTriangleAngle(prev, current, next);
-          const aAngle = (180 - angle) / 2;
-          const pcAngle = MathUtils.calcAngle(prev, current);
-          const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
-          const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle - aAngle);
-          const region: IPoint[] = [];
-          region.push(current);
-          region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));
-          region.push(point);
-          region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, MathUtils.calcAngle(next, current) + 90));
-          result.push(region);
+          result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, styles));
         }
       }
     })
     return result;
+  }
+
+
+  /**
+   * 计算自由绘制闭合线框区块
+   * 
+   * @param points 
+   * @param styles 
+   * @returns 
+   */
+  static calcFoldArbitraryBorderRegions(points: IPoint[], styles: ElementStyles): IPoint[][] {
+    const { strokeWidth } = styles;
+    const result: IPoint[][] = [];
+    points.forEach((current, index) => {
+      const prev = CommonUtils.getPrevOfArray(points, index);
+      const next = CommonUtils.getNextOfArray(points, index);
+      result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth / 2));
+      result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, styles));
+    })
+    return result;
+  }
+
+  /**
+   * 计算自由绘制线框区块
+   * 
+   * @param points 
+   * @param styles 
+   * @param isFold
+   * @returns 
+   */
+  static calcArbitraryBorderRegions(points: IPoint[], styles: ElementStyles, isFold: boolean): IPoint[][] {
+    if (isFold) return ElementUtils.calcFoldArbitraryBorderRegions(points, styles);
+    return ElementUtils.calcNoFoldArbitraryBorderRegions(points, styles);
+  }
+
+  /**
+   * 计算三角区块（斜接区块）
+   * 
+   * @param prev 
+   * @param current 
+   * @param next 
+   * @param result 
+   * @param styles 
+   */
+  static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, styles: ElementStyles): IPoint[] {
+    const { strokeWidth } = styles;
+    const angle = MathUtils.calcTriangleAngle(prev, current, next);
+    const aAngle = (180 - angle) / 2;
+    const pcAngle = MathUtils.calcAngle(prev, current);
+    const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
+    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle - aAngle);
+    const region: IPoint[] = [];
+    region.push(current);
+    region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));
+    region.push(point);
+    region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, MathUtils.calcAngle(next, current) + 90));
+    return region;
   }
 }
