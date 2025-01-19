@@ -4,7 +4,7 @@ import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/IElementTransformer";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
-import { some } from "lodash";
+import { flatten, some } from "lodash";
 import ElementUtils from "./utils/ElementUtils";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
@@ -102,8 +102,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * 刷新边框线段点坐标数据
    */
   protected _refreshOutlinePoints(): void {
-    super._refreshOutlinePoints();
     this.refreshOuters();
+    super._refreshOutlinePoints();
   }
 
   /**
@@ -140,6 +140,15 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return some(this.outerWorldPaths, (paths) => {
       return MathUtils.isPolygonsOverlap(paths, coords);
     })
+  }
+
+  /**
+   * 计算外轮廓坐标
+   * 
+   * @returns 
+   */
+  calcRotateOutlinePathCoords(): IPoint[] {
+    return flatten(this._outerWorldPaths);
   }
 
 }

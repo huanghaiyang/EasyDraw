@@ -56,7 +56,7 @@ export type ElementStyles = {
   textBaseline?: CanvasTextBaseline;
 }
 
-export const DefaultStrokeType = StrokeTypes.middle;
+export const DefaultStrokeType = StrokeTypes.outside;
 export const DefaultStrokeColor = '#000000';
 export const DefaultStrokeColorOpacity = 1;
 export const DefaultFillColor = '#000000';

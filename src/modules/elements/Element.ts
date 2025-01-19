@@ -436,13 +436,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rotatePathPoints: IPoint[] = [];
   // 旋转坐标-世界坐标系
   protected _rotatePathCoords: IPoint[] = [];
-  // 旋转外框线坐标-舞台坐标系
+  // 旋转外框线坐标-舞台坐标系（组件命中处理）
   protected _rotateOutlinePathPoints: IPoint[] = [];
   // 旋转盒模型-舞台坐标系
   protected _rotateBoxPoints: IPoint[] = [];
   // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
   protected _maxOutlineBoxPoints: IPoint[] = [];
-  // 旋转外框线坐标-世界坐标系
+  // 旋转外框线坐标-世界坐标系(组件对齐时使用)
   protected _rotateOutlinePathCoords: IPoint[] = [];
   // 盒模型，同_maxBoxPoints-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
