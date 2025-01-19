@@ -1,5 +1,5 @@
 import { MinCursorMXD, MinCursorMYD } from "@/types/Constants";
-import { IPoint, ShieldDispatcherNames, } from "@/types";
+import { ElementStatus, IPoint, ShieldDispatcherNames, } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
 import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
@@ -555,17 +555,30 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         shouldClear = true;
       }
     }
-    if (shouldClear) {
-      this._clearStageSelects();
-    }
+
     if (this.isArbitraryDrawing) {
-      this.store.creatingArbitraryElement(this.cursor.worldValue, true);
+      this._handleArbitraryPressDown();
+    } else if (shouldClear) {
+      this._clearStageSelects();
     }
     // 判断是否是要拖动舞台
     if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
     }
-    this.mask.redraw();
+    await this.mask.redraw();
+  }
+
+  /**
+   * 处理自由绘制下的鼠标按下事件
+   */
+  private _handleArbitraryPressDown(): void {
+    const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
+    if (element.status === ElementStatus.initialed) {
+      this._clearStageSelects();
+    }
+    if (element?.model.isFold) {
+      this.commitArbitraryDrawing();
+    }
   }
 
   /**
@@ -690,8 +703,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _excludeTopAElement(): void {
     const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
-    this.store.deSelectElements(this.store.selectedElements);
-    if (topAElement) {
+    this.store.deSelectElements(this.store.selectedElements.filter(element => element !== topAElement));
+    if (topAElement && !topAElement.isSelected) {
       this.store.selectElement(topAElement);
     }
   }

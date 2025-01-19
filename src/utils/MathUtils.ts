@@ -391,6 +391,34 @@ export default class MathUtils {
   }
 
   /**
+   * 判断点是否在给定的点附近位置上
+   * 
+   * @param point 
+   * @param target 
+   * @param distance 
+   * @returns 
+   */
+  static isPointClosest(point: IPoint, target: IPoint, distance: number): boolean {
+    return MathUtils.distanceBetweenPoints(point, target) <= distance;
+  } 
+
+  /**
+   * 判断点是否在给定的点附近位置上
+   * 
+   * @param point 
+   * @param points 
+   * @param distance 
+   * @returns 
+   */
+  static isPointClosestWhichPoint(point: IPoint, points: IPoint[], distance: number): number {
+    for (let i = 0; i < points.length; i++) {
+      if (MathUtils.isPointClosest(point, points[i], distance)) {
+        return i;
+      }
+    }
+  }
+
+  /**
    * 将大于90度的钝角转换为锐角
    * 
    * @param angle 

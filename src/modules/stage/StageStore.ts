@@ -20,6 +20,7 @@ import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
+import { ArbitraryPointClosestMargin } from "@/types/Constants";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -736,8 +737,17 @@ export default class StageStore implements IStageStore {
       element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
       model = element.model;
       if (tailAppend) {
-        model.coords.splice(model.coords.length - 1, 1, coord);
-        element.tailCoordIndex = model.coords.length - 1;
+        const isClosestFirst = MathUtils.isPointClosest(coord, model.coords[0], ArbitraryPointClosestMargin / this.shield.stageScale);
+        if (isClosestFirst) {
+          if (element.tailCoordIndex > 0) {
+            model.isFold = true;
+          } else {
+            // 最后一个点与第一个点重合，无法形图案
+          }
+        } else {
+          model.coords.splice(model.coords.length - 1, 1, coord);
+          element.tailCoordIndex = model.coords.length - 1;
+        }
       } else {
         if (element.tailCoordIndex + 1 === model.coords.length) {
           model.coords.push(coord);
