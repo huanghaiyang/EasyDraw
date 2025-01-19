@@ -559,16 +559,16 @@ export const useStageStore = defineStore("stage", {
     /**
      * 水平均分对齐
      */
-    setElementsAverageRow(): void {
+    setElementsAverageVertical(): void {
       if (!this.averageEnable) return;
-      shield.setElementsAverageRow(this.selectedElements);
+      shield.setElementsAverageVertical(this.selectedElements);
     },
     /**
      * 垂直平均分对齐
      */
-    setElementsAverageCol(): void {
+    setElementsAverageHorizontal(): void {
       if (!this.averageEnable) return;
-      shield.setElementsAverageCol(this.selectedElements);
+      shield.setElementsAverageHorizontal(this.selectedElements);
     },
     /**
      * 上传图片

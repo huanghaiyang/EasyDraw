@@ -64,18 +64,18 @@ const stageStore = useStageStore();
       <el-icon
         :class="[
           'iconfont',
-          'icon-verbise-average-col',
+          'icon-verbise-average-h',
           { disabled: !stageStore.averageEnable },
         ]"
-        @click="stageStore.setElementsAverageCol"
+        @click="stageStore.setElementsAverageHorizontal"
       ></el-icon>
       <el-icon
         :class="[
           'iconfont',
-          'icon-verbise-average-row',
+          'icon-verbise-average-v',
           { disabled: !stageStore.averageEnable },
         ]"
-        @click="stageStore.setElementsAverageRow"
+        @click="stageStore.setElementsAverageVertical"
       ></el-icon>
     </div>
   </div>

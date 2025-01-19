@@ -1185,8 +1185,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 
    * @param elements 
    */
-  setElementsAverageRow(elements: IElement[]): void {
-    this.align.setElementsAverageRow(elements);
+  setElementsAverageVertical(elements: IElement[]): void {
+    this.align.setElementsAverageVertical(elements);
     this._redrawAll(true);
   }
 
@@ -1195,8 +1195,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 
    * @param elements 
    */
-  setElementsAverageCol(elements: IElement[]): void {
-    this.align.setElementsAverageCol(elements);
+  setElementsAverageHorizontal(elements: IElement[]): void {
+    this.align.setElementsAverageHorizontal(elements);
     this._redrawAll(true);
   }
 

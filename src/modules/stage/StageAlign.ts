@@ -224,7 +224,7 @@ export default class StageAlign implements IStageAlign {
    * 
    * @param elements 
    */
-  setElementsAverageRow(elements: IElement[]): void {
+  setElementsAverageVertical(elements: IElement[]): void {
     elements = this._sortElementsByY(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));
@@ -249,7 +249,7 @@ export default class StageAlign implements IStageAlign {
    * 
    * @param elements 
    */
-  setElementsAverageCol(elements: IElement[]): void {
+  setElementsAverageHorizontal(elements: IElement[]): void {
     elements = this._sortElementsByX(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));

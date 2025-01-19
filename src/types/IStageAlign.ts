@@ -8,8 +8,8 @@ export interface IStageAlignFuncs {
   setElementsAlignBottom(elements: IElement[]): void;
   setElementsAlignCenter(elements: IElement[]): void;
   setElementsAlignMiddle(elements: IElement[]): void;
-  setElementsAverageRow(elements: IElement[]): void;
-  setElementsAverageCol(elements: IElement[]): void;
+  setElementsAverageVertical(elements: IElement[]): void;
+  setElementsAverageHorizontal(elements: IElement[]): void;
 }
 
 export default interface IStageAlign extends IStageAlignFuncs {

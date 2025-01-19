@@ -6,18 +6,18 @@
   "description": "",
   "glyphs": [
     {
-      "icon_id": "11782601",
-      "name": "average-row",
-      "font_class": "average-row",
-      "unicode": "e7ce",
-      "unicode_decimal": 59342
+      "icon_id": "17557642",
+      "name": "average-v",
+      "font_class": "average-v",
+      "unicode": "e82e",
+      "unicode_decimal": 59438
     },
     {
-      "icon_id": "11782605",
-      "name": "average-col",
-      "font_class": "average-col",
-      "unicode": "e7d0",
-      "unicode_decimal": 59344
+      "icon_id": "17557643",
+      "name": "average-h",
+      "font_class": "average-h",
+      "unicode": "e82f",
+      "unicode_decimal": 59439
     },
     {
       "icon_id": "11802995",
