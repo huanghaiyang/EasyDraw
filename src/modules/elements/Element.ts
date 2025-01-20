@@ -18,54 +18,81 @@ import IStageShield from "@/types/IStageShield";
 import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
+  // 组件ID
   id: string;
+  // 组件模型
   model: ElementObject;
+  // 组件旋转
   rotation: IElementRotation;
+  // 舞台
   shield: IStageShield;
+  // 原始变换器点坐标
   _originalTransformerPoints: IPoint[];
+  // 原始模型坐标
   _originalModelCoords: IPoint[];
+  // 原始模型盒模型坐标
   _originalModelBoxCoords: IPoint[];
+  // 原始变换矩阵
   _originalMatrix: number[][] = [];
-
+  // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
+  // 是否选中
   @observable _isSelected: boolean = false;
+  // 是否可见
   @observable _isVisible: boolean = true;
+  // 是否正在编辑
   @observable _isEditing: boolean = false;
+  // 是否锁定
   @observable _isLocked: boolean = false;
+  // 是否正在移动
   @observable _isMoving: boolean = false;
+  // 是否正在变换
   @observable _isTransforming: boolean = false;
+  // 是否正在旋转
   @observable _isRotating: boolean = false;
+  // 是否正在旋转目标
   @observable _isRotatingTarget: boolean = false;
+  // 是否正在拖动
   @observable _isDragging: boolean = false;
+  // 是否处于临时状态
   @observable _isProvisional: boolean = false;
+  // 是否命中
   @observable _isTarget: boolean = false;
+  // 是否在选区范围内
   @observable _isInRange: boolean = false;
+  // 是否在舞台上
   @observable _isOnStage: boolean = false;
 
+  // 获取边框线段点坐标
   get strokePathPoints(): IPoint[] {
     return this.convertPointsByStrokeType(this._rotatePathPoints);
   }
 
+  // 获取边框线段坐标
   get strokePathCoords(): IPoint[] {
     return this.convertPointsByStrokeType(this._rotatePathCoords);
   }
 
+  // 是否翻转X轴
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByY([this.transformers[0], this.transformers[3]])
     return MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
   }
 
+  // 是否翻转Y轴
   get flipY(): boolean {
     if (!this.flipYEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
     const refers = CommonUtils.sortPointsByX([this.transformers[3], this.transformers[2]])
     return MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
   }
 
+  // 是否可以翻转X轴
   get flipXEnable(): boolean {
     return true;
   }
 
+  // 是否可以翻转Y轴
   get flipYEnable(): boolean {
     return true;
   }
@@ -95,6 +122,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  // 是否可以通过盒模型顶点变形
   get boxVerticesTransformEnable(): boolean {
     return true;
   }
@@ -139,6 +167,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._originalModelCoords;
   }
 
+  // 获取原始模型盒模型坐标
   get originalModelBoxCoords(): IPoint[] {
     return this._originalModelBoxCoords;
   }
@@ -585,7 +614,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   calcPathPoints(): IPoint[] {
     let points = this._pathPoints;
     if (this.activeCoordIndex !== -1) {
-      const newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      let newCoord: IPoint;
+      if (this.status === ElementStatus.editing) {
+        
+      } else {
+        newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      }
       points[this.activeCoordIndex] = newCoord;
     } else {
       points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);

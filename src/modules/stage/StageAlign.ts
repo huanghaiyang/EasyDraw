@@ -108,7 +108,9 @@ export default class StageAlign implements IStageAlign {
    * @returns 
    */
   private _getElementAlignCoords(element: IElement): IPoint[] {
+    // 如果按住shift键则对齐操作需要考虑图形外部轮廓
     if (this.shield.event.isShift) return element.alignOutlineCoords;
+    // 否则返回组件坐标
     return element.alignCoords;
   }
 

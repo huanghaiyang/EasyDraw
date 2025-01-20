@@ -7,21 +7,30 @@ import MathUtils from "@/utils/MathUtils";
 import { flatten, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/Constants";
+import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
+  // 线条绘制过程中已经绘制的点索引
   tailCoordIndex: number;
+  // 编辑坐标索引
+  editingCoordIndex: number;
 
+  // 外轮廓区域
   private _outerPaths: IPoint[][] = [];
+  // 外轮廓区域（世界坐标）
   private _outerWorldPaths: IPoint[][] = [];
 
+  // 变换器类型
   get transformerType(): TransformerTypes {
     return TransformerTypes.circle;
   }
 
+  // 是否启用顶点变换
   get verticesTransformEnable(): boolean {
     return this.status !== ElementStatus.finished;
   }
 
+  // 是否启用盒模型顶点变换
   get boxVerticesTransformEnable(): boolean {
     return this.status === ElementStatus.finished;
   }
@@ -30,23 +39,31 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * 线条绘制过程中已经绘制的点索引
    */
   get activeCoordIndex(): number {
-    if (this.status !== ElementStatus.finished) {
+    // 如果组件处于创建状态，则返回下一个点索引
+    if ([ElementStatus.startCreating, ElementStatus.creating, ElementStatus.initialed].includes(this.status)) {
+      // 如果坐标点索引小于坐标点数量，则返回下一个点索引
       if (this.model.coords.length > this.tailCoordIndex + 1) {
         return this.tailCoordIndex + 1;
       }
       return this.tailCoordIndex;
+    } else if (this.status === ElementStatus.editing) { // 如果组件处于编辑状态，则返回编辑坐标索引
+      return this.editingCoordIndex;
     }
+    // 如果组件处于其他状态，则返回-1
     return -1;
   }
 
+  // 外轮廓区域
   get outerPaths(): IPoint[][] {
     return this._outerPaths;
   }
 
+  // 外轮廓区域（世界坐标）
   get outerWorldPaths(): IPoint[][] {
     return this._outerWorldPaths;
   }
 
+  // 是否在编辑坐标时刷新变换器
   get tfRefreshAfterEdChanged(): boolean {
     return true;
   }
@@ -168,6 +185,41 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   calcRotateOutlinePathCoords(): IPoint[] {
     return flatten(this._outerWorldPaths);
+  }
+
+  /**
+   * 激活编辑坐标
+   * 
+   * @param index 
+   */
+  activeEditingCoord(index: number): void {
+    this.editingCoordIndex = index;
+  }
+
+  /**
+   * 取消激活编辑坐标
+   */
+  deActiveEditingCoord(): void {
+    this.editingCoordIndex = -1;
+  }
+
+  /**
+   * 激活变换器
+   * 
+   * @param transformer 
+   */
+  activeTransformer(transformer: ElementTransformer): void {
+    super.activeTransformer(transformer);
+    const index = this._transformers.findIndex(item => item.id === transformer.id);
+    this.activeEditingCoord(index);
+  }
+
+  /**
+   * 取消激活所有变换器
+   */
+  deActiveAllTransformers(): void {
+    super.deActiveAllTransformers();
+    this.deActiveEditingCoord();
   }
 
 }

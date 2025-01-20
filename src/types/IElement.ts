@@ -217,10 +217,14 @@ export interface IElementLine extends IElement {
 // 舞台元素（组件）-任意多边形&线条
 export interface IElementArbitrary extends IElement {
   tailCoordIndex: number;
+  editingCoordIndex: number;
 
   get outerPaths(): IPoint[][];
   get outerWorldPaths(): IPoint[][];
 
   calcOuterPaths(): IPoint[][];
   calcOuterWorldPaths(): IPoint[][];
+
+  activeEditingCoord(index: number): void;
+  deActiveEditingCoord(): void;
 }

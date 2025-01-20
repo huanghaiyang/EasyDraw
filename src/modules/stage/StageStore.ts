@@ -81,50 +81,62 @@ export default class StageStore implements IStageStore {
     return this._provisionalElementsMap.valuesArray();
   }
 
+  // 选中的组件
   get selectedElements(): IElement[] {
     return this._selectedElementsMap.valuesArray();
   }
 
+  // 命中的组件
   get targetElements(): IElement[] {
     return this._targetElementsMap.valuesArray();
   }
 
+  // 舞台上的组件
   get stageElements(): IElement[] {
     return this._stageElementsMap.valuesArray();
   }
 
+  // 未在舞台的组件
   get noneStageElements(): IElement[] {
     return this._noneStageElementsMap.valuesArray();
   }
 
+  // 选区范围内的组件
   get rangeElements(): IElement[] {
     return this._rangeElementsMap.valuesArray();
   }
 
+  // 可见的组件
   get visibleElements(): IElement[] {
     return this._visibleElementsMap.valuesArray();
   }
 
+  // 选中的唯一组件
   get uniqSelectedElement(): IElement {
     if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
   }
 
+  // 旋转目标组件
   get rotatingTargetElements(): IElement[] {
     return this._rotatingTargetElementsMap.valuesArray();
   }
 
+  // 编辑中的组件
   get editingElements(): IElement[] {
     return this._editingElementsMap.valuesArray();
   }
 
+  // 是否选中组件为空
   get isSelectedEmpty(): boolean {
     return this.selectedElements.length === 0;
   }
 
+  // 是否可见组件为空
   get isVisibleEmpty(): boolean {
     return this.visibleElements.length === 0;
   }
 
+  // 是否元素列表为空
   get isEmpty(): boolean {
     return this._elementList.length === 0;
   }

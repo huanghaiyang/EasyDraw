@@ -12,14 +12,17 @@ import { every, flatten, includes } from "lodash";
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
 
+  // 选区范围点
   private _rangePoints: IPoint[] = null;
 
+  // 是否为空
   get isEmpty(): boolean {
     return this.shield.store.selectedElements.length === 0
       && this.shield.store.targetElements.length === 0
       && this.shield.store.rangeElements.length === 0;
   }
 
+  // 是否为选区范围
   get isRange(): boolean {
     return this._rangePoints !== null && this._rangePoints.length > 0;
   }

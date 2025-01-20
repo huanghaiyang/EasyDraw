@@ -62,11 +62,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   stageRect: DOMRect;
   // canvas渲染容器
   renderEl: HTMLDivElement;
-
+  // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
     return CommonUtils.getRectVertices(this.stageRect);
   }
-
+  // 舞台矩形顶点坐标
   get stageWordRectCoords(): IPoint[] {
     let { width, height } = this.stageRect;
     width /= this.stageScale;
@@ -98,7 +98,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _isElementsRotating: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
-
+  // 是否需要重绘
   get shouldRedraw(): boolean {
     return this.isElementsDragging || this.isElementsRotating || this.isElementsTransforming || this.isStageMoving
   }
@@ -108,46 +108,57 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     return this.isElementsRotating || this.isElementsTransforming || this.isElementsDragging
   }
 
+  // 是否正在拖拽组件
   get isElementsDragging(): boolean {
     return this._isElementsDragging;
   }
 
+  // 设置是否正在拖拽组件
   set isElementsDragging(value: boolean) {
     this._isElementsTransforming = value;
   }
 
+  // 是否正在形变组件
   get isElementsTransforming(): boolean {
     return this._isElementsTransforming;
   }
 
+  // 设置是否正在形变组件
   set isElementsTransforming(value: boolean) {
     this._isElementsTransforming = value;
   }
 
+  // 设置是否正在移动舞台
   set isStageMoving(value: boolean) {
     this._isStageMoving = value;
   }
 
+  // 是否正在移动舞台
   get isStageMoving(): boolean {
     return this._isStageMoving;
   }
 
+  // 是否是绘制工具
   get isDrawerActive(): boolean {
     return [CreatorCategories.shapes, CreatorCategories.freedom].includes(this.currentCreator?.category);
   }
 
+  // 是否是手绘工具
   get isHandActive(): boolean {
     return this.currentCreator?.type === CreatorTypes.hand;
   }
 
+  // 是否是移动工具
   get isMoveableActive(): boolean {
     return this.currentCreator?.type === CreatorTypes.moveable;
   }
 
+  // 是否正在旋转组件
   get isElementsRotating(): boolean {
     return this._isElementsRotating;
   }
 
+  // 是否是任意绘制工具
   get isArbitraryDrawing(): boolean {
     return this.currentCreator?.type === CreatorTypes.arbitrary;
   }
