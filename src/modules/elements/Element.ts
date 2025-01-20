@@ -628,7 +628,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePathPoints(): IPoint[] {
-    const center = this.calcCenter();
+    const center = this.center;
     return this._pathPoints.map(point => MathUtils.rotateRelativeCenter(point, this.model.angle, center));
   }
 
@@ -650,7 +650,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateBoxPoints(): IPoint[] {
     if (!this.model.boxCoords?.length) return [];
-    const center = this.calcCenter();
+    const center = this.center;
     return this.model.boxCoords.map(coord => {
       const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       return MathUtils.rotateRelativeCenter(point, this.model.angle, center)
@@ -681,7 +681,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcRotatePathCoords(): IPoint[] {
-    const centerCoord = this.calcCenterCoord();
+    const centerCoord = this.centerCoord;
     return this.model.coords.map(coord => MathUtils.rotateRelativeCenter(coord, this.model.angle, centerCoord))
   }
 
@@ -1056,10 +1056,23 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoords(points: IPoint[], matrix: number[][], lockPoint: IPoint): IPoint[] {
+    return this.calcTransformCoordsByCenter(points, matrix, lockPoint, this._originalCenter);
+  }
+
+  /**
+   * 根据中心点计算变换后的坐标
+   * 
+   * @param points 
+   * @param matrix 
+   * @param lockPoint 
+   * @param centroid 
+   * @returns 
+   */
+  protected calcTransformCoordsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
     points = points.map(point => {
       return this._calcMatrixPoint(point, matrix, lockPoint);
     });
-    const center = this._calcMatrixPoint(this._originalCenter, matrix, lockPoint);
+    const center = this._calcMatrixPoint(centroid, matrix, lockPoint);
     const coords = points.map(point => {
       point = MathUtils.rotateRelativeCenter(point, -this.model.angle, center);
       const coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
@@ -1122,6 +1135,22 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint): void {
+    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset);
+    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
+    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+    // 判断是否需要翻转角度
+    this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
+  }
+
+  /**
+   * 获取变换矩阵
+   * 
+   * @param lockPoint 
+   * @param currentPointOriginal 
+   * @param offset 
+   * @returns 
+   */
+  protected getTransformMatrix(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint): number[][] {
     // 当前拖动的点当前的位置
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
@@ -1129,10 +1158,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (this.shouldRatioLockResize) {
       matrix[1][1] = MathUtils.resignValue(matrix[1][1], matrix[0][0]);
     }
-    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
-    // 判断是否需要翻转角度
-    this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
+    return matrix;
   }
 
   /**

@@ -43,6 +43,7 @@ export default interface IStageStore extends IStageSetter {
   refreshElementsPosition(elements: IElement[]): void;
   forEach(callback: (element: IElement, index: number) => void): void;
   refreshStageElements(): void;
+  refreshElements(elements: IElement[]): void;
   createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement>;
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   deleteSelects(): void;

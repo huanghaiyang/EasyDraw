@@ -926,6 +926,17 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 刷新组件
+   * 
+   * @param elements 
+   */
+  refreshElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      element.refresh();
+    })
+  }
+
+  /**
    * 计算旋转组件的中心点
    */
   calcRotatingElementsCenter(): IPoint {

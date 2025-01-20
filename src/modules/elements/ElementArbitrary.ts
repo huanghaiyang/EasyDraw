@@ -245,16 +245,11 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      const points = cloneDeep(this._originalTransformerPoints);
-      const point = points[this.editingCoordIndex];
-      points[this.editingCoordIndex] = { x: point.x + offset.x, y: point.y + offset.y };
-      const center = MathUtils.calcCenter(points);
-      const coords = points.map(item => {
-        item = MathUtils.rotateRelativeCenter(item, -this.model.angle, center);
-        const coord = ElementUtils.calcWorldPoint(item, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-        return coord;
-      })
-      this.model.coords = coords;
+      let point = this._originalRotatePathPoints[this.editingCoordIndex];
+      point = { x: point.x + offset.x, y: point.y + offset.y };
+      let coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      coord = MathUtils.rotateRelativeCenter(coord, -this.model.angle, this._originalCenterCoord);
+      this.model.coords[this.editingCoordIndex] = coord;
       this.refreshBoxCoords();
     }
   }
