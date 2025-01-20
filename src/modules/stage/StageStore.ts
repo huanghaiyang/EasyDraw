@@ -43,6 +43,8 @@ export default class StageStore implements IStageStore {
   private _noneStageElementsMap = new ElementSortedMap<string, IElement>();
   // 可见元素映射关系，加快查询
   private _visibleElementsMap = new ElementSortedMap<string, IElement>();
+  // 编辑中的元素映射关系，加快查询
+  private _editingElementsMap = new ElementSortedMap<string, IElement>();
   // 选区元素映射关系，加快查询
   private _rangeElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转目标元素映射关系，加快查询
@@ -111,6 +113,10 @@ export default class StageStore implements IStageStore {
     return this._rotatingTargetElementsMap.valuesArray();
   }
 
+  get editingElements(): IElement[] {
+    return this._editingElementsMap.valuesArray();
+  }
+
   get isSelectedEmpty(): boolean {
     return this.selectedElements.length === 0;
   }
@@ -149,6 +155,7 @@ export default class StageStore implements IStageStore {
       this._rangeElementsMap.delete(element.id);
       this._visibleElementsMap.delete(element.id);
       this._rotatingTargetElementsMap.delete(element.id);
+      this._editingElementsMap.delete(element.id);
     })
   }
 
@@ -219,6 +226,14 @@ export default class StageStore implements IStageStore {
           this._visibleElementsMap.set(element.id, element);
         } else {
           this._visibleElementsMap.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isEditing: {
+        if (value) {
+          this._editingElementsMap.set(element.id, element);
+        } else {
+          this._editingElementsMap.delete(element.id);
         }
         break;
       }
@@ -1047,6 +1062,31 @@ export default class StageStore implements IStageStore {
   cancelTargetElements(): void {
     this.targetElements.forEach(element => {
       this.updateElementById(element.id, { isTarget: false });
+    })
+  }
+  /**
+   * 开始编辑元素
+   * 
+   * @param elements 
+   */
+  beginEditingElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      if (element.editingEnable) {
+        this.updateElementById(element.id, { isEditing: true, status: ElementStatus.editing });
+      }
+    })
+  }
+
+  /**
+   * 结束编辑元素
+   * 
+   * @param elements 
+   */
+  endEditingElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      if (element.editingEnable) {
+        this.updateElementById(element.id, { isEditing: false, status: ElementStatus.finished });
+      }
     })
   }
 }

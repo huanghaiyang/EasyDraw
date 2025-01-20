@@ -29,7 +29,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   /**
    * 线条绘制过程中已经绘制的点索引
    */
-  get activePointIndex(): number {
+  get activeCoordIndex(): number {
     if (this.status !== ElementStatus.finished) {
       if (this.model.coords.length > this.tailCoordIndex + 1) {
         return this.tailCoordIndex + 1;

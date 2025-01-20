@@ -653,7 +653,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleDblClick(e: MouseEvent): Promise<void> {
     if (this.isMoveableActive) {
       this._selectTopAElement(this.store.stageElements);
-      this.mask.redraw();
+      this.store.beginEditingElements(this.store.selectedElements);
+      this._redrawAllIfy({
+        mask: true,
+        provisional: false,
+        shield: true
+      })
     }
   }
 

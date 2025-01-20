@@ -43,7 +43,8 @@ export enum ElementStatus {
   initialed = -1,
   startCreating = 0,
   creating = 1,
-  finished = 2
+  finished = 2,
+  editing = 3
 }
 
 // 平移值

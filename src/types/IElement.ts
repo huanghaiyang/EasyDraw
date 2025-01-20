@@ -53,6 +53,7 @@ export default interface IElement {
   get shouldRatioLockResize(): boolean;
   get flipXEnable(): boolean;
   get flipYEnable(): boolean;
+  get editingEnable(): boolean;
 
   get width(): number;
   get height(): number;
@@ -72,7 +73,7 @@ export default interface IElement {
   get visualStrokeWidth(): number;
   get visualFontSize(): number;
 
-  get activePointIndex(): number;
+  get activeCoordIndex(): number;
   get originalModelCoords(): IPoint[];
   get originalModelBoxCoords(): IPoint[];
   get pathPoints(): IPoint[]; // 相对于舞台画布的坐标

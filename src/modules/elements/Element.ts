@@ -119,6 +119,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  // 是否可以编辑
+  get editingEnable(): boolean {
+    return true;
+  }
+
   // 是否应该锁定比例变换尺寸
   get shouldRatioLockResize(): boolean {
     return this.ratioLockedEnable && (this.isRatioLocked || this.shield.event.isShift);
@@ -511,7 +516,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rect;
   }
 
-  get activePointIndex(): number {
+  get activeCoordIndex(): number {
     return -1;
   }
 
@@ -574,9 +579,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcPathPoints(): IPoint[] {
     let points = this._pathPoints;
-    if (this.activePointIndex !== -1) {
-      const newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activePointIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      points[this.activePointIndex] = newCoord;
+    if (this.activeCoordIndex !== -1) {
+      const newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      points[this.activeCoordIndex] = newCoord;
     } else {
       points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     }

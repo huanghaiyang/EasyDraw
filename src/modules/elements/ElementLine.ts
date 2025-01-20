@@ -9,6 +9,9 @@ import PolygonUtils from "@/utils/PolygonUtils";
 import { TransformerTypes } from "@/types/IElementTransformer";
 
 export default class ElementLine extends Element implements IElementLine {
+  get editingEnable(): boolean {
+    return false;
+  }
 
   get flipXEnable(): boolean {
     return false;
