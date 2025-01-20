@@ -583,7 +583,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
 
     // 自由绘制过程中不需要清除选区
-    if (shouldClear) {
+    if (shouldClear && !this.isArbitraryDrawing) {
       this._clearStageSelects();
     } else if (targetElement) {
       this.store.selectElement(targetElement);

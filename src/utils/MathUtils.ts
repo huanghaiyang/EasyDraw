@@ -400,7 +400,7 @@ export default class MathUtils {
    */
   static isPointClosest(point: IPoint, target: IPoint, distance: number): boolean {
     return MathUtils.distanceBetweenPoints(point, target) <= distance;
-  } 
+  }
 
   /**
    * 判断点是否在给定的点附近位置上
@@ -674,7 +674,7 @@ export default class MathUtils {
       return null;
     }
 
-    const u = ((line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y- line2Start.y) * (line1Start.x - line1End.x));
+    const u = ((line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y - line2Start.y) * (line1Start.x - line1End.x));
     if (u === 0 || u === denominator) {
       // 两条直线重合
       return null;

@@ -920,7 +920,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshOriginalModelCoords() {
     this._originalModelCoords = cloneDeep(this.model.coords);
     this._originalModelBoxCoords = cloneDeep(this.model.boxCoords);
-    this._originalCenterCoord = MathUtils.calcCenter(this._originalModelCoords);
+    this._originalCenterCoord = cloneDeep(this.centerCoord);
   }
 
   /**

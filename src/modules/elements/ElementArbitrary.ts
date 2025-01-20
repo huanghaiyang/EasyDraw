@@ -245,11 +245,25 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      let point = this._originalRotatePathPoints[this.editingCoordIndex];
-      point = { x: point.x + offset.x, y: point.y + offset.y };
-      let coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      coord = MathUtils.rotateRelativeCenter(coord, -this.model.angle, this._originalCenterCoord);
-      this.model.coords[this.editingCoordIndex] = coord;
+      const rotatePoints = cloneDeep(this._originalRotatePathPoints);
+      rotatePoints[this.editingCoordIndex] = {
+        x: rotatePoints[this.editingCoordIndex].x + offset.x,
+        y: rotatePoints[this.editingCoordIndex].y + offset.y
+      }
+      const lockPoint = this._originalRotateBoxPoints[0];
+      const center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint)));
+      const originalCenter = MathUtils.calcCenter(this._originalRotatePathPoints.map(point => MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint)));
+      const centerOffset = {
+        x: (center.x - originalCenter.x) / this.shield.stageScale,
+        y: (center.y - originalCenter.y) / this.shield.stageScale
+      }
+      const newCenterCoord = {
+        x: this._originalCenterCoord.x + centerOffset.x,
+        y: this._originalCenterCoord.y + centerOffset.y
+      }
+      const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      const coords = rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -this.model.angle, newCenterCoord));
+      this.model.coords = coords;
       this.refreshBoxCoords();
     }
   }
