@@ -267,7 +267,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
    */
-  selectTarget(): void {
+  selectTargets(): void {
     this.shield.store.updateElements(this.shield.store.targetElements, { isSelected: true, isTarget: false });
   }
 

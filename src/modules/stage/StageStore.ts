@@ -1044,7 +1044,7 @@ export default class StageStore implements IStageStore {
   /**
    * 取消高亮目标元素
    */
-  deHighlightTargetElements(): void {
+  cancelTargetElements(): void {
     this.targetElements.forEach(element => {
       this.updateElementById(element.id, { isTarget: false });
     })

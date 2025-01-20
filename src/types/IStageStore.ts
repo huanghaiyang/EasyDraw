@@ -50,5 +50,5 @@ export default interface IStageStore extends IStageSetter {
   deSelectElement(element: IElement): void;
   selectElements(elements: IElement[]): void;
   deSelectElements(elements: IElement[]): void;
-  deHighlightTargetElements(): void;
+  cancelTargetElements(): void;
 }

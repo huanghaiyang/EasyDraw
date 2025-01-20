@@ -438,7 +438,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._tryActiveController();
     }
     if (this.isElementsBusy) {
-      this.store.deHighlightTargetElements();
+      this.store.cancelTargetElements();
     }
     await this._redrawAllIfy({
       shield: flag,
@@ -540,9 +540,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
-    let shouldClear = this.isDrawerActive;
+    let shouldClear: boolean;
+    let targetElement: IElement;
 
-    if (this.isMoveableActive) {
+    if (this.isDrawerActive) {
+      shouldClear = true;
+    } else if (this.isMoveableActive) {
       const controller = this._tryActiveController();
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
@@ -552,14 +555,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._isElementsTransforming = true;
       } else if (controller instanceof ElementBorderTransformer) {
         this._isElementsTransforming = true;
-      } else if ((!this.selection.getElementOnPoint(this.cursor.value) || !this.selection.checkSelectContainsTarget())) {
-        shouldClear = true;
+      } else {
+        targetElement = this.selection.getElementOnPoint(this.cursor.value);
+        const isSelectContainsTarget = this.selection.checkSelectContainsTarget();
+        if (!targetElement && !isSelectContainsTarget) {
+          shouldClear = true;
+        }
       }
     }
 
     // 自由绘制过程中不需要清除选区
     if (shouldClear && !this.isArbitraryDrawing) {
       this._clearStageSelects();
+    } else if (targetElement) {
+      this.store.selectElement(targetElement);
     }
     // 判断是否是要拖动舞台
     if (this.isHandActive) {
@@ -571,7 +580,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理自由绘制下的鼠标按下事件
    */
-  private _handleArbitraryPressDown(): void {
+  private _handleArbitraryPressUp(): void {
     const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
     if (element.status === ElementStatus.initialed) {
       this._clearStageSelects();
@@ -587,8 +596,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _clearStageSelects(): void {
     // 清空所有组件的选中状态
     this.selection.clearSelects();
-    // 将处于命中状态的组件转换为被选中状态
-    this.selection.selectTarget();
     // 清空选区
     this.selection.setRange([]);
   }
@@ -604,7 +611,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 如果是绘制模式，则完成元素的绘制
     if (this.isArbitraryDrawing) {
       this._isPressDown = true;
-      this._handleArbitraryPressDown();
+      this._handleArbitraryPressUp();
     } else if (this.isDrawerActive) {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
@@ -632,6 +639,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e)
     }
+    // 非自由绘制模式，绘制完成之后重绘
     if (!this.isArbitraryDrawing) {
       this._redrawAfterCreated();
     }

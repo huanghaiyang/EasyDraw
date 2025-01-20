@@ -13,7 +13,7 @@ export default interface IStageSelection {
   getModels(): IMaskModel[];
   getSelectionModel(): IMaskModel;
   getTransformerModels(): IMaskModel[];
-  selectTarget(): void;
+  selectTargets(): void;
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
   tryActiveElementRotation(point: IPoint): IElementRotation;
