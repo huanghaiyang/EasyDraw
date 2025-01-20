@@ -17,6 +17,7 @@ export default interface IStageStore extends IStageSetter {
   get rotatingTargetElements(): IElement[];
   get editingElements(): IElement[];
   get isSelectedEmpty(): boolean;
+  get isEditingEmpty(): boolean;
   get isEmpty(): boolean;
   get isVisibleEmpty(): boolean;
 

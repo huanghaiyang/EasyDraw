@@ -187,6 +187,7 @@ export default interface IElement {
   refreshRotation(): void;
   refreshOriginalElementProps(): void;
   refreshOriginalModelCoords(): void;
+  refreshOriginalTransformerPoints(): void;
   refreshOriginalProps(): void;
   refreshTransformers(): void;
 }

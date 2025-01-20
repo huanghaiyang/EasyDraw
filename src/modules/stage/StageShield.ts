@@ -96,6 +96,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _isElementsTransforming: boolean = false;
   // 组件是否旋转中
   private _isElementsRotating: boolean = false;
+  // 是否处于编辑状态
+  private _isElementsEditing: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
   // 是否需要重绘
@@ -161,6 +163,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 是否是任意绘制工具
   get isArbitraryDrawing(): boolean {
     return this.currentCreator?.type === CreatorTypes.arbitrary;
+  }
+
+  // 是否处于编辑状态
+  get isElementsEditing(): boolean {
+    return this._isElementsEditing;
   }
 
   constructor() {
@@ -665,6 +672,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isMoveableActive) {
       this._selectTopAElement(this.store.stageElements);
       this.store.beginEditingElements(this.store.selectedElements);
+      this._isElementsEditing = !this.store.isEditingEmpty;
       this._redrawAllIfy({
         mask: true,
         provisional: false,
@@ -1170,6 +1178,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   _handleCancel(): void {
     if (this.isArbitraryDrawing) {
       this.commitArbitraryDrawing();
+    } else if (!this.store.isEditingEmpty) {
+      this.commitEditingDrawing();
     }
   }
 
@@ -1264,4 +1274,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
   }
 
+  /**
+   * 提交编辑绘制
+   */
+  async commitEditingDrawing(): Promise<void> {
+    if (!this.store.isEditingEmpty) {
+      this.store.endEditingElements(this.store.editingElements);
+      this._isElementsEditing = false;
+      await this._redrawAll(true);
+    }
+  }
 }

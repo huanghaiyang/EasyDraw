@@ -4,7 +4,7 @@ import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/IElementTransformer";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
-import { flatten, some } from "lodash";
+import { cloneDeep, flatten, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/Constants";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
@@ -35,6 +35,11 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return this.status === ElementStatus.finished;
   }
 
+  // 是否启用边框变换
+  get borderTransformEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   /**
    * 线条绘制过程中已经绘制的点索引
    */
@@ -46,8 +51,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
         return this.tailCoordIndex + 1;
       }
       return this.tailCoordIndex;
-    } else if (this.status === ElementStatus.editing) { // 如果组件处于编辑状态，则返回编辑坐标索引
-      return this.editingCoordIndex;
     }
     // 如果组件处于其他状态，则返回-1
     return -1;
@@ -134,7 +137,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    let outerPaths;
+    let outerPaths: IPoint[][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
       outerPaths = ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, { strokeWidth: LineClosestMinWidth / this.shield.stageScale }, this.model.isFold);
     } else {
@@ -222,4 +225,37 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     this.deActiveEditingCoord();
   }
 
+  /**
+   * 按顶点变换
+   * 
+   * @param offset 
+   */
+  doVerticesTransform(offset: IPoint): void {
+    if (this.status === ElementStatus.editing) {
+      this.doEditingTransform(offset);
+    } else {
+      super.doVerticesTransform(offset);
+    }
+  }
+
+  /**
+   * 编辑模式下的变换
+   * 
+   * @param offset 
+   */
+  private doEditingTransform(offset: IPoint): void {
+    if (this.editingCoordIndex !== -1) {
+      const points = cloneDeep(this._originalTransformerPoints);
+      const point = points[this.editingCoordIndex];
+      points[this.editingCoordIndex] = { x: point.x + offset.x, y: point.y + offset.y };
+      const center = MathUtils.calcCenter(points);
+      const coords = points.map(item => {
+        item = MathUtils.rotateRelativeCenter(item, -this.model.angle, center);
+        const coord = ElementUtils.calcWorldPoint(item, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+        return coord;
+      })
+      this.model.coords = coords;
+      this.refreshBoxCoords();
+    }
+  }
 }

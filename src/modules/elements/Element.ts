@@ -614,12 +614,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   calcPathPoints(): IPoint[] {
     let points = this._pathPoints;
     if (this.activeCoordIndex !== -1) {
-      let newCoord: IPoint;
-      if (this.status === ElementStatus.editing) {
-        
-      } else {
-        newCoord = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      }
+      const newCoord: IPoint = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       points[this.activeCoordIndex] = newCoord;
     } else {
       points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
@@ -909,13 +904,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始变形器坐标
    */
   refreshOriginalElementProps() {
-    this._originalTransformerPoints = this.transformers.map(transformer => {
-      const { x, y } = transformer;
-      return {
-        x,
-        y
-      }
-    })
     this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
     this._originalAngle = this.model.angle;
@@ -940,7 +928,21 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalProps(): void {
     this.refreshOriginalModelCoords();
+    this.refreshOriginalTransformerPoints();
     this.refreshOriginalElementProps();
+  }
+
+  /**
+   * 刷新原始顶点坐标
+   */
+  refreshOriginalTransformerPoints(): void {
+    this._originalTransformerPoints = this.transformers.map(transformer => {
+      const { x, y } = transformer;
+      return {
+        x,
+        y
+      }
+    })
   }
 
   /**

@@ -141,6 +141,11 @@ export default class StageStore implements IStageStore {
     return this._elementList.length === 0;
   }
 
+  // 是否处于编辑状态
+  get isEditingEmpty(): boolean {
+    return this.editingElements.length === 0;
+  }
+
   /**
    * 组件新增
    */
@@ -1102,9 +1107,12 @@ export default class StageStore implements IStageStore {
    */
   private _setElementsEditing(elements: IElement[], value: boolean): void {
     elements.forEach(element => {
-      this.updateElementById(element.id, { isEditing: value, status: value ? ElementStatus.editing : ElementStatus.finished });
-      if (element.tfRefreshAfterEdChanged) {
-        element.refreshTransformers();
+      if (element.editingEnable) {
+        this.updateElementById(element.id, { isEditing: value, status: value ? ElementStatus.editing : ElementStatus.finished });
+        if (element.tfRefreshAfterEdChanged) {
+          element.refreshTransformers();
+          element.refreshOriginalTransformerPoints();
+        }
       }
     })
   }

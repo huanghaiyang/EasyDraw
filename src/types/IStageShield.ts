@@ -32,6 +32,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get stageWordRectCoords(): IPoint[];
   get isElementsDragging(): boolean;
   get isElementsTransforming(): boolean;
+  get isElementsEditing(): boolean;
   get isStageMoving(): boolean;
   get isDrawerActive(): boolean;
   get isMoveableActive(): boolean;
@@ -53,4 +54,5 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
 
   uploadImages(images: File[]): Promise<void>;
   commitArbitraryDrawing(): Promise<void>;
+  commitEditingDrawing(): Promise<void>;
 }
