@@ -103,8 +103,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     return this.isElementsDragging || this.isElementsRotating || this.isElementsTransforming || this.isStageMoving
   }
 
+  // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return this.isElementsRotating || this.isElementsTransforming
+    return this.isElementsRotating || this.isElementsTransforming || this.isElementsDragging
   }
 
   get isElementsDragging(): boolean {
@@ -388,7 +389,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e 
    */
   async _handleCursorMove(e: MouseEvent): Promise<void> {
-    const funcs = [];
     let flag = false;
     this.cursor.transform(e);
     this.cursor.updateStyle(e);
@@ -434,17 +434,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._dragStage(e);
         flag = true;
       }
-      if (flag) {
-        funcs.push(() => this.redraw())
-      }
-      funcs.push(() => this.provisional.redraw())
-    } else {
-      if (this.isMoveableActive) {
-        this._tryActiveController();
-      }
+    } else if (this.isMoveableActive) {
+      this._tryActiveController();
     }
-    funcs.push(() => this.mask.redraw());
-    await Promise.all(funcs.map(func => func()));
+    if (this.isElementsBusy) {
+      this.store.deHighlightTargetElements();
+    }
+    await this._redrawAllIfy({
+      shield: flag,
+      provisional: this._isPressDown,
+      mask: true,
+    })
   }
 
   /**
@@ -609,28 +609,25 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) { // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
-      if (!this.store.isSelectedEmpty) {
-        // 检查位移是否有效
-        if (this.checkCursorPressUpALittle(e)) {
-          // 如果当前是在拖动中
-          if (this._isElementsDragging) {
-            this._endElementsDrag();
-            // 将拖动状态置为false
-            this._isElementsDragging = false;
-          } else if (this._isElementsRotating) {
-            this._endElementsRotate();
-            // 将旋转状态置为false
-            this._isElementsRotating = false;
-          } else if (this._isElementsTransforming) {
-            this._endElementsTransform();
-            // 将旋转状态置为false
-            this._isElementsTransforming = false;
-          }
-        } else {
-          this._excludeTopAElement();
+      if (this.store.isSelectedEmpty) {
+        this._makeRangeEmpty();
+      } else if (this.checkCursorPressUpALittle(e)) {
+        // 如果当前是在拖动中
+        if (this._isElementsDragging) {
+          this._endElementsDrag();
+          // 将拖动状态置为false
+          this._isElementsDragging = false;
+        } else if (this._isElementsRotating) {
+          this._endElementsRotate();
+          // 将旋转状态置为false
+          this._isElementsRotating = false;
+        } else if (this._isElementsTransforming) {
+          this._endElementsTransform();
+          // 将旋转状态置为false
+          this._isElementsTransforming = false;
         }
       } else {
-        this._makeRangeEmpty();
+        this._selectTopAElement(this.store.selectedElements);
       }
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e)
@@ -638,7 +635,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (!this.isArbitraryDrawing) {
       this._redrawAfterCreated();
     }
-    console.log('pressup')
   }
 
   /**
@@ -647,8 +643,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e 
    */
   async _handleDblClick(e: MouseEvent): Promise<void> {
-    if(this.isMoveableActive) {
-      
+    if (this.isMoveableActive) {
+      this._selectTopAElement(this.store.stageElements);
+      this.mask.redraw();
     }
   }
 
@@ -714,8 +711,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
-  private _excludeTopAElement(): void {
-    const topAElement = ElementUtils.getTopAElementByPoint(this.store.selectedElements, this.cursor.value);
+  private _selectTopAElement(elements: IElement[]): void {
+    const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
     this.store.deSelectElements(this.store.selectedElements.filter(element => element !== topAElement));
     if (topAElement && !topAElement.isSelected) {
       this.store.selectElement(topAElement);
@@ -852,6 +849,25 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.redraw(force.shield)
       ])
     }
+  }
+
+  /**
+   * 可选渲染
+   * 
+   * @param options 
+   */
+  private async _redrawAllIfy(options: { mask?: boolean, provisional?: boolean, shield?: boolean }): Promise<void> {
+    const funcs: Function[] = [];
+    if (options.shield) {
+      funcs.push(() => this.redraw());
+    }
+    if (options.provisional) {
+      funcs.push(() => this.provisional.redraw());
+    }
+    if (options.mask) {
+      funcs.push(() => this.mask.redraw());
+    }
+    await Promise.all(funcs.map(func => func()));
   }
 
   /**

@@ -1041,4 +1041,12 @@ export default class StageStore implements IStageStore {
       this.deSelectElement(node.value);
     });
   }
+  /**
+   * 取消高亮目标元素
+   */
+  deHighlightTargetElements(): void {
+    this.targetElements.forEach(element => {
+      this.updateElementById(element.id, { isTarget: false });
+    })
+  }
 }
