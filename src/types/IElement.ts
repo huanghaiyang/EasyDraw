@@ -54,6 +54,7 @@ export default interface IElement {
   get flipXEnable(): boolean;
   get flipYEnable(): boolean;
   get editingEnable(): boolean;
+  get tfRefreshAfterEdChanged(): boolean;
 
   get width(): number;
   get height(): number;
@@ -187,6 +188,7 @@ export default interface IElement {
   refreshOriginalElementProps(): void;
   refreshOriginalModelCoords(): void;
   refreshOriginalProps(): void;
+  refreshTransformers(): void;
 }
 
 // 舞台元素（组件）-React

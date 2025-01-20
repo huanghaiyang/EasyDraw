@@ -47,6 +47,10 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return this._outerWorldPaths;
   }
 
+  get tfRefreshAfterEdChanged(): boolean {
+    return true;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this.tailCoordIndex = -1;

@@ -1070,11 +1070,7 @@ export default class StageStore implements IStageStore {
    * @param elements 
    */
   beginEditingElements(elements: IElement[]): void {
-    elements.forEach(element => {
-      if (element.editingEnable) {
-        this.updateElementById(element.id, { isEditing: true, status: ElementStatus.editing });
-      }
-    })
+    this._setElementsEditing(elements, true);
   }
 
   /**
@@ -1083,9 +1079,20 @@ export default class StageStore implements IStageStore {
    * @param elements 
    */
   endEditingElements(elements: IElement[]): void {
+    this._setElementsEditing(elements, false);
+  }
+
+  /**
+   * 设置元素编辑状态
+   * 
+   * @param elements 
+   * @param value 
+   */
+  private _setElementsEditing(elements: IElement[], value: boolean): void {
     elements.forEach(element => {
-      if (element.editingEnable) {
-        this.updateElementById(element.id, { isEditing: false, status: ElementStatus.finished });
+      this.updateElementById(element.id, { isEditing: value, status: value ? ElementStatus.editing : ElementStatus.finished });
+      if (element.tfRefreshAfterEdChanged) {
+        element.refreshTransformers();
       }
     })
   }

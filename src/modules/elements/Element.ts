@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { cloneDeep, every } from "lodash";
+import { cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
@@ -122,6 +122,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否可以编辑
   get editingEnable(): boolean {
     return true;
+  }
+
+  // 是否应该刷新变换控制器
+  get tfRefreshAfterEdChanged(): boolean {
+    return false;
   }
 
   // 是否应该锁定比例变换尺寸
@@ -967,6 +972,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshBoxCoords(): void {
     this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
+  }
+
+  /**
+   * 刷新变换控制器
+   */
+  refreshTransformers(): void {
+    this._transformers = this.calcTransformers();
   }
 
   /**
