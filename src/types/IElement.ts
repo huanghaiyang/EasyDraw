@@ -69,6 +69,9 @@ export default interface IElement {
   get fontSize(): number;
   get fontFamily(): string;
 
+  get visualStrokeWidth(): number;
+  get visualFontSize(): number;
+
   get activePointIndex(): number;
   get originalModelCoords(): IPoint[];
   get originalModelBoxCoords(): IPoint[];

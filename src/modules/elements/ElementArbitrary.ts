@@ -5,7 +5,8 @@ import { TransformerTypes } from "@/types/IElementTransformer";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
 import { flatten, some } from "lodash";
-import ElementUtils from "./utils/ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import { LineClosestMinWidth } from "@/types/Constants";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   tailCoordIndex: number;
@@ -112,7 +113,13 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
-    return some(this.outerPaths, (paths) => {
+    let outerPaths;
+    if (this.visualStrokeWidth < LineClosestMinWidth) {
+      outerPaths = ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, { strokeWidth: LineClosestMinWidth / this.shield.stageScale }, this.model.isFold);
+    } else {
+      outerPaths = this.outerPaths;
+    }
+    return some(outerPaths, (paths) => {
       return MathUtils.isPointInPolygonByRayCasting(point, paths);
     })
   }

@@ -531,6 +531,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotateOutlinePathCoords;
   }
 
+  get visualStrokeWidth(): number {
+    return this.strokeWidth * this.shield.stageScale;
+  }
+
+  get visualFontSize(): number {
+    return this.fontSize * this.shield.stageScale;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();

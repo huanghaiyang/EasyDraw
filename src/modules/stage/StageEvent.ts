@@ -129,6 +129,9 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this.shield.canvas.addEventListener('mouseup', e => {
       this.emit('pressUp', e)
     })
+    this.shield.canvas.addEventListener('dblclick', e => {
+      this.emit('dblClick', e)
+    })
 
     // 滚轮事件
     this.shield.canvas.addEventListener('wheel', e => {

@@ -351,6 +351,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on('cursorLeave', this._handleCursorLeave.bind(this))
     this.event.on('pressDown', this._handlePressDown.bind(this))
     this.event.on('pressUp', this._handlePressUp.bind(this))
+    this.event.on('dblClick', this._handleDblClick.bind(this))
     this.event.on('wheelScale', this._handleWheelScale.bind(this))
     this.event.on('wheelMove', this._handleWheelMove.bind(this))
     this.event.on('scaleReduce', this._handleScaleReduce.bind(this))
@@ -636,6 +637,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     if (!this.isArbitraryDrawing) {
       this._redrawAfterCreated();
+    }
+    console.log('pressup')
+  }
+
+  /**
+   * 处理鼠标双击事件
+   * 
+   * @param e 
+   */
+  async _handleDblClick(e: MouseEvent): Promise<void> {
+    if(this.isMoveableActive) {
+      
     }
   }
 
