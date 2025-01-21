@@ -578,10 +578,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         const targetElement = this.selection.getElementOnPoint(this.cursor.value);
         // 判断当前鼠标位置的组件是否已经被选中
         const isSelectContainsTarget = this.selection.checkSelectContainsTarget();
-        // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
-        if (targetElement && !isSelectContainsTarget) {
-          this._clearStageSelects();
-          this.store.selectElement(targetElement);
+        if (e.ctrlKey) {
+          this.store.toggleSelectElement(targetElement);
+        } else {
+          // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
+          if (!isSelectContainsTarget) {
+            this._clearStageSelects();
+            if (targetElement) {
+              this.store.selectElement(targetElement);
+            }
+          }
         }
       }
     } else if (this.isHandActive) {
@@ -643,7 +649,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           // 将旋转状态置为false
           this._isElementsTransforming = false;
         }
-      } else {
+      } else if (!e.ctrlKey && !e.shiftKey) {
         this._selectTopAElement(this.store.selectedElements);
       }
     } else if (this.isHandActive) {

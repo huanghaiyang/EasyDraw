@@ -6,8 +6,10 @@ export default interface IStageEvent extends EventEmitter {
   shield: IStageShield;
 
   get isCtrl(): boolean;
+  get isOnlyCtrl(): boolean;
   get isCtrlWheel(): boolean;
   get isShift(): boolean;
+  get isOnlyShift(): boolean;
 
   init(): void;
   onImagesUpload(images: File[]): Promise<void>;

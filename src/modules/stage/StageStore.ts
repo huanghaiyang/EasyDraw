@@ -1019,6 +1019,16 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 判断元素是否被选中
+   * 
+   * @param element 
+   * @returns 
+   */
+  isElementSelected(element: IElement): boolean {
+    return this._selectedElementsMap.has(element.id);
+  }
+
+  /**
    * 删除选中元素
    */
   deleteSelects(): void {
@@ -1065,6 +1075,30 @@ export default class StageStore implements IStageStore {
     elements.forEach((element) => {
       this.deSelectElement(element);
     });
+  }
+
+  /**
+   * 切换选中状态
+   * 
+   * @param element 
+   */
+  toggleSelectElement(element: IElement): void {
+    if (this.isElementSelected(element)) {
+      this.deSelectElement(element);
+    } else {
+      this.selectElement(element);
+    }
+  }
+
+  /**
+   * 批量切换选中状态
+   * 
+   * @param elements 
+   */
+  toggleSelectElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      this.toggleSelectElement(element);
+    })
   }
 
   /**

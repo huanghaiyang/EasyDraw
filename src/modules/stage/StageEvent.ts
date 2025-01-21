@@ -30,12 +30,20 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     return this._isCtrl;
   }
 
+  get isOnlyCtrl(): boolean {
+    return this._isCtrl && !this._isShift;
+  }
+
   get isCtrlWheel(): boolean {
     return this._isCtrlWheel;
   }
 
   get isShift(): boolean {
     return this._isShift;
+  }
+
+  get isOnlyShift(): boolean {
+    return this._isShift && !this._isCtrl;
   }
 
   constructor(shield: IStageShield) {
