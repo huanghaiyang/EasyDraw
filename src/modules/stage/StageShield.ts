@@ -561,9 +561,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
-
+    
     // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
-    if (this.isArbitraryDrawing && !this.store.creatingElement || this.isDrawerActive) {
+    if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
       this._clearStageSelects();
     } else if (this.isMoveableActive) {
       // 尝试激活控制器

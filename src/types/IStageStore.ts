@@ -64,4 +64,5 @@ export default interface IStageStore extends IStageSetter {
   beginEditingElements(elements: IElement[]): void;
   endEditingElements(elements: IElement[]): void;
   getFinishedSelectedElements(): IElement[];
+  isSelectedEqCreating(): boolean;
 }

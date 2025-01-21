@@ -6,7 +6,7 @@ import {
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { flatten } from "lodash";
+import { flatten, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -1189,5 +1189,16 @@ export default class StageStore implements IStageStore {
         }
       }
     })
+  }
+
+  /**
+   * 判断选中的元素是否等于正在绘制的元素
+   * 
+   * @returns 
+   */
+  isSelectedEqCreating(): boolean {
+    const selectedIds = new Set(this.selectedElements.map(element => element.id));
+    const creatingIds = new Set(this.creatingElements.map(element => element.id));
+    return isEqual(selectedIds, creatingIds);
   }
 }
