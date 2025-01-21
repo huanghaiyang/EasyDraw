@@ -558,13 +558,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
-    let shouldClear: boolean = false;
-    let targetElement: IElement;
-    let isSelectContainsTarget: boolean;
 
-    if (this.isDrawerActive) {
-      shouldClear = true;
+    // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
+    if (this.isArbitraryDrawing && !this.store.creatingElement || this.isDrawerActive) {
+      this._clearStageSelects();
     } else if (this.isMoveableActive) {
+      // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
@@ -576,25 +575,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._isElementsTransforming = true;
       } else {
         // 获取鼠标点击的组件
-        targetElement = this.selection.getElementOnPoint(this.cursor.value);
+        const targetElement = this.selection.getElementOnPoint(this.cursor.value);
         // 判断当前鼠标位置的组件是否已经被选中
-        isSelectContainsTarget = this.selection.checkSelectContainsTarget();
-        if (!targetElement && !isSelectContainsTarget) {
-          shouldClear = true;
+        const isSelectContainsTarget = this.selection.checkSelectContainsTarget();
+        // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
+        if (targetElement && !isSelectContainsTarget) {
+          this._clearStageSelects();
+          this.store.selectElement(targetElement);
         }
       }
-    }
-
-    // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
-    if (targetElement && !isSelectContainsTarget) {
-      this._clearStageSelects();
-      this.store.selectElement(targetElement);
-    } else if (shouldClear && !this.isArbitraryDrawing) {
-      this._clearStageSelects();
-    }
-
-    // 判断是否是要拖动舞台
-    if (this.isHandActive) {
+    } else if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
     }
     await this.mask.redraw();
@@ -605,9 +595,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _handleArbitraryPressUp(): void {
     const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
-    if (element.status === ElementStatus.initialed) {
-      this._clearStageSelects();
-    }
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
     }

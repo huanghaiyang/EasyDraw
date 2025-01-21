@@ -173,8 +173,9 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    */
   hitTargetElements(point: IPoint): void {
-    for (let i = this.shield.store.stageElements.length - 1; i >= 0; i--) {
-      const element = this.shield.store.stageElements[i];
+    const stageElements = this.shield.store.stageElements;
+    for (let i = stageElements.length - 1; i >= 0; i--) {
+      const element = stageElements[i];
       const isTarget = element.isContainsPoint(point);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
@@ -303,7 +304,13 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getElementOnPoint(point: IPoint): IElement {
-    return this.shield.store.stageElements.find(item => item.isContainsPoint(point));
+    const stageElements = this.shield.store.stageElements;
+    for (let i = stageElements.length - 1; i >= 0; i--) {
+      const element = stageElements[i];
+      if (element.isContainsPoint(point)) {
+        return element;
+      }
+    }
   }
 
   /**
@@ -312,8 +319,9 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   checkSelectContainsTarget(): boolean {
-    if (this.shield.store.targetElements.length === 0) return false;
-    const targetIds = this.shield.store.targetElements.map(item => item.id);
+    const targetElements = this.shield.store.targetElements;
+    if (targetElements.length === 0) return false;
+    const targetIds = targetElements.map(item => item.id);
     const selectedIds = this.shield.store.selectedElements.map(item => item.id);
     return every(targetIds, item => includes(selectedIds, item))
   }
