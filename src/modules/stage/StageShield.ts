@@ -558,8 +558,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
-    let shouldClear: boolean;
+    let shouldClear: boolean = false;
     let targetElement: IElement;
+    let isSelectContainsTarget: boolean;
 
     if (this.isDrawerActive) {
       shouldClear = true;
@@ -574,20 +575,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       } else if (controller instanceof ElementBorderTransformer) {
         this._isElementsTransforming = true;
       } else {
+        // 获取鼠标点击的组件
         targetElement = this.selection.getElementOnPoint(this.cursor.value);
-        const isSelectContainsTarget = this.selection.checkSelectContainsTarget();
+        // 判断当前鼠标位置的组件是否已经被选中
+        isSelectContainsTarget = this.selection.checkSelectContainsTarget();
         if (!targetElement && !isSelectContainsTarget) {
           shouldClear = true;
         }
       }
     }
 
-    // 自由绘制过程中不需要清除选区
-    if (shouldClear && !this.isArbitraryDrawing) {
+    // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
+    if (targetElement && !isSelectContainsTarget) {
       this._clearStageSelects();
-    } else if (targetElement) {
       this.store.selectElement(targetElement);
+    } else if (shouldClear && !this.isArbitraryDrawing) {
+      this._clearStageSelects();
     }
+
     // 判断是否是要拖动舞台
     if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
