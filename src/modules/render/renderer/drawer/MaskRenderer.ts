@@ -113,7 +113,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const models: IMaskModel[] = [...this.drawer.shield.selection.getModels(), this.drawer.shield.selection.getSelectionModel()];
+    const models: IMaskModel[] = [...this.drawer.shield.selection.getModels(), this.drawer.shield.selection.getRealTimeSelectionModel()];
     models.forEach(model => {
       if (model) {
         const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
@@ -139,7 +139,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns 
    */
   private createMaskTransformerTasks(): IRenderTask[] {
-    const models: IMaskModel[] = this.drawer.shield.selection.getTransformerModels();
+    const models: IMaskModel[] = this.drawer.shield.selection.getRealTimeTransformerModels();
     return models.map(model => {
       switch(model.element.transformerType) {
         case TransformerTypes.circle: {

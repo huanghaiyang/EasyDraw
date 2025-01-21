@@ -8,12 +8,14 @@ import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { every, flatten, includes } from "lodash";
-import IStageBoxer from "@/types/IStageBoxer";
-import StageBoxer from "@/modules/stage/StageBoxer";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
-  boxer: IStageBoxer;
+
+  // 选区模型
+  private _selectionModel: IMaskModel;
+  // 变换控制器模型
+  private _transformerModels: IMaskModel[];
 
   // 选区范围点
   private _rangePoints: IPoint[] = null;
@@ -29,9 +31,18 @@ export default class StageSelection implements IStageSelection {
     return this._rangePoints !== null && this._rangePoints.length > 0;
   }
 
+  // 选区模型
+  get selectionModel(): IMaskModel {
+    return this._selectionModel;
+  }
+
+  // 变换控制器模型
+  get transformerModels(): IMaskModel[] {
+    return this._transformerModels;
+  }
+
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this.boxer = new StageBoxer(shield, this);
   }
 
   /**
@@ -160,7 +171,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getSelectionModel(): IMaskModel {
+  calcSelectionModel(): IMaskModel {
     const singleSelectionModel = this.calcSingleSelectionModel();
     if (singleSelectionModel) {
       return singleSelectionModel;
@@ -177,7 +188,7 @@ export default class StageSelection implements IStageSelection {
     const elements = this.shield.store.selectedElements;
     if (elements.length === 1) {
       const { transformerType, model: { angle }, transformers, verticesTransformEnable } = elements[0]
-      return this.getTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
+      return this.calcTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
     }
     return [];
   }
@@ -188,9 +199,9 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   calcMultiTransformerModels(): IMaskModel[] {
-    const selectionModel = this.getSelectionModel();
+    const selectionModel = this.calcSelectionModel();
     if (selectionModel) {
-      return this.getTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
+      return this.calcTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
     }
     return [];
   }
@@ -200,7 +211,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getTransformerModels(): IMaskModel[] {
+  calcTransformerModels(): IMaskModel[] {
     const singleTransformerModels = this.calcSingleTransformerModels();
     if (singleTransformerModels.length) {
       return singleTransformerModels;
@@ -216,7 +227,7 @@ export default class StageSelection implements IStageSelection {
    * @param transformerType 
    * @returns 
    */
-  private getTransformerModelsByPoints(points: IPoint[], angle: number, transformerType: TransformerTypes): IMaskModel[] {
+  private calcTransformerModelsByPoints(points: IPoint[], angle: number, transformerType: TransformerTypes): IMaskModel[] {
     return points.map((point) => {
       const model: IMaskModel = {
         point,
@@ -412,5 +423,47 @@ export default class StageSelection implements IStageSelection {
   deActiveElementsBorderTransformers(): void {
     const element = this.shield.store.uniqSelectedElement;
     element?.deActiveAllBorderTransformers();
+  }
+
+  /**
+   * 刷新选区模型
+   */
+  refreshSelectionModel(): void {
+    this._selectionModel = this.calcSelectionModel();
+  }
+
+  /**
+   * 刷新变换控制器模型
+   */
+  refreshTransformerModels(): void {
+    this._transformerModels = this.calcTransformerModels();
+  }
+
+  /**
+   * 刷新选区模型
+   */
+  refresh(): void {
+    this.refreshSelectionModel();
+    this.refreshTransformerModels();
+  }
+
+  /**
+   * 获取实时选区模型
+   * 
+   * @returns 
+   */
+  getRealTimeSelectionModel(): IMaskModel {
+    this.refreshSelectionModel();
+    return this._selectionModel;
+  }
+
+  /**
+   * 获取实时变换控制器模型
+   * 
+   * @returns 
+   */
+  getRealTimeTransformerModels(): IMaskModel[] {
+    this.refreshTransformerModels();
+    return this._transformerModels;
   }
 }
