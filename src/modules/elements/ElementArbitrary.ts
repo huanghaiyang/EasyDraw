@@ -251,11 +251,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
         y: rotatePoints[this.editingCoordIndex].y + offset.y
       }
       const lockPoint = this._originalRotateBoxPoints[0];
-      let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint)));
-      center = MathUtils.rotateRelativeCenter(center, this.model.angle, lockPoint);
-      const newCenterCoord = ElementUtils.calcWorldPoint(center, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      const coords = rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -this.model.angle, newCenterCoord));
+      const coords = ElementUtils.calcCoordsByRotatedPathPoints(rotatePoints, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       this.model.coords = coords;
       this.refreshBoxCoords();
     }

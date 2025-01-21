@@ -414,4 +414,23 @@ export default class ElementUtils {
     region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, MathUtils.calcAngle(next, current) + 90));
     return region;
   }
+
+  /**
+   * 通过旋转坐标计算旋转前的坐标
+   * 
+   * @param rotatePoints 
+   * @param angle 
+   * @param lockPoint 
+   * @param stageRect 
+   * @param stageWorldCoord 
+   * @param stageScale 
+   * @returns 
+   */
+  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
+    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -angle, lockPoint)));
+    center = MathUtils.rotateRelativeCenter(center, angle, lockPoint);
+    const newCenterCoord = ElementUtils.calcWorldPoint(center, stageRect, stageWorldCoord, stageScale);
+    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, stageRect, stageWorldCoord, stageScale);
+    return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
+  }
 }
