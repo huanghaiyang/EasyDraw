@@ -17,7 +17,11 @@ export default interface IStageStore extends IStageSetter {
   get rotatingTargetElements(): IElement[];
   get editingElements(): IElement[];
   get isSelectedEmpty(): boolean;
+  get isTargetEmpty(): boolean;
+  get isRangeEmpty(): boolean;
   get isEditingEmpty(): boolean;
+  get isStageEmpty(): boolean;
+  get isNoneStageEmpty(): boolean;
   get isEmpty(): boolean;
   get isVisibleEmpty(): boolean;
 
@@ -59,4 +63,5 @@ export default interface IStageStore extends IStageSetter {
   cancelTargetElements(): void;
   beginEditingElements(elements: IElement[]): void;
   endEditingElements(elements: IElement[]): void;
+  getFinishedSelectedElements(): IElement[];
 }

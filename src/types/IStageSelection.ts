@@ -3,11 +3,15 @@ import IElement from "@/types/IElement";
 import { IMaskModel } from "@/types/IModel";
 import IElementTransformer, { IElementBorderTransformer } from '@/types/IElementTransformer';
 import IElementRotation from "@/types/IElementRotation";
+import IStageBoxer from "@/types/IStageBoxer";
 
 // 舞台选区
 export default interface IStageSelection {
   get isEmpty(): boolean;
   get isRange(): boolean;
+
+  boxer: IStageBoxer;
+
   setRange(points: IPoint[]): void;
   selectRange(): void;
   getModels(): IMaskModel[];
@@ -26,4 +30,8 @@ export default interface IStageSelection {
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IElement;
   checkSelectContainsTarget(): boolean;
+  calcMultiSelectionModel(): IMaskModel;
+  calcSingleSelectionModel(): IMaskModel;
+  calcSingleTransformerModels(): IMaskModel[];
+  calcMultiTransformerModels(): IMaskModel[];
 }

@@ -146,6 +146,26 @@ export default class StageStore implements IStageStore {
     return this.editingElements.length === 0;
   }
 
+  // 是否命中组件为空
+  get isTargetEmpty(): boolean {
+    return this.targetElements.length === 0;
+  }
+
+  // 是否选区范围组件为空
+  get isRangeEmpty(): boolean {
+    return this.rangeElements.length === 0;
+  }
+
+  // 是否舞台组件为空
+  get isStageEmpty(): boolean {
+    return this.stageElements.length === 0;
+  }
+
+  // 是否未在舞台的组件为空
+  get isNoneStageEmpty(): boolean {
+    return this.noneStageElements.length === 0;
+  }
+
   /**
    * 组件新增
    */
@@ -1142,6 +1162,15 @@ export default class StageStore implements IStageStore {
    */
   endEditingElements(elements: IElement[]): void {
     this._setElementsEditing(elements, false);
+  }
+
+  /**
+   * 获取已完成的选中元素
+   * 
+   * @returns 
+   */
+  getFinishedSelectedElements(): IElement[] {
+    return this.selectedElements.filter(element => element.status === ElementStatus.finished);
   }
 
   /**

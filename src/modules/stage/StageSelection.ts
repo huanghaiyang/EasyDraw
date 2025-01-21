@@ -1,4 +1,4 @@
-import { IPoint, DrawerMaskModelTypes, ElementStatus } from "@/types";
+import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
@@ -8,18 +8,20 @@ import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { every, flatten, includes } from "lodash";
+import IStageBoxer from "@/types/IStageBoxer";
+import StageBoxer from "@/modules/stage/StageBoxer";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
+  boxer: IStageBoxer;
 
   // 选区范围点
   private _rangePoints: IPoint[] = null;
 
   // 是否为空
   get isEmpty(): boolean {
-    return this.shield.store.selectedElements.length === 0
-      && this.shield.store.targetElements.length === 0
-      && this.shield.store.rangeElements.length === 0;
+    const { isSelectedEmpty, isTargetEmpty, isRangeEmpty } = this.shield.store;
+    return isSelectedEmpty && isTargetEmpty && isRangeEmpty;
   }
 
   // 是否为选区范围
@@ -29,6 +31,7 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+    this.boxer = new StageBoxer(shield, this);
   }
 
   /**
@@ -60,36 +63,59 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 获取选区范围对象
+   * 
+   * @returns 
+   */
+  private _getRangeElementsMaskModels(): IMaskModel[] {
+    return this.shield.store.rangeElements.map(element => {
+      return {
+        type: DrawerMaskModelTypes.path,
+        ...this._getElementMaskModelProps(element),
+      };
+    });
+  }
+
+  /**
+   * 获取高亮对象
+   * 
+   * @returns 
+   */
+  private _getTargetElementsMaskModels(): IMaskModel[] {
+    return this.shield.store.targetElements.map(element => {
+      return {
+        type: DrawerMaskModelTypes.path,
+        ...this._getElementMaskModelProps(element),
+      };
+    });
+  }
+
+  /**
+   * 获取选中对象
+   * 
+   * @returns 
+   */
+  private _getSelectedElementsMaskModels(): IMaskModel[] {
+    return this.shield.store.selectedElements.map(element => {
+      return {
+        type: DrawerMaskModelTypes.path,
+        ...this._getElementMaskModelProps(element),
+      };
+    });
+  }
+
+  /**
    * 获取高亮对象
    * 
    * @returns 
    */
   getModels(): IMaskModel[] {
     const result: Partial<IMaskModel>[] = [];
-
     if (this.isRange) {
-      this.shield.store.rangeElements.forEach(element => {
-        result.push({
-          type: DrawerMaskModelTypes.path,
-          ...this._getElementMaskModelProps(element),
-        });
-      });
+      result.push(...this._getRangeElementsMaskModels());
     }
-
-    this.shield.store.targetElements.forEach(element => {
-      result.push({
-        type: DrawerMaskModelTypes.path,
-        ...this._getElementMaskModelProps(element),
-      });
-    });
-
-    this.shield.store.selectedElements.forEach(element => {
-      result.push({
-        type: DrawerMaskModelTypes.path,
-        ...this._getElementMaskModelProps(element),
-      });
-    });
-
+    result.push(...this._getTargetElementsMaskModels());
+    result.push(...this._getSelectedElementsMaskModels());
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
@@ -100,18 +126,28 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 获取选区对象
+   * 计算单选选区模型
    * 
    * @returns 
    */
-  getSelectionModel(): IMaskModel {
-    const elements = this.shield.store.selectedElements.filter(element => element.status === ElementStatus.finished);
+  calcSingleSelectionModel(): IMaskModel {
+    const elements = this.shield.store.getFinishedSelectedElements();
     if (elements.length === 1 && elements[0].boxVerticesTransformEnable) {
       return {
         type: DrawerMaskModelTypes.selection,
         points: elements[0].rotateBoxPoints,
       };
-    } else if (elements.length >= 2) {
+    }
+  }
+
+  /**
+   * 计算多选选区模型
+   * 
+   * @returns 
+   */
+  calcMultiSelectionModel(): IMaskModel {
+    const elements = this.shield.store.getFinishedSelectedElements();
+    if (elements.length >= 2) {
       return {
         type: DrawerMaskModelTypes.selection,
         points: CommonUtils.getBoxPoints(flatten(elements.map(element => element.rotateBoxPoints))),
@@ -120,20 +156,56 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 获取选区对象
+   * 
+   * @returns 
+   */
+  getSelectionModel(): IMaskModel {
+    const singleSelectionModel = this.calcSingleSelectionModel();
+    if (singleSelectionModel) {
+      return singleSelectionModel;
+    }
+    return this.calcMultiSelectionModel();
+  }
+  
+  /**
+   * 计算单选变换控制器对象
+   * 
+   * @returns 
+   */
+  calcSingleTransformerModels(): IMaskModel[] {
+    const elements = this.shield.store.selectedElements;
+    if (elements.length === 1) {
+      const { transformerType, model: { angle }, transformers, verticesTransformEnable } = elements[0]
+      return this.getTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
+    }
+    return [];
+  }
+
+  /**
+   * 计算多选变换控制器对象
+   * 
+   * @returns 
+   */
+  calcMultiTransformerModels(): IMaskModel[] {
+    const selectionModel = this.getSelectionModel();
+    if (selectionModel) {
+      return this.getTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
+    }
+    return [];
+  }
+
+  /**
    * 获取变换控制器对象
    * 
    * @returns 
    */
   getTransformerModels(): IMaskModel[] {
-    const length = this.shield.store.selectedElements.length;
-    if (length === 1) {
-      const { transformerType, model: { angle }, transformers, verticesTransformEnable } = this.shield.store.selectedElements[0]
-      return this.getTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
-    } else if (length >= 2) {
-      const selectionModel = this.getSelectionModel();
-      return this.getTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
+    const singleTransformerModels = this.calcSingleTransformerModels();
+    if (singleTransformerModels.length) {
+      return singleTransformerModels;
     }
-    return [];
+    return this.calcMultiTransformerModels();
   }
 
   /**
