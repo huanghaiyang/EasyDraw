@@ -10,6 +10,6 @@ export default interface IStageCursor {
   clear(): void;
   transform(e: MouseEvent): IPoint;
   setStyle(cursor: string): void;
-  updateStyle(e: MouseEvent): void;
+  updateStyle(e?: MouseEvent): void;
   getTask(): IMaskTask;
 }

@@ -1,5 +1,5 @@
 import { MinCursorMXD, MinCursorMYD } from "@/types/Constants";
-import { ElementStatus, IPoint, ShieldDispatcherNames, } from "@/types";
+import { IPoint, ShieldDispatcherNames, } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
 import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
@@ -31,6 +31,7 @@ import MathUtils from "@/utils/MathUtils";
 import { AutoFitPadding } from "@/types/Stage";
 import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
 import StageAlign from "@/modules/stage/StageAlign";
+import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -381,6 +382,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on('deleteSelects', this._handleSelectsDelete.bind(this))
     this.event.on('selectAll', this._handleSelectAll.bind(this))
     this.event.on('cancel', this._handleCancel.bind(this))
+    this.event.on('selectMoveable', this._handleSelectMoveable.bind(this))
+    this.event.on('selectHand', this._handleSelectHand.bind(this))
   }
 
   /**
@@ -907,6 +910,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setCreator(creator: Creator): Promise<void> {
     this.currentCreator = creator;
+    this.emit(ShieldDispatcherNames.creatorChanged, creator);
   }
 
   /**
@@ -1178,6 +1182,26 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.commitArbitraryDrawing();
     } else if (!this.store.isEditingEmpty) {
       this.commitEditingDrawing();
+    }
+  }
+
+  /**
+   * 处理组件移动操作
+   */
+  _handleSelectMoveable(): void {
+    if (this.currentCreator.type === HandCreator.type) {
+      this.setCreator(MoveableCreator);
+      this.cursor.updateStyle();
+    }
+  }
+
+  /**
+   * 处理组件手型操作
+   */
+  _handleSelectHand(): void {
+    if (this.currentCreator.type === MoveableCreator.type) {
+      this.setCreator(HandCreator);
+      this.cursor.updateStyle();
     }
   }
 

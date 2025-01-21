@@ -23,4 +23,5 @@ export declare type Creator = {
   name: string,
   category: CreatorCategories,
   icon?: string,
+  shortcut?: string,
 }

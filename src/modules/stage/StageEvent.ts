@@ -20,6 +20,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isCtrlReduceEvent: (e: KeyboardEvent) => boolean;
   private _isCtrl0Event: (e: KeyboardEvent) => boolean;
   private _isCtrlAEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlMEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlHEvent: (e: KeyboardEvent) => boolean;
   private _isShiftEvent: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
   private _isDeleteEvent: (e: KeyboardEvent) => boolean;
@@ -62,6 +64,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isShift1Event = isHotkey('shift+1');
     this._isDeleteEvent = isHotkey('backspace');
     this._isCtrlAEvent = isHotkey('ctrl+a');
+    this._isCtrlMEvent = isHotkey('ctrl+m');
+    this._isCtrlHEvent = isHotkey('ctrl+h');
     this._isEscEvent = isHotkey('esc');
     this.initEvents();
   }
@@ -217,6 +221,16 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         if (this._isCtrlAEvent(e)) {
           EventUtils.stopPP(e)
           this.emit('selectAll')
+        }
+        // 监听组件移动操作
+        if (this._isCtrlMEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('selectMoveable')
+        }
+        // 监听组件手型操作
+        if (this._isCtrlHEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('selectHand')
         }
         // 监听esc键
         if (this._isEscEvent(e)) {

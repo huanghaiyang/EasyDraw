@@ -80,4 +80,5 @@ export enum ShieldDispatcherNames {
   textAlignChanged,
   textBaselineChanged,
   ratioLockedChanged,
+  creatorChanged,
 }

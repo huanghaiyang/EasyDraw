@@ -5,6 +5,7 @@ export const MoveableCreator: Creator = {
   name: '移动',
   category: CreatorCategories.cursor,
   icon: 'icon-verbise-arrow-cursor-2--mouse-select-cursor',
+  shortcut: 'ctrl+m'
 }
 
 export const HandCreator: Creator = {
@@ -12,6 +13,7 @@ export const HandCreator: Creator = {
   name: '手型',
   category: CreatorCategories.cursor,
   icon: 'icon-verbise-hand',
+  shortcut: 'ctrl+h'
 }
 
 export const RectangleCreator: Creator = {

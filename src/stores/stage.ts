@@ -90,6 +90,7 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -98,6 +99,13 @@ export const useStageStore = defineStore("stage", {
      */
     async setCreator(creator: Creator) {
       await shield.setCreator(creator);
+    },
+    /**
+     * 创作工具变更
+     * 
+     * @param creator 
+     */
+    onCreatorChanged(creator: Creator) {
       this.currentCreator = creator;
       if (creator.category === CreatorCategories.cursor) {
         this.currentCursorCreator = creator;
@@ -108,7 +116,7 @@ export const useStageStore = defineStore("stage", {
       if (creator.category === CreatorCategories.freedom) {
         this.currentArbitraryCreator = creator;
       }
-    },
+    },  
     /**
      * 舞台组件创建完毕
      * 

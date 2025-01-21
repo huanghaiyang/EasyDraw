@@ -8,9 +8,10 @@ const { creator } = defineProps<{
 
 <template>
   <div class="creator-menu__item">
-    <div class="create-menu__item-text">{{ creator.name }}</div>
-    <div class="create-menu__item-icon">
+    <div class="text">{{ creator.name }}</div>
+    <div class="icon">
       <el-icon :class="['iconfont', creator.icon]"></el-icon>
     </div>
+    <div class="shortcut" v-if="!!creator.shortcut">{{ creator.shortcut }}</div>
   </div>
 </template>

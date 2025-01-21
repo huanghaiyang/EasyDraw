@@ -128,6 +128,16 @@ const select = (item) => {
       padding: 5px 10px;
       border-radius: 4px;
       transition: all 0.2s;
+
+      .shortcut {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        margin-left: 5px;
+        min-width: 20px;
+      }
+
       &:hover {
         .menu-active();
       }
