@@ -21,12 +21,16 @@ import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArbitraryPointClosestMargin } from "@/types/Constants";
+import { ElementGroupSubject, IElementGroup } from "@/types/IElementGroup";
+import ElementGroup from "@/modules/elements/ElementGroup";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
 
   // 画板上绘制的元素列表（形状、文字、图片等）
   private _elementList: ElementList;
+  // 组合列表
+  private _elementGroups: Map<string, IElementGroup>;
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
@@ -576,6 +580,16 @@ export default class StageStore implements IStageStore {
    */
   getElementById(id: string): IElement {
     return this._elementsMap.get(id);
+  }
+
+  /**
+   * 通过id获取元素
+   * 
+   * @param ids 
+   * @returns 
+   */
+  getElementsByIds(ids: string[]): IElement[] {
+    return ids.map(id => this.getElementById(id)).filter(element => element !== undefined);
   }
 
   /**
@@ -1200,5 +1214,73 @@ export default class StageStore implements IStageStore {
     const selectedIds = new Set(this.selectedElements.map(element => element.id));
     const creatingIds = new Set(this.creatingElements.map(element => element.id));
     return isEqual(selectedIds, creatingIds);
+  }
+
+  /**
+   * 创建组合
+   * 
+   * @param elements 
+   */
+  createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
+    const group = new ElementGroup(elements, this.shield);
+    this._elementGroups.set(group.id, group);
+    return group;
+  }
+
+  /**
+   * 删除组合
+   * 
+   * @param group 
+   */
+  removeElementGroup(group: IElementGroup): void {
+    this._elementGroups.delete(group.id);
+  }
+
+  /**
+   * 删除组合
+   * 
+   * @param id 
+   */
+  removeElementGroupById(id: string): void {
+    this._elementGroups.delete(id);
+  }
+
+  /**
+   * 获取组合元素
+   * 
+   * @param id 
+   */
+  getElementGroupById(id: string): IElementGroup {
+    return this._elementGroups.get(id);
+  }
+
+  /**
+   * 获取组合元素
+   * 
+   * @param ids 
+   */
+  getElementGroupByIds(ids: string[]): IElementGroup[] {
+    return ids.map(id => this.getElementGroupById(id)).filter(group => group !== undefined);
+  }
+
+  /**
+   * 获取组合元素
+   * 
+   * @param ids 
+   */
+  getGroupElementSubjectsByIds(ids: string[]): ElementGroupSubject[] {
+    const result: ElementGroupSubject[] = [];
+    ids.forEach(id => {
+      const element = this.getElementById(id);
+      if (element) {
+        result.push(element);
+      } else {
+        const group = this.getElementGroupById(id);
+        if (group) {
+          result.push(...group.subs);
+        }
+      }
+    })
+    return result;
   }
 }

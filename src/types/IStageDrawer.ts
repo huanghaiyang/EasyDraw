@@ -5,11 +5,14 @@ import { IStageRenderer } from "@/types/IStageRenderer";
 
 // 舞台画布
 export interface IStageDrawer extends IStageCanvas, EventEmitter {
+  // 渲染器
   renderer: IStageRenderer;
+  // 重绘
   redraw(force?: boolean): Promise<void>;
 }
 
 export interface IHelperDrawer extends IStageDrawer {
+  // 舞台
   shield: IStageShield;
 }
 

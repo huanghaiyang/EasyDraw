@@ -2,7 +2,9 @@ import { IQueueRender } from "@/types/IRender";
 
 // 舞台渲染器
 export interface IStageRenderer {
+  // 重绘
   redraw(force?: boolean): Promise<void>;
+  // 清除
   clear(): void;
 }
 

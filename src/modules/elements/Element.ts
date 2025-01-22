@@ -16,6 +16,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { IVerticesTransformer, TransformerTypes, IBorderTransformer } from "@/types/ITransformer";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
+import { IElementGroup } from "@/types/IElementGroup";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -62,6 +63,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
+
+  get group(): IElementGroup {
+    return this.shield.store.getElementGroupById(this.model.groupId);
+  }
 
   // 获取边框线段点坐标
   get strokePathPoints(): IPoint[] {
