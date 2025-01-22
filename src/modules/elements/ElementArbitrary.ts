@@ -1,13 +1,12 @@
 import { ElementObject, IElementArbitrary } from "@/types/IElement";
 import Element from "@/modules/elements/Element";
 import IStageShield from "@/types/IStageShield";
-import { TransformerTypes } from "@/types/IElementTransformer";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, flatten, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/Constants";
-import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
+import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -211,7 +210,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * 
    * @param transformer 
    */
-  activeTransformer(transformer: ElementTransformer): void {
+  activeTransformer(transformer: IVerticesTransformer): void {
     super.activeTransformer(transformer);
     const index = this._transformers.findIndex(item => item.id === transformer.id);
     this.activeEditingCoord(index);

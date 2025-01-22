@@ -1,16 +1,21 @@
 import { IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
 import { IMaskModel } from "@/types/IModel";
-import IElementTransformer, { IElementBorderTransformer } from '@/types/IElementTransformer';
 import IElementRotation from "@/types/IElementRotation";
+import IStageShield from "@/types/IStageShield";
+import { IVerticesTransformer } from "@/types/ITransformer";
+import { IBorderTransformer } from "@/types/ITransformer";
 
 // 舞台选区
 export default interface IStageSelection {
+  shield: IStageShield;
+
   get isEmpty(): boolean;
   get isRange(): boolean;
 
   get selectionModel(): IMaskModel;
   get transformerModels(): IMaskModel[];
+  get center(): IPoint;
 
   setRange(points: IPoint[]): void;
   selectRange(): void;
@@ -20,12 +25,12 @@ export default interface IStageSelection {
   clearSelects(): void;
   hitTargetElements(point: IPoint): void;
   tryActiveElementRotation(point: IPoint): IElementRotation;
-  tryActiveElementTransformer(point: IPoint): IElementTransformer;
-  tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer;
+  tryActiveElementTransformer(point: IPoint): IVerticesTransformer;
+  tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer;
   deActiveElementsTransformers(): void;
   deActiveElementsBorderTransformers(): void;
-  getActiveElementTransformer(): IElementTransformer;
-  getActiveElementBorderTransformer(): IElementBorderTransformer;
+  getActiveElementTransformer(): IVerticesTransformer;
+  getActiveElementBorderTransformer(): IBorderTransformer;
   refreshRangeElements(rangePoints: IPoint[]): void;
   getElementOnPoint(point: IPoint): IElement;
   checkSelectContainsTarget(): boolean;

@@ -1,18 +1,19 @@
+import ITransformer from "@/types/ITransformer";
 import IElement from "@/types/IElement";
-import { ITransformer } from "@/types/IElementTransformer";
+import IStageSelection from "@/types/IStageSelection";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class BaseTransformer implements ITransformer {
-  element: IElement;
   id: string;
   isActive: boolean;
+  host?: IElement | IStageSelection;
 
   get angle(): number {
     return 0;
   }
 
-  constructor(element: IElement) {
-    this.element = element;
+  constructor(host: IElement | IStageSelection) {
+    this.host = host;
     this.id = CommonUtils.getRandomId();
     this.isActive = false;
   }

@@ -6,9 +6,9 @@ import { SelectionRotationSize } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import IController from "@/types/IController";
 
-
-export default class ElementRotation implements IElementRotation {
+export default class ElementRotation implements IElementRotation, IController {
   id: string;
   model: IRotationModel = {
     point: null,

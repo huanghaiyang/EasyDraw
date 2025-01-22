@@ -1,9 +1,11 @@
 import { ElementStatus, IPoint } from "@/types/index";
-import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
+import { TransformerTypes } from "@/types/ITransformer";
+import { IBorderTransformer } from "@/types/ITransformer";
+import { IVerticesTransformer } from "@/types/ITransformer";
 
 // 舞台元素数据模型
 export type ElementObject = {
@@ -89,8 +91,8 @@ export default interface IElement {
   get strokePathCoords(): IPoint[];
   get center(): IPoint;
   get centerCoord(): IPoint;
-  get transformers(): IElementTransformer[];
-  get borderTransformers(): IElementBorderTransformer[];
+  get transformers(): IVerticesTransformer[];
+  get borderTransformers(): IBorderTransformer[];
   get transformerType(): TransformerTypes;
   get rect(): Partial<DOMRect>;
   get alignPoints(): IPoint[];
@@ -172,14 +174,14 @@ export default interface IElement {
   calcRotatePathCoords(): IPoint[];
   calcRect(): Partial<DOMRect>;
 
-  getTransformerByPoint(point: IPoint): IElementTransformer;
-  getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer;
-  activeTransformer(transformer: IElementTransformer): void;
-  activeBorderTransformer(transformer: IElementBorderTransformer): void;
+  getTransformerByPoint(point: IPoint): IVerticesTransformer;
+  getBorderTransformerByPoint(point: IPoint): IBorderTransformer;
+  activeTransformer(transformer: IVerticesTransformer): void;
+  activeBorderTransformer(transformer: IBorderTransformer): void;
   deActiveAllTransformers(): void;
   deActiveAllBorderTransformers(): void;
-  getActiveElementTransformer(): IElementTransformer;
-  getActiveElementBorderTransformer(): IElementBorderTransformer;
+  getActiveElementTransformer(): IVerticesTransformer;
+  getActiveElementBorderTransformer(): IBorderTransformer;
   transform(offset: IPoint): void;
   transformByVertices(offset: IPoint): void;
   transformByBorder(offset: IPoint): void;

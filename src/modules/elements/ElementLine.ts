@@ -6,7 +6,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
-import { TransformerTypes } from "@/types/IElementTransformer";
+import { TransformerTypes } from "@/types/ITransformer";
 
 export default class ElementLine extends Element implements IElementLine {
   get editingEnable(): boolean {

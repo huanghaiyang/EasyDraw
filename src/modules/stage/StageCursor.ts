@@ -7,12 +7,12 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
 import { CursorSize } from "@/styles/MaskStyles";
-import IElementTransformer, { IElementBorderTransformer, ITransformer } from "@/types/IElementTransformer";
 import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
 import { TransformTypes } from "@/types/Stage";
-import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
-import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import ITransformer, { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
+import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 
 export default class StageCursor implements IStageCursor {
   value: IPoint;
@@ -77,9 +77,9 @@ export default class StageCursor implements IStageCursor {
       return this.createMaskCursorTask();
     } else if (this.shield.isMoveableActive) {
       const transformer = this._getElementTransformer();
-      if (transformer instanceof ElementTransformer) {
+      if (transformer instanceof VerticesTransformer) {
         return this.createMaskTransformerCursorTask(transformer);
-      } else if (transformer instanceof ElementBorderTransformer) {
+      } else if (transformer instanceof BorderTransformer) {
         return this.createMaskBorderTransformerCursorTask(transformer);
       }
     }
@@ -125,7 +125,7 @@ export default class StageCursor implements IStageCursor {
    * @param borderTransformer 
    * @returns 
    */
-  private createMaskBorderTransformerCursorTask(borderTransformer: IElementBorderTransformer): IMaskTask {
+  private createMaskBorderTransformerCursorTask(borderTransformer: IBorderTransformer): IMaskTask {
     if (!this.value) return;
     const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(borderTransformer), TransformTypes.border, { canvas: this.shield.mask.canvas });
     return task;
@@ -137,7 +137,7 @@ export default class StageCursor implements IStageCursor {
    * @param transformer 
    * @returns 
    */
-  private createMaskTransformerCursorTask(transformer: IElementTransformer): IMaskTask {
+  private createMaskTransformerCursorTask(transformer: IVerticesTransformer): IMaskTask {
     if (!this.value) return;
     const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(transformer), TransformTypes.vertices, { canvas: this.shield.mask.canvas });
     return task;

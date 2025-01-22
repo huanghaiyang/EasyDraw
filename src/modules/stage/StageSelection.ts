@@ -1,7 +1,7 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
-import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
+import { TransformerTypes, IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
 import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
@@ -39,6 +39,11 @@ export default class StageSelection implements IStageSelection {
   // 变换控制器模型
   get transformerModels(): IMaskModel[] {
     return this._transformerModels;
+  }
+
+  // 选区中心点
+  get center(): IPoint {
+    return null;
   }
 
   constructor(shield: IStageShield) {
@@ -178,7 +183,7 @@ export default class StageSelection implements IStageSelection {
     }
     return this.calcMultiSelectionModel();
   }
-  
+
   /**
    * 计算单选变换控制器对象
    * 
@@ -291,7 +296,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @param point 
    */
-  tryActiveElementTransformer(point: IPoint): IElementTransformer {
+  tryActiveElementTransformer(point: IPoint): IVerticesTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       const transformer = element.getTransformerByPoint(point);
@@ -310,7 +315,7 @@ export default class StageSelection implements IStageSelection {
    * @param point 
    * @returns 
    */
-  tryActiveElementBorderTransformer(point: IPoint): IElementBorderTransformer {
+  tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       if (element.borderTransformEnable) {
@@ -330,7 +335,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getActiveElementTransformer(): IElementTransformer {
+  getActiveElementTransformer(): IVerticesTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       return element.getActiveElementTransformer();
@@ -342,7 +347,7 @@ export default class StageSelection implements IStageSelection {
    * 
    * @returns 
    */
-  getActiveElementBorderTransformer(): IElementBorderTransformer {
+  getActiveElementBorderTransformer(): IBorderTransformer {
     const element = this.shield.store.uniqSelectedElement;
     if (element) {
       return element.getActiveElementBorderTransformer();

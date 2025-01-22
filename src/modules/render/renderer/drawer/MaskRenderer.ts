@@ -18,7 +18,7 @@ import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPos
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
-import { TransformerTypes } from "@/types/IElementTransformer";
+import { TransformerTypes } from "@/types/ITransformer";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
 

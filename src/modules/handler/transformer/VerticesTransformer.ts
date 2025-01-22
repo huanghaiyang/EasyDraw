@@ -1,21 +1,22 @@
 import { IPoint } from "@/types";
 import IElement from "@/types/IElement";
-import IElementTransformer from "@/types/IElementTransformer";
 import MathUtils from "@/utils/MathUtils";
-import BaseTransformer from "@/modules/elements/transformer/BaseTransformer";
+import { IVerticesTransformer } from "@/types/ITransformer";
+import BaseTransformer from "@/modules/handler/transformer/BaseTransformer";
+import IStageSelection from "@/types/IStageSelection";
 
-export default class ElementTransformer extends BaseTransformer implements IElementTransformer {
+export default class VerticesTransformer extends BaseTransformer implements IVerticesTransformer {
   x: number;
   y: number;
   points: IPoint[];
 
   get angle(): number {
-    const angle =  MathUtils.calcAngle(this.element.center, { x: this.x, y: this.y });
+    const angle =  MathUtils.calcAngle(this.host.center, { x: this.x, y: this.y });
     return angle + 90;
   }
 
-  constructor(element: IElement, x: number, y: number, points: IPoint[]) {
-    super(element);
+  constructor(host: IElement | IStageSelection, x: number, y: number, points: IPoint[]) {
+    super(host);
     this.x = x;
     this.y = y;
     this.points = points;

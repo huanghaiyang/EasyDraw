@@ -25,8 +25,8 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
-import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
-import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
+import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import MathUtils from "@/utils/MathUtils";
 import { AutoFitPadding } from "@/types/Stage";
 import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
@@ -561,7 +561,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressDown(e: MouseEvent): Promise<void> {
     this._isPressDown = true;
     this.calcPressDown(e);
-    
+
     // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
     if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
       this._clearStageSelects();
@@ -572,9 +572,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCenter();
         this._isElementsRotating = true;
-      } else if (controller instanceof ElementTransformer) {
+      } else if (controller instanceof VerticesTransformer) {
         this._isElementsTransforming = true;
-      } else if (controller instanceof ElementBorderTransformer) {
+      } else if (controller instanceof BorderTransformer) {
         this._isElementsTransforming = true;
       } else {
         // 获取鼠标点击的组件

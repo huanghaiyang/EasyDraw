@@ -5,17 +5,17 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import ElementTransformer from "@/modules/elements/transformer/ElementTransformer";
 import { multiply } from 'mathjs';
 import IElement, { ElementObject } from "@/types/IElement";
-import IElementTransformer, { IElementBorderTransformer, TransformerTypes } from "@/types/IElementTransformer";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
-import ElementBorderTransformer from "@/modules/elements/transformer/ElementBorderTransformer";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import IStageShield from "@/types/IStageShield";
 import CanvasUtils from "@/utils/CanvasUtils";
+import { IVerticesTransformer, TransformerTypes, IBorderTransformer } from "@/types/ITransformer";
+import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -486,9 +486,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 盒模型，同_maxBoxPoints-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
   // 顶点变换器-舞台坐标系
-  protected _transformers: IElementTransformer[] = [];
+  protected _transformers: IVerticesTransformer[] = [];
   // 边框变换器-舞台坐标系
-  protected _borderTransformers: IElementBorderTransformer[] = [];
+  protected _borderTransformers: IBorderTransformer[] = [];
   // 原始中心点-世界坐标系
   protected _originalCenterCoord: IPoint;
   // 原始旋转的组件坐标-世界坐标系
@@ -534,11 +534,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotateOutlinePathCoords;
   }
 
-  get transformers(): IElementTransformer[] {
+  get transformers(): IVerticesTransformer[] {
     return this._transformers;
   }
 
-  get borderTransformers(): IElementBorderTransformer[] {
+  get borderTransformers(): IBorderTransformer[] {
     return this._borderTransformers;
   }
 
@@ -722,7 +722,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param points 
    * @returns 
    */
-  private calcTransformersByPoints(points: IPoint[]): IElementTransformer[] {
+  private calcTransformersByPoints(points: IPoint[]): IVerticesTransformer[] {
     const result = points.map((point, index) => {
       const { x, y } = point;
       const points = CommonUtils.get4BoxPoints(point, {
@@ -737,7 +737,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         transformer.x = x;
         transformer.y = y;
       } else {
-        transformer = new ElementTransformer(this, x, y, points);
+        transformer = new VerticesTransformer(this, x, y, points);
       }
       return transformer;
     })
@@ -747,7 +747,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 计算边框变换器坐标
    */
-  calcBoxVerticesTransformers(): IElementTransformer[] {
+  calcBoxVerticesTransformers(): IVerticesTransformer[] {
     return this.calcTransformersByPoints(this._rotateBoxPoints);
   }
 
@@ -756,7 +756,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcVerticesTransformers(): IElementTransformer[] {
+  calcVerticesTransformers(): IVerticesTransformer[] {
     return this.calcTransformersByPoints(this._rotatePathPoints);
   }
 
@@ -765,7 +765,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  calcTransformers(): IElementTransformer[] {
+  calcTransformers(): IVerticesTransformer[] {
     if (this.verticesTransformEnable) {
       return this.calcVerticesTransformers();
     }
@@ -777,7 +777,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 计算边框变换器
    */
-  calcBorderTransformers(): IElementBorderTransformer[] {
+  calcBorderTransformers(): IBorderTransformer[] {
     const result = this._rotateBoxPoints.map((point, index) => {
       const nextPoint = CommonUtils.getNextOfArray(this._rotateBoxPoints, index);
       let borderTransformer = this._borderTransformers[index];
@@ -785,7 +785,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         borderTransformer.start = point;
         borderTransformer.end = nextPoint;
       } else {
-        borderTransformer = new ElementBorderTransformer(this, point, nextPoint);
+        borderTransformer = new BorderTransformer(this, point, nextPoint);
       }
       return borderTransformer;
     })
@@ -868,7 +868,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point 
    * @returns 
    */
-  getTransformerByPoint(point: IPoint): IElementTransformer {
+  getTransformerByPoint(point: IPoint): IVerticesTransformer {
     return this.transformers.find(item => item.isContainsPoint(point));
   }
 
@@ -878,7 +878,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point 
    * @returns 
    */
-  getBorderTransformerByPoint(point: IPoint): IElementBorderTransformer {
+  getBorderTransformerByPoint(point: IPoint): IBorderTransformer {
     return this.borderTransformers.find(item => item.isClosest(point));
   }
 
@@ -887,7 +887,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  getActiveElementTransformer(): IElementTransformer {
+  getActiveElementTransformer(): IVerticesTransformer {
     return this.transformers.find(item => item.isActive);
   }
 
@@ -896,7 +896,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @returns 
    */
-  getActiveElementBorderTransformer(): IElementBorderTransformer {
+  getActiveElementBorderTransformer(): IBorderTransformer {
     return this.borderTransformers.find(item => item.isActive);
   }
 
@@ -950,7 +950,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param transformer 
    */
-  activeTransformer(transformer: ElementTransformer): void {
+  activeTransformer(transformer: IVerticesTransformer): void {
     this._transformers.forEach(item => {
       item.isActive = item.id === transformer.id;
     });
@@ -961,7 +961,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param transformer 
    */
-  activeBorderTransformer(transformer: IElementBorderTransformer): void {
+  activeBorderTransformer(transformer: IBorderTransformer): void {
     this._borderTransformers.forEach(item => {
       item.isActive = item.id === transformer.id;
     });
