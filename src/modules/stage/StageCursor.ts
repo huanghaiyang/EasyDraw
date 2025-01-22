@@ -58,7 +58,11 @@ export default class StageCursor implements IStageCursor {
    * 更新鼠标样式
    */
   updateStyle(e: MouseEvent): void {
-    if (this.shield.selection.getActiveElementBorderTransformer() || this.shield.selection.getActiveElementTransformer() || this.shield.isDrawerActive) {
+    if (
+      this.shield.selection.getActiveElementBorderTransformer()
+      || this.shield.selection.getActiveElementTransformer()
+      || this.shield.isDrawerActive
+    ) {
       this.setStyle('none')
     } else if (this.shield.isHandActive) {
       this.setStyle('grab');

@@ -20,6 +20,8 @@ export interface IElementGroup {
   model: ElementGroupObject;
   // 舞台
   shield: IStageShield;
+  // 是否选中
+  isSelected: boolean;
 
   // 子元素
   get subs(): ElementGroupSubject[];

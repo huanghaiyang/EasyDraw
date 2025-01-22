@@ -384,6 +384,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on('cancel', this._handleCancel.bind(this))
     this.event.on('selectMoveable', this._handleSelectMoveable.bind(this))
     this.event.on('selectHand', this._handleSelectHand.bind(this))
+    this.event.on('selectGroup', this._handleSelectGroup.bind(this))
+    this.event.on('selectGroupCancel', this._handleSelectGroupCancel.bind(this))
   }
 
   /**
@@ -1202,6 +1204,26 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.currentCreator.type === MoveableCreator.type) {
       this.setCreator(HandCreator);
       this.cursor.updateStyle();
+    }
+  }
+
+  /**
+   * 处理组件组合操作
+   */
+  _handleSelectGroup(): void {
+    const flag = this.store.selectToGroup();
+    if (flag) {
+      this.mask.redraw(true);
+    }
+  }
+
+  /**
+   * 处理组件组合取消操作
+   */
+  _handleSelectGroupCancel(): void {
+    const flag = this.store.selectCancelGroup();
+    if (flag) {
+      this.mask.redraw(true);
     }
   }
 

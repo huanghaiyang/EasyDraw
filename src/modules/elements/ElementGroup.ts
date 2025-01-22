@@ -5,9 +5,14 @@ import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementGroup implements IElementGroup {
+  // 组合id
   id: string;
+  // 组合模型
   model: ElementGroupObject;
+  // 舞台
   shield: IStageShield;
+  // 是否选中
+  isSelected: boolean;
 
   constructor(elements: (IElement | IElementGroup)[], shield: IStageShield) {
     this.id = CommonUtils.getRandomDateId();
@@ -18,6 +23,9 @@ export default class ElementGroup implements IElementGroup {
     this.shield = shield;
   }
 
+  /**
+   * 获取子元素
+   */
   get subs(): ElementGroupSubject[] {
     return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
   }

@@ -170,6 +170,11 @@ export default class StageStore implements IStageStore {
     return this.noneStageElements.length === 0;
   }
 
+  // 选中的组合
+  get selectedGroups(): IElementGroup[] {
+    return this.getSelectedGroups();
+  }
+
   /**
    * 组件新增
    */
@@ -1217,12 +1222,35 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 绑定元素组合
+   * 
+   * @param group 
+   */
+  private _bindElementsGroup(group: IElementGroup): void {
+    group.subs.forEach(element => {
+      this.updateElementModel(element.id, { groupId: group.id });
+    });
+  }
+
+  /**
+   * 取消元素组合
+   * 
+   * @param group 
+   */
+  private _unbindElementsGroup(group: IElementGroup): void {
+    group.subs.forEach(element => {
+      this.updateElementModel(element.id, { groupId: undefined });
+    });
+  }
+
+  /**
    * 创建组合
    * 
    * @param elements 
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
     const group = new ElementGroup(elements, this.shield);
+    this._bindElementsGroup(group);
     this._elementGroups.set(group.id, group);
     return group;
   }
@@ -1233,7 +1261,20 @@ export default class StageStore implements IStageStore {
    * @param group 
    */
   removeElementGroup(group: IElementGroup): void {
-    this._elementGroups.delete(group.id);
+    if (this.hasElementGroup(group.id)) {
+      this._unbindElementsGroup(group);
+      this._elementGroups.delete(group.id);
+    }
+  }
+
+  /**
+   * 判断组合是否存在
+   * 
+   * @param id 
+   * @returns 
+   */
+  hasElementGroup(id: string): boolean {
+    return this._elementGroups.has(id);
   }
 
   /**
@@ -1242,7 +1283,10 @@ export default class StageStore implements IStageStore {
    * @param id 
    */
   removeElementGroupById(id: string): void {
-    this._elementGroups.delete(id);
+    const group = this.getElementGroupById(id);
+    if (group) {
+      this.removeElementGroup(group);
+    }
   }
 
   /**
@@ -1282,5 +1326,38 @@ export default class StageStore implements IStageStore {
       }
     })
     return result;
+  }
+
+  /**
+   * 将选中的元素转换为组合
+   */
+  selectToGroup(): boolean {
+    const elements = this.selectedElements;
+    if (elements.length === 0) {
+      return false;
+    }
+    this.createElementGroup(elements);
+    return true;
+  }
+
+  /**
+   * 取消组合
+   */
+  selectCancelGroup(): boolean {
+    const groups = this.selectedGroups;
+    if (groups.length === 0) {
+      return false;
+    }
+    groups.forEach(group => {
+      this.removeElementGroup(group);
+    })
+    return true;
+  }
+
+  /**
+   * 获取选中的组合
+   */
+  getSelectedGroups(): IElementGroup[] {
+    return Array.from(this._elementGroups.values()).filter(group => group.isSelected);
   }
 }

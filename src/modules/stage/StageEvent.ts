@@ -22,6 +22,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isCtrlAEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlMEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlHEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlGEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlShiftGEvent: (e: KeyboardEvent) => boolean;
   private _isShiftEvent: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
   private _isDeleteEvent: (e: KeyboardEvent) => boolean;
@@ -66,6 +68,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isCtrlAEvent = isHotkey('ctrl+a');
     this._isCtrlMEvent = isHotkey('ctrl+m');
     this._isCtrlHEvent = isHotkey('ctrl+h');
+    this._isCtrlGEvent = isHotkey('ctrl+g');
+    this._isCtrlShiftGEvent = isHotkey('ctrl+shift+g');
     this._isEscEvent = isHotkey('esc');
     this.initEvents();
   }
@@ -231,6 +235,16 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         if (this._isCtrlHEvent(e)) {
           EventUtils.stopPP(e)
           this.emit('selectHand')
+        }
+        // 监听组件组合操作
+        if (this._isCtrlGEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('selectGroup')
+        }
+        // 监听组件组合取消操作
+        if (this._isCtrlShiftGEvent(e)) {
+          EventUtils.stopPP(e)
+          this.emit('selectGroupCancel')
         }
         // 监听esc键
         if (this._isEscEvent(e)) {

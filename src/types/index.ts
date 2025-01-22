@@ -117,4 +117,6 @@ export enum ShieldDispatcherNames {
   textBaselineChanged,
   // 锁定比例改变
   creatorChanged,
+  // 锁定比例改变
+  ratioLockedChanged,
 }

@@ -44,6 +44,8 @@ export default interface IStageStore extends IStageSetter {
   get isEmpty(): boolean;
   // 是否可见元素为空
   get isVisibleEmpty(): boolean;
+  // 选中的组合
+  get selectedGroups(): IElementGroup[];
 
   // 创建元素数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
@@ -134,10 +136,18 @@ export default interface IStageStore extends IStageSetter {
   // 判断选中的元素是否等于正在绘制的元素
   isSelectedEqCreating(): boolean;
 
+  // 是否存在组合
+  hasElementGroup(id: string): boolean;
   // 创建组合
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup;
   // 删除组合
   removeElementGroup(group: IElementGroup): void;
   // 删除组合
   removeElementGroupById(id: string): void;
+  // 将选中的元素转换为组合
+  selectToGroup(): boolean;
+  // 取消组合
+  selectCancelGroup(): boolean;
+  // 获取选中的组合
+  getSelectedGroups(): IElementGroup[];
 }
