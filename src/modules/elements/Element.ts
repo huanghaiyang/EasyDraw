@@ -64,8 +64,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
 
+  // 所属组合
   get group(): IElementGroup {
     return this.shield.store.getElementGroupById(this.model.groupId);
+  }
+
+  // 是否是组合元素
+  get isGroupSubject(): boolean {
+    return this.model.groupId !== undefined;
   }
 
   // 获取边框线段点坐标
@@ -484,6 +490,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _rotateOutlinePathPoints: IPoint[] = [];
   // 旋转盒模型-舞台坐标系
   protected _rotateBoxPoints: IPoint[] = [];
+  // 旋转盒模型坐标-舞台坐标系
+  protected _rotateBoxCoords: IPoint[] = [];
   // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
   protected _maxOutlineBoxPoints: IPoint[] = [];
   // 旋转外框线坐标-世界坐标系(组件对齐时使用)
@@ -533,6 +541,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get rotateBoxPoints(): IPoint[] {
     return this._rotateBoxPoints;
+  }
+
+  get rotateBoxCoords(): IPoint[] {
+    return this._rotateBoxCoords;
   }
 
   get rotateOutlinePathCoords(): IPoint[] {
@@ -660,6 +672,16 @@ export default class Element implements IElement, ILinkedNodeValue {
       const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
       return MathUtils.rotateRelativeCenter(point, this.model.angle, center)
     });
+  }
+
+  /**
+   * 计算旋转后的盒模型坐标
+   * 
+   * @returns 
+   */
+  calcRotateBoxCoords(): IPoint[] {
+    const centerCoord = this.centerCoord;
+    return this.model.coords.map(coord => MathUtils.rotateRelativeCenter(coord, this.model.angle, centerCoord));
   }
 
   /**

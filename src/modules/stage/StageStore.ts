@@ -21,7 +21,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArbitraryPointClosestMargin } from "@/types/Constants";
-import { ElementGroupSubject, IElementGroup } from "@/types/IElementGroup";
+import { ElementGroupObject, ElementGroupSubject, IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 
 export default class StageStore implements IStageStore {
@@ -30,7 +30,7 @@ export default class StageStore implements IStageStore {
   // 画板上绘制的元素列表（形状、文字、图片等）
   private _elementList: ElementList;
   // 组合列表
-  private _elementGroups: Map<string, IElementGroup>;
+  private _elementGroups = new Map<string, IElementGroup>();
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
@@ -636,9 +636,10 @@ export default class StageStore implements IStageStore {
    */
   removeElement(id: string): IElement {
     if (this.hasElement(id)) {
-      const element = this._elementsMap.get(id);
+      let element = this._elementsMap.get(id);
       this._elementList.removeBy(node => node.value.id === id);
       this._elementsMap.delete(id);
+      element = null;
       return element;
     }
   }
@@ -1244,12 +1245,25 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 创建组合的数据对象
+   * 
+   * @param elements 
+   */
+  private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementGroupObject {
+    const subIds = new Set(elements.map(element => element.id));
+    const onlyElements: IElement[] = elements.filter(element => element instanceof Element) as IElement[];
+    const coords = CommonUtils.getBoxPoints(flatten(onlyElements.map(element => element.rotateBoxCoords)));
+    const { width, height } = CommonUtils.getRect(coords);
+    return { id: CommonUtils.getRandomDateId(), subIds, coords, width, height, angle: 0 };
+  }
+
+  /**
    * 创建组合
    * 
    * @param elements 
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
-    const group = new ElementGroup(elements, this.shield);
+    const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
     this._bindElementsGroup(group);
     this._elementGroups.set(group.id, group);
     return group;
@@ -1262,8 +1276,10 @@ export default class StageStore implements IStageStore {
    */
   removeElementGroup(group: IElementGroup): void {
     if (this.hasElementGroup(group.id)) {
+      this.deSelectGroup(group);
       this._unbindElementsGroup(group);
       this._elementGroups.delete(group.id);
+      group = null;
     }
   }
 
@@ -1331,27 +1347,27 @@ export default class StageStore implements IStageStore {
   /**
    * 将选中的元素转换为组合
    */
-  selectToGroup(): boolean {
+  selectToGroup(): IElementGroup {
     const elements = this.selectedElements;
-    if (elements.length === 0) {
-      return false;
+    if (elements.length < 2) {
+      return null;
     }
-    this.createElementGroup(elements);
-    return true;
+    const group = this.createElementGroup(elements);
+    return group;
   }
 
   /**
    * 取消组合
    */
-  selectCancelGroup(): boolean {
+  selectCancelGroup(): IElementGroup[] {
     const groups = this.selectedGroups;
     if (groups.length === 0) {
-      return false;
+      return null;
     }
     groups.forEach(group => {
       this.removeElementGroup(group);
     })
-    return true;
+    return groups;
   }
 
   /**
@@ -1360,4 +1376,34 @@ export default class StageStore implements IStageStore {
   getSelectedGroups(): IElementGroup[] {
     return Array.from(this._elementGroups.values()).filter(group => group.isSelected);
   }
+
+  /**
+   * 选中组合
+   * 
+   * @param group 
+   */
+  selectGroup(group: IElementGroup): void {
+    group.isSelected = true;
+  }
+
+  /**
+   * 取消选中组合
+   * 
+   * @param group 
+   */
+  deSelectGroup(group: IElementGroup): void {
+    group.isSelected = false;
+  }
+
+  /**
+   * 取消选中组合
+   * 
+   * @param groups 
+   */
+  deSelectGroups(groups: IElementGroup[]): void {
+    groups.forEach(group => {
+      this.deSelectGroup(group);
+    })
+  }
+
 }

@@ -145,9 +145,15 @@ export default interface IStageStore extends IStageSetter {
   // 删除组合
   removeElementGroupById(id: string): void;
   // 将选中的元素转换为组合
-  selectToGroup(): boolean;
+  selectToGroup(): IElementGroup;
   // 取消组合
-  selectCancelGroup(): boolean;
+  selectCancelGroup(): IElementGroup[];
   // 获取选中的组合
   getSelectedGroups(): IElementGroup[];
+  // 选中组合
+  selectGroup(group: IElementGroup): void;
+  // 取消选中组合
+  deSelectGroup(group: IElementGroup): void;
+  // 取消选中组合
+  deSelectGroups(groups: IElementGroup[]): void;
 }

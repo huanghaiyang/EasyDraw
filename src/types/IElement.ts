@@ -76,7 +76,8 @@ export default interface IElement {
 
   // 所属组合
   get group(): IElementGroup;
-
+  // 是否是组合元素
+  get isGroupSubject(): boolean;
   // 宽度是否可修改
   get widthModifyEnable(): boolean;
   // 高度是否可修改
@@ -160,6 +161,8 @@ export default interface IElement {
   get rotateOutlinePathPoints(): IPoint[];
   // 旋转盒模型顶点
   get rotateBoxPoints(): IPoint[];
+  // 旋转盒模型坐标
+  get rotateBoxCoords(): IPoint[];
   // 最大外框盒模型顶点
   get maxOutlineBoxPoints(): IPoint[];
   // 旋转路径外框坐标
