@@ -7,7 +7,7 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
-import { every, flatten, includes } from "lodash";
+import { flatten } from "lodash";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
@@ -402,19 +402,6 @@ export default class StageSelection implements IStageSelection {
         return element;
       }
     }
-  }
-
-  /**
-   * 检查当前鼠标命中的组件是否都已经被选中
-   * 
-   * @returns 
-   */
-  checkSelectContainsTarget(): boolean {
-    const targetElements = this.shield.store.targetElements;
-    if (targetElements.length === 0) return false;
-    const targetIds = targetElements.map(item => item.id);
-    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
-    return every(targetIds, item => includes(selectedIds, item))
   }
 
   /**

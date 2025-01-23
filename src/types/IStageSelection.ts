@@ -52,8 +52,6 @@ export default interface IStageSelection {
   refreshRangeElements(rangePoints: IPoint[]): void;
   // 获取点上元素
   getElementOnPoint(point: IPoint): IElement;
-  // 检查选区是否包含目标
-  checkSelectContainsTarget(): boolean;
 
   // 计算选区模型
   calcSelectionModel(): IMaskModel;

@@ -444,7 +444,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
             this._transformElements();
             flag = true;
           }
-        } else if ((this._isElementsDragging || this.selection.checkSelectContainsTarget())) {
+        } else if ((this._isElementsDragging || this.store.isSelectedContainsTarget())) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
@@ -582,7 +582,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         // 获取鼠标点击的组件
         const targetElement = this.selection.getElementOnPoint(this.cursor.value);
         // 判断当前鼠标位置的组件是否已经被选中
-        const isSelectContainsTarget = this.selection.checkSelectContainsTarget();
+        const isSelectContainsTarget = this.store.isSelectedContainsTarget();
         if (e.ctrlKey) {
           this.store.toggleSelectElement(targetElement);
         } else {

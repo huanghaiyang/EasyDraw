@@ -105,6 +105,8 @@ export default interface IStageStore extends IStageSetter {
   deleteSelects(): void;
   // 判断元素是否选中
   isElementSelected(element: IElement): boolean;
+  // 检查选区是否包含目标
+  isSelectedContainsTarget(): boolean;
   // 全选
   selectAll(): void;
   // 取消全选

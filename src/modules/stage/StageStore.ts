@@ -6,7 +6,7 @@ import {
 } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { flatten, isEqual } from "lodash";
+import { every, flatten, includes, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -1014,6 +1014,19 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       element.refresh();
     })
+  }
+
+  /**
+   * 检查当前鼠标命中的组件是否都已经被选中
+   * 
+   * @returns 
+   */
+  isSelectedContainsTarget(): boolean {
+    const targetElements = this.shield.store.targetElements;
+    if (targetElements.length === 0) return false;
+    const targetIds = targetElements.map(item => item.id);
+    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
+    return every(targetIds, item => includes(selectedIds, item))
   }
 
   /**
