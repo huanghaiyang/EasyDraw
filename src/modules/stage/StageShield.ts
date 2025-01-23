@@ -1227,9 +1227,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理组件组合取消操作
    */
   _handleSelectGroupCancel(): void {
-    const groups = this.store.selectCancelGroup();
+    const groups = this.store.cancelSelectedGroups();
     if (groups) {
+      const elements = groups.map(group => group.getAllSubElements()).flat();
       this.store.deSelectGroups(groups);
+      this.store.selectElements(elements);
       this.mask.redraw(true);
     }
   }

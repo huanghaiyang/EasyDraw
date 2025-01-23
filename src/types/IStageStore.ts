@@ -71,12 +71,6 @@ export default interface IStageStore extends IStageSetter {
   getElementById(id: string): IElement;
   // 获取元素
   getElementsByIds(ids: string[]): IElement[];
-  // 获取组合元素
-  getElementGroupById(id: string): IElementGroup;
-  // 获取组合元素
-  getElementGroupByIds(ids: string[]): IElementGroup[];
-  // 获取组合元素
-  getGroupElementSubjectsByIds(ids: string[]): IElement[];
   // 获取元素索引
   getIndexById(id: string): number;
   // 创建元素
@@ -144,12 +138,10 @@ export default interface IStageStore extends IStageSetter {
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup;
   // 删除组合
   removeElementGroup(group: IElementGroup): void;
-  // 删除组合
-  removeElementGroupById(id: string): void;
   // 将选中的元素转换为组合
   selectToGroup(): IElementGroup;
   // 取消组合
-  selectCancelGroup(): IElementGroup[];
+  cancelSelectedGroups(): IElementGroup[];
   // 获取选中的组合
   getSelectedElementGroups(): IElementGroup[];
   // 选中组合

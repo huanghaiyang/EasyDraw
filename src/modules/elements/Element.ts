@@ -88,7 +88,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 所属组合
   get group(): IElementGroup {
     if (!this.isGroupSubject) return null;
-    return this.shield.store.getElementGroupById(this.model.groupId);
+    return this.shield.store.getElementById(this.model.groupId) as IElementGroup;
   }
 
   // 祖先组合

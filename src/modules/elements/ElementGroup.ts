@@ -80,27 +80,9 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 获取子元素
-   * 
-   * @param id 
-   */
-  getSubById(id: string): IElement {
-    return this.shield.store.getElementById(id);
-  }
-
-  /**
-   * 获取子元素
-   * 
-   * @param ids 
-   */
-  getSubsByIds(ids: string[]): IElement[] {
-    return this.shield.store.getGroupElementSubjectsByIds(ids);
-  }
-
-  /**
-   * 获取子元素
    */
   getSubs(): IElement[] {
-    return this.shield.store.getGroupElementSubjectsByIds(Array.from(this.model.subIds));
+    return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
   }
 
   /**
@@ -135,7 +117,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param type 
    */
   getSubElementsByType(type: CreatorTypes): IElement[] {
-    return this.shield.store.getGroupElementSubjectsByIds(Array.from(this.model.subIds)).filter(sub => {
+    return this.getSubs().filter(sub => {
       return sub.isElement && sub.model.type === type;
     });
   }
@@ -144,14 +126,14 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取所有子元素
    */
   getAllSubElements(): IElement[] {
-    return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
+    return this.getSubs().filter(sub => sub.isElement);
   }
 
   /**
    * 获取所有子组合
    */
   getAllSubElementGroups(): IElementGroup[] {
-    return this.shield.store.getElementGroupByIds(Array.from(this.model.subIds));
+    return this.getSubs().filter(sub => sub.isGroup) as IElementGroup[];
   }
 
   /**

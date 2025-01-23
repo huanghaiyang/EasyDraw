@@ -229,6 +229,7 @@ export default class StageStore implements IStageStore {
    */
   private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
     switch (propName) {
+      // 选中元素
       case ElementReactionPropNames.isSelected: {
         if (value) {
           this._selectedElementsMap.set(element.id, element);
@@ -237,6 +238,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否在舞台上
       case ElementReactionPropNames.isOnStage: {
         if (value) {
           this._stageElementsMap.set(element.id, element);
@@ -247,6 +249,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否临时元素
       case ElementReactionPropNames.isProvisional: {
         if (value) {
           this._provisionalElementsMap.set(element.id, element);
@@ -255,6 +258,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否命中
       case ElementReactionPropNames.isTarget: {
         if (value) {
           this._targetElementsMap.set(element.id, element);
@@ -263,6 +267,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否在选区范围内
       case ElementReactionPropNames.isInRange: {
         if (value) {
           this._rangeElementsMap.set(element.id, element);
@@ -271,6 +276,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否可见
       case ElementReactionPropNames.isVisible: {
         if (value) {
           this._visibleElementsMap.set(element.id, element);
@@ -279,6 +285,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 是否编辑中
       case ElementReactionPropNames.isEditing: {
         if (value) {
           this._editingElementsMap.set(element.id, element);
@@ -287,12 +294,14 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 元素状态
       case ElementReactionPropNames.status: {
         if (this._currentCreatingElementId && value === ElementStatus.creating) {
           this._selectedElementsMap.set(element.id, element);
         }
         break;
       }
+      // 是否旋转目标
       case ElementReactionPropNames.isRotatingTarget: {
         if (value) {
           this._rotatingTargetElementsMap.set(element.id, element);
@@ -301,54 +310,67 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
+      // 元素位置
       case ElementReactionPropNames.position: {
         this.shield.emit(ShieldDispatcherNames.positionChanged, element, value)
         break;
       }
+      // 元素角度
       case ElementReactionPropNames.angle: {
         this.shield.emit(ShieldDispatcherNames.angleChanged, element, value)
         break;
       }
+      // 元素宽度
       case ElementReactionPropNames.width: {
         this.shield.emit(ShieldDispatcherNames.widthChanged, element, value)
         break;
       }
+      // 元素高度
       case ElementReactionPropNames.height: {
         this.shield.emit(ShieldDispatcherNames.heightChanged, element, value)
         break;
       }
+      // 元素边框类型
       case ElementReactionPropNames.strokeType: {
         this.shield.emit(ShieldDispatcherNames.strokeTypeChanged, element, value)
         break;
       }
+      // 元素边框颜色
       case ElementReactionPropNames.strokeColor: {
         this.shield.emit(ShieldDispatcherNames.strokeColorChanged, element, value)
         break;
       }
+      // 元素边框颜色透明度
       case ElementReactionPropNames.strokeColorOpacity: {
         this.shield.emit(ShieldDispatcherNames.strokeColorOpacityChanged, element, value)
         break;
       }
+      // 元素边框宽度
       case ElementReactionPropNames.strokeWidth: {
         this.shield.emit(ShieldDispatcherNames.strokeWidthChanged, element, value)
         break;
       }
+      // 元素填充颜色
       case ElementReactionPropNames.fillColor: {
         this.shield.emit(ShieldDispatcherNames.fillColorChanged, element, value)
         break;
       }
+      // 元素填充颜色透明度
       case ElementReactionPropNames.fillColorOpacity: {
         this.shield.emit(ShieldDispatcherNames.fillColorOpacityChanged, element, value)
         break;
       }
+      // 元素文本对齐方式
       case ElementReactionPropNames.textAlign: {
         this.shield.emit(ShieldDispatcherNames.textAlignChanged, element, value)
         break;
       }
+      // 元素文本基线
       case ElementReactionPropNames.textBaseline: {
         this.shield.emit(ShieldDispatcherNames.textBaselineChanged, element, value)
         break;
       }
+      // 是否锁定比例
       case ElementReactionPropNames.isRatioLocked: {
         this.shield.emit(ShieldDispatcherNames.ratioLockedChanged, element, value)
         break;
@@ -1312,57 +1334,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 删除组合
-   * 
-   * @param id 
-   */
-  removeElementGroupById(id: string): void {
-    const group = this.getElementGroupById(id);
-    if (group) {
-      this.removeElementGroup(group);
-    }
-  }
-
-  /**
-   * 获取组合元素
-   * 
-   * @param id 
-   */
-  getElementGroupById(id: string): IElementGroup {
-    return this.getElementById(id) as IElementGroup;
-  }
-
-  /**
-   * 获取组合元素
-   * 
-   * @param ids 
-   */
-  getElementGroupByIds(ids: string[]): IElementGroup[] {
-    return ids.map(id => this.getElementGroupById(id)).filter(group => group !== undefined);
-  }
-
-  /**
-   * 获取组合元素
-   * 
-   * @param ids 
-   */
-  getGroupElementSubjectsByIds(ids: string[]): IElement[] {
-    const result: IElement[] = [];
-    ids.forEach(id => {
-      const element = this.getElementById(id);
-      if (element) {
-        result.push(element);
-      } else {
-        const group = this.getElementGroupById(id);
-        if (group) {
-          result.push(...group.subs);
-        }
-      }
-    })
-    return result;
-  }
-
-  /**
    * 将选中的元素转换为组合
    */
   selectToGroup(): IElementGroup {
@@ -1377,7 +1348,7 @@ export default class StageStore implements IStageStore {
   /**
    * 取消组合
    */
-  selectCancelGroup(): IElementGroup[] {
+  cancelSelectedGroups(): IElementGroup[] {
     const groups = this.selectedElementGroups;
     if (groups.length === 0) {
       return null;

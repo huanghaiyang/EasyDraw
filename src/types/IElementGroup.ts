@@ -17,13 +17,9 @@ export interface IElementGroup extends IElement {
   // 判断是否包含子元素
   hasSubById(id: string): boolean;
   // 获取子元素
-  getSubById(id: string): IElement;
-  // 获取子元素
   getSubs(): IElement[];
   // 获取深度子元素
   getDeepSubs(): IElement[];
-  // 获取子元素
-  getSubsByIds(ids: string[]): IElement[];
   // 获取子元素
   getSubElementsByType(type: CreatorTypes): IElement[];
   // 获取所有子元素
