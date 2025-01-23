@@ -1276,7 +1276,7 @@ export default class StageStore implements IStageStore {
     const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
     this._bindElementsGroup(group);
     this.addElement(group);
-    this.updateElementById(group.id, { status: ElementStatus.finished });
+    this.updateElementById(group.id, { status: ElementStatus.finished, isOnStage: true });
     group.refresh();
     return group;
   }

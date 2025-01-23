@@ -80,6 +80,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     ].includes(this.model.type);
   }
 
+  // 是否是组合
+  get isGroup(): boolean {
+    return this.model.type === CreatorTypes.group;
+  }
+
   // 所属组合
   get group(): IElementGroup {
     return this.shield.store.getElementGroupById(this.model.groupId);
@@ -431,8 +436,13 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   @action
   protected _setIsSelected(value: boolean): void {
+    this.__setIsSelected(value);
+  }
+
+  protected __setIsSelected(value: boolean): void {
     this._isSelected = value;
   }
+
 
   @action
   protected _setIsVisible(value: boolean): void {

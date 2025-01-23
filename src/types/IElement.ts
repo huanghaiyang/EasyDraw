@@ -74,6 +74,8 @@ export default interface IElement {
 
   // 是否是元素
   get isElement(): boolean;
+  // 是否是组合
+  get isGroup(): boolean;
   // 所属组合
   get group(): IElementGroup;
   // 是否是组合元素

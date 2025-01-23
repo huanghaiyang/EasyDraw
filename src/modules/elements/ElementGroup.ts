@@ -2,6 +2,7 @@ import { CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
 import { IElementGroup } from "@/types/IElementGroup";
 import Element from "@/modules/elements/Element";
+import { IPoint } from "@/types";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
@@ -119,4 +120,44 @@ export default class ElementGroup extends Element implements IElementGroup {
   getAllSubElementGroups(): IElementGroup[] {
     return this.shield.store.getElementGroupByIds(Array.from(this.model.subIds));
   }
+
+  /**
+   * 是否包含点
+   * 
+   * @param point 
+   */
+  isContainsPoint(point: IPoint): boolean {
+    return this.subs.some(sub => sub.isContainsPoint(point));
+  }
+
+  /**
+   * 是否多边形重叠
+   * 
+   * @param points 
+   */
+  isPolygonOverlap(points: IPoint[]): boolean {
+    return this.subs.some(sub => sub.isPolygonOverlap(points));
+  }
+  
+  /**
+   * 是否模型多边形重叠
+   * 
+   * @param coords 
+   */
+  isModelPolygonOverlap(coords: IPoint[]): boolean {
+    return this.subs.some(sub => sub.isModelPolygonOverlap(coords));
+  }
+
+  /**
+   * 设置选中状态,子元素也会同步设置
+   * 
+   * @param value 
+   */
+  protected __setIsSelected(value: boolean): void {
+    this.subs.forEach(sub => {
+      sub.isSelected = value;
+    })
+  }
+
+
 }

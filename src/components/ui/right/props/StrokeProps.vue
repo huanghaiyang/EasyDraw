@@ -56,7 +56,7 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="stroke-props right-props">
+  <div class="stroke-props right-props" v-if="stageStore.uniqSelectedElement?.strokeEnable">
     <div class="stroke-props__title">描边</div>
 
     <div class="stroke-props__row color">
