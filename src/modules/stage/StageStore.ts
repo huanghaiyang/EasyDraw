@@ -197,14 +197,23 @@ export default class StageStore implements IStageStore {
   private _reactionElementRemoved(): void {
     this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IElement>) => {
       const element = node.value;
+      // 删除元素在舞台上的映射关系
       this._stageElementsMap.delete(element.id);
+      // 删除元素在选中的映射关系
       this._selectedElementsMap.delete(element.id);
+      // 删除元素在未在舞台上的映射关系
       this._noneStageElementsMap.delete(element.id);
+      // 删除元素在临时元素的映射关系
       this._provisionalElementsMap.delete(element.id);
+      // 删除元素在命中的映射关系
       this._targetElementsMap.delete(element.id);
+      // 删除元素在选区范围内的映射关系
       this._rangeElementsMap.delete(element.id);
+      // 删除元素在可见的映射关系
       this._visibleElementsMap.delete(element.id);
+      // 删除元素在旋转目标的映射关系
       this._rotatingTargetElementsMap.delete(element.id);
+      // 删除元素在编辑中的映射关系
       this._editingElementsMap.delete(element.id);
     })
   }
@@ -831,10 +840,13 @@ export default class StageStore implements IStageStore {
   creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement {
     let element: IElementArbitrary;
     let model: ElementObject;
+    // 如果当前创建的元素id存在，则获取该元素
     if (this._currentCreatingElementId) {
       element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
       model = element.model;
+      // 如果tailAppend为true，则追加节点
       if (tailAppend) {
+        // 判断点是否在第一个点附近
         const isClosestFirst = MathUtils.isPointClosest(coord, model.coords[0], ArbitraryPointClosestMargin / this.shield.stageScale);
         if (isClosestFirst) {
           if (element.tailCoordIndex > 0) {
@@ -847,6 +859,7 @@ export default class StageStore implements IStageStore {
           element.tailCoordIndex = model.coords.length - 1;
         }
       } else {
+        // 如果tailAppend为false，则更新尾部节点
         if (element.tailCoordIndex + 1 === model.coords.length) {
           model.coords.push(coord);
         } else {
@@ -856,6 +869,7 @@ export default class StageStore implements IStageStore {
       element.refreshBoxCoords();
       this._setElementProvisionalCreating(element);
     } else {
+      // 如果当前创建的元素id不存在，则创建一个新的元素
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
       model.isFold = false;
       element = this._createProvisionalElement(model) as ElementArbitrary;
@@ -1276,10 +1290,15 @@ export default class StageStore implements IStageStore {
    * @param elements 
    */
   private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementObject {
+    // 过滤掉组合元素
+    elements = elements.filter(element => !element.isGroupSubject);
+    // 获取组合元素的子元素id
     const subIds = new Set(elements.map(element => element.id));
-    const onlyElements: IElement[] = elements.filter(element => element.isElement);
-    const coords = CommonUtils.getBoxPoints(flatten(onlyElements.map(element => element.rotateBoxCoords)));
+    // 获取组合元素的坐标
+    const coords = CommonUtils.getBoxPoints(flatten(elements.map(element => element.rotateBoxCoords)));
+    // 获取组合元素的宽高
     const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
+    // 返回组合元素的数据对象
     return {
       id: CommonUtils.getRandomDateId(),
       subIds,
@@ -1301,10 +1320,15 @@ export default class StageStore implements IStageStore {
    * @param elements 
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
+    // 创建组合元素
     const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
+    // 绑定组合元素的子元素
     this._bindElementsGroup(group);
+    // 添加组合元素
     this.addElement(group);
+    // 设置组合元素状态
     this.updateElementById(group.id, { status: ElementStatus.finished, isOnStage: true });
+    // 刷新组合元素
     group.refresh();
     return group;
   }
@@ -1316,8 +1340,11 @@ export default class StageStore implements IStageStore {
    */
   removeElementGroup(group: IElementGroup): void {
     if (this.hasElementGroup(group.id)) {
+      // 取消选中组合
       this.deSelectGroup(group);
+      // 取消绑定组合元素的子元素
       this._unbindElementsGroup(group);
+      // 删除组合元素
       this.removeElement(group.id);
       group = null;
     }
