@@ -2,7 +2,7 @@ import IElement, { ElementObject } from "@/types/IElement";
 import { IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
-import { ElementGroupSubject, IElementGroup } from "@/types/IElementGroup";
+import { IElementGroup } from "@/types/IElementGroup";
 
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
@@ -74,7 +74,7 @@ export default interface IStageStore extends IStageSetter {
   // 获取组合元素
   getElementGroupByIds(ids: string[]): IElementGroup[];
   // 获取组合元素
-  getGroupElementSubjectsByIds(ids: string[]): ElementGroupSubject[];
+  getGroupElementSubjectsByIds(ids: string[]): IElement[];
   // 获取元素索引
   getIndexById(id: string): number;
   // 创建元素

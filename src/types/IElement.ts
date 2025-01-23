@@ -18,31 +18,31 @@ export type ElementObject = {
   // 元素id
   id: string;
   // 元素坐标
-  coords: IPoint[];
+  coords?: IPoint[];
   // 盒模型坐标
   boxCoords?: IPoint[];
   // 元素类型
-  type: CreatorTypes;
+  type?: CreatorTypes;
   // 元素数据
-  data: any;
+  data?: any;
   // 旋转角度
-  angle: number;
+  angle?: number;
   // 元素名称
-  name: string;
+  name?: string;
   // 宽度
-  width: number;
+  width?: number;
   // 高度
-  height: number;
+  height?: number;
   // 长度
   length?: number;
   // 样式
-  styles: ElementStyles;
+  styles?: ElementStyles;
   // 左上角坐标
-  left: number;
+  left?: number;
   // 上边坐标
-  top: number;
+  top?: number;
   // 是否锁定比例
-  isRatioLocked: boolean;
+  isRatioLocked?: boolean;
   // 比例
   ratio?: number;
   // 变换矩阵
@@ -51,16 +51,16 @@ export type ElementObject = {
   isFold?: boolean;
   // 组合id
   groupId?: string;
-}
-
-// 图片元素数据模型
-export type ImageElementObject = ElementObject & {
   // 图片颜色空间
-  colorSpace: string;
+  colorSpace?: string;
   // 图片自然宽度
-  naturalWidth: number;
+  naturalWidth?: number;
   // 图片自然高度
-  naturalHeight: number;
+  naturalHeight?: number;
+  // 子元素id集合
+  subIds?: Set<string>;
+  // 是否是组合
+  isGroup?: boolean;
 }
 
 // 舞台元素（组件）

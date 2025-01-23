@@ -942,6 +942,19 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新原始顶点坐标
+   */
+  refreshOriginalTransformerPoints(): void {
+    this._originalTransformerPoints = this.transformers.map(transformer => {
+      const { x, y } = transformer;
+      return {
+        x,
+        y
+      }
+    })
+  }
+
+  /**
    * 重新维护原始坐标
    */
   refreshOriginalModelCoords() {
@@ -957,19 +970,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshOriginalModelCoords();
     this.refreshOriginalTransformerPoints();
     this.refreshOriginalElementProps();
-  }
-
-  /**
-   * 刷新原始顶点坐标
-   */
-  refreshOriginalTransformerPoints(): void {
-    this._originalTransformerPoints = this.transformers.map(transformer => {
-      const { x, y } = transformer;
-      return {
-        x,
-        y
-      }
-    })
   }
 
   /**

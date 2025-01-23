@@ -14,14 +14,14 @@ import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { ElementObject, IElementArbitrary, ImageElementObject } from "@/types/IElement";
+import IElement, { ElementObject, IElementArbitrary } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArbitraryPointClosestMargin } from "@/types/Constants";
-import { ElementGroupObject, ElementGroupSubject, IElementGroup } from "@/types/IElementGroup";
+import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 
 export default class StageStore implements IStageStore {
@@ -29,8 +29,6 @@ export default class StageStore implements IStageStore {
 
   // 画板上绘制的元素列表（形状、文字、图片等）
   private _elementList: ElementList;
-  // 组合列表
-  private _elementGroups = new Map<string, IElementGroup>();
   // 当前正在创建的元素
   private _currentCreatingElementId;
   // 元素对象映射关系，加快查询
@@ -1011,7 +1009,7 @@ export default class StageStore implements IStageStore {
     const { width, height } = image;
     const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, { width, height });
     const center = MathUtils.calcCenter(coords);
-    const object: ImageElementObject = {
+    const object: ElementObject = {
       id: CommonUtils.getRandomDateId(),
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
@@ -1249,12 +1247,15 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementGroupObject {
+  private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementObject {
     const subIds = new Set(elements.map(element => element.id));
     const onlyElements: IElement[] = elements.filter(element => element instanceof Element) as IElement[];
     const coords = CommonUtils.getBoxPoints(flatten(onlyElements.map(element => element.rotateBoxCoords)));
-    const { width, height } = CommonUtils.getRect(coords);
-    return { id: CommonUtils.getRandomDateId(), subIds, coords, width, height, angle: 0 };
+    const { width, height, left, top } = CommonUtils.getRect(coords);
+    return {
+      id: CommonUtils.getRandomDateId(), subIds, coords, width, height, angle: 0, isGroup: true,
+      styles: {}, left: left + width / 2, top: top + height / 2
+    };
   }
 
   /**
@@ -1265,7 +1266,7 @@ export default class StageStore implements IStageStore {
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
     const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
     this._bindElementsGroup(group);
-    this._elementGroups.set(group.id, group);
+    this.addElement(group);
     return group;
   }
 
@@ -1278,7 +1279,7 @@ export default class StageStore implements IStageStore {
     if (this.hasElementGroup(group.id)) {
       this.deSelectGroup(group);
       this._unbindElementsGroup(group);
-      this._elementGroups.delete(group.id);
+      this.removeElement(group.id);
       group = null;
     }
   }
@@ -1290,7 +1291,7 @@ export default class StageStore implements IStageStore {
    * @returns 
    */
   hasElementGroup(id: string): boolean {
-    return this._elementGroups.has(id);
+    return this.hasElement(id);
   }
 
   /**
@@ -1311,7 +1312,7 @@ export default class StageStore implements IStageStore {
    * @param id 
    */
   getElementGroupById(id: string): IElementGroup {
-    return this._elementGroups.get(id);
+    return this.getElementById(id) as IElementGroup;
   }
 
   /**
@@ -1328,8 +1329,8 @@ export default class StageStore implements IStageStore {
    * 
    * @param ids 
    */
-  getGroupElementSubjectsByIds(ids: string[]): ElementGroupSubject[] {
-    const result: ElementGroupSubject[] = [];
+  getGroupElementSubjectsByIds(ids: string[]): IElement[] {
+    const result: IElement[] = [];
     ids.forEach(id => {
       const element = this.getElementById(id);
       if (element) {
@@ -1374,7 +1375,7 @@ export default class StageStore implements IStageStore {
    * 获取选中的组合
    */
   getSelectedGroups(): IElementGroup[] {
-    return Array.from(this._elementGroups.values()).filter(group => group.isSelected);
+    return this.selectedElements.filter(element => element.model.isGroup) as IElementGroup[];
   }
 
   /**
