@@ -748,7 +748,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _selectTopAElement(elements: IElement[]): void {
     const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
-    this.store.deSelectElements(this.store.selectedElements.filter(element => element !== topAElement));
+    this.store.deSelectElements(this.store.selectedElements.filter(element => {
+      if (topAElement.isGroup) {
+        return element.ancestorGroup !== topAElement;
+      }
+      return element !== topAElement;
+    }));
     if (topAElement && !topAElement.isSelected) {
       this.store.selectElement(topAElement);
     }

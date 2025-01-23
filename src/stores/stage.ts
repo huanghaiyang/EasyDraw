@@ -11,6 +11,7 @@ import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDi
 const shield = new StageShield();
 const container = new StageContainer();
 shield.configure.config({ rotationIconEnable: true })
+window.shield = shield;
 
 export const useStageStore = defineStore("stage", {
   state: () => {

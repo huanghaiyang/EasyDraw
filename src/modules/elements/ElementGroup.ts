@@ -9,7 +9,14 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取子元素
    */
   get subs(): IElement[] {
-    return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
+    return this.getSubs();
+  }
+
+  /**
+   * 获取深度子元素
+   */
+  get deepSubs(): IElement[] {
+    return this.getDeepSubs();
   }
 
   /**
@@ -97,6 +104,32 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
+   * 获取深度子元素
+   */
+  getDeepSubs(): IElement[] {
+    const result: IElement[] = [];
+    this._getDeepSubs(result, this.getSubs());
+    return result;
+  }
+
+  /**
+   * 获取深度子元素
+   * 
+   * @param result 
+   * @param subs 
+   */
+  private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
+    subs.forEach(sub => {
+      if (sub.isGroup) {
+        this._getDeepSubs(result, (sub as ElementGroup).subs);
+      } else {
+        result.push(sub);
+      }
+    })
+    return result;
+  }
+
+  /**
    * 根据类型获取子元素
    * 
    * @param type 
@@ -127,7 +160,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param point 
    */
   isContainsPoint(point: IPoint): boolean {
-    return this.subs.some(sub => sub.isContainsPoint(point));
+    return this.deepSubs.some(sub => sub.isContainsPoint(point));
   }
 
   /**
@@ -136,7 +169,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param points 
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return this.subs.some(sub => sub.isPolygonOverlap(points));
+    return this.deepSubs.some(sub => sub.isPolygonOverlap(points));
   }
   
   /**
@@ -145,7 +178,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param coords 
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return this.subs.some(sub => sub.isModelPolygonOverlap(coords));
+    return this.deepSubs.some(sub => sub.isModelPolygonOverlap(coords));
   }
 
   /**
@@ -154,7 +187,8 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param value 
    */
   protected __setIsSelected(value: boolean): void {
-    this.subs.forEach(sub => {
+    super.__setIsSelected(value);
+    this.deepSubs.forEach(sub => {
       sub.isSelected = value;
     })
   }

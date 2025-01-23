@@ -78,6 +78,8 @@ export default interface IElement {
   get isGroup(): boolean;
   // 所属组合
   get group(): IElementGroup;
+  // 祖先组合
+  get ancestorGroup(): IElementGroup;
   // 是否是组合元素
   get isGroupSubject(): boolean;
   // 宽度是否可修改

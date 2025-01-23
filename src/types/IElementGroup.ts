@@ -4,6 +4,8 @@ import { CreatorTypes } from "@/types/Creator";
 export interface IElementGroup extends IElement {
   // 子元素
   get subs(): IElement[];
+  // 深度子元素
+  get deepSubs(): IElement[];
   // 添加子元素
   addSub(sub: IElement): void;
   // 移除子元素
@@ -18,6 +20,8 @@ export interface IElementGroup extends IElement {
   getSubById(id: string): IElement;
   // 获取子元素
   getSubs(): IElement[];
+  // 获取深度子元素
+  getDeepSubs(): IElement[];
   // 获取子元素
   getSubsByIds(ids: string[]): IElement[];
   // 获取子元素
