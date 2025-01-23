@@ -45,7 +45,9 @@ export default interface IStageStore extends IStageSetter {
   // 是否可见元素为空
   get isVisibleEmpty(): boolean;
   // 选中的组合
-  get selectedGroups(): IElementGroup[];
+  get selectedElementGroups(): IElementGroup[];
+  // 选中的根元素
+  get selectedAncestorElement(): IElement;
 
   // 创建元素数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
@@ -149,11 +151,17 @@ export default interface IStageStore extends IStageSetter {
   // 取消组合
   selectCancelGroup(): IElementGroup[];
   // 获取选中的组合
-  getSelectedGroups(): IElementGroup[];
+  getSelectedElementGroups(): IElementGroup[];
   // 选中组合
   selectGroup(group: IElementGroup): void;
   // 取消选中组合
   deSelectGroup(group: IElementGroup): void;
   // 取消选中组合
   deSelectGroups(groups: IElementGroup[]): void;
+  // 判定给定的元素是否属于同一个组合
+  isSameAncestorGroup(elements: IElement[]): boolean;
+  // 获取选中的根元素
+  getAncestorGroup(elements: IElement[]): IElement;
+  // 获取非组合元素
+  getNoParentElements(elements: IElement[]): IElement[];
 }

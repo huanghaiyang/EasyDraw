@@ -113,9 +113,15 @@ export default class StageStore implements IStageStore {
     return this._visibleElementsMap.valuesArray();
   }
 
+  // 选中的根元素
+  get selectedAncestorElement(): IElement {
+    return this.getAncestorGroup(this.selectedElements);
+  }
+
   // 选中的唯一组件
   get uniqSelectedElement(): IElement {
-    if (this.selectedElements.length === 1 && !this.selectedElements[0].isProvisional) return this.selectedElements[0];
+    const ancestorElement = this.selectedAncestorElement;
+    if (ancestorElement && !ancestorElement.isProvisional) return ancestorElement;
   }
 
   // 旋转目标组件
@@ -169,8 +175,8 @@ export default class StageStore implements IStageStore {
   }
 
   // 选中的组合
-  get selectedGroups(): IElementGroup[] {
-    return this.getSelectedGroups();
+  get selectedElementGroups(): IElementGroup[] {
+    return this.getSelectedElementGroups();
   }
 
   /**
@@ -1372,7 +1378,7 @@ export default class StageStore implements IStageStore {
    * 取消组合
    */
   selectCancelGroup(): IElementGroup[] {
-    const groups = this.selectedGroups;
+    const groups = this.selectedElementGroups;
     if (groups.length === 0) {
       return null;
     }
@@ -1385,7 +1391,7 @@ export default class StageStore implements IStageStore {
   /**
    * 获取选中的组合
    */
-  getSelectedGroups(): IElementGroup[] {
+  getSelectedElementGroups(): IElementGroup[] {
     return this.selectedElements.filter(element => element.model.type === CreatorTypes.group) as IElementGroup[];
   }
 
@@ -1418,4 +1424,35 @@ export default class StageStore implements IStageStore {
     })
   }
 
+  /**
+   * 判定给定的元素是否属于同一个组合
+   * 
+   * @param elements 
+   */
+  isSameAncestorGroup(elements: IElement[]): boolean {
+    if (elements.length <= 1) return true;
+    const ancestorGroup = this.getAncestorGroup(elements);
+    return ancestorGroup !== null;
+  }
+
+  /**
+   * 获取选中的根元素
+   * 
+   * @param elements 
+   */
+  getAncestorGroup(elements: IElement[]): IElement {
+    if (elements.length === 0) return null;
+    const noParentElements = this.getNoParentElements(elements);
+    if (noParentElements.length > 1) return null;
+    return noParentElements[0];
+  }
+
+  /**
+   * 获取非组合元素
+   * 
+   * @param elements 
+   */
+  getNoParentElements(elements: IElement[]): IElement[] {
+    return elements.filter(element => !element.isGroupSubject);
+  }
 }
