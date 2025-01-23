@@ -19,6 +19,8 @@ import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitr
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
+import ElementGroup from "@/modules/elements/ElementGroup";
+import ElementText from "@/modules/elements/ElementText";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -151,6 +153,8 @@ export default class ElementUtils {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
       case CreatorTypes.arbitrary:
+      case CreatorTypes.text:
+      case CreatorTypes.group:
         return CommonUtils.getBoxPoints(points);
       default:
         return points;
@@ -177,6 +181,12 @@ export default class ElementUtils {
       }
       case CreatorTypes.arbitrary: {
         return new ElementArbitrary(model, shield);
+      }
+      case CreatorTypes.text: {
+        return new ElementText(model, shield);
+      }
+      case CreatorTypes.group: {
+        return new ElementGroup(model, shield);
       }
       default:
         return new Element(model, shield);
@@ -221,7 +231,9 @@ export default class ElementUtils {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
       case CreatorTypes.line:
-      case CreatorTypes.arbitrary: {
+      case CreatorTypes.arbitrary:
+      case CreatorTypes.text:
+      case CreatorTypes.group: {
         return MathUtils.calcCenter(model.coords);
       }
     }
@@ -254,6 +266,8 @@ export default class ElementUtils {
     const { coords, type } = model;
     switch (type) {
       case CreatorTypes.rectangle:
+      case CreatorTypes.text:
+      case CreatorTypes.group:
       case CreatorTypes.image: {
         return CommonUtils.calcRectangleSize(coords);
       }
@@ -406,7 +420,7 @@ export default class ElementUtils {
     const aAngle = (180 - angle) / 2;
     const pcAngle = MathUtils.calcAngle(prev, current);
     const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
-    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle + (isClockwise? -aAngle: aAngle));
+    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle + (isClockwise ? -aAngle : aAngle));
     const region: IPoint[] = [];
     region.push(current);
     region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));

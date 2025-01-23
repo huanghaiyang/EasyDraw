@@ -59,8 +59,6 @@ export type ElementObject = {
   naturalHeight?: number;
   // 子元素id集合
   subIds?: Set<string>;
-  // 是否是组合
-  isGroup?: boolean;
 }
 
 // 舞台元素（组件）
@@ -74,6 +72,8 @@ export default interface IElement {
   // 舞台
   shield: IStageShield;
 
+  // 是否是元素
+  get isElement(): boolean;
   // 所属组合
   get group(): IElementGroup;
   // 是否是组合元素
@@ -379,6 +379,9 @@ export interface IElementImage extends IElementReact { }
 
 // 舞台元素（组件）-任意多边形&线条
 export interface IElementPolygon extends IElement { }
+
+// 舞台元素（组件）-文本
+export interface IElementText extends IElement { }
 
 // 舞台元素（组件）-线段
 export interface IElementLine extends IElement {

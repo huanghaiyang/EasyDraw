@@ -1187,8 +1187,8 @@ export default class StageStore implements IStageStore {
    * 
    * @returns 
    */
-  getFinishedSelectedElements(): IElement[] {
-    return this.selectedElements.filter(element => element.status === ElementStatus.finished);
+  getFinishedSelectedElements(isExcludeGroupSubs: boolean): IElement[] {
+    return this.selectedElements.filter(element => element.status === ElementStatus.finished && (isExcludeGroupSubs ? !element.isGroupSubject : true));
   }
 
   /**
@@ -1249,12 +1249,21 @@ export default class StageStore implements IStageStore {
    */
   private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementObject {
     const subIds = new Set(elements.map(element => element.id));
-    const onlyElements: IElement[] = elements.filter(element => element instanceof Element) as IElement[];
+    const onlyElements: IElement[] = elements.filter(element => element.isElement);
     const coords = CommonUtils.getBoxPoints(flatten(onlyElements.map(element => element.rotateBoxCoords)));
-    const { width, height, left, top } = CommonUtils.getRect(coords);
+    const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
     return {
-      id: CommonUtils.getRandomDateId(), subIds, coords, width, height, angle: 0, isGroup: true,
-      styles: {}, left: left + width / 2, top: top + height / 2
+      id: CommonUtils.getRandomDateId(),
+      subIds,
+      coords,
+      boxCoords: CommonUtils.getBoxPoints(coords),
+      width,
+      height,
+      angle: 0,
+      styles: {},
+      left: left + width / 2,
+      top: top + height / 2,
+      type: CreatorTypes.group,
     };
   }
 
@@ -1267,6 +1276,8 @@ export default class StageStore implements IStageStore {
     const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
     this._bindElementsGroup(group);
     this.addElement(group);
+    this.updateElementById(group.id, { status: ElementStatus.finished });
+    group.refresh();
     return group;
   }
 
@@ -1375,7 +1386,7 @@ export default class StageStore implements IStageStore {
    * 获取选中的组合
    */
   getSelectedGroups(): IElementGroup[] {
-    return this.selectedElements.filter(element => element.model.isGroup) as IElementGroup[];
+    return this.selectedElements.filter(element => element.model.type === CreatorTypes.group) as IElementGroup[];
   }
 
   /**
@@ -1384,7 +1395,7 @@ export default class StageStore implements IStageStore {
    * @param group 
    */
   selectGroup(group: IElementGroup): void {
-    group.isSelected = true;
+    this.updateElementById(group.id, { isSelected: true });
   }
 
   /**
@@ -1393,7 +1404,7 @@ export default class StageStore implements IStageStore {
    * @param group 
    */
   deSelectGroup(group: IElementGroup): void {
-    group.isSelected = false;
+    this.updateElementById(group.id, { isSelected: false });
   }
 
   /**

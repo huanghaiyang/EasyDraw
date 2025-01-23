@@ -79,17 +79,30 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 获取元素模型
+   * 
+   * @param elements 
+   * @returns 
+   */
+  private _getElementsMaskModels(elements: IElement[], type: DrawerMaskModelTypes): IMaskModel[] {
+    const result: IMaskModel[] = [];
+    elements.forEach(element => {
+      if (element.isGroupSubject) return;
+      result.push({
+        type,
+        ...this._getElementMaskModelProps(element),
+      });
+    });
+    return result;
+  }
+
+  /**
    * 获取选区范围对象
    * 
    * @returns 
    */
   private _getRangeElementsMaskModels(): IMaskModel[] {
-    return this.shield.store.rangeElements.map(element => {
-      return {
-        type: DrawerMaskModelTypes.path,
-        ...this._getElementMaskModelProps(element),
-      };
-    });
+    return this._getElementsMaskModels(this.shield.store.rangeElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -98,12 +111,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   private _getTargetElementsMaskModels(): IMaskModel[] {
-    return this.shield.store.targetElements.map(element => {
-      return {
-        type: DrawerMaskModelTypes.path,
-        ...this._getElementMaskModelProps(element),
-      };
-    });
+    return this._getElementsMaskModels(this.shield.store.targetElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -112,12 +120,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   private _getSelectedElementsMaskModels(): IMaskModel[] {
-    return this.shield.store.selectedElements.map(element => {
-      return {
-        type: DrawerMaskModelTypes.path,
-        ...this._getElementMaskModelProps(element),
-      };
-    });
+    return this._getElementsMaskModels(this.shield.store.selectedElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -126,7 +129,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getModels(): IMaskModel[] {
-    const result: Partial<IMaskModel>[] = [];
+    const result: IMaskModel[] = [];
     if (this.isRange) {
       result.push(...this._getRangeElementsMaskModels());
     }
@@ -138,7 +141,7 @@ export default class StageSelection implements IStageSelection {
         type: DrawerMaskModelTypes.range,
       });
     }
-    return result as IMaskModel[];
+    return result;
   }
 
   /**
@@ -147,7 +150,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   calcSingleSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements();
+    const elements = this.shield.store.getFinishedSelectedElements(true);
     if (elements.length === 1 && elements[0].boxVerticesTransformEnable) {
       return {
         type: DrawerMaskModelTypes.selection,
@@ -162,7 +165,7 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   calcMultiSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements();
+    const elements = this.shield.store.getFinishedSelectedElements(true);
     if (elements.length >= 2) {
       return {
         type: DrawerMaskModelTypes.selection,

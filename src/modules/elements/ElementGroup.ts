@@ -102,7 +102,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   getSubElementsByType(type: CreatorTypes): IElement[] {
     return this.shield.store.getGroupElementSubjectsByIds(Array.from(this.model.subIds)).filter(sub => {
-      return sub instanceof Element && (sub as IElement).model.type === type;
+      return sub.isElement && sub.model.type === type;
     });
   }
 

@@ -17,6 +17,7 @@ import { IVerticesTransformer, TransformerTypes, IBorderTransformer } from "@/ty
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
+import { CreatorTypes } from "@/types/Creator";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -63,6 +64,21 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
+
+  // 是否是元素
+  get isElement(): boolean {
+    return [
+      CreatorTypes.image,
+      CreatorTypes.text,
+      CreatorTypes.arbitrary,
+      CreatorTypes.rectangle,
+      CreatorTypes.circle,
+      CreatorTypes.polygon,
+      CreatorTypes.line,
+      CreatorTypes.text,
+      CreatorTypes.pencil,
+    ].includes(this.model.type);
+  }
 
   // 所属组合
   get group(): IElementGroup {
@@ -852,6 +868,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._rotatePathPoints = this.calcRotatePathPoints();
     this._rotatePathCoords = this.calcRotatePathCoords();
     this._rotateBoxPoints = this.calcRotateBoxPoints();
+    this._rotateBoxCoords = this.calcRotateBoxCoords();
     this._transformers = this.calcTransformers();
     if (this.borderTransformEnable) {
       this._borderTransformers = this.calcBorderTransformers();

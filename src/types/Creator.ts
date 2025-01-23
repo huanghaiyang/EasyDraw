@@ -2,10 +2,11 @@
 export enum CreatorTypes {
   // 移动
   moveable = 'moveable',
-  // 矩形
-  rectangle = 'rectangle',
   // 手
   hand = 'hand',
+
+  // 矩形
+  rectangle = 'rectangle',
   // 线段
   line = 'line',
   // 图片
@@ -16,6 +17,12 @@ export enum CreatorTypes {
   arbitrary = 'arbitrary',
   // 铅笔
   pencil = 'pencil',
+  // 文本
+  text = 'text',
+  // 组合
+  group = 'group',
+  // 圆
+  circle = 'circle',
 }
 
 // 创作工具分类
