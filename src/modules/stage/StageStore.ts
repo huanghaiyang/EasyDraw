@@ -179,6 +179,11 @@ export default class StageStore implements IStageStore {
     return this.getSelectedElementGroups();
   }
 
+  // 选中的根组合
+  get selectedAncestorElementGroups(): IElementGroup[] {
+    return this.getSelectedAncestorElementGroups();
+  }
+
   /**
    * 组件新增
    */
@@ -1389,7 +1394,7 @@ export default class StageStore implements IStageStore {
    * 取消组合
    */
   cancelSelectedGroups(): IElementGroup[] {
-    const groups = this.selectedElementGroups;
+    const groups = this.getSelectedAncestorElementGroups();
     if (groups.length === 0) {
       return null;
     }
@@ -1404,6 +1409,13 @@ export default class StageStore implements IStageStore {
    */
   getSelectedElementGroups(): IElementGroup[] {
     return this.selectedElements.filter(element => element.model.type === CreatorTypes.group) as IElementGroup[];
+  }
+
+  /**
+   * 获取选中的根组合
+   */
+  getSelectedAncestorElementGroups(): IElementGroup[] {
+    return this.getNoParentElements(this.getSelectedElementGroups()) as IElementGroup[];
   }
 
   /**

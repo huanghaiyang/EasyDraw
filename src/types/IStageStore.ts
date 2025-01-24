@@ -46,6 +46,8 @@ export default interface IStageStore extends IStageSetter {
   get isVisibleEmpty(): boolean;
   // 选中的组合
   get selectedElementGroups(): IElementGroup[];
+  // 选中的根组合
+  get selectedAncestorElementGroups(): IElementGroup[];
   // 选中的根元素
   get selectedAncestorElement(): IElement;
 
@@ -144,6 +146,8 @@ export default interface IStageStore extends IStageSetter {
   selectToGroup(): IElementGroup;
   // 取消组合
   cancelSelectedGroups(): IElementGroup[];
+  // 获取选中的根组合
+  getSelectedAncestorElementGroups(): IElementGroup[];
   // 获取选中的组合
   getSelectedElementGroups(): IElementGroup[];
   // 选中组合
