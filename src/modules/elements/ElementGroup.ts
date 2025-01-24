@@ -34,6 +34,13 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
+   * 是否可以编辑
+   */
+  get editingEnable(): boolean {
+    return false;
+  }
+
+  /**
    * 添加子元素
    * 
    * @param sub 
