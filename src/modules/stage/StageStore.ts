@@ -1297,9 +1297,8 @@ export default class StageStore implements IStageStore {
    * @param group 
    */
   private _unbindElementsGroup(group: IElementGroup): void {
-    group.subs.forEach(element => {
-      this.updateElementModel(element.id, { groupId: undefined });
-    });
+    this.updateElementsModel(group.getSubs(), { groupId: undefined });
+    this.updateElementModel(group.id, { subIds: new Set() });
   }
 
   /**
@@ -1358,13 +1357,12 @@ export default class StageStore implements IStageStore {
    */
   removeElementGroup(group: IElementGroup): void {
     if (this.hasElementGroup(group.id)) {
-      // 取消选中组合
-      this.deSelectGroup(group);
       // 取消绑定组合元素的子元素
       this._unbindElementsGroup(group);
+      // 取消选中组合
+      this.deSelectGroup(group);
       // 删除组合元素
       this.removeElement(group.id);
-      group = null;
     }
   }
 
@@ -1394,7 +1392,7 @@ export default class StageStore implements IStageStore {
    * 取消组合
    */
   cancelSelectedGroups(): IElementGroup[] {
-    const groups = this.getSelectedAncestorElementGroups();
+    let groups = this.getSelectedAncestorElementGroups();
     if (groups.length === 0) {
       return null;
     }

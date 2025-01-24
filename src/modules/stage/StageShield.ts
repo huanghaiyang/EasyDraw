@@ -1216,6 +1216,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理组件组合操作
    */
   _handleSelectGroup(): void {
+    if (this.isElementsBusy) return;
     const group = this.store.selectToGroup();
     if (group) {
       this.store.selectGroup(group);
@@ -1227,6 +1228,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理组件组合取消操作
    */
   _handleSelectGroupCancel(): void {
+    if (this.isElementsBusy) return;
     const groups = this.store.cancelSelectedGroups();
     if (groups) {
       const elements = groups.map(group => group.getAllSubElements()).flat();
