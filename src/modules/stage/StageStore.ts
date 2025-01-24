@@ -53,6 +53,8 @@ export default class StageStore implements IStageStore {
   private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转组件中心点
   private _rotatingTargetElementsCenter: IPoint;
+  // 旋转组件中心点-世界坐标
+  private _rotatingTargetElementsCenterCoord: IPoint;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -978,7 +980,7 @@ export default class StageStore implements IStageStore {
    * 
    * @param elements 
    */
-  restoreElementsOriginalProps(elements: IElement[]): void {
+  refreshElementsOriginals(elements: IElement[]): void {
     elements.forEach(element => {
       element.refreshOriginalProps();
     })
@@ -1040,6 +1042,9 @@ export default class StageStore implements IStageStore {
   calcRotatingElementsCenter(): IPoint {
     const point = MathUtils.calcCenter(flatten(this.selectedElements.map(element => element.pathPoints)))
     this._rotatingTargetElementsCenter = point;
+    this._rotatingTargetElementsCenterCoord = ElementUtils.calcWorldPoint(
+      this._rotatingTargetElementsCenter, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale
+    );
     return point;
   }
 
@@ -1050,11 +1055,15 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsRotation(point: IPoint): void {
     let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCenter, point) + 90);
-    if (angle > 180) {
-      angle = angle - 360;
-    }
+    angle = ElementUtils.mirrorAngle(angle);
     this.rotatingTargetElements.forEach(element => {
+      const originalAngle = element.model.angle;
       element.setAngle(angle);
+      if (element.isGroup) {
+        (element as IElementGroup).deepSubs.forEach(sub => {
+          sub.rotateBy(angle - originalAngle, this._rotatingTargetElementsCenterCoord);
+        })
+      }
     })
   }
 

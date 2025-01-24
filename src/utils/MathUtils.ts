@@ -84,6 +84,18 @@ export default class MathUtils {
   }
 
   /**
+   * 旋转一组点
+   * 
+   * @param coords 
+   * @param angle 
+   * @param center 
+   * @returns 
+   */
+  static rotateRelativeCenters(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.rotateRelativeCenter(coord, angle, center));
+  }
+
+  /**
    * 旋转垂直坐标系上的某一点（x右侧为正，顺时针为正角度）
    * 
    * @param point 

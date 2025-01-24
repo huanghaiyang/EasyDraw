@@ -573,6 +573,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
         this.store.calcRotatingElementsCenter();
+        this.store.refreshElementsOriginals(this.store.selectedElements);
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
         this._isElementsTransforming = true;
@@ -708,7 +709,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 取消组件拖动状态
     this.store.updateElements(this.store.selectedElements, { isDragging: false });
     // 刷新组件坐标数据
-    this.store.restoreElementsOriginalProps(this.store.selectedElements);
+    this.store.refreshElementsOriginals(this.store.selectedElements);
     // 刷新组件坐标数据
     this.store.refreshElementsPosition(this.store.selectedElements);
   }
@@ -719,7 +720,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _endElementsRotate() {
     this.store.updateSelectedElementsRotation(this._pressUpPosition)
     // 刷新组件坐标数据
-    this.store.restoreElementsOriginalProps(this.store.rotatingTargetElements);
+    this.store.refreshElementsOriginals(this.store.rotatingTargetElements);
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,
@@ -736,7 +737,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y
     })
     // 刷新组件坐标数据
-    this.store.restoreElementsOriginalProps(this.store.selectedElements);
+    this.store.refreshElementsOriginals(this.store.selectedElements);
     // 更新组件状态
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
@@ -749,7 +750,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _selectTopAElement(elements: IElement[]): void {
     const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
     this.store.deSelectElements(this.store.selectedElements.filter(element => {
-      if (topAElement.isGroup) {
+      if (topAElement && topAElement.isGroup) {
         return element.ancestorGroup !== topAElement;
       }
       return element !== topAElement;

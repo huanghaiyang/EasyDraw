@@ -90,7 +90,7 @@ export default interface IStageStore extends IStageSetter {
   // 计算旋转元素中心
   calcRotatingElementsCenter(): void;
   // 恢复元素原始属性
-  restoreElementsOriginalProps(elements: IElement[]): void;
+  refreshElementsOriginals(elements: IElement[]): void;
   // 刷新元素位置
   refreshElementsPosition(elements: IElement[]): void;
   // 遍历元素

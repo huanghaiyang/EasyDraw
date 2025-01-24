@@ -551,6 +551,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _originalRect: Partial<DOMRect> = {};
   // 原始中心点-舞台坐标系
   protected _originalCenter: IPoint;
+  // 原始的相对于祖先节点的角度
+  protected _originalAncestorAngle: number;
 
   get pathPoints(): IPoint[] {
     return this._pathPoints;
@@ -974,6 +976,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._originalAngle = this.model.angle;
     this._originalRect = this.calcRect();
     this._originalMatrix = [];
+
+    const ancestor = this.ancestorGroup;
+    if (ancestor) {
+      this._originalAncestorAngle = ElementUtils.normalizeAngle(MathUtils.calcAngle(ancestor.centerCoord, this.centerCoord));
+    } else {
+      this._originalAncestorAngle = 0;
+    }
+
     if (this.pathPoints.length) {
       this._originalCenter = cloneDeep(this.center);
     }
@@ -1505,5 +1515,22 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else {
       this.model.ratio = null;
     }
+  }
+
+  /**
+   * 按照某一点为圆心，旋转指定角度
+   * 
+   * @param value 
+   * @param lockCenter 
+   */
+  rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void {
+    const newCenterCoord = MathUtils.rotateRelativeCenter(this._originalCenterCoord, deltaAngle, lockCenterCoord);
+    const offset = {dx: newCenterCoord.x - this._originalCenterCoord.x, dy: newCenterCoord.y - this._originalCenterCoord.y};
+    const coords = this._originalModelCoords.map(coord => MathUtils.translate(coord, offset));
+    const boxCoords = this._originalModelBoxCoords.map(coord => MathUtils.translate(coord, offset));
+    this.model.coords = coords;
+    this.model.boxCoords = boxCoords;
+    this.model.angle = ElementUtils.mirrorAngle((ElementUtils.normalizeAngle(this._originalAngle) + ElementUtils.normalizeAngle(deltaAngle) % 360));
+    this.refresh();
   }
 }

@@ -290,6 +290,9 @@ export default interface IElement {
   // 设置比例锁定
   setRatioLocked(value: boolean): void;
 
+  // 旋转
+  rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void;
+
   // 刷新尺寸
   refreshSize(): void;
   // 刷新位置

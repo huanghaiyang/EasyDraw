@@ -447,4 +447,27 @@ export default class ElementUtils {
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, stageRect, stageWorldCoord, stageScale);
     return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
   }
+
+  /**
+   * 镜像角度
+   * 
+   * @param angle 
+   * @returns 
+   */
+  static mirrorAngle(angle: number): number {
+    return angle > 180 ? angle - 360 : angle;
+  }
+
+  /**
+   * 角度归一化
+   * 
+   * @param angle 
+   * @returns 
+   */
+  static normalizeAngle(angle: number): number {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    return angle;
+  }
 }
