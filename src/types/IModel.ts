@@ -37,5 +37,5 @@ export interface IIconModel extends IMaskModel {
 // 组件旋转图标绘制任务对象
 export interface IRotationModel extends IIconModel {
   // 顶点
-  vertices: IPoint[];
+  points: IPoint[];
 }

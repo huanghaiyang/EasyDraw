@@ -18,7 +18,7 @@ export default class ElementRotation implements IElementRotation, IController {
     width: SelectionRotationSize,
     height: SelectionRotationSize,
     angle: -90,
-    vertices: []
+    points: []
   };
   // 元素
   element: IElement;
@@ -37,9 +37,9 @@ export default class ElementRotation implements IElementRotation, IController {
     if (!this.element.rotationEnable) return;
     this.model.angle = this.element.angle - 90;
     this.model.point = ElementUtils.calcElementRotatePoint(this.element);
-    this.model.vertices = CommonUtils.getBoxVertices(this.model.point, {
-      width: this.model.width,
-      height: this.model.height
+    this.model.points = CommonUtils.getBoxVertices(this.model.point, {
+      width: this.model.width / this.element.shield.stageScale,
+      height: this.model.height / this.element.shield.stageScale
     }).map(point => MathUtils.rotateRelativeCenter(point, this.element.angle, this.model.point))
   }
 
@@ -51,7 +51,7 @@ export default class ElementRotation implements IElementRotation, IController {
    */
   isContainsPoint(point: IPoint): boolean {
     if (this.element.rotationEnable) {
-      return MathUtils.isPointInPolygonByRayCasting(point, this.model.vertices);
+      return MathUtils.isPointInPolygonByRayCasting(point, this.model.points);
     }
     return false;
   }
