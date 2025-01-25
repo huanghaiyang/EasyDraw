@@ -84,13 +84,21 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    */
   remove(node: ILinkedNode<T>): void {
     this.nodes.delete(node);
-    if (node.prev) {
-      node.prev.next = node.next;
-      node.prev = null;
+    const prev = node.prev;
+    const next = node.next;
+    if (prev) {
+      prev.next = next;
     }
-    if (node.next) {
-      node.next.prev = node.prev;
-      node.next = null;
+    if (next) {
+      next.prev = prev;
+    }
+    node.prev = null;
+    node.next = null;
+    if (this._tail === node) {
+      this._tail = prev;
+    }
+    if (this._head === node) {
+      this._head = next;
     }
   }
 
