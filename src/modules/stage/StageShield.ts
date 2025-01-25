@@ -721,7 +721,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _endElementsRotate() {
     this.store.updateSelectedElementsRotation(this._pressUpPosition)
     // 刷新组件坐标数据
-    this.store.refreshElementsOriginals(this.store.rotatingTargetElements);
+    this.store.refreshElementsOriginals(this.store.rotatingTargetElements, { deepSubs: true });
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,

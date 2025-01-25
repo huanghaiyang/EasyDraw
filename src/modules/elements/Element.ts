@@ -634,6 +634,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.fontSize * this.shield.stageScale;
   }
 
+  get originalAngle(): number {
+    return this._originalAngle;
+  }
+
+  set originalAngle(value: number) {
+    this._originalAngle = value;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -973,7 +981,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshOriginalElementProps() {
     this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
-    this._originalAngle = this.model.angle;
     this._originalRect = this.calcRect();
     this._originalMatrix = [];
 
@@ -1531,7 +1538,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = coords;
     this.model.boxCoords = boxCoords;
     this.model.angle = ElementUtils.mirrorAngle((ElementUtils.normalizeAngle(this._originalAngle) + ElementUtils.normalizeAngle(deltaAngle) % 360));
-    this.refresh();
+    this.refreshElementPoints();
+    this.refreshPosition();
+    console.log('rotateBy', this.model.left, this.model.top);
   }
 
   /**

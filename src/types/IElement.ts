@@ -112,6 +112,8 @@ export default interface IElement {
   get editingEnable(): boolean;
   // 是否在编辑后刷新
   get tfRefreshAfterEdChanged(): boolean;
+  // 原始旋转角度
+  get originalAngle(): number;
 
   // 宽度
   get width(): number;
@@ -253,6 +255,8 @@ export default interface IElement {
   set isInRange(value: boolean);
   // 设置状态
   set status(value: ElementStatus);
+  // 设置原始旋转角度
+  set originalAngle(value: number);
 
   // 是否翻转X
   get flipX(): boolean;

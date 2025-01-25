@@ -950,6 +950,7 @@ export default class StageStore implements IStageStore {
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
       this.updateElementModel(element.id, { coords, boxCoords, left: x, top: y })
       element.refreshStagePoints();
+      element.refreshPosition();
     })
   }
 
@@ -979,10 +980,23 @@ export default class StageStore implements IStageStore {
    * 刷新model坐标
    * 
    * @param elements 
+   * @param options 
    */
-  refreshElementsOriginals(elements: IElement[]): void {
+  refreshElementsOriginals(elements: IElement[], options: { subs: boolean, deepSubs: boolean } = { subs: false, deepSubs: false }): void {
     elements.forEach(element => {
       element.refreshOriginalProps();
+      if (element.isGroup) {
+        if (options.subs) {
+          (element as IElementGroup).subs.forEach(sub => {
+            sub.refreshOriginalProps();
+          })
+        }
+        if (options.deepSubs) {
+          (element as IElementGroup).deepSubs.forEach(sub => {
+            sub.refreshOriginalProps();
+          })
+        }
+      }
     })
   }
 
@@ -1040,11 +1054,19 @@ export default class StageStore implements IStageStore {
    * 计算旋转组件的中心点
    */
   calcRotatingElementsCenter(): IPoint {
-    const point = MathUtils.calcCenter(flatten(this.selectedElements.map(element => element.pathPoints)))
+    const point = MathUtils.calcCenter(flatten(this.rotatingTargetElements.map(element => element.pathPoints)))
     this._rotatingTargetElementsCenter = point;
     this._rotatingTargetElementsCenterCoord = ElementUtils.calcWorldPoint(
       this._rotatingTargetElementsCenter, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale
     );
+    this.rotatingTargetElements.forEach(element => {
+      element.originalAngle = element.model.angle;
+      if (element.isGroup) {
+        (element as IElementGroup).deepSubs.forEach(sub => {
+          sub.originalAngle = sub.model.angle;
+        })
+      }
+    })
     return point;
   }
 
@@ -1057,11 +1079,10 @@ export default class StageStore implements IStageStore {
     let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCenter, point) + 90);
     angle = ElementUtils.mirrorAngle(angle);
     this.rotatingTargetElements.forEach(element => {
-      const originalAngle = element.model.angle;
       element.setAngle(angle);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.rotateBy(angle - originalAngle, this._rotatingTargetElementsCenterCoord);
+          sub.rotateBy(angle - element.originalAngle, this._rotatingTargetElementsCenterCoord);
         })
       }
     })
