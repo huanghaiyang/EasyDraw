@@ -1538,7 +1538,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = coords;
     this.model.boxCoords = boxCoords;
     this.model.angle = ElementUtils.mirrorAngle((ElementUtils.normalizeAngle(this._originalAngle) + ElementUtils.normalizeAngle(deltaAngle) % 360));
-    this.refreshElementPoints();
+    this.refreshStagePoints();
     this.refreshPosition();
   }
 
