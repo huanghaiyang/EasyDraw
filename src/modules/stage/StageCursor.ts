@@ -9,16 +9,34 @@ import { CursorSize } from "@/styles/MaskStyles";
 import MaskTaskIconCursor from "@/modules/render/mask/task/MaskTaskIconCursor";
 import { CursorTypes } from "@/types/Stage";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import ITransformer, { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
+import { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
+import IElementRotation from "@/types/IElementRotation";
+import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 
 export default class StageCursor implements IStageCursor {
+  // 光标位置
   value: IPoint;
+  // 舞台
   shield: IStageShield;
 
+  /**
+   * 获取世界坐标
+   * 
+   * @returns 
+   */
   get worldValue(): IPoint {
     return ElementUtils.calcWorldPoint(this.value, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+  }
+
+  /**
+   * 获取渲染参数
+   * 
+   * @returns 
+   */
+  get renderParams(): any {
+    return { canvas: this.shield.mask.canvas };
   }
 
   constructor(shield: IStageShield) {
@@ -26,6 +44,9 @@ export default class StageCursor implements IStageCursor {
     this.value = null;
   }
 
+  /**
+   * 清除光标
+   */
   clear(): void {
     this.value = null;
   }
@@ -60,6 +81,7 @@ export default class StageCursor implements IStageCursor {
     if (
       this.shield.selection.getActiveElementBorderTransformer()
       || this.shield.selection.getActiveElementTransformer()
+      || this.shield.selection.getActiveElementRotation()
       || this.shield.isDrawerActive
     ) {
       this.setStyle('none')
@@ -79,28 +101,13 @@ export default class StageCursor implements IStageCursor {
     if (this.shield.isDrawerActive) {
       return this.createMaskDrawingCursorTask();
     } else if (this.shield.isMoveableActive) {
-      const transformer = this._getElementTransformer();
-      if (transformer instanceof VerticesTransformer) {
-        return this.createMaskTransformerCursorTask(transformer);
-      } else if (transformer instanceof BorderTransformer) {
-        return this.createMaskBorderTransformerCursorTask(transformer);
-      }
-    }
-  }
-
-  /**
-   * 获取变换器对象
-   * 
-   * @returns 
-   */
-  private _getElementTransformer(): ITransformer {
-    const transformer = this.shield.selection.getActiveElementTransformer();
-    if (transformer) {
-      return transformer;
-    } else {
-      const borderTransformer = this.shield.selection.getActiveElementBorderTransformer();
-      if (borderTransformer) {
-        return borderTransformer;
+      const controller = this.shield.selection.getActiveController();
+      if (controller instanceof ElementRotation) {
+        return this.createMaskRotationCursorTask(controller);
+      } else if (controller instanceof VerticesTransformer) {
+        return this.createMaskTransformerCursorTask(controller);
+      } else if (controller instanceof BorderTransformer) {
+        return this.createMaskBorderTransformerCursorTask(controller);
       }
     }
   }
@@ -112,7 +119,17 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskDrawingCursorTask(): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(), CursorTypes.cross, { canvas: this.shield.mask.canvas });
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(), CursorTypes.cross, this.renderParams);
+  }
+
+  /**
+   * 创建一个旋转光标任务
+   * 
+   * @returns 
+   */
+  private createMaskRotationCursorTask(rotation: IElementRotation): IMaskTask {
+    if (!this.value) return;
+    return new MaskTaskIconCursor(this._createTransformerCursorModel({ angle: rotation.model.angle }), CursorTypes.move, this.renderParams);
   }
 
   /**
@@ -123,7 +140,7 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskBorderTransformerCursorTask(borderTransformer: IBorderTransformer): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(borderTransformer), CursorTypes.border, { canvas: this.shield.mask.canvas });
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(borderTransformer), CursorTypes.border, this.renderParams);
   }
 
   /**
@@ -134,7 +151,7 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskTransformerCursorTask(transformer: IVerticesTransformer): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(transformer), CursorTypes.vertices, { canvas: this.shield.mask.canvas });
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(transformer), CursorTypes.vertices, this.renderParams);
   }
 
   /**

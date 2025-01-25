@@ -8,6 +8,7 @@ import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { flatten } from "lodash";
+import IController from "@/types/IController";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
@@ -289,6 +290,7 @@ export default class StageSelection implements IStageSelection {
     if (this.shield.configure.rotationIconEnable) {
       const element = this.shield.store.uniqSelectedElement;
       if (element && element.rotation.isContainsPoint(point)) {
+        element.activeRotation();
         return element.rotation;
       }
     }
@@ -358,6 +360,18 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 获取激活元素旋转
+   * 
+   * @returns 
+   */
+  getActiveElementRotation(): IElementRotation {
+    const element = this.shield.store.uniqSelectedElement;
+    if (element && element.rotation.isActive) {
+      return element.rotation;
+    }
+  }
+
+  /**
    * 刷新选区
    * 
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
@@ -421,6 +435,14 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 取消所有选中元素的旋转
+   */
+  deActiveElementsRotations(): void {
+    const element = this.shield.store.uniqSelectedElement;
+    element?.deActiveRotation();
+  }
+
+  /**
    * 刷新选区模型
    */
   refreshSelectionModel(): void {
@@ -460,5 +482,42 @@ export default class StageSelection implements IStageSelection {
   getRealTimeTransformerModels(): IMaskModel[] {
     this.refreshTransformerModels();
     return this._transformerModels;
+  }
+
+  /**
+   * 尝试激活控制器
+   * 
+   * @param point 
+   * @returns 
+   */
+  tryActiveController(point: IPoint): IController {
+    const rotation = this.tryActiveElementRotation(point);
+    if (rotation) {
+      return rotation;
+    }
+    const transformer = this.tryActiveElementTransformer(point);
+    if (transformer) {
+      return transformer;
+    }
+    const borderTransformer = this.tryActiveElementBorderTransformer(point);
+    if (borderTransformer) {
+      return borderTransformer;
+    }
+  }
+
+  /**
+   * 获取激活控制器
+   * 
+   * @returns 
+   */
+  getActiveController(): IController {
+    let controller: IController = this.getActiveElementRotation();
+    if (!controller) {
+      controller = this.getActiveElementTransformer();
+      if (!controller) {
+        controller = this.getActiveElementBorderTransformer();
+      }
+    }
+    return controller;
   }
 }

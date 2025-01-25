@@ -6,6 +6,7 @@ import { CursorTypes } from "@/types/Stage";
 import SplitV from '@/assets/svg/split-v.svg';
 import Hand from '@/assets/svg/hand.svg';
 import Cross from '@/assets/svg/cross.svg';
+import Move from '@/assets/svg/move.svg';
 
 export default class MaskTaskIconCursor extends MaskTaskBase {
   type: CursorTypes = CursorTypes.vertices;
@@ -37,6 +38,9 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
       }
       case CursorTypes.cross: {
         return Cross;
+      }
+      case CursorTypes.move: {
+        return Move;
       }
     }
   }

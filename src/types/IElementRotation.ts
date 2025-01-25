@@ -9,6 +9,8 @@ export default interface IElementRotation {
   model: IRotationModel;
   // 元素
   element: IElement;
+  // 是否激活
+  isActive: boolean;
 
   // 刷新
   refresh(): void;

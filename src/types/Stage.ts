@@ -16,7 +16,9 @@ export enum CursorTypes {
   // 手
   hand,
   // 十字
-  cross
+  cross,
+  // 移动
+  move
 }
 
 // 舞台自动缩放时的内边距

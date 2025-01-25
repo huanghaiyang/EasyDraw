@@ -1533,4 +1533,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.angle = ElementUtils.mirrorAngle((ElementUtils.normalizeAngle(this._originalAngle) + ElementUtils.normalizeAngle(deltaAngle) % 360));
     this.refresh();
   }
+
+  /**
+   * 激活旋转
+   */
+  activeRotation(): void {
+    this.rotation.isActive = true;
+  }
+
+  /**
+   * 取消旋转
+   */
+  deActiveRotation(): void {
+    this.rotation.isActive = false;
+  }
 }

@@ -338,6 +338,11 @@ export default interface IElement {
   // 计算矩形
   calcRect(): Partial<DOMRect>;
 
+  // 激活旋转
+  activeRotation(): void;
+  // 取消旋转
+  deActiveRotation(): void;
+
   // 获取变换器
   getTransformerByPoint(point: IPoint): IVerticesTransformer;
   // 获取边框变换器

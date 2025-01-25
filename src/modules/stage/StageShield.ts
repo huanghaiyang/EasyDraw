@@ -476,22 +476,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns 
    */
   private _tryActiveController(): IController {
-    // 尝试激活旋转控制器
-    const rotation = this.selection.tryActiveElementRotation(this.cursor.value);
-    if (rotation) {
+    const controller = this.selection.tryActiveController(this.cursor.value);
+    // 判断是否是旋转控制器
+    const isRotationController = controller instanceof ElementRotation;
+    if (!isRotationController) {
+      this.selection.deActiveElementsRotations();
+    }
+    // 判断是否是变换控制器
+    const isTransformerController = controller instanceof VerticesTransformer;
+    if (!isTransformerController) {
       this.selection.deActiveElementsTransformers();
-      this.selection.deActiveElementsBorderTransformers();
-      return rotation;
     }
-    // 尝试激活形变控制器
-    const transformer = this.selection.tryActiveElementTransformer(this.cursor.value);
-    if (transformer) {
+    // 判断是否是边框变换控制器
+    const isBorderTransformerController = controller instanceof BorderTransformer;
+    if (!isBorderTransformerController) {
       this.selection.deActiveElementsBorderTransformers();
-      return transformer;
     }
-    // 尝试激活边形控制器
-    const borderTransformer = this.selection.tryActiveElementBorderTransformer(this.cursor.value);
-    if (borderTransformer) return borderTransformer;
+    return controller;
   }
 
   /**

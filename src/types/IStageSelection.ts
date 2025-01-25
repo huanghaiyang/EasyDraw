@@ -5,6 +5,7 @@ import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IBorderTransformer } from "@/types/ITransformer";
+import IController from "@/types/IController";
 
 // 舞台选区
 export default interface IStageSelection {
@@ -34,6 +35,8 @@ export default interface IStageSelection {
   clearSelects(): void;
   // 命中目标元素
   hitTargetElements(point: IPoint): void;
+  // 尝试激活控制器
+  tryActiveController(point: IPoint): IController;
   // 尝试激活元素旋转
   tryActiveElementRotation(point: IPoint): IElementRotation;
   // 尝试激活元素变换
@@ -44,14 +47,20 @@ export default interface IStageSelection {
   deActiveElementsTransformers(): void;
   // 清除元素边框变换
   deActiveElementsBorderTransformers(): void;
+  // 清除元素旋转
+  deActiveElementsRotations(): void;
   // 获取激活元素变换
   getActiveElementTransformer(): IVerticesTransformer;
   // 获取激活元素边框变换
   getActiveElementBorderTransformer(): IBorderTransformer;
+  // 获取激活元素旋转
+  getActiveElementRotation(): IElementRotation;
   // 刷新范围元素
   refreshRangeElements(rangePoints: IPoint[]): void;
   // 获取点上元素
   getElementOnPoint(point: IPoint): IElement;
+  // 获取激活控制器
+  getActiveController(): IController;
 
   // 计算选区模型
   calcSelectionModel(): IMaskModel;

@@ -9,7 +9,9 @@ import MathUtils from "@/utils/MathUtils";
 import IController from "@/types/IController";
 
 export default class ElementRotation implements IElementRotation, IController {
+  // id
   id: string;
+  // 数据模型
   model: IRotationModel = {
     point: null,
     type: DrawerMaskModelTypes.rotate,
@@ -18,7 +20,10 @@ export default class ElementRotation implements IElementRotation, IController {
     angle: -90,
     vertices: []
   };
+  // 元素
   element: IElement;
+  // 是否激活
+  isActive: boolean = false;
 
   constructor(element: IElement) {
     this.id = element.id;
