@@ -95,7 +95,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   get ancestorGroup(): IElementGroup {
     if (!this.isGroupSubject) return null;
     let group = this.group;
-    while (group.group) {
+    while (group && group.isGroupSubject) {
       group = group.group;
     }
     return group;

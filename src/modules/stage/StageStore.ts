@@ -1414,6 +1414,10 @@ export default class StageStore implements IStageStore {
     if (elements.length < 2) {
       return null;
     }
+    const isSameGroup = this.isSameAncestorGroup(elements);
+    if (isSameGroup) {
+      return null;
+    }
     const group = this.createElementGroup(elements);
     return group;
   }
