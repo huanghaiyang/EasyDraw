@@ -8,5 +8,16 @@ export enum TransformTypes {
   border
 }
 
+export enum CursorTypes {
+  // 顶点
+  vertices,
+  // 边框
+  border,
+  // 手
+  hand,
+  // 十字
+  cross
+}
+
 // 舞台自动缩放时的内边距
 export const AutoFitPadding = 100;

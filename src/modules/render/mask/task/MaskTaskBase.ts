@@ -3,7 +3,9 @@ import { IMaskModel } from "@/types/IModel";
 import { IMaskTask } from "@/types/IRenderTask";
 
 export default abstract class MaskTaskBase extends RenderTaskBase implements IMaskTask {
+  // 模型
   model: IMaskModel;
+  // 画布
   protected _canvas: HTMLCanvasElement;
 
   get data(): IMaskModel {

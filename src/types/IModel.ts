@@ -1,5 +1,4 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types/index";
-import { CreatorCategories } from "@/types/Creator";
 import { TransformerTypes } from "@/types/ITransformer";
 
 // 辅助画布绘制任务对象类型
@@ -25,12 +24,6 @@ export interface IMaskModel {
     // 是否闭合
     isFold?: boolean;
   }
-}
-
-// 辅助画布绘制任务光标对象
-export interface IMaskCursorModel extends IMaskModel {
-  // 创建器类型
-  creatorCategory: CreatorCategories;
 }
 
 // 图标模型

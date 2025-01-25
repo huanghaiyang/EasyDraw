@@ -2,28 +2,46 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import ResizeV from "@/assets/svg/resize-v.svg";
 import { IIconModel, IMaskModel } from "@/types/IModel";
-import { TransformTypes } from "@/types/Stage";
+import { CursorTypes } from "@/types/Stage";
 import SplitV from '@/assets/svg/split-v.svg';
+import Hand from '@/assets/svg/hand.svg';
+import Cross from '@/assets/svg/cross.svg';
 
-export default class MaskTaskTransformerCursor extends MaskTaskBase {
-  type: TransformTypes = TransformTypes.vertices;
+export default class MaskTaskIconCursor extends MaskTaskBase {
+  type: CursorTypes = CursorTypes.vertices;
 
+  /**
+   * 获取模型
+   * 
+   * @returns 
+   */
   get data(): IIconModel {
     return this.model as IIconModel;
   }
 
+  /**
+   * 获取图标
+   * 
+   * @returns 
+   */
   get img(): string {
     switch (this.type) {
-      case TransformTypes.vertices: {
+      case CursorTypes.vertices: {
         return ResizeV;
       }
-      case TransformTypes.border: {
+      case CursorTypes.border: {
         return SplitV;
+      }
+      case CursorTypes.hand: {
+        return Hand;
+      }
+      case CursorTypes.cross: {
+        return Cross;
       }
     }
   }
 
-  constructor(model: IMaskModel, type: TransformTypes, params?: any) {
+  constructor(model: IMaskModel, type: CursorTypes, params?: any) {
     super(model, params);
     this.type = type;
   }

@@ -1,14 +1,13 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types";
-import { IIconModel, IMaskCursorModel } from "@/types/IModel";
+import { IIconModel } from "@/types/IModel";
 import { IMaskTask } from "@/types/IRenderTask";
 import IStageCursor from "@/types/IStageCursor";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import MaskTaskCursor from "@/modules/render/mask/task/MaskTaskCursor";
 import { CursorSize } from "@/styles/MaskStyles";
-import MaskTaskTransformerCursor from "@/modules/render/mask/task/MaskTaskTransformerCursor";
-import { TransformTypes } from "@/types/Stage";
+import MaskTaskIconCursor from "@/modules/render/mask/task/MaskTaskIconCursor";
+import { CursorTypes } from "@/types/Stage";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ITransformer, { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -78,7 +77,7 @@ export default class StageCursor implements IStageCursor {
    */
   getTask(): IMaskTask {
     if (this.shield.isDrawerActive) {
-      return this.createMaskCursorTask();
+      return this.createMaskDrawingCursorTask();
     } else if (this.shield.isMoveableActive) {
       const transformer = this._getElementTransformer();
       if (transformer instanceof VerticesTransformer) {
@@ -111,16 +110,9 @@ export default class StageCursor implements IStageCursor {
    * 
    * @returns 
    */
-  private createMaskCursorTask(): IMaskTask {
+  private createMaskDrawingCursorTask(): IMaskTask {
     if (!this.value) return;
-    const model: IMaskCursorModel = {
-      point: this.value,
-      type: DrawerMaskModelTypes.cursor,
-      creatorCategory: this.shield.currentCreator.category,
-      scale: 1 / this.shield.stageScale
-    }
-    const task = new MaskTaskCursor(model, { canvas: this.shield.mask.canvas });
-    return task;
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(), CursorTypes.cross, { canvas: this.shield.mask.canvas });
   }
 
   /**
@@ -131,8 +123,7 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskBorderTransformerCursorTask(borderTransformer: IBorderTransformer): IMaskTask {
     if (!this.value) return;
-    const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(borderTransformer), TransformTypes.border, { canvas: this.shield.mask.canvas });
-    return task;
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(borderTransformer), CursorTypes.border, { canvas: this.shield.mask.canvas });
   }
 
   /**
@@ -143,23 +134,22 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskTransformerCursorTask(transformer: IVerticesTransformer): IMaskTask {
     if (!this.value) return;
-    const task = new MaskTaskTransformerCursor(this._createTransformerCursorModel(transformer), TransformTypes.vertices, { canvas: this.shield.mask.canvas });
-    return task;
+    return new MaskTaskIconCursor(this._createTransformerCursorModel(transformer), CursorTypes.vertices, { canvas: this.shield.mask.canvas });
   }
 
   /**
    * 创建一个变换光标的模型
    * 
-   * @param transformer 
+   * @param options 
    * @returns 
    */
-  private _createTransformerCursorModel(transformer: ITransformer): IIconModel {
+  private _createTransformerCursorModel(options?: { angle: number }): IIconModel {
     return {
       point: this.value,
       type: DrawerMaskModelTypes.cursor,
       width: CursorSize,
       height: CursorSize,
-      angle: transformer.angle,
+      angle: options?.angle || 0,
       scale: 1 / this.shield.stageScale
     }
   }
