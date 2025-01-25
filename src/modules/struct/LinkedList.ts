@@ -120,7 +120,7 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     if (target) {
       target.insertBefore(node);
       this.nodes.add(node);
-      if (target.isHead) {
+      if (node.isHead) {
         this._head = node;
       }
     }
@@ -136,7 +136,7 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     if (target) {
       target.insertAfter(node);
       this.nodes.add(node);
-      if (target.isTail) {
+      if (node.isTail) {
         this._tail = node;
       }
     }

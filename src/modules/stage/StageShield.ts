@@ -586,7 +586,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         // 判断当前鼠标位置的组件是否已经被选中
         const isSelectContainsTarget = this.store.isSelectedContainsTarget();
         if (e.ctrlKey) {
-          this.store.toggleSelectElement(targetElement);
+          targetElement && this.store.toggleSelectElement(targetElement);
         } else {
           // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
           if (!isSelectContainsTarget) {
