@@ -1171,7 +1171,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoordsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
-    points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid);
+    points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid, this.model.angle);
     return points.map(point => {
       return ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     })
@@ -1186,11 +1186,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param centroid 
    * @returns 
    */
-  protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
+  protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angle: number): IPoint[] {
     const center = this._calcMatrixPoint(centroid, matrix, lockPoint);
     return points.map(point => {
       point = this._calcMatrixPoint(point, matrix, lockPoint);
-      return MathUtils.rotateRelativeCenter(point, -this.model.angle, center);
+      return MathUtils.rotateRelativeCenter(point, -angle, center);
     })
   }
 
@@ -1222,9 +1222,16 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   transformBy(matrix: number[][], lockPoint: IPoint, deltaAngle: number, isAngleFlip: boolean): boolean {
-    matrix = MathUtils.rotateMatrix(matrix, deltaAngle);
-    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+    const points = this._originalRotatePathPoints.map(point => {
+      return this._calcMatrixPoint(point, matrix, lockPoint);
+    })
+    const boxPoints = this._originalRotateBoxPoints.map(point => {
+      return this._calcMatrixPoint(point, matrix, lockPoint);
+    })
+    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    this.model.coords = coords;
+    this.model.boxCoords = boxCoords;
     this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
