@@ -45,8 +45,6 @@ export type ElementObject = {
   isRatioLocked?: boolean;
   // 比例
   ratio?: number;
-  // 变换矩阵
-  matrix?: number[][];
   // 是否闭合
   isFold?: boolean;
   // 组合id
@@ -114,7 +112,12 @@ export default interface IElement {
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
   get originalAngle(): number;
-
+  // 变换矩阵
+  get transformMatrix(): number[][];
+  // 变换不动点
+  get transformLockPoint(): IPoint;
+  // 变换原始拖动点
+  get transformOriginalMovingPoint(): IPoint;
   // 宽度
   get width(): number;
   // 高度
@@ -364,11 +367,13 @@ export default interface IElement {
   // 获取激活的元素边框变换器
   getActiveElementBorderTransformer(): IBorderTransformer;
   // 变换
-  transform(offset: IPoint): void;
+  transform(offset: IPoint): boolean;
   // 顶点变换
-  transformByVertices(offset: IPoint): void;
+  transformByVertices(offset: IPoint): boolean;
   // 边框变换
-  transformByBorder(offset: IPoint): void;
+  transformByBorder(offset: IPoint): boolean;
+  // 矩阵变换
+  transformBy(lockPoint: IPoint, originalMovingPoint: IPoint, offset: IPoint): boolean;
 
   // 刷新旋转
   refreshRotation(): void;

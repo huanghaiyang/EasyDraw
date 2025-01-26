@@ -962,6 +962,11 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsTransform(offset: IPoint): void {
     this.selectedElements.forEach(element => {
       element.transform(offset);
+      if (element.isGroup) {
+        (element as IElementGroup).deepSubs.forEach(sub => {
+          sub.transformBy(element.transformLockPoint, element.transformOriginalMovingPoint, offset);
+        })
+      }
     })
   }
 
