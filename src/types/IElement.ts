@@ -373,7 +373,7 @@ export default interface IElement {
   // 边框变换
   transformByBorder(offset: IPoint): boolean;
   // 矩阵变换
-  transformBy(matrix: number[][], lockPoint: IPoint, isAngleFlip: boolean): boolean;
+  transformBy(matrix: number[][], lockPoint: IPoint, deltaAngle: number, isAngleFlip: boolean): boolean;
 
   // 刷新旋转
   refreshRotation(): void;

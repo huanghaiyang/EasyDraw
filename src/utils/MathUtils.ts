@@ -40,6 +40,20 @@ export default class MathUtils {
   }
 
   /**
+   * 旋转矩阵
+   * 
+   * @param matrix 
+   * @param angle 
+   * @returns 
+   */
+  static rotateMatrix(matrix: number[][], angle: number): number[][] {
+    const theta = MathUtils.degreesToRadians(angle); // 将角度转换为弧度
+    const rotationMatrix = [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
+    const result = multiply(matrix, rotationMatrix);
+    return result as unknown as number[][];
+  }
+
+  /**
    * 给定原点，以及一个不断移动的点，计算出缩放矩阵
    * 
    * 旋转角度为0的情况下

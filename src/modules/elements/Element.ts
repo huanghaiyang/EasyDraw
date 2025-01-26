@@ -1053,6 +1053,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeTransformer(transformer: IVerticesTransformer): void {
     this._transformers.forEach(item => {
       item.isActive = item.id === transformer.id;
+      this._refreshOriginalAngle();
     });
   }
 
@@ -1064,6 +1065,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeBorderTransformer(transformer: IBorderTransformer): void {
     this._borderTransformers.forEach(item => {
       item.isActive = item.id === transformer.id;
+      this._refreshOriginalAngle();
     });
   }
 
@@ -1215,9 +1217,12 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param lockPoint 
    * @param originalMovingPoint 
+   * @param deltaAngle 
+   * @param isAngleFlip
+   * @returns 
    */
-  transformBy(matrix: number[][], lockPoint: IPoint, isAngleFlip: boolean): boolean {
-
+  transformBy(matrix: number[][], lockPoint: IPoint, deltaAngle: number, isAngleFlip: boolean): boolean {
+    matrix = MathUtils.rotateMatrix(matrix, deltaAngle);
     this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
     this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
     this.refreshStagePoints();
@@ -1634,6 +1639,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   activeRotation(): void {
     this.rotation.isActive = true;
+    this._refreshOriginalAngle();
   }
 
   /**
@@ -1641,5 +1647,24 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   deActiveRotation(): void {
     this.rotation.isActive = false;
+  }
+
+  /**
+   * 恢复原始角度
+   */
+  private _refreshOriginalAngle(): void {
+    this._originalAngle = this.model.angle;
+    this._refreshDeepSubsOriginalAngle();
+  }
+
+  /**
+   * 恢复子组件的原始角度
+   */
+  private _refreshDeepSubsOriginalAngle(): void {
+    if (this.isGroup) {
+      (this as unknown as IElementGroup).deepSubs.forEach(sub => {
+        sub.originalAngle = sub.model.angle;
+      })
+    }
   }
 }

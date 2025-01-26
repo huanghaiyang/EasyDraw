@@ -964,7 +964,7 @@ export default class StageStore implements IStageStore {
       const isAngleFlip = element.transform(offset);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.transformBy(element.transformMatrix, element.transformLockPoint, isAngleFlip);
+          sub.transformBy(element.transformMatrix, element.transformLockPoint, sub.originalAngle - element.originalAngle, isAngleFlip);
         })
       }
     })
@@ -1064,14 +1064,6 @@ export default class StageStore implements IStageStore {
     this._rotatingTargetElementsCenterCoord = ElementUtils.calcWorldPoint(
       this._rotatingTargetElementsCenter, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale
     );
-    this.rotatingTargetElements.forEach(element => {
-      element.originalAngle = element.model.angle;
-      if (element.isGroup) {
-        (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.originalAngle = sub.model.angle;
-        })
-      }
-    })
     return point;
   }
 
