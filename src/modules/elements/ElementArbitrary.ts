@@ -228,12 +228,14 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * 按顶点变换
    * 
    * @param offset 
+   * @returns 
    */
-  doVerticesTransform(offset: IPoint): void {
+  doVerticesTransform(offset: IPoint): boolean {
     if (this.status === ElementStatus.editing) {
       this.doEditingTransform(offset);
+      return false
     } else {
-      super.doVerticesTransform(offset);
+      return super.doVerticesTransform(offset);
     }
   }
 

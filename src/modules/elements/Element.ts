@@ -29,19 +29,19 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 舞台
   shield: IStageShield;
   // 原始变换器点坐标
-  private _originalTransformerPoints: IPoint[];
+  protected _originalTransformerPoints: IPoint[];
   // 原始模型坐标
-  private _originalModelCoords: IPoint[];
+  protected _originalModelCoords: IPoint[];
   // 原始模型盒模型坐标
-  private _originalModelBoxCoords: IPoint[];
+  protected _originalModelBoxCoords: IPoint[];
   // 原始变换矩阵
-  private _originalTransformMatrix: number[][] = [];
+  protected _originalTransformMatrix: number[][] = [];
   // 变换矩阵
-  private _transformMatrix: number[][] = [];
+  protected _transformMatrix: number[][] = [];
   // 变换不动点
-  private _transformLockPoint: IPoint;
+  protected _transformLockPoint: IPoint;
   // 变换原始拖动点
-  private _transformOriginalMovingPoint: IPoint;
+  protected _transformOriginalMovingPoint: IPoint;
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中

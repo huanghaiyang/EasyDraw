@@ -47,6 +47,7 @@ export default class MathUtils {
    * @param center 旋转中心点
    * @param point 移动点
    * @param originalPoint 缩放前的点
+   * @param angle 旋转角度
    */
   static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angle?: number): number[][] {
     // 如果坐标系旋转过，则需要重新计算给定的坐标

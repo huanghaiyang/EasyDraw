@@ -178,15 +178,16 @@ export default class ElementLine extends Element implements IElementLine {
    * 
    * @param offset 
    */
-  protected doVerticesTransform(offset: IPoint): void {
+  protected doVerticesTransform(offset: IPoint): boolean {
     const index = this._transformers.findIndex(transformer => transformer.isActive);
     if (index !== -1) {
       const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 根据不动点进行形变
-      this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
+      return this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
     }
+    return false;
   }
 
   /**
