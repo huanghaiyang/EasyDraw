@@ -1169,16 +1169,27 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoordsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
-    points = points.map(point => {
-      return this._calcMatrixPoint(point, matrix, lockPoint);
-    });
-    const center = this._calcMatrixPoint(centroid, matrix, lockPoint);
-    const coords = points.map(point => {
-      point = MathUtils.rotateRelativeCenter(point, -this.model.angle, center);
-      const coord = ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
-      return coord;
+    points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid);
+    return points.map(point => {
+      return ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     })
-    return coords;
+  }
+
+  /**
+   * 计算变换后的点
+   * 
+   * @param points 
+   * @param matrix 
+   * @param lockPoint 
+   * @param centroid 
+   * @returns 
+   */
+  protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
+    const center = this._calcMatrixPoint(centroid, matrix, lockPoint);
+    return points.map(point => {
+      point = this._calcMatrixPoint(point, matrix, lockPoint);
+      return MathUtils.rotateRelativeCenter(point, -this.model.angle, center);
+    })
   }
 
   /**
@@ -1205,11 +1216,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param lockPoint 
    * @param originalMovingPoint 
    */
-  transformBy(lockPoint: IPoint, originalMovingPoint: IPoint, offset: IPoint): boolean {
-    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, false);
+  transformBy(matrix: number[][], lockPoint: IPoint, isAngleFlip: boolean): boolean {
+
     this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
     this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
-    const isAngleFlip = this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
     this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
