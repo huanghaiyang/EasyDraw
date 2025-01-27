@@ -964,7 +964,7 @@ export default class StageStore implements IStageStore {
       const isAngleFlip = element.transform(offset);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.transformBy(element.transformMatrix, element.transformLockPoint, sub.originalAngle - element.originalAngle, isAngleFlip);
+          sub.transformBy(element.transformLockPoint, element.transformOriginalMovingPoint, offset, isAngleFlip);
         })
       }
     })

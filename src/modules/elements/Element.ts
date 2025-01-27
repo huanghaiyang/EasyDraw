@@ -1136,29 +1136,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point 
    * @param matrix 
    * @param lockPoint 
+   * @param angle 
    * @returns 
    */
-  private _calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint): IPoint {
+  private _calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angle: number): IPoint {
     // 先旋转回角度0
-    point = MathUtils.rotateRelativeCenter(point, -this.model.angle, lockPoint);
+    point = MathUtils.rotateRelativeCenter(point, -angle, lockPoint);
     // 以不动点为圆心，计算形变
     const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
     // 重新计算坐标
     point = { x: x + lockPoint.x, y: y + lockPoint.y };
     // 坐标重新按照角度偏转
-    point = MathUtils.rotateRelativeCenter(point, this.model.angle, lockPoint);
+    point = MathUtils.rotateRelativeCenter(point, angle, lockPoint);
     return point;
-  }
-
-  /**
-   * 根据矩阵和中心点计算新的坐标
-   * 
-   * @param matrix 
-   * @param lockPoint 
-   * @returns 
-   */
-  protected calcTransformCoords(points: IPoint[], matrix: number[][], lockPoint: IPoint): IPoint[] {
-    return this.calcTransformCoordsByCenter(points, matrix, lockPoint, this._originalCenter);
   }
 
   /**
@@ -1184,12 +1174,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param matrix 
    * @param lockPoint 
    * @param centroid 
+   * @param angle 
    * @returns 
    */
   protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angle: number): IPoint[] {
-    const center = this._calcMatrixPoint(centroid, matrix, lockPoint);
+    const center = this._calcMatrixPoint(centroid, matrix, lockPoint, angle);
     return points.map(point => {
-      point = this._calcMatrixPoint(point, matrix, lockPoint);
+      point = this._calcMatrixPoint(point, matrix, lockPoint, angle);
       return MathUtils.rotateRelativeCenter(point, -angle, center);
     })
   }
@@ -1215,23 +1206,22 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 矩阵变换
    * 
+   * @param matrix 
    * @param lockPoint 
    * @param originalMovingPoint 
-   * @param deltaAngle 
+   * @param groupAngle 
    * @param isAngleFlip
    * @returns 
    */
-  transformBy(matrix: number[][], lockPoint: IPoint, deltaAngle: number, isAngleFlip: boolean): boolean {
-    const points = this._originalRotatePathPoints.map(point => {
-      return this._calcMatrixPoint(point, matrix, lockPoint);
-    })
-    const boxPoints = this._originalRotateBoxPoints.map(point => {
-      return this._calcMatrixPoint(point, matrix, lockPoint);
-    })
+  transformBy(lockPoint: IPoint, originalMovingPoint: IPoint, offset: IPoint, isAngleFlip: boolean): boolean {
+    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, 0, false);
+    const points = this._originalRotatePathPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, 0))
+    const boxPoints = this._originalRotateBoxPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, 0))
     const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
     this.model.coords = coords;
     this.model.boxCoords = boxCoords;
+    this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
     this.refreshStagePoints();
     this.refreshSize();
     this.refreshPosition();
@@ -1280,11 +1270,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint): boolean {
-    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset);
+    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, this.model.angle);
     this._transformMatrix = matrix;
     this._transformLockPoint = lockPoint;
-    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+    this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+    this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 判断是否需要翻转角度
     return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
   }
@@ -1295,17 +1285,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param lockPoint 
    * @param currentPointOriginal 
    * @param offset
+   * @param angle 
    * @param wouldBeRatioLock 
    * @returns 
    */
-  protected getTransformMatrix(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, wouldBeRatioLock?: boolean): number[][] {
+  protected getTransformMatrix(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, angle: number, wouldBeRatioLock?: boolean): number[][] {
     if (typeof wouldBeRatioLock === 'undefined') {
       wouldBeRatioLock = true;
     }
     // 当前拖动的点当前的位置
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, angle);
     if (wouldBeRatioLock && this.shouldRatioLockResize) {
       matrix[1][1] = MathUtils.resignValue(matrix[1][1], matrix[0][0]);
     }
@@ -1413,8 +1404,8 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
       this._transformMatrix = matrix;
       this._transformLockPoint = lockPoint;
-      this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-      this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+      this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+      this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
       return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
     }
     return false;
@@ -1468,8 +1459,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     this._transformMatrix = matrix;
     this._transformLockPoint = lockPoint;
-    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+    this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+    this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     this.refresh();
   }
 
@@ -1493,8 +1484,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     this._transformMatrix = matrix;
     this._transformLockPoint = lockPoint;
-    this.model.coords = this.calcTransformCoords(this._originalRotatePathPoints, matrix, lockPoint);
-    this.model.boxCoords = this.calcTransformCoords(this._originalRotateBoxPoints, matrix, lockPoint);
+    this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+    this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     this.refresh();
   }
 
