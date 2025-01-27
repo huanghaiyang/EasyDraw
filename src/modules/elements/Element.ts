@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import { multiply } from 'mathjs';
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { ElementObject, TransformByOptions } from "@/types/IElement";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -1206,24 +1206,33 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 矩阵变换
    * 
-   * @param matrix 
-   * @param lockPoint 
-   * @param originalMovingPoint 
-   * @param groupAngle 
-   * @param isAngleFlip
+   * @param options 
    * @returns 
    */
-  transformBy(lockPoint: IPoint, originalMovingPoint: IPoint, offset: IPoint, isAngleFlip: boolean): boolean {
-    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, 0, false);
-    const points = this._originalRotatePathPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, 0))
-    const boxPoints = this._originalRotateBoxPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, 0))
+  transformBy(options: TransformByOptions): boolean {
+    // 解构参数
+    const { lockPoint, originalMovingPoint, offset, groupAngle, isAngleFlip } = options;
+    // 获取变换矩阵
+    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, groupAngle, false);
+    // 计算变换后的点
+    const points = this._originalRotatePathPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
+    // 计算变换后的盒模型坐标
+    const boxPoints = this._originalRotateBoxPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
+    // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    // 计算变换后的盒模型坐标
     const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    // 设置变换后的坐标
     this.model.coords = coords;
+    // 设置变换后的盒模型坐标
     this.model.boxCoords = boxCoords;
+    // 判断是否需要翻转角度
     this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
+    // 刷新舞台坐标
     this.refreshStagePoints();
+    // 刷新尺寸
     this.refreshSize();
+    // 刷新位置
     this.refreshPosition();
     return isAngleFlip;
   }
@@ -1297,7 +1306,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
     const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, angle);
+    // 如果需要比例锁定，则调整纵轴缩放系数
     if (wouldBeRatioLock && this.shouldRatioLockResize) {
+      // 调整纵轴缩放系数
       matrix[1][1] = MathUtils.resignValue(matrix[1][1], matrix[0][0]);
     }
     return matrix;

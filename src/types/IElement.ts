@@ -13,6 +13,20 @@ import { IBorderTransformer } from "@/types/ITransformer";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 
+// 变换参数
+export type TransformByOptions = {
+  // 不动点
+  lockPoint: IPoint;
+  // 当前拖动的点的原始位置
+  originalMovingPoint: IPoint;
+  // 偏移量
+  offset: IPoint;
+  // 组合角度
+  groupAngle: number;
+  // 是否需要翻转角度
+  isAngleFlip: boolean;
+}
+
 // 舞台元素数据模型
 export type ElementObject = {
   // 元素id
@@ -373,7 +387,7 @@ export default interface IElement {
   // 边框变换
   transformByBorder(offset: IPoint): boolean;
   // 矩阵变换
-  transformBy(lockPoint: IPoint, originalMovingPoint: IPoint, offset: IPoint, isAngleFlip: boolean): boolean;
+  transformBy(options: TransformByOptions): boolean;
 
   // 刷新旋转
   refreshRotation(): void;
