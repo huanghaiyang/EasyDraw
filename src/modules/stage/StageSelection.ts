@@ -152,11 +152,15 @@ export default class StageSelection implements IStageSelection {
    */
   calcSingleSelectionModel(): IMaskModel {
     const elements = this.shield.store.getFinishedSelectedElements(true);
-    if (elements.length === 1 && elements[0].boxVerticesTransformEnable) {
-      return {
-        type: DrawerMaskModelTypes.selection,
-        points: elements[0].rotateBoxPoints,
-      };
+    if (elements.length === 1) {
+      const element = elements[0];
+      if (element.boxVerticesTransformEnable) {
+        return {
+          type: DrawerMaskModelTypes.selection,
+          points: element.rotateBoxPoints,
+          angle: element.model.angle,
+        };
+      }
     }
   }
 
@@ -171,6 +175,7 @@ export default class StageSelection implements IStageSelection {
       return {
         type: DrawerMaskModelTypes.selection,
         points: CommonUtils.getBoxPoints(flatten(elements.map(element => element.rotateBoxPoints))),
+        angle: 0,
       };
     }
   }
@@ -210,7 +215,7 @@ export default class StageSelection implements IStageSelection {
   calcMultiTransformerModels(): IMaskModel[] {
     const selectionModel = this.calcSelectionModel();
     if (selectionModel) {
-      return this.calcTransformerModelsByPoints(selectionModel.points, 0, TransformerTypes.rect);
+      return this.calcTransformerModelsByPoints(selectionModel.points, selectionModel.angle, TransformerTypes.rect);
     }
     return [];
   }
