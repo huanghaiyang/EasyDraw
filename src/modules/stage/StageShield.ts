@@ -17,7 +17,7 @@ import IElement from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
-import IStageShield from "@/types/IStageShield";
+import IStageShield, { StageCalcParams } from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
@@ -169,6 +169,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 是否处于编辑状态
   get isElementsEditing(): boolean {
     return this._isElementsEditing;
+  }
+
+  // 舞台计算参数
+  get stageCalcParams(): StageCalcParams {
+    return { rect: this.stageRect, worldCoord: this.stageWorldCoord, scale: this.stageScale };
   }
 
   constructor() {
@@ -849,7 +854,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param pos 
    */
   calcWorldCoord(pos: IPoint): IPoint {
-    return ElementUtils.calcWorldPoint(pos, this.stageRect, this.stageWorldCoord, this.stageScale);
+    return ElementUtils.calcWorldPoint(pos, this.stageCalcParams);
   }
 
   /**
@@ -994,7 +999,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _handleWheelScale(deltaScale: number, e: MouseEvent): void {
     const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
-    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageRect, this.stageWorldCoord, this.stageScale);
+    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageCalcParams);
     const value = this._checkScale(deltaScale);
     const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
     const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;

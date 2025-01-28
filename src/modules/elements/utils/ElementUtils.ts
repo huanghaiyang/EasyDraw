@@ -14,7 +14,7 @@ import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
-import IStageShield from "@/types/IStageShield";
+import IStageShield, { StageCalcParams } from "@/types/IStageShield";
 import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { RenderParams } from "@/types/IRender";
@@ -89,27 +89,24 @@ export default class ElementUtils {
    * 计算世界坐标在画布坐标系下的坐标
    * 
    * @param worldCoords 
-   * @param stageRect 
-   * @param stageWorldCoord 
+   * @param params 
    * @returns 
    */
-  static calcStageRelativePoints(worldCoords: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
-    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, stageRect, stageWorldCoord, stageScale));
+  static calcStageRelativePoints(worldCoords: IPoint[], params: StageCalcParams): IPoint[] {
+    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, params));
   }
 
   /**
    * 计算世界坐标在画布坐标系下的坐标
    * 
    * @param worldCoord 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale 
+   * @param params 
    * @returns 
    */
-  static calcStageRelativePoint(worldCoord: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
+  static calcStageRelativePoint(worldCoord: IPoint, params: StageCalcParams): IPoint {
     return {
-      x: MathUtils.preciseToFixed(worldCoord.x + (stageRect.width / 2) / stageScale - stageWorldCoord.x, 2),
-      y: MathUtils.preciseToFixed(worldCoord.y + (stageRect.height / 2) / stageScale - stageWorldCoord.y, 2)
+      x: MathUtils.preciseToFixed(worldCoord.x + (params.rect.width / 2) / params.scale - params.worldCoord.x, 2),
+      y: MathUtils.preciseToFixed(worldCoord.y + (params.rect.height / 2) / params.scale - params.worldCoord.y, 2)
     }
   }
 
@@ -117,27 +114,24 @@ export default class ElementUtils {
    * 计算世界坐标
    * 
    * @param points 
-   * @param stageRect 
-   * @param stageWorldCoord 
+   * @param params 
    * @returns 
    */
-  static calcWorldPoints(points: IPoint[], stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
-    return points.map(p => ElementUtils.calcWorldPoint(p, stageRect, stageWorldCoord, stageScale));
+  static calcWorldPoints(points: IPoint[], params: StageCalcParams): IPoint[] {
+    return points.map(p => ElementUtils.calcWorldPoint(p, params));
   }
 
   /**
    * 计算世界坐标
    * 
    * @param point 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale 
+   * @param params 
    * @returns 
    */
-  static calcWorldPoint(point: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint {
+  static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint { 
     return {
-      x: MathUtils.preciseToFixed(point.x - (stageRect.width / 2) / stageScale + stageWorldCoord.x, 2),
-      y: MathUtils.preciseToFixed(point.y - (stageRect.height / 2) / stageScale + stageWorldCoord.y, 2)
+      x: MathUtils.preciseToFixed(point.x - (params.rect.width / 2) / params.scale + params.worldCoord.x, 2),
+      y: MathUtils.preciseToFixed(point.y - (params.rect.height / 2) / params.scale + params.worldCoord.y, 2)
     }
   }
 
@@ -333,18 +327,16 @@ export default class ElementUtils {
    * 
    * @param width 
    * @param height 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale 
+   * @param params 
    * @param padding 
    * @returns 
    */
-  static calcRectangleCoordsInStage(width: number, height: number, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number, padding: number = 0): IPoint[] {
-    let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(stageRect, 1 / stageScale), padding / stageScale);
-    innerWidth = MathUtils.preciseToFixed(innerWidth * stageScale, 2);
-    innerHeight = MathUtils.preciseToFixed(innerHeight * stageScale, 2);
-    const points = CommonUtils.calcCenterInnerRectPoints({ width: innerWidth, height: innerHeight }, stageRect);
-    return ElementUtils.calcWorldPoints(points, stageRect, stageWorldCoord, stageScale);
+  static calcRectangleCoordsInStage(width: number, height: number, params: StageCalcParams, padding: number = 0): IPoint[] {
+    let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(params.rect, 1 / params.scale), padding / params.scale);
+    innerWidth = MathUtils.preciseToFixed(innerWidth * params.scale, 2);
+    innerHeight = MathUtils.preciseToFixed(innerHeight * params.scale, 2);
+    const points = CommonUtils.calcCenterInnerRectPoints({ width: innerWidth, height: innerHeight }, params.rect);
+    return ElementUtils.calcWorldPoints(points, params);
   }
 
   /**
@@ -410,7 +402,6 @@ export default class ElementUtils {
    * @param prev 
    * @param current 
    * @param next 
-   * @param result 
    * @param styles 
    */
   static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, styles: ElementStyles): IPoint[] {
@@ -435,16 +426,14 @@ export default class ElementUtils {
    * @param rotatePoints 
    * @param angle 
    * @param lockPoint 
-   * @param stageRect 
-   * @param stageWorldCoord 
-   * @param stageScale 
+   * @param params 
    * @returns 
    */
-  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, stageRect: DOMRect, stageWorldCoord: IPoint, stageScale: number): IPoint[] {
+  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -angle, lockPoint)));
     center = MathUtils.rotateRelativeCenter(center, angle, lockPoint);
-    const newCenterCoord = ElementUtils.calcWorldPoint(center, stageRect, stageWorldCoord, stageScale);
-    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, stageRect, stageWorldCoord, stageScale);
+    const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
+    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
   }
 

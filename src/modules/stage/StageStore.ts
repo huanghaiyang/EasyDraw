@@ -1068,7 +1068,7 @@ export default class StageStore implements IStageStore {
     const point = MathUtils.calcCenter(flatten(this.rotatingTargetElements.map(element => element.pathPoints)))
     this._rotatingTargetElementsCenter = point;
     this._rotatingTargetElementsCenterCoord = ElementUtils.calcWorldPoint(
-      this._rotatingTargetElementsCenter, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale
+      this._rotatingTargetElementsCenter, this.shield.stageCalcParams
     );
     return point;
   }

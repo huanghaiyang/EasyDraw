@@ -696,10 +696,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   calcPathPoints(): IPoint[] {
     let points = this._pathPoints;
     if (this.activeCoordIndex !== -1) {
-      const newCoord: IPoint = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      const newCoord: IPoint = ElementUtils.calcStageRelativePoint(this.model.coords[this.activeCoordIndex], this.shield.stageCalcParams);
       points[this.activeCoordIndex] = newCoord;
     } else {
-      points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      points = ElementUtils.calcStageRelativePoints(this.model.coords, this.shield.stageCalcParams);
     }
     return points;
   }
@@ -734,7 +734,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (!this.model.boxCoords?.length) return [];
     const center = this.center;
     return this.model.boxCoords.map(coord => {
-      const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
       return MathUtils.rotateRelativeCenter(point, this.model.angle, center)
     });
   }
@@ -1163,7 +1163,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected calcTransformCoordsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
     points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid, this.model.angle);
     return points.map(point => {
-      return ElementUtils.calcWorldPoint(point, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+      return ElementUtils.calcWorldPoint(point, this.shield.stageCalcParams);
     })
   }
 
@@ -1219,9 +1219,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的盒模型坐标
     const boxPoints = this._originalRotateBoxPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
     // 计算变换后的坐标
-    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
-    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageRect, this.shield.stageWorldCoord, this.shield.stageScale);
+    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageCalcParams);
     // 设置变换后的坐标
     this.model.coords = coords;
     // 设置变换后的盒模型坐标

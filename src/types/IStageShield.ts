@@ -65,6 +65,9 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isElementsRotating(): boolean;
   // 是否任意绘制
   get isArbitraryDrawing(): boolean;
+  // 舞台计算参数
+  get stageCalcParams(): StageCalcParams;
+
   // 计算给定范围的自动缩放值 
   calcScaleAutoFitValueByBox(box: IPoint[]): number;
   // 计算自动缩放值
@@ -91,4 +94,14 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   commitArbitraryDrawing(): Promise<void>;
   // 提交编辑绘制
   commitEditingDrawing(): Promise<void>;
+}
+
+// 舞台计算参数
+export interface StageCalcParams {
+  // 舞台矩形
+  rect: DOMRect;
+  // 舞台世界坐标
+  worldCoord: IPoint;
+  // 舞台缩放
+  scale: number;
 }
