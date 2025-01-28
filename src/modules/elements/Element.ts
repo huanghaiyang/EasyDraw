@@ -560,8 +560,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _originalRect: Partial<DOMRect> = {};
   // 原始中心点-舞台坐标系
   protected _originalCenter: IPoint;
-  // 原始的相对于祖先节点的角度
-  protected _originalAncestorAngle: number;
   // 变换器类型
   protected _transformType: TransformTypes;
 
@@ -1014,14 +1012,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
     this._originalRect = this.calcRect();
     this._originalTransformMatrix = [];
-
-    const ancestor = this.ancestorGroup;
-    if (ancestor) {
-      this._originalAncestorAngle = ElementUtils.normalizeAngle(MathUtils.calcAngle(ancestor.centerCoord, this.centerCoord));
-    } else {
-      this._originalAncestorAngle = 0;
-    }
-
     if (this.pathPoints.length) {
       this._originalCenter = cloneDeep(this.center);
     }
