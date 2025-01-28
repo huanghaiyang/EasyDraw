@@ -671,6 +671,15 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._transformType;
   }
 
+  get leanX(): number {
+    return 0;
+  }
+
+  get leanY(): number {
+    const angle = MathUtils.calcTriangleAngle(this.model.coords[0], this.model.coords[3], this.model.coords[2]) - 90;
+    return -Math.tan(MathUtils.degreesToRadians(angle));
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -1222,7 +1231,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 如果变换类型为边框，则调整矩阵
     if (transformType === TransformTypes.border) {
       // 调整矩阵
-      this._transBorderMatrix(matrix, lockIndex);
+      this._transBorderMatrix(matrix, lockIndex, false);
     }
     // 计算变换后的点
     const points = this._originalRotatePathPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
@@ -1401,13 +1410,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 
    * @param matrix 
    * @param index 
+   * @param wouldBeRatioLock 
    * @returns 
    */
-  private _transBorderMatrix(matrix: number[][], index: number): number[][] {
+  private _transBorderMatrix(matrix: number[][], index: number, wouldBeRatioLock?: boolean): number[][] {
+    if (typeof wouldBeRatioLock === 'undefined') {
+      wouldBeRatioLock = true;
+    }
+    const rationLock = wouldBeRatioLock && this.shouldRatioLockResize;
     if (index === 0 || index === 2) { // 调整高度，0上边/2下边
-      matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
+      matrix[0][0] = rationLock ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     } else if (index === 1 || index === 3) { // 调整宽度，1左边/3右边
-      matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
+      matrix[1][1] = rationLock ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     }
     // 如果是调整宽度，并且纵轴缩放系数小于0，则取绝对值
     if ([1, 3].includes(index) && matrix[1][1] < 0) {

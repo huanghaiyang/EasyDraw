@@ -57,4 +57,8 @@ export type RenderParams = {
   calcVertices?: boolean,
   // 斜接限制
   miterLimit?: number,
+  // 倾斜角度
+  leanX?: number,
+  // 倾斜角度
+  leanY?: number,
 }

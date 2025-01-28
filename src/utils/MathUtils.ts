@@ -426,7 +426,7 @@ export default class MathUtils {
    * @returns 
    */
   static isPointClosest(point: IPoint, target: IPoint, distance: number): boolean {
-    return MathUtils.distanceBetweenPoints(point, target) <= distance;
+    return MathUtils.calcDistance(point, target) <= distance;
   }
 
   /**
@@ -465,7 +465,7 @@ export default class MathUtils {
    * @param p2 
    * @returns 
    */
-  static distanceBetweenPoints(p1: IPoint, p2: IPoint) {
+  static calcDistance(p1: IPoint, p2: IPoint) {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
   }
 
@@ -479,10 +479,10 @@ export default class MathUtils {
       return false;
     }
     const sides = [
-      MathUtils.distanceBetweenPoints(points[0], points[1]),
-      MathUtils.distanceBetweenPoints(points[1], points[2]),
-      MathUtils.distanceBetweenPoints(points[2], points[3]),
-      MathUtils.distanceBetweenPoints(points[3], points[0]),
+      MathUtils.calcDistance(points[0], points[1]),
+      MathUtils.calcDistance(points[1], points[2]),
+      MathUtils.calcDistance(points[2], points[3]),
+      MathUtils.calcDistance(points[3], points[0]),
     ];
     const uniqueSides = new Set(sides);
     return uniqueSides.size === 2;

@@ -89,21 +89,26 @@ export default class CanvasUtils {
    */
   static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
     let { x, y, width, height } = rect;
-    const { angle = 0, flipX = false, flipY = false } = options;
+    const { angle = 0, flipX = false, flipY = false, leanX = 0, leanY = 0 } = options;
     const ctx = target.getContext('2d');
-    const radian = MathUtils.degreesToRadians(angle);
+    let radian = MathUtils.degreesToRadians(angle);
     ctx.save()
     ctx.translate(x + width / 2, y + height / 2);
+    let scaleX = 1;
+    let scaleY = 1;
     if (flipX && !flipY) {
-      ctx.scale(-1, 1);
-      ctx.rotate(-radian)
+      scaleX = -1;
+      radian = -radian;
     } else if (flipY && !flipX) {
-      ctx.scale(1, -1);
-      ctx.rotate(MathUtils.degreesToRadians(180) - radian)
-    } else {
-      ctx.scale(1, 1);
-      ctx.rotate(radian);
+      scaleY = -1;
+      radian = MathUtils.degreesToRadians(180) - radian;
     }
+    // 缩放
+    ctx.scale(scaleX, scaleY);
+    // 旋转
+    ctx.rotate(radian);
+    // 倾斜
+    ctx.transform(1, leanX, leanY, 1, 0, 0);
     ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();
   }

@@ -267,7 +267,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return {
-          width: MathUtils.preciseToFixed(MathUtils.distanceBetweenPoints(coords[0], coords[1]), 2),
+          width: MathUtils.preciseToFixed(MathUtils.calcDistance(coords[0], coords[1]), 2),
           height: 0,
         }
       }
