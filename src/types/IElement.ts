@@ -12,11 +12,16 @@ import { TransformerTypes } from "@/types/ITransformer";
 import { IBorderTransformer } from "@/types/ITransformer";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
+import { TransformTypes } from "@/types/Stage";
 
 // 变换参数
 export type TransformByOptions = {
+  // 变换器类型
+  transformType: TransformTypes;
   // 不动点
   lockPoint: IPoint;
+  // 不动点索引
+  lockIndex: number;
   // 当前拖动的点的原始位置
   originalMovingPoint: IPoint;
   // 偏移量
@@ -128,6 +133,8 @@ export default interface IElement {
   get originalAngle(): number;
   // 变换矩阵
   get transformMatrix(): number[][];
+  // 变换不动点索引
+  get transformLockIndex(): number;
   // 变换不动点
   get transformLockPoint(): IPoint;
   // 变换原始拖动点
@@ -279,6 +286,8 @@ export default interface IElement {
   get flipX(): boolean;
   // 是否翻转Y
   get flipY(): boolean;
+  // 变换器类型
+  get transformType(): TransformTypes;
 
   // 设置位置
   setPosition(x: number, y: number, offset: IPoint): void;
