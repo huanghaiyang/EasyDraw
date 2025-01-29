@@ -133,10 +133,18 @@ export default interface IElement {
   get originalAngle(): number;
   // 变换矩阵
   get transformMatrix(): number[][];
+  // 视觉角度
+  get viewAngle(): number;
+  // 内夹角
+  get internalAngle(): number;
   // 倾斜角度
   get leanX(): number;
   // 倾斜角度
   get leanY(): number;
+  // 倾斜x角度
+  get leanXAngle(): number;
+  // 倾斜y角度
+  get leanYAngle(): number;
   // 变换不动点索引
   get transformLockIndex(): number;
   // 变换不动点

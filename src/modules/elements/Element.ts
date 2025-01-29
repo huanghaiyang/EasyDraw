@@ -670,13 +670,29 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._transformType;
   }
 
-  get leanX(): number {
+  get viewAngle(): number {
+    const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
+    return ElementUtils.mirrorAngle(angle + 90);
+  }
+
+  get internalAngle(): number {
+    return 180 - MathUtils.calcTriangleAngle(this.model.boxCoords[0], this.model.boxCoords[3], this.model.boxCoords[2]);
+  }
+
+  get leanXAngle(): number {
     return 0;
   }
 
+  get leanYAngle(): number {
+    return 90 - this.internalAngle;
+  }
+
+  get leanX(): number {
+    return -Math.tan(MathUtils.degreesToRadians(this.leanXAngle));
+  }
+
   get leanY(): number {
-    const angle = MathUtils.calcTriangleAngle(this.model.coords[0], this.model.coords[3], this.model.coords[2]) - 90;
-    return -Math.tan(MathUtils.degreesToRadians(angle));
+    return -Math.tan(MathUtils.degreesToRadians(this.leanYAngle));
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
