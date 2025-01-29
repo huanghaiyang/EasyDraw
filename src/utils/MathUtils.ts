@@ -637,6 +637,18 @@ export default class MathUtils {
   static sortVerticesClockwise(vertices: IPoint[]) {
     // 计算质心
     let center = MathUtils.calcCenter(vertices);
+    return MathUtils.sortVerticesClockwiseByCenter(vertices, center);
+  }
+
+
+  /**
+   * 给定顶点数组和质心，将顶点数组按照顺时针方向排序
+   * 
+   * @param vertices 
+   * @param center 
+   * @returns 
+   */
+  static sortVerticesClockwiseByCenter(vertices: IPoint[], center: IPoint): IPoint[] {
     // 计算每个顶点与质心之间的角度
     let angles = vertices.map((vertex, index) => {
       let angle = Math.atan2(vertex.y - center.y, vertex.x - center.x);

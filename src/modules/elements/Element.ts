@@ -127,18 +127,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否翻转X轴
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
-    let coords = [this.model.boxCoords[0], this.model.boxCoords[3]];
-    coords = CommonUtils.sortPointsByY(coords);
-    return MathUtils.isPointClockwise(this.centerCoord, coords[0], coords[1]);
-
+    return MathUtils.isPointClockwise(this.centerCoord, this.model.boxCoords[0], this.model.boxCoords[3]);
   }
 
-  // 是否翻转Y轴
+  // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
   get flipY(): boolean {
-    if (!this.flipYEnable || !this.boxVerticesTransformEnable) return false;
-    let coords = [this.model.boxCoords[2], this.model.boxCoords[3]];
-    coords = CommonUtils.sortPointsByX(coords);
-    return MathUtils.isPointClockwise(this.centerCoord, coords[0], coords[1]);
+    return false;
   }
 
   // 是否可以翻转X轴
