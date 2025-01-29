@@ -109,6 +109,7 @@ export default class CanvasUtils {
     ctx.rotate(radian);
     // 倾斜
     ctx.transform(1, leanX, leanY, 1, 0, 0);
+    // 绘制
     ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();
   }
@@ -122,19 +123,8 @@ export default class CanvasUtils {
    * @param options 
    */
   static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: Partial<DOMRect>, options: RenderParams = {}) {
-    let { x, y, width, height } = rect;
-    const { angle = 0 } = options;
-    const ctx = target.getContext('2d');
     const img = CanvasUtils.getCanvasByImageData(imageData); // 频繁调用有性能问题
-    if (angle) {
-      ctx.save()
-      ctx.translate(x + width / 2, y + height / 2);
-      ctx.rotate(MathUtils.degreesToRadians(angle));
-      ctx.drawImage(img, -width / 2, -height / 2, width, height);
-    } else {
-      ctx.drawImage(img, x, y, width, height);
-    }
-    ctx.restore();
+    CanvasUtils.drawRotateImage(target, img, rect, options);
   }
 
   /**
