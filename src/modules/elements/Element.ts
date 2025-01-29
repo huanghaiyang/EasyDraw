@@ -126,20 +126,19 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否翻转X轴
   get flipX(): boolean {
-    if (!this.flipXEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
-    let points: IPoint[] = [this.transformers[0], this.transformers[3]];
-    points = MathUtils.rotateRelativeCenters(points, -this.leanYAngle, this.center);
-    const refers = CommonUtils.sortPointsByY(points);
-    return MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
+    if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
+    let coords = [this.model.boxCoords[0], this.model.boxCoords[3]];
+    coords = CommonUtils.sortPointsByY(coords);
+    return MathUtils.isPointClockwise(this.centerCoord, coords[0], coords[1]);
+
   }
 
   // 是否翻转Y轴
   get flipY(): boolean {
-    if (!this.flipYEnable || !this.boxVerticesTransformEnable || !this.transformers.length) return false;
-    let points: IPoint[] = [this.transformers[3], this.transformers[2]];
-    points = MathUtils.rotateRelativeCenters(points, -this.leanXAngle, this.center);
-    const refers = CommonUtils.sortPointsByX(points);
-    return MathUtils.isPointClockwise(this.center, refers[0], refers[1]);
+    if (!this.flipYEnable || !this.boxVerticesTransformEnable) return false;
+    let coords = [this.model.boxCoords[2], this.model.boxCoords[3]];
+    coords = CommonUtils.sortPointsByX(coords);
+    return MathUtils.isPointClockwise(this.centerCoord, coords[0], coords[1]);
   }
 
   // 是否可以翻转X轴

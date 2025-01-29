@@ -185,7 +185,7 @@ export default class ElementLine extends Element implements IElementLine {
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 根据不动点进行形变
-      return this.transformByLockPoint(lockPoint, currentPointOriginal, offset);
+      return this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
     }
     return false;
   }
