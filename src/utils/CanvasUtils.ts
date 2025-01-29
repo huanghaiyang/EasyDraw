@@ -5,6 +5,7 @@ import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -89,18 +90,18 @@ export default class CanvasUtils {
    */
   static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
     let { x, y, width, height } = rect;
-    const { angle = 0, flipX = false, flipY = false, viewAngle, leanX, leanY, leanXAngle, leanYAngle, internalAngle } = options;
+    let { angle = 0, flipX = false, flipY = false, viewAngle, leanX, leanY, leanXAngle, leanYAngle, internalAngle } = options;
     const ctx = target.getContext('2d');
-    let radian;
     if (typeof viewAngle === 'number') {
-      radian = MathUtils.degreesToRadians(viewAngle - (90 - internalAngle));
-    } else {
-      radian = MathUtils.degreesToRadians(angle);
+      angle = ElementUtils.mirrorAngle(viewAngle - (90 - internalAngle));
     }
+    let radian = MathUtils.degreesToRadians(angle);
     ctx.save()
     ctx.translate(x + width / 2, y + height / 2);
     let scaleX = 1;
     let scaleY = 1;
+
+
     if (flipX && !flipY) {
       scaleX = -1;
       radian = -radian;
