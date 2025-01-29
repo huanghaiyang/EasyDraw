@@ -21,6 +21,7 @@ import { RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
+import { multiply } from "mathjs";
 
 export enum ElementReactionPropNames {
   isSelected = 'isSelected',
@@ -128,7 +129,7 @@ export default class ElementUtils {
    * @param params 
    * @returns 
    */
-  static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint { 
+  static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint {
     return {
       x: MathUtils.preciseToFixed(point.x - (params.rect.width / 2) / params.scale + params.worldCoord.x, 2),
       y: MathUtils.preciseToFixed(point.y - (params.rect.height / 2) / params.scale + params.worldCoord.y, 2)
@@ -458,5 +459,38 @@ export default class ElementUtils {
       angle = angle + 360;
     }
     return angle;
+  }
+
+  /**
+   * 计算矩阵变换后的点
+   * 
+   * @param point 
+   * @param matrix 
+   * @param lockPoint 
+   * @param angle 
+   * @returns 
+   */
+  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angle: number): IPoint {
+    // 先旋转回角度0
+    point = MathUtils.rotateRelativeCenter(point, -angle, lockPoint);
+    // 以不动点为圆心，计算形变
+    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
+    // 重新计算坐标
+    point = { x: x + lockPoint.x, y: y + lockPoint.y };
+    // 坐标重新按照角度偏转
+    return MathUtils.rotateRelativeCenter(point, angle, lockPoint);
+  }
+
+  /**
+   * 计算矩阵变换后的点
+   * 
+   * @param points 
+   * @param matrix 
+   * @param lockPoint 
+   * @param angle 
+   * @returns 
+   */
+  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angle: number): IPoint[] {
+    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angle));
   }
 }

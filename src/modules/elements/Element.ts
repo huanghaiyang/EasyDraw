@@ -5,7 +5,6 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import { multiply } from 'mathjs';
 import IElement, { ElementObject, TransformByOptions } from "@/types/IElement";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
@@ -1143,27 +1142,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 根据矩阵计算新的坐标
-   * 
-   * @param point 
-   * @param matrix 
-   * @param lockPoint 
-   * @param angle 
-   * @returns 
-   */
-  private _calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angle: number): IPoint {
-    // 先旋转回角度0
-    point = MathUtils.rotateRelativeCenter(point, -angle, lockPoint);
-    // 以不动点为圆心，计算形变
-    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
-    // 重新计算坐标
-    point = { x: x + lockPoint.x, y: y + lockPoint.y };
-    // 坐标重新按照角度偏转
-    point = MathUtils.rotateRelativeCenter(point, angle, lockPoint);
-    return point;
-  }
-
-  /**
    * 根据中心点计算变换后的坐标
    * 
    * @param points 
@@ -1190,9 +1168,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angle: number): IPoint[] {
-    const center = this._calcMatrixPoint(centroid, matrix, lockPoint, angle);
+    const center = ElementUtils.calcMatrixPoint(centroid, matrix, lockPoint, angle);
     return points.map(point => {
-      point = this._calcMatrixPoint(point, matrix, lockPoint, angle);
+      point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angle);
       return MathUtils.rotateRelativeCenter(point, -angle, center);
     })
   }
@@ -1234,9 +1212,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       this._transBorderMatrix(matrix, lockIndex, false);
     }
     // 计算变换后的点
-    const points = this._originalRotatePathPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
+    const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, groupAngle);
     // 计算变换后的盒模型坐标
-    const boxPoints = this._originalRotateBoxPoints.map(point => this._calcMatrixPoint(point, matrix, lockPoint, groupAngle))
+    const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngle);
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
