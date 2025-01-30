@@ -93,7 +93,11 @@ export default class CanvasUtils {
     let { angle = 0, flipX = false, viewAngle, leanX, leanY, internalAngle } = options;
     const ctx = target.getContext('2d');
     if (typeof viewAngle === 'number') {
-      angle = ElementUtils.mirrorAngle(viewAngle - (90 - internalAngle));
+      if (flipX) {
+        angle = ElementUtils.mirrorAngle(viewAngle + (90 - internalAngle));
+      } else {
+        angle = ElementUtils.mirrorAngle(viewAngle - (90 - internalAngle));
+      }
     }
     let radian = MathUtils.degreesToRadians(angle);
     ctx.save()

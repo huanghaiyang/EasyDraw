@@ -14,17 +14,6 @@ export default class ElementTaskImage extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const { model, angle, flipX, flipY, leanXAngle, leanYAngle, leanX, leanY, viewAngle, internalAngle, rotateBoxPoints, center } = this.node;
-    console.log(
-      'viewAngle', viewAngle,
-      'internalAngle', internalAngle,
-      'angle', angle,
-      'leanXAngle', leanXAngle,
-      'leanYAngle', leanYAngle,
-      'leanX', leanX,
-      'leanY', leanY,
-      'flipX', flipX,
-      'flipY', flipY
-    );
     // 计算倾斜后的图片的宽度，此宽的值实际上与倾斜之前的值相同
     const width = MathUtils.calcDistance(rotateBoxPoints[0], rotateBoxPoints[1]);
     // 计算倾斜后的图片的高度，此高的值实际上与倾斜之前的值相同
