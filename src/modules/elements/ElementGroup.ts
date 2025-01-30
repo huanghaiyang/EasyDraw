@@ -109,10 +109,9 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
     subs.forEach(sub => {
+      result.push(sub);
       if (sub.isGroup) {
         this._getDeepSubs(result, (sub as ElementGroup).subs);
-      } else {
-        result.push(sub);
       }
     })
     return result;
@@ -160,7 +159,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   isPolygonOverlap(points: IPoint[]): boolean {
     return this.deepSubs.some(sub => sub.isPolygonOverlap(points));
   }
-  
+
   /**
    * 是否模型多边形重叠
    * 
@@ -182,5 +181,20 @@ export default class ElementGroup extends Element implements IElementGroup {
     })
   }
 
+  /**
+   * 刷新原始角度
+   */
+  protected _refreshOriginalAngle(): void {
+    super._refreshOriginalAngle();
+    this._refreshDeepSubsOriginalAngle();
+  }
 
+  /**
+   * 刷新子组件的原始角度
+   */
+  private _refreshDeepSubsOriginalAngle(): void {
+    this.deepSubs.forEach(sub => {
+      sub.originalAngle = sub.model.angle;
+    })
+  }
 }

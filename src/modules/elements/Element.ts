@@ -1735,19 +1735,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 恢复原始角度
    */
-  private _refreshOriginalAngle(): void {
+  protected _refreshOriginalAngle(): void {
     this._originalAngle = this.model.angle;
-    this._refreshDeepSubsOriginalAngle();
-  }
-
-  /**
-   * 恢复子组件的原始角度
-   */
-  private _refreshDeepSubsOriginalAngle(): void {
-    if (this.isGroup) {
-      (this as unknown as IElementGroup).deepSubs.forEach(sub => {
-        sub.originalAngle = sub.model.angle;
-      })
-    }
   }
 }
