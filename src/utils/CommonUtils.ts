@@ -159,19 +159,36 @@ export default class CommonUtils {
    * @param points 
    */
   static getLBRPoints(points: IPoint[]): IPoint[] {
-    let leftIndex, bottomIndex, rightIndex;
+    let [left, bottom, right] = CommonUtils.getLBRPointIndexes(points);
+    if (left === bottom) {
+      left = CommonUtils.getPrevIndexOfArray(points.length, left);
+    }
+    if (bottom === right) {
+      right = CommonUtils.getNextIndexOfArray(points.length, right);
+    }
+    return [points[left], points[bottom], points[right]];
+  }
+
+  /**
+   * 给定一个多边形，取最左侧，最下侧，最右侧三个点的索引
+   * 
+   * @param points 
+   * @returns 
+   */
+  static getLBRPointIndexes(points: IPoint[]): number[] {
+    let left, bottom, right;
     points.forEach((point, index) => {
-      if (leftIndex === undefined || point.x < points[leftIndex].x) {
-        leftIndex = index;
+      if (left === undefined || point.x < points[left].x) {
+        left = index;
       }
-      if (bottomIndex === undefined || point.y > points[bottomIndex].y) {
-        bottomIndex = index;
+      if (bottom === undefined || point.y > points[bottom].y) {
+        bottom = index;
       }
-      if (rightIndex === undefined || point.x > points[rightIndex].x) {
-        rightIndex = index;
+      if (right === undefined || point.x > points[right].x) {
+        right = index;
       }
     });
-    return [points[leftIndex], points[bottomIndex], points[rightIndex]];
+    return [left, bottom, right];
   }
 
   /**

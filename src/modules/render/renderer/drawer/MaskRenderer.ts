@@ -176,19 +176,26 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       }
       default: {
         if (element.model.angle % 90 === 0) {
-          p1 = element.maxBoxPoints[3];
-          p2 = element.maxBoxPoints[2];
+          p1 = element.rotateBoxPoints[3];
+          p2 = element.rotateBoxPoints[2];
         } else {
+          // 获取最左侧，最下侧，最右侧三个点
           const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints);
+          // 计算最下侧点与最左侧点，最下侧点与最右侧点的夹角
           let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
+          // 计算最下侧点与最右侧点，最下侧点与最右侧点的夹角
           let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, rightPoint) + 180);
+          // 取夹角较小的点
           const point = leftAngle < rightAngle ? leftPoint : rightPoint;
+          // 将点按x坐标排序
           [p1, p2] = [point, bottomPoint].sort((a, b) => a.x - b.x);
         }
         break;
       }
     }
+    // 计算夹角
     const angle = MathUtils.calcAngle(p1, p2);
+    // 生成指示器数据对象
     const model: IMaskModel = {
       point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,

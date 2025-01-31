@@ -522,8 +522,6 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 坐标-舞台坐标系
   protected _pathPoints: IPoint[] = [];
-  // 最大盒模型-舞台坐标系
-  protected _maxBoxPoints: IPoint[] = [];
   // 旋转坐标-舞台坐标系
   protected _rotatePathPoints: IPoint[] = [];
   // 旋转坐标-世界坐标系
@@ -538,7 +536,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _maxOutlineBoxPoints: IPoint[] = [];
   // 旋转外框线坐标-世界坐标系(组件对齐时使用)
   protected _rotateOutlinePathCoords: IPoint[] = [];
-  // 盒模型，同_maxBoxPoints-舞台坐标系
+  // 盒模型-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
   // 顶点变换器-舞台坐标系
   protected _transformers: IVerticesTransformer[] = [];
@@ -561,10 +559,6 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get pathPoints(): IPoint[] {
     return this._pathPoints;
-  }
-
-  get maxBoxPoints(): IPoint[] {
-    return this._maxBoxPoints;
   }
 
   get maxOutlineBoxPoints(): IPoint[] {
@@ -782,15 +776,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 计算非旋转的最大盒模型
-   * 
-   * @returns 
-   */
-  calcMaxBoxPoints(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotatePathPoints)
-  }
-
-  /**
    * 计算带边框的最大盒模型
    * 
    * @returns 
@@ -954,7 +939,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (this.borderTransformEnable) {
       this._borderTransformers = this.calcBorderTransformers();
     }
-    this._maxBoxPoints = this.calcMaxBoxPoints();
     this._rect = this.calcRect();
     this._refreshOutlinePoints();
   }
