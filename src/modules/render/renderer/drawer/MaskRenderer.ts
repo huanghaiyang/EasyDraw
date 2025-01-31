@@ -176,8 +176,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       }
       default: {
         if (element.model.angle % 90 === 0) {
-          p1 = element.rotateBoxPoints[3];
-          p2 = element.rotateBoxPoints[2];
+          p1 = element.maxBoxPoints[3];
+          p2 = element.maxBoxPoints[2];
         } else {
           // 获取最左侧，最下侧，最右侧三个点
           const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints);

@@ -193,6 +193,8 @@ export default interface IElement {
   get originalModelBoxCoords(): IPoint[];
   // 路径点-相对于舞台画布的坐标
   get pathPoints(): IPoint[];
+  // 最大盒模型顶点
+  get maxBoxPoints(): IPoint[];
   // 旋转路径点
   get rotatePathPoints(): IPoint[];
   // 旋转路径坐标
@@ -355,6 +357,8 @@ export default interface IElement {
   calcRotatePathPoints(): IPoint[];
   // 计算旋转外框路径点
   calcRotateOutlinePathPoints(): IPoint[];
+  // 计算最大盒模型顶点
+  calcMaxBoxPoints(): IPoint[];
   // 计算最大外框盒模型顶点
   calcMaxOutlineBoxPoints(): IPoint[];
   // 计算旋转外框坐标
