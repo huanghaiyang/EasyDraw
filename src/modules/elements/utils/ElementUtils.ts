@@ -210,9 +210,8 @@ export default class ElementUtils {
    * @returns 
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { center, rotation: { model: { angle, scale } }, rect } = element;
-    const halfValue = rect.height / 2;
-    return MathUtils.calcTargetPoint(center, halfValue + SelectionRotationMargin * scale, angle);
+    const { center, rotation: { model: { angle, scale } }, model: { height } } = element;
+    return MathUtils.calcTargetPoint(center, height / 2 + SelectionRotationMargin * scale, angle);
   }
 
   /**
@@ -406,13 +405,21 @@ export default class ElementUtils {
    * @param styles 
    */
   static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, styles: ElementStyles): IPoint[] {
+    // 描边宽度
     const { strokeWidth } = styles;
+    // 是否顺时针
     const isClockwise = MathUtils.isPointClockwise(next, prev, current);
+    // 三角形角度
     const angle = MathUtils.calcTriangleAngle(prev, current, next);
+    // 三角形角度的一半
     const aAngle = (180 - angle) / 2;
+    // 计算三角形第三边长度
     const pcAngle = MathUtils.calcAngle(prev, current);
+    // 计算三角形第三边长度
     const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
+    // 计算三角形第三边终点
     const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle + (isClockwise ? -aAngle : aAngle));
+    // 计算三角形区域
     const region: IPoint[] = [];
     region.push(current);
     region.push(MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90));
@@ -431,10 +438,15 @@ export default class ElementUtils {
    * @returns 
    */
   static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+    // 计算中心点
     let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -angle, lockPoint)));
+    // 计算旋转后的中心点
     center = MathUtils.rotateRelativeCenter(center, angle, lockPoint);
+    // 计算中心点世界坐标
     const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
+    // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
+    // 计算旋转后的坐标
     return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
   }
 

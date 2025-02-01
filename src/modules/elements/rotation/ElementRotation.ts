@@ -35,12 +35,15 @@ export default class ElementRotation implements IElementRotation, IController {
    */
   refresh(): void {
     if (!this.element.rotationEnable) return;
-    this.model.angle = this.element.angle - 90;
+    // 设置旋转角度
+    this.model.angle = this.element.viewAngle - 90;
+    // 设置旋转点
     this.model.point = ElementUtils.calcElementRotatePoint(this.element);
+    // 设置旋转路径点
     this.model.points = CommonUtils.getBoxVertices(this.model.point, {
       width: this.model.width / this.element.shield.stageScale,
       height: this.model.height / this.element.shield.stageScale
-    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.angle, this.model.point))
+    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.viewAngle, this.model.point))
   }
 
   /**
@@ -50,9 +53,12 @@ export default class ElementRotation implements IElementRotation, IController {
    * @returns 
    */
   isContainsPoint(point: IPoint): boolean {
+    // 如果元素旋转启用，则检查点是否在旋转路径点内
     if (this.element.rotationEnable) {
+      // 使用射线法检查点是否在旋转路径点内
       return MathUtils.isPointInPolygonByRayCasting(point, this.model.points);
     }
+    // 如果元素旋转未启用，则返回 false
     return false;
   }
 }

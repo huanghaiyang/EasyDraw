@@ -294,8 +294,8 @@ export default class CommonUtils {
    * @returns 
    */
   static calcRectangleSize(coords: IPoint[]): ISize {
-    const width = MathUtils.preciseToFixed(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.preciseToFixed(Math.abs(coords[0].y - coords[3].y));
+    const width = MathUtils.preciseToFixed(MathUtils.calcDistance(coords[0], coords[1]));
+    const height = MathUtils.preciseToFixed(MathUtils.calcDistance(coords[0], coords[3]));
     return { width, height };
   }
 

@@ -945,17 +945,28 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新舞台坐标
    */
   refreshElementPoints() {
+    // 计算舞台坐标
     this._pathPoints = this.calcPathPoints();
+    // 计算旋转后的路径点
     this._rotatePathPoints = this.calcRotatePathPoints();
+    // 计算旋转后的路径坐标
     this._rotatePathCoords = this.calcRotatePathCoords();
+    // 计算旋转后的盒模型点
     this._rotateBoxPoints = this.calcRotateBoxPoints();
+    // 计算旋转后的盒模型坐标
     this._rotateBoxCoords = this.calcRotateBoxCoords();
+    // 计算变换器
     this._transformers = this.calcTransformers();
+    // 判断是否启用边框变换
     if (this.borderTransformEnable) {
+      // 计算边框变换器
       this._borderTransformers = this.calcBorderTransformers();
     }
+    // 计算最大盒模型点
     this._maxBoxPoints = this.calcMaxBoxPoints();
+    // 计算矩形
     this._rect = this.calcRect();
+    // 刷新边框路径点
     this._refreshOutlinePoints();
   }
 
@@ -1029,10 +1040,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始变形器坐标
    */
   refreshOriginalElementProps() {
+    // 维护原始旋转路径点
     this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
+    // 维护原始旋转盒模型点
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
+    // 维护原始矩形
     this._originalRect = this.calcRect();
+    // 维护原始变换矩阵
     this._originalTransformMatrix = [];
+    // 如果路径点存在，则维护原始中心点
     if (this.pathPoints.length) {
       this._originalCenter = cloneDeep(this.center);
     }
@@ -1055,8 +1071,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始坐标
    */
   refreshOriginalModelCoords() {
+    // 维护原始模型坐标
     this._originalModelCoords = cloneDeep(this.model.coords);
+    // 维护原始模型盒模型坐标
     this._originalModelBoxCoords = cloneDeep(this.model.boxCoords);
+    // 维护原始中心点坐标
     this._originalCenterCoord = cloneDeep(this.centerCoord);
   }
 
@@ -1064,8 +1083,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始属性，用于组件的移动、旋转、大小变换
    */
   refreshOriginalProps(): void {
+    // 维护原始模型坐标
     this.refreshOriginalModelCoords();
+    // 维护原始变换器坐标
     this.refreshOriginalTransformerPoints();
+    // 维护原始元素属性
     this.refreshOriginalElementProps();
   }
 
@@ -1290,11 +1312,17 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index 
    */
   protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, lockIndex: number): boolean {
+    // 获取变换矩阵
     const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, this.model.angle);
+    // 设置变换矩阵
     this._transformMatrix = matrix;
+    // 设置变换不动点
     this._transformLockPoint = lockPoint;
+    // 设置变换不动点索引
     this._transformLockIndex = lockIndex;
+    // 设置变换坐标
     this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+    // 设置变换盒模型坐标
     this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 判断是否需要翻转角度
     return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
@@ -1339,8 +1367,11 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 计算原始矩阵
       this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
     }
+    // 判断是否需要翻转角度
     const isFlip = this._doFlipAngle(matrix, this._originalTransformMatrix);
+    // 如果需要翻转角度，则更新原始矩阵
     if (isFlip) {
+      // 更新原始矩阵以便下次判断是否需要翻转角度
       this._originalTransformMatrix = cloneDeep(matrix);
     }
     return isFlip;
@@ -1392,8 +1423,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 不动边的点2索引
     const lockNextIndex = CommonUtils.getNextIndexOfArray(this._borderTransformers.length, index, 3);
     // 不动点
-    const lockPoint = MathUtils.calcCenter([this._originalTransformerPoints[lockIndex], this._originalTransformerPoints[lockNextIndex]]);
-    return lockPoint;
+    return MathUtils.calcCenter([this._originalTransformerPoints[lockIndex], this._originalTransformerPoints[lockNextIndex]]);
   }
 
   /**
@@ -1474,9 +1504,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新组件必要数据
    */
   refresh(): void {
+    // 刷新舞台坐标
     this.refreshStagePoints();
+    // 刷新尺寸
     this.refreshSize();
+    // 刷新位置
     this.refreshPosition();
+    // 刷新原始属性
     this.refreshOriginalProps();
   }
 
@@ -1484,8 +1518,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新与边框设置相关的坐标
    */
   protected _refreshOutlinePoints(): void {
+    // 计算旋转后的边框路径点
     this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+    // 计算旋转后的边框路径坐标
     this._rotateOutlinePathCoords = this.calcRotateOutlinePathCoords();
+    // 计算最大边框盒模型点
     this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
   }
 
@@ -1721,7 +1758,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 激活旋转
    */
   activeRotation(): void {
+    // 设置旋转为激活状态
     this.rotation.isActive = true;
+    // 刷新原始角度
     this._refreshOriginalAngle();
   }
 
@@ -1729,6 +1768,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 取消旋转
    */
   deActiveRotation(): void {
+    // 设置旋转为非激活状态
     this.rotation.isActive = false;
   }
 
@@ -1736,6 +1776,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 恢复原始角度
    */
   protected _refreshOriginalAngle(): void {
+    // 设置原始角度
     this._originalAngle = this.model.angle;
   }
 }
