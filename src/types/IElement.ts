@@ -422,8 +422,6 @@ export default interface IElement {
   refreshOriginalProps(): void;
   // 刷新变换器
   refreshTransformers(): void;
-  // 刷新角度
-  refreshAngleWithView(): void;
 }
 
 // 舞台元素（组件）-React

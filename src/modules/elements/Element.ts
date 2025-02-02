@@ -1211,14 +1211,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 刷新角度
-   */
-  refreshAngleWithView(): void {
-    this.model.angle = this.viewAngle;
-    this.refreshStagePoints();
-  }
-
-  /**
    * 形变
    * 
    * @param offset 
@@ -1274,8 +1266,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshSize();
     // 刷新位置
     this.refreshPosition();
-    // 刷新角度
-    // this.refreshAngleWithView();
     return isAngleFlip;
   }
 
