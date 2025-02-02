@@ -46,6 +46,12 @@ export type ElementObject = {
   data?: any;
   // 旋转角度
   angle?: number;
+  // 倾斜角度
+  leanYAngle?: number;
+  // 内部角度
+  internalAngle?: number;
+  // 视觉角度
+  viewAngle?: number;
   // 元素名称
   name?: string;
   // 宽度
@@ -422,6 +428,12 @@ export default interface IElement {
   refreshOriginalProps(): void;
   // 刷新变换器
   refreshTransformers(): void;
+
+  // 转换为JSON
+  toJson(): ElementObject;
+
+  // 从JSON转换
+  fromJson(json: ElementObject): void;
 }
 
 // 舞台元素（组件）-React

@@ -36,14 +36,14 @@ export default class ElementRotation implements IElementRotation, IController {
   refresh(): void {
     if (!this.element.rotationEnable) return;
     // 设置旋转角度
-    this.model.angle = this.element.angle - 90;
+    this.model.angle = this.element.viewAngle - 90;
     // 设置旋转点
     this.model.point = ElementUtils.calcElementRotatePoint(this.element);
     // 设置旋转路径点
     this.model.points = CommonUtils.getBoxVertices(this.model.point, {
       width: this.model.width / this.element.shield.stageScale,
       height: this.model.height / this.element.shield.stageScale
-    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.angle, this.model.point))
+    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.viewAngle, this.model.point))
   }
 
   /**

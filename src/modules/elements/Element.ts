@@ -1780,4 +1780,28 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置原始角度
     this._originalAngle = this.model.angle;
   }
+
+  /**
+   * 转换为JSON
+   * 
+   * @returns 
+   */
+  toJson(): ElementObject {
+    const { viewAngle, internalAngle, leanYAngle } = this.model;
+    return {
+      ...this.model,
+      viewAngle,
+      internalAngle,
+      leanYAngle
+    }
+  }
+
+  /**
+   * 从JSON转换
+   * 
+   * @param json 
+   */
+  fromJson(json: ElementObject): void {
+    this.model = json;
+  }
 }

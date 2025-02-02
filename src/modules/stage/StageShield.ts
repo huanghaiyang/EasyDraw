@@ -578,7 +578,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const controller = this._tryActiveController();
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true })
-        this.store.calcRotatingElementsCenter();
+        this.store.calcRotatingStates(this._pressDownPosition);
         this.store.refreshElementsOriginals(this.store.selectedElements);
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
@@ -724,7 +724,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件旋转操作
    */
   private _endElementsRotate() {
-    this.store.updateSelectedElementsRotation(this._pressUpPosition)
     // 刷新组件坐标数据
     this.store.refreshElementsOriginals(this.store.rotatingTargetElements, { deepSubs: true });
     // 更新组件状态
@@ -732,6 +731,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       isRotatingTarget: false,
       isRotating: false,
     })
+    this.store.clearRotatingStates();
   }
 
   /**

@@ -52,9 +52,11 @@ export default class StageStore implements IStageStore {
   // 旋转目标元素映射关系，加快查询
   private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转组件中心点
-  private _rotatingTargetElementsCenter: IPoint;
+  private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
-  private _rotatingTargetElementsCenterCoord: IPoint;
+  private _rotatingCenterCoord: IPoint;
+  // 旋转组件原始角度
+  private _rotatingOriginalAngle: number;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -1067,13 +1069,22 @@ export default class StageStore implements IStageStore {
   /**
    * 计算旋转组件的中心点
    */
-  calcRotatingElementsCenter(): IPoint {
-    const point = MathUtils.calcCenter(flatten(this.rotatingTargetElements.map(element => element.pathPoints)))
-    this._rotatingTargetElementsCenter = point;
-    this._rotatingTargetElementsCenterCoord = ElementUtils.calcWorldPoint(
-      this._rotatingTargetElementsCenter, this.shield.stageCalcParams
+  calcRotatingStates(point: IPoint): void {
+    const center = MathUtils.calcCenter(flatten(this.rotatingTargetElements.map(element => element.pathPoints)))
+    this._rotatingCenter = center;
+    this._rotatingCenterCoord = ElementUtils.calcWorldPoint(
+      center, this.shield.stageCalcParams
     );
-    return point;
+    this._rotatingOriginalAngle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
+  }
+
+  /**
+   * 清除旋转属性
+   */
+  clearRotatingStates(): void {
+    this._rotatingCenter = null;
+    this._rotatingCenterCoord = null;
+    this._rotatingOriginalAngle = null;
   }
 
   /**
@@ -1082,13 +1093,13 @@ export default class StageStore implements IStageStore {
    * @param point 
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingTargetElementsCenter, point) + 90);
-    angle = ElementUtils.mirrorAngle(angle);
+    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
     this.rotatingTargetElements.forEach(element => {
+      angle = ElementUtils.mirrorAngle(element.originalAngle + angle - this._rotatingOriginalAngle);
       element.setAngle(angle);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.rotateBy(angle - element.originalAngle, this._rotatingTargetElementsCenterCoord);
+          sub.rotateBy(angle - element.originalAngle, this._rotatingCenterCoord);
         })
       }
     })
