@@ -909,7 +909,7 @@ export default class Element implements IElement, ILinkedNodeValue {
         borderTransformer.start = point;
         borderTransformer.end = nextPoint;
       } else {
-        borderTransformer = new BorderTransformer(this, point, nextPoint);
+        borderTransformer = new BorderTransformer(this, point, nextPoint, index);
       }
       return borderTransformer;
     })

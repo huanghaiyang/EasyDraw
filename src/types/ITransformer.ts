@@ -35,6 +35,8 @@ export interface IBorderTransformer extends ITransformer {
   start: IPoint;
   // 结束点
   end: IPoint;
+  // 索引
+  index: number;
   // 是否接近
   isClosest(point: IPoint): boolean;
 }

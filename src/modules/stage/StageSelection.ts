@@ -47,6 +47,11 @@ export default class StageSelection implements IStageSelection {
     return null;
   }
 
+  // 获取内部角度
+  get internalAngle(): number {
+    return 0;
+  }
+
   constructor(shield: IStageShield) {
     this.shield = shield;
   }
