@@ -1248,7 +1248,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 解构参数
     const { lockPoint, lockIndex, transformType, originalMovingPoint, offset, groupAngle, isAngleFlip } = options;
     // 获取变换矩阵
-    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, groupAngle, false);
+    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, groupAngle, 0, false);
     // 如果变换类型为边框，则调整矩阵
     if (transformType === TransformTypes.border) {
       // 调整矩阵
@@ -1275,7 +1275,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新位置
     this.refreshPosition();
     // 刷新角度
-    this.refreshAngleWithView();
+    // this.refreshAngleWithView();
     return isAngleFlip;
   }
 
@@ -1323,7 +1323,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, lockIndex: number): boolean {
     // 获取变换矩阵
-    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, this.model.angle);
+    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, this.model.angle, this.leanYAngle);
     // 设置变换矩阵
     this._transformMatrix = matrix;
     // 设置变换不动点
@@ -1345,17 +1345,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param currentPointOriginal 
    * @param offset
    * @param angle 
+   * @param leanYAngle 
    * @param wouldBeRatioLock 
    * @returns 
    */
-  protected getTransformMatrix(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, angle: number, wouldBeRatioLock?: boolean): number[][] {
+  protected getTransformMatrix(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, angle: number, leanYAngle: number, wouldBeRatioLock?: boolean): number[][] {
     if (typeof wouldBeRatioLock === 'undefined') {
       wouldBeRatioLock = true;
     }
     // 当前拖动的点当前的位置
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, angle);
+    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, angle, leanYAngle);
     // 如果需要比例锁定，则调整纵轴缩放系数
     if (wouldBeRatioLock && this.shouldRatioLockResize) {
       // 调整纵轴缩放系数
@@ -1375,7 +1376,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 判断是否已经计算过原始矩阵
     if (!this._originalTransformMatrix.length) {
       // 计算原始矩阵
-      this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle);
+      this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, this.model.angle, this.leanXAngle);
     }
     // 判断是否需要翻转角度
     const isFlip = this._doFlipAngle(matrix, this._originalTransformMatrix);
@@ -1482,7 +1483,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点当前的位置
       const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
       // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-      const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+      const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle, this.leanYAngle);
       // 调整矩阵
       this._transBorderMatrix(matrix, index);
       // 设置变换矩阵
@@ -1557,7 +1558,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的坐标
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle, this.leanYAngle);
     // 调整矩阵
     matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     // 设置变换矩阵
@@ -1593,7 +1594,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的坐标
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle);
+    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.model.angle, this.leanYAngle);
     // 调整矩阵
     matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     // 设置变换矩阵

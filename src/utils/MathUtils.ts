@@ -62,8 +62,9 @@ export default class MathUtils {
    * @param point 移动点
    * @param originalPoint 缩放前的点
    * @param angle 旋转角度
+   * @param leanYAngle 纵轴倾斜角度
    */
-  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angle?: number): number[][] {
+  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angle: number, leanYAngle: number): number[][] {
     // 如果坐标系旋转过，则需要重新计算给定的坐标
     if (angle) {
       point = MathUtils.rotateRelativeCenter(point, -angle, center);
