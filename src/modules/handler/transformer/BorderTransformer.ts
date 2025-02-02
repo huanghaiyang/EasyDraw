@@ -15,13 +15,7 @@ export default class BorderTransformer extends BaseTransformer implements IBorde
   index: number;
 
   get angle(): number {
-    let result = MathUtils.calcAngleBetweenPointAndSegment(this.host.center, this.start, this.end);
-    if ([1, 3].includes(this.index)) {
-      result += 90 + (90 - this.host.internalAngle);
-    } else {
-      result += this.host.internalAngle;
-    }
-    return result;
+    return MathUtils.calcAngle(this.start, this.end);
   }
 
   constructor(host: IElement | IStageSelection, start: IPoint, end: IPoint, index: number) {
