@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from '@/modules/struct/LinkedNode';
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { cloneDeep } from "lodash";
+import { clamp, cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import IElement, { ElementObject, TransformByOptions } from "@/types/IElement";
 import { StrokeTypes } from "@/styles/ElementStyles";
@@ -1743,6 +1743,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param value 
    */
   setLeanYAngle(value: number): void {
+    value = clamp(value, -89, 89);
+    const coords = this.calcUnLeanCoords();
+    this.model.coords = MathUtils.leanYRelativeCenters(coords, value, this.centerCoord);
+    const boxCoords = this.calcUnleanBoxCoords();
+    this.model.boxCoords = MathUtils.leanYRelativeCenters(boxCoords, value, this.centerCoord);
     this.model.leanYAngle = value;
     this.refresh();
   }

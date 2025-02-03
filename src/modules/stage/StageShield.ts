@@ -230,7 +230,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsLeanYAngle(elements, value);
-    await this._redrawAll({ shield: true });
+    await this._redrawAll({ shield: true, mask: true });
   }
 
   /**
@@ -241,7 +241,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsLeanXAngle(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsLeanXAngle(elements, value);
-    await this._redrawAll({ shield: true });
+    await this._redrawAll({ shield: true, mask: true });
   }
 
   /**
