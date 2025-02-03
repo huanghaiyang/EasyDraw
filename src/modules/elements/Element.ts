@@ -853,7 +853,8 @@ export default class Element implements IElement, ILinkedNodeValue {
         width: TransformerSize / this.shield.stageScale,
         height: TransformerSize / this.shield.stageScale,
       }, {
-        angle: this.model.angle
+        angle: this.model.angle,
+        leanYAngle: this.model.leanYAngle
       });
       let transformer = this._transformers[index];
       if (transformer) {

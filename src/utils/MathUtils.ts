@@ -1,4 +1,4 @@
-import { multiply, cos, sin, add, isPositive, tan } from "mathjs";
+import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import { divide } from "lodash";
 import CommonUtils from '@/utils/CommonUtils';
@@ -30,8 +30,7 @@ export default class MathUtils {
    * @returns 
    */
   static rotate(coord: IPoint, angle: number): IPoint {
-    const theta = MathUtils.degreesToRadians(angle); // 将角度转换为弧度
-    const rotationMatrix = [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
+    const rotationMatrix = MathUtils.calcRotateMatrix(angle);
     const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
@@ -47,8 +46,7 @@ export default class MathUtils {
    * @returns 
    */
   static rotateMatrix(matrix: number[][], angle: number): number[][] {
-    const theta = MathUtils.degreesToRadians(angle); // 将角度转换为弧度
-    const rotationMatrix = [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
+    const rotationMatrix = MathUtils.calcRotateMatrix(angle);
     const result = multiply(matrix, rotationMatrix);
     return result as unknown as number[][];
   }
@@ -109,6 +107,145 @@ export default class MathUtils {
    */
   static rotateRelativeCenters(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
     return coords.map(coord => MathUtils.rotateRelativeCenter(coord, angle, center));
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coord 
+   * @param leanYAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanYRelativeCenter(coord: IPoint, leanYAngle: number, center: IPoint): IPoint {
+    return MathUtils.leanRelativeCenter(coord, 0, leanYAngle, center);
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coords 
+   * @param leanYAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanYRelativeCenters(coords: IPoint[], leanYAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanYRelativeCenter(coord, leanYAngle, center));
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coord 
+   * @param leanXAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanXRelativeCenter(coord: IPoint, leanXAngle: number, center: IPoint): IPoint {
+    return MathUtils.leanRelativeCenter(coord, leanXAngle, 0, center);
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coords 
+   * @param leanXAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanXRelativeCenters(coords: IPoint[], leanXAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanXRelativeCenter(coord, leanXAngle, center));
+  }
+
+  /**
+   * 计算偏移矩阵
+   * 
+   * @param leanXAngle 
+   * @param leanYAngle 
+   * @returns 
+   */
+  static calcLeanMatrix(leanXAngle: number, leanYAngle: number): number[][] {
+    leanXAngle = leanXAngle || 0;
+    leanYAngle = leanYAngle || 0;
+    const leanX = Math.tan(MathUtils.degreesToRadians(leanXAngle));
+    const leanY = -Math.tan(MathUtils.degreesToRadians(leanYAngle));
+    const matrix = [[1, leanY, 0], [leanX, 1, 0], [0, 0, 1]];
+    return matrix;
+  }
+
+  /**
+   * 计算旋转矩阵
+   * 
+   * @param angle 
+   * @returns 
+   */
+  static calcRotateMatrix(angle: number): number[][] {
+    angle = angle || 0;
+    const theta = MathUtils.degreesToRadians(angle);
+    return [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coord 
+   * @param leanXAngle 
+   * @param leanYAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanRelativeCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
+    const matrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
+    const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    return {
+      x: add(result[0], center.x),
+      y: add(result[1], center.y)
+    }
+  }
+
+  /**
+   * 倾斜坐标系上的某一点
+   * 
+   * @param coords 
+   * @param leanXAngle 
+   * @param leanYAngle 
+   * @param center 
+   * @returns 
+   */
+  static leanRelativeCenters(coords: IPoint[], leanXAngle: number, leanYAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanRelativeCenter(coord, leanXAngle, leanYAngle, center));
+  }
+
+  /**
+   * 旋转倾斜坐标系上的某一点
+   * 
+   * @param coord 
+   * @param trans 
+   * @param center 
+   * @returns 
+   */
+  static transformRelativeCenter(coord: IPoint, trans: { angle?: number, leanYAngle?: number, leanXAngle?: number }, center: IPoint) {
+    const {angle = 0 , leanXAngle = 0 , leanYAngle = 0} = trans;
+    const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
+    const rotateMatrix = MathUtils.calcRotateMatrix(angle);
+    const matrix = multiply(leanMatrix, rotateMatrix);
+    const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    return {
+      x: add(result[0], center.x),
+      y: add(result[1], center.y)
+    }
+  }
+
+  /**
+   * 旋转倾斜坐标系上的某一点
+   * 
+   * @param coords 
+   * @param trans 
+   * @param center 
+   * @returns 
+   */
+  static transformRelativeCenters(coords: IPoint[], trans: { angle: number, leanYAngle: number, leanXAngle: number }, center: IPoint) {
+    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center));
   }
 
   /**

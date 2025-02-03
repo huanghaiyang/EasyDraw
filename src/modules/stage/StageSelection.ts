@@ -206,8 +206,8 @@ export default class StageSelection implements IStageSelection {
   calcSingleTransformerModels(): IMaskModel[] {
     const elements = this.shield.store.selectedElements;
     if (elements.length === 1) {
-      const { transformerType, model: { angle }, transformers, verticesTransformEnable } = elements[0]
-      return this.calcTransformerModelsByPoints(transformers, angle, verticesTransformEnable ? transformerType : TransformerTypes.rect);
+      const { transformerType, angle, leanYAngle, viewAngle, transformers, verticesTransformEnable } = elements[0]
+      return this.calcTransformerModelsByPoints(transformers, { angle, leanYAngle, viewAngle }, verticesTransformEnable ? transformerType : TransformerTypes.rect);
     }
     return [];
   }
@@ -220,7 +220,7 @@ export default class StageSelection implements IStageSelection {
   calcMultiTransformerModels(): IMaskModel[] {
     const selectionModel = this.calcSelectionModel();
     if (selectionModel) {
-      return this.calcTransformerModelsByPoints(selectionModel.points, selectionModel.angle, TransformerTypes.rect);
+      return this.calcTransformerModelsByPoints(selectionModel.points, selectionModel, TransformerTypes.rect);
     }
     return [];
   }
@@ -246,17 +246,17 @@ export default class StageSelection implements IStageSelection {
    * @param transformerType 
    * @returns 
    */
-  private calcTransformerModelsByPoints(points: IPoint[], angle: number, transformerType: TransformerTypes): IMaskModel[] {
+  private calcTransformerModelsByPoints(points: IPoint[], props: Partial<IMaskModel>, transformerType: TransformerTypes): IMaskModel[] {
     return points.map((point) => {
       const model: IMaskModel = {
         point,
         type: DrawerMaskModelTypes.transformer,
-        angle,
         scale: 1 / this.shield.stageScale,
         element: {
           transformerType,
         },
         radius: ArbitraryControllerRadius,
+        ...props,
       }
       return model;
     });

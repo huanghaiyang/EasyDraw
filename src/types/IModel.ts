@@ -13,6 +13,10 @@ export interface IMaskModel {
   points?: IPoint[];
   // 角度
   angle?: number;
+  // 倾斜角度
+  leanYAngle?: number;
+  // 视觉角度
+  viewAngle?: number;
   // 文本
   text?: string;
   // 半径

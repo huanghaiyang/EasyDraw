@@ -196,10 +196,11 @@ export default class CommonUtils {
    * 
    * @param center 
    * @param size 
-   * @param param2 
+   * @param options 
    * @returns 
    */
-  static get4BoxPoints(center: IPoint, size: ISize, { angle: number } = { angle: 0 }): IPoint[] {
+  static get4BoxPoints(center: IPoint, size: ISize, options?: { angle?: number, leanYAngle?: number }): IPoint[] {
+    const { angle = 0, leanYAngle = 0 } = options || {};
     const points = [
       {
         x: center.x - size.width / 2,
@@ -219,7 +220,9 @@ export default class CommonUtils {
       },
     ];
     points.forEach((point) => {
-      Object.assign(point, MathUtils.rotateRelativeCenter(point, number, center));
+      Object.assign(point, MathUtils.leanYRelativeCenter(point, leanYAngle, center));
+      Object.assign(point, MathUtils.rotateRelativeCenter(point, angle, center));
+      // Object.assign(point, MathUtils.transformRelativeCenter(point, { angle, leanYAngle }, center));
     });
     return points;
   }
