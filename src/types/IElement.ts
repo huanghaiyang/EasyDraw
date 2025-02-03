@@ -47,6 +47,16 @@ export type AngleModel = {
   viewAngle?: number;
 }
 
+// 默认角度
+export const DefaultAngleModel: AngleModel = {
+  angle: 0,
+  leanXAngle: 0,
+  leanYAngle: 0,
+  internalAngle: 90,
+  actualAngle: 0,
+  viewAngle: 0,
+}
+
 // 舞台元素数据模型
 export type ElementObject = AngleModel & {
   // 元素id
@@ -324,6 +334,8 @@ export default interface IElement {
   setHeight(value: number): void;
   // 设置旋转角度
   setAngle(value: number): void;
+  // 设置Y倾斜角度
+  setLeanYAngle(value: number): void;
   // 设置描边类型
   setStrokeType(value: StrokeTypes): void;
   // 设置描边宽度
@@ -356,6 +368,8 @@ export default interface IElement {
   refreshPosition(): void;
   // 刷新舞台点
   refreshStagePoints(): void;
+  // 刷新角度
+  refreshAngles(): void;
   // 刷新
   refresh(): void;
   // 刷新盒模型坐标
@@ -394,6 +408,20 @@ export default interface IElement {
   calcRotatePathCoords(): IPoint[];
   // 计算矩形
   calcRect(): Partial<DOMRect>;
+  // 计算非倾斜坐标
+  calcUnLeanCoords(): IPoint[];
+  // 计算非倾斜盒模型坐标
+  calcUnleanBoxCoords(): IPoint[];
+  // 计算倾斜X角度
+  calcLeanXAngle(): number;
+  // 计算倾斜Y角度
+  calcLeanYAngle(): number;
+  // 计算内部角度
+  calcInternalAngle(): number;
+  // 计算视角角度
+  calcViewAngle(): number;
+  // 计算实际角度
+  calcActualAngle(): number;
 
   // 激活旋转
   activeRotation(): void;

@@ -11,6 +11,8 @@ export default interface IStageSetter {
   setElementsHeight(elements: IElement[], value: number): Promise<void>;
   // 设置元素角度
   setElementsAngle(elements: IElement[], value: number): Promise<void>;
+  // 设置元素Y倾斜角度
+  setElementsLeanYAngle(elements: IElement[], value: number): Promise<void>;
   // 设置元素描边类型
   setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void>;
   // 设置元素描边宽度

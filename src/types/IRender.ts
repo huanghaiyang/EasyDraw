@@ -1,5 +1,5 @@
 import { IRenderTask } from "@/types/IRenderTask";
-import { AngleModel } from "./IElement";
+import { AngleModel } from "@/types/IElement";
 
 // 渲染器
 export interface IQueueRender {

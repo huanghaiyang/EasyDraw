@@ -14,7 +14,7 @@ import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { ElementObject, IElementArbitrary } from "@/types/IElement";
+import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
@@ -458,6 +458,20 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件Y倾斜角度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setLeanYAngle(value);
+      }
+    });
+  }
+
+  /**
    * 设置组件边框类型
    * 
    * @param elements 
@@ -762,7 +776,6 @@ export default class StageStore implements IStageStore {
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
       data,
-      angle: 0,
       width: size.width,
       height: size.height,
       left: position.x,
@@ -770,6 +783,7 @@ export default class StageStore implements IStageStore {
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
+      ...DefaultAngleModel,
     }
     return model;
   }
@@ -1122,7 +1136,6 @@ export default class StageStore implements IStageStore {
       boxCoords: CommonUtils.getBoxPoints(coords),
       type: CreatorTypes.image,
       data: image,
-      angle: 0,
       name: 'image',
       left: center.x,
       top: center.y,
@@ -1134,6 +1147,7 @@ export default class StageStore implements IStageStore {
       naturalWidth: width,
       naturalHeight: height,
       isRatioLocked: true,
+      ...DefaultAngleModel
     }
     const element = ElementUtils.createElement(object, this.shield);
     return element;
@@ -1370,11 +1384,11 @@ export default class StageStore implements IStageStore {
       boxCoords: CommonUtils.getBoxPoints(coords),
       width,
       height,
-      angle: 0,
       styles: {},
       left: left + width / 2,
       top: top + height / 2,
       type: CreatorTypes.group,
+      ...DefaultAngleModel
     };
   }
 

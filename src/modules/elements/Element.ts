@@ -668,20 +668,21 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get viewAngle(): number {
-    const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
-    return ElementUtils.mirrorAngle(angle + 90);
+    return this.model.viewAngle;
   }
 
   get internalAngle(): number {
-    return 180 - MathUtils.calcTriangleAngle(this.model.boxCoords[0], this.model.boxCoords[3], this.model.boxCoords[2]);
+    return this.model.internalAngle;
   }
 
+  @computed
   get leanXAngle(): number {
-    return 0;
+    return this.model.leanXAngle;
   }
 
+  @computed
   get leanYAngle(): number {
-    return 90 - this.internalAngle;
+    return this.model.leanYAngle;
   }
 
   get leanX(): number {
@@ -693,11 +694,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get actualAngle(): number {
-    if (this.flipX) {
-      return ElementUtils.mirrorAngle(this.viewAngle + this.leanYAngle);
-    } else {
-      return ElementUtils.mirrorAngle(this.viewAngle - this.leanYAngle);
-    }
+    return this.model.actualAngle;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
@@ -932,6 +929,87 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRect(): Partial<DOMRect> {
     return CommonUtils.getRect(this._pathPoints);
+  }
+
+  /**
+   * 计算非倾斜盒模型坐标
+   * 
+   * @returns 
+   */
+  calcUnLeanCoords(): IPoint[] {
+    const centerCoord = this.centerCoord;
+    return MathUtils.leanRelativeCenters(this.model.coords, -this.leanXAngle, -this.leanYAngle, centerCoord);
+  }
+
+  /**
+   * 计算非倾斜盒模型坐标
+   * 
+   * @returns 
+   */
+  calcUnleanBoxCoords(): IPoint[] {
+    const centerCoord = this.centerCoord;
+    return MathUtils.leanRelativeCenters(this.model.boxCoords, -this.leanXAngle, -this.leanYAngle, centerCoord);
+  }
+
+  /**
+   * 计算内部角度
+   * 
+   * @returns 
+   */
+  calcInternalAngle(): number {
+    return 180 - MathUtils.calcTriangleAngle(this.model.boxCoords[0], this.model.boxCoords[3], this.model.boxCoords[2]);
+  }
+
+  /**
+   * 计算倾斜角度
+   * 
+   * @returns 
+   */
+  calcLeanXAngle(): number {
+    return 0;
+  }
+
+  /**
+   * 计算倾斜角度
+   * 
+   * @returns 
+   */
+  calcLeanYAngle(): number {
+    return 90 - this.internalAngle;
+  }
+
+  /**
+   * 计算视角角度
+   * 
+   * @returns 
+   */
+  calcViewAngle(): number {
+    const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
+    return ElementUtils.mirrorAngle(angle + 90);
+  }
+
+  /**
+   * 计算实际角度
+   * 
+   * @returns 
+   */
+  calcActualAngle(): number {
+    if (this.flipX) {
+      return ElementUtils.mirrorAngle(this.viewAngle + this.leanYAngle);
+    } else {
+      return ElementUtils.mirrorAngle(this.viewAngle - this.leanYAngle);
+    }
+  }
+
+  /**
+   * 刷新角度
+   */
+  refreshAngles(): void {
+    this.model.viewAngle = this.calcViewAngle();
+    this.model.internalAngle = this.calcInternalAngle();
+    this.model.leanXAngle = this.calcLeanXAngle();
+    this.model.leanYAngle = this.calcLeanYAngle();
+    this.model.actualAngle = this.calcActualAngle();
   }
 
   /**
@@ -1225,17 +1303,25 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset 
    */
   transform(offset: IPoint): boolean {
+    // 默认不翻转角度
     let isAngleFlip = false;
+    // 如果有顶点变形器激活，则进行顶点变形
     if (this.getActiveElementTransformer()) {
       isAngleFlip = this.transformByVertices(offset);
       this._transformType = TransformTypes.vertices;
     } else if (this.getActiveElementBorderTransformer()) {
+      // 否则如果有边框变形器激活，则进行边框变形
       isAngleFlip = this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
     }
+    // 刷新舞台坐标
     this.refreshStagePoints();
+    // 刷新尺寸
     this.refreshSize();
+    // 刷新位置
     this.refreshPosition();
+    // 刷新角度
+    this.refreshAngles();
     return isAngleFlip;
   }
 
@@ -1275,6 +1361,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshSize();
     // 刷新位置
     this.refreshPosition();
+    // 刷新角度
+    this.refreshAngles();
     return isAngleFlip;
   }
 
@@ -1520,6 +1608,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshSize();
     // 刷新位置
     this.refreshPosition();
+    // 刷新角度
+    this.refreshAngles();
     // 刷新原始属性
     this.refreshOriginalProps();
   }
@@ -1635,6 +1725,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   setAngle(value: number): void {
     this.model.angle = value;
     this.refresh();
+  }
+
+  /**
+   * 设置Y倾斜角度
+   * 
+   * @param value 
+   */
+  setLeanYAngle(value: number): void {
+    const matrix = MathUtils.calcLeanMatrix(0, value);
   }
 
   /**
@@ -1762,6 +1861,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshStagePoints();
     // 刷新位置
     this.refreshPosition();
+    // 刷新角度
+    this.refreshAngles();
   }
 
   /**
@@ -1796,14 +1897,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   toJson(): ElementObject {
-    const { viewAngle, internalAngle, leanYAngle, actualAngle } = this.model;
-    return {
-      ...this.model,
-      viewAngle,
-      internalAngle,
-      leanYAngle,
-      actualAngle
-    }
+    return JSON.parse(JSON.stringify(this.model));
   }
 
   /**
@@ -1812,6 +1906,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param json 
    */
   fromJson(json: ElementObject): void {
-    this.model = json;
+    this.model = JSON.parse(JSON.stringify(json));
   }
 }
