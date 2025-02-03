@@ -16,7 +16,7 @@ export const TransformerFillColor = '#ffffff';
 export const TransformerFillColorOpacity = 1;
 export const TransformerLineWidth = 1;
 
-export const TransformerSize = 60;
+export const TransformerSize = 6;
 export const SelectionRotationSize = 12;
 export const SelectionRotationMargin = 12;
 export const SelectionIndicatorMargin = 12;

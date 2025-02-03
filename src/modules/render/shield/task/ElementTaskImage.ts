@@ -13,7 +13,21 @@ export default class ElementTaskImage extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    const { model, angle, flipX, flipY, leanXAngle, leanYAngle, leanX, leanY, viewAngle, internalAngle, rotateBoxPoints, center } = this.node;
+    const {
+      model,
+      angle,
+      flipX,
+      flipY,
+      leanXAngle,
+      leanYAngle,
+      actualAngle,
+      leanX,
+      leanY,
+      viewAngle,
+      internalAngle,
+      rotateBoxPoints,
+      center
+    } = this.node;
     // 计算倾斜后的图片的宽度，此宽的值实际上与倾斜之前的值相同
     const width = MathUtils.calcDistance(rotateBoxPoints[0], rotateBoxPoints[1]);
     // 计算倾斜后的图片的高度，此高的值实际上与倾斜之前的值相同
@@ -36,7 +50,8 @@ export default class ElementTaskImage extends ElementTaskBase {
       leanX,
       leanY,
       internalAngle,
-      viewAngle
+      viewAngle,
+      actualAngle
     });
     // 绘制描边
     CanvasUtils.drawPathStokeWidthScale(this.canvas, this.node.strokePathPoints, model.styles);

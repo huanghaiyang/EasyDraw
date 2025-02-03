@@ -32,8 +32,23 @@ export type TransformByOptions = {
   isAngleFlip: boolean;
 }
 
+export type AngleModel = {
+  // 旋转角度
+  angle?: number;
+  // 倾斜角度
+  leanXAngle?: number;
+  // 倾斜角度
+  leanYAngle?: number;
+  // 内部角度
+  internalAngle?: number;
+  // 实际需要旋转的角度
+  actualAngle?: number;
+  // 视觉角度
+  viewAngle?: number;
+}
+
 // 舞台元素数据模型
-export type ElementObject = {
+export type ElementObject = AngleModel & {
   // 元素id
   id: string;
   // 元素坐标
@@ -44,14 +59,6 @@ export type ElementObject = {
   type?: CreatorTypes;
   // 元素数据
   data?: any;
-  // 旋转角度
-  angle?: number;
-  // 倾斜角度
-  leanYAngle?: number;
-  // 内部角度
-  internalAngle?: number;
-  // 视觉角度
-  viewAngle?: number;
   // 元素名称
   name?: string;
   // 宽度
@@ -143,6 +150,8 @@ export default interface IElement {
   get viewAngle(): number;
   // 内夹角
   get internalAngle(): number;
+  // 实际需要旋转的角度
+  get actualAngle(): number;
   // 倾斜角度
   get leanX(): number;
   // 倾斜角度

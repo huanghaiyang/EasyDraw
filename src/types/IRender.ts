@@ -1,4 +1,5 @@
 import { IRenderTask } from "@/types/IRenderTask";
+import { AngleModel } from "./IElement";
 
 // 渲染器
 export interface IQueueRender {
@@ -44,7 +45,7 @@ export interface IRenderQueue {
 }
 
 // 渲染参数
-export type RenderParams = {
+export type RenderParams = AngleModel & {
   // 角度
   angle?: number,
   // 是否翻转x
@@ -61,12 +62,4 @@ export type RenderParams = {
   leanX?: number,
   // 倾斜y
   leanY?: number,
-  // 倾斜x角度
-  leanXAngle?: number,
-  // 倾斜y角度
-  leanYAngle?: number,
-  // 内夹角
-  internalAngle?: number,
-  // 视觉角度
-  viewAngle?: number,
 }

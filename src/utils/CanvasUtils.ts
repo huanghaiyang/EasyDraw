@@ -90,14 +90,10 @@ export default class CanvasUtils {
    */
   static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
     let { x, y, width, height } = rect;
-    let { angle = 0, flipX = false, viewAngle, leanX, leanY, leanYAngle } = options;
+    let { angle = 0, flipX = false, leanX, leanY, actualAngle } = options;
     const ctx = target.getContext('2d');
-    if (typeof viewAngle === 'number' && typeof leanYAngle === 'number') {
-      if (flipX) {
-        angle = ElementUtils.mirrorAngle(viewAngle + leanYAngle);
-      } else {
-        angle = ElementUtils.mirrorAngle(viewAngle - leanYAngle);
-      }
+    if (typeof actualAngle === 'number') {
+      angle = actualAngle;
     }
     let radian = MathUtils.degreesToRadians(angle);
     ctx.save()

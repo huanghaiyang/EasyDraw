@@ -1,8 +1,9 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types/index";
 import { TransformerTypes } from "@/types/ITransformer";
+import { AngleModel } from "@/types/IElement";
 
 // 辅助画布绘制任务对象类型
-export interface IMaskModel {
+export interface IMaskModel extends AngleModel {
   // 类型
   type: DrawerMaskModelTypes;
   // 比例
@@ -11,12 +12,6 @@ export interface IMaskModel {
   point?: IPoint;
   // 点
   points?: IPoint[];
-  // 角度
-  angle?: number;
-  // 倾斜角度
-  leanYAngle?: number;
-  // 视觉角度
-  viewAngle?: number;
   // 文本
   text?: string;
   // 半径

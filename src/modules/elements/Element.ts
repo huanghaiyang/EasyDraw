@@ -692,6 +692,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return -Math.tan(MathUtils.degreesToRadians(this.leanYAngle));
   }
 
+  get actualAngle(): number {
+    if (this.flipX) {
+      return ElementUtils.mirrorAngle(this.viewAngle + this.leanYAngle);
+    } else {
+      return ElementUtils.mirrorAngle(this.viewAngle - this.leanYAngle);
+    }
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -853,8 +861,8 @@ export default class Element implements IElement, ILinkedNodeValue {
         width: TransformerSize / this.shield.stageScale,
         height: TransformerSize / this.shield.stageScale,
       }, {
-        angle: this.model.angle,
-        leanYAngle: this.model.leanYAngle
+        angle: this.actualAngle,
+        leanYAngle: this.leanYAngle
       });
       let transformer = this._transformers[index];
       if (transformer) {
@@ -1788,12 +1796,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   toJson(): ElementObject {
-    const { viewAngle, internalAngle, leanYAngle } = this.model;
+    const { viewAngle, internalAngle, leanYAngle, actualAngle } = this.model;
     return {
       ...this.model,
       viewAngle,
       internalAngle,
-      leanYAngle
+      leanYAngle,
+      actualAngle
     }
   }
 
