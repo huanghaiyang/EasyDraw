@@ -29,6 +29,8 @@ export const useStageStore = defineStore("stage", {
       width: 0,
       height: 0,
       angle: 0,
+      leanYAngle: 0,
+      leanXAngle: 0,
       scale: 1,
       strokeType: DefaultElementStyle.strokeType,
       strokeWidth: DefaultElementStyle.strokeWidth,
@@ -79,6 +81,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.leanXAngleChanged, throttle(this.onLeanXAngleChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.strokeTypeChanged, throttle(this.onStrokeTypeChanged.bind(this), 100));
       shield.on(ShieldDispatcherNames.strokeColorOpacityChanged, throttle(this.onStrokeColorOpacityChanged.bind(this), 100));
@@ -140,6 +144,8 @@ export const useStageStore = defineStore("stage", {
           width,
           height,
           angle,
+          leanXAngle,
+          leanYAngle,
           strokeType,
           strokeWidth,
           strokeColor,
@@ -156,6 +162,8 @@ export const useStageStore = defineStore("stage", {
         this.onWidthChanged(element, width);
         this.onHeightChanged(element, height);
         this.onAngleChanged(element, angle);
+        this.onLeanXAngleChanged(element, leanXAngle);
+        this.onLeanYAngleChanged(element, leanYAngle);
         this.onStrokeTypeChanged(element, strokeType);
         this.onStrokeWidthChanged(element, strokeWidth);
         this.onStrokeColorChanged(element, strokeColor);
@@ -216,6 +224,24 @@ export const useStageStore = defineStore("stage", {
      */
     onAngleChanged(element: IElement, angle: number) {
       this.angle = angle;
+    },
+    /**
+     * 组件倾斜变化
+     * 
+     * @param element 
+     * @param angle 
+     */
+    onLeanXAngleChanged(element: IElement, angle: number) {
+      this.leanXAngle = angle;
+    },
+    /**
+     * 组件倾斜变化
+     * 
+     * @param element 
+     * @param angle 
+     */
+    onLeanYAngleChanged(element: IElement, angle: number) {
+      this.leanYAngle = angle;
     },
     /**
      * 组件缩放变化
@@ -388,6 +414,20 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsAngle(value: number): void {
       shield.setElementsAngle(this.selectedElements, value);
+    },
+
+    /**
+     * 设置组件X倾斜角度
+     */
+    setElementsLeanXAngle(value: number): void {
+      shield.setElementsLeanXAngle(this.selectedElements, value);
+    },
+
+    /**
+     * 设置组件Y倾斜角度
+     */
+    setElementsLeanYAngle(value: number): void {
+      shield.setElementsLeanYAngle(this.selectedElements, value);
     },
 
     /**

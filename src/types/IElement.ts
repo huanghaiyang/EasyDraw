@@ -334,6 +334,8 @@ export default interface IElement {
   setHeight(value: number): void;
   // 设置旋转角度
   setAngle(value: number): void;
+  // 设置X倾斜角度
+  setLeanXAngle(value: number): void;
   // 设置Y倾斜角度
   setLeanYAngle(value: number): void;
   // 设置描边类型

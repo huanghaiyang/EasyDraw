@@ -234,6 +234,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件X倾斜角度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsLeanXAngle(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsLeanXAngle(elements, value);
+    await this._redrawAll({ shield: true });
+  }
+
+  /**
    * 设置组件角度
    * 
    * @param elements 

@@ -1,14 +1,23 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
+import { clamp } from 'lodash';
 
 const stageStore = useStageStore();
 const aValue = ref(0);
+const leanYValue = ref(0);
 
 watch(
   () => stageStore.angle,
   (newValue) => {
     aValue.value = newValue;
+  }
+);
+
+watch(
+  () => stageStore.leanYAngle,
+  (newValue) => {
+    leanYValue.value = newValue;
   }
 );
 
@@ -28,6 +37,17 @@ function setElementsAngle(value: string) {
   stageStore.setElementsAngle(val);
 }
 
+/**
+ * 设置元素Y倾斜角度
+ * 
+ * @param value 
+ */
+function setElementsLeanYAngle(value: string) {
+  let val = Number(value);
+  val = clamp(val, -89, 89);
+  stageStore.setElementsLeanYAngle(val);
+}
+
 </script>
 <template>
   <div class="angle-props right-props">
@@ -42,7 +62,13 @@ function setElementsAngle(value: string) {
         </el-input>
       </div>
 
-      <div class="angle-props__row-item"></div>
+      <div class="angle-props__row-item">
+        <el-input v-model="leanYValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-89"
+          max="89" @change="setElementsLeanYAngle">
+          <template #prepend>ly</template>
+          <template #append>°</template>
+        </el-input>
+      </div>
     </div>
   </div>
 </template>

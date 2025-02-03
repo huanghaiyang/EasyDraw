@@ -338,6 +338,16 @@ export default class StageStore implements IStageStore {
         this.shield.emit(ShieldDispatcherNames.angleChanged, element, value)
         break;
       }
+      // x偏移角度
+      case ElementReactionPropNames.leanXAngle: {
+        this.shield.emit(ShieldDispatcherNames.leanXAngleChanged, element, value)
+        break;
+      }
+      // y偏移角度
+      case ElementReactionPropNames.leanYAngle: {
+        this.shield.emit(ShieldDispatcherNames.leanYAngleChanged, element, value)
+        break;
+      }
       // 元素宽度
       case ElementReactionPropNames.width: {
         this.shield.emit(ShieldDispatcherNames.widthChanged, element, value)
@@ -453,6 +463,20 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setAngle(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件X倾斜角度
+   * 
+   * @param elements 
+   * @param value 
+   */
+  async setElementsLeanXAngle(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setLeanXAngle(value);
       }
     });
   }

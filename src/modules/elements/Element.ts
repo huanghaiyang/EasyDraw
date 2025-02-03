@@ -1728,12 +1728,23 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置X倾斜角度
+   * 
+   * @param value 
+   */
+  setLeanXAngle(value: number): void {
+    this.model.leanXAngle = value;
+    this.refresh();
+  }
+
+  /**
    * 设置Y倾斜角度
    * 
    * @param value 
    */
   setLeanYAngle(value: number): void {
-    const matrix = MathUtils.calcLeanMatrix(0, value);
+    this.model.leanYAngle = value;
+    this.refresh();
   }
 
   /**
