@@ -228,8 +228,8 @@ export default class MathUtils {
     const {angle = 0 , leanXAngle = 0 , leanYAngle = 0} = trans;
     const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const rotateMatrix = MathUtils.calcRotateMatrix(angle);
-    const matrix = multiply(leanMatrix, rotateMatrix);
-    const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    let result = multiply(leanMatrix, [coord.x - center.x, coord.y - center.y, 1]);
+    result = multiply(rotateMatrix, result);
     return {
       x: add(result[0], center.x),
       y: add(result[1], center.y)

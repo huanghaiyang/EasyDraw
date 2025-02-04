@@ -229,9 +229,7 @@ export default class CommonUtils {
       },
     ];
     points.forEach((point) => {
-      Object.assign(point, MathUtils.leanYRelativeCenter(point, leanYAngle, center));
-      Object.assign(point, MathUtils.rotateRelativeCenter(point, angle, center));
-      // Object.assign(point, MathUtils.transformRelativeCenter(point, { angle, leanYAngle }, center));
+      Object.assign(point, MathUtils.transformRelativeCenter(point, { angle, leanYAngle }, center));
     });
     return points;
   }
