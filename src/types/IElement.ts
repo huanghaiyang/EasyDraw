@@ -178,6 +178,16 @@ export default interface IElement {
   get flipYEnable(): boolean;
   // 是否可编辑
   get editingEnable(): boolean;
+  // 视觉角度计算是否可用
+  get viewAngleCalcEnable(): boolean;
+  // y是否可倾斜
+  get leanYAngleCalcEnable(): boolean;
+  // x是否可倾斜
+  get leanXAngleCalcEnable(): boolean;
+  // y倾斜角度是否可修改
+  get leanYAngleModifyEnable(): boolean;
+  // x倾斜角度是否可修改
+  get leanXAngleModifyEnable(): boolean;
   // 是否在编辑后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度

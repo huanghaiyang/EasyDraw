@@ -62,7 +62,7 @@ function setElementsLeanYAngle(value: string) {
         </el-input>
       </div>
 
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item" v-if="stageStore.uniqSelectedElement?.leanYAngleModifyEnable">
         <el-input v-model="leanYValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-89"
           max="89" @change="setElementsLeanYAngle">
           <template #prepend>ly</template>

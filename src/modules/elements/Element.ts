@@ -697,6 +697,26 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.actualAngle;
   }
 
+  get viewAngleCalcEnable(): boolean {
+    return true;
+  }
+
+  get leanXAngleCalcEnable(): boolean {
+    return true;
+  }
+
+  get leanYAngleCalcEnable(): boolean {
+    return true;
+  }
+
+  get leanYAngleModifyEnable(): boolean {
+    return true;
+  }
+
+  get leanXAngleModifyEnable(): boolean {
+    return true;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -986,6 +1006,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcLeanXAngle(): number {
+    if (!this.leanXAngleCalcEnable) return 0;
     return 0;
   }
 
@@ -995,6 +1016,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcLeanYAngle(): number {
+    if (!this.leanYAngleCalcEnable) return 0;
     return 90 - this.internalAngle;
   }
 
@@ -1004,6 +1026,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcViewAngle(): number {
+    if (!this.viewAngleCalcEnable) return this.model.angle;
     const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
     return ElementUtils.mirrorAngle(angle + 90);
   }

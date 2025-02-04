@@ -49,6 +49,26 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
+  get viewAngleCalcEnable(): boolean {
+    return false;
+  }
+
+  get leanXAngleCalcEnable(): boolean {
+    return false;
+  }
+
+  get leanYAngleCalcEnable(): boolean {
+    return false;
+  }
+
+  get leanYAngleModifyEnable(): boolean {
+    return false;
+  }
+
+  get leanXAngleModifyEnable(): boolean {
+    return false;
+  }
+
   get startRotatePathPoint(): IPoint {
     return this.rotatePathPoints[0];
   }
