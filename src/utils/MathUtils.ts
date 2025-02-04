@@ -2,6 +2,7 @@ import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import { divide } from "lodash";
 import CommonUtils from '@/utils/CommonUtils';
+import { AngleModel } from "@/types/IElement";
 
 export default class MathUtils {
   /**
@@ -220,11 +221,11 @@ export default class MathUtils {
    * 旋转倾斜坐标系上的某一点
    * 
    * @param coord 
-   * @param trans 
+   * @param trans
    * @param center 
    * @returns 
    */
-  static transformRelativeCenter(coord: IPoint, trans: { angle?: number, leanYAngle?: number, leanXAngle?: number }, center: IPoint) {
+  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint) {
     const {angle = 0 , leanXAngle = 0 , leanYAngle = 0} = trans;
     const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const rotateMatrix = MathUtils.calcRotateMatrix(angle);
