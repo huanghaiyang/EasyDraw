@@ -1,9 +1,9 @@
 import { DrawerMaskModelTypes, IPoint } from "@/types/index";
 import { TransformerTypes } from "@/types/ITransformer";
-import { AngleModel } from "@/types/IElement";
+import { AngleModel, FlipModel } from "@/types/IElement";
 
 // 辅助画布绘制任务对象类型
-export interface IMaskModel extends AngleModel {
+export interface IMaskModel extends AngleModel, FlipModel {
   // 类型
   type: DrawerMaskModelTypes;
   // 比例

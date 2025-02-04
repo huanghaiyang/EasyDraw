@@ -47,6 +47,14 @@ export type AngleModel = {
   viewAngle?: number;
 }
 
+// 翻转模型
+export type FlipModel = {
+  // 是否翻转x轴
+  flipX?: boolean;
+  // 是否翻转y轴
+  flipY?: boolean;
+}
+
 // 默认角度
 export const DefaultAngleModel: AngleModel = {
   angle: 0,
@@ -58,7 +66,7 @@ export const DefaultAngleModel: AngleModel = {
 }
 
 // 舞台元素数据模型
-export type ElementObject = AngleModel & {
+export type ElementObject = AngleModel & FlipModel & {
   // 元素id
   id: string;
   // 元素坐标
