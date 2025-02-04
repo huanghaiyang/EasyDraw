@@ -438,6 +438,10 @@ export default interface IElement {
   calcUnLeanCoords(): IPoint[];
   // 计算非倾斜盒模型坐标
   calcUnleanBoxCoords(): IPoint[];
+  // 计算非倾斜点-舞台坐标
+  calcUnLeanPoints(): IPoint[];
+  // 计算非倾斜盒模型点-舞台坐标
+  calcUnLeanBoxPoints(): IPoint[];
   // 计算倾斜X角度
   calcLeanXAngle(): number;
   // 计算倾斜Y角度
