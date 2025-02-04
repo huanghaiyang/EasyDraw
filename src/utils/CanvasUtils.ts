@@ -5,7 +5,6 @@ import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
-import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();

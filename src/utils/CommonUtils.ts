@@ -157,9 +157,10 @@ export default class CommonUtils {
    * 给定一个多边形，取最左侧，最下侧，最右侧三个点
    * 
    * @param points 
+   * @param isRectangle 是否是矩形
    */
-  static getLBRPoints(points: IPoint[]): IPoint[] {
-    let [left, bottom, right] = CommonUtils.getLBRPointIndexes(points);
+  static getLBRPoints(points: IPoint[], isRectangle?: boolean): IPoint[] {
+    let [left, bottom, right] = CommonUtils.getLBRPointIndexes(points, isRectangle);
     if (left === bottom) {
       left = CommonUtils.getPrevIndexOfArray(points.length, left);
     }
@@ -173,21 +174,29 @@ export default class CommonUtils {
    * 给定一个多边形，取最左侧，最下侧，最右侧三个点的索引
    * 
    * @param points 
+   * @param isRectangle
    * @returns 
    */
-  static getLBRPointIndexes(points: IPoint[]): number[] {
+  static getLBRPointIndexes(points: IPoint[], isRectangle?: boolean): number[] {
     let left, bottom, right;
+    isRectangle = isRectangle ?? false;
     points.forEach((point, index) => {
-      if (left === undefined || point.x < points[left].x) {
-        left = index;
+      if (!isRectangle) {
+        if (left === undefined || point.x < points[left].x) {
+          left = index;
+        }
+        if (right === undefined || point.x > points[right].x) {
+          right = index;
+        }
       }
       if (bottom === undefined || point.y > points[bottom].y) {
         bottom = index;
       }
-      if (right === undefined || point.x > points[right].x) {
-        right = index;
-      }
     });
+    if (isRectangle) {
+      left = CommonUtils.getPrevIndexOfArray(points.length, bottom);
+      right = CommonUtils.getNextIndexOfArray(points.length, bottom);
+    }
     return [left, bottom, right];
   }
 

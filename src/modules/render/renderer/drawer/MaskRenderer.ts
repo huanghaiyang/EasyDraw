@@ -175,12 +175,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         break;
       }
       default: {
-        if (element.model.angle % 90 === 0) {
+        if (element.model.angle % 90 === 0 && element.model.leanYAngle === 0 && element.model.leanXAngle === 0) {
           p1 = element.maxBoxPoints[3];
           p2 = element.maxBoxPoints[2];
         } else {
           // 获取最左侧，最下侧，最右侧三个点
-          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints);
+          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints, true);
           // 计算最下侧点与最左侧点，最下侧点与最右侧点的夹角
           let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
           // 计算最下侧点与最右侧点，最下侧点与最右侧点的夹角
