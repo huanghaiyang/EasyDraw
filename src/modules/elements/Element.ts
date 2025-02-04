@@ -5,7 +5,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { clamp, cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import IElement, { ElementObject, TransformByOptions } from "@/types/IElement";
+import IElement, { DefaultOptions, ElementObject, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -1023,15 +1023,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新坐标
    */
-  refreshStagePoints(): void {
-    this.refreshElementPoints();
+  refreshRPs(): void {
+    this.refreshPoints();
     this.refreshRotation();
   }
 
   /**
    * 刷新舞台坐标
    */
-  refreshElementPoints() {
+  refreshPoints() {
     // 计算舞台坐标
     this._pathPoints = this.calcPathPoints();
     // 计算旋转后的路径点
@@ -1315,7 +1315,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       this._transformType = TransformTypes.border;
     }
     // 刷新舞台坐标
-    this.refreshStagePoints();
+    this.refreshRPs();
     // 刷新尺寸
     this.refreshSize();
     // 刷新位置
@@ -1356,7 +1356,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 判断是否需要翻转角度
     this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
     // 刷新舞台坐标
-    this.refreshStagePoints();
+    this.refreshRPs();
     // 刷新尺寸
     this.refreshSize();
     // 刷新位置
@@ -1600,18 +1600,22 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 刷新组件必要数据
+   * @param options 
    */
-  refresh(): void {
+  refresh(options?: RefreshOptions): void {
+    options = Object.assign({}, DefaultOptions, options || {});
     // 刷新舞台坐标
-    this.refreshStagePoints();
+    if (options?.points) this.refreshPoints();
     // 刷新尺寸
-    this.refreshSize();
+    if (options?.size) this.refreshSize();
     // 刷新位置
-    this.refreshPosition();
+    if (options?.position) this.refreshPosition();
     // 刷新角度
-    this.refreshAngles();
+    if (options?.angles) this.refreshAngles();
+    // 刷新旋转
+    if (options?.rotation) this.refreshRotation();
     // 刷新原始属性
-    this.refreshOriginalProps();
+    if (options?.originals) this.refreshOriginalProps();
   }
 
   /**
@@ -1874,7 +1878,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换角度
     this.model.angle = ElementUtils.mirrorAngle((ElementUtils.normalizeAngle(this._originalAngle) + ElementUtils.normalizeAngle(deltaAngle) % 360));
     // 刷新舞台坐标
-    this.refreshStagePoints();
+    this.refreshRPs();
     // 刷新位置
     this.refreshPosition();
     // 刷新角度

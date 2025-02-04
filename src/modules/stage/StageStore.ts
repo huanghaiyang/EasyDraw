@@ -848,7 +848,7 @@ export default class StageStore implements IStageStore {
   private _selectAndRefreshProvisionalElement(element: IElement): void {
     if (element) {
       this.selectElement(element);
-      element.refreshStagePoints();
+      element.refreshRPs();
     }
   }
 
@@ -989,7 +989,7 @@ export default class StageStore implements IStageStore {
       const boxCoords = ElementUtils.translateCoords(element.originalModelBoxCoords, offset);
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
       this.updateElementModel(element.id, { coords, boxCoords, left: x, top: y })
-      element.refreshStagePoints();
+      element.refreshRPs();
       element.refreshPosition();
     })
   }
@@ -1061,7 +1061,7 @@ export default class StageStore implements IStageStore {
    */
   refreshElementsPosition(elements: IElement[]): void {
     elements.forEach(element => {
-      element.refreshStagePoints();
+      element.refreshRPs();
       element.refreshPosition();
     })
   }
@@ -1075,7 +1075,7 @@ export default class StageStore implements IStageStore {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage })
-      element.refreshStagePoints();
+      element.refreshRPs();
       element.refreshOriginalProps();
     })
   }
@@ -1196,7 +1196,7 @@ export default class StageStore implements IStageStore {
       status: ElementStatus.finished,
       isSelected: true,
     });
-    element.refreshStagePoints();
+    element.refreshRPs();
     element.refreshOriginalProps();
     return element;
   }

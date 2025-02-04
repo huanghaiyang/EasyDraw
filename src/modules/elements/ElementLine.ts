@@ -100,8 +100,8 @@ export default class ElementLine extends Element implements IElementLine {
   /**
    * 刷新舞台坐标
    */
-  refreshElementPoints(): void {
-    super.refreshElementPoints();
+  refreshPoints(): void {
+    super.refreshPoints();
     this.refreshBentOutline();
   }
 

@@ -116,8 +116,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   /**
    * 刷新组件的点坐标数据
    */
-  refreshElementPoints(): void {
-    super.refreshElementPoints();
+  refreshPoints(): void {
+    super.refreshPoints();
     this.refreshOuters();
   }
 

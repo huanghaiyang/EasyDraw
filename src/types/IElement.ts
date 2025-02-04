@@ -101,6 +101,26 @@ export type ElementObject = AngleModel & {
   subIds?: Set<string>;
 }
 
+// 刷新参数
+export type RefreshOptions = {
+  size?: boolean;
+  position?: boolean;
+  points?: boolean;
+  rotation?: boolean;
+  angles?: boolean;
+  originals?: boolean;
+}
+
+// 默认刷新选项
+export const DefaultOptions: RefreshOptions = {
+  size: true,
+  position: true,
+  points: true,
+  rotation: true,
+  angles: true,
+  originals: true
+}
+
 // 舞台元素（组件）
 export default interface IElement {
   // 组件ID
@@ -368,12 +388,16 @@ export default interface IElement {
   refreshSize(): void;
   // 刷新位置
   refreshPosition(): void;
-  // 刷新舞台点
-  refreshStagePoints(): void;
+  // 刷新坐标和旋转坐标
+  refreshRPs(): void;
+  // 刷新坐标
+  refreshPoints(): void;
+  // 刷新旋转
+  refreshRotation(): void;
   // 刷新角度
   refreshAngles(): void;
   // 刷新
-  refresh(): void;
+  refresh(options?: RefreshOptions): void;
   // 刷新盒模型坐标
   refreshBoxCoords(): void;
   // 是否包含点
