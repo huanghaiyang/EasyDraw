@@ -60,10 +60,13 @@ export default class MathUtils {
    * @param center 旋转中心点
    * @param point 移动点
    * @param originalPoint 缩放前的点
-   * @param angle 旋转角度
-   * @param leanYAngle 纵轴倾斜角度
+   * @param angles 旋转角度和纵轴倾斜角度
    */
-  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angle: number, leanYAngle: number): number[][] {
+  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
+    const { angle = 0, leanYAngle = 0, leanXAngle = 0 } = angles;
+    // const angleParams: AngleModel = { angle: -angle, leanYAngle: -leanYAngle, leanXAngle: -leanXAngle };
+    // point = MathUtils.transformRelativeCenter(point, angleParams, center);
+    // originalPoint = MathUtils.transformRelativeCenter(originalPoint, angleParams, center);
     // 如果坐标系旋转过，则需要重新计算给定的坐标
     if (angle) {
       point = MathUtils.rotateRelativeCenter(point, -angle, center);

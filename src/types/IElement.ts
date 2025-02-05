@@ -200,6 +200,8 @@ export default interface IElement {
   get internalAngle(): number;
   // 实际需要旋转的角度
   get actualAngle(): number;
+  // 角度
+  get angles(): Partial<AngleModel>;
   // 倾斜角度
   get leanX(): number;
   // 倾斜角度
