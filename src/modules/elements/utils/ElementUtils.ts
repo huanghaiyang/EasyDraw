@@ -4,7 +4,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { AngleModel, ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
@@ -481,18 +481,17 @@ export default class ElementUtils {
    * @param point 
    * @param matrix 
    * @param lockPoint 
-   * @param angle 
+   * @param angles
    * @returns 
    */
-  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angle: number): IPoint {
-    // 先旋转回角度0
-    point = MathUtils.rotateRelativeCenter(point, -angle, lockPoint);
+  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+    point = MathUtils.transformRelativeCenter(point, angles, lockPoint, true);
     // 以不动点为圆心，计算形变
     const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
     // 重新计算坐标
     point = { x: x + lockPoint.x, y: y + lockPoint.y };
     // 坐标重新按照角度偏转
-    return MathUtils.rotateRelativeCenter(point, angle, lockPoint);
+    return MathUtils.transformRelativeCenter(point, angles, lockPoint);
   }
 
   /**
@@ -501,10 +500,10 @@ export default class ElementUtils {
    * @param points 
    * @param matrix 
    * @param lockPoint 
-   * @param angle 
+   * @param angles 
    * @returns 
    */
-  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angle: number): IPoint[] {
-    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angle));
+  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint[] {
+    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles));
   }
 }

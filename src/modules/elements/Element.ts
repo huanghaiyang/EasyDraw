@@ -1340,10 +1340,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   protected calcTransformCoordsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint): IPoint[] {
-    points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid, this.model.angle);
-    return points.map(point => {
-      return ElementUtils.calcWorldPoint(point, this.shield.stageCalcParams);
-    })
+    points = this.calcTransformPointsByCenter(points, matrix, lockPoint, centroid, this.angles);
+    return ElementUtils.calcWorldPoints(points, this.shield.stageCalcParams);
   }
 
   /**
@@ -1353,14 +1351,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param matrix 
    * @param lockPoint 
    * @param centroid 
-   * @param angle 
+   * @param angles 
    * @returns 
    */
-  protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angle: number): IPoint[] {
-    const center = ElementUtils.calcMatrixPoint(centroid, matrix, lockPoint, angle);
-    return points.map(point => {
-      point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angle);
-      return MathUtils.rotateRelativeCenter(point, -angle, center);
+  protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angles: Partial<AngleModel>): IPoint[] {
+    const center = ElementUtils.calcMatrixPoint(centroid, matrix, lockPoint, angles);
+    return points.map((point, index) => {
+      point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles);
+      // 坐标重新按照角度偏转
+      point = MathUtils.transformRelativeCenter(point, angles, center, true);
+      if (index === 0) {
+        console.log(point, center,matrix, angles )
+      }
+      return point;
     })
   }
 
@@ -1401,17 +1404,18 @@ export default class Element implements IElement, ILinkedNodeValue {
   transformBy(options: TransformByOptions): boolean {
     // 解构参数
     const { lockPoint, lockIndex, transformType, originalMovingPoint, offset, groupAngle, isAngleFlip } = options;
+    const angles: Partial<AngleModel> = { ...this.angles, angle: groupAngle }
     // 获取变换矩阵
-    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, { ...this.angles, angle: groupAngle }, false);
+    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, angles, false);
     // 如果变换类型为边框，则调整矩阵
     if (transformType === TransformTypes.border) {
       // 调整矩阵
       this._transBorderMatrix(matrix, lockIndex, false);
     }
     // 计算变换后的点
-    const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, groupAngle);
+    const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, angles);
     // 计算变换后的盒模型坐标
-    const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngle);
+    const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, angles);
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
@@ -1477,11 +1481,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   protected transformByLockPoint(lockPoint: IPoint, currentPointOriginal: IPoint, offset: IPoint, lockIndex: number): boolean {
     // 获取变换矩阵
-    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, {
-      angle: this.model.angle,
-      leanYAngle: this.model.leanYAngle,
-      leanXAngle: this.model.leanXAngle
-    });
+    const matrix = this.getTransformMatrix(lockPoint, currentPointOriginal, offset, this.angles);
     // 设置变换矩阵
     this._transformMatrix = matrix;
     // 设置变换不动点
@@ -1490,8 +1490,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._transformLockIndex = lockIndex;
     // 设置变换坐标
     this.model.coords = this.calcTransformCoordsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
+    const centerCoord = MathUtils.calcCenter(this.model.coords);
+    this.model.coords = MathUtils.leanRelativeCenters(this.model.coords, this.angles.leanXAngle, this.angles.leanYAngle, centerCoord);
     // 设置变换盒模型坐标
     this.model.boxCoords = this.calcTransformCoordsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
+    this.model.boxCoords = MathUtils.leanRelativeCenters(this.model.boxCoords, this.angles.leanXAngle, this.angles.leanYAngle, centerCoord);
     // 判断是否需要翻转角度
     return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
   }
@@ -1502,8 +1505,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param lockPoint 
    * @param currentPointOriginal 
    * @param offset
-   * @param angle 
-   * @param leanYAngle 
+   * @param angles
    * @param wouldBeRatioLock 
    * @returns 
    */
@@ -1534,11 +1536,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 判断是否已经计算过原始矩阵
     if (!this._originalTransformMatrix.length) {
       // 计算原始矩阵
-      this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, {
-        angle: this.model.angle,
-        leanYAngle: this.model.leanYAngle,
-        leanXAngle: this.model.leanXAngle
-      });
+      this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, this.angles);
     }
     // 判断是否需要翻转角度
     const isFlip = this._doFlipAngle(matrix, this._originalTransformMatrix);

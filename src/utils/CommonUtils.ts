@@ -2,6 +2,7 @@ import { IPoint, ISize } from "@/types";
 import { nanoid } from "nanoid";
 import MathUtils from "@/utils/MathUtils";
 import { isNumber } from "lodash";
+import { AngleModel } from "@/types/IElement";
 
 export default class CommonUtils {
 
@@ -208,8 +209,7 @@ export default class CommonUtils {
    * @param options 
    * @returns 
    */
-  static get4BoxPoints(center: IPoint, size: ISize, options?: { angle?: number, leanYAngle?: number }): IPoint[] {
-    const { angle = 0, leanYAngle = 0 } = options || {};
+  static get4BoxPoints(center: IPoint, size: ISize, angles?: Partial<AngleModel>): IPoint[] {
     const points = [
       {
         x: center.x - size.width / 2,
@@ -229,7 +229,7 @@ export default class CommonUtils {
       },
     ];
     points.forEach((point) => {
-      Object.assign(point, MathUtils.transformRelativeCenter(point, { angle, leanYAngle }, center));
+      Object.assign(point, MathUtils.transformRelativeCenter(point, angles, center));
     });
     return points;
   }

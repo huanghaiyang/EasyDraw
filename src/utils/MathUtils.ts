@@ -63,21 +63,22 @@ export default class MathUtils {
    * @param angles 旋转角度和纵轴倾斜角度
    */
   static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
-    const { angle = 0, leanYAngle = 0, leanXAngle = 0 } = angles;
-    // const angleParams: AngleModel = { angle: -angle, leanYAngle: -leanYAngle, leanXAngle: -leanXAngle };
-    // point = MathUtils.transformRelativeCenter(point, angleParams, center);
-    // originalPoint = MathUtils.transformRelativeCenter(originalPoint, angleParams, center);
-    // 如果坐标系旋转过，则需要重新计算给定的坐标
-    if (angle) {
-      point = MathUtils.rotateRelativeCenter(point, -angle, center);
-      originalPoint = MathUtils.rotateRelativeCenter(originalPoint, -angle, center);
-    }
-    const originalWidth = add(originalPoint.x, -center.x);
-    const originalHeight = add(originalPoint.y, -center.y);
-    const newWidth = add(point.x, - center.x);
-    const newHeight = add(point.y, - center.y);
-    const scaleX = originalWidth === 0 ? 1 : divide(newWidth, originalWidth);
-    const scaleY = originalHeight === 0 ? 1 : divide(newHeight, originalHeight);
+    point = MathUtils.transformRelativeCenter(point, angles, center, true);
+    originalPoint = MathUtils.transformRelativeCenter(originalPoint, angles, center, true);
+
+    let originalWidth = originalPoint.x - center.x;
+    let originalHeight = originalPoint.y - center.y;
+    let newWidth = point.x - center.x;
+    let newHeight = point.y - center.y;
+
+    // if (leanYAngle) {
+    //   originalHeight = MathUtils.calcTriangleSide3By1(leanYAngle, originalHeight);
+    //   newHeight = MathUtils.calcTriangleSide3By1(leanYAngle, newHeight);
+    //   originalWidth = originalWidth - MathUtils.calcTriangleSide2By3(leanYAngle, originalHeight);
+    //   newWidth = newWidth - MathUtils.calcTriangleSide2By3(leanYAngle, newHeight);
+    // }
+    const scaleX = originalWidth === 0 ? 1 : newWidth / originalWidth;
+    const scaleY = originalHeight === 0 ? 1 : newHeight / originalHeight;
     return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
   }
 
@@ -226,14 +227,19 @@ export default class MathUtils {
    * @param coord 
    * @param trans
    * @param center 
+   * @param isNegative
    * @returns 
    */
-  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint) {
-    const {angle = 0 , leanXAngle = 0 , leanYAngle = 0} = trans;
+  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isNegative?: boolean) {
+    let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = trans;
+    if (isNegative) {
+      angle = -angle;
+      leanXAngle = -leanXAngle;
+      leanYAngle = -leanYAngle;
+    }
     const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const rotateMatrix = MathUtils.calcRotateMatrix(angle);
-    let result = multiply(leanMatrix, [coord.x - center.x, coord.y - center.y, 1]);
-    result = multiply(rotateMatrix, result);
+    let result = multiply(rotateMatrix, leanMatrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
       x: add(result[0], center.x),
       y: add(result[1], center.y)
@@ -248,8 +254,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static transformRelativeCenters(coords: IPoint[], trans: { angle: number, leanYAngle: number, leanXAngle: number }, center: IPoint) {
-    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center));
+  static transformRelativeCenters(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isNegative?: boolean) {
+    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center, isNegative));
   }
 
   /**
@@ -731,24 +737,36 @@ export default class MathUtils {
    * 给定角度和对边边长，计算直角三角形的临边边长
    * 
    * @param angle 
-   * @param oppositeSide 
+   * @param value 
    * @returns 
    */
-  static calcTriangleSide1By2(angle: number, oppositeSide: number): number {
+  static calcTriangleSide1By2(angle: number, value: number): number {
     const radians = angle * (Math.PI / 180);
-    return oppositeSide / Math.tan(radians);
+    return value / Math.tan(radians);
+  }
+
+  /**
+   * 给定角度和临边边长，计算直角三角形的斜边边长
+   * 
+   * @param angle 
+   * @param value 
+   * @returns 
+   */
+  static calcTriangleSide3By1(angle: number, value: number): number {
+    const radians = angle * (Math.PI / 180);
+    return value / cos(radians);
   }
 
   /**
    * 给定角度和对边边长，计算直角三角形的斜边边长
    * 
    * @param angle 
-   * @param oppositeSide 
+   * @param value 
    * @returns 
    */
-  static calcTriangleSide3By2(angle: number, oppositeSide: number): number {
+  static calcTriangleSide3By2(angle: number, value: number): number {
     const radians = angle * (Math.PI / 180);
-    return oppositeSide / sin(radians);
+    return value / sin(radians);
   }
 
   /**
