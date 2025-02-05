@@ -957,8 +957,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcUnLeanCoords(): IPoint[] {
-    const centerCoord = this.centerCoord;
-    return MathUtils.leanRelativeCenters(this.model.coords, -this.leanXAngle, this.flipX ? this.leanYAngle : -this.leanYAngle, centerCoord);
+    return this.calcUnLeanByPoints(this.model.coords);
   }
 
   /**
@@ -967,8 +966,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcUnleanBoxCoords(): IPoint[] {
-    const centerCoord = this.centerCoord;
-    return MathUtils.leanRelativeCenters(this.model.boxCoords, -this.leanXAngle, this.flipX ? this.leanYAngle : -this.leanYAngle, centerCoord);
+    return this.calcUnLeanByPoints(this.model.boxCoords);
   }
 
   /**
@@ -989,6 +987,16 @@ export default class Element implements IElement, ILinkedNodeValue {
   calcUnLeanBoxPoints(): IPoint[] {
     const boxCoords = this.calcUnleanBoxCoords();
     return ElementUtils.calcStageRelativePoints(boxCoords, this.shield.stageCalcParams);
+  }
+
+  /**
+   * 计算非倾斜点坐标
+   * 
+   * @returns 
+   */
+  calcUnLeanByPoints(points: IPoint[]): IPoint[]  {
+    const center = MathUtils.calcCenter(points);
+    return MathUtils.leanRelativeCenters(points, -this.leanXAngle, this.flipX ? this.leanYAngle : -this.leanYAngle, center);
   }
 
   /**
