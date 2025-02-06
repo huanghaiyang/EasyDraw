@@ -697,11 +697,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get leanX(): number {
-    return -Math.tan(MathUtils.degreesToRadians(this.model.leanXAngle));
+    return -Math.tan(MathUtils.angleToRadian(this.model.leanXAngle));
   }
 
   get leanY(): number {
-    return -Math.tan(MathUtils.degreesToRadians(this.model.leanYAngle));
+    return -Math.tan(MathUtils.angleToRadian(this.model.leanYAngle));
   }
 
   get actualAngle(): number {

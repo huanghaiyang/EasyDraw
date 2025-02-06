@@ -203,8 +203,8 @@ export default class MathUtils {
   static calcLeanMatrix(leanXAngle: number, leanYAngle: number): number[][] {
     leanXAngle = leanXAngle || 0;
     leanYAngle = leanYAngle || 0;
-    const leanX = Math.tan(MathUtils.degreesToRadians(leanXAngle));
-    const leanY = -Math.tan(MathUtils.degreesToRadians(leanYAngle));
+    const leanX = Math.tan(MathUtils.angleToRadian(leanXAngle));
+    const leanY = -Math.tan(MathUtils.angleToRadian(leanYAngle));
     const matrix = [[1, leanY, 0], [leanX, 1, 0], [0, 0, 1]];
     return matrix;
   }
@@ -217,7 +217,7 @@ export default class MathUtils {
    */
   static calcRotateMatrix(angle: number): number[][] {
     angle = angle || 0;
-    const theta = MathUtils.degreesToRadians(angle);
+    const theta = MathUtils.angleToRadian(angle);
     return [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
   }
 
@@ -296,22 +296,6 @@ export default class MathUtils {
   }
 
   /**
-   * 旋转垂直坐标系上的某一点（x右侧为正，顺时针为正角度）
-   * 
-   * @param point 
-   * @param angle 
-   * @returns 
-   */
-  static rotatePoint(point: IPoint, angle: number): IPoint {
-    const { x, y } = point;
-    const theta = MathUtils.degreesToRadians(angle);
-    // 计算新坐标
-    let xPrime = add(multiply(x, cos(theta)), - multiply(y, sin(theta)));
-    let yPrime = add(multiply(x, sin(theta)), multiply(y, cos(theta)));
-    return { x: xPrime, y: yPrime };
-  }
-
-  /**
    * 旋转并平移
    * 
    * @param coord 
@@ -331,7 +315,7 @@ export default class MathUtils {
    * @returns 
    */
   static scale(coord: IPoint, value: ScaleValue): IPoint {
-    const scaleMatrix = [[value.sx, 0, 0], [0, value.sy, 0], [0, 0, 1]];
+    const scaleMatrix = MathUtils.calcScaleMatrix(value.sx, value.sy);
     const scaledPoint = multiply(scaleMatrix, [coord.x, coord.y, 1]);
     return {
       x: scaledPoint[0],
@@ -345,7 +329,7 @@ export default class MathUtils {
    * @param degrees 
    * @returns 
    */
-  static degreesToRadians(degrees: number): number {
+  static angleToRadian(degrees: number): number {
     return degrees * (Math.PI / 180);
   }
 
@@ -355,7 +339,7 @@ export default class MathUtils {
    * @param radians 
    * @returns 
    */
-  static radiansToDegrees(radians: number): number {
+  static radianToAngle(radians: number): number {
     return radians * (180 / Math.PI);
   }
 
@@ -506,7 +490,7 @@ export default class MathUtils {
    */
   static calcTargetPoint(center: IPoint, distance: number, angleDeg: number) {
     // 将角度转换为弧度
-    const angleRad = MathUtils.degreesToRadians(angleDeg);
+    const angleRad = MathUtils.angleToRadian(angleDeg);
     // 计算目标点的坐标
     const targetX = center.x + distance * cos(angleRad);
     const targetY = center.y + distance * sin(angleRad);
@@ -542,8 +526,11 @@ export default class MathUtils {
    * @param distance 
    */
   static calcSegmentLineCenterCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
+    // 计算中心点
     const center = MathUtils.calcCenter([p1, p2]);
+    // 计算角度
     const angle = MathUtils.calcAngle(p1, p2);
+    // 计算目标点
     return MathUtils.calcTargetPoint(center, distance, isClockwise ? angle + 90 : angle - 90);
   }
 
@@ -778,7 +765,7 @@ export default class MathUtils {
    * @returns 
    */
   static calcTriangleSide1By2(angle: number, value: number): number {
-    const radians = angle * (Math.PI / 180);
+    const radians = angle * MathUtils.angleToRadian(angle);
     return value / Math.tan(radians);
   }
 
@@ -790,8 +777,8 @@ export default class MathUtils {
    * @returns 
    */
   static calcTriangleSide3By1(angle: number, value: number): number {
-    const radians = angle * (Math.PI / 180);
-    return value / cos(radians);
+    const radians = angle * MathUtils.angleToRadian(angle);
+    return value / Math.cos(radians);
   }
 
   /**
@@ -802,8 +789,8 @@ export default class MathUtils {
    * @returns 
    */
   static calcTriangleSide3By2(angle: number, value: number): number {
-    const radians = angle * (Math.PI / 180);
-    return value / sin(radians);
+    const radians = MathUtils.angleToRadian(angle);
+    return value / Math.sin(radians);
   }
 
   /**
@@ -813,16 +800,16 @@ export default class MathUtils {
    * @param hypotenuse 
    */
   static calcTriangleSide1By3(angle: number, hypotenuse: number): number {
-    const radians = angle * (Math.PI / 180);
-    return hypotenuse * cos(radians);
+    const radians = MathUtils.angleToRadian(angle);
+    return hypotenuse * Math.cos(radians);
   }
 
   /**
    * 给定角度和斜边长，求对边长
    */
   static calcTriangleSide2By3(angle: number, hypotenuse: number): number {
-    const radians = angle * (Math.PI / 180);
-    return hypotenuse * sin(radians);
+    const radians = MathUtils.angleToRadian(angle);
+    return hypotenuse * Math.sin(radians);
   }
 
   /**

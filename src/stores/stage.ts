@@ -16,32 +16,56 @@ window.shield = shield;
 export const useStageStore = defineStore("stage", {
   state: () => {
     return {
+      // 当前绘制工具
       currentCreator: MoveableCreator,
+      // 当前鼠标工具
       currentCursorCreator: MoveableCreator,
+      // 当前形状工具
       currentShapeCreator: RectangleCreator,
+      // 当前自由工具
       currentArbitraryCreator: PenCreator,
+      // 选中元素
       selectedElements: [],
+      // 目标元素
       targetElements: [],
+      // 组件位置
       position: {
         x: 0,
         y: 0
       },
+      // 组件宽度
       width: 0,
+      // 组件高度
       height: 0,
+      // 组件角度
       angle: 0,
-      leanYAngle: 0,
+      // X偏移角度
       leanXAngle: 0,
+      // Y偏移角度
+      leanYAngle: 0,
+      // 缩放比例
       scale: 1,
+      // 描边类型
       strokeType: DefaultElementStyle.strokeType,
+      // 描边宽度
       strokeWidth: DefaultElementStyle.strokeWidth,
+      // 描边颜色
       strokeColor: DefaultElementStyle.strokeColor,
+      // 描边透明度
       strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
+      // 填充颜色
       fillColor: DefaultElementStyle.fillColor,
+      // 填充透明度
       fillColorOpacity: DefaultElementStyle.fillColorOpacity,
+      // 字体大小
       fontSize: DefaultElementStyle.fontSize,
+      // 字体
       fontFamily: DefaultElementStyle.fontFamily,
+      // 文字对齐方式
       textAlign: DefaultElementStyle.textAlign,
+      // 文字基线
       textBaseline: DefaultElementStyle.textBaseline,
+      // 是否锁定比例
       isRatioLocked: false,
     }
   },
@@ -74,27 +98,49 @@ export const useStageStore = defineStore("stage", {
 
       this.setCreator(MoveableCreator);
 
+      // 监听组件创建
       shield.on(ShieldDispatcherNames.elementCreated, this.onElementCreated);
+      // 监听选中
       shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
+      // 监听目标
       shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
+      // 监听位置
       shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), 100));
+      // 监听宽度
       shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
+      // 监听高度
       shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
+      // 监听角度
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
+      // 监听X偏移角度
       shield.on(ShieldDispatcherNames.leanXAngleChanged, throttle(this.onLeanXAngleChanged.bind(this), 100));
+      // 监听Y偏移角度
       shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
+      // 监听缩放
       shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
+      // 监听描边类型
       shield.on(ShieldDispatcherNames.strokeTypeChanged, throttle(this.onStrokeTypeChanged.bind(this), 100));
+      // 监听描边颜色透明度
       shield.on(ShieldDispatcherNames.strokeColorOpacityChanged, throttle(this.onStrokeColorOpacityChanged.bind(this), 100));
+      // 监听描边宽度
       shield.on(ShieldDispatcherNames.strokeWidthChanged, throttle(this.onStrokeWidthChanged.bind(this), 100));
+      // 监听描边颜色
       shield.on(ShieldDispatcherNames.strokeColorChanged, throttle(this.onStrokeColorChanged.bind(this), 100));
+      // 监听填充颜色
       shield.on(ShieldDispatcherNames.fillColorChanged, throttle(this.onFillColorChanged.bind(this), 100));
+      // 监听填充颜色透明度
       shield.on(ShieldDispatcherNames.fillColorOpacityChanged, throttle(this.onFillColorOpacityChanged.bind(this), 100));
+      // 监听字体大小
       shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), 100));
+      // 监听字体
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
+      // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
+      // 监听文本基线
       shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
+      // 监听宽高比锁定
       shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
+      // 监听绘制工具
       shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
     },
     /**
@@ -158,22 +204,39 @@ export const useStageStore = defineStore("stage", {
           textBaseline,
           isRatioLocked,
         } = element;
+        // 组件位置
         this.onPositionChanged(element, position);
+        // 组件宽度
         this.onWidthChanged(element, width);
+        // 组件高度
         this.onHeightChanged(element, height);
+        // 组件旋转角度
         this.onAngleChanged(element, angle);
+        // X轴偏移角度
         this.onLeanXAngleChanged(element, leanXAngle);
+        // Y轴偏移角度
         this.onLeanYAngleChanged(element, leanYAngle);
+        // 描边类型
         this.onStrokeTypeChanged(element, strokeType);
+        // 描边宽度
         this.onStrokeWidthChanged(element, strokeWidth);
+        // 描边颜色
         this.onStrokeColorChanged(element, strokeColor);
+        // 描边颜色透明度
         this.onStrokeColorOpacityChanged(element, strokeColorOpacity);
+        // 填充颜色
         this.onFillColorChanged(element, fillColor);
+        // 填充颜色透明度
         this.onFillColorOpacityChanged(element, fillColorOpacity);
+        // 字体大小
         this.onFontSizeChanged(element, fontSize);
+        // 字体
         this.onFontFamilyChanged(element, fontFamily);
+        // 文本对齐方式
         this.onTextAlignChanged(element, textAlign);
+        // 文本基线
         this.onTextBaselineChanged(element, textBaseline);
+        // 宽高比锁定
         this.onRatioLockedChanged(element, isRatioLocked);
       }
     },

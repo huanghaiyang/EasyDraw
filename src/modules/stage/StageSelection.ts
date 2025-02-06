@@ -516,14 +516,17 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   tryActiveController(point: IPoint): IController {
+    // 旋转
     const rotation = this.tryActiveElementRotation(point);
     if (rotation) {
       return rotation;
     }
+    // 顶点变换
     const transformer = this.tryActiveElementTransformer(point);
     if (transformer) {
       return transformer;
     }
+    // 边框变换
     const borderTransformer = this.tryActiveElementBorderTransformer(point);
     if (borderTransformer) {
       return borderTransformer;
@@ -536,10 +539,13 @@ export default class StageSelection implements IStageSelection {
    * @returns 
    */
   getActiveController(): IController {
+    // 旋转
     let controller: IController = this.getActiveElementRotation();
     if (!controller) {
+      // 顶点变换
       controller = this.getActiveElementTransformer();
       if (!controller) {
+        // 边框变换
         controller = this.getActiveElementBorderTransformer();
       }
     }

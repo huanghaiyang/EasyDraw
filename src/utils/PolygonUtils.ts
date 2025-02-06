@@ -16,13 +16,19 @@ export default class PolygonUtils {
    * @returns 
    */
   static calcIOPoint(current: IPoint, next: IPoint, angle: number, r: number, innerOrOuter: boolean): IPoint {
+    // 半角度
     const halfAngle = evaluate('angle / 2', { angle });
+    // 三角形斜边
     const hypotenuse = MathUtils.calcTriangleSide3By2(halfAngle, r);
+    // 下一个角度
     let nextAngle = MathUtils.calcAngle(current, next);
+    // 角度范围[0, 360]
     if (nextAngle < 0) {
       nextAngle += 360;
     }
+    // 最终角度
     let finalAngle = evaluate('halfAngle + nextAngle', { halfAngle, nextAngle });
+    // 计算目标点
     const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate('finalAngle + 180', { finalAngle }));
     return point;
   }
@@ -36,11 +42,17 @@ export default class PolygonUtils {
    * @returns 
    */
   static getPolygonVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
+    // 排序顶点
     const sortedVertices = MathUtils.sortVerticesClockwise(vertices);
+    // 计算内外顶点
     return sortedVertices.map((ver, index) => {
+      // 上一个顶点
       const prev = CommonUtils.getPrevOfArray(sortedVertices, index);
+      // 下一个顶点
       const next = CommonUtils.getNextOfArray(sortedVertices, index);
+      // 三角形角度
       const angle = MathUtils.calcTriangleAngle(prev, ver, next);
+      // 计算内外顶点
       return PolygonUtils.calcIOPoint(ver, next, angle, r, innerOrOuter);
     });
   }
@@ -88,7 +100,9 @@ export default class PolygonUtils {
    * @returns 
    */
   static calcBentLineClockWisePoints(points: IPoint[], r: number, isClockWise: boolean): IPoint[] {
+    // 结果
     const result: IPoint[] = [];
+    // 遍历坐标
     for (let i = 0; i < points.length - 1; i++) {
       const p1 = points[i];
       const p2 = points[i + 1];

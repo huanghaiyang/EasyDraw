@@ -94,7 +94,7 @@ export default class CanvasUtils {
     if (typeof actualAngle === 'number') {
       angle = actualAngle;
     }
-    let radian = MathUtils.degreesToRadians(angle);
+    let radian = MathUtils.angleToRadian(angle);
     ctx.save()
     ctx.translate(x + width / 2, y + height / 2);
     let scaleX = 1;
@@ -141,7 +141,7 @@ export default class CanvasUtils {
     const ctx = target.getContext('2d');
     ctx.save();
     ctx.translate(center.x, center.y);
-    ctx.rotate(MathUtils.degreesToRadians(angle));
+    ctx.rotate(MathUtils.angleToRadian(angle));
     ctx.font = StyleUtils.joinFont(styles);
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
     ctx.textAlign = styles.textAlign;
