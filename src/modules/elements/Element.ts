@@ -1360,8 +1360,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return points.map((point, index) => {
       point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles);
       // 坐标重新按照角度偏转
-      point = MathUtils.transformRelativeCenter(point, angles, center, true);
-      return point;
+      return MathUtils.rotateRelativeCenter(point, -angles.angle, center);
     })
   }
 
@@ -1492,11 +1491,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._transformLockIndex = lockIndex;
     // 设置变换坐标
     this.model.coords = this.batchCalcTransformPointsByCenter(this._originalRotatePathPoints, matrix, lockPoint, this._originalCenter);
-    const centerCoord = MathUtils.calcCenter(this.model.coords);
-    this.model.coords = MathUtils.leanRelativeCenters(this.model.coords, this.angles.leanXAngle, this.angles.leanYAngle, centerCoord);
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
-    this.model.boxCoords = MathUtils.leanRelativeCenters(this.model.boxCoords, this.angles.leanXAngle, this.angles.leanYAngle, centerCoord);
     // 判断是否需要翻转角度
     return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
   }
