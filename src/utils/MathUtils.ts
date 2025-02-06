@@ -65,18 +65,10 @@ export default class MathUtils {
   static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
     point = MathUtils.transformRelativeCenter(point, angles, center, true);
     originalPoint = MathUtils.transformRelativeCenter(originalPoint, angles, center, true);
-
-    let originalWidth = originalPoint.x - center.x;
-    let originalHeight = originalPoint.y - center.y;
-    let newWidth = point.x - center.x;
-    let newHeight = point.y - center.y;
-
-    // if (leanYAngle) {
-    //   originalHeight = MathUtils.calcTriangleSide3By1(leanYAngle, originalHeight);
-    //   newHeight = MathUtils.calcTriangleSide3By1(leanYAngle, newHeight);
-    //   originalWidth = originalWidth - MathUtils.calcTriangleSide2By3(leanYAngle, originalHeight);
-    //   newWidth = newWidth - MathUtils.calcTriangleSide2By3(leanYAngle, newHeight);
-    // }
+    const originalWidth = originalPoint.x - center.x;
+    const originalHeight = originalPoint.y - center.y;
+    const newWidth = point.x - center.x;
+    const newHeight = point.y - center.y;
     const scaleX = originalWidth === 0 ? 1 : newWidth / originalWidth;
     const scaleY = originalHeight === 0 ? 1 : newHeight / originalHeight;
     return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
@@ -227,19 +219,25 @@ export default class MathUtils {
    * @param coord 
    * @param trans
    * @param center 
-   * @param isNegative
+   * @param isReverse
    * @returns 
    */
-  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isNegative?: boolean) {
+  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
     let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = trans;
-    if (isNegative) {
+    if (isReverse) {
       angle = -angle;
       leanXAngle = -leanXAngle;
       leanYAngle = -leanYAngle;
     }
+    let matrix: number[][];
     const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const rotateMatrix = MathUtils.calcRotateMatrix(angle);
-    let result = multiply(rotateMatrix, leanMatrix, [coord.x - center.x, coord.y - center.y, 1]);
+    if (isReverse) {
+      matrix = multiply(leanMatrix, rotateMatrix) as unknown as number[][];
+    } else {
+      matrix = multiply(rotateMatrix, leanMatrix) as unknown as number[][];
+    }
+    let result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
       x: add(result[0], center.x),
       y: add(result[1], center.y)
@@ -254,8 +252,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static transformRelativeCenters(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isNegative?: boolean) {
-    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center, isNegative));
+  static transformRelativeCenters(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center, isReverse));
   }
 
   /**
