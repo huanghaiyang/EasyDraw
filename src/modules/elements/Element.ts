@@ -1056,11 +1056,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns 
    */
   calcActualAngle(): number {
-    if (this.flipX) {
-      return ElementUtils.mirrorAngle(this.model.viewAngle + this.model.leanYAngle);
-    } else {
-      return ElementUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
-    }
+    return ElementUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
   }
 
   /**

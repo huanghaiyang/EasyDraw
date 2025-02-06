@@ -256,13 +256,13 @@ export default class MathUtils {
    * 旋转倾斜坐标系上的某一点
    * 
    * @param coord 
-   * @param trans
+   * @param angles
    * @param center 
    * @param isReverse
    * @returns 
    */
-  static transWithCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
-    let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = trans;
+  static transWithCenter(coord: IPoint, angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+    let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = angles || {};
     if (isReverse) {
       angle = -angle;
       leanXAngle = -leanXAngle;
@@ -287,12 +287,12 @@ export default class MathUtils {
    * 旋转倾斜坐标系上的某一点
    * 
    * @param coords 
-   * @param trans 
+   * @param angles 
    * @param center 
    * @returns 
    */
-  static batchTransWithCenter(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
-    return coords.map(coord => MathUtils.transWithCenter(coord, trans, center, isReverse));
+  static batchTransWithCenter(coords: IPoint[], angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+    return coords.map(coord => MathUtils.transWithCenter(coord, angles, center, isReverse));
   }
 
   /**
