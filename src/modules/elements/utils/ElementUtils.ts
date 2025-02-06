@@ -476,6 +476,24 @@ export default class ElementUtils {
   }
 
   /**
+   * 将给定点还原为未变形前的坐标并按照给定的矩阵进行变形
+   * 
+   * @param point 
+   * @param matrix 
+   * @param lockPoint 
+   * @param angles 
+   * @returns 
+   */
+  static normalizeMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+    // 坐标重新按照角度反向偏转
+    point = MathUtils.transformRelativeCenter(point, angles, lockPoint, true);
+    // 以不动点为圆心，计算形变
+    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
+    // 重新计算坐标
+    return { x: x + lockPoint.x, y: y + lockPoint.y };
+  }
+
+  /**
    * 计算矩阵变换后的点
    * 
    * @param point 
@@ -485,13 +503,10 @@ export default class ElementUtils {
    * @returns 
    */
   static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
-    point = MathUtils.transformRelativeCenter(point, angles, lockPoint, true);
-    // 以不动点为圆心，计算形变
-    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
-    // 重新计算坐标
-    point = { x: x + lockPoint.x, y: y + lockPoint.y };
+    // 还原并计算
+    const normalizedPoint = ElementUtils.normalizeMatrixPoint(point, matrix, lockPoint, angles);
     // 坐标重新按照角度偏转
-    return MathUtils.transformRelativeCenter(point, angles, lockPoint);
+    return MathUtils.transformRelativeCenter(normalizedPoint, angles, lockPoint);
   }
 
   /**

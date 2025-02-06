@@ -1361,9 +1361,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles);
       // 坐标重新按照角度偏转
       point = MathUtils.transformRelativeCenter(point, angles, center, true);
-      if (index === 0) {
-        console.log(point, center,matrix, angles )
-      }
       return point;
     })
   }
