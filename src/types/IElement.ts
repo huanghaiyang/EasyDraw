@@ -120,13 +120,31 @@ export type RefreshOptions = {
 }
 
 // 默认刷新选项
-export const DefaultOptions: RefreshOptions = {
+export const DefaultElementRefreshOptions: RefreshOptions = {
   size: true,
   position: true,
   points: true,
   rotation: true,
   angles: true,
   originals: true
+}
+
+// 刷新角度选项参数
+export type RefreshAnglesOptions = {
+  view?: boolean;
+  leanX?: boolean;
+  leanY?: boolean;
+  actual?: boolean;
+  internal?: boolean;
+}
+
+// 默认刷新角度选项
+export const DefaultRefreshAnglesOptions: RefreshAnglesOptions = {
+  view: true,
+  leanX: true,
+  leanY: true,
+  actual: true,
+  internal: true
 }
 
 // 舞台元素（组件）
@@ -415,7 +433,7 @@ export default interface IElement {
   // 刷新旋转
   refreshRotation(): void;
   // 刷新角度
-  refreshAngles(): void;
+  refreshAngles(options?: RefreshAnglesOptions): void;
   // 刷新
   refresh(options?: RefreshOptions): void;
   // 刷新盒模型坐标
