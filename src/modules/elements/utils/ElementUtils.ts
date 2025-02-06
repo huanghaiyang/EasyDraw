@@ -441,15 +441,15 @@ export default class ElementUtils {
    */
   static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -angle, lockPoint)));
+    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateWithCenter(point, -angle, lockPoint)));
     // 计算旋转后的中心点
-    center = MathUtils.rotateRelativeCenter(center, angle, lockPoint);
+    center = MathUtils.rotateWithCenter(center, angle, lockPoint);
     // 计算中心点世界坐标
     const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
     // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
-    return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
+    return rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angle, newCenterCoord));
   }
 
   /**
@@ -486,7 +486,7 @@ export default class ElementUtils {
    */
   static normalizeMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
     // 坐标重新按照角度反向偏转
-    point = MathUtils.transformRelativeCenter(point, angles, lockPoint, true);
+    point = MathUtils.transWithCenter(point, angles, lockPoint, true);
     // 以不动点为圆心，计算形变
     const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
     // 重新计算坐标
@@ -506,7 +506,7 @@ export default class ElementUtils {
     // 还原并计算
     const normalizedPoint = ElementUtils.normalizeMatrixPoint(point, matrix, lockPoint, angles);
     // 坐标重新按照角度偏转
-    return MathUtils.transformRelativeCenter(normalizedPoint, angles, lockPoint);
+    return MathUtils.transWithCenter(normalizedPoint, angles, lockPoint);
   }
 
   /**

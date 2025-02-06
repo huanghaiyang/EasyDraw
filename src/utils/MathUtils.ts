@@ -1,10 +1,20 @@
 import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
-import { divide } from "lodash";
 import CommonUtils from '@/utils/CommonUtils';
 import { AngleModel } from "@/types/IElement";
 
 export default class MathUtils {
+
+  /**
+   * 计算平移矩阵
+   * 
+   * @param dx 
+   * @param dy 
+   * @returns 
+   */
+  static calcTranslateMatrix(dx: number, dy: number): number[][] {
+    return [[1, 0, dx], [0, 1, dy], [0, 0, 1]];
+  }
   /**
    * 平移
    * 
@@ -13,12 +23,23 @@ export default class MathUtils {
    * @returns 
    */
   static translate(coord: IPoint, value: TranslationValue): IPoint {
-    const translationMatrix = [[1, 0, value.dx], [0, 1, value.dy], [0, 0, 1]];
+    const translationMatrix = MathUtils.calcTranslateMatrix(value.dx, value.dy);
     const translatedPoint = multiply(translationMatrix, [coord.x, coord.y, 1]);
     return {
       x: translatedPoint[0],
       y: translatedPoint[1]
     }
+  }
+
+  /**
+   * 批量平移
+   * 
+   * @param coords 
+   * @param value 
+   * @returns 
+   */
+  static batchTraslate(coords: IPoint[], value: TranslationValue): IPoint[] {
+    return coords.map(coord => this.translate(coord, value));
   }
 
   /**
@@ -40,16 +61,25 @@ export default class MathUtils {
   }
 
   /**
-   * 旋转矩阵
+   * 批量旋转
    * 
-   * @param matrix 
+   * @param coords 
    * @param angle 
    * @returns 
    */
-  static rotateMatrix(matrix: number[][], angle: number): number[][] {
-    const rotationMatrix = MathUtils.calcRotateMatrix(angle);
-    const result = multiply(matrix, rotationMatrix);
-    return result as unknown as number[][];
+  static batchRotate(coords: IPoint[], angle: number): IPoint[] {
+    return coords.map(coord => this.rotate(coord, angle));
+  }
+
+  /**
+   * 计算缩放矩阵
+   * 
+   * @param scaleX 
+   * @param scaleY 
+   * @returns 
+   */
+  static calcScaleMatrix(scaleX: number, scaleY: number): number[][] {
+    return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
   }
 
   /**
@@ -62,16 +92,25 @@ export default class MathUtils {
    * @param originalPoint 缩放前的点
    * @param angles 旋转角度和纵轴倾斜角度
    */
-  static calcTransformMatrixOfCenter(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
-    point = MathUtils.transformRelativeCenter(point, angles, center, true);
-    originalPoint = MathUtils.transformRelativeCenter(originalPoint, angles, center, true);
+  static calcTransformMatrix(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
+    // 计算移动点在原始坐标系中的位置
+    point = MathUtils.transWithCenter(point, angles, center, true);
+    // 计算缩放前的点在原始坐标系中的位置
+    originalPoint = MathUtils.transWithCenter(originalPoint, angles, center, true);
+    // 计算原始宽度
     const originalWidth = originalPoint.x - center.x;
+    // 计算原始高度
     const originalHeight = originalPoint.y - center.y;
+    // 计算新宽度
     const newWidth = point.x - center.x;
+    // 计算新高度
     const newHeight = point.y - center.y;
+    // 计算宽度缩放比例
     const scaleX = originalWidth === 0 ? 1 : newWidth / originalWidth;
+    // 计算高度缩放比例
     const scaleY = originalHeight === 0 ? 1 : newHeight / originalHeight;
-    return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
+    // 返回缩放矩阵
+    return MathUtils.calcScaleMatrix(scaleX, scaleY);
   }
 
   /**
@@ -82,15 +121,15 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static rotateRelativeCenter(coord: IPoint, angle: number, center: IPoint): IPoint {
-    const point = {
-      x: add(coord.x, - center.x),
-      y: add(coord.y, - center.y)
+  static rotateWithCenter(point: IPoint, angle: number, center: IPoint): IPoint {
+    point = {
+      x: point.x - center.x,
+      y: point.y - center.y
     };
     const result = MathUtils.rotate(point, angle);
     return {
-      x: add(result.x, center.x),
-      y: add(result.y, center.y)
+      x: result.x + center.x,
+      y: result.y + center.y
     }
   }
 
@@ -102,8 +141,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static rotateRelativeCenters(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.rotateRelativeCenter(coord, angle, center));
+  static batchRotateWithCenter(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.rotateWithCenter(coord, angle, center));
   }
 
   /**
@@ -114,8 +153,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanYRelativeCenter(coord: IPoint, leanYAngle: number, center: IPoint): IPoint {
-    return MathUtils.leanRelativeCenter(coord, 0, leanYAngle, center);
+  static leanYWithCenter(coord: IPoint, leanYAngle: number, center: IPoint): IPoint {
+    return MathUtils.leanWithCenter(coord, 0, leanYAngle, center);
   }
 
   /**
@@ -126,8 +165,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanYRelativeCenters(coords: IPoint[], leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanYRelativeCenter(coord, leanYAngle, center));
+  static batchLeanYWithCenter(coords: IPoint[], leanYAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanYWithCenter(coord, leanYAngle, center));
   }
 
   /**
@@ -138,8 +177,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanXRelativeCenter(coord: IPoint, leanXAngle: number, center: IPoint): IPoint {
-    return MathUtils.leanRelativeCenter(coord, leanXAngle, 0, center);
+  static leanXWithCenter(coord: IPoint, leanXAngle: number, center: IPoint): IPoint {
+    return MathUtils.leanWithCenter(coord, leanXAngle, 0, center);
   }
 
   /**
@@ -150,8 +189,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanXRelativeCenters(coords: IPoint[], leanXAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanXRelativeCenter(coord, leanXAngle, center));
+  static batchLeanXWithCenter(coords: IPoint[], leanXAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanXWithCenter(coord, leanXAngle, center));
   }
 
   /**
@@ -191,7 +230,7 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanRelativeCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
+  static leanWithCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
     const matrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
@@ -209,8 +248,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static leanRelativeCenters(coords: IPoint[], leanXAngle: number, leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanRelativeCenter(coord, leanXAngle, leanYAngle, center));
+  static batchLeanWithCenter(coords: IPoint[], leanXAngle: number, leanYAngle: number, center: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.leanWithCenter(coord, leanXAngle, leanYAngle, center));
   }
 
   /**
@@ -222,7 +261,7 @@ export default class MathUtils {
    * @param isReverse
    * @returns 
    */
-  static transformRelativeCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+  static transWithCenter(coord: IPoint, trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
     let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = trans;
     if (isReverse) {
       angle = -angle;
@@ -252,8 +291,8 @@ export default class MathUtils {
    * @param center 
    * @returns 
    */
-  static transformRelativeCenters(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
-    return coords.map(coord => MathUtils.transformRelativeCenter(coord, trans, center, isReverse));
+  static batchTransWithCenter(coords: IPoint[], trans: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+    return coords.map(coord => MathUtils.transWithCenter(coord, trans, center, isReverse));
   }
 
   /**

@@ -229,7 +229,7 @@ export default class CommonUtils {
       },
     ];
     points.forEach((point) => {
-      Object.assign(point, MathUtils.transformRelativeCenter(point, angles, center));
+      Object.assign(point, MathUtils.transWithCenter(point, angles, center));
     });
     return points;
   }

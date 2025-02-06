@@ -779,7 +779,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotatePathPoints(): IPoint[] {
     const center = this.center;
-    return this._pathPoints.map(point => MathUtils.rotateRelativeCenter(point, this.model.angle, center));
+    return this._pathPoints.map(point => MathUtils.rotateWithCenter(point, this.model.angle, center));
   }
 
   /**
@@ -803,7 +803,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const center = this.center;
     return this.model.boxCoords.map(coord => {
       const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
-      return MathUtils.rotateRelativeCenter(point, this.model.angle, center)
+      return MathUtils.rotateWithCenter(point, this.model.angle, center)
     });
   }
 
@@ -814,7 +814,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateBoxCoords(): IPoint[] {
     const centerCoord = this.centerCoord;
-    return this.model.coords.map(coord => MathUtils.rotateRelativeCenter(coord, this.model.angle, centerCoord));
+    return this.model.coords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, centerCoord));
   }
 
   /**
@@ -842,7 +842,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotatePathCoords(): IPoint[] {
     const centerCoord = this.centerCoord;
-    return this.model.coords.map(coord => MathUtils.rotateRelativeCenter(coord, this.model.angle, centerCoord))
+    return this.model.coords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, centerCoord))
   }
 
   /**
@@ -1007,7 +1007,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcUnLeanByPoints(points: IPoint[]): IPoint[] {
     const center = MathUtils.calcCenter(points);
-    return MathUtils.leanRelativeCenters(points, -this.model.leanXAngle, this.model.flipX ? this.model.leanYAngle : -this.model.leanYAngle, center);
+    return MathUtils.batchLeanWithCenter(points, -this.model.leanXAngle, this.model.flipX ? this.model.leanYAngle : -this.model.leanYAngle, center);
   }
 
   /**
@@ -1360,7 +1360,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return points.map((point, index) => {
       point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles);
       // 坐标重新按照角度偏转
-      return MathUtils.rotateRelativeCenter(point, -angles.angle, center);
+      return MathUtils.rotateWithCenter(point, -angles.angle, center);
     })
   }
 
@@ -1514,7 +1514,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 当前拖动的点当前的位置
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, angles);
+    const matrix = MathUtils.calcTransformMatrix(lockPoint, currentPoint, currentPointOriginal, angles);
     // 如果需要比例锁定，则调整纵轴缩放系数
     if (wouldBeRatioLock && this.shouldRatioLockResize) {
       // 调整纵轴缩放系数
@@ -1534,7 +1534,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 判断是否已经计算过原始矩阵
     if (!this._originalTransformMatrix.length) {
       // 计算原始矩阵
-      this._originalTransformMatrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPointOriginal, currentPointOriginal, this.angles);
+      this._originalTransformMatrix = MathUtils.calcTransformMatrix(lockPoint, currentPointOriginal, currentPointOriginal, this.angles);
     }
     // 判断是否需要翻转角度
     const isFlip = this._doFlipAngle(matrix, this._originalTransformMatrix);
@@ -1641,7 +1641,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点当前的位置
       const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
       // 判断当前拖动点，在坐标系垂直轴的左边还是右边
-      const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.angles);
+      const matrix = MathUtils.calcTransformMatrix(lockPoint, currentPoint, currentPointOriginal, this.angles);
       // 调整矩阵
       this._transBorderMatrix(matrix, index);
       // 设置变换矩阵
@@ -1722,7 +1722,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的坐标
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.angles);
+    const matrix = MathUtils.calcTransformMatrix(lockPoint, currentPoint, currentPointOriginal, this.angles);
     // 调整矩阵
     matrix[1][1] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[1][1], matrix[0][0]) : 1;
     // 设置变换矩阵
@@ -1758,7 +1758,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的坐标
     const currentPoint = { x: currentPointOriginal.x + offset.x, y: currentPointOriginal.y + offset.y };
     // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrixOfCenter(lockPoint, currentPoint, currentPointOriginal, this.angles);
+    const matrix = MathUtils.calcTransformMatrix(lockPoint, currentPoint, currentPointOriginal, this.angles);
     // 调整矩阵
     matrix[0][0] = this.shouldRatioLockResize ? MathUtils.resignValue(matrix[0][0], matrix[1][1]) : 1;
     // 设置变换矩阵
@@ -1825,11 +1825,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算非倾斜坐标
     const coords = this.calcUnLeanCoords();
     // 重新计算倾斜坐标
-    this.model.coords = MathUtils.leanYRelativeCenters(coords, leanAngle, this.centerCoord);
+    this.model.coords = MathUtils.batchLeanYWithCenter(coords, leanAngle, this.centerCoord);
     // 计算非倾斜盒模型坐标
     const boxCoords = this.calcUnleanBoxCoords();
     // 重新计算倾斜盒模型坐标
-    this.model.boxCoords = MathUtils.leanYRelativeCenters(boxCoords, leanAngle, this.centerCoord);
+    this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, leanAngle, this.centerCoord);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
     // 刷新
@@ -1944,7 +1944,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void {
     // 计算旋转后的中心点坐标
-    const newCenterCoord = MathUtils.rotateRelativeCenter(this._originalCenterCoord, deltaAngle, lockCenterCoord);
+    const newCenterCoord = MathUtils.rotateWithCenter(this._originalCenterCoord, deltaAngle, lockCenterCoord);
     // 计算偏移量
     const offset = { dx: newCenterCoord.x - this._originalCenterCoord.x, dy: newCenterCoord.y - this._originalCenterCoord.y };
     // 计算变换后的坐标
