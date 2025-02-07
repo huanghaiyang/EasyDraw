@@ -439,22 +439,22 @@ export default class ElementUtils {
    * 通过旋转坐标计算旋转前的坐标
    *
    * @param rotatePoints
-   * @param angle
+   * @param angles
    * @param lockPoint
    * @param params
    * @returns
    */
-  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(rotatePoints.map((point) => MathUtils.rotateWithCenter(point, -angle, lockPoint)));
+    let center = MathUtils.calcCenter(rotatePoints.map((point) => MathUtils.transWithCenter(point, angles, lockPoint, true)));
     // 计算旋转后的中心点
-    center = MathUtils.rotateWithCenter(center, angle, lockPoint);
+    center = MathUtils.transWithCenter(center, angles, lockPoint);
     // 计算中心点世界坐标
     const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
     // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
-    return rotateCoords.map((point) => MathUtils.rotateWithCenter(point, -angle, newCenterCoord));
+    return rotateCoords.map((point) => MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord));
   }
 
   /**

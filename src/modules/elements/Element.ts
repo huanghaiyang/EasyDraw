@@ -1352,7 +1352,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   protected calcTransformPointsByCenter(points: IPoint[], matrix: number[][], lockPoint: IPoint, centroid: IPoint, angles: Partial<AngleModel>): IPoint[] {
     const center = ElementUtils.calcMatrixPoint(centroid, matrix, lockPoint, angles);
-    return points.map((point, index) => {
+    return points.map((point) => {
       point = ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles);
       // 坐标重新按照角度偏转
       return MathUtils.rotateWithCenter(point, -angles.angle, center);
@@ -1400,22 +1400,23 @@ export default class Element implements IElement, ILinkedNodeValue {
   transformBy(options: TransformByOptions): boolean {
     // 解构参数
     const { lockPoint, lockIndex, transformType, originalMovingPoint, offset, groupAngle, isAngleFlip } = options;
-    const angles: Partial<AngleModel> = { ...this.angles, angle: groupAngle };
+    // 还原坐标需要用到的角度
+    const groupAngles = { angle: groupAngle };
     // 获取变换矩阵
-    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, angles, false);
+    const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, groupAngles, false);
     // 如果变换类型为边框，则调整矩阵
     if (transformType === TransformTypes.border) {
       // 调整矩阵
       this._transBorderMatrix(matrix, lockIndex, false);
     }
     // 计算变换后的点
-    const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, angles);
+    const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, groupAngles);
     // 计算变换后的盒模型坐标
-    const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, angles);
+    const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngles);
     // 计算变换后的坐标
-    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.model.angle, lockPoint, this.shield.stageCalcParams);
+    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
-    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.model.angle, lockPoint, this.shield.stageCalcParams);
+    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.angles, lockPoint, this.shield.stageCalcParams);
     // 设置变换后的坐标
     this.model.coords = coords;
     // 设置变换后的盒模型坐标
