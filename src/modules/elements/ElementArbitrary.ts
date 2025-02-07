@@ -254,7 +254,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
       const lockPoint = this._originalRotateBoxPoints[0];
       const coords = ElementUtils.calcCoordsByRotatedPathPoints(rotatePoints, this.angles, lockPoint, this.shield.stageCalcParams);
       this.model.coords = coords;
-      this.refreshBoxCoords();
     }
   }
 }

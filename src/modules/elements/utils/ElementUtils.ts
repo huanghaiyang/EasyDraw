@@ -265,33 +265,20 @@ export default class ElementUtils {
    * @returns
    */
   static calcSize(model: Partial<ElementObject>): ISize {
-    const { coords, type } = model;
+    const { coords, boxCoords, type } = model;
     switch (type) {
       case CreatorTypes.rectangle:
       case CreatorTypes.text:
       case CreatorTypes.group:
-      case CreatorTypes.image: {
-        return CommonUtils.calcRectangleSize(coords);
+      case CreatorTypes.image:
+      case CreatorTypes.arbitrary: {
+        return CommonUtils.calcRectangleSize(boxCoords);
       }
       case CreatorTypes.line: {
         return {
           width: MathUtils.preciseToFixed(MathUtils.calcDistance(coords[0], coords[1]), 2),
           height: 0,
         };
-      }
-      case CreatorTypes.arbitrary: {
-        if (coords.length === 1) {
-          return {
-            width: 0,
-            height: 0,
-          };
-        } else {
-          const { width, height } = CommonUtils.getRect(coords);
-          return {
-            width,
-            height,
-          };
-        }
       }
     }
   }

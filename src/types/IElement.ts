@@ -441,8 +441,6 @@ export default interface IElement {
   refreshAngles(options?: RefreshAnglesOptions): void;
   // 刷新
   refresh(options?: RefreshOptions): void;
-  // 刷新盒模型坐标
-  refreshBoxCoords(): void;
   // 是否包含点
   isContainsPoint(point: IPoint): boolean;
   // 是否多边形重叠

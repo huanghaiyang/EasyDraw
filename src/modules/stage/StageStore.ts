@@ -790,7 +790,7 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
-    const size: ISize = ElementUtils.calcSize({ coords, type });
+    const size: ISize = ElementUtils.calcSize({ coords, boxCoords: CommonUtils.getBoxPoints(coords), type });
     const position: IPoint = ElementUtils.calcPosition({ type, coords });
     const model: ElementObject = {
       id: CommonUtils.getRandomDateId(),
@@ -863,6 +863,7 @@ export default class StageStore implements IStageStore {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type));
         if (this._currentCreatingElementId) {
           element = this.updateElementModel(this._currentCreatingElementId, model);
+          element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
           this._setElementProvisionalCreating(element);
         } else {
           element = this._createProvisionalElement(model);
@@ -911,7 +912,7 @@ export default class StageStore implements IStageStore {
           model.coords.splice(element.tailCoordIndex + 1, 1, coord);
         }
       }
-      element.refreshBoxCoords();
+      element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
       this._setElementProvisionalCreating(element);
     } else {
       // 如果当前创建的元素id不存在，则创建一个新的元素
@@ -934,7 +935,6 @@ export default class StageStore implements IStageStore {
     element.tailCoordIndex = -1;
     if (tailCoordIndex < element.model.coords.length - 1) {
       element.model.coords = element.model.coords.slice(0, tailCoordIndex + 1);
-      element.refreshBoxCoords();
     }
   }
 
@@ -956,6 +956,7 @@ export default class StageStore implements IStageStore {
           }
         }
         this.updateElementById(element.id, { status: ElementStatus.finished });
+        element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
         element.refresh();
         return element;
       }
