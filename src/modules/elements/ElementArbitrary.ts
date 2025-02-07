@@ -7,6 +7,7 @@ import { cloneDeep, flatten, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/Constants";
 import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -246,14 +247,14 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      const rotatePoints = cloneDeep(this._originalRotatePathPoints);
-      rotatePoints[this.editingCoordIndex] = {
-        x: rotatePoints[this.editingCoordIndex].x + offset.x,
-        y: rotatePoints[this.editingCoordIndex].y + offset.y,
+      const points = cloneDeep(this._originalRotatePathPoints);
+      points[this.editingCoordIndex] = {
+        x: points[this.editingCoordIndex].x + offset.x,
+        y: points[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxPoints[0];
-      const coords = ElementUtils.calcCoordsByRotatedPathPoints(rotatePoints, this.angles, lockPoint, this.shield.stageCalcParams);
-      this.model.coords = coords;
+      this.model.coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
+      this.model.boxCoords = MathUtils.batchLeanWithCenter(CommonUtils.getBoxPoints(this.calcUnLeanByPoints(this.model.coords)), this.leanXAngle, this.leanYAngle, this.calcCenterCoord());
     }
   }
 }
