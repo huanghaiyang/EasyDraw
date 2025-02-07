@@ -1,23 +1,22 @@
 import { IPoint } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { evaluate } from 'mathjs';
+import { evaluate } from "mathjs";
 
 export default class PolygonUtils {
-
   /**
    * 计算内外顶点坐标
-   * 
-   * @param current 
-   * @param next 
-   * @param angle 
-   * @param r 
-   * @param innerOrOuter 
-   * @returns 
+   *
+   * @param current
+   * @param next
+   * @param angle
+   * @param r
+   * @param innerOrOuter
+   * @returns
    */
   static calcIOPoint(current: IPoint, next: IPoint, angle: number, r: number, innerOrOuter: boolean): IPoint {
     // 半角度
-    const halfAngle = evaluate('angle / 2', { angle });
+    const halfAngle = evaluate("angle / 2", { angle });
     // 三角形斜边
     const hypotenuse = MathUtils.calcTriangleSide3By2(halfAngle, r);
     // 下一个角度
@@ -27,19 +26,19 @@ export default class PolygonUtils {
       nextAngle += 360;
     }
     // 最终角度
-    let finalAngle = evaluate('halfAngle + nextAngle', { halfAngle, nextAngle });
+    let finalAngle = evaluate("halfAngle + nextAngle", { halfAngle, nextAngle });
     // 计算目标点
-    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate('finalAngle + 180', { finalAngle }));
+    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate("finalAngle + 180", { finalAngle }));
     return point;
   }
 
   /**
    * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
-   * 
-   * @param vertices 
-   * @param r 
-   * @param innerOrOuter 
-   * @returns 
+   *
+   * @param vertices
+   * @param r
+   * @param innerOrOuter
+   * @returns
    */
   static getPolygonVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
     // 排序顶点
@@ -59,7 +58,7 @@ export default class PolygonUtils {
 
   /**
    * 获取对边形内顶点坐标
-   * 
+   *
    * @param points 多边形的顶点坐标集合
    * @param width 多边形的宽度
    */
@@ -69,10 +68,10 @@ export default class PolygonUtils {
 
   /**
    * 获取对边形外顶点坐标
-   * 
-   * @param vertices 
-   * @param width 
-   * @returns 
+   *
+   * @param vertices
+   * @param width
+   * @returns
    */
   static getPolygonOuterVertices(vertices: IPoint[], r: number): IPoint[] {
     return PolygonUtils.getPolygonVertices(vertices, r, false);
@@ -80,9 +79,9 @@ export default class PolygonUtils {
 
   /**
    * 计算连续的线段的外顶点坐标
-   * 
-   * @param points 
-   * @param r 
+   *
+   * @param points
+   * @param r
    */
   static calcBentLineOuterVertices(points: IPoint[], r: number): IPoint[] {
     const result: IPoint[] = [];
@@ -93,11 +92,11 @@ export default class PolygonUtils {
 
   /**
    * 计算线段的平行线
-   * 
-   * @param points 
-   * @param r 
-   * @param isClockWise 
-   * @returns 
+   *
+   * @param points
+   * @param r
+   * @param isClockWise
+   * @returns
    */
   static calcBentLineClockWisePoints(points: IPoint[], r: number, isClockWise: boolean): IPoint[] {
     // 结果

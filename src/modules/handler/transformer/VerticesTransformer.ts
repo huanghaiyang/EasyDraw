@@ -11,7 +11,7 @@ export default class VerticesTransformer extends BaseTransformer implements IVer
   points: IPoint[];
 
   get angle(): number {
-    const angle =  MathUtils.calcAngle(this.host.center, { x: this.x, y: this.y });
+    const angle = MathUtils.calcAngle(this.host.center, { x: this.x, y: this.y });
     return angle + 90;
   }
 
@@ -24,9 +24,9 @@ export default class VerticesTransformer extends BaseTransformer implements IVer
 
   /**
    * 判断点是否在多边形内
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   isContainsPoint(point: IPoint): boolean {
     return MathUtils.isPointInPolygonByRayCasting(point, this.points);

@@ -1,4 +1,4 @@
-export interface ILinkedNodeValue { }
+export interface ILinkedNodeValue {}
 
 export interface ILinkedNode<T> {
   prev: ILinkedNode<T> | null;
@@ -36,8 +36,8 @@ export default class LinkedNode<T extends ILinkedNodeValue> implements ILinkedNo
 
   /**
    * 插入到当前节点之后
-   * 
-   * @param node 
+   *
+   * @param node
    */
   insertAfter(node: ILinkedNode<T>): void {
     const next = this.next;
@@ -51,8 +51,8 @@ export default class LinkedNode<T extends ILinkedNodeValue> implements ILinkedNo
 
   /**
    * 插入到当前节点之前
-   * 
-   * @param node 
+   *
+   * @param node
    */
   insertBefore(node: ILinkedNode<T>): void {
     const prev = this.prev;

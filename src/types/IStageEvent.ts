@@ -3,7 +3,7 @@ import IStageShield from "@/types/IStageShield";
 
 // 舞台事件处理器
 export default interface IStageEvent extends EventEmitter {
-  // 舞台 
+  // 舞台
   shield: IStageShield;
   // 是否为ctrl
   get isCtrl(): boolean;

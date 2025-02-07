@@ -1,5 +1,5 @@
-import { DrawerMaskModelTypes, ElementStatus, IPoint, } from "@/types";
-import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
+import { DrawerMaskModelTypes, ElementStatus, IPoint } from "@/types";
+import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
 import MaskTaskPath from "@/modules/render/mask/task/MaskTaskPath";
 import MaskTaskClear from "@/modules/render/mask/task/MaskTaskClear";
 import MaskTaskTransformer from "@/modules/render/mask/task/MaskTaskTransformer";
@@ -21,13 +21,12 @@ import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircle
 import { TransformerTypes } from "@/types/ITransformer";
 
 export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
-
   private _lastCursorRendered = false;
   private _lastSelectionRendered = false;
 
   /**
    * 重绘蒙版
-   * 
+   *
    * TODO 需要优化，光标只要移动就会重绘
    */
   async redraw(): Promise<void> {
@@ -36,7 +35,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
     // 绘制选区
     const selectionTasks = this.createMaskSelectionTasks();
-    selectionTasks.forEach(task => {
+    selectionTasks.forEach((task) => {
       cargo.add(task);
     });
     if (selectionTasks.length) {
@@ -65,7 +64,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
     if (this.drawer.shield.isDrawerActive) {
       cargo.add(this.createMaskCursorPositionTask());
-      cargo.add(this.createMaskArbitraryCursorTask())
+      cargo.add(this.createMaskArbitraryCursorTask());
     }
 
     // 如果有绘制任务，则添加一个清除任务到队列头部
@@ -87,8 +86,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 绘制当前鼠标位置的文字任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskCursorPositionTask(): IRenderTask {
     const point = this.drawer.shield.cursor.value;
@@ -97,24 +96,24 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const model: IMaskModel = {
       point: {
         x: point.x + 20 / this.drawer.shield.stageScale,
-        y: point.y + 20 / this.drawer.shield.stageScale
+        y: point.y + 20 / this.drawer.shield.stageScale,
       },
       type: DrawerMaskModelTypes.cursorPosition,
-      text: `${coord.x},${coord.y}`
-    }
+      text: `${coord.x},${coord.y}`,
+    };
     const task = new MaskTaskCursorPosition(model, this.renderParams);
     return task;
   }
 
   /**
    * 创建一个绘制mask选区的任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
     const models: IMaskModel[] = [...this.drawer.shield.selection.getModels(), this.drawer.shield.selection.getRealTimeSelectionModel()];
-    models.forEach(model => {
+    models.forEach((model) => {
       if (model) {
         const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
         tasks.push(task);
@@ -125,8 +124,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 创建一个清空mask的任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskClearTask(): IRenderTask {
     const task = new MaskTaskClear(null, this.renderParams);
@@ -135,13 +134,13 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 创建选区handler绘制任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskTransformerTasks(): IRenderTask[] {
     const models: IMaskModel[] = this.drawer.shield.selection.getRealTimeTransformerModels();
-    return models.map(model => {
-      switch(model.element.transformerType) {
+    return models.map((model) => {
+      switch (model.element.transformerType) {
         case TransformerTypes.circle: {
           return new MaskTaskCircleTransformer(model, this.renderParams);
         }
@@ -154,9 +153,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 创建一个绘制旋转图标的任务
-   * 
-   * @param element 
-   * @returns 
+   *
+   * @param element
+   * @returns
    */
   private createMaskRotateTask(element: IElement): IRenderTask {
     return new MaskTaskRotate(element.rotation.model, this.renderParams);
@@ -164,8 +163,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
   /**
    * 给出一个元素创建一个绘制尺寸指示器的任务
-   * 
-   * @param element 
+   *
+   * @param element
    */
   private createMaskIndicatorTask(element: IElement): IRenderTask {
     let p1: IPoint, p2: IPoint;
@@ -201,14 +200,14 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
-    }
+    };
     return new MaskTaskIndicator(model, this.renderParams);
   }
 
   /**
    * 创建一个光标圆
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
     if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
@@ -216,9 +215,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,
         radius: ArbitraryControllerRadius,
-      }
+      };
       return new MaskTaskCircleTransformer(model, this.renderParams);
     }
   }
-
 }

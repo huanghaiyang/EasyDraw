@@ -42,8 +42,8 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 添加子元素
-   * 
-   * @param sub 
+   *
+   * @param sub
    */
   addSub(sub: IElement): void {
     this.model.subIds.add(sub.id);
@@ -51,8 +51,8 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 移除子元素
-   * 
-   * @param sub 
+   *
+   * @param sub
    */
   removeSub(sub: IElement): void {
     this.model.subIds.delete(sub.id);
@@ -60,8 +60,8 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 移除子元素
-   * 
-   * @param id 
+   *
+   * @param id
    */
   removeSubById(id: string): void {
     this.model.subIds.delete(id);
@@ -69,8 +69,8 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 判断是否包含子元素
-   * 
-   * @param sub 
+   *
+   * @param sub
    */
   hasSub(sub: IElement): boolean {
     return this.model.subIds.has(sub.id);
@@ -78,8 +78,8 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 判断是否包含子元素
-   * 
-   * @param id 
+   *
+   * @param id
    */
   hasSubById(id: string): boolean {
     return this.model.subIds.has(id);
@@ -103,27 +103,27 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 获取深度子元素
-   * 
-   * @param result 
-   * @param subs 
+   *
+   * @param result
+   * @param subs
    */
   private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
-    subs.forEach(sub => {
+    subs.forEach((sub) => {
       result.push(sub);
       if (sub.isGroup) {
         this._getDeepSubs(result, (sub as ElementGroup).subs);
       }
-    })
+    });
     return result;
   }
 
   /**
    * 根据类型获取子元素
-   * 
-   * @param type 
+   *
+   * @param type
    */
   getSubElementsByType(type: CreatorTypes): IElement[] {
-    return this.getSubs().filter(sub => {
+    return this.getSubs().filter((sub) => {
       return sub.isElement && sub.model.type === type;
     });
   }
@@ -132,53 +132,53 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取所有子元素
    */
   getAllSubElements(): IElement[] {
-    return this.getSubs().filter(sub => sub.isElement);
+    return this.getSubs().filter((sub) => sub.isElement);
   }
 
   /**
    * 获取所有子组合
    */
   getAllSubElementGroups(): IElementGroup[] {
-    return this.getSubs().filter(sub => sub.isGroup) as IElementGroup[];
+    return this.getSubs().filter((sub) => sub.isGroup) as IElementGroup[];
   }
 
   /**
    * 是否包含点
-   * 
-   * @param point 
+   *
+   * @param point
    */
   isContainsPoint(point: IPoint): boolean {
-    return this.deepSubs.some(sub => sub.isContainsPoint(point));
+    return this.deepSubs.some((sub) => sub.isContainsPoint(point));
   }
 
   /**
    * 是否多边形重叠
-   * 
-   * @param points 
+   *
+   * @param points
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return this.deepSubs.some(sub => sub.isPolygonOverlap(points));
+    return this.deepSubs.some((sub) => sub.isPolygonOverlap(points));
   }
 
   /**
    * 是否模型多边形重叠
-   * 
-   * @param coords 
+   *
+   * @param coords
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return this.deepSubs.some(sub => sub.isModelPolygonOverlap(coords));
+    return this.deepSubs.some((sub) => sub.isModelPolygonOverlap(coords));
   }
 
   /**
    * 设置选中状态,子元素也会同步设置
-   * 
-   * @param value 
+   *
+   * @param value
    */
   protected __setIsSelected(value: boolean): void {
     super.__setIsSelected(value);
-    this.deepSubs.forEach(sub => {
+    this.deepSubs.forEach((sub) => {
       sub.isSelected = value;
-    })
+    });
   }
 
   /**
@@ -193,8 +193,8 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 刷新子组件的原始角度
    */
   private _refreshDeepSubsOriginalAngle(): void {
-    this.deepSubs.forEach(sub => {
+    this.deepSubs.forEach((sub) => {
       sub.originalAngle = sub.model.angle;
-    })
+    });
   }
 }

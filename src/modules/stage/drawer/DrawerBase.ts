@@ -9,18 +9,18 @@ export default class DrawerBase extends EventEmitter implements IStageDrawer {
 
   /**
    * 初始化画布
-   * 
-   * @returns 
+   *
+   * @returns
    */
   initCanvas(): HTMLCanvasElement {
-    this.canvas = document.createElement('canvas');
+    this.canvas = document.createElement("canvas");
     return this.canvas;
   }
 
   /**
    * 设置画布大小
-   * 
-   * @param size 
+   *
+   * @param size
    */
   updateCanvasSize(size: ISize): void {
     this.canvas.width = size.width;
@@ -31,7 +31,7 @@ export default class DrawerBase extends EventEmitter implements IStageDrawer {
    * 画布清空
    */
   clearCanvas(): void {
-    this.canvas.getContext('2d')?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.canvas.getContext("2d")?.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**

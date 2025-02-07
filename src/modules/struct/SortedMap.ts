@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 
-export default class SortedMap<K, V> extends EventEmitter{
+export default class SortedMap<K, V> extends EventEmitter {
   protected map: Map<K, V>;
   protected keys: K[];
 
@@ -47,7 +47,7 @@ export default class SortedMap<K, V> extends EventEmitter{
   }
 
   entries(): [K, V][] {
-    return this.keys.map(key => [key, this.map.get(key) as V]);
+    return this.keys.map((key) => [key, this.map.get(key) as V]);
   }
 
   keysArray(): K[] {
@@ -55,16 +55,16 @@ export default class SortedMap<K, V> extends EventEmitter{
   }
 
   valuesArray(): V[] {
-    return this.keys.map(key => this.map.get(key) as V);
+    return this.keys.map((key) => this.map.get(key) as V);
   }
 
   private compareKeys(a: K, b: K): number {
-    if (typeof a === 'string' && typeof b === 'string') {
-      return a.localeCompare(b, 'en', { numeric: true });
-    } else if (typeof a === 'number' && typeof b === 'number') {
+    if (typeof a === "string" && typeof b === "string") {
+      return a.localeCompare(b, "en", { numeric: true });
+    } else if (typeof a === "number" && typeof b === "number") {
       return a - b;
     } else {
-      throw new Error('Unsupported key type');
+      throw new Error("Unsupported key type");
     }
   }
 }

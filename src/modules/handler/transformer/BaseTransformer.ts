@@ -17,5 +17,4 @@ export default class BaseTransformer implements ITransformer {
     this.id = CommonUtils.getRandomId();
     this.isActive = false;
   }
-
 }

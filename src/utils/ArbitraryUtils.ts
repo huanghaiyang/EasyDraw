@@ -6,35 +6,35 @@ import MathUtils from "@/utils/MathUtils";
 
 export default class ArbitraryUtils {
   /**
-     * 获取自由边形内顶点坐标
-     * 
-     * @param vertices 
-     * @param r 
-     * @returns 
-     */
+   * 获取自由边形内顶点坐标
+   *
+   * @param vertices
+   * @param r
+   * @returns
+   */
   static getArbitraryInnerVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
     return ArbitraryUtils.getArbitraryVertices(vertices, r, true, options);
   }
 
   /**
    * 获取自由边形外顶点坐标
-   * 
-   * @param vertices 
-   * @param r 
-   * @returns 
+   *
+   * @param vertices
+   * @param r
+   * @returns
    */
   static getArbitraryOuterVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
     return ArbitraryUtils.getArbitraryVertices(vertices, r, false, options);
   }
 
   /**
-     * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
-     * 
-     * @param vertices 
-     * @param r 
-     * @param innerOrOuter 
-     * @returns 
-     */
+   * 给定一个多边形的顶点坐标集合，已知多边形的边的宽度，计算多边形的内外顶点坐标
+   *
+   * @param vertices
+   * @param r
+   * @param innerOrOuter
+   * @returns
+   */
   static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean, options: RenderParams): IPoint[] {
     if (vertices.length === 1) return vertices;
     if (vertices.length === 2) {

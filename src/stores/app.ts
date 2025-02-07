@@ -1,4 +1,4 @@
-import axios from "axios"
+import axios from "axios";
 import { defineStore } from "pinia";
 
 export const useAppStore = defineStore("app", {
@@ -19,12 +19,7 @@ export const useAppStore = defineStore("app", {
   }),
   actions: {
     async init() {
-      const res = await Promise.all([
-        this.getLocale(),
-        this.getUserInfo(),
-        this.getVersion(),
-        this.getConfig(),
-      ]);
+      const res = await Promise.all([this.getLocale(), this.getUserInfo(), this.getVersion(), this.getConfig()]);
       const [locale, user, version, config] = res;
       this.locale = locale.data;
       this.user = user.data;
@@ -32,7 +27,7 @@ export const useAppStore = defineStore("app", {
       this.config = config.data;
     },
     async getLocale() {
-      return 'zh'
+      return "zh";
       const res = await axios.get("/api/locale");
       return res;
     },

@@ -3,11 +3,11 @@ import { createI18n } from "vue-i18n";
 const i18n = createI18n({
   legacy: false,
   locale: "zh",
-  messages: {}
+  messages: {},
 });
 
 async function loadLocaleMessages() {
-  const modules = import.meta.glob('@/locales/*.json');
+  const modules = import.meta.glob("@/locales/*.json");
 
   for (const path in modules) {
     const locale = path.match(/\/([A-Za-z0-9-_]+)\.json$/)[1];
@@ -17,6 +17,6 @@ async function loadLocaleMessages() {
   }
 }
 
-loadLocaleMessages()
+loadLocaleMessages();
 
 export default i18n;

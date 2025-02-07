@@ -1,12 +1,11 @@
 import BaseRenderer from "@/modules/render/renderer/drawer/BaseRenderer";
-import RenderTaskCargo from '@/modules/render/RenderTaskCargo';
+import RenderTaskCargo from "@/modules/render/RenderTaskCargo";
 import ElementTaskClear from "@/modules/render/shield/task/ElementTaskClear";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IDrawerProvisional } from "@/types/IStageDrawer";
 import { IProvisionalRenderer } from "@/types/IStageRenderer";
 
 export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional> implements IProvisionalRenderer {
-
   private _latestElementRendered: boolean;
   private _latestClearRendered: boolean;
 
@@ -25,7 +24,7 @@ export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional
       });
       this._latestElementRendered = true;
     }
-    this._latestClearRendered = (cargo.isEmpty() && this._latestElementRendered)
+    this._latestClearRendered = cargo.isEmpty() && this._latestElementRendered;
     if (!cargo.isEmpty() || this._latestClearRendered) {
       cargo.prepend(new ElementTaskClear(null, this.renderParams));
       await this.renderCargo(cargo);

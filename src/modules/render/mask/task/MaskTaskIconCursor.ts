@@ -3,18 +3,18 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import ResizeV from "@/assets/svg/resize-v.svg";
 import { IIconModel, IMaskModel } from "@/types/IModel";
 import { CursorTypes } from "@/types/Stage";
-import SplitV from '@/assets/svg/split-v.svg';
-import Hand from '@/assets/svg/hand.svg';
-import Cross from '@/assets/svg/cross.svg';
-import Move from '@/assets/svg/move.svg';
+import SplitV from "@/assets/svg/split-v.svg";
+import Hand from "@/assets/svg/hand.svg";
+import Cross from "@/assets/svg/cross.svg";
+import Move from "@/assets/svg/move.svg";
 
 export default class MaskTaskIconCursor extends MaskTaskBase {
   type: CursorTypes = CursorTypes.vertices;
 
   /**
    * 获取模型
-   * 
-   * @returns 
+   *
+   * @returns
    */
   get data(): IIconModel {
     return this.model as IIconModel;
@@ -22,8 +22,8 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
 
   /**
    * 获取图标
-   * 
-   * @returns 
+   *
+   * @returns
    */
   get img(): string {
     switch (this.type) {
@@ -55,16 +55,25 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      let { point: { x, y }, width, height, scale } = this.data;
-      await CanvasUtils.drawImgLike(this.canvas, this.img, {
-        x: (x - width * scale / 2) / scale,
-        y: (y - height * scale / 2) / scale,
+      let {
+        point: { x, y },
         width,
         height,
-      }, {
-        angle: this.data.angle
-      })
+        scale,
+      } = this.data;
+      await CanvasUtils.drawImgLike(
+        this.canvas,
+        this.img,
+        {
+          x: (x - (width * scale) / 2) / scale,
+          y: (y - (height * scale) / 2) / scale,
+          width,
+          height,
+        },
+        {
+          angle: this.data.angle,
+        }
+      );
     }
   }
-
 }

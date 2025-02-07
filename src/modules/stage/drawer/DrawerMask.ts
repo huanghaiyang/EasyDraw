@@ -11,8 +11,8 @@ export default class DrawerMask extends HelperDrawer implements IDrawerMask {
 
   initCanvas(): HTMLCanvasElement {
     super.initCanvas();
-    this.canvas.id = 'mask'
-    this.canvas.style.pointerEvents = 'none'
+    this.canvas.id = "mask";
+    this.canvas.style.pointerEvents = "none";
     return this.canvas;
   }
 }

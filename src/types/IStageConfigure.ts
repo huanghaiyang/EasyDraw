@@ -7,11 +7,11 @@ export default interface IStageConfigure {
 
 export type StageConfigs = {
   // 旋转图标是否启用
-  rotationIconEnable?: boolean
-}
+  rotationIconEnable?: boolean;
+};
 
 // 舞台配置
 export const StageConfigValues: StageConfigs = {
   // 默认启用旋转
-  rotationIconEnable: true
-}
+  rotationIconEnable: true,
+};

@@ -11,8 +11,8 @@ export default class RenderTask extends RenderTaskBase {
 
   /**
    * 执行任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   async run(): Promise<void> {
     await this.func();
@@ -24,7 +24,6 @@ export default class RenderTask extends RenderTaskBase {
   async destroy(): Promise<void> {
     // do nothing
   }
-
 }
 
-export class QueueTask extends RenderTask { }
+export class QueueTask extends RenderTask {}

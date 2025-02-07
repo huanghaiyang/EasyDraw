@@ -8,9 +8,9 @@ import { IShieldRenderer } from "@/types/IStageRenderer";
 export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
   /**
    * 绘制舞台内容
-   * 
-   * @param force 
-   * @returns 
+   *
+   * @param force
+   * @returns
    */
   async redraw(force?: boolean): Promise<void> {
     const cargo = new RenderTaskCargo([]);

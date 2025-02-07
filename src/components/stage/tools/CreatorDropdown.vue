@@ -32,23 +32,13 @@ const onBeforeUpload = (file: File) => {
     </div>
     <template #dropdown>
       <el-dropdown-menu>
-        <el-dropdown-item
-          v-for="creator in creators"
-          :key="creator.type"
-          :class="[
-            {
-              selected: creator.type === currentCreator.type,
-            },
-          ]"
-          @click="select(creator)"
-        >
-          <el-upload
-            v-if="creator.type === CreatorTypes.image"
-            action=""
-            multiple
-            accept="image/*"
-            :before-upload="onBeforeUpload"
-          >
+        <el-dropdown-item v-for="creator in creators" :key="creator.type" :class="[
+          {
+            selected: creator.type === currentCreator.type,
+          },
+        ]" @click="select(creator)">
+          <el-upload v-if="creator.type === CreatorTypes.image" action="" multiple accept="image/*"
+            :before-upload="onBeforeUpload">
             <creator-drop-down-item :creator="creator" />
           </el-upload>
           <creator-drop-down-item :creator="creator" v-else />
@@ -67,9 +57,11 @@ const onBeforeUpload = (file: File) => {
   border-radius: 4px;
   transition: all 0.2s;
   margin: 0 0 0 2px;
+
   &:focus-visible {
     outline: none;
   }
+
   .iconfont {
     font-size: 8px;
   }

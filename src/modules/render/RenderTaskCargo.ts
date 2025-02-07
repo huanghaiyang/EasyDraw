@@ -13,8 +13,8 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
 
   /**
    * 判断是否为空
-   * 
-   * @returns 
+   *
+   * @returns
    */
   isEmpty() {
     return this.tasks.length === 0;
@@ -22,8 +22,8 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
 
   /**
    * 添加一个任务
-   * 
-   * @param task 
+   *
+   * @param task
    */
   add(task: IRenderTask) {
     if (this.running) {
@@ -36,9 +36,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
 
   /**
    * 添加多个任务
-   * 
-   * @param tasks 
-   * @returns 
+   *
+   * @param tasks
+   * @returns
    */
   addAll(tasks: IRenderTask[]): void {
     tasks.forEach((task) => {
@@ -48,8 +48,8 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
 
   /**
    * 添加一个任务到头部
-   * 
-   * @param task 
+   *
+   * @param task
    */
   prepend(task: IRenderTask): void {
     if (this.running) {
@@ -77,5 +77,4 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
     }
     this.running = false;
   }
-
 }

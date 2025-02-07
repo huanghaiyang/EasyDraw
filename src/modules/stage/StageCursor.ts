@@ -23,8 +23,8 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 获取世界坐标
-   * 
-   * @returns 
+   *
+   * @returns
    */
   get worldValue(): IPoint {
     return ElementUtils.calcWorldPoint(this.value, this.shield.stageCalcParams);
@@ -32,8 +32,8 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 获取渲染参数
-   * 
-   * @returns 
+   *
+   * @returns
    */
   get renderParams(): any {
     return { canvas: this.shield.mask.canvas };
@@ -53,9 +53,9 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 计算鼠标相对于画板的位置
-   * 
-   * @param e 
-   * @returns 
+   *
+   * @param e
+   * @returns
    */
   transform(e: MouseEvent): IPoint {
     if (!this.shield.stageRect) return { x: 0, y: 0 };
@@ -67,8 +67,8 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 设置鼠标样式
-   * 
-   * @param cursor 
+   *
+   * @param cursor
    */
   setStyle(cursor: string): void {
     this.shield.canvas.style.cursor = cursor;
@@ -79,23 +79,23 @@ export default class StageCursor implements IStageCursor {
    */
   updateStyle(e: MouseEvent): void {
     if (
-      this.shield.selection.getActiveElementBorderTransformer()
-      || this.shield.selection.getActiveElementTransformer()
-      || this.shield.selection.getActiveElementRotation()
-      || this.shield.isDrawerActive
+      this.shield.selection.getActiveElementBorderTransformer() ||
+      this.shield.selection.getActiveElementTransformer() ||
+      this.shield.selection.getActiveElementRotation() ||
+      this.shield.isDrawerActive
     ) {
-      this.setStyle('none')
+      this.setStyle("none");
     } else if (this.shield.isHandActive) {
-      this.setStyle('grab');
+      this.setStyle("grab");
     } else {
-      this.setStyle('default');
+      this.setStyle("default");
     }
   }
 
   /**
    * 创建一个光标任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getTask(): IMaskTask {
     if (this.shield.isDrawerActive) {
@@ -114,8 +114,8 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 创建一个绘制mask光标的任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskDrawingCursorTask(): IMaskTask {
     if (!this.value) return;
@@ -124,8 +124,8 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 创建一个旋转光标任务
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private createMaskRotationCursorTask(rotation: IElementRotation): IMaskTask {
     if (!this.value) return;
@@ -134,9 +134,9 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 创建一个边框变换光标任务
-   * 
-   * @param borderTransformer 
-   * @returns 
+   *
+   * @param borderTransformer
+   * @returns
    */
   private createMaskBorderTransformerCursorTask(borderTransformer: IBorderTransformer): IMaskTask {
     if (!this.value) return;
@@ -145,9 +145,9 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 创建一个变换光标任务
-   * 
-   * @param transformer 
-   * @returns 
+   *
+   * @param transformer
+   * @returns
    */
   private createMaskTransformerCursorTask(transformer: IVerticesTransformer): IMaskTask {
     if (!this.value) return;
@@ -156,9 +156,9 @@ export default class StageCursor implements IStageCursor {
 
   /**
    * 创建一个变换光标的模型
-   * 
-   * @param options 
-   * @returns 
+   *
+   * @param options
+   * @returns
    */
   private _createTransformerCursorModel(options?: { angle: number }): IIconModel {
     return {
@@ -167,8 +167,7 @@ export default class StageCursor implements IStageCursor {
       width: CursorSize,
       height: CursorSize,
       angle: options?.angle || 0,
-      scale: 1 / this.shield.stageScale
-    }
+      scale: 1 / this.shield.stageScale,
+    };
   }
-
 }

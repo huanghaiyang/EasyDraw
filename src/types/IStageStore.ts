@@ -6,7 +6,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
-  // 可见元素 
+  // 可见元素
   get visibleElements(): IElement[];
   // 正在绘制的元素
   get creatingElements(): IElement[];
@@ -92,7 +92,7 @@ export default interface IStageStore extends IStageSetter {
   // 清除旋转元素中心
   clearRotatingStates(): void;
   // 恢复元素原始属性
-  refreshElementsOriginals(elements: IElement[], options?: { subs?: boolean, deepSubs?: boolean }): void;
+  refreshElementsOriginals(elements: IElement[], options?: { subs?: boolean; deepSubs?: boolean }): void;
   // 刷新元素位置
   refreshElementsPosition(elements: IElement[]): void;
   // 遍历元素

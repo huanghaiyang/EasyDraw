@@ -30,7 +30,7 @@ export type TransformByOptions = {
   groupAngle: number;
   // 是否需要翻转角度
   isAngleFlip: boolean;
-}
+};
 
 export type AngleModel = {
   // 旋转角度
@@ -45,7 +45,7 @@ export type AngleModel = {
   actualAngle?: number;
   // 视觉角度
   viewAngle?: number;
-}
+};
 
 // 翻转模型
 export type FlipModel = {
@@ -53,7 +53,7 @@ export type FlipModel = {
   flipX?: boolean;
   // 是否翻转y轴
   flipY?: boolean;
-}
+};
 
 // 默认角度
 export const DefaultAngleModel: AngleModel = {
@@ -63,51 +63,52 @@ export const DefaultAngleModel: AngleModel = {
   internalAngle: 90,
   actualAngle: 0,
   viewAngle: 0,
-}
+};
 
 // 舞台元素数据模型
-export type ElementObject = AngleModel & FlipModel & {
-  // 元素id
-  id: string;
-  // 元素坐标
-  coords?: IPoint[];
-  // 盒模型坐标
-  boxCoords?: IPoint[];
-  // 元素类型
-  type?: CreatorTypes;
-  // 元素数据
-  data?: any;
-  // 元素名称
-  name?: string;
-  // 宽度
-  width?: number;
-  // 高度
-  height?: number;
-  // 长度
-  length?: number;
-  // 样式
-  styles?: ElementStyles;
-  // 左上角坐标
-  left?: number;
-  // 上边坐标
-  top?: number;
-  // 是否锁定比例
-  isRatioLocked?: boolean;
-  // 比例
-  ratio?: number;
-  // 是否闭合
-  isFold?: boolean;
-  // 组合id
-  groupId?: string;
-  // 图片颜色空间
-  colorSpace?: string;
-  // 图片自然宽度
-  naturalWidth?: number;
-  // 图片自然高度
-  naturalHeight?: number;
-  // 子元素id集合
-  subIds?: Set<string>;
-}
+export type ElementObject = AngleModel &
+  FlipModel & {
+    // 元素id
+    id: string;
+    // 元素坐标
+    coords?: IPoint[];
+    // 盒模型坐标
+    boxCoords?: IPoint[];
+    // 元素类型
+    type?: CreatorTypes;
+    // 元素数据
+    data?: any;
+    // 元素名称
+    name?: string;
+    // 宽度
+    width?: number;
+    // 高度
+    height?: number;
+    // 长度
+    length?: number;
+    // 样式
+    styles?: ElementStyles;
+    // 左上角坐标
+    left?: number;
+    // 上边坐标
+    top?: number;
+    // 是否锁定比例
+    isRatioLocked?: boolean;
+    // 比例
+    ratio?: number;
+    // 是否闭合
+    isFold?: boolean;
+    // 组合id
+    groupId?: string;
+    // 图片颜色空间
+    colorSpace?: string;
+    // 图片自然宽度
+    naturalWidth?: number;
+    // 图片自然高度
+    naturalHeight?: number;
+    // 子元素id集合
+    subIds?: Set<string>;
+  };
 
 // 刷新参数
 export type RefreshOptions = {
@@ -117,7 +118,7 @@ export type RefreshOptions = {
   rotation?: boolean;
   angles?: boolean;
   originals?: boolean;
-}
+};
 
 // 默认刷新选项
 export const DefaultElementRefreshOptions: RefreshOptions = {
@@ -126,8 +127,8 @@ export const DefaultElementRefreshOptions: RefreshOptions = {
   points: true,
   rotation: true,
   angles: true,
-  originals: true
-}
+  originals: true,
+};
 
 // 刷新角度选项参数
 export type RefreshAnglesOptions = {
@@ -136,7 +137,7 @@ export type RefreshAnglesOptions = {
   leanY?: boolean;
   actual?: boolean;
   internal?: boolean;
-}
+};
 
 // 默认刷新角度选项
 export const DefaultRefreshAnglesOptions: RefreshAnglesOptions = {
@@ -144,8 +145,8 @@ export const DefaultRefreshAnglesOptions: RefreshAnglesOptions = {
   leanX: true,
   leanY: true,
   actual: true,
-  internal: true
-}
+  internal: true,
+};
 
 // 舞台元素（组件）
 export default interface IElement {
@@ -544,19 +545,19 @@ export default interface IElement {
 }
 
 // 舞台元素（组件）-React
-export interface IElementReact extends IElement { }
+export interface IElementReact extends IElement {}
 
 // 舞台元素（组件）-圆形
-export interface IElementCircle extends IElement { }
+export interface IElementCircle extends IElement {}
 
 // 舞台元素（组件）-图片
-export interface IElementImage extends IElementReact { }
+export interface IElementImage extends IElementReact {}
 
 // 舞台元素（组件）-任意多边形&线条
-export interface IElementPolygon extends IElement { }
+export interface IElementPolygon extends IElement {}
 
 // 舞台元素（组件）-文本
-export interface IElementText extends IElement { }
+export interface IElementText extends IElement {}
 
 // 舞台元素（组件）-线段
 export interface IElementLine extends IElement {

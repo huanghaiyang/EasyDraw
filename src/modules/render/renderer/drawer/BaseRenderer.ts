@@ -4,7 +4,6 @@ import { IStageDrawer } from "@/types/IStageDrawer";
 import { IStageRenderer } from "@/types/IStageRenderer";
 
 export default class BaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
-
   drawer: T;
   renderQueue: IRenderQueue;
 
@@ -19,8 +18,8 @@ export default class BaseRenderer<T extends IStageDrawer> implements IStageRende
 
   get renderParams() {
     return {
-      canvas: this.drawer.canvas
-    }
+      canvas: this.drawer.canvas,
+    };
   }
 
   clear(): void {

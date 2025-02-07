@@ -9,10 +9,10 @@ export interface IStageRenderer {
 }
 
 // 辅助画布绘制器
-export interface IMaskRenderer extends IStageRenderer, IQueueRender { }
+export interface IMaskRenderer extends IStageRenderer, IQueueRender {}
 
-// 临时画布绘制器 
-export interface IProvisionalRenderer extends IStageRenderer, IQueueRender { }
+// 临时画布绘制器
+export interface IProvisionalRenderer extends IStageRenderer, IQueueRender {}
 
 // 主画布绘制器
-export interface IShieldRenderer extends IStageRenderer, IQueueRender { }
+export interface IShieldRenderer extends IStageRenderer, IQueueRender {}

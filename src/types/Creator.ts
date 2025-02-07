@@ -1,50 +1,50 @@
 // 创作工具类型,同时也是组件类型
 export enum CreatorTypes {
   // 移动
-  moveable = 'moveable',
+  moveable = "moveable",
   // 手
-  hand = 'hand',
+  hand = "hand",
 
   // 矩形
-  rectangle = 'rectangle',
+  rectangle = "rectangle",
   // 线段
-  line = 'line',
+  line = "line",
   // 图片
-  image = 'image',
+  image = "image",
   // 多边形
-  polygon = 'polygon',
+  polygon = "polygon",
   // 任意
-  arbitrary = 'arbitrary',
+  arbitrary = "arbitrary",
   // 铅笔
-  pencil = 'pencil',
+  pencil = "pencil",
   // 文本
-  text = 'text',
+  text = "text",
   // 组合
-  group = 'group',
+  group = "group",
   // 圆
-  circle = 'circle',
+  circle = "circle",
 }
 
 // 创作工具分类
 export enum CreatorCategories {
   // 光标
-  cursor = 'cursor',
+  cursor = "cursor",
   // 形状
-  shapes = 'shapes',
+  shapes = "shapes",
   // 自由绘制
-  freedom = 'freedom',
+  freedom = "freedom",
 }
 
 // 创作工具
 export declare type Creator = {
   // 工具类型
-  type: CreatorTypes,
+  type: CreatorTypes;
   // 工具名称
-  name: string,
+  name: string;
   // 工具分类
-  category: CreatorCategories,
+  category: CreatorCategories;
   // 工具图标
-  icon?: string,
+  icon?: string;
   // 工具快捷键
-  shortcut?: string,
-}
+  shortcut?: string;
+};

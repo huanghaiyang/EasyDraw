@@ -77,8 +77,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 设置组件状态
-   * 
-   * @param status 
+   *
+   * @param status
    */
   protected __setStatus(status: ElementStatus): void {
     super.__setStatus(status);
@@ -89,8 +89,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 刷新由边框线段计算出边框区域
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcOuterPaths(): IPoint[][] {
     return ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, this.model.styles, this.model.isFold);
@@ -98,8 +98,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 刷新由边框线段计算出世界坐标的边框区域
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcOuterWorldPaths(): IPoint[][] {
     return ElementUtils.calcArbitraryBorderRegions(this.strokePathCoords, this.model.styles, this.model.isFold);
@@ -131,9 +131,9 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 判断点是否在边框内
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   isContainsPoint(point: IPoint): boolean {
     let outerPaths: IPoint[][];
@@ -144,37 +144,37 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     }
     return some(outerPaths, (paths) => {
       return MathUtils.isPointInPolygonByRayCasting(point, paths);
-    })
+    });
   }
 
   /**
    * 判断给定区域是否与边框有交集
-   * 
-   * @param points 
-   * @returns 
+   *
+   * @param points
+   * @returns
    */
   isPolygonOverlap(points: IPoint[]): boolean {
     return some(this.outerPaths, (paths) => {
       return MathUtils.isPolygonsOverlap(paths, points);
-    })
+    });
   }
 
   /**
    * 判断当前组件是否与世界区块相交
-   * 
-   * @param coords 
-   * @returns 
+   *
+   * @param coords
+   * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
     return some(this.outerWorldPaths, (paths) => {
       return MathUtils.isPolygonsOverlap(paths, coords);
-    })
+    });
   }
 
   /**
    * 计算外轮廓舞台坐标
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcRotateOutlinePathPoints(): IPoint[] {
     return flatten(this._outerPaths);
@@ -182,8 +182,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 计算外轮廓坐标
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcRotateOutlinePathCoords(): IPoint[] {
     return flatten(this._outerWorldPaths);
@@ -191,8 +191,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 激活编辑坐标
-   * 
-   * @param index 
+   *
+   * @param index
    */
   activeEditingCoord(index: number): void {
     this.editingCoordIndex = index;
@@ -207,12 +207,12 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 激活变换器
-   * 
-   * @param transformer 
+   *
+   * @param transformer
    */
   activeTransformer(transformer: IVerticesTransformer): void {
     super.activeTransformer(transformer);
-    const index = this._transformers.findIndex(item => item.id === transformer.id);
+    const index = this._transformers.findIndex((item) => item.id === transformer.id);
     this.activeEditingCoord(index);
   }
 
@@ -226,14 +226,14 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 按顶点变换
-   * 
-   * @param offset 
-   * @returns 
+   *
+   * @param offset
+   * @returns
    */
   doVerticesTransform(offset: IPoint): boolean {
     if (this.status === ElementStatus.editing) {
       this.doEditingTransform(offset);
-      return false
+      return false;
     } else {
       return super.doVerticesTransform(offset);
     }
@@ -241,16 +241,16 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   /**
    * 编辑模式下的变换
-   * 
-   * @param offset 
+   *
+   * @param offset
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
       const rotatePoints = cloneDeep(this._originalRotatePathPoints);
       rotatePoints[this.editingCoordIndex] = {
         x: rotatePoints[this.editingCoordIndex].x + offset.x,
-        y: rotatePoints[this.editingCoordIndex].y + offset.y
-      }
+        y: rotatePoints[this.editingCoordIndex].y + offset.y,
+      };
       const lockPoint = this._originalRotateBoxPoints[0];
       const coords = ElementUtils.calcCoordsByRotatedPathPoints(rotatePoints, this.model.angle, lockPoint, this.shield.stageCalcParams);
       this.model.coords = coords;

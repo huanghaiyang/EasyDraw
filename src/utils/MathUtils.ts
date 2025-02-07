@@ -1,92 +1,99 @@
 import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ScaleValue, TranslationValue } from "@/types";
-import CommonUtils from '@/utils/CommonUtils';
+import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
 
 export default class MathUtils {
-
   /**
    * 计算平移矩阵
-   * 
-   * @param dx 
-   * @param dy 
-   * @returns 
+   *
+   * @param dx
+   * @param dy
+   * @returns
    */
   static calcTranslateMatrix(dx: number, dy: number): number[][] {
-    return [[1, 0, dx], [0, 1, dy], [0, 0, 1]];
+    return [
+      [1, 0, dx],
+      [0, 1, dy],
+      [0, 0, 1],
+    ];
   }
   /**
    * 平移
-   * 
-   * @param coord 
-   * @param value 
-   * @returns 
+   *
+   * @param coord
+   * @param value
+   * @returns
    */
   static translate(coord: IPoint, value: TranslationValue): IPoint {
     const translationMatrix = MathUtils.calcTranslateMatrix(value.dx, value.dy);
     const translatedPoint = multiply(translationMatrix, [coord.x, coord.y, 1]);
     return {
       x: translatedPoint[0],
-      y: translatedPoint[1]
-    }
+      y: translatedPoint[1],
+    };
   }
 
   /**
    * 批量平移
-   * 
-   * @param coords 
-   * @param value 
-   * @returns 
+   *
+   * @param coords
+   * @param value
+   * @returns
    */
   static batchTraslate(coords: IPoint[], value: TranslationValue): IPoint[] {
-    return coords.map(coord => this.translate(coord, value));
+    return coords.map((coord) => this.translate(coord, value));
   }
 
   /**
    * 旋转
-   * 
+   *
    * 在右手坐标系中，当从旋转轴的正向向原点看去，如果旋转是逆时针方向进行的，那么这种旋转被定义为正方向。相反，如果旋转是顺时针方向进行的，则定义为负方向。这一规则适用于绕任意坐标轴（x轴、y轴或z轴）的旋转。
-   * 
-   * @param coord 
-   * @param angle 
-   * @returns 
+   *
+   * @param coord
+   * @param angle
+   * @returns
    */
   static rotate(coord: IPoint, angle: number): IPoint {
     const rotationMatrix = MathUtils.calcRotateMatrix(angle);
     const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
-      y: rotatedPoint[1]
+      y: rotatedPoint[1],
     };
   }
 
   /**
    * 批量旋转
-   * 
-   * @param coords 
-   * @param angle 
-   * @returns 
+   *
+   * @param coords
+   * @param angle
+   * @returns
    */
   static batchRotate(coords: IPoint[], angle: number): IPoint[] {
-    return coords.map(coord => this.rotate(coord, angle));
+    return coords.map((coord) => this.rotate(coord, angle));
   }
 
   /**
    * 计算缩放矩阵
-   * 
-   * @param scaleX 
-   * @param scaleY 
-   * @returns 
+   *
+   * @param scaleX
+   * @param scaleY
+   * @returns
    */
   static calcScaleMatrix(scaleX: number, scaleY: number): number[][] {
-    return [[scaleX, 0, 0], [0, scaleY, 0], [0, 0, 1]];
+    return [
+      [scaleX, 0, 0],
+      [0, scaleY, 0],
+      [0, 0, 1],
+    ];
   }
 
   /**
    * 给定原点，以及一个不断移动的点，计算出缩放矩阵
-   * 
+   *
    * 旋转角度为0的情况下
-   * 
+   *
    * @param center 旋转中心点
    * @param point 移动点
    * @param originalPoint 缩放前的点
@@ -115,43 +122,43 @@ export default class MathUtils {
 
   /**
    * 相对于圆心上旋转
-   * 
-   * @param coord 
-   * @param angle 
-   * @param center 
-   * @returns 
+   *
+   * @param coord
+   * @param angle
+   * @param center
+   * @returns
    */
   static rotateWithCenter(point: IPoint, angle: number, center: IPoint): IPoint {
     point = {
       x: point.x - center.x,
-      y: point.y - center.y
+      y: point.y - center.y,
     };
     const result = MathUtils.rotate(point, angle);
     return {
       x: result.x + center.x,
-      y: result.y + center.y
-    }
+      y: result.y + center.y,
+    };
   }
 
   /**
    * 旋转一组点
-   * 
-   * @param coords 
-   * @param angle 
-   * @param center 
-   * @returns 
+   *
+   * @param coords
+   * @param angle
+   * @param center
+   * @returns
    */
   static batchRotateWithCenter(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.rotateWithCenter(coord, angle, center));
+    return coords.map((coord) => MathUtils.rotateWithCenter(coord, angle, center));
   }
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coord 
-   * @param leanYAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coord
+   * @param leanYAngle
+   * @param center
+   * @returns
    */
   static leanYWithCenter(coord: IPoint, leanYAngle: number, center: IPoint): IPoint {
     return MathUtils.leanWithCenter(coord, 0, leanYAngle, center);
@@ -159,23 +166,23 @@ export default class MathUtils {
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coords 
-   * @param leanYAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coords
+   * @param leanYAngle
+   * @param center
+   * @returns
    */
   static batchLeanYWithCenter(coords: IPoint[], leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanYWithCenter(coord, leanYAngle, center));
+    return coords.map((coord) => MathUtils.leanYWithCenter(coord, leanYAngle, center));
   }
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coord 
-   * @param leanXAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coord
+   * @param leanXAngle
+   * @param center
+   * @returns
    */
   static leanXWithCenter(coord: IPoint, leanXAngle: number, center: IPoint): IPoint {
     return MathUtils.leanWithCenter(coord, leanXAngle, 0, center);
@@ -183,83 +190,91 @@ export default class MathUtils {
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coords 
-   * @param leanXAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coords
+   * @param leanXAngle
+   * @param center
+   * @returns
    */
   static batchLeanXWithCenter(coords: IPoint[], leanXAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanXWithCenter(coord, leanXAngle, center));
+    return coords.map((coord) => MathUtils.leanXWithCenter(coord, leanXAngle, center));
   }
 
   /**
    * 计算偏移矩阵
-   * 
-   * @param leanXAngle 
-   * @param leanYAngle 
-   * @returns 
+   *
+   * @param leanXAngle
+   * @param leanYAngle
+   * @returns
    */
   static calcLeanMatrix(leanXAngle: number, leanYAngle: number): number[][] {
     leanXAngle = leanXAngle || 0;
     leanYAngle = leanYAngle || 0;
     const leanX = Math.tan(MathUtils.angleToRadian(leanXAngle));
     const leanY = -Math.tan(MathUtils.angleToRadian(leanYAngle));
-    const matrix = [[1, leanY, 0], [leanX, 1, 0], [0, 0, 1]];
+    const matrix = [
+      [1, leanY, 0],
+      [leanX, 1, 0],
+      [0, 0, 1],
+    ];
     return matrix;
   }
 
   /**
    * 计算旋转矩阵
-   * 
-   * @param angle 
-   * @returns 
+   *
+   * @param angle
+   * @returns
    */
   static calcRotateMatrix(angle: number): number[][] {
     angle = angle || 0;
     const theta = MathUtils.angleToRadian(angle);
-    return [[cos(theta), -sin(theta), 0], [sin(theta), cos(theta), 0], [0, 0, 1]];
+    return [
+      [cos(theta), -sin(theta), 0],
+      [sin(theta), cos(theta), 0],
+      [0, 0, 1],
+    ];
   }
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coord 
-   * @param leanXAngle 
-   * @param leanYAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coord
+   * @param leanXAngle
+   * @param leanYAngle
+   * @param center
+   * @returns
    */
   static leanWithCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
     const matrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
       x: add(result[0], center.x),
-      y: add(result[1], center.y)
-    }
+      y: add(result[1], center.y),
+    };
   }
 
   /**
    * 倾斜坐标系上的某一点
-   * 
-   * @param coords 
-   * @param leanXAngle 
-   * @param leanYAngle 
-   * @param center 
-   * @returns 
+   *
+   * @param coords
+   * @param leanXAngle
+   * @param leanYAngle
+   * @param center
+   * @returns
    */
   static batchLeanWithCenter(coords: IPoint[], leanXAngle: number, leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map(coord => MathUtils.leanWithCenter(coord, leanXAngle, leanYAngle, center));
+    return coords.map((coord) => MathUtils.leanWithCenter(coord, leanXAngle, leanYAngle, center));
   }
 
   /**
    * 旋转倾斜坐标系上的某一点
-   * 
-   * @param coord 
+   *
+   * @param coord
    * @param angles
-   * @param center 
+   * @param center
    * @param isReverse
-   * @returns 
+   * @returns
    */
   static transWithCenter(coord: IPoint, angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
     let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = angles || {};
@@ -279,29 +294,29 @@ export default class MathUtils {
     let result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
       x: add(result[0], center.x),
-      y: add(result[1], center.y)
-    }
+      y: add(result[1], center.y),
+    };
   }
 
   /**
    * 旋转倾斜坐标系上的某一点
-   * 
-   * @param coords 
-   * @param angles 
-   * @param center 
-   * @returns 
+   *
+   * @param coords
+   * @param angles
+   * @param center
+   * @returns
    */
   static batchTransWithCenter(coords: IPoint[], angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
-    return coords.map(coord => MathUtils.transWithCenter(coord, angles, center, isReverse));
+    return coords.map((coord) => MathUtils.transWithCenter(coord, angles, center, isReverse));
   }
 
   /**
    * 旋转并平移
-   * 
-   * @param coord 
-   * @param angle 
-   * @param value 
-   * @returns 
+   *
+   * @param coord
+   * @param angle
+   * @param value
+   * @returns
    */
   static rotateAndTranslate(coord: IPoint, angle: number, value: TranslationValue): IPoint {
     return MathUtils.translate(MathUtils.rotate(coord, angle), value);
@@ -309,25 +324,25 @@ export default class MathUtils {
 
   /**
    * 缩放
-   * 
-   * @param coord 
-   * @param value 
-   * @returns 
+   *
+   * @param coord
+   * @param value
+   * @returns
    */
   static scale(coord: IPoint, value: ScaleValue): IPoint {
     const scaleMatrix = MathUtils.calcScaleMatrix(value.sx, value.sy);
     const scaledPoint = multiply(scaleMatrix, [coord.x, coord.y, 1]);
     return {
       x: scaledPoint[0],
-      y: scaledPoint[1]
+      y: scaledPoint[1],
     };
   }
 
   /**
    * 角度转弧度
-   * 
-   * @param degrees 
-   * @returns 
+   *
+   * @param degrees
+   * @returns
    */
   static angleToRadian(degrees: number): number {
     return degrees * (Math.PI / 180);
@@ -335,9 +350,9 @@ export default class MathUtils {
 
   /**
    * 弧度转角度
-   * 
-   * @param radians 
-   * @returns 
+   *
+   * @param radians
+   * @returns
    */
   static radianToAngle(radians: number): number {
     return radians * (180 / Math.PI);
@@ -345,14 +360,14 @@ export default class MathUtils {
 
   /**
    * 使用射线法判断点是否在多边形内
-   * 
-   * @param coord 
-   * @param polygonCoords 
-   * @returns 
+   *
+   * @param coord
+   * @param polygonCoords
+   * @returns
    */
   static isPointInPolygonByRayCasting(coord: IPoint, polygonCoords: IPoint[]) {
     const point = [coord.x, coord.y];
-    const polygon = polygonCoords.map(p => [p.x, p.y]);
+    const polygon = polygonCoords.map((p) => [p.x, p.y]);
     const [px, py] = point;
     let inside = false;
 
@@ -361,13 +376,12 @@ export default class MathUtils {
       const [xj, yj] = polygon[j];
 
       // 检查点是否在多边形的边上
-      if ((yi > py) !== (yj > py) &&
-        (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+      if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
         inside = !inside;
       }
 
       // 特殊情况：点恰好在多边形的边上
-      if ((yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj))) {
+      if (yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj)) {
         return true;
       }
     }
@@ -377,14 +391,14 @@ export default class MathUtils {
 
   /**
    * 要判断两个多边形是否重叠，可以使用分离轴定理（Separating Axis Theorem, SAT）。这个定理指出，如果存在一条轴，使得将两个多边形投影到这条轴上时，它们的投影不重叠，那么这两个多边形就不重叠。
-   * 
-   * @param points1 
-   * @param points2 
-   * @returns 
+   *
+   * @param points1
+   * @param points2
+   * @returns
    */
   static isPolygonsOverlap(points1: IPoint[], points2: IPoint[]) {
-    const poly1 = points1.map(p => [p.x, p.y]);
-    const poly2 = points2.map(p => [p.x, p.y]);
+    const poly1 = points1.map((p) => [p.x, p.y]);
+    const poly2 = points2.map((p) => [p.x, p.y]);
 
     // 获取所有边
     function getEdges(polygon: number[][]) {
@@ -443,9 +457,9 @@ export default class MathUtils {
 
   /**
    * 计算多边形的质心（几何法）
-   * 
-   * @param points 
-   * @returns 
+   *
+   * @param points
+   * @returns
    */
   static calcPolygonCentroid(points: IPoint[]): IPoint {
     if (!points || points.length === 0) {
@@ -469,9 +483,9 @@ export default class MathUtils {
 
   /**
    * 计算中心点
-   * 
-   * @param points 
-   * @returns 
+   *
+   * @param points
+   * @returns
    */
   static calcCenter(points: IPoint[]): IPoint {
     const box = CommonUtils.getBoxPoints(points);
@@ -480,13 +494,13 @@ export default class MathUtils {
 
   /**
    * 给定中心点和一个距离，以及一个角度，计算出该角度下的目标点。
-   * 
+   *
    * 以x轴为0度，顺时针为正，逆时针为负
-   * 
-   * @param center 
-   * @param distance 
+   *
+   * @param center
+   * @param distance
    * @param angleDeg 值如果小于0，请加上360在传递给此方法
-   * @returns 
+   * @returns
    */
   static calcTargetPoint(center: IPoint, distance: number, angleDeg: number) {
     // 将角度转换为弧度
@@ -499,10 +513,10 @@ export default class MathUtils {
 
   /**
    * 计算两个点之间的夹角，以x轴正方向为0度，逆时针为负，顺时针为正，角度绝对值不超过180
-   * 
-   * @param p1 
-   * @param p2 
-   * @returns 
+   *
+   * @param p1
+   * @param p2
+   * @returns
    */
   static calcAngle(p1: IPoint, p2: IPoint): number {
     // 计算两点之间的差值
@@ -517,13 +531,13 @@ export default class MathUtils {
 
   /**
    * 给定一条线段，求距离线段中心点距离的一点，参数为直线的点一和点二，是否顺时针还是逆时针，距离，共四个参数
-   * 
+   *
    * 注意p1一定是x轴值最小的那个点
-   * 
-   * @param p1 
-   * @param p2 
-   * @param isClockwise 
-   * @param distance 
+   *
+   * @param p1
+   * @param p2
+   * @param isClockwise
+   * @param distance
    */
   static calcSegmentLineCenterCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
     // 计算中心点
@@ -536,9 +550,9 @@ export default class MathUtils {
 
   /**
    * 计算点到直线的距离
-   * 
+   *
    * @param point
-   * @param a 
+   * @param a
    * @param b
    */
   static calcDistancePointToLine(p: IPoint, a: IPoint, b: IPoint): number {
@@ -555,9 +569,9 @@ export default class MathUtils {
 
   /**
    * 判断点在线段的射影是否在线段上
-   * 
-   * @param p 
-   * @param a 
+   *
+   * @param p
+   * @param a
    * @param b
    */
   static isProjectionOnSegment(p: IPoint, a: IPoint, b: IPoint): boolean {
@@ -574,15 +588,14 @@ export default class MathUtils {
     return t >= 0 && t <= 1;
   }
 
-
   /**
    * 判断点是否在给定的线段附近位置上
-   * 
-   * @param point 
-   * @param a 
-   * @param b 
-   * @param maxDistance 
-   * @returns 
+   *
+   * @param point
+   * @param a
+   * @param b
+   * @param maxDistance
+   * @returns
    */
   static isPointClosestSegment(point: IPoint, a: IPoint, b: IPoint, maxDistance: number): boolean {
     if (!MathUtils.isProjectionOnSegment(point, a, b)) return false;
@@ -591,11 +604,11 @@ export default class MathUtils {
 
   /**
    * 判断点是否在给定的点附近位置上
-   * 
-   * @param point 
-   * @param target 
-   * @param distance 
-   * @returns 
+   *
+   * @param point
+   * @param target
+   * @param distance
+   * @returns
    */
   static isPointClosest(point: IPoint, target: IPoint, distance: number): boolean {
     return MathUtils.calcDistance(point, target) <= distance;
@@ -603,11 +616,11 @@ export default class MathUtils {
 
   /**
    * 判断点是否在给定的点附近位置上
-   * 
-   * @param point 
-   * @param points 
-   * @param distance 
-   * @returns 
+   *
+   * @param point
+   * @param points
+   * @param distance
+   * @returns
    */
   static isPointClosestWhichPoint(point: IPoint, points: IPoint[], distance: number): number {
     for (let i = 0; i < points.length; i++) {
@@ -619,9 +632,9 @@ export default class MathUtils {
 
   /**
    * 将大于90度的钝角转换为锐角
-   * 
-   * @param angle 
-   * @returns 
+   *
+   * @param angle
+   * @returns
    */
   static transformToAcuteAngle(angle: number) {
     if (angle > 90) {
@@ -632,10 +645,10 @@ export default class MathUtils {
 
   /**
    * 计算两点之间的距离
-   * 
-   * @param p1 
-   * @param p2 
-   * @returns 
+   *
+   * @param p1
+   * @param p2
+   * @returns
    */
   static calcDistance(p1: IPoint, p2: IPoint) {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
@@ -643,8 +656,8 @@ export default class MathUtils {
 
   /**
    * 判断给定的四边形是否是一个矩形
-   * 
-   * @param points 
+   *
+   * @param points
    */
   static isRectangle(points: IPoint[]): boolean {
     if (points.length !== 4) {
@@ -662,24 +675,24 @@ export default class MathUtils {
 
   /**
    * 判断两个数值的符号是否相等
-   * 
-   * @param a 
-   * @param b 
+   *
+   * @param a
+   * @param b
    */
   static isSameSign(a: number, b: number): boolean {
-    return (a * b) >= 0;
+    return a * b >= 0;
   }
 
   /**
    * 保留小数点后几位
-   * 
-   * @param num 
-   * @param precision 
-   * @returns 
+   *
+   * @param num
+   * @param precision
+   * @returns
    */
   static preciseToFixed(number: number, digits: number = 2): number {
-    if (typeof number !== 'number' || typeof digits !== 'number') {
-      throw new TypeError('Both arguments must be numbers');
+    if (typeof number !== "number" || typeof digits !== "number") {
+      throw new TypeError("Both arguments must be numbers");
     }
 
     // Handle edge cases for very small or very large numbers
@@ -692,15 +705,15 @@ export default class MathUtils {
     const resultString = roundedNumber / factor;
 
     // Ensure the result has the correct number of decimal places
-    const resultArray = resultString.toString().split('.');
+    const resultArray = resultString.toString().split(".");
     if (resultArray.length === 1) {
-      resultArray.push(''); // No decimal part
+      resultArray.push(""); // No decimal part
     }
     while (resultArray[1].length < digits) {
-      resultArray[1] += '0'; // Add trailing zeros if necessary
+      resultArray[1] += "0"; // Add trailing zeros if necessary
     }
 
-    return Number(resultArray.join('.'));
+    return Number(resultArray.join("."));
   }
   /**
    * 给定三角形的三个坐标点a,b,c计算b的夹角
@@ -759,10 +772,10 @@ export default class MathUtils {
 
   /**
    * 给定角度和对边边长，计算直角三角形的临边边长
-   * 
-   * @param angle 
-   * @param value 
-   * @returns 
+   *
+   * @param angle
+   * @param value
+   * @returns
    */
   static calcTriangleSide1By2(angle: number, value: number): number {
     const radians = angle * MathUtils.angleToRadian(angle);
@@ -771,10 +784,10 @@ export default class MathUtils {
 
   /**
    * 给定角度和临边边长，计算直角三角形的斜边边长
-   * 
-   * @param angle 
-   * @param value 
-   * @returns 
+   *
+   * @param angle
+   * @param value
+   * @returns
    */
   static calcTriangleSide3By1(angle: number, value: number): number {
     const radians = angle * MathUtils.angleToRadian(angle);
@@ -783,10 +796,10 @@ export default class MathUtils {
 
   /**
    * 给定角度和对边边长，计算直角三角形的斜边边长
-   * 
-   * @param angle 
-   * @param value 
-   * @returns 
+   *
+   * @param angle
+   * @param value
+   * @returns
    */
   static calcTriangleSide3By2(angle: number, value: number): number {
     const radians = MathUtils.angleToRadian(angle);
@@ -795,9 +808,9 @@ export default class MathUtils {
 
   /**
    * 给定角度和斜边长，求临边长度
-   * 
-   * @param angle 
-   * @param hypotenuse 
+   *
+   * @param angle
+   * @param hypotenuse
    */
   static calcTriangleSide1By3(angle: number, hypotenuse: number): number {
     const radians = MathUtils.angleToRadian(angle);
@@ -814,9 +827,9 @@ export default class MathUtils {
 
   /**
    * 将多边形的顶点按照顺时针方向排序
-   * 
-   * @param vertices 
-   * @returns 
+   *
+   * @param vertices
+   * @returns
    */
   static sortVerticesClockwise(vertices: IPoint[]) {
     // 计算质心
@@ -824,13 +837,12 @@ export default class MathUtils {
     return MathUtils.sortVerticesClockwiseByCenter(vertices, center);
   }
 
-
   /**
    * 给定顶点数组和质心，将顶点数组按照顺时针方向排序
-   * 
-   * @param vertices 
-   * @param center 
-   * @returns 
+   *
+   * @param vertices
+   * @param center
+   * @returns
    */
   static sortVerticesClockwiseByCenter(vertices: IPoint[], center: IPoint): IPoint[] {
     // 计算每个顶点与质心之间的角度
@@ -853,10 +865,10 @@ export default class MathUtils {
 
   /**
    * 计算点到线段中点的角度
-   * 
-   * @param point 
-   * @param segmentStart 
-   * @param segmentEnd 
+   *
+   * @param point
+   * @param segmentStart
+   * @param segmentEnd
    */
   static calcAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
     const center = MathUtils.calcCenter([segmentStart, segmentEnd]);
@@ -865,10 +877,10 @@ export default class MathUtils {
 
   /**
    * 赋值但保留符号
-   * 
-   * @param value 
-   * @param referValue 
-   * @returns 
+   *
+   * @param value
+   * @param referValue
+   * @returns
    */
   static resignValue(value: number, referValue: number): number {
     const isPst = isPositive(value);
@@ -877,10 +889,10 @@ export default class MathUtils {
 
   /**
    * 判断点在直线的哪一侧
-   * 
-   * @param point 
-   * @param lineStart 
-   * @param lineEnd 
+   *
+   * @param point
+   * @param lineStart
+   * @param lineEnd
    */
   static isPointClockwise(point: IPoint, lineStart: IPoint, lineEnd: IPoint): boolean {
     const crossProduct = (point.x - lineStart.x) * (lineEnd.y - lineStart.y) - (point.y - lineStart.y) * (lineEnd.x - lineStart.x);
@@ -897,12 +909,11 @@ export default class MathUtils {
       return null;
     }
 
-    const u = ((line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y - line2Start.y) * (line1Start.x - line1End.x));
+    const u = (line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y - line2Start.y) * (line1Start.x - line1End.x);
     if (u === 0 || u === denominator) {
       // 两条直线重合
       return null;
     }
     return { x: (line1Start.x + u * (line1End.x - line1Start.x)) / denominator, y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator };
   }
-
 }

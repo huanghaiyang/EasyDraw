@@ -6,5 +6,4 @@ export default class StageContainer implements IStageContainer {
   async init(el: HTMLDivElement): Promise<void> {
     this.el = el;
   }
-
 }

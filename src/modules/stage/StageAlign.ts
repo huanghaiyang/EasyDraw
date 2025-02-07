@@ -6,7 +6,6 @@ import CommonUtils from "@/utils/CommonUtils";
 import { flatten, sortBy } from "lodash";
 
 export default class StageAlign implements IStageAlign {
-
   shield: IStageShield;
 
   constructor(shield: IStageShield) {
@@ -15,48 +14,48 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 获取组件坐标盒模型
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _getElementsCoordsRect(elements: IElement[]): Partial<DOMRect> {
-    return CommonUtils.getRect(flatten(elements.map(element => this._getElementAlignCoords(element))));
+    return CommonUtils.getRect(flatten(elements.map((element) => this._getElementAlignCoords(element))));
   }
 
   /**
    * 计算所有组件的宽度总和
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _calcElementsAllWidth(elements: IElement[]): number {
     let allWidth = 0;
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const elementRect = CommonUtils.getRect(this._getElementAlignCoords(element));
       allWidth += elementRect.width;
-    })
+    });
     return allWidth;
   }
 
   /**
    * 计算所有组件的高度总和
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _calcElementsAllHeight(elements: IElement[]): number {
     let allHeight = 0;
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const elementRect = CommonUtils.getRect(this._getElementAlignCoords(element));
       allHeight += elementRect.height;
-    })
+    });
     return allHeight;
   }
 
   /**
    * 按照x坐标排序
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   private _sortElementsByX(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
@@ -66,9 +65,9 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 按照x坐标排序(x+width)
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _sortElementsByXW(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
@@ -79,8 +78,8 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 按照y坐标排序
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   private _sortElementsByY(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
@@ -90,9 +89,9 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 按照y坐标排序(y+height)
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _sortElementsByYH(elements: IElement[]): IElement[] {
     return sortBy(elements, (element) => {
@@ -103,9 +102,9 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 获取组件对齐操作的坐标
-   * 
-   * @param element 
-   * @returns 
+   *
+   * @param element
+   * @returns
    */
   private _getElementAlignCoords(element: IElement): IPoint[] {
     // 如果按住shift键则对齐操作需要考虑图形外部轮廓
@@ -116,10 +115,10 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 设置组件位置
-   * 
-   * @param element 
-   * @param offsetX 
-   * @param offsetY 
+   *
+   * @param element
+   * @param offsetX
+   * @param offsetY
    */
   private _setElementPositionByOffset(element: IElement, offsetX: number, offsetY: number): void {
     element.setPosition(element.centerCoord.x + offsetX, element.centerCoord.y + offsetY, { x: offsetX, y: offsetY });
@@ -127,104 +126,104 @@ export default class StageAlign implements IStageAlign {
 
   /**
    * 左对齐
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignLeft(elements: IElement[]): void {
     const { x } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { x: eX } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x - eX;
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
       }
-    })
+    });
   }
 
   /**
    * 右对齐
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignRight(elements: IElement[]): void {
     const { x, width } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x + width - eX - eWidth;
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
       }
-    })
+    });
   }
 
   /**
    * 顶部对齐
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignTop(elements: IElement[]): void {
     const { y } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { y: eY } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y - eY;
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
       }
-    })
+    });
   }
 
   /**
    * 底部对齐
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignBottom(elements: IElement[]): void {
     const { y, height } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y + height - eY - eHeight;
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
       }
-    })
+    });
   }
 
   /**
    * 水平居中
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignCenter(elements: IElement[]): void {
     const { x, width } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetX = x + width / 2 - (eX + eWidth / 2);
       if (offsetX !== 0) {
         this._setElementPositionByOffset(element, offsetX, 0);
       }
-    })
+    });
   }
 
   /**
    * 垂直居中
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAlignMiddle(elements: IElement[]): void {
     const { y, height } = this._getElementsCoordsRect(elements);
-    elements.forEach(element => {
+    elements.forEach((element) => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
       const offsetY = y + height / 2 - (eY + eHeight / 2);
       if (offsetY !== 0) {
         this._setElementPositionByOffset(element, 0, offsetY);
       }
-    })
+    });
   }
 
   /**
    * 水平平均分布
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAverageVertical(elements: IElement[]): void {
     elements = this._sortElementsByY(elements);
@@ -243,13 +242,13 @@ export default class StageAlign implements IStageAlign {
         }
         prevY = eY + offsetY + eHeight;
       }
-    })
+    });
   }
 
   /**
    * 垂直平均分布
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   setElementsAverageHorizontal(elements: IElement[]): void {
     elements = this._sortElementsByX(elements);
@@ -268,6 +267,6 @@ export default class StageAlign implements IStageAlign {
         }
         prevX = eX + offsetX + eWidth;
       }
-    })
+    });
   }
 }

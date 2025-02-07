@@ -127,8 +127,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 计算外轮廓
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcOuterPathPoints(): IPoint[] {
     return PolygonUtils.calcBentLineOuterVertices(this.rotatePathPoints, this.model.styles.strokeWidth / 2);
@@ -136,8 +136,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 计算外轮廓坐标
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcOuterPathCoords(): IPoint[] {
     const rotateCoords = this.calcRotatePathCoords();
@@ -154,8 +154,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 获取显示角度
-   * 
-   * @returns 
+   *
+   * @returns
    */
   protected getAngle(): number {
     return ElementUtils.fixAngle(MathUtils.calcAngle(this.startCoord, this.endCoord) + 90);
@@ -163,21 +163,18 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 判断点是否靠近组件
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(
-      point,
-      this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + (this.model.styles.strokeWidth / 2) / this.shield.stageScale
-    );
+    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + this.model.styles.strokeWidth / 2 / this.shield.stageScale);
   }
 
   /**
    * 是否与多边形相交
-   * 
-   * @param points 
+   *
+   * @param points
    */
   isPolygonOverlap(points: IPoint[]): boolean {
     return MathUtils.isPolygonsOverlap(this.outerPathPoints, points);
@@ -185,9 +182,9 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 判断直线外轮廓是否与给定的多边形相交
-   * 
-   * @param coords 
-   * @returns 
+   *
+   * @param coords
+   * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
     return MathUtils.isPolygonsOverlap(this._outerPathCoords, coords);
@@ -195,11 +192,11 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 按顶点变换
-   * 
-   * @param offset 
+   *
+   * @param offset
    */
   protected doVerticesTransform(offset: IPoint): boolean {
-    const index = this._transformers.findIndex(transformer => transformer.isActive);
+    const index = this._transformers.findIndex((transformer) => transformer.isActive);
     if (index !== -1) {
       const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
       // 当前拖动的点的原始位置
@@ -212,8 +209,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 获取设置尺寸变换的变换点（设置宽度的时候使用）
-   * 
-   * @returns 
+   *
+   * @returns
    */
   protected getTransformPointForSizeChange(): IPoint {
     return this._originalTransformerPoints[1];
@@ -221,8 +218,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 设置宽度
-   * 
-   * @param value 
+   *
+   * @param value
    */
   setWidth(value: number): void {
     const newCoord = MathUtils.calcTargetPoint(this.startCoord, value, this.angle - 90);
@@ -233,8 +230,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 设置角度，注意直线的角度始终为0，属性菜单显示的角度是通过开始坐标和结束坐标计算出来的
-   * 
-   * @param value 
+   *
+   * @param value
    */
   setAngle(value: number): void {
     const center = MathUtils.calcCenter(this.model.coords);

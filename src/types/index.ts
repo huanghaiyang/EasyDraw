@@ -2,18 +2,18 @@
 export type ISize = {
   width: number;
   height: number;
-}
+};
 
 // 坐标
 export type IPoint = {
   x: number;
   y: number;
-}
+};
 
 // 3D坐标
 export type IPoint3D = IPoint & {
   z: number;
-}
+};
 
 // 辅助画布绘制任务类型
 export enum DrawerMaskModelTypes {
@@ -41,7 +41,7 @@ export type StageInitParams = {
   containerEl?: HTMLDivElement;
   // 盾牌
   shieldEl?: HTMLDivElement;
-}
+};
 
 // 舞台实例
 export interface StageShieldInstance {
@@ -60,22 +60,22 @@ export enum ElementStatus {
   // 完成
   finished = 2,
   // 编辑
-  editing = 3
+  editing = 3,
 }
 
 // 平移值
 export type TranslationValue = {
   dx: number;
   dy: number;
-}
+};
 
 // 缩放值
 export type ScaleValue = {
   // 缩放x
   sx: number;
   // 缩放y
-  sy: number
-}
+  sy: number;
+};
 
 // 舞台通知名称
 export enum ShieldDispatcherNames {
