@@ -14,10 +14,19 @@ export default class MaskTaskPath extends MaskTaskBase {
     if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.data.type)) {
       specialStyles.fillColorOpacity = 0;
     }
-    CanvasUtils.drawPathWithScale(this.canvas, this.data.points, Object.assign({}, { ...SelectionStyle, ...specialStyles }, {
-      strokeWidth: strokeWidth * this.data.scale
-    }), {
-      isFold: typeof this.data.element?.isFold === 'undefined' ? true : this.data.element?.isFold
-    });
+    CanvasUtils.drawPathWithScale(
+      this.canvas,
+      this.data.points,
+      Object.assign(
+        {},
+        { ...SelectionStyle, ...specialStyles },
+        {
+          strokeWidth: strokeWidth * this.data.scale,
+        }
+      ),
+      {
+        isFold: typeof this.data.element?.isFold === "undefined" ? true : this.data.element?.isFold,
+      }
+    );
   }
 }

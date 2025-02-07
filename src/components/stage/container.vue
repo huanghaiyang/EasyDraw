@@ -31,7 +31,7 @@ onMounted(async () => {
   <div class="stage-container" ref="stageRef">
     <stage-shield-vue ref="stageShieldRef" />
     <arbitrary-bar />
-    <creator-bar @select="handleCreatorSelect"/>
+    <creator-bar @select="handleCreatorSelect" />
   </div>
 </template>
 <style lang="less" scoped>

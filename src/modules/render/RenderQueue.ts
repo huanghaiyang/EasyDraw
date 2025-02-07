@@ -1,26 +1,25 @@
-import { IRenderQueue } from "@/types/IRender"
-import { IRenderTask } from "@/types/IRenderTask"
+import { IRenderQueue } from "@/types/IRender";
+import { IRenderTask } from "@/types/IRenderTask";
 
 export default class RenderQueue implements IRenderQueue {
-  running: boolean
-  queue: IRenderTask[]
+  running: boolean;
+  queue: IRenderTask[];
 
   constructor() {
-    this.running = false
-    this.queue = []
+    this.running = false;
+    this.queue = [];
   }
-
 
   /**
    * 添加任务
-   * 
-   * @param task 
+   *
+   * @param task
    */
   async add(task: IRenderTask): Promise<void> {
-    this.queue.push(task)
+    this.queue.push(task);
     if (!this.running) {
-      this.running = true
-      await this.run()
+      this.running = true;
+      await this.run();
     }
   }
 
@@ -38,7 +37,7 @@ export default class RenderQueue implements IRenderQueue {
       try {
         await this.run();
       } catch (error) {
-        console.error('RenderQueue: error running task', task.id, error);
+        console.error("RenderQueue: error running task", task.id, error);
       } finally {
         task.destroy();
         task = null;
@@ -67,4 +66,4 @@ export default class RenderQueue implements IRenderQueue {
   }
 }
 
-export class TaskQueue extends RenderQueue { }
+export class TaskQueue extends RenderQueue {}

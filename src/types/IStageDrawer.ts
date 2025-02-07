@@ -17,7 +17,7 @@ export interface IHelperDrawer extends IStageDrawer {
 }
 
 // 辅助画布
-export interface IDrawerMask extends IHelperDrawer { }
+export interface IDrawerMask extends IHelperDrawer {}
 
 // 临时组件绘制画布
-export interface IDrawerProvisional extends IHelperDrawer { }
+export interface IDrawerProvisional extends IHelperDrawer {}

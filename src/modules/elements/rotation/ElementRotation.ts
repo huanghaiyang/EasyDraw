@@ -18,7 +18,7 @@ export default class ElementRotation implements IElementRotation, IController {
     width: SelectionRotationSize,
     height: SelectionRotationSize,
     angle: -90,
-    points: []
+    points: [],
   };
   // 元素
   element: IElement;
@@ -42,15 +42,15 @@ export default class ElementRotation implements IElementRotation, IController {
     // 设置旋转路径点
     this.model.points = CommonUtils.getBoxVertices(this.model.point, {
       width: this.model.width / this.element.shield.stageScale,
-      height: this.model.height / this.element.shield.stageScale
-    }).map(point => MathUtils.rotateRelativeCenter(point, this.element.viewAngle, this.model.point))
+      height: this.model.height / this.element.shield.stageScale,
+    }).map((point) => MathUtils.rotateWithCenter(point, this.element.viewAngle, this.model.point));
   }
 
   /**
    * 检查点是否在旋转句柄内
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   isContainsPoint(point: IPoint): boolean {
     // 如果元素旋转启用，则检查点是否在旋转路径点内

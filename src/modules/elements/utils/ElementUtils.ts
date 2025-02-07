@@ -4,7 +4,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { AngleModel, ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
@@ -24,37 +24,37 @@ import ElementText from "@/modules/elements/ElementText";
 import { multiply } from "mathjs";
 
 export enum ElementReactionPropNames {
-  isSelected = 'isSelected',
-  isVisible = 'isVisible',
-  isLocked = 'isLocked',
-  isEditing = 'isEditing',
-  isMoving = 'isMoving',
-  isTransforming = 'isTransforming',
-  isRotating = 'isRotating',
-  isRotatingTarget = 'isRotatingTarget',
-  isDragging = 'isDragging',
-  isProvisional = 'isProvisional',
-  isTarget = 'isTarget',
-  isInRange = 'isInRange',
-  isOnStage = 'isOnStage',
-  status = 'status',
-  position = 'position',
-  width = 'width',
-  height = 'height',
-  angle = 'angle',
-  leanYAngle = 'leanYAngle',
-  leanXAngle = 'leanXAngle',
-  strokeType = 'strokeType',
-  strokeWidth = 'strokeWidth',
-  strokeColor = 'strokeColor',
-  strokeColorOpacity = 'strokeColorOpacity',
-  fillColor = 'fillColor',
-  fillColorOpacity = 'fillColorOpacity',
-  fontSize = 'fontSize',
-  fontFamily = 'fontFamily',
-  textAlign = 'textAlign',
-  textBaseline = 'textBaseline',
-  isRatioLocked = 'isRatioLocked',
+  isSelected = "isSelected",
+  isVisible = "isVisible",
+  isLocked = "isLocked",
+  isEditing = "isEditing",
+  isMoving = "isMoving",
+  isTransforming = "isTransforming",
+  isRotating = "isRotating",
+  isRotatingTarget = "isRotatingTarget",
+  isDragging = "isDragging",
+  isProvisional = "isProvisional",
+  isTarget = "isTarget",
+  isInRange = "isInRange",
+  isOnStage = "isOnStage",
+  status = "status",
+  position = "position",
+  width = "width",
+  height = "height",
+  angle = "angle",
+  leanYAngle = "leanYAngle",
+  leanXAngle = "leanXAngle",
+  strokeType = "strokeType",
+  strokeWidth = "strokeWidth",
+  strokeColor = "strokeColor",
+  strokeColorOpacity = "strokeColorOpacity",
+  fillColor = "fillColor",
+  fillColorOpacity = "fillColorOpacity",
+  fontSize = "fontSize",
+  fontFamily = "fontFamily",
+  textAlign = "textAlign",
+  textBaseline = "textBaseline",
+  isRatioLocked = "isRatioLocked",
 }
 
 export enum ElementListEventNames {
@@ -90,60 +90,60 @@ export default class ElementUtils {
 
   /**
    * 计算世界坐标在画布坐标系下的坐标
-   * 
-   * @param worldCoords 
-   * @param params 
-   * @returns 
+   *
+   * @param worldCoords
+   * @param params
+   * @returns
    */
   static calcStageRelativePoints(worldCoords: IPoint[], params: StageCalcParams): IPoint[] {
-    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, params));
+    return worldCoords.map((p) => ElementUtils.calcStageRelativePoint(p, params));
   }
 
   /**
    * 计算世界坐标在画布坐标系下的坐标
-   * 
-   * @param worldCoord 
-   * @param params 
-   * @returns 
+   *
+   * @param worldCoord
+   * @param params
+   * @returns
    */
   static calcStageRelativePoint(worldCoord: IPoint, params: StageCalcParams): IPoint {
     return {
-      x: MathUtils.preciseToFixed(worldCoord.x + (params.rect.width / 2) / params.scale - params.worldCoord.x, 2),
-      y: MathUtils.preciseToFixed(worldCoord.y + (params.rect.height / 2) / params.scale - params.worldCoord.y, 2)
-    }
+      x: MathUtils.preciseToFixed(worldCoord.x + params.rect.width / 2 / params.scale - params.worldCoord.x, 2),
+      y: MathUtils.preciseToFixed(worldCoord.y + params.rect.height / 2 / params.scale - params.worldCoord.y, 2),
+    };
   }
 
   /**
    * 计算世界坐标
-   * 
-   * @param points 
-   * @param params 
-   * @returns 
+   *
+   * @param points
+   * @param params
+   * @returns
    */
   static calcWorldPoints(points: IPoint[], params: StageCalcParams): IPoint[] {
-    return points.map(p => ElementUtils.calcWorldPoint(p, params));
+    return points.map((p) => ElementUtils.calcWorldPoint(p, params));
   }
 
   /**
    * 计算世界坐标
-   * 
-   * @param point 
-   * @param params 
-   * @returns 
+   *
+   * @param point
+   * @param params
+   * @returns
    */
   static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint {
     return {
-      x: MathUtils.preciseToFixed(point.x - (params.rect.width / 2) / params.scale + params.worldCoord.x, 2),
-      y: MathUtils.preciseToFixed(point.y - (params.rect.height / 2) / params.scale + params.worldCoord.y, 2)
-    }
+      x: MathUtils.preciseToFixed(point.x - params.rect.width / 2 / params.scale + params.worldCoord.x, 2),
+      y: MathUtils.preciseToFixed(point.y - params.rect.height / 2 / params.scale + params.worldCoord.y, 2),
+    };
   }
 
   /**
    * 在绘制图形时补全缺省点
-   * 
-   * @param points 
-   * @param creatorType 
-   * @returns 
+   *
+   * @param points
+   * @param creatorType
+   * @returns
    */
   static calcCreatorPoints(points: IPoint[], creatorType: CreatorTypes) {
     switch (creatorType) {
@@ -160,9 +160,9 @@ export default class ElementUtils {
 
   /**
    * 根据对象创建元素
-   * 
-   * @param model 
-   * @returns 
+   *
+   * @param model
+   * @returns
    */
   static createElement(model: ElementObject, shield: IStageShield): IElement {
     const { type } = model;
@@ -192,9 +192,9 @@ export default class ElementUtils {
 
   /**
    * 给定一个坐标，选出最上层的那个组件
-   * 
-   * @param elements 
-   * @param point 
+   *
+   * @param elements
+   * @param point
    */
   static getTopAElementByPoint(elements: IElement[], point: IPoint): IElement {
     for (let i = elements.length - 1; i >= 0; i--) {
@@ -207,20 +207,26 @@ export default class ElementUtils {
 
   /**
    * 计算组件旋转按钮的中心点
-   * 
-   * @param element 
-   * @returns 
+   *
+   * @param element
+   * @returns
    */
   static calcElementRotatePoint(element: IElement): IPoint {
-    const { center, rotation: { model: { angle, scale } }, model: { height } } = element;
+    const {
+      center,
+      rotation: {
+        model: { angle, scale },
+      },
+      model: { height },
+    } = element;
     return MathUtils.calcTargetPoint(center, height / 2 + SelectionRotationMargin * scale, angle);
   }
 
   /**
    * 计算组件位置
-   * 
-   * @param element 
-   * @returns 
+   *
+   * @param element
+   * @returns
    */
   static calcPosition(model: Partial<ElementObject>): IPoint {
     switch (model.type) {
@@ -237,26 +243,26 @@ export default class ElementUtils {
 
   /**
    * 移动坐标
-   * 
-   * @param coords 
-   * @param offset 
-   * @returns 
+   *
+   * @param coords
+   * @param offset
+   * @returns
    */
   static translateCoords(coords: IPoint[], offset: IPoint): IPoint[] {
-    return coords.map(p => {
+    return coords.map((p) => {
       return {
         x: p.x + offset.x,
-        y: p.y + offset.y
-      }
-    })
+        y: p.y + offset.y,
+      };
+    });
   }
 
   /**
    * 计算组件尺寸
-   * 
-   * @param coords 
-   * @param type 
-   * @returns 
+   *
+   * @param coords
+   * @param type
+   * @returns
    */
   static calcSize(model: Partial<ElementObject>): ISize {
     const { coords, type } = model;
@@ -271,20 +277,20 @@ export default class ElementUtils {
         return {
           width: MathUtils.preciseToFixed(MathUtils.calcDistance(coords[0], coords[1]), 2),
           height: 0,
-        }
+        };
       }
       case CreatorTypes.arbitrary: {
         if (coords.length === 1) {
           return {
             width: 0,
             height: 0,
-          }
+          };
         } else {
           const { width, height } = CommonUtils.getRect(coords);
           return {
             width,
             height,
-          }
+          };
         }
       }
     }
@@ -292,9 +298,9 @@ export default class ElementUtils {
 
   /**
    * 修正旋转角度
-   * 
-   * @param angle 
-   * @returns 
+   *
+   * @param angle
+   * @returns
    */
   static fixAngle(angle: number): number {
     if (angle > 180) {
@@ -305,7 +311,7 @@ export default class ElementUtils {
 
   /**
    * 计算组件包含外边框宽度的坐标
-   * 
+   *
    * @param points
    * @param strokeType
    * @param strokeWidth
@@ -326,12 +332,12 @@ export default class ElementUtils {
 
   /**
    * 给定一个矩形的宽高，将其完全放入舞台中，计算世界坐标
-   * 
-   * @param width 
-   * @param height 
-   * @param params 
-   * @param padding 
-   * @returns 
+   *
+   * @param width
+   * @param height
+   * @param params
+   * @param padding
+   * @returns
    */
   static calcRectangleCoordsInStage(width: number, height: number, params: StageCalcParams, padding: number = 0): IPoint[] {
     let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(params.rect, 1 / params.scale), padding / params.scale);
@@ -343,11 +349,11 @@ export default class ElementUtils {
 
   /**
    * 计算自由绘制非闭合线框区块
-   * 
-   * @param points 
-   * @param styles 
+   *
+   * @param points
+   * @param styles
    * @param isFold
-   * @returns 
+   * @returns
    */
   static calcNoFoldArbitraryBorderRegions(points: IPoint[], styles: ElementStyles): IPoint[][] {
     const { strokeWidth } = styles;
@@ -361,17 +367,16 @@ export default class ElementUtils {
           result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, styles));
         }
       }
-    })
+    });
     return result;
   }
 
-
   /**
    * 计算自由绘制闭合线框区块
-   * 
-   * @param points 
-   * @param styles 
-   * @returns 
+   *
+   * @param points
+   * @param styles
+   * @returns
    */
   static calcFoldArbitraryBorderRegions(points: IPoint[], styles: ElementStyles): IPoint[][] {
     const { strokeWidth } = styles;
@@ -381,17 +386,17 @@ export default class ElementUtils {
       const next = CommonUtils.getNextOfArray(points, index);
       result.push(PolygonUtils.calcBentLineOuterVertices([current, next], strokeWidth / 2));
       result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, styles));
-    })
+    });
     return result;
   }
 
   /**
    * 计算自由绘制线框区块
-   * 
-   * @param points 
-   * @param styles 
+   *
+   * @param points
+   * @param styles
    * @param isFold
-   * @returns 
+   * @returns
    */
   static calcArbitraryBorderRegions(points: IPoint[], styles: ElementStyles, isFold: boolean): IPoint[][] {
     if (isFold) return ElementUtils.calcFoldArbitraryBorderRegions(points, styles);
@@ -400,11 +405,11 @@ export default class ElementUtils {
 
   /**
    * 计算三角区块（斜接区块）
-   * 
-   * @param prev 
-   * @param current 
-   * @param next 
-   * @param styles 
+   *
+   * @param prev
+   * @param current
+   * @param next
+   * @param styles
    */
   static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, styles: ElementStyles): IPoint[] {
     // 描边宽度
@@ -432,31 +437,31 @@ export default class ElementUtils {
 
   /**
    * 通过旋转坐标计算旋转前的坐标
-   * 
-   * @param rotatePoints 
-   * @param angle 
-   * @param lockPoint 
-   * @param params 
-   * @returns 
+   *
+   * @param rotatePoints
+   * @param angles
+   * @param lockPoint
+   * @param params
+   * @returns
    */
-  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateRelativeCenter(point, -angle, lockPoint)));
+    let center = MathUtils.calcCenter(rotatePoints.map((point) => MathUtils.transWithCenter(point, angles, lockPoint, true)));
     // 计算旋转后的中心点
-    center = MathUtils.rotateRelativeCenter(center, angle, lockPoint);
+    center = MathUtils.transWithCenter(center, angles, lockPoint);
     // 计算中心点世界坐标
     const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
     // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
-    return rotateCoords.map(point => MathUtils.rotateRelativeCenter(point, -angle, newCenterCoord));
+    return rotateCoords.map((point) => MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord));
   }
 
   /**
    * 镜像角度
-   * 
-   * @param angle 
-   * @returns 
+   *
+   * @param angle
+   * @returns
    */
   static mirrorAngle(angle: number): number {
     return angle > 180 ? angle - 360 : angle;
@@ -464,9 +469,9 @@ export default class ElementUtils {
 
   /**
    * 角度归一化
-   * 
-   * @param angle 
-   * @returns 
+   *
+   * @param angle
+   * @returns
    */
   static normalizeAngle(angle: number): number {
     if (angle < 0) {
@@ -476,35 +481,49 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算矩阵变换后的点
-   * 
-   * @param point 
-   * @param matrix 
-   * @param lockPoint 
-   * @param angle 
-   * @returns 
+   * 将给定点还原为未变形前的坐标并按照给定的矩阵进行变形
+   *
+   * @param point
+   * @param matrix
+   * @param lockPoint
+   * @param angles
+   * @returns
    */
-  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angle: number): IPoint {
-    // 先旋转回角度0
-    point = MathUtils.rotateRelativeCenter(point, -angle, lockPoint);
+  static normalizeMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+    // 坐标重新按照角度反向偏转
+    point = MathUtils.transWithCenter(point, angles, lockPoint, true);
     // 以不动点为圆心，计算形变
     const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
     // 重新计算坐标
-    point = { x: x + lockPoint.x, y: y + lockPoint.y };
-    // 坐标重新按照角度偏转
-    return MathUtils.rotateRelativeCenter(point, angle, lockPoint);
+    return { x: x + lockPoint.x, y: y + lockPoint.y };
   }
 
   /**
    * 计算矩阵变换后的点
-   * 
-   * @param points 
-   * @param matrix 
-   * @param lockPoint 
-   * @param angle 
-   * @returns 
+   *
+   * @param point
+   * @param matrix
+   * @param lockPoint
+   * @param angles
+   * @returns
    */
-  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angle: number): IPoint[] {
-    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angle));
+  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+    // 还原并计算
+    const normalizedPoint = ElementUtils.normalizeMatrixPoint(point, matrix, lockPoint, angles);
+    // 坐标重新按照角度偏转
+    return MathUtils.transWithCenter(normalizedPoint, angles, lockPoint);
+  }
+
+  /**
+   * 计算矩阵变换后的点
+   *
+   * @param points
+   * @param matrix
+   * @param lockPoint
+   * @param angles
+   * @returns
+   */
+  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint[] {
+    return points.map((point) => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles));
   }
 }

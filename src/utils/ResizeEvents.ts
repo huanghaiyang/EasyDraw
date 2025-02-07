@@ -1,9 +1,9 @@
 /**
  * 从element-ui里粘出来的代码
  */
-import ResizeObserver from 'resize-observer-polyfill';
+import ResizeObserver from "resize-observer-polyfill";
 
-const isServer = typeof window === 'undefined';
+const isServer = typeof window === "undefined";
 
 /* istanbul ignore next */
 const resizeHandler = function (entries) {

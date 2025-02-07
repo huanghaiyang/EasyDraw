@@ -7,7 +7,9 @@ const stageStore = useStageStore();
 <template>
   <div class="arbitrary-bar" v-if="stageStore.arbitraryVisible">
     <div class="tool-item">
-      <el-icon @click="stageStore.commitArbitraryDrawing"><Close /></el-icon>
+      <el-icon @click="stageStore.commitArbitraryDrawing">
+        <Close />
+      </el-icon>
     </div>
   </div>
 </template>

@@ -10,40 +10,64 @@ import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDi
 
 const shield = new StageShield();
 const container = new StageContainer();
-shield.configure.config({ rotationIconEnable: true })
+shield.configure.config({ rotationIconEnable: true });
 window.shield = shield;
 
 export const useStageStore = defineStore("stage", {
   state: () => {
     return {
+      // 当前绘制工具
       currentCreator: MoveableCreator,
+      // 当前鼠标工具
       currentCursorCreator: MoveableCreator,
+      // 当前形状工具
       currentShapeCreator: RectangleCreator,
+      // 当前自由工具
       currentArbitraryCreator: PenCreator,
+      // 选中元素
       selectedElements: [],
+      // 目标元素
       targetElements: [],
+      // 组件位置
       position: {
         x: 0,
-        y: 0
+        y: 0,
       },
+      // 组件宽度
       width: 0,
+      // 组件高度
       height: 0,
+      // 组件角度
       angle: 0,
-      leanYAngle: 0,
+      // X偏移角度
       leanXAngle: 0,
+      // Y偏移角度
+      leanYAngle: 0,
+      // 缩放比例
       scale: 1,
+      // 描边类型
       strokeType: DefaultElementStyle.strokeType,
+      // 描边宽度
       strokeWidth: DefaultElementStyle.strokeWidth,
+      // 描边颜色
       strokeColor: DefaultElementStyle.strokeColor,
+      // 描边透明度
       strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
+      // 填充颜色
       fillColor: DefaultElementStyle.fillColor,
+      // 填充透明度
       fillColorOpacity: DefaultElementStyle.fillColorOpacity,
+      // 字体大小
       fontSize: DefaultElementStyle.fontSize,
+      // 字体
       fontFamily: DefaultElementStyle.fontFamily,
+      // 文字对齐方式
       textAlign: DefaultElementStyle.textAlign,
+      // 文字基线
       textBaseline: DefaultElementStyle.textBaseline,
+      // 是否锁定比例
       isRatioLocked: false,
-    }
+    };
   },
   getters: {
     uniqSelectedElement(): IElement {
@@ -53,10 +77,10 @@ export const useStageStore = defineStore("stage", {
       return !this.uniqSelectedElement;
     },
     alignEnable(): boolean {
-      return this.selectedElements?.length >= 2
+      return this.selectedElements?.length >= 2;
     },
     averageEnable(): boolean {
-      return this.selectedElements?.length >= 3
+      return this.selectedElements?.length >= 3;
     },
     arbitraryVisible(): boolean {
       return this.currentCreator?.type === CreatorTypes.arbitrary;
@@ -65,8 +89,8 @@ export const useStageStore = defineStore("stage", {
   actions: {
     /**
      * 初始化舞台
-     * 
-     * @param params 
+     *
+     * @param params
      */
     async init(params: StageInitParams) {
       await container.init(params.containerEl);
@@ -74,41 +98,63 @@ export const useStageStore = defineStore("stage", {
 
       this.setCreator(MoveableCreator);
 
+      // 监听组件创建
       shield.on(ShieldDispatcherNames.elementCreated, this.onElementCreated);
+      // 监听选中
       shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
+      // 监听目标
       shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
+      // 监听位置
       shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), 100));
+      // 监听宽度
       shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
+      // 监听高度
       shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
+      // 监听角度
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
+      // 监听X偏移角度
       shield.on(ShieldDispatcherNames.leanXAngleChanged, throttle(this.onLeanXAngleChanged.bind(this), 100));
+      // 监听Y偏移角度
       shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
+      // 监听缩放
       shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
+      // 监听描边类型
       shield.on(ShieldDispatcherNames.strokeTypeChanged, throttle(this.onStrokeTypeChanged.bind(this), 100));
+      // 监听描边颜色透明度
       shield.on(ShieldDispatcherNames.strokeColorOpacityChanged, throttle(this.onStrokeColorOpacityChanged.bind(this), 100));
+      // 监听描边宽度
       shield.on(ShieldDispatcherNames.strokeWidthChanged, throttle(this.onStrokeWidthChanged.bind(this), 100));
+      // 监听描边颜色
       shield.on(ShieldDispatcherNames.strokeColorChanged, throttle(this.onStrokeColorChanged.bind(this), 100));
+      // 监听填充颜色
       shield.on(ShieldDispatcherNames.fillColorChanged, throttle(this.onFillColorChanged.bind(this), 100));
+      // 监听填充颜色透明度
       shield.on(ShieldDispatcherNames.fillColorOpacityChanged, throttle(this.onFillColorOpacityChanged.bind(this), 100));
+      // 监听字体大小
       shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), 100));
+      // 监听字体
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
+      // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
+      // 监听文本基线
       shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
+      // 监听宽高比锁定
       shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
+      // 监听绘制工具
       shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
-     * 
-     * @param creator 
+     *
+     * @param creator
      */
     async setCreator(creator: Creator) {
       await shield.setCreator(creator);
     },
     /**
      * 创作工具变更
-     * 
-     * @param creator 
+     *
+     * @param creator
      */
     onCreatorChanged(creator: Creator) {
       this.currentCreator = creator;
@@ -121,19 +167,19 @@ export const useStageStore = defineStore("stage", {
       if (creator.category === CreatorCategories.freedom) {
         this.currentArbitraryCreator = creator;
       }
-    },  
+    },
     /**
      * 舞台组件创建完毕
-     * 
-     * @param elementIds 
+     *
+     * @param elementIds
      */
     onElementCreated(elementIds: string[]) {
       this.setCreator(MoveableCreator);
     },
     /**
      * 舞台组件选中状态改变
-     * 
-     * @param selectedElements 
+     *
+     * @param selectedElements
      */
     onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
@@ -158,195 +204,212 @@ export const useStageStore = defineStore("stage", {
           textBaseline,
           isRatioLocked,
         } = element;
+        // 组件位置
         this.onPositionChanged(element, position);
+        // 组件宽度
         this.onWidthChanged(element, width);
+        // 组件高度
         this.onHeightChanged(element, height);
+        // 组件旋转角度
         this.onAngleChanged(element, angle);
+        // X轴偏移角度
         this.onLeanXAngleChanged(element, leanXAngle);
+        // Y轴偏移角度
         this.onLeanYAngleChanged(element, leanYAngle);
+        // 描边类型
         this.onStrokeTypeChanged(element, strokeType);
+        // 描边宽度
         this.onStrokeWidthChanged(element, strokeWidth);
+        // 描边颜色
         this.onStrokeColorChanged(element, strokeColor);
+        // 描边颜色透明度
         this.onStrokeColorOpacityChanged(element, strokeColorOpacity);
+        // 填充颜色
         this.onFillColorChanged(element, fillColor);
+        // 填充颜色透明度
         this.onFillColorOpacityChanged(element, fillColorOpacity);
+        // 字体大小
         this.onFontSizeChanged(element, fontSize);
+        // 字体
         this.onFontFamilyChanged(element, fontFamily);
+        // 文本对齐方式
         this.onTextAlignChanged(element, textAlign);
+        // 文本基线
         this.onTextBaselineChanged(element, textBaseline);
+        // 宽高比锁定
         this.onRatioLockedChanged(element, isRatioLocked);
       }
     },
     /**
      * 舞台组件命中状态改变
-     * 
-     * @param targetElements 
+     *
+     * @param targetElements
      */
     onTargetChanged(targetElements: IElement[]) {
       this.targetElements = targetElements;
     },
     /**
      * 组件坐标变化
-     * 
-     * @param position 
+     *
+     * @param position
      */
     onPositionChanged(element: IElement, position: IPoint) {
       if (position) {
         this.position = {
           x: position.x,
-          y: position.y
+          y: position.y,
         };
       }
     },
     /**
      * 组件宽度变化
-     * 
-     * @param element 
-     * @param width 
+     *
+     * @param element
+     * @param width
      */
     onWidthChanged(element: IElement, width: number) {
       this.width = width;
     },
     /**
      * 组件高度变化
-     * 
-     * @param element 
-     * @param height 
+     *
+     * @param element
+     * @param height
      */
     onHeightChanged(element: IElement, height: number) {
       this.height = height;
     },
     /**
      * 组件角度变化
-     * 
-     * @param element 
-     * @param angle 
+     *
+     * @param element
+     * @param angle
      */
     onAngleChanged(element: IElement, angle: number) {
       this.angle = angle;
     },
     /**
      * 组件倾斜变化
-     * 
-     * @param element 
-     * @param angle 
+     *
+     * @param element
+     * @param angle
      */
     onLeanXAngleChanged(element: IElement, angle: number) {
       this.leanXAngle = angle;
     },
     /**
      * 组件倾斜变化
-     * 
-     * @param element 
-     * @param angle 
+     *
+     * @param element
+     * @param angle
      */
     onLeanYAngleChanged(element: IElement, angle: number) {
       this.leanYAngle = angle;
     },
     /**
      * 组件缩放变化
-     * 
-     * @param element 
-     * @param scale 
+     *
+     * @param element
+     * @param scale
      */
     onScaleChanged(scale: number) {
       this.scale = scale;
     },
     /**
      * 组件描边类型变化
-     * 
-     * @param element 
-     * @param strokeType 
+     *
+     * @param element
+     * @param strokeType
      */
     onStrokeTypeChanged(element: IElement, strokeType: StrokeTypes) {
       this.strokeType = strokeType;
     },
     /**
      * 组件描边宽度变化
-     * 
-     * @param element 
-     * @param strokeWidth 
+     *
+     * @param element
+     * @param strokeWidth
      */
     onStrokeWidthChanged(element: IElement, strokeWidth: number) {
       this.strokeWidth = strokeWidth;
     },
     /**
      * 组件描边颜色变化
-     * 
-     * @param element 
-     * @param strokeColor 
+     *
+     * @param element
+     * @param strokeColor
      */
     onStrokeColorChanged(element: IElement, strokeColor: string) {
       this.strokeColor = strokeColor;
     },
     /**
      * 组件填充颜色变化
-     * 
-     * @param element 
-     * @param fillColor 
+     *
+     * @param element
+     * @param fillColor
      */
     onFillColorChanged(element: IElement, fillColor: string) {
       this.fillColor = fillColor;
     },
     /**
      * 组件描边透明度变化
-     * 
-     * @param element 
-     * @param strokeColorOpacity 
+     *
+     * @param element
+     * @param strokeColorOpacity
      */
     onStrokeColorOpacityChanged(element: IElement, strokeColorOpacity: number) {
       this.strokeColorOpacity = strokeColorOpacity;
     },
     /**
      * 组件填充透明度变化
-     * 
-     * @param element 
-     * @param fillColorOpacity 
+     *
+     * @param element
+     * @param fillColorOpacity
      */
     onFillColorOpacityChanged(element: IElement, fillColorOpacity: number) {
       this.fillColorOpacity = fillColorOpacity;
     },
     /**
      * 组件字体大小变化
-     * 
-     * @param element 
-     * @param fontSize 
+     *
+     * @param element
+     * @param fontSize
      */
     onFontSizeChanged(element: IElement, fontSize: number) {
       this.fontSize = fontSize;
     },
     /**
      * 组件字体变化
-     * 
-     * @param element 
-     * @param fontFamily 
+     *
+     * @param element
+     * @param fontFamily
      */
     onFontFamilyChanged(element: IElement, fontFamily: string) {
       this.fontFamily = fontFamily;
     },
     /**
      * 组件字体对齐方式变化
-     * 
-     * @param element 
-     * @param textAlign 
+     *
+     * @param element
+     * @param textAlign
      */
     onTextAlignChanged(element: IElement, textAlign: string) {
       this.textAlign = textAlign;
     },
     /**
      * 组件字体基线变化
-     * 
-     * @param element 
-     * @param textBaseline 
+     *
+     * @param element
+     * @param textBaseline
      */
     onTextBaselineChanged(element: IElement, textBaseline: string) {
       this.textBaseline = textBaseline;
     },
     /**
      * 组件锁定比例变更
-     * 
-     * @param element 
-     * @param ratioLocked 
+     *
+     * @param element
+     * @param ratioLocked
      */
     onRatioLockedChanged(element: IElement, isRatioLocked: boolean) {
       this.isRatioLocked = isRatioLocked;
@@ -354,9 +417,9 @@ export const useStageStore = defineStore("stage", {
     //-----------------------------------属性设置---------------------------------------//
     /**
      * 设置组件位置
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsPosition(value: IPoint): void {
       shield.setElementsPosition(this.selectedElements, value);
@@ -364,33 +427,33 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置横坐标
-     * 
-     * @param value 
+     *
+     * @param value
      */
     setElementsLeft(value: number): void {
       shield.setElementsPosition(this.selectedElements, {
         x: value,
-        y: this.position.y
+        y: this.position.y,
       });
     },
 
     /**
      * 设置纵坐标
-     * 
-     * @param value 
+     *
+     * @param value
      */
     setElementsTop(value: number): void {
       shield.setElementsPosition(this.selectedElements, {
         x: this.position.x,
-        y: value
+        y: value,
       });
     },
 
     /**
      * 设置组件宽度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsWidth(value: number): void {
       shield.setElementsWidth(this.selectedElements, value);
@@ -398,9 +461,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件高度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsHeight(value: number): void {
       shield.setElementsHeight(this.selectedElements, value);
@@ -408,9 +471,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件角度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsAngle(value: number): void {
       shield.setElementsAngle(this.selectedElements, value);
@@ -432,9 +495,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件边框类型
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsStrokeType(value: StrokeTypes): void {
       shield.setElementsStrokeType(this.selectedElements, value);
@@ -442,9 +505,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件边框宽度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsStrokeWidth(value: number): void {
       shield.setElementsStrokeWidth(this.selectedElements, value);
@@ -452,9 +515,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件边框颜色
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsStrokeColor(value: string): void {
       shield.setElementsStrokeColor(this.selectedElements, value);
@@ -462,9 +525,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件边框颜色透明度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsStrokeColorOpacity(value: number): void {
       shield.setElementsStrokeColorOpacity(this.selectedElements, value);
@@ -472,9 +535,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件填充颜色
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsFillColor(value: string): void {
       shield.setElementsFillColor(this.selectedElements, value);
@@ -482,9 +545,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件填充颜色透明度
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsFillColorOpacity(value: number): void {
       shield.setElementsFillColorOpacity(this.selectedElements, value);
@@ -492,9 +555,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件文本对齐方式
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsTextAlign(value: CanvasTextAlign): void {
       shield.setElementsTextAlign(this.selectedElements, value);
@@ -502,9 +565,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件文本基线
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
       shield.setElementsTextBaseline(this.selectedElements, value);
@@ -512,9 +575,9 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件字体大小
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsFontSize(value: number): void {
       shield.setElementsFontSize(this.selectedElements, value);
@@ -522,17 +585,17 @@ export const useStageStore = defineStore("stage", {
 
     /**
      * 设置组件字体
-     * 
-     * @param elements 
-     * @param value 
+     *
+     * @param elements
+     * @param value
      */
     setElementsFontFamily(value: string): void {
       shield.setElementsFontFamily(this.selectedElements, value);
     },
     /**
      * 设置舞台缩放
-     * 
-     * @param value 
+     *
+     * @param value
      */
     setScale(value: number): void {
       shield.setScale(value);
@@ -557,8 +620,8 @@ export const useStageStore = defineStore("stage", {
     },
     /**
      * 锁定比例
-     * 
-     * @param value 
+     *
+     * @param value
      */
     setRatioLocked(value: boolean): void {
       shield.setElementsRatioLocked(this.selectedElements, value);
@@ -621,8 +684,8 @@ export const useStageStore = defineStore("stage", {
     },
     /**
      * 上传图片
-     * 
-     * @param files 
+     *
+     * @param files
      */
     uploadImages(files: File[]): void {
       if (files.length) {
@@ -634,6 +697,6 @@ export const useStageStore = defineStore("stage", {
      */
     commitArbitraryDrawing(): void {
       shield.commitArbitraryDrawing();
-    }
+    },
   },
 });

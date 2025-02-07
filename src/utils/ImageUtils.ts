@@ -3,9 +3,9 @@ import CanvasUtils from "@/utils/CanvasUtils";
 export default class ImageUtils {
   /**
    * 通过ImageData创建Image
-   * 
-   * @param imageData 
-   * @returns 
+   *
+   * @param imageData
+   * @returns
    */
   static createImageFromImageData(imageData: ImageData): HTMLImageElement {
     const canvas = CanvasUtils.getCanvasByImageData(imageData);
@@ -16,9 +16,9 @@ export default class ImageUtils {
 
   /**
    * 等待图片加载完成
-   * 
-   * @param img 
-   * @returns 
+   *
+   * @param img
+   * @returns
    */
   static waitForImageLoad(img: HTMLImageElement): Promise<HTMLImageElement> {
     return new Promise((resolve, reject) => {
@@ -26,7 +26,7 @@ export default class ImageUtils {
         resolve(img);
       };
       img.onerror = () => {
-        reject(new Error('Image load failed'));
+        reject(new Error("Image load failed"));
       };
     });
   }

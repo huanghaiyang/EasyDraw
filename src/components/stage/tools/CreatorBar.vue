@@ -22,56 +22,35 @@ const select = (item) => {
 </script>
 <template>
   <div class="create-bar">
-    <div
-      :class="[
-        'tool-item',
-        { selected: currentCursorCreator.category === currentCreator.category },
-      ]"
-      @click="select(currentCursorCreator)"
-    >
+    <div :class="[
+      'tool-item',
+      { selected: currentCursorCreator.category === currentCreator.category },
+    ]" @click="select(currentCursorCreator)">
       <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="CursorCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="CursorCreators" :current-creator="currentCreator" :select="select" />
 
-    <div
-      :class="[
-        'tool-item',
-        { selected: currentShapeCreator.category === currentCreator.category },
-      ]"
-      @click="select(currentShapeCreator)"
-    >
+    <div :class="[
+      'tool-item',
+      { selected: currentShapeCreator.category === currentCreator.category },
+    ]" @click="select(currentShapeCreator)">
       <el-icon :class="['iconfont', currentShapeCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="ShapeCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="ShapeCreators" :current-creator="currentCreator" :select="select" />
 
-    <div
-      :class="[
-        'tool-item',
-        {
-          selected:
-            currentArbitraryCreator.category === currentCreator.category,
-        },
-      ]"
-      @click="select(currentArbitraryCreator)"
-    >
+    <div :class="[
+      'tool-item',
+      {
+        selected:
+          currentArbitraryCreator.category === currentCreator.category,
+      },
+    ]" @click="select(currentArbitraryCreator)">
       <el-icon :class="['iconfont', currentArbitraryCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="FreedomCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="FreedomCreators" :current-creator="currentCreator" :select="select" />
   </div>
 </template>
 <style lang="less">
@@ -88,6 +67,7 @@ const select = (item) => {
   bottom: 10px;
   left: calc(50% - 100px);
   padding: 0 5px;
+
   .tool-item {
     width: 30px;
     height: 30px;
@@ -97,12 +77,15 @@ const select = (item) => {
     border-radius: 4px;
     transition: all 0.2s;
     margin: 0 0 0 5px;
+
     &:first-of-type {
       margin: 0;
     }
+
     &:hover,
     &.selected {
       background-color: #007be5;
+
       .iconfont,
       .el-icon {
         color: #fff;
@@ -143,6 +126,7 @@ const select = (item) => {
       }
     }
   }
+
   &.selected {
     .creator-menu {
       &__item {

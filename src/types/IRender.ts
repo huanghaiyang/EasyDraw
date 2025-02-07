@@ -47,19 +47,19 @@ export interface IRenderQueue {
 // 渲染参数
 export type RenderParams = AngleModel & {
   // 角度
-  angle?: number,
+  angle?: number;
   // 是否翻转x
-  flipX?: boolean,
+  flipX?: boolean;
   // 是否翻转y
-  flipY?: boolean,
+  flipY?: boolean;
   // 是否闭合
-  isFold?: boolean,
+  isFold?: boolean;
   // 是否计算顶点
-  calcVertices?: boolean,
+  calcVertices?: boolean;
   // 斜接限制
-  miterLimit?: number,
+  miterLimit?: number;
   // 倾斜x
-  leanX?: number,
+  leanX?: number;
   // 倾斜y
-  leanY?: number,
-}
+  leanY?: number;
+};

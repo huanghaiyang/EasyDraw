@@ -58,8 +58,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 设置选区
-   * 
-   * @param points 
+   *
+   * @param points
    */
   setRange(points: IPoint[]): void {
     this._rangePoints = points;
@@ -68,31 +68,35 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 根据组件获取选区对象的属性
-   * 
-   * @param element 
+   *
+   * @param element
    * @param boxRender
-   * @returns 
+   * @returns
    */
   private _getElementMaskModelProps(element: IElement, boxRender?: boolean): Partial<IMaskModel> {
-    const { rotatePathPoints, rotateBoxPoints, model: { angle, isFold } } = element;
+    const {
+      rotatePathPoints,
+      rotateBoxPoints,
+      model: { angle, isFold },
+    } = element;
     return {
       points: boxRender ? rotateBoxPoints : rotatePathPoints,
       angle,
       element: {
         isFold,
-      }
+      },
     };
   }
 
   /**
    * 获取元素模型
-   * 
-   * @param elements 
-   * @returns 
+   *
+   * @param elements
+   * @returns
    */
   private _getElementsMaskModels(elements: IElement[], type: DrawerMaskModelTypes): IMaskModel[] {
     const result: IMaskModel[] = [];
-    elements.forEach(element => {
+    elements.forEach((element) => {
       if (element.isGroupSubject) return;
       result.push({
         type,
@@ -104,8 +108,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取选区范围对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private _getRangeElementsMaskModels(): IMaskModel[] {
     return this._getElementsMaskModels(this.shield.store.rangeElements, DrawerMaskModelTypes.path);
@@ -113,8 +117,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取高亮对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private _getTargetElementsMaskModels(): IMaskModel[] {
     return this._getElementsMaskModels(this.shield.store.targetElements, DrawerMaskModelTypes.path);
@@ -122,8 +126,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取选中对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   private _getSelectedElementsMaskModels(): IMaskModel[] {
     return this._getElementsMaskModels(this.shield.store.selectedElements, DrawerMaskModelTypes.path);
@@ -131,8 +135,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取高亮对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getModels(): IMaskModel[] {
     const result: IMaskModel[] = [];
@@ -152,8 +156,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 计算单选选区模型
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcSingleSelectionModel(): IMaskModel {
     const elements = this.shield.store.getFinishedSelectedElements(true);
@@ -171,15 +175,15 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 计算多选选区模型
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcMultiSelectionModel(): IMaskModel {
     const elements = this.shield.store.getFinishedSelectedElements(true);
     if (elements.length >= 2) {
       return {
         type: DrawerMaskModelTypes.selection,
-        points: CommonUtils.getBoxPoints(flatten(elements.map(element => element.rotateBoxPoints))),
+        points: CommonUtils.getBoxPoints(flatten(elements.map((element) => element.rotateBoxPoints))),
         angle: 0,
       };
     }
@@ -187,8 +191,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取选区对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcSelectionModel(): IMaskModel {
     const singleSelectionModel = this.calcSingleSelectionModel();
@@ -200,37 +204,32 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 计算单选变换控制器对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcSingleTransformerModels(): IMaskModel[] {
     const elements = this.shield.store.selectedElements;
     if (elements.length === 1) {
-      const {
-        transformerType,
-        angle,
-        leanYAngle,
-        actualAngle,
+      const { transformerType, angle, leanYAngle, actualAngle, transformers, verticesTransformEnable, flipX, flipY } = elements[0];
+      return this.calcTransformerModelsByPoints(
         transformers,
-        verticesTransformEnable,
-        flipX,
-        flipY
-      } = elements[0]
-      return this.calcTransformerModelsByPoints(transformers, {
-        angle,
-        leanYAngle,
-        actualAngle,
-        flipX,
-        flipY
-      }, verticesTransformEnable ? transformerType : TransformerTypes.rect);
+        {
+          angle,
+          leanYAngle,
+          actualAngle,
+          flipX,
+          flipY,
+        },
+        verticesTransformEnable ? transformerType : TransformerTypes.rect
+      );
     }
     return [];
   }
 
   /**
    * 计算多选变换控制器对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcMultiTransformerModels(): IMaskModel[] {
     const selectionModel = this.calcSelectionModel();
@@ -242,8 +241,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取变换控制器对象
-   * 
-   * @returns 
+   *
+   * @returns
    */
   calcTransformerModels(): IMaskModel[] {
     const singleTransformerModels = this.calcSingleTransformerModels();
@@ -255,11 +254,11 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取变换控制器对象
-   * 
-   * @param points 
-   * @param angle 
-   * @param transformerType 
-   * @returns 
+   *
+   * @param points
+   * @param angle
+   * @param transformerType
+   * @returns
    */
   private calcTransformerModelsByPoints(points: IPoint[], props: Partial<IMaskModel>, transformerType: TransformerTypes): IMaskModel[] {
     return points.map((point) => {
@@ -272,7 +271,7 @@ export default class StageSelection implements IStageSelection {
         },
         radius: ArbitraryControllerRadius,
         ...props,
-      }
+      };
       return model;
     });
   }
@@ -286,8 +285,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 根据坐标获取命中的组件
-   * 
-   * @param point 
+   *
+   * @param point
    */
   hitTargetElements(point: IPoint): void {
     const stageElements = this.shield.store.stageElements;
@@ -296,7 +295,7 @@ export default class StageSelection implements IStageSelection {
       const isTarget = element.isContainsPoint(point);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
-        this.shield.store.targetElements.forEach(target => {
+        this.shield.store.targetElements.forEach((target) => {
           if (target.id !== element.id) {
             this.shield.store.updateElementById(target.id, { isTarget: false });
           }
@@ -308,8 +307,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 检查当前鼠标是否命中组件的旋转句柄区域
-   * 
-   * @param point 
+   *
+   * @param point
    */
   tryActiveElementRotation(point: IPoint): IElementRotation {
     if (this.shield.configure.rotationIconEnable) {
@@ -323,8 +322,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 检测鼠标当前位置是否在组件的尺寸变换句柄区域
-   * 
-   * @param point 
+   *
+   * @param point
    */
   tryActiveElementTransformer(point: IPoint): IVerticesTransformer {
     const element = this.shield.store.uniqSelectedElement;
@@ -341,9 +340,9 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 检测鼠标是否在组件的边框上，如果是，可以拖动边框改变宽高
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer {
     const element = this.shield.store.uniqSelectedElement;
@@ -362,8 +361,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取处于激活状态的变形器
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getActiveElementTransformer(): IVerticesTransformer {
     const element = this.shield.store.uniqSelectedElement;
@@ -374,8 +373,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取处于激活状态的边框变形器
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getActiveElementBorderTransformer(): IBorderTransformer {
     const element = this.shield.store.uniqSelectedElement;
@@ -386,8 +385,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取激活元素旋转
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getActiveElementRotation(): IElementRotation {
     const element = this.shield.store.uniqSelectedElement;
@@ -398,7 +397,7 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 刷新选区
-   * 
+   *
    * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
    */
   selectTargets(): void {
@@ -407,13 +406,13 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 刷新给定区域的元素，将其设置为命中状态
-   * 
-   * @param rangePoints 
+   *
+   * @param rangePoints
    */
   refreshRangeElements(rangePoints: IPoint[]): void {
     if (rangePoints && rangePoints.length) {
-      this.shield.store.stageElements.forEach(element => {
-        this.shield.store.updateElementById(element.id, { isInRange: element.isPolygonOverlap(rangePoints) })
+      this.shield.store.stageElements.forEach((element) => {
+        this.shield.store.updateElementById(element.id, { isInRange: element.isPolygonOverlap(rangePoints) });
       });
     }
   }
@@ -429,9 +428,9 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 给定坐标获取命中的组件
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   getElementOnPoint(point: IPoint): IElement {
     const stageElements = this.shield.store.stageElements;
@@ -491,8 +490,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取实时选区模型
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getRealTimeSelectionModel(): IMaskModel {
     this.refreshSelectionModel();
@@ -501,8 +500,8 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取实时变换控制器模型
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getRealTimeTransformerModels(): IMaskModel[] {
     this.refreshTransformerModels();
@@ -511,19 +510,22 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 尝试激活控制器
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   tryActiveController(point: IPoint): IController {
+    // 旋转
     const rotation = this.tryActiveElementRotation(point);
     if (rotation) {
       return rotation;
     }
+    // 顶点变换
     const transformer = this.tryActiveElementTransformer(point);
     if (transformer) {
       return transformer;
     }
+    // 边框变换
     const borderTransformer = this.tryActiveElementBorderTransformer(point);
     if (borderTransformer) {
       return borderTransformer;
@@ -532,14 +534,17 @@ export default class StageSelection implements IStageSelection {
 
   /**
    * 获取激活控制器
-   * 
-   * @returns 
+   *
+   * @returns
    */
   getActiveController(): IController {
+    // 旋转
     let controller: IController = this.getActiveElementRotation();
     if (!controller) {
+      // 顶点变换
       controller = this.getActiveElementTransformer();
       if (!controller) {
+        // 边框变换
         controller = this.getActiveElementBorderTransformer();
       }
     }

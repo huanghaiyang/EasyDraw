@@ -20,6 +20,7 @@
 <style lang="less">
 .right-props {
   width: 100%;
+
   .position-props,
   .align-props,
   .size-props,
@@ -33,6 +34,7 @@
       padding: 10px;
       display: flex;
       align-items: center;
+
       &-text {
         display: flex;
         align-items: center;
@@ -40,6 +42,7 @@
         line-height: 12px;
         margin: 0 4px 0 0;
       }
+
       .el-icon {
         &:hover {
           color: #007be5;
@@ -65,9 +68,11 @@
         justify-content: space-between;
         width: 96px;
         margin-right: 8px;
+
         .el-select,
         .el-input {
           width: 100%;
+
           .el-input-group__prepend,
           .el-input-group__append {
             padding: 0 6px;

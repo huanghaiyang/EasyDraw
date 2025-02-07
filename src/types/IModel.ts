@@ -22,7 +22,7 @@ export interface IMaskModel extends AngleModel, FlipModel {
     transformerType?: TransformerTypes;
     // 是否闭合
     isFold?: boolean;
-  }
+  };
 }
 
 // 图标模型

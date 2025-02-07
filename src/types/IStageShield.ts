@@ -4,7 +4,7 @@ import { IDrawerMask, IDrawerProvisional, IStageDrawer } from "@/types/IStageDra
 import IStageSelection from "@/types/IStageSelection";
 import IStageStore from "@/types/IStageStore";
 import IStageCursor from "@/types/IStageCursor";
-import { Creator } from '@/types/Creator';
+import { Creator } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
@@ -68,7 +68,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 舞台计算参数
   get stageCalcParams(): StageCalcParams;
 
-  // 计算给定范围的自动缩放值 
+  // 计算给定范围的自动缩放值
   calcScaleAutoFitValueByBox(box: IPoint[]): number;
   // 计算自动缩放值
   calcScaleAutoFitValue(): number;

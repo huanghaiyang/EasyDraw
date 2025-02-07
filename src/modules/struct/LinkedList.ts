@@ -45,8 +45,8 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 插入节点到链表的尾部
-   * 
-   * @param node 
+   *
+   * @param node
    */
   insert(node: ILinkedNode<T>): void {
     if (this._tail) {
@@ -62,8 +62,8 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 插入节点到链表的头部
-   * 
-   * @param node 
+   *
+   * @param node
    */
   prepend(node: ILinkedNode<T>): void {
     if (this._head) {
@@ -79,8 +79,8 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 删除节点
-   * 
-   * @param node 
+   *
+   * @param node
    */
   remove(node: ILinkedNode<T>): void {
     this.nodes.delete(node);
@@ -104,12 +104,12 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 根据条件删除节点
-   * 
-   * @param predicate 
+   *
+   * @param predicate
    */
   removeBy(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T>[] {
     let result: ILinkedNode<T>[] = [];
-    Array.from(this.nodes).forEach(node => {
+    Array.from(this.nodes).forEach((node) => {
       if (predicate(node)) {
         this.remove(node);
         result.push(node);
@@ -120,9 +120,9 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 插入节点到目标节点的前面
-   * 
-   * @param node 
-   * @param target 
+   *
+   * @param node
+   * @param target
    */
   insertBefore(node: ILinkedNode<T>, target: ILinkedNode<T>): void {
     if (target) {
@@ -136,9 +136,9 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 插入节点到目标节点的后面
-   * 
-   * @param node 
-   * @param target 
+   *
+   * @param node
+   * @param target
    */
   insertAfter(node: ILinkedNode<T>, target: ILinkedNode<T>): void {
     if (target) {
@@ -152,8 +152,8 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 遍历链表
-   * 
-   * @param callback 
+   *
+   * @param callback
    */
   forEach(callback: (node: ILinkedNode<T>, index: number) => void): void {
     this.forEachBreak(callback, () => false);
@@ -161,10 +161,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 遍历链表，并中断遍历
-   * 
-   * @param callback 
-   * @param predicate 
-   * @returns 
+   *
+   * @param callback
+   * @param predicate
+   * @returns
    */
   forEachBreak(callback: (node: ILinkedNode<T>, index: number) => void, predicate?: (node: ILinkedNode<T>, index: number) => boolean): void {
     let index = 0;
@@ -179,12 +179,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     }
   }
 
-
-
   /**
    * 倒序遍历链表
-   * 
-   * @param callback 
+   *
+   * @param callback
    */
   forEachRevert(callback: (node: ILinkedNode<T>, index: number) => void): void {
     this.forEachBreakRevert(callback, () => false);
@@ -192,10 +190,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 倒序遍历链表，并中断遍历
-   * 
-   * @param callback 
-   * @param predicate 
-   * @returns 
+   *
+   * @param callback
+   * @param predicate
+   * @returns
    */
   forEachBreakRevert(callback: (node: ILinkedNode<T>, index: number) => void, predicate?: (node: ILinkedNode<T>, index: number) => boolean): void {
     let index = this.length - 1;
@@ -212,9 +210,9 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
 
   /**
    * 获取节点在链表中的位置
-   * 
-   * @param node 
-   * @returns 
+   *
+   * @param node
+   * @returns
    */
   getIndex(node: ILinkedNode<T>): number {
     let index = -1;

@@ -8,7 +8,7 @@ export enum TransformerTypes {
   // 矩形
   rect,
   // 圆形
-  circle
+  circle,
 }
 
 export default interface ITransformer extends IController {
@@ -20,7 +20,6 @@ export default interface ITransformer extends IController {
   get angle(): number;
   // 宿主
   host?: IElement | IStageSelection;
-
 }
 
 export interface IVerticesTransformer extends ITransformer, IPoint {

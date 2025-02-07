@@ -11,8 +11,8 @@ export default class DrawerProvisional extends HelperDrawer implements IDrawerMa
 
   initCanvas(): HTMLCanvasElement {
     super.initCanvas();
-    this.canvas.id = 'provisional'
-    this.canvas.style.pointerEvents = 'none'
+    this.canvas.id = "provisional";
+    this.canvas.style.pointerEvents = "none";
     return this.canvas;
   }
 }

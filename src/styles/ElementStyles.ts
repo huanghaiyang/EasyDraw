@@ -3,29 +3,35 @@ import { CreatorTypes } from "@/types/Creator";
 export enum StrokeTypes {
   inside = 0,
   middle = 1,
-  outside = 2
+  outside = 2,
 }
 
 type StrokeTypePair = {
-  type: StrokeTypes,
-  name: string
-}
+  type: StrokeTypes;
+  name: string;
+};
 
-export const StrokeTypesArray: StrokeTypePair[] = [{
-  type: StrokeTypes.inside,
-  name: '内描边'
-}, {
-  type: StrokeTypes.middle,
-  name: '平分线宽'
-}, {
-  type: StrokeTypes.outside,
-  name: '外描边'
-}]
+export const StrokeTypesArray: StrokeTypePair[] = [
+  {
+    type: StrokeTypes.inside,
+    name: "内描边",
+  },
+  {
+    type: StrokeTypes.middle,
+    name: "平分线宽",
+  },
+  {
+    type: StrokeTypes.outside,
+    name: "外描边",
+  },
+];
 
-export const LineStrokeTypes: StrokeTypePair[] = [{
-  type: StrokeTypes.middle,
-  name: '平分线宽'
-}]
+export const LineStrokeTypes: StrokeTypePair[] = [
+  {
+    type: StrokeTypes.middle,
+    name: "平分线宽",
+  },
+];
 
 export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   switch (type) {
@@ -54,18 +60,18 @@ export type ElementStyles = {
   fontFamily?: string;
   textAlign?: CanvasTextAlign;
   textBaseline?: CanvasTextBaseline;
-}
+};
 
 export const DefaultStrokeType = StrokeTypes.middle;
-export const DefaultStrokeColor = '#000000';
+export const DefaultStrokeColor = "#000000";
 export const DefaultStrokeColorOpacity = 1;
-export const DefaultFillColor = '#000000';
+export const DefaultFillColor = "#000000";
 export const DefaultFillColorOpacity = 0.05;
 export const DefaultStrokeWidth = 1;
 export const DefaultFontSize = 12;
-export const DefaultFontFamily = 'sans-serif';
-export const DefaultTextAlign = 'center';
-export const DefaultTextBaseline = 'middle';
+export const DefaultFontFamily = "sans-serif";
+export const DefaultTextAlign = "center";
+export const DefaultTextBaseline = "middle";
 export const DefaultLineStrokeWidth = 1;
 export const DefaultLineMeterLimit = 100;
 
@@ -79,37 +85,37 @@ export const DefaultElementStyle: ElementStyles = {
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
   textAlign: DefaultTextAlign,
-  textBaseline: DefaultTextBaseline
-}
+  textBaseline: DefaultTextBaseline,
+};
 
 export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
   switch (type) {
     case CreatorTypes.line: {
       return {
         ...DefaultElementStyle,
-        strokeWidth: DefaultLineStrokeWidth
-      }
+        strokeWidth: DefaultLineStrokeWidth,
+      };
     }
     case CreatorTypes.image: {
       return {
         ...DefaultElementStyle,
-        fillColor: '',
+        fillColor: "",
         fillColorOpacity: 0,
-      }
+      };
     }
     case CreatorTypes.arbitrary: {
       return {
         ...DefaultElementStyle,
-        fillColor: '',
+        fillColor: "",
         fillColorOpacity: 0,
-        strokeWidth: DefaultLineStrokeWidth
-      }
+        strokeWidth: DefaultLineStrokeWidth,
+      };
     }
     case CreatorTypes.rectangle:
     default: {
       return {
         ...DefaultElementStyle,
-      }
+      };
     }
   }
-}
+};

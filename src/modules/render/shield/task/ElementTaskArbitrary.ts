@@ -12,11 +12,9 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPathWithScale(this.canvas, this.node.strokePathPoints, this.node.model.styles,
-      {
-        isFold: this.node.model.isFold,
-        miterLimit: DefaultLineMeterLimit
-      },
-    );
+    CanvasUtils.drawPathWithScale(this.canvas, this.node.strokePathPoints, this.node.model.styles, {
+      isFold: this.node.model.isFold,
+      miterLimit: DefaultLineMeterLimit,
+    });
   }
 }

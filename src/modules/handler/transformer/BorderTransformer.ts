@@ -27,9 +27,9 @@ export default class BorderTransformer extends BaseTransformer implements IBorde
 
   /**
    * 判断点是否在多边形内
-   * 
-   * @param point 
-   * @returns 
+   *
+   * @param point
+   * @returns
    */
   isClosest(point: IPoint): boolean {
     return MathUtils.isPointClosestSegment(point, this.start, this.end, BorderTransformerMargin / this.host.shield.stageScale);

@@ -9,17 +9,26 @@ export default class MaskTaskTransformer extends MaskTaskBase {
    */
   async run(): Promise<void> {
     const { strokeWidth } = ControllerStyle;
-    const { scale, point, leanYAngle, actualAngle, flipX } = this.data;
-    CanvasUtils.drawPathWithScale(this.canvas, CommonUtils.get4BoxPoints(point, {
-      width: TransformerSize * scale,
-      height: TransformerSize * scale
-    }, {
-      angle: actualAngle,
-      leanYAngle: flipX ? -leanYAngle : leanYAngle
-    }), Object.assign({}, ControllerStyle, {
-      strokeWidth: strokeWidth * scale
-    }), {
-      calcVertices: false
-    });
+    const { scale, point, leanYAngle, actualAngle } = this.data;
+    CanvasUtils.drawPathWithScale(
+      this.canvas,
+      CommonUtils.get4BoxPoints(
+        point,
+        {
+          width: TransformerSize * scale,
+          height: TransformerSize * scale,
+        },
+        {
+          angle: actualAngle,
+          leanYAngle,
+        }
+      ),
+      Object.assign({}, ControllerStyle, {
+        strokeWidth: strokeWidth * scale,
+      }),
+      {
+        calcVertices: false,
+      }
+    );
   }
 }
