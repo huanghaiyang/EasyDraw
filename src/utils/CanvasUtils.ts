@@ -97,6 +97,7 @@ export default class CanvasUtils {
     if (flipX) {
       scaleX = -1;
       radian = -radian;
+      leanY = -leanY;
     }
     // 缩放
     ctx.scale(scaleX, scaleY);

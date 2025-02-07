@@ -18,6 +18,7 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -1676,7 +1677,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param options
    */
   refresh(options?: RefreshOptions): void {
-    options = Object.assign({}, DefaultElementRefreshOptions, options || {});
+    options = LodashUtils.deepPlanObjectAssign({}, DefaultElementRefreshOptions, options || {});
     // 刷新舞台坐标
     if (options?.points) this.refreshPoints();
     // 刷新尺寸
@@ -1684,7 +1685,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新位置
     if (options?.position) this.refreshPosition();
     // 刷新角度
-    if (options?.angles) this.refreshAngles();
+    if (options?.angles) this.refreshAngles(options?.angleOptions);
     // 刷新旋转
     if (options?.rotation) this.refreshRotation();
     // 刷新原始属性
@@ -1813,7 +1814,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setAngle(value: number): void {
     this.model.angle = value;
-    this.refresh();
+    this.refresh({
+      angleOptions: {
+        leanX: false,
+        leanY: false,
+        internal: false,
+      },
+    });
   }
 
   /**

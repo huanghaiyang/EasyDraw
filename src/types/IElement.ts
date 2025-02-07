@@ -110,26 +110,6 @@ export type ElementObject = AngleModel &
     subIds?: Set<string>;
   };
 
-// 刷新参数
-export type RefreshOptions = {
-  size?: boolean;
-  position?: boolean;
-  points?: boolean;
-  rotation?: boolean;
-  angles?: boolean;
-  originals?: boolean;
-};
-
-// 默认刷新选项
-export const DefaultElementRefreshOptions: RefreshOptions = {
-  size: true,
-  position: true,
-  points: true,
-  rotation: true,
-  angles: true,
-  originals: true,
-};
-
 // 刷新角度选项参数
 export type RefreshAnglesOptions = {
   view?: boolean;
@@ -146,6 +126,28 @@ export const DefaultRefreshAnglesOptions: RefreshAnglesOptions = {
   leanY: true,
   actual: true,
   internal: true,
+};
+
+// 刷新参数
+export type RefreshOptions = {
+  size?: boolean;
+  position?: boolean;
+  points?: boolean;
+  rotation?: boolean;
+  angles?: boolean;
+  originals?: boolean;
+  angleOptions?: RefreshAnglesOptions;
+};
+
+// 默认刷新选项
+export const DefaultElementRefreshOptions: RefreshOptions = {
+  size: true,
+  position: true,
+  points: true,
+  rotation: true,
+  angles: true,
+  originals: true,
+  angleOptions: DefaultRefreshAnglesOptions,
 };
 
 // 舞台元素（组件）
