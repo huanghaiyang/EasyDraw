@@ -1411,9 +1411,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算变换后的盒模型坐标
     const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngles);
     // 计算变换后的坐标
-    const coords = ElementUtils.calcCoordsByRotatedPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
+    const coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
-    const boxCoords = ElementUtils.calcCoordsByRotatedPathPoints(boxPoints, this.angles, lockPoint, this.shield.stageCalcParams);
+    const boxCoords = ElementUtils.calcCoordsByTransPathPoints(boxPoints, this.angles, lockPoint, this.shield.stageCalcParams);
     // 设置变换后的坐标
     this.model.coords = coords;
     // 设置变换后的盒模型坐标

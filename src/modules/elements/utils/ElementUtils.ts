@@ -431,7 +431,7 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcCoordsByRotatedPathPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+  static calcCoordsByTransPathPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
     let center = MathUtils.calcCenter(rotatePoints.map((point) => MathUtils.transWithCenter(point, angles, lockPoint, true)));
     // 计算旋转后的中心点
@@ -442,6 +442,28 @@ export default class ElementUtils {
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
     return rotateCoords.map((point) => MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord));
+  }
+
+  /**
+   * 通过旋转坐标计算旋转前的坐标
+   *
+   * @param rotatePoints
+   * @param angle
+   * @param lockPoint
+   * @param params
+   * @returns
+   */
+  static calcCoordsByRotatePathPoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+    // 计算中心点
+    let center = MathUtils.calcCenter(rotatePoints.map((point) => MathUtils.rotateWithCenter(point, -angle, lockPoint)));
+    // 计算旋转后的中心点
+    center = MathUtils.rotateWithCenter(center, angle, lockPoint);
+    // 计算中心点世界坐标
+    const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
+    // 计算旋转后的坐标
+    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
+    // 计算旋转后的坐标
+    return rotateCoords.map((point) => MathUtils.rotateWithCenter(point, -angle, newCenterCoord));
   }
 
   /**
