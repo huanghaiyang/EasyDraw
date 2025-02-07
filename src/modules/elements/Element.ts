@@ -5,7 +5,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { clamp, cloneDeep } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
-import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
+import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { StrokeTypes } from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -134,6 +134,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
   get flipY(): boolean {
     return false;
+  }
+
+  // 获取翻转信息
+  get flip(): FlipModel {
+    return {
+      flipX: this.flipX,
+      flipY: this.flipY,
+    };
   }
 
   // 是否可以翻转X轴
@@ -745,8 +753,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   private convertPointsByStrokeType(points: IPoint[]): IPoint[] {
     return CanvasUtils.convertPointsByStrokeType(points, this.model.styles.strokeType, this.model.styles.strokeWidth, {
-      flipX: this.flipX,
-      flipY: this.flipY,
+      ...this.flip,
       isFold: this.model.isFold,
     });
   }
@@ -784,10 +791,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateOutlinePathPoints(): IPoint[] {
     const { strokeType, strokeWidth } = this.model.styles;
-    return ElementUtils.calcOutlinePoints(this._rotatePathPoints, strokeType, strokeWidth, {
-      flipX: this.flipX,
-      flipY: this.flipY,
-    });
+    return ElementUtils.calcOutlinePoints(this._rotatePathPoints, strokeType, strokeWidth, this.flip);
   }
 
   /**
@@ -847,8 +851,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcRotateOutlinePathCoords(): IPoint[] {
     return ElementUtils.calcOutlinePoints(this._rotatePathCoords, this.model.styles.strokeType, this.model.styles.strokeWidth, {
-      flipX: this.flipX,
-      flipY: this.flipY,
+      ...this.flip,
       isFold: this.model.isFold,
     });
   }
@@ -1035,6 +1038,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcLeanYAngle(): number {
     if (!this.leanYAngleCalcEnable) return 0;
+    if (this.flipX) return this.model.internalAngle - 90;
     return 90 - this.model.internalAngle;
   }
 
@@ -2022,7 +2026,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   toJson(): ElementObject {
-    return JSON.parse(JSON.stringify(this.model));
+    return JSON.parse(JSON.stringify({ ...this.model, ...this.flip }));
   }
 
   /**

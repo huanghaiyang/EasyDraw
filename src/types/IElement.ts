@@ -231,6 +231,8 @@ export default interface IElement {
   get leanXAngle(): number;
   // 倾斜y角度
   get leanYAngle(): number;
+  // 翻转
+  get flip(): FlipModel;
   // 变换不动点索引
   get transformLockIndex(): number;
   // 变换不动点
