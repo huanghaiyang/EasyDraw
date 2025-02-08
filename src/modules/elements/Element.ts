@@ -1741,7 +1741,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
-    this.refresh();
+    this.refresh({
+      angles: false
+    });
   }
 
   /**
@@ -1783,7 +1785,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
-    this.refresh();
+    this.refresh({
+      angles: false
+    });
   }
 
   /**
