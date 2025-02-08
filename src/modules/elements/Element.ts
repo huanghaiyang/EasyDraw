@@ -862,7 +862,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcCenter(): IPoint {
-    return MathUtils.calcCenter(this.pathPoints);
+    const centerCoord = this.calcCenterCoord();
+    return ElementUtils.calcStageRelativePoint(centerCoord, this.shield.stageCalcParams);
   }
 
   /**
@@ -871,7 +872,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcCenterCoord(): IPoint {
-    return MathUtils.calcCenter(this.model.coords);
+    return MathUtils.calcCenter(this.model.boxCoords);
   }
 
   /**
@@ -1300,9 +1301,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 更新坐标
    */
   refreshPosition(): void {
-    const { x, y } = ElementUtils.calcPosition(this.model);
-    this.model.left = x;
-    this.model.top = y;
+    const centerCoord = this.calcCenterCoord();
+    this.model.left = centerCoord.x;
+    this.model.top = centerCoord.y;
   }
 
   /**
