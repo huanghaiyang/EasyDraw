@@ -57,6 +57,10 @@
       align-items: center;
       padding: 0 4px;
 
+      &:not(:first-child) {
+        margin: 0 0 8px 0;
+      }
+
       .el-tag {
         height: 24px;
         width: 70px;
