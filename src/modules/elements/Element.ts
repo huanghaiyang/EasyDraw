@@ -1828,7 +1828,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setLeanXAngle(value: number): void {
     this.model.leanXAngle = value;
-    this.refresh();
+    this.refresh({
+      angleOptions: {
+        leanX: false,
+      }
+    });
   }
 
   /**
@@ -1843,16 +1847,22 @@ export default class Element implements IElement, ILinkedNodeValue {
     const leanAngle = this.flipX ? -value : value;
     // 计算非倾斜坐标
     const coords = this.calcUnLeanCoords();
+    // 计算中心坐标
+    const centerCoord = this.calcCenterCoord();
     // 重新计算倾斜坐标
-    this.model.coords = MathUtils.batchLeanYWithCenter(coords, leanAngle, this.calcCenterCoord());
+    this.model.coords = MathUtils.batchLeanYWithCenter(coords, leanAngle, centerCoord);
     // 计算非倾斜盒模型坐标
     const boxCoords = this.calcUnleanBoxCoords();
     // 重新计算倾斜盒模型坐标
-    this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, leanAngle, this.calcCenterCoord());
+    this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, leanAngle, centerCoord);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
     // 刷新
-    this.refresh();
+    this.refresh({
+      angleOptions: {
+        leanY: false,
+      }
+    });
   }
 
   /**
