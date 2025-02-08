@@ -128,7 +128,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否翻转X轴
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
-    return MathUtils.isPointClockwise(this.calcCenterCoord(), this.model.boxCoords[0], this.model.boxCoords[3]);
+    return MathUtils.calcFlipX(this.model.boxCoords);
   }
 
   // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
@@ -971,7 +971,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnLeanCoords(): IPoint[] {
-    return this.calcUnLeanByPoints(this.model.coords);
+    return MathUtils.calcUnLeanByPoints(this.model.coords, this.model.leanXAngle, this.model.leanYAngle, this.flipX);
   }
 
   /**
@@ -980,7 +980,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnleanBoxCoords(): IPoint[] {
-    return this.calcUnLeanByPoints(this.model.boxCoords);
+    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, this.model.leanXAngle, this.model.leanYAngle, this.flipX);
   }
 
   /**
@@ -1004,22 +1004,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 计算非倾斜点坐标
-   *
-   * @returns
-   */
-  calcUnLeanByPoints(points: IPoint[]): IPoint[] {
-    const center = MathUtils.calcCenter(points);
-    return MathUtils.batchLeanWithCenter(points, -this.model.leanXAngle, this.model.flipX ? this.model.leanYAngle : -this.model.leanYAngle, center);
-  }
-
-  /**
    * 计算内部角度
    *
    * @returns
    */
   calcInternalAngle(): number {
-    return 180 - MathUtils.calcTriangleAngle(this.model.boxCoords[0], this.model.boxCoords[3], this.model.boxCoords[2]);
+    return MathUtils.calcInternalAngle(this.model.boxCoords);
   }
 
   /**
@@ -1039,8 +1029,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcLeanYAngle(): number {
     if (!this.leanYAngleCalcEnable) return 0;
-    if (this.flipX) return this.model.internalAngle - 90;
-    return 90 - this.model.internalAngle;
+    return MathUtils.calcLeanYAngle(this.model.internalAngle, this.flipX);
   }
 
   /**
@@ -1051,7 +1040,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   calcViewAngle(): number {
     if (!this.viewAngleCalcEnable) return this.model.angle;
     const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
-    return ElementUtils.mirrorAngle(angle + 90);
+    return MathUtils.mirrorAngle(angle + 90);
   }
 
   /**
@@ -1060,7 +1049,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcActualAngle(): number {
-    return ElementUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
+    return MathUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
+  }
+
+  /**
+   * 根据坐标重新计算角度
+   *
+   * 组合形变时，子组件因为坐标变换，导致角度也发生了变化，需要重新计算，否则子组件独立形变时，坐标计算会出现错误
+   *
+   * @returns
+   */
+  calcAngle(): number {
+    return MathUtils.calcAngleByPoints(this.model.boxCoords);
   }
 
   /**
@@ -1411,6 +1411,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, groupAngles);
     // 计算变换后的盒模型坐标
     const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngles);
+    // 计算变换后的角度
+    // this.model.angle = MathUtils.calcAngleByPoints(boxPoints);
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
@@ -1743,7 +1745,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
     this.refresh({
-      angles: false
+      angles: false,
     });
   }
 
@@ -1787,7 +1789,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
     this.refresh({
-      angles: false
+      angles: false,
     });
   }
 
@@ -1836,7 +1838,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refresh({
       angleOptions: {
         leanX: false,
-      }
+      },
     });
   }
 
@@ -1866,7 +1868,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refresh({
       angleOptions: {
         leanY: false,
-      }
+      },
     });
   }
 
@@ -1993,7 +1995,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = boxCoords;
     // 设置变换角度
-    this.model.angle = ElementUtils.mirrorAngle(ElementUtils.normalizeAngle(this._originalAngle) + (ElementUtils.normalizeAngle(deltaAngle) % 360));
+    this.model.angle = MathUtils.mirrorAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
     // 刷新舞台坐标
     this.refreshRPs();
     // 刷新位置

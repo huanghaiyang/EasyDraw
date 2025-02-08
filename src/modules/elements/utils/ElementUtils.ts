@@ -467,29 +467,6 @@ export default class ElementUtils {
   }
 
   /**
-   * 镜像角度
-   *
-   * @param angle
-   * @returns
-   */
-  static mirrorAngle(angle: number): number {
-    return angle > 180 ? angle - 360 : angle;
-  }
-
-  /**
-   * 角度归一化
-   *
-   * @param angle
-   * @returns
-   */
-  static normalizeAngle(angle: number): number {
-    if (angle < 0) {
-      angle = angle + 360;
-    }
-    return angle;
-  }
-
-  /**
    * 将给定点还原为未变形前的坐标并按照给定的矩阵进行变形
    *
    * @param point

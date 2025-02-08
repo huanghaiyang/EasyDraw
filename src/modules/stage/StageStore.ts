@@ -1132,7 +1132,7 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsRotation(point: IPoint): void {
     let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
     this.rotatingTargetElements.forEach((element) => {
-      angle = ElementUtils.mirrorAngle(element.originalAngle + angle - this._rotatingOriginalAngle);
+      angle = MathUtils.mirrorAngle(element.originalAngle + angle - this._rotatingOriginalAngle);
       element.setAngle(angle);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach((sub) => {

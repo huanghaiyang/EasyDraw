@@ -530,6 +530,103 @@ export default class MathUtils {
   }
 
   /**
+   * 计算内角
+   *
+   * @param boxPoints
+   * @returns
+   */
+  static calcInternalAngle(boxPoints: IPoint[]): number {
+    return 180 - MathUtils.calcTriangleAngle(boxPoints[0], boxPoints[3], boxPoints[2]);
+  }
+
+  /**
+   * 计算倾斜Y角度
+   *
+   * @param internalAngle
+   * @param flipX
+   * @returns
+   */
+  static calcLeanYAngle(internalAngle: number, flipX: boolean): number {
+    if (flipX) return internalAngle - 90;
+    return 90 - internalAngle;
+  }
+
+  /**
+   * 根据点集和翻转信息计算倾斜Y角度
+   *
+   * @param boxPoints
+   * @param flipX
+   * @returns
+   */
+  static calcLeanYAngleByPoints(boxPoints: IPoint[], flipX: boolean): number {
+    return MathUtils.calcLeanYAngle(MathUtils.calcInternalAngle(boxPoints), flipX);
+  }
+
+  /**
+   * 计算不倾斜的点集
+   *
+   * @param points
+   * @param leanYAngle
+   * @param leanXAngle
+   * @param flipX
+   * @returns
+   */
+  static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number, flipX: boolean): IPoint[] {
+    const center = MathUtils.calcCenter(points);
+    return MathUtils.batchLeanWithCenter(points, -leanXAngle, flipX ? leanYAngle : -leanYAngle, center);
+  }
+
+  /**
+   * 判断翻转X是否正确
+   *
+   * @param boxPoints
+   * @returns
+   */
+  static calcFlipX(boxPoints: IPoint[]): boolean {
+    const centerCoord = MathUtils.calcCenter(boxPoints);
+    return MathUtils.isPointClockwise(centerCoord, boxPoints[0], boxPoints[3]);
+  }
+
+  /**
+   * 根据点集计算倾斜X角度
+   *
+   * @param points
+   * @returns
+   */
+  static calcAngleByPoints(points: IPoint[]): number {
+    const leanXAngle = 0;
+    const internalAngle = MathUtils.calcInternalAngle(points);
+    const flipX = MathUtils.calcFlipX(points);
+    const leanYAngle = MathUtils.calcLeanYAngle(internalAngle, flipX);
+    points = MathUtils.calcUnLeanByPoints(points, leanXAngle, leanYAngle, flipX);
+    const angle = MathUtils.calcAngle(points[2], points[1]);
+    return MathUtils.mirrorAngle(angle + 90);
+  }
+
+  /**
+   * 镜像角度
+   *
+   * @param angle
+   * @returns
+   */
+  static mirrorAngle(angle: number): number {
+    return angle > 180 ? angle - 360 : angle;
+  }
+
+  /**
+   * 角度归一化
+   *
+   * @param angle
+   * @returns
+   */
+  static normalizeAngle(angle: number): number {
+    if (angle < 0) {
+      angle = angle + 360;
+    }
+    return angle;
+  }
+
+  /**
    * 给定一条线段，求距离线段中心点距离的一点，参数为直线的点一和点二，是否顺时针还是逆时针，距离，共四个参数
    *
    * 注意p1一定是x轴值最小的那个点
