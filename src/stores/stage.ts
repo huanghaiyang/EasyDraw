@@ -39,6 +39,8 @@ export const useStageStore = defineStore("stage", {
       height: 0,
       // 组件角度
       angle: 0,
+      // X轴翻转
+      flipX: false,
       // X偏移角度
       leanXAngle: 0,
       // Y偏移角度
@@ -112,6 +114,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
       // 监听角度
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
+      // 监听X轴翻转
+      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), 100));
       // 监听X偏移角度
       shield.on(ShieldDispatcherNames.leanXAngleChanged, throttle(this.onLeanXAngleChanged.bind(this), 100));
       // 监听Y偏移角度
@@ -190,6 +194,7 @@ export const useStageStore = defineStore("stage", {
           width,
           height,
           angle,
+          flipX,
           leanXAngle,
           leanYAngle,
           strokeType,
@@ -212,6 +217,8 @@ export const useStageStore = defineStore("stage", {
         this.onHeightChanged(element, height);
         // 组件旋转角度
         this.onAngleChanged(element, angle);
+        // X轴翻转
+        this.onFlipXChanged(element, flipX);
         // X轴偏移角度
         this.onLeanXAngleChanged(element, leanXAngle);
         // Y轴偏移角度
@@ -287,6 +294,15 @@ export const useStageStore = defineStore("stage", {
      */
     onAngleChanged(element: IElement, angle: number) {
       this.angle = angle;
+    },
+    /**
+     * X轴翻转变化
+     *
+     * @param element
+     * @param flipX
+     */
+    onFlipXChanged(element: IElement, flipX: boolean) {
+      this.flipX = flipX;
     },
     /**
      * 组件倾斜变化

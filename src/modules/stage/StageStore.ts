@@ -333,6 +333,10 @@ export default class StageStore implements IStageStore {
         this.shield.emit(ShieldDispatcherNames.angleChanged, element, value);
         break;
       }
+      case ElementReactionPropNames.flipX: {
+        this.shield.emit(ShieldDispatcherNames.flipXChanged, element, value);
+        break;
+      }
       // x偏移角度
       case ElementReactionPropNames.leanXAngle: {
         this.shield.emit(ShieldDispatcherNames.leanXAngleChanged, element, value);

@@ -51,7 +51,11 @@ function setElementsLeanYAngle(value: string) {
 </script>
 <template>
   <div class="angle-props right-props">
-    <div class="angle-props__title">角度</div>
+    <div class="angle-props__title">
+      <span class="angle-props__title-text">角度</span>
+      <el-icon :class="['iconfont', 'icon-verbise-flip-horizontal']" v-if="stageStore.flipX">
+      </el-icon>
+    </div>
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">

@@ -126,6 +126,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 是否翻转X轴
+  @computed
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
     return MathUtils.calcFlipXByPoints(this.model.boxCoords);
