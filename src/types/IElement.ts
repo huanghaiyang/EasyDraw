@@ -493,8 +493,6 @@ export default interface IElement {
   calcViewAngle(): number;
   // 计算实际角度
   calcActualAngle(): number;
-  // 计算角度
-  calcAngle(): number;
 
   // 激活旋转
   activeRotation(): void;

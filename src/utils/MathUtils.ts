@@ -582,25 +582,33 @@ export default class MathUtils {
    * @param boxPoints
    * @returns
    */
-  static calcFlipX(boxPoints: IPoint[]): boolean {
+  static calcFlipXByPoints(boxPoints: IPoint[]): boolean {
     const centerCoord = MathUtils.calcCenter(boxPoints);
     return MathUtils.isPointClockwise(centerCoord, boxPoints[0], boxPoints[3]);
   }
 
   /**
-   * 根据点集计算倾斜X角度
+   * 计算实际角度
    *
    * @param points
    * @returns
    */
-  static calcAngleByPoints(points: IPoint[]): number {
-    const leanXAngle = 0;
-    const internalAngle = MathUtils.calcInternalAngle(points);
-    const flipX = MathUtils.calcFlipX(points);
-    const leanYAngle = MathUtils.calcLeanYAngle(internalAngle, flipX);
-    points = MathUtils.calcUnLeanByPoints(points, leanXAngle, leanYAngle, flipX);
-    const angle = MathUtils.calcAngle(points[2], points[1]);
+  static calcViewAngleByPoints(boxPoints: IPoint[]): number {
+    const angle = MathUtils.calcAngle(boxPoints[2], boxPoints[1]);
     return MathUtils.mirrorAngle(angle + 90);
+  }
+
+  /**
+   * 计算实际角度
+   *
+   * @param boxPoints
+   * @returns
+   */
+  static calcActualAngleByPoints(boxPoints: IPoint[]): number {
+    const internalAngle = MathUtils.calcInternalAngle(boxPoints);
+    const leanYAngle = MathUtils.calcLeanYAngle(internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
+    const viewAngle = MathUtils.calcViewAngleByPoints(boxPoints);
+    return MathUtils.mirrorAngle(viewAngle - leanYAngle);
   }
 
   /**

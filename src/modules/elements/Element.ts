@@ -128,7 +128,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否翻转X轴
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
-    return MathUtils.calcFlipX(this.model.boxCoords);
+    return MathUtils.calcFlipXByPoints(this.model.boxCoords);
   }
 
   // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
@@ -1039,8 +1039,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcViewAngle(): number {
     if (!this.viewAngleCalcEnable) return this.model.angle;
-    const angle = MathUtils.calcAngle(this.rotateBoxCoords[2], this.rotateBoxCoords[1]);
-    return MathUtils.mirrorAngle(angle + 90);
+    return MathUtils.calcViewAngleByPoints(this.rotateBoxCoords);
   }
 
   /**
@@ -1050,17 +1049,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcActualAngle(): number {
     return MathUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
-  }
-
-  /**
-   * 根据坐标重新计算角度
-   *
-   * 组合形变时，子组件因为坐标变换，导致角度也发生了变化，需要重新计算，否则子组件独立形变时，坐标计算会出现错误
-   *
-   * @returns
-   */
-  calcAngle(): number {
-    return MathUtils.calcAngleByPoints(this.model.boxCoords);
   }
 
   /**
@@ -1411,8 +1399,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     const points = ElementUtils.calcMatrixPoints(this._originalRotatePathPoints, matrix, lockPoint, groupAngles);
     // 计算变换后的盒模型坐标
     const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngles);
+    // 计算内角
+    this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
+    // 计算x倾斜角度
+    this.model.leanXAngle = 0;
+    // 计算y倾斜角度
+    this.model.leanYAngle = MathUtils.calcLeanYAngle(this.model.internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
     // 计算变换后的角度
-    // this.model.angle = MathUtils.calcAngleByPoints(boxPoints);
+    this.model.angle = MathUtils.calcActualAngleByPoints(boxPoints);
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
     // 计算变换后的盒模型坐标
@@ -1430,7 +1424,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新位置
     this.refreshPosition();
     // 刷新角度
-    this.refreshAngles();
+    this.refreshAngles({
+      leanX: false,
+      leanY: false,
+      internal: false,
+    });
+    this.refreshRotation();
     return isAngleFlip;
   }
 
@@ -1830,6 +1829,8 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 设置X倾斜角度
+   * 
+   * do noting
    *
    * @param value
    */
