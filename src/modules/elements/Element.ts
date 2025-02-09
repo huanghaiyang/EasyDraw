@@ -972,7 +972,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnLeanCoords(): IPoint[] {
-    return MathUtils.calcUnLeanByPoints(this.model.coords, this.model.leanXAngle, this.model.leanYAngle, this.flipX);
+    return MathUtils.calcUnLeanByPoints(this.model.coords, this.model.leanXAngle, this.model.leanYAngle);
   }
 
   /**
@@ -981,7 +981,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnleanBoxCoords(): IPoint[] {
-    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, this.model.leanXAngle, this.model.leanYAngle, this.flipX);
+    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, this.model.leanXAngle, this.model.leanYAngle);
   }
 
   /**
@@ -1852,18 +1852,16 @@ export default class Element implements IElement, ILinkedNodeValue {
   setLeanYAngle(value: number): void {
     // 限制倾斜角度
     value = clamp(value, -89, 89);
-    // 计算倾斜角度
-    const leanAngle = this.flipX ? -value : value;
     // 计算非倾斜坐标
     const coords = this.calcUnLeanCoords();
     // 计算中心坐标
     const centerCoord = this.calcCenterCoord();
     // 重新计算倾斜坐标
-    this.model.coords = MathUtils.batchLeanYWithCenter(coords, leanAngle, centerCoord);
+    this.model.coords = MathUtils.batchLeanYWithCenter(coords, value, centerCoord);
     // 计算非倾斜盒模型坐标
     const boxCoords = this.calcUnleanBoxCoords();
     // 重新计算倾斜盒模型坐标
-    this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, leanAngle, centerCoord);
+    this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
     // 刷新

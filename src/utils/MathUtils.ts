@@ -568,12 +568,11 @@ export default class MathUtils {
    * @param points
    * @param leanYAngle
    * @param leanXAngle
-   * @param flipX
    * @returns
    */
-  static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number, flipX: boolean): IPoint[] {
+  static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number): IPoint[] {
     const center = MathUtils.calcCenter(points);
-    return MathUtils.batchLeanWithCenter(points, -leanXAngle, flipX ? leanYAngle : -leanYAngle, center);
+    return MathUtils.batchLeanWithCenter(points, -leanXAngle, -leanYAngle, center);
   }
 
   /**
