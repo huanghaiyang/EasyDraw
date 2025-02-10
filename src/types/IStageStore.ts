@@ -1,4 +1,4 @@
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
 import { IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
@@ -88,11 +88,13 @@ export default interface IStageStore extends IStageSetter {
   // 更新选中元素形变
   updateSelectedElementsTransform(point: IPoint): void;
   // 计算旋转元素中心
-  calcRotatingStates(point: IPoint): void;
+  refreshRotatingStates(point: IPoint): void;
   // 清除旋转元素中心
   clearRotatingStates(): void;
   // 恢复元素原始属性
-  refreshElementsOriginals(elements: IElement[], options?: { subs?: boolean; deepSubs?: boolean }): void;
+  refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void;
+  // 刷新元素角度
+  refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void;
   // 刷新元素位置
   refreshElementsPosition(elements: IElement[]): void;
   // 遍历元素

@@ -9,7 +9,7 @@ import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary } from "@/types/IElement";
+import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
@@ -460,8 +460,8 @@ export default class StageStore implements IStageStore {
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach((element) => {
-      if (this.hasElement(element.id)) {
-        element.setAngle(value);
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        this.rotateElements([element], value, element.angle, element.centerCoord);
       }
     });
   }
@@ -1041,9 +1041,32 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param options
    */
-  refreshElementsOriginals(elements: IElement[], options: { subs: boolean; deepSubs: boolean } = { subs: false, deepSubs: false }): void {
-    let ids = new Set<string>();
+  refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
+   this._refreshElementsByFunc(elements, (element) => element.refreshOriginalProps(), options);
+  }
 
+  /**
+   * 刷新元素角度
+   *
+   * @param elements
+   * @param func
+   * @param options
+   */
+  refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void {
+   this._refreshElementsByFunc(elements, (element) => element.refreshOriginalAngle(), options);
+  }
+
+  /**
+   * 刷新元素属性
+   *
+   * @param elements
+   * @param func
+   * @param options
+   */
+  private _refreshElementsByFunc(elements: IElement[], func: (element: IElement) => void, options?: RefreshSubOptions): void {
+    options = Object.assign({}, DefaultRefreshSubOptions, options || {});
+
+    let ids = new Set<string>();
     /**
      * 刷新单个元素
      *
@@ -1052,7 +1075,7 @@ export default class StageStore implements IStageStore {
     function refreshElement(element: IElement): void {
       if (ids.has(element.id)) return;
       ids.add(element.id);
-      element.refreshOriginalProps();
+      func(element);
     }
 
     elements.forEach((element) => {
@@ -1121,12 +1144,29 @@ export default class StageStore implements IStageStore {
 
   /**
    * 计算旋转组件的中心点
+   *
+   * @param point
    */
-  calcRotatingStates(point: IPoint): void {
-    const center = MathUtils.calcCenter(flatten(this.rotatingTargetElements.map((element) => element.pathPoints)));
+  refreshRotatingStates(point: IPoint): void {
+    const { center, centerCoord, angle } = this.calcRotatingStatesByElements(point, this.rotatingTargetElements);
     this._rotatingCenter = center;
-    this._rotatingCenterCoord = ElementUtils.calcWorldPoint(center, this.shield.stageCalcParams);
-    this._rotatingOriginalAngle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
+    this._rotatingCenterCoord = centerCoord;
+    this._rotatingOriginalAngle = angle;
+  }
+
+  /**
+   * 计算给定旋转组件的中心点
+   *
+   * @param point
+   * @param elements
+   *
+   * @returns { center: IPoint; centerCoord: IPoint; angle: number }
+   */
+  calcRotatingStatesByElements(point: IPoint, elements: IElement[]): { center: IPoint; centerCoord: IPoint; angle: number } {
+    const center = MathUtils.calcCenter(flatten(elements.map((element) => element.pathPoints)));
+    const centerCoord = ElementUtils.calcWorldPoint(center, this.shield.stageCalcParams);
+    const angle = MathUtils.preciseToFixed(MathUtils.calcAngle(center, point));
+    return { center, centerCoord, angle };
   }
 
   /**
@@ -1144,13 +1184,25 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    let angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
-    this.rotatingTargetElements.forEach((element) => {
-      angle = MathUtils.mirrorAngle(element.originalAngle + angle - this._rotatingOriginalAngle);
+    const angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
+    this.rotateElements(this.rotatingTargetElements, angle, this._rotatingOriginalAngle, this._rotatingCenterCoord);
+  }
+
+  /**
+   * 组件旋转操作
+   *
+   * @param elements
+   * @param angle
+   * @param originalAngle
+   * @param centerCoord
+   */
+  rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint): void {
+    elements.forEach((element) => {
+      angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
       element.setAngle(angle);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach((sub) => {
-          sub.rotateBy(angle - element.originalAngle, this._rotatingCenterCoord);
+          sub.rotateBy(angle - element.originalAngle, centerCoord);
         });
       }
     });

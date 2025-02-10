@@ -14,6 +14,12 @@ import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
 
+// 刷新子元素选项
+export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
+
+// 默认刷新子元素选项
+export const DefaultRefreshSubOptions: RefreshSubOptions = { subs: false, deepSubs: false };
+
 // 变换参数
 export type TransformByOptions = {
   // 变换器类型
@@ -439,6 +445,8 @@ export default interface IElement {
   refreshRotation(): void;
   // 刷新角度
   refreshAngles(options?: RefreshAnglesOptions): void;
+  // 刷新原始角度
+  refreshOriginalAngle(): void;
   // 刷新
   refresh(options?: RefreshOptions): void;
   // 是否包含点

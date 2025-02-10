@@ -180,21 +180,4 @@ export default class ElementGroup extends Element implements IElementGroup {
       sub.isSelected = value;
     });
   }
-
-  /**
-   * 刷新原始角度
-   */
-  protected _refreshOriginalAngle(): void {
-    super._refreshOriginalAngle();
-    this._refreshDeepSubsOriginalAngle();
-  }
-
-  /**
-   * 刷新子组件的原始角度
-   */
-  private _refreshDeepSubsOriginalAngle(): void {
-    this.deepSubs.forEach((sub) => {
-      sub.originalAngle = sub.model.angle;
-    });
-  }
 }

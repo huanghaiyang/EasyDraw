@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp, cloneDeep, flatten, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement from "@/types/IElement";
+import IElement, { RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -251,8 +251,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
+    this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsAngle(elements, value);
     await this._redrawAll({ shield: true });
+    this._refreshElementsOriginals(elements, { deepSubs: true });
   }
 
   /**
@@ -596,10 +598,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isMoveableActive) {
       // 尝试激活控制器
       const controller = this._tryActiveController();
+      if (controller) {
+        this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
+      }
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, { isRotatingTarget: true });
-        this.store.calcRotatingStates(this._pressDownPosition);
-        this.store.refreshElementsOriginals(this.store.selectedElements);
+        this.store.refreshRotatingStates(this._pressDownPosition);
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
         this._isElementsTransforming = true;
@@ -626,6 +630,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
     }
     await this.mask.redraw();
+  }
+
+  /**
+   * 刷新元素原始数据
+   *
+   * @param elements
+   * @param options
+   */
+  private _refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
+    this.store.refreshElementsOriginalAngles(elements, options);
+    this.store.refreshElementsOriginals(elements, options);
   }
 
   /**
@@ -723,15 +738,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件拖拽操作
    */
   private _endElementsDrag() {
-    // 更新组件的坐标位置
-    this.store.updateSelectedElementsMovement({
-      x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-    });
+    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
     // 取消组件拖动状态
     this.store.updateElements(this.store.selectedElements, { isDragging: false });
-    // 刷新组件坐标数据
-    this.store.refreshElementsOriginals(this.store.selectedElements);
     // 刷新组件坐标数据
     this.store.refreshElementsPosition(this.store.selectedElements);
   }
@@ -740,8 +749,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件旋转操作
    */
   private _endElementsRotate() {
-    // 刷新组件坐标数据
-    this.store.refreshElementsOriginals(this.store.rotatingTargetElements, { deepSubs: true });
+    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,
@@ -754,12 +762,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件变换操作
    */
   private _endElementsTransform() {
-    this.store.updateSelectedElementsTransform({
-      x: this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      y: this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-    });
-    // 刷新组件坐标数据
-    this.store.refreshElementsOriginals(this.store.selectedElements);
+    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
     // 更新组件状态
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,

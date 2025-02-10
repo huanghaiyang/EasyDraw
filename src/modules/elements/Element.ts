@@ -1243,7 +1243,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeTransformer(transformer: IVerticesTransformer): void {
     this._transformers.forEach((item) => {
       item.isActive = item.id === transformer.id;
-      this._refreshOriginalAngle();
     });
   }
 
@@ -1255,7 +1254,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeBorderTransformer(transformer: IBorderTransformer): void {
     this._borderTransformers.forEach((item) => {
       item.isActive = item.id === transformer.id;
-      this._refreshOriginalAngle();
     });
   }
 
@@ -2010,8 +2008,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   activeRotation(): void {
     // 设置旋转为激活状态
     this.rotation.isActive = true;
-    // 刷新原始角度
-    this._refreshOriginalAngle();
   }
 
   /**
@@ -2025,7 +2021,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 恢复原始角度
    */
-  protected _refreshOriginalAngle(): void {
+  refreshOriginalAngle(): void {
     // 设置原始角度
     this._originalAngle = this.model.angle;
   }
