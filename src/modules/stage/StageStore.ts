@@ -1402,6 +1402,15 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 获取选中的元素
+   *
+   * @returns
+   */
+  getSelectedElements(isExcludeGroupSubs: boolean): IElement[] {
+    return this.selectedElements.filter((element) => (isExcludeGroupSubs ? !element.isGroupSubject : true));
+  }
+
+  /**
    * 设置元素编辑状态
    *
    * @param elements

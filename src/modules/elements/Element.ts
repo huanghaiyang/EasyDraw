@@ -1363,10 +1363,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
     // 刷新舞台坐标
     this.refreshRPs();
-    // 刷新尺寸
-    this.refreshSize();
     // 刷新位置
     this.refreshPosition();
+    // 刷新尺寸
+    this.refreshSize();
     // 刷新角度
     this.refreshAngles({
       leanX: false,

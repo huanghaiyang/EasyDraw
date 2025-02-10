@@ -137,6 +137,8 @@ export default interface IStageStore extends IStageSetter {
   endEditingElements(elements: IElement[]): void;
   // 获取已完成的选中元素
   getFinishedSelectedElements(isExcludeGroupSubs: boolean): IElement[];
+  // 获取选中的元素
+  getSelectedElements(isExcludeGroupSubs: boolean): IElement[];
   // 判断选中的元素是否等于正在绘制的元素
   isSelectedEqCreating(): boolean;
 
