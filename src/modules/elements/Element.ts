@@ -1828,7 +1828,7 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 设置X倾斜角度
-   * 
+   *
    * do noting
    *
    * @param value
@@ -1868,6 +1868,50 @@ export default class Element implements IElement, ILinkedNodeValue {
         leanY: false,
       },
     });
+  }
+
+  /**
+   * 组合子组件倾斜
+   *
+   * @param value
+   * @param prevValue
+   * @param groupAngle
+   * @param center
+   */
+  leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void {
+    // 计算旋转偏移前的坐标
+    let points = MathUtils.batchTransWithCenter(this._rotatePathPoints, { angle: groupAngle, leanYAngle: prevValue }, center, true);
+    // 计算旋转偏移前的盒模型坐标
+    let boxPoints = MathUtils.batchTransWithCenter(this._rotateBoxPoints, { angle: groupAngle, leanYAngle: prevValue }, center, true);
+    // 计算偏移后的坐标
+    points = MathUtils.batchTransWithCenter(points, { angle: groupAngle, leanYAngle: value }, center);
+    // 计算偏移后的盒模型坐标
+    boxPoints = MathUtils.batchTransWithCenter(boxPoints, { angle: groupAngle, leanYAngle: value }, center);
+    // 计算内角
+    this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
+    // 计算x倾斜角度
+    this.model.leanXAngle = 0;
+    // 计算y倾斜角度
+    this.model.leanYAngle = MathUtils.calcLeanYAngle(this.model.internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
+    // 计算实际角度
+    this.model.angle = MathUtils.calcActualAngleByPoints(boxPoints);
+    // 计算坐标
+    this.model.coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, center, this.shield.stageCalcParams);
+    // 计算盒模型坐标
+    this.model.boxCoords = ElementUtils.calcCoordsByTransPathPoints(boxPoints, this.angles, center, this.shield.stageCalcParams);
+    // 刷新舞台坐标
+    this.refreshRPs();
+    // 刷新尺寸
+    this.refreshSize();
+    // 刷新位置
+    this.refreshPosition();
+    // 刷新角度
+    this.refreshAngles({
+      leanX: false,
+      leanY: false,
+      internal: false,
+    });
+    this.refreshRotation();
   }
 
   /**

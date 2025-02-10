@@ -488,8 +488,15 @@ export default class StageStore implements IStageStore {
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach((element) => {
-      if (this.hasElement(element.id)) {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        const prevValue = element.leanYAngle;
         element.setLeanYAngle(value);
+        if (element.isGroup) {
+          const center = element.center;
+          (element as IElementGroup).deepSubs.forEach((sub) => {
+            sub.leanYBy(value, prevValue, element.angle, center);
+          });
+        }
       }
     });
   }
@@ -1042,7 +1049,7 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-   this._refreshElementsByFunc(elements, (element) => element.refreshOriginalProps(), options);
+    this._refreshElementsByFunc(elements, (element) => element.refreshOriginalProps(), options);
   }
 
   /**
@@ -1053,7 +1060,7 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void {
-   this._refreshElementsByFunc(elements, (element) => element.refreshOriginalAngle(), options);
+    this._refreshElementsByFunc(elements, (element) => element.refreshOriginalAngle(), options);
   }
 
   /**
@@ -1160,7 +1167,7 @@ export default class StageStore implements IStageStore {
    * @param point
    * @param elements
    *
-   * @returns { center: IPoint; centerCoord: IPoint; angle: number }
+   * @returns
    */
   calcRotatingStatesByElements(point: IPoint, elements: IElement[]): { center: IPoint; centerCoord: IPoint; angle: number } {
     const center = MathUtils.calcCenter(flatten(elements.map((element) => element.pathPoints)));

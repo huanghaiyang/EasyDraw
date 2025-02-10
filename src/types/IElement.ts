@@ -531,6 +531,8 @@ export default interface IElement {
   transformByBorder(offset: IPoint): boolean;
   // 矩阵变换
   transformBy(options: TransformByOptions): boolean;
+  // 组合子组件倾斜
+  leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void;
 
   // 刷新旋转
   refreshRotation(): void;

@@ -229,8 +229,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
+    this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
     await this._redrawAll({ shield: true, mask: true });
+    this._refreshElementsOriginals(elements, { deepSubs: true });
   }
 
   /**
