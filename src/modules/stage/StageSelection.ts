@@ -208,7 +208,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   calcSingleTransformerModels(): IMaskModel[] {
-    const elements = this.shield.store.selectedElements;
+    const elements = this.shield.store.getFinishedSelectedElements(true);
     if (elements.length === 1) {
       const { transformerType, angle, leanYAngle, actualAngle, transformers, verticesTransformEnable, flipX, flipY } = elements[0];
       return this.calcTransformerModelsByPoints(
