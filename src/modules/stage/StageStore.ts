@@ -1007,7 +1007,7 @@ export default class StageStore implements IStageStore {
   updateSelectedElementsTransform(offset: IPoint): void {
     this.selectedElements.forEach((element) => {
       const isAngleFlip = element.transform(offset);
-      if (element.isGroup) {
+      if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach((sub) => {
           const { transformLockPoint, transformLockIndex, transformOriginalMovingPoint, transformType } = element;
           sub.transformBy({
@@ -1042,21 +1042,31 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginals(elements: IElement[], options: { subs: boolean; deepSubs: boolean } = { subs: false, deepSubs: false }): void {
-    elements.forEach((element) => {
+    let ids = new Set<string>();
+
+    /**
+     * 刷新单个元素
+     *
+     * @param element
+     */
+    function refreshElement(element: IElement): void {
+      if (ids.has(element.id)) return;
+      ids.add(element.id);
       element.refreshOriginalProps();
+    }
+
+    elements.forEach((element) => {
+      refreshElement(element);
       if (element.isGroup) {
-        if (options.subs) {
-          (element as IElementGroup).subs.forEach((sub) => {
-            sub.refreshOriginalProps();
-          });
-        }
         if (options.deepSubs) {
-          (element as IElementGroup).deepSubs.forEach((sub) => {
-            sub.refreshOriginalProps();
-          });
+          (element as IElementGroup).deepSubs.forEach(refreshElement);
+        } else if (options.subs) {
+          (element as IElementGroup).subs.forEach(refreshElement);
         }
       }
     });
+    ids.clear();
+    ids = null;
   }
 
   /**
