@@ -59,15 +59,25 @@ export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
 
 // 画板元素样式定义
 export type ElementStyles = {
+  // 边框颜色
   strokeColor?: string;
+  // 边框颜色透明度
   strokeColorOpacity?: number;
+  // 边框描边类型
   strokeType?: StrokeTypes;
+  // 边框宽度
   strokeWidth?: number;
+  // 填充颜色
   fillColor?: string;
+  // 填充颜色透明度
   fillColorOpacity?: number;
+  // 字体大小
   fontSize?: number;
+  // 字体
   fontFamily?: string;
+  // 文本对齐方式
   textAlign?: CanvasTextAlign;
+  // 文本基线
   textBaseline?: CanvasTextBaseline;
 };
 

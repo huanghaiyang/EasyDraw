@@ -86,17 +86,23 @@ export default class CanvasUtils {
     let { x, y, width, height } = rect;
     let { angle = 0, flipX = false, leanX, leanY, actualAngle } = options;
     const ctx = target.getContext("2d");
+    // 以实际组件角度替换angle
     if (typeof actualAngle === "number") {
       angle = actualAngle;
     }
+    // 计算弧度
     let radian = MathUtils.angleToRadian(angle);
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
     let scaleX = 1;
     let scaleY = 1;
+    // 如果组件翻转
     if (flipX) {
+      // 翻转显示
       scaleX = -1;
+      // 翻转角度
       radian = -radian;
+      // 倾斜翻转
       leanY = -leanY;
     }
     // 缩放

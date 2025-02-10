@@ -4,14 +4,62 @@ import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
 import { DefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
-import { throttle } from "lodash";
+import { cloneDeep, throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 
+// 舞台实例
 const shield = new StageShield();
+// 舞台容器
 const container = new StageContainer();
+// 配置
 shield.configure.config({ rotationIconEnable: true });
 window.shield = shield;
+
+// 舞台默认数据
+const DefaultStage = {
+  // 组件位置
+  position: {
+    x: 0,
+    y: 0,
+  },
+  // 组件宽度
+  width: 0,
+  // 组件高度
+  height: 0,
+  // 组件角度
+  angle: 0,
+  // X轴翻转
+  flipX: false,
+  // X偏移角度
+  leanXAngle: 0,
+  // Y偏移角度
+  leanYAngle: 0,
+  // 缩放比例
+  scale: 1,
+  // 描边类型
+  strokeType: DefaultElementStyle.strokeType,
+  // 描边宽度
+  strokeWidth: DefaultElementStyle.strokeWidth,
+  // 描边颜色
+  strokeColor: DefaultElementStyle.strokeColor,
+  // 描边透明度
+  strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
+  // 填充颜色
+  fillColor: DefaultElementStyle.fillColor,
+  // 填充透明度
+  fillColorOpacity: DefaultElementStyle.fillColorOpacity,
+  // 字体大小
+  fontSize: DefaultElementStyle.fontSize,
+  // 字体
+  fontFamily: DefaultElementStyle.fontFamily,
+  // 文字对齐方式
+  textAlign: DefaultElementStyle.textAlign,
+  // 文字基线
+  textBaseline: DefaultElementStyle.textBaseline,
+  // 是否锁定比例
+  isRatioLocked: false,
+};
 
 export const useStageStore = defineStore("stage", {
   state: () => {
@@ -28,62 +76,31 @@ export const useStageStore = defineStore("stage", {
       selectedElements: [],
       // 目标元素
       targetElements: [],
-      // 组件位置
-      position: {
-        x: 0,
-        y: 0,
-      },
-      // 组件宽度
-      width: 0,
-      // 组件高度
-      height: 0,
-      // 组件角度
-      angle: 0,
-      // X轴翻转
-      flipX: false,
-      // X偏移角度
-      leanXAngle: 0,
-      // Y偏移角度
-      leanYAngle: 0,
-      // 缩放比例
-      scale: 1,
-      // 描边类型
-      strokeType: DefaultElementStyle.strokeType,
-      // 描边宽度
-      strokeWidth: DefaultElementStyle.strokeWidth,
-      // 描边颜色
-      strokeColor: DefaultElementStyle.strokeColor,
-      // 描边透明度
-      strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
-      // 填充颜色
-      fillColor: DefaultElementStyle.fillColor,
-      // 填充透明度
-      fillColorOpacity: DefaultElementStyle.fillColorOpacity,
-      // 字体大小
-      fontSize: DefaultElementStyle.fontSize,
-      // 字体
-      fontFamily: DefaultElementStyle.fontFamily,
-      // 文字对齐方式
-      textAlign: DefaultElementStyle.textAlign,
-      // 文字基线
-      textBaseline: DefaultElementStyle.textBaseline,
-      // 是否锁定比例
-      isRatioLocked: false,
+      // 舞台默认数据
+      ...cloneDeep(DefaultStage),
     };
   },
   getters: {
+    // 选中的唯一元素
     uniqSelectedElement(): IElement {
-      return this.selectedElements.length === 1 ? this.selectedElements[0] : null;
+      // 选中的非组合元素
+      const elements = shield.store.getNoParentElements(this.selectedElements);
+      if (elements.length !== 1) return null;
+      return elements[0];
     },
+    // 输入框是否禁用
     inputDisabled(): boolean {
       return !this.uniqSelectedElement;
     },
+    // 对齐是否可用
     alignEnable(): boolean {
       return this.selectedElements?.length >= 2;
     },
+    // 平均是否可用
     averageEnable(): boolean {
       return this.selectedElements?.length >= 3;
     },
+    // 自由线条绘制是否可见
     arbitraryVisible(): boolean {
       return this.currentCreator?.type === CreatorTypes.arbitrary;
     },
@@ -188,7 +205,12 @@ export const useStageStore = defineStore("stage", {
     onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
-        const element: IElement = this.selectedElements[0];
+        // 获取组合或者组件
+        const element: IElement = shield.store.getAncestorGroup(this.selectedElements);
+        if (!element) {
+          Object.assign(this, cloneDeep(DefaultStage));
+          return;
+        }
         const {
           position,
           width,
