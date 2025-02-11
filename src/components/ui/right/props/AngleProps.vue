@@ -9,22 +9,22 @@ const leanYValue = ref(0);
 
 watch(
   () => stageStore.angle,
-  (newValue) => {
+  newValue => {
     aValue.value = newValue;
-  }
+  },
 );
 
 watch(
   () => stageStore.leanYAngle,
-  (newValue) => {
+  newValue => {
     leanYValue.value = newValue;
-  }
+  },
 );
 
 /**
  * 设置旋转角度
- * 
- * @param value 
+ *
+ * @param value
  */
 function setElementsAngle(value: string) {
   let val = Number(value);
@@ -39,36 +39,55 @@ function setElementsAngle(value: string) {
 
 /**
  * 设置元素Y倾斜角度
- * 
- * @param value 
+ *
+ * @param value
  */
 function setElementsLeanYAngle(value: string) {
   let val = Number(value);
   val = clamp(val, -89, 89);
   stageStore.setElementsLeanYAngle(val);
 }
-
 </script>
 <template>
   <div class="angle-props right-props">
     <div class="angle-props__title">
       <span class="angle-props__title-text">角度</span>
-      <el-icon :class="['iconfont', 'icon-verbise-flip-horizontal']" v-if="stageStore.flipX">
+      <el-icon
+        :class="['iconfont', 'icon-verbise-flip-horizontal']"
+        v-if="stageStore.flipX"
+      >
       </el-icon>
     </div>
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-180"
-          max="180" @change="setElementsAngle">
+        <el-input
+          v-model="aValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled"
+          type="number"
+          min="-180"
+          max="180"
+          @change="setElementsAngle"
+        >
           <template #prepend>a</template>
           <template #append>°</template>
         </el-input>
       </div>
 
-      <div class="angle-props__row-item" v-if="stageStore.primarySelectedElement?.leanYAngleModifyEnable">
-        <el-input v-model="leanYValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-89"
-          max="89" @change="setElementsLeanYAngle">
+      <div
+        class="angle-props__row-item"
+        v-if="stageStore.primarySelectedElement?.leanYAngleModifyEnable"
+      >
+        <el-input
+          v-model="leanYValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled"
+          type="number"
+          min="-89"
+          max="89"
+          @change="setElementsLeanYAngle"
+        >
           <template #prepend>ly</template>
           <template #append>°</template>
         </el-input>

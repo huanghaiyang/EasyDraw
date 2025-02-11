@@ -10,12 +10,12 @@ const stageRef = ref<HTMLElement | null>(null);
 const stageShieldRef = ref<
   InstanceType<typeof StageShieldVue> & StageShieldInstance
 >();
-const handleCreatorSelect = (creator) => {
+const handleCreatorSelect = creator => {
   const { type } = creator;
   if (type !== CreatorTypes.image) {
     stageStore.setCreator(creator);
   }
-}
+};
 
 onMounted(async () => {
   if (stageShieldRef.value) {

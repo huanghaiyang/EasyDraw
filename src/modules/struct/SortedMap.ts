@@ -47,7 +47,7 @@ export default class SortedMap<K, V> extends EventEmitter {
   }
 
   entries(): [K, V][] {
-    return this.keys.map((key) => [key, this.map.get(key) as V]);
+    return this.keys.map(key => [key, this.map.get(key) as V]);
   }
 
   keysArray(): K[] {
@@ -55,7 +55,7 @@ export default class SortedMap<K, V> extends EventEmitter {
   }
 
   valuesArray(): V[] {
-    return this.keys.map((key) => this.map.get(key) as V);
+    return this.keys.map(key => this.map.get(key) as V);
   }
 
   private compareKeys(a: K, b: K): number {

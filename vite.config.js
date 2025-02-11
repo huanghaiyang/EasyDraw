@@ -35,8 +35,8 @@ export default defineConfig({
           lodash: ["lodash"],
           mathjs: ["mathjs"],
           mobx: ["mobx"],
-        }
-      }
-    }
-  }
+        },
+      },
+    },
+  },
 });

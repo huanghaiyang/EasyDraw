@@ -87,14 +87,17 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * @returns
    */
   private _isInputEvent(e: Event): boolean {
-    return e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
+    return (
+      e.target instanceof HTMLInputElement ||
+      e.target instanceof HTMLTextAreaElement
+    );
   }
 
   /**
    * 初始化画布容器尺寸变更监听
    */
   async initRenderResizeEvent(): Promise<void> {
-    ResizeEvents.addListener(this.shield.renderEl, (e) => {
+    ResizeEvents.addListener(this.shield.renderEl, e => {
       this.emit("resize", e);
     });
   }
@@ -110,7 +113,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       imageDataList.forEach((imageData, index) => {
         taskQueue.add(
           new QueueTask(async () => {
-            await new Promise((resolve) => {
+            await new Promise(resolve => {
               this.emit("pasteImage", imageData, async () => {
                 await TimeUtils.wait(100);
                 resolve(true);
@@ -120,7 +123,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
               await taskQueue.destroy();
               taskQueue = null;
             }
-          })
+          }),
         );
       });
     }
@@ -130,24 +133,24 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * 初始化鼠标事件
    */
   async initMouseEvents(): Promise<void> {
-    this.shield.canvas.addEventListener("mousemove", (e) => {
+    this.shield.canvas.addEventListener("mousemove", e => {
       this.emit("cursorMove", e);
     });
-    this.shield.canvas.addEventListener("mouseleave", (e) => {
+    this.shield.canvas.addEventListener("mouseleave", e => {
       this.emit("cursorLeave", e);
     });
-    this.shield.canvas.addEventListener("mousedown", (e) => {
+    this.shield.canvas.addEventListener("mousedown", e => {
       this.emit("pressDown", e);
     });
-    this.shield.canvas.addEventListener("mouseup", (e) => {
+    this.shield.canvas.addEventListener("mouseup", e => {
       this.emit("pressUp", e);
     });
-    this.shield.canvas.addEventListener("dblclick", (e) => {
+    this.shield.canvas.addEventListener("dblclick", e => {
       this.emit("dblClick", e);
     });
 
     // 滚轮事件
-    this.shield.canvas.addEventListener("wheel", (e) => {
+    this.shield.canvas.addEventListener("wheel", e => {
       EventUtils.stopPP(e);
 
       // 如果为ctrl+滚轮事件，则缩放，否则移动舞台
@@ -161,32 +164,32 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
             x: e.deltaX,
             y: e.deltaY,
           },
-          e
+          e,
         );
       }
     });
 
     // 拖拽over事件需要阻止默认事件，否则无法触发drop事件
-    this.shield.canvas.addEventListener("dragover", (e) => {
+    this.shield.canvas.addEventListener("dragover", e => {
       EventUtils.stopPP(e);
     });
 
     // 拖拽解析数据
-    this.shield.canvas.addEventListener("drop", (e) => {
+    this.shield.canvas.addEventListener("drop", e => {
       EventUtils.stopPP(e);
 
       // 解析图片
       FileUtils.getImageDataFromFileTransfer(e)
-        .then((imageDataList) => {
+        .then(imageDataList => {
           this._createImages(imageDataList);
         })
-        .catch((e) => {
+        .catch(e => {
           e && console.warn(e);
         });
     });
 
     // 键盘事件
-    document.addEventListener("keydown", (e) => {
+    document.addEventListener("keydown", e => {
       this._isCtrl = this._isCtrlEvent(e);
 
       // 放大操作
@@ -258,19 +261,19 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     });
 
     // 键盘弹起事件监听
-    document.addEventListener("keyup", (e) => {
+    document.addEventListener("keyup", e => {
       this._isCtrl = e.ctrlKey;
       this._isShift = e.shiftKey;
     });
 
     // 粘贴操作
-    document.addEventListener("paste", (e) => {
+    document.addEventListener("paste", e => {
       // 解析图片
       FileUtils.getImageDataFromClipboard(e)
-        .then((imageDataList) => {
+        .then(imageDataList => {
           this._createImages(imageDataList);
         })
-        .catch((e) => {
+        .catch(e => {
           e && console.warn(e);
         });
     });

@@ -13,7 +13,9 @@ export interface ILinkedNode<T> {
   insertBefore(node: ILinkedNode<T>): void;
 }
 
-export default class LinkedNode<T extends ILinkedNodeValue> implements ILinkedNode<ILinkedNodeValue> {
+export default class LinkedNode<T extends ILinkedNodeValue>
+  implements ILinkedNode<ILinkedNodeValue>
+{
   prev: ILinkedNode<T> | null = null;
   next: ILinkedNode<T> | null = null;
   value: T;

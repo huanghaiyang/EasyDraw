@@ -108,7 +108,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param subs
    */
   private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
-    subs.forEach((sub) => {
+    subs.forEach(sub => {
       result.push(sub);
       if (sub.isGroup) {
         this._getDeepSubs(result, (sub as ElementGroup).subs);
@@ -123,7 +123,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param type
    */
   getSubElementsByType(type: CreatorTypes): IElement[] {
-    return this.getSubs().filter((sub) => {
+    return this.getSubs().filter(sub => {
       return sub.isElement && sub.model.type === type;
     });
   }
@@ -132,14 +132,14 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取所有子元素
    */
   getAllSubElements(): IElement[] {
-    return this.getSubs().filter((sub) => sub.isElement);
+    return this.getSubs().filter(sub => sub.isElement);
   }
 
   /**
    * 获取所有子组合
    */
   getAllSubElementGroups(): IElementGroup[] {
-    return this.getSubs().filter((sub) => sub.isGroup) as IElementGroup[];
+    return this.getSubs().filter(sub => sub.isGroup) as IElementGroup[];
   }
 
   /**
@@ -148,7 +148,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param point
    */
   isContainsPoint(point: IPoint): boolean {
-    return this.deepSubs.some((sub) => sub.isContainsPoint(point));
+    return this.deepSubs.some(sub => sub.isContainsPoint(point));
   }
 
   /**
@@ -157,7 +157,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param points
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return this.deepSubs.some((sub) => sub.isPolygonOverlap(points));
+    return this.deepSubs.some(sub => sub.isPolygonOverlap(points));
   }
 
   /**
@@ -166,7 +166,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param coords
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return this.deepSubs.some((sub) => sub.isModelPolygonOverlap(coords));
+    return this.deepSubs.some(sub => sub.isModelPolygonOverlap(coords));
   }
 
   /**
@@ -176,7 +176,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   protected __setIsSelected(value: boolean): void {
     super.__setIsSelected(value);
-    this.deepSubs.forEach((sub) => {
+    this.deepSubs.forEach(sub => {
       sub.isSelected = value;
     });
   }

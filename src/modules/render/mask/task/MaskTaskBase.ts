@@ -2,7 +2,10 @@ import RenderTaskBase from "@/modules/render/RenderTaskBase";
 import { IMaskModel } from "@/types/IModel";
 import { IMaskTask } from "@/types/IRenderTask";
 
-export default abstract class MaskTaskBase extends RenderTaskBase implements IMaskTask {
+export default abstract class MaskTaskBase
+  extends RenderTaskBase
+  implements IMaskTask
+{
   // 模型
   model: IMaskModel;
   // 画布

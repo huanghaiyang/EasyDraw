@@ -11,16 +11,16 @@ const fillColorOpacity = ref(DefaultElementStyle.fillColorOpacity);
 
 watch(
   () => stageStore.fillColorOpacity,
-  (newValue) => {
+  newValue => {
     fillColorOpacity.value = newValue;
-  }
+  },
 );
 
 watch(
   () => stageStore.fillColor,
-  (newValue) => {
+  newValue => {
     fillColor.value = newValue;
-  }
+  },
 );
 
 const toggleColorPickerVisible = () => {
@@ -28,21 +28,37 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="fill-props right-props" v-if="stageStore.primarySelectedElement?.fillEnabled">
+  <div
+    class="fill-props right-props"
+    v-if="stageStore.primarySelectedElement?.fillEnabled"
+  >
     <div class="fill-props__title">填充</div>
 
     <div class="fill-props__row color">
       <div class="fill-props__row-item">
-        <el-color-picker v-model="fillColor" @change="stageStore.setElementsFillColor" ref="colorPickerRef"
-          :disabled="stageStore.inputDisabled" />
+        <el-color-picker
+          v-model="fillColor"
+          @change="stageStore.setElementsFillColor"
+          ref="colorPickerRef"
+          :disabled="stageStore.inputDisabled"
+        />
         <el-tag type="info" @click="toggleColorPickerVisible">{{
           fillColor
         }}</el-tag>
       </div>
 
       <div class="fill-props__row-item">
-        <el-input v-model="fillColorOpacity" placeholder="输入数字" type="number" min="0" max="1" @change="(value) => stageStore.setElementsFillColorOpacity(Number(value))
-          " :disabled="stageStore.inputDisabled">
+        <el-input
+          v-model="fillColorOpacity"
+          placeholder="输入数字"
+          type="number"
+          min="0"
+          max="1"
+          @change="
+            value => stageStore.setElementsFillColorOpacity(Number(value))
+          "
+          :disabled="stageStore.inputDisabled"
+        >
           <template #prepend>o</template>
         </el-input>
       </div>

@@ -9,6 +9,6 @@ export default class CreatorHelper {
    * @returns 工具
    */
   static getCreatorByType(type: CreatorTypes): Creator {
-    return Creators.find((item) => item.type === type);
+    return Creators.find(item => item.type === type);
   }
 }

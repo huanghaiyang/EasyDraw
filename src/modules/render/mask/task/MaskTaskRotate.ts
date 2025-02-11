@@ -30,7 +30,7 @@ export default class MaskTaskRotate extends MaskTaskBase {
         },
         {
           angle: this.data.angle,
-        }
+        },
       );
     }
   }

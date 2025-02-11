@@ -19,7 +19,7 @@ export default class ColorUtils {
     if (hex.length === 3) {
       hex = hex
         .split("")
-        .map((char) => char + char)
+        .map(char => char + char)
         .join("");
     }
 

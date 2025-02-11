@@ -19,7 +19,12 @@ export const useAppStore = defineStore("app", {
   }),
   actions: {
     async init() {
-      const res = await Promise.all([this.getLocale(), this.getUserInfo(), this.getVersion(), this.getConfig()]);
+      const res = await Promise.all([
+        this.getLocale(),
+        this.getUserInfo(),
+        this.getVersion(),
+        this.getConfig(),
+      ]);
       const [locale, user, version, config] = res;
       this.locale = locale.data;
       this.user = user.data;

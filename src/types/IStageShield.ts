@@ -1,6 +1,10 @@
 import { IPoint } from "@/types/index";
 import IStageConfigure from "@/types/IStageConfigure";
-import { IDrawerMask, IDrawerProvisional, IStageDrawer } from "@/types/IStageDrawer";
+import {
+  IDrawerMask,
+  IDrawerProvisional,
+  IStageDrawer,
+} from "@/types/IStageDrawer";
 import IStageSelection from "@/types/IStageSelection";
 import IStageStore from "@/types/IStageStore";
 import IStageCursor from "@/types/IStageCursor";

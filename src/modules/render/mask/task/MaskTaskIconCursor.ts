@@ -72,7 +72,7 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
         },
         {
           angle: this.data.angle,
-        }
+        },
       );
     }
   }

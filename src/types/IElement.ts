@@ -18,7 +18,10 @@ import { TransformTypes } from "@/types/Stage";
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
 
 // 默认刷新子元素选项
-export const DefaultRefreshSubOptions: RefreshSubOptions = { subs: false, deepSubs: false };
+export const DefaultRefreshSubOptions: RefreshSubOptions = {
+  subs: false,
+  deepSubs: false,
+};
 
 // 变换参数
 export type TransformByOptions = {
@@ -433,7 +436,10 @@ export default interface IElement {
   // 刷新原始角度
   refreshOriginalAngle(): void;
   // 刷新
-  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void;
+  refresh(
+    options?: RefreshOptions,
+    subOptions?: { angles?: RefreshAnglesOptions },
+  ): void;
   // 是否包含点
   isContainsPoint(point: IPoint): boolean;
   // 是否多边形重叠
@@ -515,7 +521,12 @@ export default interface IElement {
   // 矩阵变换
   transformBy(options: TransformByOptions): boolean;
   // 组合子组件倾斜
-  leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void;
+  leanYBy(
+    value: number,
+    prevValue: number,
+    groupAngle: number,
+    center: IPoint,
+  ): void;
 
   // 刷新旋转
   refreshRotation(): void;

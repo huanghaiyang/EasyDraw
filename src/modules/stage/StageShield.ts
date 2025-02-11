@@ -33,7 +33,10 @@ import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
 import StageAlign from "@/modules/stage/StageAlign";
 import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 
-export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
+export default class StageShield
+  extends DrawerBase
+  implements IStageShield, IStageAlignFuncs
+{
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -103,12 +106,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _originalStageWorldCoord: IPoint;
   // 是否需要重绘
   get shouldRedraw(): boolean {
-    return this.isElementsDragging || this.isElementsRotating || this.isElementsTransforming || this.isStageMoving;
+    return (
+      this.isElementsDragging ||
+      this.isElementsRotating ||
+      this.isElementsTransforming ||
+      this.isStageMoving
+    );
   }
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return this.isElementsRotating || this.isElementsTransforming || this.isElementsDragging;
+    return (
+      this.isElementsRotating ||
+      this.isElementsTransforming ||
+      this.isElementsDragging
+    );
   }
 
   // 是否正在拖拽组件
@@ -143,7 +155,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 是否是绘制工具
   get isDrawerActive(): boolean {
-    return [CreatorCategories.shapes, CreatorCategories.freedom].includes(this.currentCreator?.category);
+    return [CreatorCategories.shapes, CreatorCategories.freedom].includes(
+      this.currentCreator?.category,
+    );
   }
 
   // 是否是手绘工具
@@ -173,7 +187,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 舞台计算参数
   get stageCalcParams(): StageCalcParams {
-    return { rect: this.stageRect, worldCoord: this.stageWorldCoord, scale: this.stageScale };
+    return {
+      rect: this.stageRect,
+      worldCoord: this.stageWorldCoord,
+      scale: this.stageScale,
+    };
   }
 
   constructor() {
@@ -195,7 +213,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+  async setElementsPosition(
+    elements: IElement[],
+    value: IPoint,
+  ): Promise<void> {
     await this.store.setElementsPosition(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -228,7 +249,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
+  async setElementsLeanYAngle(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
     await this._redrawAll({ shield: true, mask: true });
@@ -254,7 +278,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
+  async setElementsStrokeType(
+    elements: IElement[],
+    value: StrokeTypes,
+  ): Promise<void> {
     await this.store.setElementsStrokeType(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -265,7 +292,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
+  async setElementsStrokeWidth(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -276,7 +306,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
+  async setElementsStrokeColor(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
     await this.store.setElementsStrokeColor(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -287,7 +320,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
+  async setElementsStrokeColorOpacity(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
     await this.store.setElementsStrokeColorOpacity(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -298,7 +334,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
+  async setElementsFillColor(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
     await this.store.setElementsFillColor(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -309,7 +348,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
+  async setElementsFillColorOpacity(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
     await this.store.setElementsFillColorOpacity(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -320,7 +362,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+  async setElementsTextAlign(
+    elements: IElement[],
+    value: CanvasTextAlign,
+  ): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -331,7 +376,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+  async setElementsTextBaseline(
+    elements: IElement[],
+    value: CanvasTextBaseline,
+  ): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -342,7 +390,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+  async setElementsFontSize(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -353,7 +404,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+  async setElementsFontFamily(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -364,7 +418,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
+  async setElementsRatioLocked(
+    elements: IElement[],
+    value: boolean,
+  ): Promise<void> {
     await this.store.setElementsRatioLocked(elements, value);
   }
 
@@ -402,7 +459,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectMoveable", this._handleSelectMoveable.bind(this));
     this.event.on("selectHand", this._handleSelectHand.bind(this));
     this.event.on("selectGroup", this._handleSelectGroup.bind(this));
-    this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
+    this.event.on(
+      "selectGroupCancel",
+      this._handleSelectGroupCancel.bind(this),
+    );
   }
 
   /**
@@ -462,7 +522,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
             this._transformElements();
             flag = true;
           }
-        } else if (this._isElementsDragging || this.store.isSelectedContainsTarget()) {
+        } else if (
+          this._isElementsDragging ||
+          this.store.isSelectedContainsTarget()
+        ) {
           if (this.checkCursorPressMovedALittle(e)) {
             // 标记拖动
             this._isElementsDragging = true;
@@ -506,7 +569,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.selection.deActiveElementsTransformers();
     }
     // 判断是否是边框变换控制器
-    const isBorderTransformerController = controller instanceof BorderTransformer;
+    const isBorderTransformerController =
+      controller instanceof BorderTransformer;
     if (!isBorderTransformerController) {
       this.selection.deActiveElementsBorderTransformers();
     }
@@ -528,7 +592,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _dragElements(): void {
     // 标记组件正在拖动
-    this.store.updateElements(this.store.selectedElements, { isDragging: true });
+    this.store.updateElements(this.store.selectedElements, {
+      isDragging: true,
+    });
     // 更新元素位置
     this.store.updateSelectedElementsMovement({
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
@@ -540,7 +606,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 组件形变
    */
   private _transformElements(): void {
-    this.store.updateElements(this.store.selectedElements, { isTransforming: true });
+    this.store.updateElements(this.store.selectedElements, {
+      isTransforming: true,
+    });
     this.store.updateSelectedElementsTransform({
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
@@ -551,7 +619,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 旋转组件
    */
   private _rotateElements(): void {
-    this.store.updateElements(this.store.selectedElements, { isRotating: true });
+    this.store.updateElements(this.store.selectedElements, {
+      isRotating: true,
+    });
     this.store.updateSelectedElementsRotation(this._pressMovePosition);
   }
 
@@ -560,7 +630,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _createRange(): void {
     // 计算选区
-    const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
+    const rangePoints = CommonUtils.getBoxPoints([
+      this._pressDownPosition,
+      this._pressMovePosition,
+    ]);
     // 更新选区，命中组件
     this.selection.setRange(rangePoints);
   }
@@ -590,10 +663,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller) {
-        this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
+        this._refreshElementsOriginals(this.store.selectedElements, {
+          deepSubs: true,
+        });
       }
       if (controller instanceof ElementRotation) {
-        this.store.updateElementById(controller.element.id, { isRotatingTarget: true });
+        this.store.updateElementById(controller.element.id, {
+          isRotatingTarget: true,
+        });
         this.store.refreshRotatingStates(this._pressDownPosition);
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
@@ -602,7 +679,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._isElementsTransforming = true;
       } else {
         // 获取鼠标点击的组件
-        const targetElement = this.selection.getElementOnPoint(this.cursor.value);
+        const targetElement = this.selection.getElementOnPoint(
+          this.cursor.value,
+        );
         // 判断当前鼠标位置的组件是否已经被选中
         const isSelectContainsTarget = this.store.isSelectedContainsTarget();
         if (e.ctrlKey) {
@@ -629,7 +708,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param options
    */
-  private _refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
+  private _refreshElementsOriginals(
+    elements: IElement[],
+    options?: RefreshSubOptions,
+  ): void {
     this.store.refreshElementsOriginalAngles(elements, options);
     this.store.refreshElementsOriginals(elements, options);
   }
@@ -638,7 +720,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理自由绘制下的鼠标按下事件
    */
   private _handleArbitraryPressUp(): void {
-    const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
+    const element = this.store.creatingArbitraryElement(
+      this.cursor.worldValue,
+      true,
+    );
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
     }
@@ -722,16 +807,25 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 绘制完成之后的重绘
    */
   private async _redrawAfterCreated(): Promise<void> {
-    await Promise.all([this.mask.redraw(), this.provisional.redraw(), this.redraw(), this.triggerElementCreated()]);
+    await Promise.all([
+      this.mask.redraw(),
+      this.provisional.redraw(),
+      this.redraw(),
+      this.triggerElementCreated(),
+    ]);
   }
 
   /**
    * 结束组件拖拽操作
    */
   private _endElementsDrag() {
-    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
+    this._refreshElementsOriginals(this.store.selectedElements, {
+      deepSubs: true,
+    });
     // 取消组件拖动状态
-    this.store.updateElements(this.store.selectedElements, { isDragging: false });
+    this.store.updateElements(this.store.selectedElements, {
+      isDragging: false,
+    });
     // 刷新组件坐标数据
     this.store.refreshElementsPosition(this.store.selectedElements);
   }
@@ -740,7 +834,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件旋转操作
    */
   private _endElementsRotate() {
-    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
+    this._refreshElementsOriginals(this.store.selectedElements, {
+      deepSubs: true,
+    });
     // 更新组件状态
     this.store.updateElements(this.store.rotatingTargetElements, {
       isRotatingTarget: false,
@@ -753,7 +849,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件变换操作
    */
   private _endElementsTransform() {
-    this._refreshElementsOriginals(this.store.selectedElements, { deepSubs: true });
+    this._refreshElementsOriginals(this.store.selectedElements, {
+      deepSubs: true,
+    });
     // 更新组件状态
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
@@ -764,14 +862,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
   private _selectTopAElement(elements: IElement[]): void {
-    const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
+    const topAElement = ElementUtils.getTopAElementByPoint(
+      elements,
+      this.cursor.value,
+    );
     this.store.deSelectElements(
-      this.store.selectedElements.filter((element) => {
+      this.store.selectedElements.filter(element => {
         if (topAElement && topAElement.isGroup) {
           return element.ancestorGroup !== topAElement;
         }
         return element !== topAElement;
-      })
+      }),
     );
     if (topAElement && !topAElement.isSelected) {
       this.store.selectElement(topAElement);
@@ -803,10 +904,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async triggerElementCreated(): Promise<void> {
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
-      this.store.updateElements(provisionalElements, { isProvisional: false, isOnStage: true });
+      this.store.updateElements(provisionalElements, {
+        isProvisional: false,
+        isOnStage: true,
+      });
       this.emit(
         ShieldDispatcherNames.elementCreated,
-        provisionalElements.map((item) => item.id)
+        provisionalElements.map(item => item.id),
       );
     }
   }
@@ -818,7 +922,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcPressDown(e: MouseEvent): void {
     this._pressDownPosition = this.cursor.transform(e);
-    this._pressDownStageWorldCoord = this.calcWorldCoord(this._pressDownPosition);
+    this._pressDownStageWorldCoord = this.calcWorldCoord(
+      this._pressDownPosition,
+    );
   }
 
   /**
@@ -838,7 +944,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcPressMove(e: MouseEvent): void {
     this._pressMovePosition = this.cursor.transform(e);
-    this._pressMoveStageWorldCoord = this.calcWorldCoord(this._pressMovePosition);
+    this._pressMoveStageWorldCoord = this.calcWorldCoord(
+      this._pressMovePosition,
+    );
   }
 
   /**
@@ -849,7 +957,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   checkCursorPressMovedALittle(e: MouseEvent): boolean {
     return (
-      Math.abs(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD || Math.abs(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD
+      Math.abs(
+        this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      ) >= MinCursorMXD ||
+      Math.abs(
+        this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
+      ) >= MinCursorMYD
     );
   }
 
@@ -860,7 +973,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   checkCursorPressUpALittle(e: MouseEvent): boolean {
-    return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD;
+    return (
+      Math.abs(
+        this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      ) >= MinCursorMXD ||
+      Math.abs(
+        this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y,
+      ) >= MinCursorMYD
+    );
   }
 
   /**
@@ -897,11 +1017,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 重新绘制所有内容
    */
-  private async _redrawAll(force?: boolean | { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
+  private async _redrawAll(
+    force?:
+      | boolean
+      | { mask?: boolean; provisional?: boolean; shield?: boolean },
+  ): Promise<void> {
     if (isBoolean(force)) {
-      await Promise.all([this.mask.redraw(force), this.provisional.redraw(force), this.redraw(force)]);
+      await Promise.all([
+        this.mask.redraw(force),
+        this.provisional.redraw(force),
+        this.redraw(force),
+      ]);
     } else {
-      await Promise.all([this.mask.redraw(force.mask), this.provisional.redraw(force.provisional), this.redraw(force.shield)]);
+      await Promise.all([
+        this.mask.redraw(force.mask),
+        this.provisional.redraw(force.provisional),
+        this.redraw(force.shield),
+      ]);
     }
   }
 
@@ -910,7 +1042,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param options
    */
-  private async _redrawAllIfy(options: { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
+  private async _redrawAllIfy(options: {
+    mask?: boolean;
+    provisional?: boolean;
+    shield?: boolean;
+  }): Promise<void> {
     const funcs: Function[] = [];
     if (options.shield) {
       funcs.push(() => this.redraw());
@@ -921,7 +1057,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (options.mask) {
       funcs.push(() => this.mask.redraw());
     }
-    await Promise.all(funcs.map((func) => func()));
+    await Promise.all(funcs.map(func => func()));
   }
 
   /**
@@ -941,7 +1077,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   _creatingElementOnMovement(e: MouseEvent): IElement {
     if (this.checkCursorPressMovedALittle(e)) {
-      return this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
+      return this.store.creatingElement([
+        this._pressDownStageWorldCoord,
+        this._pressMoveStageWorldCoord,
+      ]);
     }
   }
 
@@ -953,7 +1092,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   _updatingArbitraryElementOnMovement(e: MouseEvent): IElement {
     if (this.checkCursorPressMovedALittle(e)) {
-      return this.store.creatingArbitraryElement(this._pressMoveStageWorldCoord, false);
+      return this.store.creatingArbitraryElement(
+        this._pressMoveStageWorldCoord,
+        false,
+      );
     }
   }
 
@@ -961,10 +1103,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 刷新当前舞台世界坐标
    */
   private _refreshStageWorldCoord(e: MouseEvent): void {
-    const point = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
+    const point = CommonUtils.getEventPosition(
+      e,
+      this.stageRect,
+      this.stageScale,
+    );
     this.stageWorldCoord = {
-      x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
-      y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y),
+      x:
+        this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
+      y:
+        this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y),
     };
   }
 
@@ -1005,15 +1153,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e
    */
   private _handleWheelScale(deltaScale: number, e: MouseEvent): void {
-    const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
-    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageCalcParams);
+    const prevCursorPosition = CommonUtils.getEventPosition(
+      e,
+      this.stageRect,
+      this.stageScale,
+    );
+    const cursorCoord = ElementUtils.calcWorldPoint(
+      prevCursorPosition,
+      this.stageCalcParams,
+    );
     const value = this._checkScale(deltaScale);
     const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
     const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;
     const stageRectCoordX = cursorCoord.x - cursorCoordOffsetX;
     const stageRectCoordY = cursorCoord.y - cursorCoordOffsetY;
     const stageWorldCoordX = stageRectCoordX + this.stageRect.width / 2 / value;
-    const stageWorldCoordY = stageRectCoordY + this.stageRect.height / 2 / value;
+    const stageWorldCoordY =
+      stageRectCoordY + this.stageRect.height / 2 / value;
     this.stageWorldCoord = {
       x: stageWorldCoordX,
       y: stageWorldCoordY,
@@ -1042,7 +1198,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
-    let scale = MathUtils.preciseToFixed(CommonUtils.calcScale(this.stageRect, { width, height }, AutoFitPadding * this.stageScale), 2);
+    let scale = MathUtils.preciseToFixed(
+      CommonUtils.calcScale(
+        this.stageRect,
+        { width, height },
+        AutoFitPadding * this.stageScale,
+      ),
+      2,
+    );
     scale = clamp(scale, 0.02, 1);
     return scale;
   }
@@ -1053,7 +1216,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   calcScaleAutoFitValue(): number {
-    const elementsBox = CommonUtils.getBoxPoints(flatten(this.store.visibleElements.map((element) => element.maxOutlineBoxPoints)));
+    const elementsBox = CommonUtils.getBoxPoints(
+      flatten(
+        this.store.visibleElements.map(element => element.maxOutlineBoxPoints),
+      ),
+    );
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
 
@@ -1072,7 +1239,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
-      const center = MathUtils.calcCenter(flatten(this.store.visibleElements.map((element) => element.rotateOutlinePathCoords)));
+      const center = MathUtils.calcCenter(
+        flatten(
+          this.store.visibleElements.map(
+            element => element.rotateOutlinePathCoords,
+          ),
+        ),
+      );
       this.stageWorldCoord = center;
       this.store.refreshStageElements();
       this.setScale(this.calcScaleAutoFitValue());
@@ -1139,7 +1312,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param imageData
    * @param callback
    */
-  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
+  async _handleImagePasted(
+    imageData: ImageData,
+    callback?: Function,
+  ): Promise<void> {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
@@ -1245,7 +1421,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isElementsBusy) return;
     const groups = this.store.cancelSelectedGroups();
     if (groups) {
-      const elements = groups.map((group) => group.getAllSubElements()).flat();
+      const elements = groups.map(group => group.getAllSubElements()).flat();
       this.store.deSelectGroups(groups);
       this.store.selectElements(elements);
       this.mask.redraw(true);

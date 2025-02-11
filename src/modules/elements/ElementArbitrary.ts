@@ -9,7 +9,10 @@ import { LineClosestMinWidth } from "@/types/constants";
 import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
 
-export default class ElementArbitrary extends Element implements IElementArbitrary {
+export default class ElementArbitrary
+  extends Element
+  implements IElementArbitrary
+{
   // 线条绘制过程中已经绘制的点索引
   tailCoordIndex: number;
   // 编辑坐标索引
@@ -45,7 +48,13 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   get activeCoordIndex(): number {
     // 如果组件处于创建状态，则返回下一个点索引
-    if ([ElementStatus.startCreating, ElementStatus.creating, ElementStatus.initialed].includes(this.status)) {
+    if (
+      [
+        ElementStatus.startCreating,
+        ElementStatus.creating,
+        ElementStatus.initialed,
+      ].includes(this.status)
+    ) {
       // 如果坐标点索引小于坐标点数量，则返回下一个点索引
       if (this.model.coords.length > this.tailCoordIndex + 1) {
         return this.tailCoordIndex + 1;
@@ -94,7 +103,11 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns
    */
   calcOuterPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, this.model.styles, this.model.isFold);
+    return ElementUtils.calcArbitraryBorderRegions(
+      this.strokePathPoints,
+      this.model.styles,
+      this.model.isFold,
+    );
   }
 
   /**
@@ -103,7 +116,11 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns
    */
   calcOuterWorldPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(this.strokePathCoords, this.model.styles, this.model.isFold);
+    return ElementUtils.calcArbitraryBorderRegions(
+      this.strokePathCoords,
+      this.model.styles,
+      this.model.isFold,
+    );
   }
 
   /**
@@ -139,11 +156,15 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   isContainsPoint(point: IPoint): boolean {
     let outerPaths: IPoint[][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
-      outerPaths = ElementUtils.calcArbitraryBorderRegions(this.strokePathPoints, { strokeWidth: LineClosestMinWidth / this.shield.stageScale }, this.model.isFold);
+      outerPaths = ElementUtils.calcArbitraryBorderRegions(
+        this.strokePathPoints,
+        { strokeWidth: LineClosestMinWidth / this.shield.stageScale },
+        this.model.isFold,
+      );
     } else {
       outerPaths = this.outerPaths;
     }
-    return some(outerPaths, (paths) => {
+    return some(outerPaths, paths => {
       return MathUtils.isPointInPolygonByRayCasting(point, paths);
     });
   }
@@ -155,7 +176,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return some(this.outerPaths, (paths) => {
+    return some(this.outerPaths, paths => {
       return MathUtils.isPolygonsOverlap(paths, points);
     });
   }
@@ -167,7 +188,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this.outerWorldPaths, (paths) => {
+    return some(this.outerWorldPaths, paths => {
       return MathUtils.isPolygonsOverlap(paths, coords);
     });
   }
@@ -213,7 +234,9 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   activeTransformer(transformer: IVerticesTransformer): void {
     super.activeTransformer(transformer);
-    const index = this._transformers.findIndex((item) => item.id === transformer.id);
+    const index = this._transformers.findIndex(
+      item => item.id === transformer.id,
+    );
     this.activeEditingCoord(index);
   }
 
@@ -253,12 +276,23 @@ export default class ElementArbitrary extends Element implements IElementArbitra
         y: points[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxPoints[0];
-      this.model.coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
+      this.model.coords = ElementUtils.calcCoordsByTransPathPoints(
+        points,
+        this.angles,
+        lockPoint,
+        this.shield.stageCalcParams,
+      );
       this.model.boxCoords = MathUtils.batchLeanWithCenter(
-        CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)),
+        CommonUtils.getBoxPoints(
+          MathUtils.calcUnLeanByPoints(
+            this.model.coords,
+            0,
+            this.model.leanYAngle,
+          ),
+        ),
         0,
         this.model.leanYAngle,
-        this.calcCenterCoord()
+        this.calcCenterCoord(),
       );
     }
   }

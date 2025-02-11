@@ -15,7 +15,7 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
       this.data.radius,
       Object.assign({}, ControllerStyle, {
         strokeWidth: strokeWidth * this.data.scale,
-      })
+      }),
     );
   }
 }

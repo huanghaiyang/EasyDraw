@@ -2,7 +2,7 @@
 let readyResolve: (value: void | PromiseLike<void>) => void;
 
 const init = async () => {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     readyResolve = resolve;
     readyResolve();
   });

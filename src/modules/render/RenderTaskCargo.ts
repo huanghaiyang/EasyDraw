@@ -2,7 +2,10 @@ import RenderTaskBase from "@/modules/render/RenderTaskBase";
 import { IRenderTaskCargo } from "@/types/IRender";
 import { IRenderTask } from "@/types/IRenderTask";
 
-export default class RenderTaskCargo extends RenderTaskBase implements IRenderTaskCargo {
+export default class RenderTaskCargo
+  extends RenderTaskBase
+  implements IRenderTaskCargo
+{
   tasks: IRenderTask[];
   running: boolean;
 
@@ -41,7 +44,7 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
    * @returns
    */
   addAll(tasks: IRenderTask[]): void {
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       this.add(task);
     });
   }

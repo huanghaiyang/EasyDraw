@@ -14,13 +14,15 @@ export default class FileUtils {
         console.warn("No clipboard data");
         return reject();
       }
-      const images = Array.from(items).filter((item) => item.type.startsWith("image/"));
+      const images = Array.from(items).filter(item =>
+        item.type.startsWith("image/"),
+      );
       if (!images.length) {
         console.warn("No image in clipboard");
         return reject();
       }
       const result = Promise.all(
-        images.map((item) => {
+        images.map(item => {
           const blob = item.getAsFile();
           if (!blob) {
             console.warn("No blob in clipboard");
@@ -28,7 +30,7 @@ export default class FileUtils {
             return;
           }
           return CanvasUtils.getImageDataFromBlob(blob);
-        })
+        }),
       );
       resolve(result);
     });
@@ -71,16 +73,22 @@ export default class FileUtils {
    * @param reject
    * @returns
    */
-  static parseImageFiles(files: File[], resolve: Function, reject: Function): Promise<void> {
-    const images = Array.from(files).filter((file) => file.type.startsWith("image/"));
+  static parseImageFiles(
+    files: File[],
+    resolve: Function,
+    reject: Function,
+  ): Promise<void> {
+    const images = Array.from(files).filter(file =>
+      file.type.startsWith("image/"),
+    );
     if (!images.length) {
       console.warn("No image in files");
       return reject();
     }
     const result = Promise.all(
-      images.map((file) => {
+      images.map(file => {
         return CanvasUtils.getImageDataFromBlob(file);
-      })
+      }),
     );
     resolve(result);
   }

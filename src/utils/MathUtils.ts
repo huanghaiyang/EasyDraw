@@ -42,7 +42,7 @@ export default class MathUtils {
    * @returns
    */
   static batchTraslate(coords: IPoint[], value: TranslationValue): IPoint[] {
-    return coords.map((coord) => this.translate(coord, value));
+    return coords.map(coord => this.translate(coord, value));
   }
 
   /**
@@ -71,7 +71,7 @@ export default class MathUtils {
    * @returns
    */
   static batchRotate(coords: IPoint[], angle: number): IPoint[] {
-    return coords.map((coord) => this.rotate(coord, angle));
+    return coords.map(coord => this.rotate(coord, angle));
   }
 
   /**
@@ -99,11 +99,21 @@ export default class MathUtils {
    * @param originalPoint 缩放前的点
    * @param angles 旋转角度和纵轴倾斜角度
    */
-  static calcTransformMatrix(center: IPoint, point: IPoint, originalPoint: IPoint, angles: Partial<AngleModel> = {}): number[][] {
+  static calcTransformMatrix(
+    center: IPoint,
+    point: IPoint,
+    originalPoint: IPoint,
+    angles: Partial<AngleModel> = {},
+  ): number[][] {
     // 计算移动点在原始坐标系中的位置
     point = MathUtils.transWithCenter(point, angles, center, true);
     // 计算缩放前的点在原始坐标系中的位置
-    originalPoint = MathUtils.transWithCenter(originalPoint, angles, center, true);
+    originalPoint = MathUtils.transWithCenter(
+      originalPoint,
+      angles,
+      center,
+      true,
+    );
     // 计算原始宽度
     const originalWidth = originalPoint.x - center.x;
     // 计算原始高度
@@ -128,7 +138,11 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static rotateWithCenter(point: IPoint, angle: number, center: IPoint): IPoint {
+  static rotateWithCenter(
+    point: IPoint,
+    angle: number,
+    center: IPoint,
+  ): IPoint {
     point = {
       x: point.x - center.x,
       y: point.y - center.y,
@@ -148,8 +162,14 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static batchRotateWithCenter(coords: IPoint[], angle: number, center: IPoint): IPoint[] {
-    return coords.map((coord) => MathUtils.rotateWithCenter(coord, angle, center));
+  static batchRotateWithCenter(
+    coords: IPoint[],
+    angle: number,
+    center: IPoint,
+  ): IPoint[] {
+    return coords.map(coord =>
+      MathUtils.rotateWithCenter(coord, angle, center),
+    );
   }
 
   /**
@@ -160,7 +180,11 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static leanYWithCenter(coord: IPoint, leanYAngle: number, center: IPoint): IPoint {
+  static leanYWithCenter(
+    coord: IPoint,
+    leanYAngle: number,
+    center: IPoint,
+  ): IPoint {
     return MathUtils.leanWithCenter(coord, 0, leanYAngle, center);
   }
 
@@ -172,8 +196,14 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static batchLeanYWithCenter(coords: IPoint[], leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map((coord) => MathUtils.leanYWithCenter(coord, leanYAngle, center));
+  static batchLeanYWithCenter(
+    coords: IPoint[],
+    leanYAngle: number,
+    center: IPoint,
+  ): IPoint[] {
+    return coords.map(coord =>
+      MathUtils.leanYWithCenter(coord, leanYAngle, center),
+    );
   }
 
   /**
@@ -184,7 +214,11 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static leanXWithCenter(coord: IPoint, leanXAngle: number, center: IPoint): IPoint {
+  static leanXWithCenter(
+    coord: IPoint,
+    leanXAngle: number,
+    center: IPoint,
+  ): IPoint {
     return MathUtils.leanWithCenter(coord, leanXAngle, 0, center);
   }
 
@@ -196,8 +230,14 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static batchLeanXWithCenter(coords: IPoint[], leanXAngle: number, center: IPoint): IPoint[] {
-    return coords.map((coord) => MathUtils.leanXWithCenter(coord, leanXAngle, center));
+  static batchLeanXWithCenter(
+    coords: IPoint[],
+    leanXAngle: number,
+    center: IPoint,
+  ): IPoint[] {
+    return coords.map(coord =>
+      MathUtils.leanXWithCenter(coord, leanXAngle, center),
+    );
   }
 
   /**
@@ -245,9 +285,18 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static leanWithCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
+  static leanWithCenter(
+    coord: IPoint,
+    leanXAngle: number,
+    leanYAngle: number,
+    center: IPoint,
+  ): IPoint {
     const matrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
-    const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    const result = multiply(matrix, [
+      coord.x - center.x,
+      coord.y - center.y,
+      1,
+    ]);
     return {
       x: add(result[0], center.x),
       y: add(result[1], center.y),
@@ -263,8 +312,15 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static batchLeanWithCenter(coords: IPoint[], leanXAngle: number, leanYAngle: number, center: IPoint): IPoint[] {
-    return coords.map((coord) => MathUtils.leanWithCenter(coord, leanXAngle, leanYAngle, center));
+  static batchLeanWithCenter(
+    coords: IPoint[],
+    leanXAngle: number,
+    leanYAngle: number,
+    center: IPoint,
+  ): IPoint[] {
+    return coords.map(coord =>
+      MathUtils.leanWithCenter(coord, leanXAngle, leanYAngle, center),
+    );
   }
 
   /**
@@ -276,7 +332,12 @@ export default class MathUtils {
    * @param isReverse
    * @returns
    */
-  static transWithCenter(coord: IPoint, angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
+  static transWithCenter(
+    coord: IPoint,
+    angles: Partial<AngleModel>,
+    center: IPoint,
+    isReverse?: boolean,
+  ) {
     let { angle = 0, leanXAngle = 0, leanYAngle = 0 } = angles || {};
     if (isReverse) {
       angle = -angle;
@@ -306,8 +367,15 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static batchTransWithCenter(coords: IPoint[], angles: Partial<AngleModel>, center: IPoint, isReverse?: boolean) {
-    return coords.map((coord) => MathUtils.transWithCenter(coord, angles, center, isReverse));
+  static batchTransWithCenter(
+    coords: IPoint[],
+    angles: Partial<AngleModel>,
+    center: IPoint,
+    isReverse?: boolean,
+  ) {
+    return coords.map(coord =>
+      MathUtils.transWithCenter(coord, angles, center, isReverse),
+    );
   }
 
   /**
@@ -318,7 +386,11 @@ export default class MathUtils {
    * @param value
    * @returns
    */
-  static rotateAndTranslate(coord: IPoint, angle: number, value: TranslationValue): IPoint {
+  static rotateAndTranslate(
+    coord: IPoint,
+    angle: number,
+    value: TranslationValue,
+  ): IPoint {
     return MathUtils.translate(MathUtils.rotate(coord, angle), value);
   }
 
@@ -367,7 +439,7 @@ export default class MathUtils {
    */
   static isPointInPolygonByRayCasting(coord: IPoint, polygonCoords: IPoint[]) {
     const point = [coord.x, coord.y];
-    const polygon = polygonCoords.map((p) => [p.x, p.y]);
+    const polygon = polygonCoords.map(p => [p.x, p.y]);
     const [px, py] = point;
     let inside = false;
 
@@ -376,12 +448,22 @@ export default class MathUtils {
       const [xj, yj] = polygon[j];
 
       // 检查点是否在多边形的边上
-      if (yi > py !== yj > py && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      if (
+        yi > py !== yj > py &&
+        px < ((xj - xi) * (py - yi)) / (yj - yi) + xi
+      ) {
         inside = !inside;
       }
 
       // 特殊情况：点恰好在多边形的边上
-      if (yi === py && py === yj && px >= Math.min(xi, xj) && px <= Math.max(xi, xj) && py >= Math.min(yi, yj) && py <= Math.max(yi, yj)) {
+      if (
+        yi === py &&
+        py === yj &&
+        px >= Math.min(xi, xj) &&
+        px <= Math.max(xi, xj) &&
+        py >= Math.min(yi, yj) &&
+        py <= Math.max(yi, yj)
+      ) {
         return true;
       }
     }
@@ -397,15 +479,18 @@ export default class MathUtils {
    * @returns
    */
   static isPolygonsOverlap(points1: IPoint[], points2: IPoint[]) {
-    const poly1 = points1.map((p) => [p.x, p.y]);
-    const poly2 = points2.map((p) => [p.x, p.y]);
+    const poly1 = points1.map(p => [p.x, p.y]);
+    const poly2 = points2.map(p => [p.x, p.y]);
 
     // 获取所有边
     function getEdges(polygon: number[][]) {
       let edges = [];
       for (let i = 0; i < polygon.length; i++) {
         let next = (i + 1) % polygon.length;
-        let edge = [polygon[next][0] - polygon[i][0], polygon[next][1] - polygon[i][1]];
+        let edge = [
+          polygon[next][0] - polygon[i][0],
+          polygon[next][1] - polygon[i][1],
+        ];
         edges.push(edge);
       }
       return edges;
@@ -536,7 +621,10 @@ export default class MathUtils {
    * @returns
    */
   static calcInternalAngle(boxPoints: IPoint[]): number {
-    return 180 - MathUtils.calcTriangleAngle(boxPoints[0], boxPoints[3], boxPoints[2]);
+    return (
+      180 -
+      MathUtils.calcTriangleAngle(boxPoints[0], boxPoints[3], boxPoints[2])
+    );
   }
 
   /**
@@ -559,7 +647,10 @@ export default class MathUtils {
    * @returns
    */
   static calcLeanYAngleByPoints(boxPoints: IPoint[], flipX: boolean): number {
-    return MathUtils.calcLeanYAngle(MathUtils.calcInternalAngle(boxPoints), flipX);
+    return MathUtils.calcLeanYAngle(
+      MathUtils.calcInternalAngle(boxPoints),
+      flipX,
+    );
   }
 
   /**
@@ -570,9 +661,18 @@ export default class MathUtils {
    * @param leanXAngle
    * @returns
    */
-  static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number): IPoint[] {
+  static calcUnLeanByPoints(
+    points: IPoint[],
+    leanXAngle: number,
+    leanYAngle: number,
+  ): IPoint[] {
     const center = MathUtils.calcCenter(points);
-    return MathUtils.batchLeanWithCenter(points, -leanXAngle, -leanYAngle, center);
+    return MathUtils.batchLeanWithCenter(
+      points,
+      -leanXAngle,
+      -leanYAngle,
+      center,
+    );
   }
 
   /**
@@ -605,7 +705,10 @@ export default class MathUtils {
    */
   static calcActualAngleByPoints(boxPoints: IPoint[]): number {
     const internalAngle = MathUtils.calcInternalAngle(boxPoints);
-    const leanYAngle = MathUtils.calcLeanYAngle(internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
+    const leanYAngle = MathUtils.calcLeanYAngle(
+      internalAngle,
+      MathUtils.calcFlipXByPoints(boxPoints),
+    );
     const viewAngle = MathUtils.calcViewAngleByPoints(boxPoints);
     return MathUtils.mirrorAngle(viewAngle - leanYAngle);
   }
@@ -643,13 +746,22 @@ export default class MathUtils {
    * @param isClockwise
    * @param distance
    */
-  static calcSegmentLineCenterCrossPoint(p1: IPoint, p2: IPoint, isClockwise: boolean, distance: number): IPoint {
+  static calcSegmentLineCenterCrossPoint(
+    p1: IPoint,
+    p2: IPoint,
+    isClockwise: boolean,
+    distance: number,
+  ): IPoint {
     // 计算中心点
     const center = MathUtils.calcCenter([p1, p2]);
     // 计算角度
     const angle = MathUtils.calcAngle(p1, p2);
     // 计算目标点
-    return MathUtils.calcTargetPoint(center, distance, isClockwise ? angle + 90 : angle - 90);
+    return MathUtils.calcTargetPoint(
+      center,
+      distance,
+      isClockwise ? angle + 90 : angle - 90,
+    );
   }
 
   /**
@@ -668,7 +780,9 @@ export default class MathUtils {
     const t = (Apx * Abx + Apy * Aby) / ab_sq;
     const closetX = a.x + t * Abx;
     const closetY = a.y + t * Aby;
-    return Math.sqrt((p.x - closetX) * (p.x - closetX) + (p.y - closetY) * (p.y - closetY));
+    return Math.sqrt(
+      (p.x - closetX) * (p.x - closetX) + (p.y - closetY) * (p.y - closetY),
+    );
   }
 
   /**
@@ -701,7 +815,12 @@ export default class MathUtils {
    * @param maxDistance
    * @returns
    */
-  static isPointClosestSegment(point: IPoint, a: IPoint, b: IPoint, maxDistance: number): boolean {
+  static isPointClosestSegment(
+    point: IPoint,
+    a: IPoint,
+    b: IPoint,
+    maxDistance: number,
+  ): boolean {
     if (!MathUtils.isProjectionOnSegment(point, a, b)) return false;
     return MathUtils.calcDistancePointToLine(point, a, b) < maxDistance;
   }
@@ -714,7 +833,11 @@ export default class MathUtils {
    * @param distance
    * @returns
    */
-  static isPointClosest(point: IPoint, target: IPoint, distance: number): boolean {
+  static isPointClosest(
+    point: IPoint,
+    target: IPoint,
+    distance: number,
+  ): boolean {
     return MathUtils.calcDistance(point, target) <= distance;
   }
 
@@ -726,7 +849,11 @@ export default class MathUtils {
    * @param distance
    * @returns
    */
-  static isPointClosestWhichPoint(point: IPoint, points: IPoint[], distance: number): number {
+  static isPointClosestWhichPoint(
+    point: IPoint,
+    points: IPoint[],
+    distance: number,
+  ): number {
     for (let i = 0; i < points.length; i++) {
       if (MathUtils.isPointClosest(point, points[i], distance)) {
         return i;
@@ -844,7 +971,10 @@ export default class MathUtils {
    * 给定三角形的三个坐标点a,b,c计算b的内测夹角
    */
   static calcTriangleAngle2(a: IPoint, b: IPoint, c: IPoint): number {
-    const angle = Math.acos((Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)) / (Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2)));
+    const angle = Math.acos(
+      (Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)) /
+        (Math.pow(c.x - a.x, 2) + Math.pow(c.y - a.y, 2)),
+    );
     return angle * (180 / Math.PI);
   }
 
@@ -852,7 +982,10 @@ export default class MathUtils {
    * 给定三角形的三个坐标点a,b,c计算b的外侧夹角
    */
   static calcTriangleAngle3(a: IPoint, b: IPoint, c: IPoint): number {
-    const angle = Math.acos((Math.pow(b.x - c.x, 2) + Math.pow(b.y - c.y, 2)) / (Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)));
+    const angle = Math.acos(
+      (Math.pow(b.x - c.x, 2) + Math.pow(b.y - c.y, 2)) /
+        (Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2)),
+    );
     return angle * (180 / Math.PI);
   }
 
@@ -948,7 +1081,10 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static sortVerticesClockwiseByCenter(vertices: IPoint[], center: IPoint): IPoint[] {
+  static sortVerticesClockwiseByCenter(
+    vertices: IPoint[],
+    center: IPoint,
+  ): IPoint[] {
     // 计算每个顶点与质心之间的角度
     let angles = vertices.map((vertex, index) => {
       let angle = Math.atan2(vertex.y - center.y, vertex.x - center.x);
@@ -974,7 +1110,11 @@ export default class MathUtils {
    * @param segmentStart
    * @param segmentEnd
    */
-  static calcAngleBetweenPointAndSegment(point: IPoint, segmentStart: IPoint, segmentEnd: IPoint): number {
+  static calcAngleBetweenPointAndSegment(
+    point: IPoint,
+    segmentStart: IPoint,
+    segmentEnd: IPoint,
+  ): number {
     const center = MathUtils.calcCenter([segmentStart, segmentEnd]);
     return MathUtils.calcAngle(point, center);
   }
@@ -998,26 +1138,44 @@ export default class MathUtils {
    * @param lineStart
    * @param lineEnd
    */
-  static isPointClockwise(point: IPoint, lineStart: IPoint, lineEnd: IPoint): boolean {
-    const crossProduct = (point.x - lineStart.x) * (lineEnd.y - lineStart.y) - (point.y - lineStart.y) * (lineEnd.x - lineStart.x);
+  static isPointClockwise(
+    point: IPoint,
+    lineStart: IPoint,
+    lineEnd: IPoint,
+  ): boolean {
+    const crossProduct =
+      (point.x - lineStart.x) * (lineEnd.y - lineStart.y) -
+      (point.y - lineStart.y) * (lineEnd.x - lineStart.x);
     return crossProduct < 0;
   }
 
   /**
    * 计算两条直线的交点
    */
-  static calcLineCrossPoint(line1Start: IPoint, line1End: IPoint, line2Start: IPoint, line2End: IPoint): IPoint | null {
-    const denominator = (line2End.y - line2Start.y) * (line1End.x - line1Start.x) - (line2End.x - line2Start.x) * (line1End.y - line1Start.y);
+  static calcLineCrossPoint(
+    line1Start: IPoint,
+    line1End: IPoint,
+    line2Start: IPoint,
+    line2End: IPoint,
+  ): IPoint | null {
+    const denominator =
+      (line2End.y - line2Start.y) * (line1End.x - line1Start.x) -
+      (line2End.x - line2Start.x) * (line1End.y - line1Start.y);
     if (denominator === 0) {
       // 两条直线平行
       return null;
     }
 
-    const u = (line2End.x - line2Start.x) * (line1Start.y - line2Start.y) - (line2End.y - line2Start.y) * (line1Start.x - line1End.x);
+    const u =
+      (line2End.x - line2Start.x) * (line1Start.y - line2Start.y) -
+      (line2End.y - line2Start.y) * (line1Start.x - line1End.x);
     if (u === 0 || u === denominator) {
       // 两条直线重合
       return null;
     }
-    return { x: (line1Start.x + u * (line1End.x - line1Start.x)) / denominator, y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator };
+    return {
+      x: (line1Start.x + u * (line1End.x - line1Start.x)) / denominator,
+      y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator,
+    };
   }
 }

@@ -1,9 +1,6 @@
-<script lang="ts" setup>
-</script>
+<script lang="ts" setup></script>
 <template>
-  <div class="left-bar">
-
-  </div>
+  <div class="left-bar"></div>
 </template>
 <style lang="less" scoped>
 .left-bar {

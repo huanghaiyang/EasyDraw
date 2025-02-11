@@ -13,11 +13,30 @@ export default class ElementTaskImage extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    const { model, angle, flipX, flipY, leanYAngle, actualAngle, leanY, viewAngle, internalAngle, rotateBoxPoints, center } = this.node;
+    const {
+      model,
+      angle,
+      flipX,
+      flipY,
+      leanYAngle,
+      actualAngle,
+      leanY,
+      viewAngle,
+      internalAngle,
+      rotateBoxPoints,
+      center,
+    } = this.node;
     // 计算倾斜后的图片的宽度，此宽的值实际上与倾斜之前的值相同
-    const width = MathUtils.calcDistance(rotateBoxPoints[0], rotateBoxPoints[1]);
+    const width = MathUtils.calcDistance(
+      rotateBoxPoints[0],
+      rotateBoxPoints[1],
+    );
     // 计算倾斜后的图片的高度，此高的值实际上与倾斜之前的值相同
-    const height = MathUtils.calcDistancePointToLine(rotateBoxPoints[0], rotateBoxPoints[2], rotateBoxPoints[3]);
+    const height = MathUtils.calcDistancePointToLine(
+      rotateBoxPoints[0],
+      rotateBoxPoints[2],
+      rotateBoxPoints[3],
+    );
     // 计算绘制后的图片的rect
     const rect = {
       x: center.x - width / 2,
@@ -27,17 +46,26 @@ export default class ElementTaskImage extends ElementTaskBase {
     };
 
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, model.data, CommonUtils.scaleRect(rect, this.node.shield.stageScale), {
-      angle,
-      flipX,
-      flipY,
-      leanYAngle,
-      leanY,
-      internalAngle,
-      viewAngle,
-      actualAngle,
-    });
+    CanvasUtils.drawImgLike(
+      this.canvas,
+      model.data,
+      CommonUtils.scaleRect(rect, this.node.shield.stageScale),
+      {
+        angle,
+        flipX,
+        flipY,
+        leanYAngle,
+        leanY,
+        internalAngle,
+        viewAngle,
+        actualAngle,
+      },
+    );
     // 绘制描边
-    CanvasUtils.drawPathStokeWidthScale(this.canvas, this.node.strokePathPoints, model.styles);
+    CanvasUtils.drawPathStokeWidthScale(
+      this.canvas,
+      this.node.strokePathPoints,
+      model.styles,
+    );
   }
 }

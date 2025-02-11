@@ -21,14 +21,14 @@ export default class MaskTaskTransformer extends MaskTaskBase {
         {
           angle: actualAngle,
           leanYAngle,
-        }
+        },
       ),
       Object.assign({}, ControllerStyle, {
         strokeWidth: strokeWidth * scale,
       }),
       {
         calcVertices: false,
-      }
+      },
     );
   }
 }

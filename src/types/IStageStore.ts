@@ -52,7 +52,11 @@ export default interface IStageStore extends IStageSetter {
   get selectedAncestorElement(): IElement;
 
   // 创建元素数据模型
-  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
+  createElementModel(
+    type: CreatorTypes,
+    coords: IPoint[],
+    data?: any,
+  ): ElementObject;
   // 添加元素
   addElement(element: IElement): IElement;
   // 移除元素
@@ -64,7 +68,10 @@ export default interface IStageStore extends IStageSetter {
   // 更新元素数据模型
   updateElementModel(id: string, data: Partial<ElementObject>): IElement;
   // 批量更新元素数据模型
-  updateElementsModel(elements: IElement[], props: Partial<ElementObject>): void;
+  updateElementsModel(
+    elements: IElement[],
+    props: Partial<ElementObject>,
+  ): void;
   // 判断元素是否存在
   hasElement(id: string): boolean;
   // 查找元素
@@ -92,9 +99,15 @@ export default interface IStageStore extends IStageSetter {
   // 清除旋转元素中心
   clearRotatingStates(): void;
   // 恢复元素原始属性
-  refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void;
+  refreshElementsOriginals(
+    elements: IElement[],
+    options?: RefreshSubOptions,
+  ): void;
   // 刷新元素角度
-  refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void;
+  refreshElementsOriginalAngles(
+    elements: IElement[],
+    options?: RefreshSubOptions,
+  ): void;
   // 刷新元素位置
   refreshElementsPosition(elements: IElement[]): void;
   // 遍历元素
@@ -104,7 +117,10 @@ export default interface IStageStore extends IStageSetter {
   // 刷新元素
   refreshElements(elements: IElement[]): void;
   // 创建图片元素
-  createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement>;
+  createImageElement(
+    image: HTMLImageElement | ImageData,
+    options: Partial<ImageData>,
+  ): Promise<IElement>;
   // 插入图片元素
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   // 删除选中元素

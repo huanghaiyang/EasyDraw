@@ -59,7 +59,11 @@ export default class StageCursor implements IStageCursor {
    */
   transform(e: MouseEvent): IPoint {
     if (!this.shield.stageRect) return { x: 0, y: 0 };
-    this.value = CommonUtils.getEventPosition(e, this.shield.stageRect, this.shield.stageScale);
+    this.value = CommonUtils.getEventPosition(
+      e,
+      this.shield.stageRect,
+      this.shield.stageScale,
+    );
     this.value.x = MathUtils.preciseToFixed(this.value.x, 0);
     this.value.y = MathUtils.preciseToFixed(this.value.y, 0);
     return this.value;
@@ -119,7 +123,11 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskDrawingCursorTask(): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(), CursorTypes.cross, this.renderParams);
+    return new MaskTaskIconCursor(
+      this._createTransformerCursorModel(),
+      CursorTypes.cross,
+      this.renderParams,
+    );
   }
 
   /**
@@ -129,7 +137,11 @@ export default class StageCursor implements IStageCursor {
    */
   private createMaskRotationCursorTask(rotation: IElementRotation): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel({ angle: rotation.model.angle }), CursorTypes.move, this.renderParams);
+    return new MaskTaskIconCursor(
+      this._createTransformerCursorModel({ angle: rotation.model.angle }),
+      CursorTypes.move,
+      this.renderParams,
+    );
   }
 
   /**
@@ -138,9 +150,15 @@ export default class StageCursor implements IStageCursor {
    * @param borderTransformer
    * @returns
    */
-  private createMaskBorderTransformerCursorTask(borderTransformer: IBorderTransformer): IMaskTask {
+  private createMaskBorderTransformerCursorTask(
+    borderTransformer: IBorderTransformer,
+  ): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(borderTransformer), CursorTypes.border, this.renderParams);
+    return new MaskTaskIconCursor(
+      this._createTransformerCursorModel(borderTransformer),
+      CursorTypes.border,
+      this.renderParams,
+    );
   }
 
   /**
@@ -149,9 +167,15 @@ export default class StageCursor implements IStageCursor {
    * @param transformer
    * @returns
    */
-  private createMaskTransformerCursorTask(transformer: IVerticesTransformer): IMaskTask {
+  private createMaskTransformerCursorTask(
+    transformer: IVerticesTransformer,
+  ): IMaskTask {
     if (!this.value) return;
-    return new MaskTaskIconCursor(this._createTransformerCursorModel(transformer), CursorTypes.vertices, this.renderParams);
+    return new MaskTaskIconCursor(
+      this._createTransformerCursorModel(transformer),
+      CursorTypes.vertices,
+      this.renderParams,
+    );
   }
 
   /**
@@ -160,7 +184,9 @@ export default class StageCursor implements IStageCursor {
    * @param options
    * @returns
    */
-  private _createTransformerCursorModel(options?: { angle: number }): IIconModel {
+  private _createTransformerCursorModel(options?: {
+    angle: number;
+  }): IIconModel {
     return {
       point: this.value,
       type: DrawerMaskModelTypes.cursor,

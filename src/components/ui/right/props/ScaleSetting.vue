@@ -9,7 +9,11 @@ const stageStore = useStageStore();
 <template>
   <div class="scale-setting">
     <div class="scale-setting__item factor">
-      <el-dropdown trigger="click" popper-class="scale-setting__dropdown" :hide-on-click="false">
+      <el-dropdown
+        trigger="click"
+        popper-class="scale-setting__dropdown"
+        :hide-on-click="false"
+      >
         <span class="el-dropdown-link">
           {{ MathUtils.preciseToFixed(stageStore.scale * 100, 0) + "%" }}
           <el-icon class="el-icon--right">
@@ -31,8 +35,14 @@ const stageStore = useStageStore();
               <span>ctrl + +</span>
             </el-dropdown-item>
             <el-divider>预置缩放</el-divider>
-            <el-dropdown-item v-for="value in StageScales" :key="value" @click="stageStore.setScale(value)">
-              <span>缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}</span>
+            <el-dropdown-item
+              v-for="value in StageScales"
+              :key="value"
+              @click="stageStore.setScale(value)"
+            >
+              <span
+                >缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}</span
+              >
               <span>{{ value === 1 ? "ctrl + 0" : "" }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>

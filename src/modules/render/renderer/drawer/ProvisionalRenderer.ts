@@ -5,7 +5,10 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IDrawerProvisional } from "@/types/IStageDrawer";
 import { IProvisionalRenderer } from "@/types/IStageRenderer";
 
-export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional> implements IProvisionalRenderer {
+export default class ProvisionalRenderer
+  extends BaseRenderer<IDrawerProvisional>
+  implements IProvisionalRenderer
+{
   private _latestElementRendered: boolean;
   private _latestClearRendered: boolean;
 
@@ -16,7 +19,7 @@ export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional
     let cargo = new RenderTaskCargo([]);
     const elements = this.drawer.shield.store.creatingElements;
     if (elements.length > 0) {
-      elements.forEach((element) => {
+      elements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

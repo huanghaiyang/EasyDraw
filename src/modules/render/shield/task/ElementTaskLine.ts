@@ -11,6 +11,10 @@ export default class ElementTaskLine extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawLineWidthScale(this.canvas, this.node.strokePathPoints, this.node.model.styles);
+    CanvasUtils.drawLineWidthScale(
+      this.canvas,
+      this.node.strokePathPoints,
+      this.node.model.styles,
+    );
   }
 }

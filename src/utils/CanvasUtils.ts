@@ -18,18 +18,27 @@ export default class CanvasUtils {
    * @param strokeWidth
    * @returns
    */
-  static convertPointsByStrokeType(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
+  static convertPointsByStrokeType(
+    points: IPoint[],
+    strokeType: StrokeTypes,
+    strokeWidth: number,
+    options: RenderParams,
+  ): IPoint[] {
     if (!strokeWidth) return points;
     const { flipX = false, flipY = false } = options;
     // 需要考虑下舞台缩放
     const r = strokeWidth / 2;
     switch (strokeType) {
       case StrokeTypes.inside:
-        return flipX !== flipY ? ArbitraryUtils.getArbitraryOuterVertices(points, r, options) : ArbitraryUtils.getArbitraryInnerVertices(points, r, options);
+        return flipX !== flipY
+          ? ArbitraryUtils.getArbitraryOuterVertices(points, r, options)
+          : ArbitraryUtils.getArbitraryInnerVertices(points, r, options);
       case StrokeTypes.middle:
         return points;
       case StrokeTypes.outside:
-        return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options) : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
+        return flipX !== flipY
+          ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options)
+          : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
     }
   }
 
@@ -42,14 +51,24 @@ export default class CanvasUtils {
    * @param options
    * @returns
    */
-  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: Partial<DOMRect>, options: RenderParams = {}): Promise<void> {
+  static async drawImgLike(
+    target: HTMLCanvasElement,
+    data: string | HTMLCanvasElement | ImageData | HTMLImageElement,
+    rect: Partial<DOMRect>,
+    options: RenderParams = {},
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       if (data instanceof ImageData) {
         data = CanvasUtils.getCanvasByImageData(data).toDataURL();
       }
       if (typeof data === "string") {
         if (CanvasUtils.ImageCaches.has(data)) {
-          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(data), rect, options);
+          CanvasUtils.drawRotateImage(
+            target,
+            CanvasUtils.ImageCaches.get(data),
+            rect,
+            options,
+          );
           resolve();
           return;
         }
@@ -63,7 +82,10 @@ export default class CanvasUtils {
         img.onerror = () => {
           reject();
         };
-      } else if (data instanceof HTMLCanvasElement || data instanceof HTMLImageElement) {
+      } else if (
+        data instanceof HTMLCanvasElement ||
+        data instanceof HTMLImageElement
+      ) {
         CanvasUtils.drawRotateImage(target, data, rect, options);
         resolve();
       } else {
@@ -82,7 +104,12 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
+  static drawRotateImage(
+    target: HTMLCanvasElement,
+    img: CanvasImageSource | HTMLCanvasElement,
+    rect: Partial<DOMRect>,
+    options: RenderParams = {},
+  ): void {
     let { x, y, width, height } = rect;
     let { angle = 0, flipX = false, leanY, actualAngle } = options;
     const ctx = target.getContext("2d");
@@ -124,7 +151,12 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: Partial<DOMRect>, options: RenderParams = {}) {
+  static drawRotateImageData(
+    target: HTMLCanvasElement,
+    imageData: ImageData,
+    rect: Partial<DOMRect>,
+    options: RenderParams = {},
+  ) {
     const img = CanvasUtils.getCanvasByImageData(imageData); // 频繁调用有性能问题
     CanvasUtils.drawRotateImage(target, img, rect, options);
   }
@@ -138,7 +170,13 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options: RenderParams = {}): void {
+  static drawRotateText(
+    target: HTMLCanvasElement,
+    text: string,
+    center: IPoint,
+    styles: ElementStyles,
+    options: RenderParams = {},
+  ): void {
     const { angle = 0 } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -161,7 +199,13 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options: RenderParams = {}) {
+  static drawRotateTextWithScale(
+    target: HTMLCanvasElement,
+    text: string,
+    center: IPoint,
+    styles: ElementStyles,
+    options: RenderParams = {},
+  ) {
     if (CanvasUtils.scale !== 1) {
       center = {
         x: center.x * CanvasUtils.scale,
@@ -178,7 +222,10 @@ export default class CanvasUtils {
    * @param styles
    * @returns
    */
-  static transParamsWithScale(points: IPoint[], styles: ElementStyles): [IPoint[], ElementStyles] {
+  static transParamsWithScale(
+    points: IPoint[],
+    styles: ElementStyles,
+  ): [IPoint[], ElementStyles] {
     points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     styles = { ...styles, strokeWidth: styles.strokeWidth * CanvasUtils.scale };
     return [points, styles];
@@ -192,11 +239,20 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}): void {
+  static drawPathWithScale(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+    options: RenderParams = {},
+  ): void {
     const { calcVertices = true } = options;
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
     if (styles.fillColorOpacity && calcVertices) {
-      const innerPoints = ArbitraryUtils.getArbitraryInnerVertices(points, styles.strokeWidth / 2, options);
+      const innerPoints = ArbitraryUtils.getArbitraryInnerVertices(
+        points,
+        styles.strokeWidth / 2,
+        options,
+      );
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
     if (styles.strokeWidth && styles.strokeColorOpacity) {
@@ -211,7 +267,12 @@ export default class CanvasUtils {
    * @param points
    * @param styles
    */
-  static drawPathStokeWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}) {
+  static drawPathStokeWidthScale(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+    options: RenderParams = {},
+  ) {
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
     CanvasUtils.drawPathStroke(target, points, styles, options);
   }
@@ -224,7 +285,12 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawPathStroke(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, options: RenderParams = {}) {
+  static drawPathStroke(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+    options: RenderParams = {},
+  ) {
     const { isFold = true, miterLimit } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -256,7 +322,11 @@ export default class CanvasUtils {
    * @param points
    * @param styles
    */
-  static drawPathFill(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+  static drawPathFill(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+  ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
@@ -281,7 +351,12 @@ export default class CanvasUtils {
    * @param radius
    * @param styles
    */
-  static drawCircleFill(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+  static drawCircleFill(
+    target: HTMLCanvasElement,
+    point: IPoint,
+    radius: number,
+    styles: ElementStyles,
+  ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.fillStyle = StyleUtils.joinFillColor(styles);
@@ -300,7 +375,12 @@ export default class CanvasUtils {
    * @param radius
    * @param styles
    */
-  static drawCircleStroke(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
+  static drawCircleStroke(
+    target: HTMLCanvasElement,
+    point: IPoint,
+    radius: number,
+    styles: ElementStyles,
+  ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
@@ -319,8 +399,16 @@ export default class CanvasUtils {
    * @param radius
    * @param styles
    */
-  static drawCircleStrokeWithScale(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
-    const [points, scaleStyles] = CanvasUtils.transParamsWithScale([point], styles);
+  static drawCircleStrokeWithScale(
+    target: HTMLCanvasElement,
+    point: IPoint,
+    radius: number,
+    styles: ElementStyles,
+  ) {
+    const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
+      [point],
+      styles,
+    );
     CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
   }
 
@@ -332,8 +420,16 @@ export default class CanvasUtils {
    * @param radius
    * @param styles
    */
-  static drawCircleFillWithScale(target: HTMLCanvasElement, point: IPoint, radius: number, styles: ElementStyles) {
-    const [points, scaleStyles] = CanvasUtils.transParamsWithScale([point], styles);
+  static drawCircleFillWithScale(
+    target: HTMLCanvasElement,
+    point: IPoint,
+    radius: number,
+    styles: ElementStyles,
+  ) {
+    const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
+      [point],
+      styles,
+    );
     CanvasUtils.drawCircleFill(target, points[0], radius, scaleStyles);
   }
 
@@ -344,7 +440,11 @@ export default class CanvasUtils {
    * @param points
    * @param styles
    */
-  static drawLine(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+  static drawLine(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+  ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.beginPath();
@@ -369,7 +469,11 @@ export default class CanvasUtils {
    * @param points
    * @param styles
    */
-  static drawLineWidthScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles) {
+  static drawLineWidthScale(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+  ) {
     [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
     CanvasUtils.drawLine(target, points, styles);
   }

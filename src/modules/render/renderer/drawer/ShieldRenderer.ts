@@ -5,7 +5,10 @@ import ElementTaskClear from "@/modules/render/shield/task/ElementTaskClear";
 import IStageShield from "@/types/IStageShield";
 import { IShieldRenderer } from "@/types/IStageRenderer";
 
-export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
+export default class ShieldRenderer
+  extends BaseRenderer<IStageShield>
+  implements IShieldRenderer
+{
   /**
    * 绘制舞台内容
    *
@@ -15,7 +18,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
   async redraw(force?: boolean): Promise<void> {
     const cargo = new RenderTaskCargo([]);
     if (this.drawer.store.provisionalElements.length) {
-      this.drawer.store.provisionalElements.forEach((element) => {
+      this.drawer.store.provisionalElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);
@@ -28,7 +31,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
     }
     if (force || this.drawer.shouldRedraw) {
       cargo.add(new ElementTaskClear(null, this.renderParams));
-      this.drawer.store.stageElements.forEach((element) => {
+      this.drawer.store.stageElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

@@ -13,7 +13,7 @@ export default class ElementSortedMap<K, V> extends SortedMap<K, V> {
       () => this.keys.join(","),
       () => {
         this.emit(ElementSortedMapEventNames.changed);
-      }
+      },
     );
   }
 }

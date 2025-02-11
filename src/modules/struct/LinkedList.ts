@@ -14,12 +14,21 @@ export interface ILinkedList<T> extends EventEmitter {
   removeBy(predicate: (node: T) => boolean): T[];
   forEach(callback: (node: T, index: number) => void): void;
   forEachRevert(callback: (node: T, index: number) => void): void;
-  forEachBreak(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
-  forEachBreakRevert(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
+  forEachBreak(
+    callback: (node: T, index: number) => void,
+    predicate?: (node: T, index: number) => boolean,
+  ): void;
+  forEachBreakRevert(
+    callback: (node: T, index: number) => void,
+    predicate?: (node: T, index: number) => boolean,
+  ): void;
   getIndex(node: T): number;
 }
 
-export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter implements ILinkedList<ILinkedNode<ILinkedNodeValue>> {
+export default class LinkedList<T extends ILinkedNodeValue>
+  extends EventEmitter
+  implements ILinkedList<ILinkedNode<ILinkedNodeValue>>
+{
   nodes: Set<ILinkedNode<T>>;
   private _head: ILinkedNode<T>;
   private _tail: ILinkedNode<T>;
@@ -109,7 +118,7 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    */
   removeBy(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T>[] {
     let result: ILinkedNode<T>[] = [];
-    Array.from(this.nodes).forEach((node) => {
+    Array.from(this.nodes).forEach(node => {
       if (predicate(node)) {
         this.remove(node);
         result.push(node);
@@ -166,7 +175,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    * @param predicate
    * @returns
    */
-  forEachBreak(callback: (node: ILinkedNode<T>, index: number) => void, predicate?: (node: ILinkedNode<T>, index: number) => boolean): void {
+  forEachBreak(
+    callback: (node: ILinkedNode<T>, index: number) => void,
+    predicate?: (node: ILinkedNode<T>, index: number) => boolean,
+  ): void {
     let index = 0;
     let current = this._head;
     while (current) {
@@ -195,7 +207,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    * @param predicate
    * @returns
    */
-  forEachBreakRevert(callback: (node: ILinkedNode<T>, index: number) => void, predicate?: (node: ILinkedNode<T>, index: number) => boolean): void {
+  forEachBreakRevert(
+    callback: (node: ILinkedNode<T>, index: number) => void,
+    predicate?: (node: ILinkedNode<T>, index: number) => boolean,
+  ): void {
     let index = this.length - 1;
     let current = this._tail;
     while (current) {

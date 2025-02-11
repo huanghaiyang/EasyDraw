@@ -9,7 +9,7 @@ export default class LodashUtils {
    * @returns
    */
   static deepPlanObjectAssign<T>(target: T, ...sources: any[]): T {
-    sources.forEach((source) => {
+    sources.forEach(source => {
       for (const key in source) {
         if (source.hasOwnProperty(key)) {
           if (isPlainObject(source[key])) {

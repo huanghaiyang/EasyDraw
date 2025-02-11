@@ -1,15 +1,26 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
-import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
+import ElementUtils, {
+  ElementListEventNames,
+  ElementReactionPropNames,
+} from "@/modules/elements/utils/ElementUtils";
 import { every, flatten, includes, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/helpers/ElementSortedMap";
+import ElementSortedMap, {
+  ElementSortedMapEventNames,
+} from "@/modules/elements/helpers/ElementSortedMap";
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions } from "@/types/IElement";
+import IElement, {
+  DefaultAngleModel,
+  ElementObject,
+  IElementArbitrary,
+  RefreshSubOptions,
+  DefaultRefreshSubOptions,
+} from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
@@ -61,10 +72,16 @@ export default class StageStore implements IStageStore {
     this._reactionElementsPropsChanged();
 
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
-      this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements);
+      this.shield.emit(
+        ShieldDispatcherNames.selectedChanged,
+        this.selectedElements,
+      );
     });
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
-      this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements);
+      this.shield.emit(
+        ShieldDispatcherNames.targetChanged,
+        this.targetElements,
+      );
     });
   }
 
@@ -120,7 +137,8 @@ export default class StageStore implements IStageStore {
   // 选中的唯一组件
   get primarySelectedElement(): IElement {
     const ancestorElement = this.selectedAncestorElement;
-    if (ancestorElement && !ancestorElement.isProvisional) return ancestorElement;
+    if (ancestorElement && !ancestorElement.isProvisional)
+      return ancestorElement;
   }
 
   // 旋转目标组件
@@ -187,46 +205,56 @@ export default class StageStore implements IStageStore {
    * 组件新增
    */
   private _reactionElementAdded(): void {
-    this._elementList.on(ElementListEventNames.added, (node: ILinkedNode<IElement>) => {
-      const element = node.value;
-      Object.keys(ElementReactionPropNames).forEach((propName) => {
-        this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
-      });
-    });
+    this._elementList.on(
+      ElementListEventNames.added,
+      (node: ILinkedNode<IElement>) => {
+        const element = node.value;
+        Object.keys(ElementReactionPropNames).forEach(propName => {
+          this._reactionElementPropsChanged(
+            ElementReactionPropNames[propName],
+            element,
+            element[propName],
+          );
+        });
+      },
+    );
   }
 
   /**
    * 组件删除
    */
   private _reactionElementRemoved(): void {
-    this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IElement>) => {
-      const element = node.value;
-      // 删除元素在舞台上的映射关系
-      this._stageElementsMap.delete(element.id);
-      // 删除元素在选中的映射关系
-      this._selectedElementsMap.delete(element.id);
-      // 删除元素在未在舞台上的映射关系
-      this._noneStageElementsMap.delete(element.id);
-      // 删除元素在临时元素的映射关系
-      this._provisionalElementsMap.delete(element.id);
-      // 删除元素在命中的映射关系
-      this._targetElementsMap.delete(element.id);
-      // 删除元素在选区范围内的映射关系
-      this._rangeElementsMap.delete(element.id);
-      // 删除元素在可见的映射关系
-      this._visibleElementsMap.delete(element.id);
-      // 删除元素在旋转目标的映射关系
-      this._rotatingTargetElementsMap.delete(element.id);
-      // 删除元素在编辑中的映射关系
-      this._editingElementsMap.delete(element.id);
-    });
+    this._elementList.on(
+      ElementListEventNames.removed,
+      (node: ILinkedNode<IElement>) => {
+        const element = node.value;
+        // 删除元素在舞台上的映射关系
+        this._stageElementsMap.delete(element.id);
+        // 删除元素在选中的映射关系
+        this._selectedElementsMap.delete(element.id);
+        // 删除元素在未在舞台上的映射关系
+        this._noneStageElementsMap.delete(element.id);
+        // 删除元素在临时元素的映射关系
+        this._provisionalElementsMap.delete(element.id);
+        // 删除元素在命中的映射关系
+        this._targetElementsMap.delete(element.id);
+        // 删除元素在选区范围内的映射关系
+        this._rangeElementsMap.delete(element.id);
+        // 删除元素在可见的映射关系
+        this._visibleElementsMap.delete(element.id);
+        // 删除元素在旋转目标的映射关系
+        this._rotatingTargetElementsMap.delete(element.id);
+        // 删除元素在编辑中的映射关系
+        this._editingElementsMap.delete(element.id);
+      },
+    );
   }
 
   /**
    * 元素属性变化时，更新元素映射关系
    */
   private _reactionElementsPropsChanged(): void {
-    Object.keys(ElementReactionPropNames).forEach((propName) => {
+    Object.keys(ElementReactionPropNames).forEach(propName => {
       this._elementList.on(propName, (element, value) => {
         this._reactionElementPropsChanged(propName, element, value);
       });
@@ -240,7 +268,11 @@ export default class StageStore implements IStageStore {
    * @param element
    * @param value
    */
-  private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
+  private _reactionElementPropsChanged(
+    propName: string,
+    element: IElement,
+    value: boolean | ElementStatus | IPoint,
+  ): void {
     switch (propName) {
       // 选中元素
       case ElementReactionPropNames.isSelected: {
@@ -309,7 +341,10 @@ export default class StageStore implements IStageStore {
       }
       // 元素状态
       case ElementReactionPropNames.status: {
-        if (this._currentCreatingElementId && value === ElementStatus.creating) {
+        if (
+          this._currentCreatingElementId &&
+          value === ElementStatus.creating
+        ) {
           this._selectedElementsMap.set(element.id, element);
         }
         break;
@@ -342,7 +377,7 @@ export default class StageStore implements IStageStore {
           ShieldDispatcherNames.textBaselineChanged,
           ShieldDispatcherNames.ratioLockedChanged,
         ];
-        for(const name of names) {
+        for (const name of names) {
           if (name.toString() === `${propName}Changed`) {
             this.filterEmit(name, element, value);
             break;
@@ -360,7 +395,11 @@ export default class StageStore implements IStageStore {
    * @param element
    * @param args
    */
-  filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void {
+  filterEmit(
+    name: ShieldDispatcherNames,
+    element: IElement,
+    ...args: any[]
+  ): void {
     if (element.id === this.primarySelectedElement?.id) {
       this.shield.emit(name, element, ...args);
     }
@@ -372,8 +411,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsPosition(
+    elements: IElement[],
+    value: IPoint,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         const { left: prevLeft, top: prevTop } = element.model;
         const { x, y } = value;
@@ -389,7 +431,7 @@ export default class StageStore implements IStageStore {
    * @param value
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setWidth(value);
       }
@@ -403,7 +445,7 @@ export default class StageStore implements IStageStore {
    * @param value
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setHeight(value);
       }
@@ -417,9 +459,14 @@ export default class StageStore implements IStageStore {
    * @param value
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
-        this.rotateElements([element], value, element.angle, element.centerCoord);
+        this.rotateElements(
+          [element],
+          value,
+          element.angle,
+          element.centerCoord,
+        );
       }
     });
   }
@@ -430,14 +477,17 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsLeanYAngle(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
         const prevValue = element.leanYAngle;
         element.setLeanYAngle(value);
         if (element.isGroup) {
           const center = element.center;
-          (element as IElementGroup).deepSubs.forEach((sub) => {
+          (element as IElementGroup).deepSubs.forEach(sub => {
             sub.leanYBy(value, prevValue, element.angle, center);
           });
         }
@@ -451,8 +501,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsStrokeType(elements: IElement[], value: StrokeTypes): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsStrokeType(
+    elements: IElement[],
+    value: StrokeTypes,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setStrokeType(value);
       }
@@ -465,8 +518,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsStrokeWidth(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsStrokeWidth(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setStrokeWidth(value);
       }
@@ -479,8 +535,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsStrokeColor(elements: IElement[], value: string): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsStrokeColor(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setStrokeColor(value);
       }
@@ -493,8 +552,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsStrokeColorOpacity(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsStrokeColorOpacity(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setStrokeColorOpacity(value);
       }
@@ -507,8 +569,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsFillColor(elements: IElement[], value: string): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsFillColor(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setFillColor(value);
       }
@@ -521,8 +586,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsFillColorOpacity(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsFillColorOpacity(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setFillColorOpacity(value);
       }
@@ -535,8 +603,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsTextAlign(
+    elements: IElement[],
+    value: CanvasTextAlign,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setTextAlign(value);
       }
@@ -549,8 +620,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsTextBaseline(
+    elements: IElement[],
+    value: CanvasTextBaseline,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setTextBaseline(value);
       }
@@ -563,8 +637,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsFontSize(
+    elements: IElement[],
+    value: number,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setFontSize(value);
       }
@@ -577,8 +654,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsFontFamily(
+    elements: IElement[],
+    value: string,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setFontFamily(value);
       }
@@ -591,8 +671,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param value
    */
-  async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
-    elements.forEach((element) => {
+  async setElementsRatioLocked(
+    elements: IElement[],
+    value: boolean,
+  ): Promise<void> {
+    elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setRatioLocked(value);
       }
@@ -626,7 +709,9 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   getElementsByIds(ids: string[]): IElement[] {
-    return ids.map((id) => this.getElementById(id)).filter((element) => element !== undefined);
+    return ids
+      .map(id => this.getElementById(id))
+      .filter(element => element !== undefined);
   }
 
   /**
@@ -643,11 +728,11 @@ export default class StageStore implements IStageStore {
             return index;
           }
         },
-        (node) => {
+        node => {
           if (node.value.id === id) {
             return true;
           }
-        }
+        },
       );
     }
     return -1;
@@ -672,7 +757,7 @@ export default class StageStore implements IStageStore {
   removeElement(id: string): IElement {
     if (this.hasElement(id)) {
       let element = this._elementsMap.get(id);
-      this._elementList.removeBy((node) => node.value.id === id);
+      this._elementList.removeBy(node => node.value.id === id);
       this._elementsMap.delete(id);
       element = null;
       return element;
@@ -703,7 +788,7 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   updateElements(elements: IElement[], props: Partial<IElement>): IElement[] {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       return this.updateElementById(element.id, props);
     });
     return elements;
@@ -730,8 +815,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param props
    */
-  updateElementsModel(elements: IElement[], props: Partial<ElementObject>): void {
-    elements.forEach((element) => {
+  updateElementsModel(
+    elements: IElement[],
+    props: Partial<ElementObject>,
+  ): void {
+    elements.forEach(element => {
       this.updateElementModel(element.id, props);
     });
   }
@@ -744,8 +832,16 @@ export default class StageStore implements IStageStore {
    * @param data
    * @returns
    */
-  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
-    const size: ISize = ElementUtils.calcSize({ coords, boxCoords: CommonUtils.getBoxPoints(coords), type });
+  createElementModel(
+    type: CreatorTypes,
+    coords: IPoint[],
+    data?: any,
+  ): ElementObject {
+    const size: ISize = ElementUtils.calcSize({
+      coords,
+      boxCoords: CommonUtils.getBoxPoints(coords),
+      type,
+    });
     const position: IPoint = ElementUtils.calcPosition({ type, coords });
     const model: ElementObject = {
       id: CommonUtils.getRandomDateId(),
@@ -815,10 +911,18 @@ export default class StageStore implements IStageStore {
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type));
+        const model = this.createElementModel(
+          type,
+          ElementUtils.calcCreatorPoints(coords, type),
+        );
         if (this._currentCreatingElementId) {
-          element = this.updateElementModel(this._currentCreatingElementId, model);
-          element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
+          element = this.updateElementModel(
+            this._currentCreatingElementId,
+            model,
+          );
+          element.model.boxCoords = CommonUtils.getBoxPoints(
+            element.model.coords,
+          );
           this._setElementProvisionalCreating(element);
         } else {
           element = this._createProvisionalElement(model);
@@ -843,12 +947,18 @@ export default class StageStore implements IStageStore {
     let model: ElementObject;
     // 如果当前创建的元素id存在，则获取该元素
     if (this._currentCreatingElementId) {
-      element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
+      element = this.getElementById(
+        this._currentCreatingElementId,
+      ) as ElementArbitrary;
       model = element.model;
       // 如果tailAppend为true，则追加节点
       if (tailAppend) {
         // 判断点是否在第一个点附近
-        const isClosestFirst = MathUtils.isPointClosest(coord, model.coords[0], ArbitraryPointClosestMargin / this.shield.stageScale);
+        const isClosestFirst = MathUtils.isPointClosest(
+          coord,
+          model.coords[0],
+          ArbitraryPointClosestMargin / this.shield.stageScale,
+        );
         if (isClosestFirst) {
           if (element.tailCoordIndex > 0) {
             model.isFold = true;
@@ -911,7 +1021,9 @@ export default class StageStore implements IStageStore {
           }
         }
         this.updateElementById(element.id, { status: ElementStatus.finished });
-        element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
+        element.model.boxCoords = CommonUtils.getBoxPoints(
+          element.model.coords,
+        );
         element.refresh();
         return element;
       }
@@ -926,7 +1038,7 @@ export default class StageStore implements IStageStore {
    */
   findElements(predicate: (node: IElement) => boolean): IElement[] {
     const result = [];
-    this._elementList.forEach((node) => {
+    this._elementList.forEach(node => {
       if (predicate(node.value)) {
         result.push(node.value);
       }
@@ -940,11 +1052,25 @@ export default class StageStore implements IStageStore {
    * @param offset
    */
   updateSelectedElementsMovement(offset: IPoint): void {
-    this.selectedElements.forEach((element) => {
-      const coords = ElementUtils.translateCoords(element.originalModelCoords, offset);
-      const boxCoords = ElementUtils.translateCoords(element.originalModelBoxCoords, offset);
-      const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
-      this.updateElementModel(element.id, { coords, boxCoords, left: x, top: y });
+    this.selectedElements.forEach(element => {
+      const coords = ElementUtils.translateCoords(
+        element.originalModelCoords,
+        offset,
+      );
+      const boxCoords = ElementUtils.translateCoords(
+        element.originalModelBoxCoords,
+        offset,
+      );
+      const { x, y } = ElementUtils.calcPosition({
+        type: element.model.type,
+        coords,
+      });
+      this.updateElementModel(element.id, {
+        coords,
+        boxCoords,
+        left: x,
+        top: y,
+      });
       element.refresh({ points: true, rotation: true, position: true });
     });
   }
@@ -955,11 +1081,17 @@ export default class StageStore implements IStageStore {
    * @param offset
    */
   updateSelectedElementsTransform(offset: IPoint): void {
-    this.selectedElements.forEach((element) => {
+    this.selectedElements.forEach(element => {
       const isAngleFlip = element.transform(offset);
       if (element.isGroup && !element.isGroupSubject) {
-        (element as IElementGroup).deepSubs.forEach((sub) => {
-          const { transformLockPoint, transformLockIndex, transformOriginalMovingPoint, transformType, model: { angle, leanYAngle } } = element;
+        (element as IElementGroup).deepSubs.forEach(sub => {
+          const {
+            transformLockPoint,
+            transformLockIndex,
+            transformOriginalMovingPoint,
+            transformType,
+            model: { angle, leanYAngle },
+          } = element;
           sub.transformBy({
             lockPoint: transformLockPoint,
             lockIndex: transformLockIndex,
@@ -992,8 +1124,15 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param options
    */
-  refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-    this._refreshElementsByFunc(elements, (element) => element.refresh({ originals: true }), options);
+  refreshElementsOriginals(
+    elements: IElement[],
+    options?: RefreshSubOptions,
+  ): void {
+    this._refreshElementsByFunc(
+      elements,
+      element => element.refresh({ originals: true }),
+      options,
+    );
   }
 
   /**
@@ -1003,8 +1142,15 @@ export default class StageStore implements IStageStore {
    * @param func
    * @param options
    */
-  refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void {
-    this._refreshElementsByFunc(elements, (element) => element.refreshOriginalAngle(), options);
+  refreshElementsOriginalAngles(
+    elements: IElement[],
+    options?: RefreshSubOptions,
+  ): void {
+    this._refreshElementsByFunc(
+      elements,
+      element => element.refreshOriginalAngle(),
+      options,
+    );
   }
 
   /**
@@ -1014,7 +1160,11 @@ export default class StageStore implements IStageStore {
    * @param func
    * @param options
    */
-  private _refreshElementsByFunc(elements: IElement[], func: (element: IElement) => void, options?: RefreshSubOptions): void {
+  private _refreshElementsByFunc(
+    elements: IElement[],
+    func: (element: IElement) => void,
+    options?: RefreshSubOptions,
+  ): void {
     options = Object.assign({}, DefaultRefreshSubOptions, options || {});
 
     let ids = new Set<string>();
@@ -1029,7 +1179,7 @@ export default class StageStore implements IStageStore {
       func(element);
     }
 
-    elements.forEach((element) => {
+    elements.forEach(element => {
       refreshElement(element);
       if (element.isGroup) {
         if (options.deepSubs) {
@@ -1049,7 +1199,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   refreshElementsPosition(elements: IElement[]): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       element.refresh({ points: true, rotation: true, position: true });
     });
   }
@@ -1059,7 +1209,7 @@ export default class StageStore implements IStageStore {
    */
   refreshStageElements(): void {
     const stageWordRectCoords = this.shield.stageWordRectCoords;
-    this._elementList.forEach((node) => {
+    this._elementList.forEach(node => {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage });
@@ -1073,7 +1223,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   refreshElements(elements: IElement[]): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       element.refresh();
     });
   }
@@ -1086,9 +1236,9 @@ export default class StageStore implements IStageStore {
   isSelectedContainsTarget(): boolean {
     const targetElements = this.shield.store.targetElements;
     if (targetElements.length === 0) return false;
-    const targetIds = targetElements.map((item) => item.id);
-    const selectedIds = this.shield.store.selectedElements.map((item) => item.id);
-    return every(targetIds, (item) => includes(selectedIds, item));
+    const targetIds = targetElements.map(item => item.id);
+    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
+    return every(targetIds, item => includes(selectedIds, item));
   }
 
   /**
@@ -1097,7 +1247,10 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   refreshRotatingStates(point: IPoint): void {
-    const { center, centerCoord, angle } = this.calcRotatingStatesByElements(point, this.rotatingTargetElements);
+    const { center, centerCoord, angle } = this.calcRotatingStatesByElements(
+      point,
+      this.rotatingTargetElements,
+    );
     this._rotatingCenter = center;
     this._rotatingCenterCoord = centerCoord;
     this._rotatingOriginalAngle = angle;
@@ -1111,9 +1264,17 @@ export default class StageStore implements IStageStore {
    *
    * @returns
    */
-  calcRotatingStatesByElements(point: IPoint, elements: IElement[]): { center: IPoint; centerCoord: IPoint; angle: number } {
-    const center = MathUtils.calcCenter(flatten(elements.map((element) => element.pathPoints)));
-    const centerCoord = ElementUtils.calcWorldPoint(center, this.shield.stageCalcParams);
+  calcRotatingStatesByElements(
+    point: IPoint,
+    elements: IElement[],
+  ): { center: IPoint; centerCoord: IPoint; angle: number } {
+    const center = MathUtils.calcCenter(
+      flatten(elements.map(element => element.pathPoints)),
+    );
+    const centerCoord = ElementUtils.calcWorldPoint(
+      center,
+      this.shield.stageCalcParams,
+    );
     const angle = MathUtils.preciseToFixed(MathUtils.calcAngle(center, point));
     return { center, centerCoord, angle };
   }
@@ -1133,8 +1294,15 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   updateSelectedElementsRotation(point: IPoint): void {
-    const angle = MathUtils.preciseToFixed(MathUtils.calcAngle(this._rotatingCenter, point));
-    this.rotateElements(this.rotatingTargetElements, angle, this._rotatingOriginalAngle, this._rotatingCenterCoord);
+    const angle = MathUtils.preciseToFixed(
+      MathUtils.calcAngle(this._rotatingCenter, point),
+    );
+    this.rotateElements(
+      this.rotatingTargetElements,
+      angle,
+      this._rotatingOriginalAngle,
+      this._rotatingCenterCoord,
+    );
   }
 
   /**
@@ -1145,12 +1313,19 @@ export default class StageStore implements IStageStore {
    * @param originalAngle
    * @param centerCoord
    */
-  rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint): void {
-    elements.forEach((element) => {
-      angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
+  rotateElements(
+    elements: IElement[],
+    angle: number,
+    originalAngle: number,
+    centerCoord: IPoint,
+  ): void {
+    elements.forEach(element => {
+      angle = MathUtils.mirrorAngle(
+        element.originalAngle + angle - originalAngle,
+      );
       element.setAngle(angle);
       if (element.isGroup) {
-        (element as IElementGroup).deepSubs.forEach((sub) => {
+        (element as IElementGroup).deepSubs.forEach(sub => {
           sub.rotateBy(angle - element.originalAngle, centerCoord);
         });
       }
@@ -1163,10 +1338,16 @@ export default class StageStore implements IStageStore {
    * @param image
    * @param options
    */
-  async createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement> {
+  async createImageElement(
+    image: HTMLImageElement | ImageData,
+    options: Partial<ImageData>,
+  ): Promise<IElement> {
     const { colorSpace } = options;
     const { width, height } = image;
-    const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, { width, height });
+    const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, {
+      width,
+      height,
+    });
     const center = MathUtils.calcCenter(coords);
     const object: ElementObject = {
       id: CommonUtils.getRandomDateId(),
@@ -1196,7 +1377,9 @@ export default class StageStore implements IStageStore {
    *
    * @param image
    */
-  async insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement> {
+  async insertImageElement(
+    image: HTMLImageElement | ImageData,
+  ): Promise<IElement> {
     let colorSpace;
     if (image instanceof ImageData) {
       colorSpace = image.colorSpace;
@@ -1228,7 +1411,7 @@ export default class StageStore implements IStageStore {
    * 删除选中元素
    */
   deleteSelects(): void {
-    this._selectedElementsMap.keysArray().forEach((id) => {
+    this._selectedElementsMap.keysArray().forEach(id => {
       this.removeElement(id);
     });
   }
@@ -1257,7 +1440,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   selectElements(elements: IElement[]): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       this.selectElement(element);
     });
   }
@@ -1268,7 +1451,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   deSelectElements(elements: IElement[]): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       this.deSelectElement(element);
     });
   }
@@ -1292,7 +1475,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   toggleSelectElements(elements: IElement[]): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       this.toggleSelectElement(element);
     });
   }
@@ -1301,7 +1484,7 @@ export default class StageStore implements IStageStore {
    * 全选
    */
   selectAll(): void {
-    this._elementList.forEach((node) => {
+    this._elementList.forEach(node => {
       this.selectElement(node.value);
     });
   }
@@ -1310,7 +1493,7 @@ export default class StageStore implements IStageStore {
    * 取消全选
    */
   deSelectAll(): void {
-    this._elementList.forEach((node) => {
+    this._elementList.forEach(node => {
       this.deSelectElement(node.value);
     });
   }
@@ -1318,7 +1501,7 @@ export default class StageStore implements IStageStore {
    * 取消高亮目标元素
    */
   cancelTargetElements(): void {
-    this.targetElements.forEach((element) => {
+    this.targetElements.forEach(element => {
       this.updateElementById(element.id, { isTarget: false });
     });
   }
@@ -1346,7 +1529,11 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   getFinishedSelectedElements(isExcludeGroupSubs: boolean): IElement[] {
-    return this.selectedElements.filter((element) => element.status === ElementStatus.finished && (isExcludeGroupSubs ? !element.isGroupSubject : true));
+    return this.selectedElements.filter(
+      element =>
+        element.status === ElementStatus.finished &&
+        (isExcludeGroupSubs ? !element.isGroupSubject : true),
+    );
   }
 
   /**
@@ -1355,7 +1542,9 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   getSelectedElements(isExcludeGroupSubs: boolean): IElement[] {
-    return this.selectedElements.filter((element) => (isExcludeGroupSubs ? !element.isGroupSubject : true));
+    return this.selectedElements.filter(element =>
+      isExcludeGroupSubs ? !element.isGroupSubject : true,
+    );
   }
 
   /**
@@ -1365,9 +1554,12 @@ export default class StageStore implements IStageStore {
    * @param value
    */
   private _setElementsEditing(elements: IElement[], value: boolean): void {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       if (element.editingEnable) {
-        this.updateElementById(element.id, { isEditing: value, status: value ? ElementStatus.editing : ElementStatus.finished });
+        this.updateElementById(element.id, {
+          isEditing: value,
+          status: value ? ElementStatus.editing : ElementStatus.finished,
+        });
         if (element.tfRefreshAfterEdChanged) {
           element.refreshTransformers();
           element.refreshOriginalTransformerPoints();
@@ -1382,8 +1574,12 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   isSelectedEqCreating(): boolean {
-    const selectedIds = new Set(this.selectedElements.map((element) => element.id));
-    const creatingIds = new Set(this.creatingElements.map((element) => element.id));
+    const selectedIds = new Set(
+      this.selectedElements.map(element => element.id),
+    );
+    const creatingIds = new Set(
+      this.creatingElements.map(element => element.id),
+    );
     return isEqual(selectedIds, creatingIds);
   }
 
@@ -1393,7 +1589,7 @@ export default class StageStore implements IStageStore {
    * @param group
    */
   private _bindElementsGroup(group: IElementGroup): void {
-    group.subs.forEach((element) => {
+    group.subs.forEach(element => {
       this.updateElementModel(element.id, { groupId: group.id });
     });
   }
@@ -1413,13 +1609,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    */
-  private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementObject {
+  private _createElementGroupObject(
+    elements: (IElement | IElementGroup)[],
+  ): ElementObject {
     // 过滤掉组合元素
-    elements = elements.filter((element) => !element.isGroupSubject);
+    elements = elements.filter(element => !element.isGroupSubject);
     // 获取组合元素的子元素id
-    const subIds = new Set(elements.map((element) => element.id));
+    const subIds = new Set(elements.map(element => element.id));
     // 获取组合元素的坐标
-    const coords = CommonUtils.getBoxPoints(flatten(elements.map((element) => element.rotateBoxCoords)));
+    const coords = CommonUtils.getBoxPoints(
+      flatten(elements.map(element => element.rotateBoxCoords)),
+    );
     // 获取组合元素的宽高
     const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
     // 返回组合元素的数据对象
@@ -1445,13 +1645,19 @@ export default class StageStore implements IStageStore {
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
     // 创建组合元素
-    const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
+    const group = new ElementGroup(
+      this._createElementGroupObject(elements),
+      this.shield,
+    );
     // 绑定组合元素的子元素
     this._bindElementsGroup(group);
     // 添加组合元素
     this.addElement(group);
     // 设置组合元素状态
-    this.updateElementById(group.id, { status: ElementStatus.finished, isOnStage: true });
+    this.updateElementById(group.id, {
+      status: ElementStatus.finished,
+      isOnStage: true,
+    });
     // 刷新组合元素
     group.refresh();
     return group;
@@ -1507,7 +1713,7 @@ export default class StageStore implements IStageStore {
     if (groups.length === 0) {
       return null;
     }
-    groups.forEach((group) => {
+    groups.forEach(group => {
       this.removeElementGroup(group);
     });
     return groups;
@@ -1517,14 +1723,18 @@ export default class StageStore implements IStageStore {
    * 获取选中的组合
    */
   getSelectedElementGroups(): IElementGroup[] {
-    return this.selectedElements.filter((element) => element.model.type === CreatorTypes.group) as IElementGroup[];
+    return this.selectedElements.filter(
+      element => element.model.type === CreatorTypes.group,
+    ) as IElementGroup[];
   }
 
   /**
    * 获取选中的根组合
    */
   getSelectedAncestorElementGroups(): IElementGroup[] {
-    return this.getNoParentElements(this.getSelectedElementGroups()) as IElementGroup[];
+    return this.getNoParentElements(
+      this.getSelectedElementGroups(),
+    ) as IElementGroup[];
   }
 
   /**
@@ -1551,7 +1761,7 @@ export default class StageStore implements IStageStore {
    * @param groups
    */
   deSelectGroups(groups: IElementGroup[]): void {
-    groups.forEach((group) => {
+    groups.forEach(group => {
       this.deSelectGroup(group);
     });
   }
@@ -1585,6 +1795,6 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   getNoParentElements(elements: IElement[]): IElement[] {
-    return elements.filter((element) => !element.isGroupSubject);
+    return elements.filter(element => !element.isGroupSubject);
   }
 }

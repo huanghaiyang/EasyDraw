@@ -43,7 +43,13 @@ export default class ElementRotation implements IElementRotation, IController {
     this.model.points = CommonUtils.getBoxVertices(this.model.point, {
       width: this.model.width / this.element.shield.stageScale,
       height: this.model.height / this.element.shield.stageScale,
-    }).map((point) => MathUtils.rotateWithCenter(point, this.element.viewAngle, this.model.point));
+    }).map(point =>
+      MathUtils.rotateWithCenter(
+        point,
+        this.element.viewAngle,
+        this.model.point,
+      ),
+    );
   }
 
   /**

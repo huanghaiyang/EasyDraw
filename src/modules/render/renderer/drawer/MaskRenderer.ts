@@ -13,14 +13,20 @@ import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
-import { ArbitraryControllerRadius, SelectionIndicatorMargin } from "@/styles/MaskStyles";
+import {
+  ArbitraryControllerRadius,
+  SelectionIndicatorMargin,
+} from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 import { TransformerTypes } from "@/types/ITransformer";
 
-export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
+export default class MaskRenderer
+  extends BaseRenderer<IDrawerMask>
+  implements IMaskRenderer
+{
   private _lastCursorRendered = false;
   private _lastSelectionRendered = false;
 
@@ -35,7 +41,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
     // 绘制选区
     const selectionTasks = this.createMaskSelectionTasks();
-    selectionTasks.forEach((task) => {
+    selectionTasks.forEach(task => {
       cargo.add(task);
     });
     if (selectionTasks.length) {
@@ -49,7 +55,11 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
     const element = this.drawer.shield.store.primarySelectedElement;
     if (element) {
-      if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
+      if (
+        this.drawer.shield.configure.rotationIconEnable &&
+        element.rotationEnable &&
+        element.status === ElementStatus.finished
+      ) {
         cargo.add(this.createMaskRotateTask(element));
       }
       cargo.add(this.createMaskIndicatorTask(element));
@@ -73,7 +83,11 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       await this.renderCargo(cargo);
     } else {
       // 解决光标移出舞台出现残留的问题
-      if ((this._lastCursorRendered || this._lastSelectionRendered) && !selectionTasks.length && !cursorRendered) {
+      if (
+        (this._lastCursorRendered || this._lastSelectionRendered) &&
+        !selectionTasks.length &&
+        !cursorRendered
+      ) {
         cargo.add(new MaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
         this._lastCursorRendered = false;
@@ -92,7 +106,10 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   private createMaskCursorPositionTask(): IRenderTask {
     const point = this.drawer.shield.cursor.value;
     if (!point) return;
-    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageCalcParams);
+    const coord = ElementUtils.calcWorldPoint(
+      point,
+      this.drawer.shield.stageCalcParams,
+    );
     const model: IMaskModel = {
       point: {
         x: point.x + 20 / this.drawer.shield.stageScale,
@@ -112,10 +129,16 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const tasks: IRenderTask[] = [];
-    const models: IMaskModel[] = [...this.drawer.shield.selection.getModels(), this.drawer.shield.selection.getRealTimeSelectionModel()];
-    models.forEach((model) => {
+    const models: IMaskModel[] = [
+      ...this.drawer.shield.selection.getModels(),
+      this.drawer.shield.selection.getRealTimeSelectionModel(),
+    ];
+    models.forEach(model => {
       if (model) {
-        const task = new MaskTaskPath({ ...model, scale: 1 / this.drawer.shield.stageScale }, this.renderParams);
+        const task = new MaskTaskPath(
+          { ...model, scale: 1 / this.drawer.shield.stageScale },
+          this.renderParams,
+        );
         tasks.push(task);
       }
     });
@@ -138,8 +161,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskTransformerTasks(): IRenderTask[] {
-    const models: IMaskModel[] = this.drawer.shield.selection.getRealTimeTransformerModels();
-    return models.map((model) => {
+    const models: IMaskModel[] =
+      this.drawer.shield.selection.getRealTimeTransformerModels();
+    return models.map(model => {
       switch (model.element.transformerType) {
         case TransformerTypes.circle: {
           return new MaskTaskCircleTransformer(model, this.renderParams);
@@ -179,11 +203,18 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
           p2 = element.maxBoxPoints[2];
         } else {
           // 获取最左侧，最下侧，最右侧三个点
-          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints, true);
+          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(
+            element.rotateBoxPoints,
+            true,
+          );
           // 计算最下侧点与最左侧点，最下侧点与最右侧点的夹角
-          let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
+          let leftAngle = MathUtils.transformToAcuteAngle(
+            MathUtils.calcAngle(bottomPoint, leftPoint) + 180,
+          );
           // 计算最下侧点与最右侧点，最下侧点与最右侧点的夹角
-          let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, rightPoint) + 180);
+          let rightAngle = MathUtils.transformToAcuteAngle(
+            MathUtils.calcAngle(bottomPoint, rightPoint) + 180,
+          );
           // 取夹角较小的点
           const point = leftAngle < rightAngle ? leftPoint : rightPoint;
           // 将点按x坐标排序
@@ -196,7 +227,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const angle = MathUtils.calcAngle(p1, p2);
     // 生成指示器数据对象
     const model: IMaskModel = {
-      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
+      point: MathUtils.calcSegmentLineCenterCrossPoint(
+        p1,
+        p2,
+        true,
+        SelectionIndicatorMargin / this.drawer.shield.stageScale,
+      ),
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
@@ -210,7 +246,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
+    if (
+      this.drawer.shield.currentCreator.category === CreatorCategories.freedom
+    ) {
       const model: IMaskModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,

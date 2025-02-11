@@ -123,7 +123,10 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   calcOuterPathPoints(): IPoint[] {
-    return PolygonUtils.calcBentLineOuterVertices(this.rotatePathPoints, this.model.styles.strokeWidth / 2);
+    return PolygonUtils.calcBentLineOuterVertices(
+      this.rotatePathPoints,
+      this.model.styles.strokeWidth / 2,
+    );
   }
 
   /**
@@ -133,7 +136,10 @@ export default class ElementLine extends Element implements IElementLine {
    */
   calcOuterPathCoords(): IPoint[] {
     const rotateCoords = this.calcRotatePathCoords();
-    return PolygonUtils.calcBentLineOuterVertices(rotateCoords, this.model.styles.strokeWidth / 2);
+    return PolygonUtils.calcBentLineOuterVertices(
+      rotateCoords,
+      this.model.styles.strokeWidth / 2,
+    );
   }
 
   /**
@@ -150,7 +156,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   protected getAngle(): number {
-    return ElementUtils.fixAngle(MathUtils.calcAngle(this.startCoord, this.endCoord) + 90);
+    return ElementUtils.fixAngle(
+      MathUtils.calcAngle(this.startCoord, this.endCoord) + 90,
+    );
   }
 
   /**
@@ -160,7 +168,13 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + this.model.styles.strokeWidth / 2 / this.shield.stageScale);
+    return MathUtils.isPointClosestSegment(
+      point,
+      this.startRotatePathPoint,
+      this.endRotatePathPoint,
+      LineClosestMargin +
+        this.model.styles.strokeWidth / 2 / this.shield.stageScale,
+    );
   }
 
   /**
@@ -188,13 +202,23 @@ export default class ElementLine extends Element implements IElementLine {
    * @param offset
    */
   protected doVerticesTransform(offset: IPoint): boolean {
-    const index = this._transformers.findIndex((transformer) => transformer.isActive);
+    const index = this._transformers.findIndex(
+      transformer => transformer.isActive,
+    );
     if (index !== -1) {
-      const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
+      const lockPoint =
+        this._originalTransformerPoints[
+          CommonUtils.getNextIndexOfArray(2, index, 1)
+        ];
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 根据不动点进行形变
-      return this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
+      return this.transformByLockPoint(
+        lockPoint,
+        currentPointOriginal,
+        offset,
+        index,
+      );
     }
     return false;
   }
@@ -214,7 +238,11 @@ export default class ElementLine extends Element implements IElementLine {
    * @param value
    */
   setWidth(value: number): void {
-    const newCoord = MathUtils.calcTargetPoint(this.startCoord, value, this.angle - 90);
+    const newCoord = MathUtils.calcTargetPoint(
+      this.startCoord,
+      value,
+      this.angle - 90,
+    );
     this.model.coords[1] = newCoord;
     this.model.width = value;
     this.refresh();
@@ -227,8 +255,16 @@ export default class ElementLine extends Element implements IElementLine {
    */
   setAngle(value: number): void {
     const center = MathUtils.calcCenter(this.model.coords);
-    const startCoord = MathUtils.calcTargetPoint(center, this.width / 2, value + 90);
-    const endCoord = MathUtils.calcTargetPoint(center, this.width / 2, value - 90);
+    const startCoord = MathUtils.calcTargetPoint(
+      center,
+      this.width / 2,
+      value + 90,
+    );
+    const endCoord = MathUtils.calcTargetPoint(
+      center,
+      this.width / 2,
+      value - 90,
+    );
     this.model.coords = [startCoord, endCoord];
     this.refresh();
   }

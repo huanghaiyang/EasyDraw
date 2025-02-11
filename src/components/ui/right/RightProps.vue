@@ -1,5 +1,4 @@
-<script lang="ts" setup>
-</script>
+<script lang="ts" setup></script>
 <template>
   <div class="props-right-panel">
     <scale-setting></scale-setting>
