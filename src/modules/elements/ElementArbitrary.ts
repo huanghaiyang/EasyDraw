@@ -254,12 +254,11 @@ export default class ElementArbitrary
    * @param offset
    * @returns
    */
-  doVerticesTransform(offset: IPoint): boolean {
+  doVerticesTransform(offset: IPoint): void {
     if (this.status === ElementStatus.editing) {
       this.doEditingTransform(offset);
-      return false;
     } else {
-      return super.doVerticesTransform(offset);
+      super.doVerticesTransform(offset);
     }
   }
 

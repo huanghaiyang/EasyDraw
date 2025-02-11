@@ -39,8 +39,6 @@ export type TransformByOptions = {
   groupAngle: number;
   // 组合Y倾斜角度
   groupLeanYAngle: number;
-  // 是否需要翻转角度
-  isAngleFlip: boolean;
 };
 
 export type AngleModel = {
@@ -513,13 +511,13 @@ export default interface IElement {
   // 获取激活的元素边框变换器
   getActiveElementBorderTransformer(): IBorderTransformer;
   // 变换
-  transform(offset: IPoint): boolean;
+  transform(offset: IPoint): void;
   // 顶点变换
-  transformByVertices(offset: IPoint): boolean;
+  transformByVertices(offset: IPoint): void;
   // 边框变换
-  transformByBorder(offset: IPoint): boolean;
+  transformByBorder(offset: IPoint): void;
   // 矩阵变换
-  transformBy(options: TransformByOptions): boolean;
+  transformBy(options: TransformByOptions): void;
   // 组合子组件倾斜
   leanYBy(
     value: number,

@@ -1408,16 +1408,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param offset
    */
-  transform(offset: IPoint): boolean {
-    // 默认不翻转角度
-    let isAngleFlip = false;
+  transform(offset: IPoint): void {
     // 如果有顶点变形器激活，则进行顶点变形
     if (this.getActiveElementTransformer()) {
-      isAngleFlip = this.transformByVertices(offset);
+      this.transformByVertices(offset);
       this._transformType = TransformTypes.vertices;
     } else if (this.getActiveElementBorderTransformer()) {
       // 否则如果有边框变形器激活，则进行边框变形
-      isAngleFlip = this.transformByBorder(offset);
+      this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
     }
     this.refresh(
@@ -1430,7 +1428,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       },
       { angles: { view: true, actual: true } },
     );
-    return isAngleFlip;
   }
 
   /**
@@ -1439,7 +1436,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param options
    * @returns
    */
-  transformBy(options: TransformByOptions): boolean {
+  transformBy(options: TransformByOptions): void {
     // 解构参数
     const {
       lockPoint,
@@ -1449,7 +1446,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       offset,
       groupAngle,
       groupLeanYAngle,
-      isAngleFlip,
     } = options;
     // 还原坐标需要用到的角度
     const groupAngles = { angle: groupAngle, leanYAngle: groupLeanYAngle };
@@ -1519,7 +1515,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       },
       { angles: { view: true, actual: true } },
     );
-    return isAngleFlip;
   }
 
   /**
@@ -1528,10 +1523,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    * @returns
    */
-  transformByVertices(offset: IPoint): boolean {
+  transformByVertices(offset: IPoint): void {
     if (!this.verticesTransformEnable && !this.boxVerticesTransformEnable)
-      return false;
-    return this.doVerticesTransform(offset);
+      return;
+    this.doVerticesTransform(offset);
   }
 
   /**
@@ -1540,7 +1535,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    * @returns
    */
-  protected doVerticesTransform(offset: IPoint): boolean {
+  protected doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -1556,14 +1551,13 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点的原始位置
       this._transformOriginalMovingPoint = currentPointOriginal;
       // 根据不动点进行形变
-      return this.transformByLockPoint(
+      this.transformByLockPoint(
         lockPoint,
         currentPointOriginal,
         offset,
         index,
       );
     }
-    return false;
   }
 
   /**
@@ -1579,7 +1573,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     currentPointOriginal: IPoint,
     offset: IPoint,
     lockIndex: number,
-  ): boolean {
+  ): void {
     // 获取变换矩阵
     const matrix = this.getTransformMatrix(
       lockPoint,
@@ -1608,7 +1602,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       this._originalCenter,
     );
     // 判断是否需要翻转角度
-    return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
+    this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
   }
 
   /**
@@ -1715,9 +1709,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    * @returns
    */
-  transformByBorder(offset: IPoint): boolean {
-    if (!this.borderTransformEnable) return false;
-    return this.doBorderTransform(offset);
+  transformByBorder(offset: IPoint): void {
+    if (!this.borderTransformEnable) return;
+    this.doBorderTransform(offset);
   }
 
   /**
@@ -1790,7 +1784,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param offset
    */
-  protected doBorderTransform(offset: IPoint): boolean {
+  protected doBorderTransform(offset: IPoint): void {
     const index = this._borderTransformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点
@@ -1834,9 +1828,8 @@ export default class Element implements IElement, ILinkedNodeValue {
         this._originalCenter,
       );
       // 尝试翻转角度
-      return this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
+      this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
     }
-    return false;
   }
 
   /**

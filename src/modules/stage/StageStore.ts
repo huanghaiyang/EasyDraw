@@ -1084,7 +1084,7 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsTransform(offset: IPoint): void {
     this.selectedElements.forEach(element => {
-      const isAngleFlip = element.transform(offset);
+      element.transform(offset);
       if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach(sub => {
           const {
@@ -1101,7 +1101,6 @@ export default class StageStore implements IStageStore {
             offset,
             groupAngle: angle,
             groupLeanYAngle: leanYAngle,
-            isAngleFlip,
             transformType,
           });
         });
