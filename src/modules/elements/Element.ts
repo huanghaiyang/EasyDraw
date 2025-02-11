@@ -579,7 +579,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 原始角度-舞台坐标系&世界坐标系
   protected _originalAngle: number = 0;
   // 原始盒模型-舞台坐标系
-  protected _originalRect: Partial<DOMRect> = {};
+  protected _originalSize: Partial<DOMRect> = {};
   // 原始中心点-舞台坐标系
   protected _originalCenter: IPoint;
   // 变换器类型
@@ -1226,7 +1226,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 维护原始旋转盒模型点
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
     // 维护原始矩形
-    this._originalRect = this.calcRect();
+    this._originalSize = { width: this.model.width, height: this.model.height };
     // 维护原始变换矩阵
     this._originalTransformMatrix = [];
     // 如果路径点存在，则维护原始中心点
@@ -1900,11 +1900,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算原始坐标
     const originXValue = MathUtils.calcTriangleSide1By3(
       this.model.angle,
-      this._originalRect.width,
+      this._originalSize.width,
     );
     const originYValue = MathUtils.calcTriangleSide2By3(
       this.model.angle,
-      this._originalRect.width,
+      this._originalSize.width,
     );
     // 计算偏移量
     const offset = {
@@ -1971,11 +1971,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算原始坐标
     const originXValue = MathUtils.calcTriangleSide2By3(
       this.model.angle,
-      this._originalRect.height,
+      this._originalSize.height,
     );
     const originYValue = MathUtils.calcTriangleSide1By3(
       this.model.angle,
-      this._originalRect.height,
+      this._originalSize.height,
     );
     // 计算偏移量
     const offset = {

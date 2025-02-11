@@ -400,7 +400,9 @@ export default class StageStore implements IStageStore {
     element: IElement,
     ...args: any[]
   ): void {
-    if (element.id === this.primarySelectedElement?.id) {
+    if (!element) return;
+    // 如果元素是创建中的元素或者选中的元素且元素没有组合，则发送事件
+    if (element.id === this.primarySelectedElement?.id || element.id === this._currentCreatingElementId) {
       this.shield.emit(name, element, ...args);
     }
   }
