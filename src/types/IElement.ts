@@ -34,6 +34,8 @@ export type TransformByOptions = {
   offset: IPoint;
   // 组合角度
   groupAngle: number;
+  // 组合Y倾斜角度
+  groupLeanYAngle: number;
   // 是否需要翻转角度
   isAngleFlip: boolean;
 };

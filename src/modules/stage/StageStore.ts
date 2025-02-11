@@ -959,13 +959,14 @@ export default class StageStore implements IStageStore {
       const isAngleFlip = element.transform(offset);
       if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach((sub) => {
-          const { transformLockPoint, transformLockIndex, transformOriginalMovingPoint, transformType } = element;
+          const { transformLockPoint, transformLockIndex, transformOriginalMovingPoint, transformType, model: { angle, leanYAngle } } = element;
           sub.transformBy({
             lockPoint: transformLockPoint,
             lockIndex: transformLockIndex,
             originalMovingPoint: transformOriginalMovingPoint,
             offset,
-            groupAngle: element.model.angle,
+            groupAngle: angle,
+            groupLeanYAngle: leanYAngle,
             isAngleFlip,
             transformType,
           });

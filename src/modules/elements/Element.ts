@@ -1334,9 +1334,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   transformBy(options: TransformByOptions): boolean {
     // 解构参数
-    const { lockPoint, lockIndex, transformType, originalMovingPoint, offset, groupAngle, isAngleFlip } = options;
+    const { lockPoint, lockIndex, transformType, originalMovingPoint, offset, groupAngle, groupLeanYAngle, isAngleFlip } = options;
     // 还原坐标需要用到的角度
-    const groupAngles = { angle: groupAngle };
+    const groupAngles = { angle: groupAngle, leanYAngle: groupLeanYAngle };
     // 获取变换矩阵
     const matrix = this.getTransformMatrix(lockPoint, originalMovingPoint, offset, groupAngles, false);
     // 如果变换类型为边框，则调整矩阵
