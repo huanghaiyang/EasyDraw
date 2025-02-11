@@ -857,7 +857,7 @@ export default class StageStore implements IStageStore {
   private _selectAndRefreshProvisionalElement(element: IElement): void {
     if (element) {
       this.selectElement(element);
-      element.refreshRPs();
+      element.refresh({ points: true, rotation: true });
     }
   }
 
@@ -1001,8 +1001,7 @@ export default class StageStore implements IStageStore {
       const boxCoords = ElementUtils.translateCoords(element.originalModelBoxCoords, offset);
       const { x, y } = ElementUtils.calcPosition({ type: element.model.type, coords });
       this.updateElementModel(element.id, { coords, boxCoords, left: x, top: y });
-      element.refreshRPs();
-      element.refreshPosition();
+      element.refresh({ points: true, rotation: true, position: true });
     });
   }
 
@@ -1049,7 +1048,7 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-    this._refreshElementsByFunc(elements, (element) => element.refreshOriginalProps(), options);
+    this._refreshElementsByFunc(elements, (element) => element.refresh({ originals: true }), options);
   }
 
   /**
@@ -1106,8 +1105,7 @@ export default class StageStore implements IStageStore {
    */
   refreshElementsPosition(elements: IElement[]): void {
     elements.forEach((element) => {
-      element.refreshRPs();
-      element.refreshPosition();
+      element.refresh({ points: true, rotation: true, position: true });
     });
   }
 
@@ -1120,8 +1118,7 @@ export default class StageStore implements IStageStore {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage });
-      element.refreshRPs();
-      element.refreshOriginalProps();
+      element.refresh({ points: true, rotation: true, originals: true });
     });
   }
 
@@ -1268,8 +1265,7 @@ export default class StageStore implements IStageStore {
       status: ElementStatus.finished,
       isSelected: true,
     });
-    element.refreshRPs();
-    element.refreshOriginalProps();
+    element.refresh({ points: true, rotation: true, originals: true });
     return element;
   }
 

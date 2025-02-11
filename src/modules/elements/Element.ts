@@ -742,7 +742,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.id = CommonUtils.getRandomDateId();
     this.rotation = new ElementRotation(this);
     this.shield = shield;
-    this.refreshOriginalProps();
+    this.refresh({ originals: true });
     makeObservable(this);
   }
 
@@ -1056,7 +1056,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新角度
    */
   refreshAngles(options?: RefreshAnglesOptions): void {
-    options = Object.assign({}, DefaultRefreshAnglesOptions, options || {});
+    options = options || DefaultRefreshAnglesOptions;
     // 计算视觉角度
     if (options.view) this.model.viewAngle = this.calcViewAngle();
     // 计算内部角度
@@ -1075,14 +1075,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshRotation(): void {
     this.rotation.model.scale = 1 / this.shield.stageScale;
     this.rotation.refresh();
-  }
-
-  /**
-   * 刷新坐标
-   */
-  refreshRPs(): void {
-    this.refreshPoints();
-    this.refreshRotation();
   }
 
   /**
@@ -1361,18 +1353,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       isAngleFlip = this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
     }
-    // 刷新舞台坐标
-    this.refreshRPs();
-    // 刷新位置
-    this.refreshPosition();
-    // 刷新尺寸
-    this.refreshSize();
-    // 刷新角度
-    this.refreshAngles({
-      leanX: false,
-      leanY: false,
-      internal: false,
-    });
+    this.refresh({ points: true, rotation: true, size: true, position: true, angles: true }, { angles: { view: true, actual: true } });
     return isAngleFlip;
   }
 
@@ -1416,19 +1397,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = boxCoords;
     // 判断是否需要翻转角度
     this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
-    // 刷新舞台坐标
-    this.refreshRPs();
-    // 刷新尺寸
-    this.refreshSize();
-    // 刷新位置
-    this.refreshPosition();
-    // 刷新角度
-    this.refreshAngles({
-      leanX: false,
-      leanY: false,
-      internal: false,
-    });
-    this.refreshRotation();
+    this.refresh({ points: true, rotation: true, size: true, position: true, angles: true }, { angles: { view: true, actual: true } });
     return isAngleFlip;
   }
 
@@ -1674,9 +1643,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新组件必要数据
    * @param options
+   * @param subOptions
    */
-  refresh(options?: RefreshOptions): void {
-    options = LodashUtils.deepPlanObjectAssign({}, DefaultElementRefreshOptions, options || {});
+  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void {
+    options = options || DefaultElementRefreshOptions;
     // 刷新舞台坐标
     if (options?.points) this.refreshPoints();
     // 刷新尺寸
@@ -1684,7 +1654,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新位置
     if (options?.position) this.refreshPosition();
     // 刷新角度
-    if (options?.angles) this.refreshAngles(options?.angleOptions);
+    if (options?.angles) this.refreshAngles(subOptions?.angles);
     // 刷新旋转
     if (options?.rotation) this.refreshRotation();
     // 刷新原始属性
@@ -1742,9 +1712,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
-    this.refresh({
-      angles: false,
-    });
+    this.refresh({ points: true, size: true, position: true, rotation: true, originals: true });
   }
 
   /**
@@ -1786,9 +1754,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(this._originalRotateBoxPoints, matrix, lockPoint, this._originalCenter);
     // 刷新组件
-    this.refresh({
-      angles: false,
-    });
+    this.refresh({ points: true, size: true, position: true, rotation: true, originals: true });
   }
 
   /**
@@ -1817,13 +1783,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setAngle(value: number): void {
     this.model.angle = value;
-    this.refresh({
-      angleOptions: {
-        leanX: false,
-        leanY: false,
-        internal: false,
-      },
-    });
+    this.refresh(null, { angles: { view: true, actual: true } });
   }
 
   /**
@@ -1835,11 +1795,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setLeanXAngle(value: number): void {
     this.model.leanXAngle = value;
-    this.refresh({
-      angleOptions: {
-        leanX: false,
-      },
-    });
+    this.refresh(null, { angles: { view: true, actual: true, leanY: true, internal: true } });
   }
 
   /**
@@ -1862,12 +1818,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
-    // 刷新
-    this.refresh({
-      angleOptions: {
-        leanY: false,
-      },
-    });
+    // 刷新角度选项
+    this.refresh(null, { angles: { view: true, actual: true, leanX: true, internal: true } });
   }
 
   /**
@@ -1899,19 +1851,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, center, this.shield.stageCalcParams);
     // 计算盒模型坐标
     this.model.boxCoords = ElementUtils.calcCoordsByTransPathPoints(boxPoints, this.angles, center, this.shield.stageCalcParams);
-    // 刷新舞台坐标
-    this.refreshRPs();
-    // 刷新尺寸
-    this.refreshSize();
-    // 刷新位置
-    this.refreshPosition();
-    // 刷新角度
-    this.refreshAngles({
-      leanX: false,
-      leanY: false,
-      internal: false,
-    });
-    this.refreshRotation();
+    // 刷新
+    this.refresh({ points: true, rotation: true, size: true, position: true, angles: true }, { angles: { view: true, actual: true } });
   }
 
   /**
@@ -2038,12 +1979,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = boxCoords;
     // 设置变换角度
     this.model.angle = MathUtils.mirrorAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
-    // 刷新舞台坐标
-    this.refreshRPs();
-    // 刷新位置
-    this.refreshPosition();
-    // 刷新角度
-    this.refreshAngles();
+    // 刷新
+    this.refresh({ points: true, rotation: true, position: true, angles: true });
   }
 
   /**

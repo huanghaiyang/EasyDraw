@@ -142,7 +142,6 @@ export type RefreshOptions = {
   rotation?: boolean;
   angles?: boolean;
   originals?: boolean;
-  angleOptions?: RefreshAnglesOptions;
 };
 
 // 默认刷新选项
@@ -153,7 +152,6 @@ export const DefaultElementRefreshOptions: RefreshOptions = {
   rotation: true,
   angles: true,
   originals: true,
-  angleOptions: DefaultRefreshAnglesOptions,
 };
 
 // 舞台元素（组件）
@@ -437,8 +435,6 @@ export default interface IElement {
   refreshSize(): void;
   // 刷新位置
   refreshPosition(): void;
-  // 刷新坐标和旋转坐标
-  refreshRPs(): void;
   // 刷新坐标
   refreshPoints(): void;
   // 刷新旋转
@@ -448,7 +444,7 @@ export default interface IElement {
   // 刷新原始角度
   refreshOriginalAngle(): void;
   // 刷新
-  refresh(options?: RefreshOptions): void;
+  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void;
   // 是否包含点
   isContainsPoint(point: IPoint): boolean;
   // 是否多边形重叠
