@@ -18,7 +18,6 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
-import LodashUtils from "@/utils/LodashUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
