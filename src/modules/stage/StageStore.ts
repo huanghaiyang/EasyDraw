@@ -402,7 +402,10 @@ export default class StageStore implements IStageStore {
   ): void {
     if (!element) return;
     // 如果元素是创建中的元素或者选中的元素且元素没有组合，则发送事件
-    if (element.id === this.primarySelectedElement?.id || element.id === this._currentCreatingElementId) {
+    if (
+      element.id === this.primarySelectedElement?.id ||
+      element.id === this._currentCreatingElementId
+    ) {
       this.shield.emit(name, element, ...args);
     }
   }
@@ -434,8 +437,11 @@ export default class StageStore implements IStageStore {
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id)) {
-        element.setWidth(value);
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        const matrix = element.setWidth(value);
+        if (element.isGroup) {
+          this.scaleSubs(element, matrix);
+        }
       }
     });
   }
@@ -448,9 +454,29 @@ export default class StageStore implements IStageStore {
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id)) {
-        element.setHeight(value);
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        const matrix = element.setHeight(value);
+        if (element.isGroup) {
+          this.scaleSubs(element, matrix);
+        }
       }
+    });
+  }
+
+  /**
+   * 缩放子元素
+   *
+   * @param element
+   * @param matrix
+   */
+  private scaleSubs(element: IElement, matrix: number[][]): void {
+    const { center, angle, leanYAngle } = element;
+    const { scaleX, scaleY } = MathUtils.getScaleFromMatrix(matrix);
+    (element as IElementGroup).deepSubs.forEach(sub => {
+      sub.scaleBy(center, scaleX, scaleY, {
+        angle,
+        leanYAngle,
+      });
     });
   }
 

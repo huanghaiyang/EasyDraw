@@ -1178,4 +1178,20 @@ export default class MathUtils {
       y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator,
     };
   }
+
+  /**
+   * 根据矩阵获取缩放比例
+   *
+   * @param matrix
+   * @returns
+   */
+  static getScaleFromMatrix(matrix: number[][]): {
+    scaleX: number;
+    scaleY: number;
+  } {
+    return {
+      scaleX: matrix[0][0],
+      scaleY: matrix[1][1],
+    };
+  }
 }

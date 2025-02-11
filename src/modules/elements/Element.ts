@@ -1462,6 +1462,24 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 调整矩阵
       this._transBorderMatrix(matrix, lockIndex, false);
     }
+    // 执行矩阵变换
+    this._doTransformBy(matrix, lockPoint, groupAngles, originalMovingPoint);
+  }
+
+  /**
+   * 执行矩阵变换
+   *
+   * @param matrix
+   * @param lockPoint
+   * @param groupAngles
+   * @param originalMovingPoint
+   */
+  private _doTransformBy(
+    matrix: number[][],
+    lockPoint: IPoint,
+    groupAngles: AngleModel,
+    originalMovingPoint?: IPoint,
+  ): void {
     // 计算变换后的点
     const points = ElementUtils.calcMatrixPoints(
       this._originalRotatePathPoints,
@@ -1476,6 +1494,32 @@ export default class Element implements IElement, ILinkedNodeValue {
       lockPoint,
       groupAngles,
     );
+    // 执行矩阵变换
+    this._doTransformByPoints(
+      points,
+      boxPoints,
+      lockPoint,
+      matrix,
+      originalMovingPoint,
+    );
+  }
+
+  /**
+   * 执行矩阵变换
+   *
+   * @param points
+   * @param boxPoints
+   * @param lockPoint
+   * @param matrix
+   * @param originalMovingPoint
+   */
+  private _doTransformByPoints(
+    points: IPoint[],
+    boxPoints: IPoint[],
+    lockPoint: IPoint,
+    matrix?: number[][],
+    originalMovingPoint?: IPoint,
+  ): void {
     // 计算内角
     this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
     // 计算y倾斜角度
@@ -1504,7 +1548,9 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换后的盒模型坐标
     this.model.boxCoords = boxCoords;
     // 判断是否需要翻转角度
-    this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
+    if (originalMovingPoint && matrix) {
+      this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
+    }
     this.refresh(
       {
         points: true,
@@ -1551,12 +1597,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点的原始位置
       this._transformOriginalMovingPoint = currentPointOriginal;
       // 根据不动点进行形变
-      this.transformByLockPoint(
-        lockPoint,
-        currentPointOriginal,
-        offset,
-        index,
-      );
+      this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
     }
   }
 
@@ -1882,7 +1923,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param value
    */
-  setWidth(value: number): void {
+  setWidth(value: number): number[][] {
     const matrix = MathUtils.calcScaleMatrix(
       value / this._originalSize.width,
       1,
@@ -1892,6 +1933,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       ? MathUtils.resignValue(matrix[1][1], matrix[0][0])
       : 1;
     this._setWH(matrix);
+    return matrix;
   }
 
   /**
@@ -1899,7 +1941,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param value
    */
-  setHeight(value: number): void {
+  setHeight(value: number): number[][] {
     // 计算变换矩阵
     const matrix = MathUtils.calcScaleMatrix(
       1,
@@ -1910,6 +1952,47 @@ export default class Element implements IElement, ILinkedNodeValue {
       ? MathUtils.resignValue(matrix[0][0], matrix[1][1])
       : 1;
     this._setWH(matrix);
+    return matrix;
+  }
+
+  /**
+   * 按比例缩放
+   *
+   * @param center
+   * @param scaleX
+   * @param scaleY
+   * @param group
+   */
+  scaleBy(
+    center: IPoint,
+    scaleX: number,
+    scaleY: number,
+    group?: Partial<AngleModel>,
+  ): void {
+    const matrix = MathUtils.calcScaleMatrix(scaleX, scaleY);
+    if (group) {
+      this._doTransformBy(matrix, center, group);
+    } else {
+      this.model.coords = this.batchCalcTransformPointsByCenter(
+        this._originalRotatePathPoints,
+        matrix,
+        center,
+        this._originalCenter,
+      );
+      this.model.boxCoords = this.batchCalcTransformPointsByCenter(
+        this._originalRotateBoxPoints,
+        matrix,
+        center,
+        this._originalCenter,
+      );
+    }
+    this.refresh({
+      points: true,
+      size: true,
+      position: true,
+      rotation: true,
+      originals: true,
+    });
   }
 
   /**
@@ -2052,40 +2135,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       { angle: groupAngle, leanYAngle: value },
       center,
     );
-    // 计算内角
-    this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
-    // 计算y倾斜角度
-    this.model.leanYAngle = MathUtils.calcLeanYAngle(
-      this.model.internalAngle,
-      MathUtils.calcFlipXByPoints(boxPoints),
-    );
-    // 计算实际角度
-    this.model.angle = MathUtils.calcActualAngleByPoints(boxPoints);
-    // 计算坐标
-    this.model.coords = ElementUtils.calcCoordsByTransPathPoints(
-      points,
-      this.angles,
-      center,
-      this.shield.stageCalcParams,
-    );
-    // 计算盒模型坐标
-    this.model.boxCoords = ElementUtils.calcCoordsByTransPathPoints(
-      boxPoints,
-      this.angles,
-      center,
-      this.shield.stageCalcParams,
-    );
-    // 刷新
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        size: true,
-        position: true,
-        angles: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
+    this._doTransformByPoints(points, boxPoints, center);
   }
 
   /**

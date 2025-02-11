@@ -388,9 +388,9 @@ export default interface IElement {
   // 设置位置
   setPosition(x: number, y: number, offset: IPoint): void;
   // 设置宽度
-  setWidth(value: number): void;
+  setWidth(value: number): number[][];
   // 设置高度
-  setHeight(value: number): void;
+  setHeight(value: number): number[][];
   // 设置旋转角度
   setAngle(value: number): void;
   // 设置Y倾斜角度
@@ -417,10 +417,15 @@ export default interface IElement {
   setTextBaseline(value: CanvasTextBaseline): void;
   // 设置比例锁定
   setRatioLocked(value: boolean): void;
-
+  // 拉伸
+  scaleBy(
+    center: IPoint,
+    scaleX: number,
+    scaleY: number,
+    group?: Partial<AngleModel>,
+  ): void;
   // 旋转
   rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void;
-
   // 刷新尺寸
   refreshSize(): void;
   // 刷新位置
