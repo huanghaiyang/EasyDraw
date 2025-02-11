@@ -80,49 +80,49 @@ export type ScaleValue = {
 // 舞台通知名称
 export enum ShieldDispatcherNames {
   // 元素创建
-  elementCreated,
+  elementCreated = "elementCreated",
   // 选中改变
-  selectedChanged,
+  selectedChanged = "selectedChanged",
   // 目标改变
-  targetChanged,
+  targetChanged = "targetChanged",
   // 位置改变
-  positionChanged,
+  positionChanged = "positionChanged",
   // 宽度改变
-  widthChanged,
+  widthChanged = "widthChanged",
   // 高度改变
-  heightChanged,
+  heightChanged = "heightChanged",
   // 角度改变
-  angleChanged,
+  angleChanged = "angleChanged",
   // x轴翻转改变
-  flipXChanged,
+  flipXChanged = "flipXChanged",
   // x偏移角度改变
-  leanXAngleChanged,
+  leanXAngleChanged = "leanXAngleChanged",
   // y偏移角度改变
-  leanYAngleChanged,
+  leanYAngleChanged = "leanYAngleChanged",
   // 比例改变
-  scaleChanged,
+  scaleChanged = "scaleChanged",
   // 描边颜色改变
-  strokeColorChanged,
+  strokeColorChanged = "strokeColorChanged",
   // 描边颜色透明度改变
-  strokeColorOpacityChanged,
+  strokeColorOpacityChanged = "strokeColorOpacityChanged",
   // 描边宽度改变
-  strokeWidthChanged,
+  strokeWidthChanged = "strokeWidthChanged",
   // 描边类型改变
-  strokeTypeChanged,
+  strokeTypeChanged = "strokeTypeChanged",
   // 填充颜色改变
-  fillColorChanged,
+  fillColorChanged = "fillColorChanged",
   // 填充颜色透明度改变
-  fillColorOpacityChanged,
+  fillColorOpacityChanged = "fillColorOpacityChanged",
   // 字体大小改变
-  fontSizeChanged,
+  fontSizeChanged = "fontSizeChanged",
   // 字体改变
-  fontFamilyChanged,
+  fontFamilyChanged = "fontFamilyChanged",
   // 文本对齐改变
-  textAlignChanged,
+  textAlignChanged = "textAlignChanged",
   // 文本基线改变
-  textBaselineChanged,
+  textBaselineChanged = "textBaselineChanged",
   // 锁定比例改变
-  creatorChanged,
+  creatorChanged = "creatorChanged",
   // 锁定比例改变
-  ratioLockedChanged,
+  ratioLockedChanged = "ratioLockedChanged",
 }

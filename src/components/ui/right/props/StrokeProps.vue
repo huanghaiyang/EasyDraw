@@ -45,7 +45,7 @@ watch(
 
 const strokeTypes = ref([]);
 watch(
-  () => stageStore.uniqSelectedElement?.model.type,
+  () => stageStore.primarySelectedElement?.model.type,
   (strokeType: CreatorTypes) => {
     strokeTypes.value = getStokeTypes(strokeType);
   }
@@ -56,7 +56,7 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="stroke-props right-props" v-if="stageStore.uniqSelectedElement?.strokeEnable">
+  <div class="stroke-props right-props" v-if="stageStore.primarySelectedElement?.strokeEnable">
     <div class="stroke-props__title">描边</div>
 
     <div class="stroke-props__row color">
@@ -86,7 +86,7 @@ const toggleColorPickerVisible = () => {
 
       <div class="stroke-props__row-item">
         <el-input v-model="strokeWidth" placeholder="输入数字" type="number"
-          :min="stageStore.uniqSelectedElement?.model.type === CreatorTypes.line ? 1 : 0"
+          :min="stageStore.primarySelectedElement?.model.type === CreatorTypes.line ? 1 : 0"
           @change="(value) => stageStore.setElementsStrokeWidth(Number(value))" :disabled="stageStore.inputDisabled">
           <template #prepend>s</template>
           <template #append>px</template>

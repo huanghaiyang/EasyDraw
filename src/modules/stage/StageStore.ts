@@ -118,7 +118,7 @@ export default class StageStore implements IStageStore {
   }
 
   // 选中的唯一组件
-  get uniqSelectedElement(): IElement {
+  get primarySelectedElement(): IElement {
     const ancestorElement = this.selectedAncestorElement;
     if (ancestorElement && !ancestorElement.isProvisional) return ancestorElement;
   }
@@ -323,88 +323,47 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
-      // 元素位置
-      case ElementReactionPropNames.position: {
-        this.shield.emit(ShieldDispatcherNames.positionChanged, element, value);
-        break;
-      }
-      // 元素角度
-      case ElementReactionPropNames.angle: {
-        this.shield.emit(ShieldDispatcherNames.angleChanged, element, value);
-        break;
-      }
-      case ElementReactionPropNames.flipX: {
-        this.shield.emit(ShieldDispatcherNames.flipXChanged, element, value);
-        break;
-      }
-      // x偏移角度
-      case ElementReactionPropNames.leanXAngle: {
-        this.shield.emit(ShieldDispatcherNames.leanXAngleChanged, element, value);
-        break;
-      }
-      // y偏移角度
-      case ElementReactionPropNames.leanYAngle: {
-        this.shield.emit(ShieldDispatcherNames.leanYAngleChanged, element, value);
-        break;
-      }
-      // 元素宽度
-      case ElementReactionPropNames.width: {
-        this.shield.emit(ShieldDispatcherNames.widthChanged, element, value);
-        break;
-      }
-      // 元素高度
-      case ElementReactionPropNames.height: {
-        this.shield.emit(ShieldDispatcherNames.heightChanged, element, value);
-        break;
-      }
-      // 元素边框类型
-      case ElementReactionPropNames.strokeType: {
-        this.shield.emit(ShieldDispatcherNames.strokeTypeChanged, element, value);
-        break;
-      }
-      // 元素边框颜色
-      case ElementReactionPropNames.strokeColor: {
-        this.shield.emit(ShieldDispatcherNames.strokeColorChanged, element, value);
-        break;
-      }
-      // 元素边框颜色透明度
-      case ElementReactionPropNames.strokeColorOpacity: {
-        this.shield.emit(ShieldDispatcherNames.strokeColorOpacityChanged, element, value);
-        break;
-      }
-      // 元素边框宽度
-      case ElementReactionPropNames.strokeWidth: {
-        this.shield.emit(ShieldDispatcherNames.strokeWidthChanged, element, value);
-        break;
-      }
-      // 元素填充颜色
-      case ElementReactionPropNames.fillColor: {
-        this.shield.emit(ShieldDispatcherNames.fillColorChanged, element, value);
-        break;
-      }
-      // 元素填充颜色透明度
-      case ElementReactionPropNames.fillColorOpacity: {
-        this.shield.emit(ShieldDispatcherNames.fillColorOpacityChanged, element, value);
-        break;
-      }
-      // 元素文本对齐方式
-      case ElementReactionPropNames.textAlign: {
-        this.shield.emit(ShieldDispatcherNames.textAlignChanged, element, value);
-        break;
-      }
-      // 元素文本基线
-      case ElementReactionPropNames.textBaseline: {
-        this.shield.emit(ShieldDispatcherNames.textBaselineChanged, element, value);
-        break;
-      }
-      // 是否锁定比例
-      case ElementReactionPropNames.isRatioLocked: {
-        this.shield.emit(ShieldDispatcherNames.ratioLockedChanged, element, value);
-        break;
-      }
       default: {
+        const names: ShieldDispatcherNames[] = [
+          ShieldDispatcherNames.positionChanged,
+          ShieldDispatcherNames.angleChanged,
+          ShieldDispatcherNames.flipXChanged,
+          ShieldDispatcherNames.leanXAngleChanged,
+          ShieldDispatcherNames.leanYAngleChanged,
+          ShieldDispatcherNames.widthChanged,
+          ShieldDispatcherNames.heightChanged,
+          ShieldDispatcherNames.scaleChanged,
+          ShieldDispatcherNames.strokeTypeChanged,
+          ShieldDispatcherNames.strokeColorChanged,
+          ShieldDispatcherNames.strokeColorOpacityChanged,
+          ShieldDispatcherNames.strokeWidthChanged,
+          ShieldDispatcherNames.fillColorChanged,
+          ShieldDispatcherNames.fillColorOpacityChanged,
+          ShieldDispatcherNames.textAlignChanged,
+          ShieldDispatcherNames.textBaselineChanged,
+          ShieldDispatcherNames.ratioLockedChanged,
+        ];
+        for(const name of names) {
+          if (name.toString() === `${propName}Changed`) {
+            this.filterEmit(name, element, value);
+            break;
+          }
+        }
         break;
       }
+    }
+  }
+
+  /**
+   * 过滤事件并发送
+   *
+   * @param name
+   * @param element
+   * @param args
+   */
+  filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void {
+    if (element.id === this.primarySelectedElement?.id) {
+      this.shield.emit(name, element, ...args);
     }
   }
 

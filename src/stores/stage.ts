@@ -82,7 +82,7 @@ export const useStageStore = defineStore("stage", {
   },
   getters: {
     // 选中的唯一元素
-    uniqSelectedElement(): IElement {
+    primarySelectedElement(): IElement {
       // 选中的非组合元素
       const elements = shield.store.getNoParentElements(this.selectedElements);
       if (elements.length !== 1) return null;
@@ -90,7 +90,7 @@ export const useStageStore = defineStore("stage", {
     },
     // 输入框是否禁用
     inputDisabled(): boolean {
-      return !this.uniqSelectedElement;
+      return !this.primarySelectedElement;
     },
     // 对齐是否可用
     alignEnable(): boolean {

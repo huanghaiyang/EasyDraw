@@ -28,7 +28,7 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="fill-props right-props" v-if="stageStore.uniqSelectedElement?.fillEnabled">
+  <div class="fill-props right-props" v-if="stageStore.primarySelectedElement?.fillEnabled">
     <div class="fill-props__title">填充</div>
 
     <div class="fill-props__row color">

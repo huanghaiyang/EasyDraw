@@ -38,15 +38,15 @@ watch(
       </div>
       <div class="angle-props__row-item">
         <el-input v-model="hValue" placeholder="输入数字" :disabled="stageStore.inputDisabled ||
-          !stageStore.uniqSelectedElement?.heightModifyEnable
+          !stageStore.primarySelectedElement?.heightModifyEnable
           " min="2" type="number" @change="(value) => stageStore.setElementsHeight(Number(value))">
           <template #prepend>h</template>
           <template #append>px</template>
         </el-input>
       </div>
       <el-icon v-if="
-        !!stageStore.uniqSelectedElement &&
-        stageStore.uniqSelectedElement.ratioLockedEnable
+        !!stageStore.primarySelectedElement &&
+        stageStore.primarySelectedElement.ratioLockedEnable
       ">
         <Unlock v-if="!stageStore.isRatioLocked" @click="stageStore.setRatioLocked(true)" title="锁定宽高比" />
         <Lock v-else @click="stageStore.setRatioLocked(false)" title="解除宽高比锁定" />

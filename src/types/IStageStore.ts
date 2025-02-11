@@ -23,7 +23,7 @@ export default interface IStageStore extends IStageSetter {
   // 范围元素
   get rangeElements(): IElement[];
   // 唯一选中的元素
-  get uniqSelectedElement(): IElement;
+  get primarySelectedElement(): IElement;
   // 旋转目标元素
   get rotatingTargetElements(): IElement[];
   // 编辑元素

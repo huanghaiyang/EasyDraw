@@ -312,7 +312,7 @@ export default class StageSelection implements IStageSelection {
    */
   tryActiveElementRotation(point: IPoint): IElementRotation {
     if (this.shield.configure.rotationIconEnable) {
-      const element = this.shield.store.uniqSelectedElement;
+      const element = this.shield.store.primarySelectedElement;
       if (element && element.rotation.isContainsPoint(point)) {
         element.activeRotation();
         return element.rotation;
@@ -326,7 +326,7 @@ export default class StageSelection implements IStageSelection {
    * @param point
    */
   tryActiveElementTransformer(point: IPoint): IVerticesTransformer {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     if (element) {
       const transformer = element.getTransformerByPoint(point);
       if (transformer) {
@@ -345,7 +345,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     if (element) {
       if (element.borderTransformEnable) {
         const borderTransformer = element.getBorderTransformerByPoint(point);
@@ -365,7 +365,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementTransformer(): IVerticesTransformer {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     if (element) {
       return element.getActiveElementTransformer();
     }
@@ -377,7 +377,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementBorderTransformer(): IBorderTransformer {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     if (element) {
       return element.getActiveElementBorderTransformer();
     }
@@ -389,7 +389,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementRotation(): IElementRotation {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     if (element && element.rotation.isActive) {
       return element.rotation;
     }
@@ -446,7 +446,7 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中组件的变换器
    */
   deActiveElementsTransformers(): void {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     element?.deActiveAllTransformers();
   }
 
@@ -454,7 +454,7 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中元素的边框变换器
    */
   deActiveElementsBorderTransformers(): void {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     element?.deActiveAllBorderTransformers();
   }
 
@@ -462,7 +462,7 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中元素的旋转
    */
   deActiveElementsRotations(): void {
-    const element = this.shield.store.uniqSelectedElement;
+    const element = this.shield.store.primarySelectedElement;
     element?.deActiveRotation();
   }
 
