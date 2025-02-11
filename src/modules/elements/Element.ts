@@ -1890,69 +1890,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param value
    */
   setWidth(value: number): void {
-    const lockPoint = this._originalCenter;
-    const currentPointOriginal = this.getTransformPointForSizeChange();
-    // 当前拖动的点的原始位置
-    this._transformOriginalMovingPoint = currentPointOriginal;
-    // 计算变换后的坐标
-    const xValue = MathUtils.calcTriangleSide1By3(this.model.angle, value);
-    const yValue = MathUtils.calcTriangleSide2By3(this.model.angle, value);
-    // 计算原始坐标
-    const originXValue = MathUtils.calcTriangleSide1By3(
-      this.model.angle,
-      this._originalSize.width,
-    );
-    const originYValue = MathUtils.calcTriangleSide2By3(
-      this.model.angle,
-      this._originalSize.width,
-    );
-    // 计算偏移量
-    const offset = {
-      x: (xValue - originXValue) / 2,
-      y: (yValue - originYValue) / 2,
-    };
-    // 计算变换后的坐标
-    const currentPoint = {
-      x: currentPointOriginal.x + offset.x,
-      y: currentPointOriginal.y + offset.y,
-    };
-    // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrix(
-      lockPoint,
-      currentPoint,
-      currentPointOriginal,
-      this.angles,
+    const matrix = MathUtils.calcScaleMatrix(
+      value / this._originalSize.width,
+      1,
     );
     // 调整矩阵
     matrix[1][1] = this.shouldRatioLockResize
       ? MathUtils.resignValue(matrix[1][1], matrix[0][0])
       : 1;
-    // 设置变换矩阵
-    this._transformMatrix = matrix;
-    // 设置变换不动点
-    this._transformLockPoint = lockPoint;
-    // 设置变换坐标
-    this.model.coords = this.batchCalcTransformPointsByCenter(
-      this._originalRotatePathPoints,
-      matrix,
-      lockPoint,
-      this._originalCenter,
-    );
-    // 设置变换盒模型坐标
-    this.model.boxCoords = this.batchCalcTransformPointsByCenter(
-      this._originalRotateBoxPoints,
-      matrix,
-      lockPoint,
-      this._originalCenter,
-    );
-    // 刷新组件
-    this.refresh({
-      points: true,
-      size: true,
-      position: true,
-      rotation: true,
-      originals: true,
-    });
+    this._setWH(matrix);
   }
 
   /**
@@ -1961,59 +1907,40 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param value
    */
   setHeight(value: number): void {
-    const lockPoint = this._originalCenter;
-    const currentPointOriginal = this.getTransformPointForSizeChange();
-    // 当前拖动的点的原始位置
-    this._transformOriginalMovingPoint = currentPointOriginal;
-    // 计算变换后的坐标
-    const xValue = MathUtils.calcTriangleSide2By3(this.model.angle, value);
-    const yValue = MathUtils.calcTriangleSide1By3(this.model.angle, value);
-    // 计算原始坐标
-    const originXValue = MathUtils.calcTriangleSide2By3(
-      this.model.angle,
-      this._originalSize.height,
-    );
-    const originYValue = MathUtils.calcTriangleSide1By3(
-      this.model.angle,
-      this._originalSize.height,
-    );
-    // 计算偏移量
-    const offset = {
-      x: (xValue - originXValue) / 2,
-      y: (yValue - originYValue) / 2,
-    };
-    // 计算变换后的坐标
-    const currentPoint = {
-      x: currentPointOriginal.x + offset.x,
-      y: currentPointOriginal.y + offset.y,
-    };
     // 计算变换矩阵
-    const matrix = MathUtils.calcTransformMatrix(
-      lockPoint,
-      currentPoint,
-      currentPointOriginal,
-      this.angles,
+    const matrix = MathUtils.calcScaleMatrix(
+      1,
+      value / this._originalSize.height,
     );
     // 调整矩阵
     matrix[0][0] = this.shouldRatioLockResize
       ? MathUtils.resignValue(matrix[0][0], matrix[1][1])
       : 1;
+    this._setWH(matrix);
+  }
+
+  /**
+   * 设置宽高
+   *
+   * @param matrix
+   */
+  private _setWH(matrix: number[][]): void {
     // 设置变换矩阵
     this._transformMatrix = matrix;
     // 设置变换不动点
-    this._transformLockPoint = lockPoint;
+    this._transformLockPoint = this._originalCenter;
     // 设置变换坐标
     this.model.coords = this.batchCalcTransformPointsByCenter(
       this._originalRotatePathPoints,
       matrix,
-      lockPoint,
+      this._originalCenter,
       this._originalCenter,
     );
     // 设置变换盒模型坐标
     this.model.boxCoords = this.batchCalcTransformPointsByCenter(
       this._originalRotateBoxPoints,
       matrix,
-      lockPoint,
+      this._originalCenter,
       this._originalCenter,
     );
     // 刷新组件
