@@ -1,6 +1,6 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
-import { LineClosestMargin } from "@/types/Constants";
+import { LineClosestMargin } from "@/types/constants";
 import { IElementLine } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -53,19 +53,11 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get leanXAngleCalcEnable(): boolean {
-    return false;
-  }
-
   get leanYAngleCalcEnable(): boolean {
     return false;
   }
 
   get leanYAngleModifyEnable(): boolean {
-    return false;
-  }
-
-  get leanXAngleModifyEnable(): boolean {
     return false;
   }
 

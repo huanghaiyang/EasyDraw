@@ -31,8 +31,6 @@ const DefaultStage = {
   angle: 0,
   // X轴翻转
   flipX: false,
-  // X偏移角度
-  leanXAngle: 0,
   // Y偏移角度
   leanYAngle: 0,
   // 缩放比例
@@ -133,8 +131,6 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
       // 监听X轴翻转
       shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), 100));
-      // 监听X偏移角度
-      shield.on(ShieldDispatcherNames.leanXAngleChanged, throttle(this.onLeanXAngleChanged.bind(this), 100));
       // 监听Y偏移角度
       shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
       // 监听缩放
@@ -217,7 +213,6 @@ export const useStageStore = defineStore("stage", {
           height,
           angle,
           flipX,
-          leanXAngle,
           leanYAngle,
           strokeType,
           strokeWidth,
@@ -241,8 +236,6 @@ export const useStageStore = defineStore("stage", {
         this.onAngleChanged(element, angle);
         // X轴翻转
         this.onFlipXChanged(element, flipX);
-        // X轴偏移角度
-        this.onLeanXAngleChanged(element, leanXAngle);
         // Y轴偏移角度
         this.onLeanYAngleChanged(element, leanYAngle);
         // 描边类型
@@ -325,15 +318,6 @@ export const useStageStore = defineStore("stage", {
      */
     onFlipXChanged(element: IElement, flipX: boolean) {
       this.flipX = flipX;
-    },
-    /**
-     * 组件倾斜变化
-     *
-     * @param element
-     * @param angle
-     */
-    onLeanXAngleChanged(element: IElement, angle: number) {
-      this.leanXAngle = angle;
     },
     /**
      * 组件倾斜变化
@@ -515,13 +499,6 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsAngle(value: number): void {
       shield.setElementsAngle(this.selectedElements, value);
-    },
-
-    /**
-     * 设置组件X倾斜角度
-     */
-    setElementsLeanXAngle(value: number): void {
-      shield.setElementsLeanXAngle(this.selectedElements, value);
     },
 
     /**

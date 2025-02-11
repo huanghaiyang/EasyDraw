@@ -685,11 +685,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
-  get leanXAngle(): number {
-    return this.model.leanXAngle;
-  }
-
-  @computed
   get leanYAngle(): number {
     return this.model.leanYAngle;
   }
@@ -697,16 +692,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   get angles(): Partial<AngleModel> {
     return {
       angle: this.model.angle,
-      leanXAngle: this.model.leanXAngle,
       leanYAngle: this.model.leanYAngle,
       internalAngle: this.model.internalAngle,
       actualAngle: this.model.actualAngle,
       viewAngle: this.model.viewAngle,
     };
-  }
-
-  get leanX(): number {
-    return -Math.tan(MathUtils.angleToRadian(this.model.leanXAngle));
   }
 
   get leanY(): number {
@@ -721,19 +711,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
-  get leanXAngleCalcEnable(): boolean {
-    return true;
-  }
-
   get leanYAngleCalcEnable(): boolean {
     return true;
   }
 
   get leanYAngleModifyEnable(): boolean {
-    return true;
-  }
-
-  get leanXAngleModifyEnable(): boolean {
     return true;
   }
 
@@ -972,7 +954,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnLeanCoords(): IPoint[] {
-    return MathUtils.calcUnLeanByPoints(this.model.coords, this.model.leanXAngle, this.model.leanYAngle);
+    return MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle);
   }
 
   /**
@@ -981,7 +963,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnleanBoxCoords(): IPoint[] {
-    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, this.model.leanXAngle, this.model.leanYAngle);
+    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, 0, this.model.leanYAngle);
   }
 
   /**
@@ -1011,16 +993,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcInternalAngle(): number {
     return MathUtils.calcInternalAngle(this.model.boxCoords);
-  }
-
-  /**
-   * 计算倾斜角度
-   *
-   * @returns
-   */
-  calcLeanXAngle(): number {
-    if (!this.leanXAngleCalcEnable) return 0;
-    return 0;
   }
 
   /**
@@ -1061,8 +1033,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (options.view) this.model.viewAngle = this.calcViewAngle();
     // 计算内部角度
     if (options.internal) this.model.internalAngle = this.calcInternalAngle();
-    // 计算x倾斜角度
-    if (options.leanX) this.model.leanXAngle = this.calcLeanXAngle();
     // 计算y倾斜角度
     if (options.leanY) this.model.leanYAngle = this.calcLeanYAngle();
     // 计算实际角度
@@ -1381,8 +1351,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     const boxPoints = ElementUtils.calcMatrixPoints(this._originalRotateBoxPoints, matrix, lockPoint, groupAngles);
     // 计算内角
     this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
-    // 计算x倾斜角度
-    this.model.leanXAngle = 0;
     // 计算y倾斜角度
     this.model.leanYAngle = MathUtils.calcLeanYAngle(this.model.internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
     // 计算变换后的角度
@@ -1787,18 +1755,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 设置X倾斜角度
-   *
-   * do noting
-   *
-   * @param value
-   */
-  setLeanXAngle(value: number): void {
-    this.model.leanXAngle = value;
-    this.refresh(null, { angles: { view: true, actual: true, leanY: true, internal: true } });
-  }
-
-  /**
    * 设置Y倾斜角度
    *
    * @param value
@@ -1819,7 +1775,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
     // 刷新角度选项
-    this.refresh(null, { angles: { view: true, actual: true, leanX: true, internal: true } });
+    this.refresh(null, { angles: { view: true, actual: true, internal: true } });
   }
 
   /**
@@ -1841,8 +1797,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     boxPoints = MathUtils.batchTransWithCenter(boxPoints, { angle: groupAngle, leanYAngle: value }, center);
     // 计算内角
     this.model.internalAngle = MathUtils.calcInternalAngle(boxPoints);
-    // 计算x倾斜角度
-    this.model.leanXAngle = 0;
     // 计算y倾斜角度
     this.model.leanYAngle = MathUtils.calcLeanYAngle(this.model.internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
     // 计算实际角度

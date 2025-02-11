@@ -15,7 +15,7 @@ import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
-import { ArbitraryPointClosestMargin } from "@/types/Constants";
+import { ArbitraryPointClosestMargin } from "@/types/constants";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 
@@ -328,7 +328,6 @@ export default class StageStore implements IStageStore {
           ShieldDispatcherNames.positionChanged,
           ShieldDispatcherNames.angleChanged,
           ShieldDispatcherNames.flipXChanged,
-          ShieldDispatcherNames.leanXAngleChanged,
           ShieldDispatcherNames.leanYAngleChanged,
           ShieldDispatcherNames.widthChanged,
           ShieldDispatcherNames.heightChanged,
@@ -421,20 +420,6 @@ export default class StageStore implements IStageStore {
     elements.forEach((element) => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
         this.rotateElements([element], value, element.angle, element.centerCoord);
-      }
-    });
-  }
-
-  /**
-   * 设置组件X倾斜角度
-   *
-   * @param elements
-   * @param value
-   */
-  async setElementsLeanXAngle(elements: IElement[], value: number): Promise<void> {
-    elements.forEach((element) => {
-      if (this.hasElement(element.id)) {
-        element.setLeanXAngle(value);
       }
     });
   }

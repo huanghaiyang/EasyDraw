@@ -1,5 +1,5 @@
 import { IPoint } from "@/types";
-import { BorderTransformerMargin } from "@/types/Constants";
+import { BorderTransformerMargin } from "@/types/constants";
 import IElement from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import IStageSelection from "@/types/IStageSelection";

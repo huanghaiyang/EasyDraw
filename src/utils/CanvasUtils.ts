@@ -84,7 +84,7 @@ export default class CanvasUtils {
    */
   static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
     let { x, y, width, height } = rect;
-    let { angle = 0, flipX = false, leanX, leanY, actualAngle } = options;
+    let { angle = 0, flipX = false, leanY, actualAngle } = options;
     const ctx = target.getContext("2d");
     // 以实际组件角度替换angle
     if (typeof actualAngle === "number") {
@@ -110,7 +110,7 @@ export default class CanvasUtils {
     // 旋转
     ctx.rotate(radian);
     // 倾斜
-    ctx.transform(1, leanX, leanY, 1, 0, 0);
+    ctx.transform(1, 0, leanY, 1, 0, 0);
     // 绘制
     ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();

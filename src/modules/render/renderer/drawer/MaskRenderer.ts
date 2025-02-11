@@ -174,7 +174,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         break;
       }
       default: {
-        if (element.model.angle % 90 === 0 && element.model.leanYAngle === 0 && element.model.leanXAngle === 0) {
+        if (element.model.angle % 90 === 0 && element.model.leanYAngle === 0) {
           p1 = element.maxBoxPoints[3];
           p2 = element.maxBoxPoints[2];
         } else {

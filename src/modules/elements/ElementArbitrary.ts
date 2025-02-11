@@ -5,7 +5,7 @@ import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, flatten, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { LineClosestMinWidth } from "@/types/Constants";
+import { LineClosestMinWidth } from "@/types/constants";
 import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -255,8 +255,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
       const lockPoint = this._originalRotateBoxPoints[0];
       this.model.coords = ElementUtils.calcCoordsByTransPathPoints(points, this.angles, lockPoint, this.shield.stageCalcParams);
       this.model.boxCoords = MathUtils.batchLeanWithCenter(
-        CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, this.model.leanXAngle, this.model.leanYAngle)),
-        this.model.leanXAngle,
+        CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)),
+        0,
         this.model.leanYAngle,
         this.calcCenterCoord()
       );

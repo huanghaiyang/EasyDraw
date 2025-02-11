@@ -95,8 +95,6 @@ export enum ShieldDispatcherNames {
   angleChanged = "angleChanged",
   // x轴翻转改变
   flipXChanged = "flipXChanged",
-  // x偏移角度改变
-  leanXAngleChanged = "leanXAngleChanged",
   // y偏移角度改变
   leanYAngleChanged = "leanYAngleChanged",
   // 比例改变

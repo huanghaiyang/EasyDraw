@@ -41,9 +41,9 @@ export type TransformByOptions = {
 export type AngleModel = {
   // 旋转角度
   angle?: number;
-  // 倾斜角度
+  // X倾斜角度
   leanXAngle?: number;
-  // 倾斜角度
+  // Y倾斜角度
   leanYAngle?: number;
   // 内部角度
   internalAngle?: number;
@@ -64,7 +64,6 @@ export type FlipModel = {
 // 默认角度
 export const DefaultAngleModel: AngleModel = {
   angle: 0,
-  leanXAngle: 0,
   leanYAngle: 0,
   internalAngle: 90,
   actualAngle: 0,
@@ -119,7 +118,6 @@ export type ElementObject = AngleModel &
 // 刷新角度选项参数
 export type RefreshAnglesOptions = {
   view?: boolean;
-  leanX?: boolean;
   leanY?: boolean;
   actual?: boolean;
   internal?: boolean;
@@ -128,7 +126,6 @@ export type RefreshAnglesOptions = {
 // 默认刷新角度选项
 export const DefaultRefreshAnglesOptions: RefreshAnglesOptions = {
   view: true,
-  leanX: true,
   leanY: true,
   actual: true,
   internal: true,
@@ -207,12 +204,8 @@ export default interface IElement {
   get viewAngleCalcEnable(): boolean;
   // y是否可倾斜
   get leanYAngleCalcEnable(): boolean;
-  // x是否可倾斜
-  get leanXAngleCalcEnable(): boolean;
   // y倾斜角度是否可修改
   get leanYAngleModifyEnable(): boolean;
-  // x倾斜角度是否可修改
-  get leanXAngleModifyEnable(): boolean;
   // 是否在编辑后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
@@ -228,11 +221,7 @@ export default interface IElement {
   // 角度
   get angles(): Partial<AngleModel>;
   // 倾斜角度
-  get leanX(): number;
-  // 倾斜角度
   get leanY(): number;
-  // 倾斜x角度
-  get leanXAngle(): number;
   // 倾斜y角度
   get leanYAngle(): number;
   // 翻转
@@ -401,8 +390,6 @@ export default interface IElement {
   setHeight(value: number): void;
   // 设置旋转角度
   setAngle(value: number): void;
-  // 设置X倾斜角度
-  setLeanXAngle(value: number): void;
   // 设置Y倾斜角度
   setLeanYAngle(value: number): void;
   // 设置描边类型
@@ -487,8 +474,6 @@ export default interface IElement {
   calcUnLeanPoints(): IPoint[];
   // 计算非倾斜盒模型点-舞台坐标
   calcUnLeanBoxPoints(): IPoint[];
-  // 计算倾斜X角度
-  calcLeanXAngle(): number;
   // 计算倾斜Y角度
   calcLeanYAngle(): number;
   // 计算内部角度

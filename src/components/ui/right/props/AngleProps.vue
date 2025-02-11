@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
-import { clamp } from 'lodash';
+import { clamp } from "lodash";
 
 const stageStore = useStageStore();
 const aValue = ref(0);

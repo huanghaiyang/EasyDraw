@@ -58,8 +58,6 @@ export type RenderParams = AngleModel & {
   calcVertices?: boolean;
   // 斜接限制
   miterLimit?: number;
-  // 倾斜x
-  leanX?: number;
   // 倾斜y
   leanY?: number;
 };

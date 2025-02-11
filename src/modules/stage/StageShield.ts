@@ -1,4 +1,4 @@
-import { MinCursorMXD, MinCursorMYD } from "@/types/Constants";
+import { MinCursorMXD, MinCursorMYD } from "@/types/constants";
 import { IPoint, ShieldDispatcherNames } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
@@ -233,17 +233,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this.store.setElementsLeanYAngle(elements, value);
     await this._redrawAll({ shield: true, mask: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
-  }
-
-  /**
-   * 设置组件X倾斜角度
-   *
-   * @param elements
-   * @param value
-   */
-  async setElementsLeanXAngle(elements: IElement[], value: number): Promise<void> {
-    await this.store.setElementsLeanXAngle(elements, value);
-    await this._redrawAll({ shield: true, mask: true });
   }
 
   /**
