@@ -1111,7 +1111,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新旋转坐标
    */
   refreshRotation(): void {
-    this.rotation.model.scale = 1 / this.shield.stageScale;
     this.rotation.refresh();
   }
 
@@ -1526,7 +1525,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       MathUtils.calcFlipXByPoints(boxPoints),
     );
     // 计算变换后的角度
-    this.model.angle = MathUtils.mirrorAngle(MathUtils.calcActualAngleByPoints(boxPoints));
+    this.model.angle = MathUtils.mirrorAngle(
+      MathUtils.calcActualAngleByPoints(boxPoints),
+    );
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByTransPathPoints(
       points,

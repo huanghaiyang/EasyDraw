@@ -36,6 +36,8 @@ export default class ElementRotation implements IElementRotation, IController {
    */
   refresh(): void {
     if (!this.element.rotationEnable) return;
+    // 设置缩放
+    this.model.scale = 1 / this.element.shield.stageScale;
     // 设置旋转角度
     this.model.angle = this.element.viewAngle - 90;
     // 设置旋转点

@@ -22,6 +22,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 import { TransformerTypes } from "@/types/ITransformer";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export default class MaskRenderer
   extends BaseRenderer<IDrawerMask>
@@ -52,9 +53,9 @@ export default class MaskRenderer
       cargo.addAll(transformerTasks);
     }
 
-    // 如果当前舞台只有一个被选中的组件且组件已经不是正在创建中的，则渲染组件的旋转句柄图标
-    const element = this.drawer.shield.store.primarySelectedElement;
-    if (element) {
+    const noParentElements = this.drawer.shield.store.noParentElements;
+    if (noParentElements.length === 1) {
+      const element = noParentElements[0];
       if (
         this.drawer.shield.configure.rotationIconEnable &&
         element.rotationEnable &&
@@ -63,8 +64,11 @@ export default class MaskRenderer
         cargo.add(this.createMaskRotateTask(element));
       }
       cargo.add(this.createMaskIndicatorTask(element));
+    } else if (noParentElements.length > 1) {
+      cargo.add(
+        this.createSelectionRotateTask(this.drawer.shield.selection.range),
+      );
     }
-
     // 绘制光标
     const task = this.drawer.shield.cursor.getTask();
     if (task) {
@@ -134,7 +138,7 @@ export default class MaskRenderer
       this.drawer.shield.selection.getRealTimeSelectionModel(),
     ];
     models.forEach(model => {
-      if (model) {
+      if (model && model.points.length > 0) {
         const task = new MaskTaskPath(
           { ...model, scale: 1 / this.drawer.shield.stageScale },
           this.renderParams,
@@ -183,6 +187,17 @@ export default class MaskRenderer
    */
   private createMaskRotateTask(element: IElement): IRenderTask {
     return new MaskTaskRotate(element.rotation.model, this.renderParams);
+  }
+
+  /**
+   * 创建一个绘制旋转图标的任务
+   *
+   * @param element
+   */
+  private createSelectionRotateTask(
+    selectionRange: IStageSelectionRange,
+  ): IRenderTask {
+    return new MaskTaskRotate(selectionRange.rotation.model, this.renderParams);
   }
 
   /**

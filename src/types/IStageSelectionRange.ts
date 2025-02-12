@@ -16,4 +16,8 @@ export default interface IStageSelectionRange extends AngleModel {
   rotation: IElementRotation;
   // 数据模型
   model: IMaskModel;
+  // 角度
+  get angle(): number;
+  // 视觉角度
+  get viewAngle(): number;
 }

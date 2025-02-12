@@ -23,6 +23,13 @@ export class StageSelectionRange implements IStageSelectionRange {
   rotation: IElementRotation;
   model: IMaskModel;
 
+  get angle(): number {
+    return this.model.angle;
+  }
+  get viewAngle(): number {
+    return this.model.viewAngle;
+  }
+
   get rotationEnable(): boolean {
     return true;
   }
@@ -84,6 +91,9 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+    this._selectionModel = {
+      type: DrawerMaskModelTypes.selection,
+    } as IMaskModel;
     this.range = new StageSelectionRange(shield, this._selectionModel);
   }
 
@@ -543,7 +553,32 @@ export default class StageSelection implements IStageSelection {
    * 刷新选区模型
    */
   refreshSelectionModel(): void {
-    this._selectionModel = this.calcSelectionModel();
+    const model = this.calcSelectionModel();
+    if (model) {
+      Object.assign(this._selectionModel, model);
+    } else {
+      Object.assign(this._selectionModel, {
+        points: [],
+        width: null,
+        height: null,
+        angle: 0,
+        viewAngle: 0,
+      } as IMaskModel);
+    }
+    if (this._selectionModel.points.length > 0) {
+      const angle = MathUtils.calcViewAngleByPoints(
+        this._selectionModel.points,
+      );
+      Object.assign(
+        this._selectionModel,
+        {
+          angle,
+          viewAngle: angle,
+        },
+        CommonUtils.calcRectangleSize(this._selectionModel.points),
+      );
+      this.range.rotation.refresh();
+    }
   }
 
   /**

@@ -205,6 +205,13 @@ export default class StageStore implements IStageStore {
     return this.getSelectedAncestorElementGroups();
   }
 
+  // 不属于任何组合的组件
+  get noParentElements(): IElement[] {
+    return ElementUtils.getNoParentElements(
+      this.selectedElements,
+    ) as IElement[];
+  }
+
   /**
    * 组件新增
    */
@@ -433,7 +440,11 @@ export default class StageStore implements IStageStore {
         element.setPosition(x, y, offset);
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
-            sub.setPosition(sub.model.left + offset.x, sub.model.top + offset.y, offset);
+            sub.setPosition(
+              sub.model.left + offset.x,
+              sub.model.top + offset.y,
+              offset,
+            );
           });
         }
       }

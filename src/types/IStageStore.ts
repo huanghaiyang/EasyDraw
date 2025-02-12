@@ -50,6 +50,8 @@ export default interface IStageStore extends IStageSetter {
   get selectedAncestorElementGroups(): IElementGroup[];
   // 选中的根组件
   get selectedAncestorElement(): IElement;
+  // 不属于任何组合的组件
+  get noParentElements(): IElement[];
 
   // 创建组件数据模型
   createElementModel(
