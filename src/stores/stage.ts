@@ -11,6 +11,7 @@ import {
   PenCreator,
   RectangleCreator,
 } from "@/types/CreatorDicts";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 // 舞台实例
 const shield = new StageShield();
@@ -86,7 +87,7 @@ export const useStageStore = defineStore("stage", {
     // 选中的唯一组件
     primarySelectedElement(): IElement {
       // 选中的非组合组件
-      const elements = shield.store.getNoParentElements(this.selectedElements);
+      const elements = ElementUtils.getNoParentElements(this.selectedElements);
       if (elements.length !== 1) return null;
       return elements[0];
     },
@@ -263,7 +264,7 @@ export const useStageStore = defineStore("stage", {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
         // 获取组合或者组件
-        const element: IElement = shield.store.getAncestorGroup(
+        const element: IElement = ElementUtils.getAncestorGroup(
           this.selectedElements,
         );
         if (!element) {

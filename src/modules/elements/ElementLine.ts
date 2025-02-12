@@ -201,7 +201,7 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @param offset
    */
-  protected doVerticesTransform(offset: IPoint): boolean {
+  protected doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(
       transformer => transformer.isActive,
     );
@@ -213,14 +213,8 @@ export default class ElementLine extends Element implements IElementLine {
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 根据不动点进行形变
-      return this.transformByLockPoint(
-        lockPoint,
-        currentPointOriginal,
-        offset,
-        index,
-      );
+      this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
     }
-    return false;
   }
 
   /**
@@ -237,7 +231,7 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @param value
    */
-  setWidth(value: number): void {
+  setWidth(value: number): number[][] {
     const newCoord = MathUtils.calcTargetPoint(
       this.startCoord,
       value,
@@ -246,6 +240,7 @@ export default class ElementLine extends Element implements IElementLine {
     this.model.coords[1] = newCoord;
     this.model.width = value;
     this.refresh();
+    return [[]];
   }
 
   /**

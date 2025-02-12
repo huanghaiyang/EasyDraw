@@ -131,7 +131,7 @@ export default class StageStore implements IStageStore {
 
   // 选中的根组件
   get selectedAncestorElement(): IElement {
-    return this.getAncestorGroup(this.selectedElements);
+    return ElementUtils.getAncestorGroup(this.selectedElements);
   }
 
   /**
@@ -1750,7 +1750,7 @@ export default class StageStore implements IStageStore {
     if (elements.length < 2) {
       return null;
     }
-    const isSameGroup = this.isSameAncestorGroup(elements);
+    const isSameGroup = ElementUtils.isSameAncestorGroup(elements);
     if (isSameGroup) {
       return null;
     }
@@ -1785,7 +1785,7 @@ export default class StageStore implements IStageStore {
    * 获取选中的根组合
    */
   getSelectedAncestorElementGroups(): IElementGroup[] {
-    return this.getNoParentElements(
+    return ElementUtils.getNoParentElements(
       this.getSelectedElementGroups(),
     ) as IElementGroup[];
   }
@@ -1817,37 +1817,5 @@ export default class StageStore implements IStageStore {
     groups.forEach(group => {
       this.deSelectGroup(group);
     });
-  }
-
-  /**
-   * 判定给定的组件是否属于同一个组合
-   *
-   * @param elements
-   */
-  isSameAncestorGroup(elements: IElement[]): boolean {
-    if (elements.length <= 1) return true;
-    const ancestorGroup = this.getAncestorGroup(elements);
-    return ancestorGroup !== null;
-  }
-
-  /**
-   * 获取选中的根组件
-   *
-   * @param elements
-   */
-  getAncestorGroup(elements: IElement[]): IElement {
-    if (elements.length === 0) return null;
-    const noParentElements = this.getNoParentElements(elements);
-    if (noParentElements.length > 1) return null;
-    return noParentElements[0];
-  }
-
-  /**
-   * 获取非组合组件
-   *
-   * @param elements
-   */
-  getNoParentElements(elements: IElement[]): IElement[] {
-    return elements.filter(element => !element.isGroupSubject);
   }
 }

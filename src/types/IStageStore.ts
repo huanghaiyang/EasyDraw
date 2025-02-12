@@ -178,10 +178,4 @@ export default interface IStageStore extends IStageSetter {
   deSelectGroup(group: IElementGroup): void;
   // 取消选中组合
   deSelectGroups(groups: IElementGroup[]): void;
-  // 判定给定的组件是否属于同一个组合
-  isSameAncestorGroup(elements: IElement[]): boolean;
-  // 获取选中的根组件
-  getAncestorGroup(elements: IElement[]): IElement;
-  // 获取非组合组件
-  getNoParentElements(elements: IElement[]): IElement[];
 }

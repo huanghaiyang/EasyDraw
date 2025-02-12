@@ -657,4 +657,36 @@ export default class ElementUtils {
       ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles),
     );
   }
+
+  /**
+   * 判定给定的组件是否属于同一个组合
+   *
+   * @param elements
+   */
+  static isSameAncestorGroup(elements: IElement[]): boolean {
+    if (elements.length <= 1) return true;
+    const ancestorGroup = ElementUtils.getAncestorGroup(elements);
+    return ancestorGroup !== null;
+  }
+
+  /**
+   * 获取选中的根组件
+   *
+   * @param elements
+   */
+  static getAncestorGroup(elements: IElement[]): IElement {
+    if (elements.length === 0) return null;
+    const noParentElements = ElementUtils.getNoParentElements(elements);
+    if (noParentElements.length > 1) return null;
+    return noParentElements[0];
+  }
+
+  /**
+   * 获取非组合组件
+   *
+   * @param elements
+   */
+  static getNoParentElements(elements: IElement[]): IElement[] {
+    return elements.filter(element => !element.isGroupSubject);
+  }
 }
