@@ -7,6 +7,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import IController from "@/types/IController";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export default class ElementRotation implements IElementRotation, IController {
   // id
@@ -21,11 +22,11 @@ export default class ElementRotation implements IElementRotation, IController {
     points: [],
   };
   // 组件
-  element: IElement;
+  element: IElement | IStageSelectionRange;
   // 是否激活
   isActive: boolean = false;
 
-  constructor(element: IElement) {
+  constructor(element: IElement | IStageSelectionRange) {
     this.id = element.id;
     this.element = element;
   }

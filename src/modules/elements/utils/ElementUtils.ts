@@ -22,6 +22,7 @@ import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
 import { multiply } from "mathjs";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -233,7 +234,9 @@ export default class ElementUtils {
    * @param element
    * @returns
    */
-  static calcElementRotatePoint(element: IElement): IPoint {
+  static calcElementRotatePoint(
+    element: IElement | IStageSelectionRange,
+  ): IPoint {
     const {
       center,
       rotation: {

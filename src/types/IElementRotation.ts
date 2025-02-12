@@ -1,6 +1,7 @@
 import { IRotationModel } from "@/types/IModel";
 import IElement from "@/types/IElement";
 import { IPoint } from "@/types";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export default interface IElementRotation {
   // 旋转id
@@ -8,7 +9,7 @@ export default interface IElementRotation {
   // 旋转模型
   model: IRotationModel;
   // 组件
-  element: IElement;
+  element: IElement | IStageSelectionRange;
   // 是否激活
   isActive: boolean;
 

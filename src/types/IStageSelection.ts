@@ -6,11 +6,14 @@ import IStageShield from "@/types/IStageShield";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IBorderTransformer } from "@/types/ITransformer";
 import IController from "@/types/IController";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 // 舞台选区
 export default interface IStageSelection {
   // 舞台
   shield: IStageShield;
+  // 选区范围
+  range: IStageSelectionRange;
   // 是否为空
   get isEmpty(): boolean;
   // 是否为鼠标范围选区

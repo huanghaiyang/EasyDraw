@@ -13,15 +13,41 @@ import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { flatten } from "lodash";
 import IController from "@/types/IController";
+import IStageSelectionRange from "@/types/IStageSelectionRange";
+import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import MathUtils from "@/utils/MathUtils";
+
+export class StageSelectionRange implements IStageSelectionRange {
+  id: string;
+  shield: IStageShield;
+  rotation: IElementRotation;
+  model: IMaskModel;
+
+  get rotationEnable(): boolean {
+    return true;
+  }
+
+  get center(): IPoint {
+    return MathUtils.calcCenter(this.model.points);
+  }
+
+  constructor(shield: IStageShield, model: IMaskModel) {
+    this.id = CommonUtils.getRandomDateId();
+    this.shield = shield;
+    this.rotation = new ElementRotation(this);
+    this.model = model;
+  }
+}
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
+  // 选区范围
+  range: IStageSelectionRange;
 
   // 选区模型
   private _selectionModel: IMaskModel;
   // 变换控制器模型
   private _transformerModels: IMaskModel[];
-
   // 选区范围点
   private _rangePoints: IPoint[] = null;
 
@@ -58,6 +84,7 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+    this.range = new StageSelectionRange(shield, this._selectionModel);
   }
 
   /**
