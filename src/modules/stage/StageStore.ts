@@ -438,6 +438,7 @@ export default class StageStore implements IStageStore {
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (element.width === value) return;
         const matrix = element.setWidth(value);
         if (element.isGroup) {
           this.scaleSubs(element, matrix);
@@ -455,6 +456,7 @@ export default class StageStore implements IStageStore {
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (element.height === value) return;
         const matrix = element.setHeight(value);
         if (element.isGroup) {
           this.scaleSubs(element, matrix);
@@ -489,6 +491,7 @@ export default class StageStore implements IStageStore {
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (element.angle === value) return;
         this.rotateElements(
           [element],
           value,
@@ -511,6 +514,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (element.leanYAngle === value) return;
         const prevValue = element.leanYAngle;
         element.setLeanYAngle(value);
         if (element.isGroup) {
@@ -535,6 +539,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.strokeType === value) return;
         element.setStrokeType(value);
       }
     });
@@ -552,6 +557,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.strokeWidth === value) return;
         element.setStrokeWidth(value);
       }
     });
@@ -569,6 +575,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.strokeColor === value) return;
         element.setStrokeColor(value);
       }
     });
@@ -586,6 +593,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.strokeColorOpacity === value) return;
         element.setStrokeColorOpacity(value);
       }
     });
@@ -603,6 +611,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.fillColor === value) return;
         element.setFillColor(value);
       }
     });
@@ -620,6 +629,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.fillColorOpacity === value) return;
         element.setFillColorOpacity(value);
       }
     });
@@ -637,6 +647,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.textAlign === value) return;
         element.setTextAlign(value);
       }
     });
@@ -654,6 +665,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.textBaseline === value) return;
         element.setTextBaseline(value);
       }
     });
@@ -671,6 +683,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.fontSize === value) return;
         element.setFontSize(value);
       }
     });
@@ -688,6 +701,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.fontFamily === value) return;
         element.setFontFamily(value);
       }
     });
@@ -705,6 +719,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
+        if (element.isRatioLocked === value) return;
         element.setRatioLocked(value);
       }
     });
