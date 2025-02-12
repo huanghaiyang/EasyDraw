@@ -19,8 +19,8 @@ export interface IMaskTask extends IRenderTask {
   model: IMaskModel;
 }
 
-// 舞台元素绘制任务
+// 舞台组件绘制任务
 export interface IElementTask extends IRenderTask {
-  // 元素
+  // 组件
   element: IElement;
 }

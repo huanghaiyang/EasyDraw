@@ -502,14 +502,14 @@ export default class StageShield
     if (this._isPressDown) {
       this.calcPressMove(e);
       if (this.isArbitraryDrawing) {
-        // 移动过程中创建元素
+        // 移动过程中创建组件
         this._updatingArbitraryElementOnMovement(e);
       } else if (this.isDrawerActive) {
-        // 移动过程中创建元素
+        // 移动过程中创建组件
         this._creatingElementOnMovement(e);
       } else if (this.isMoveableActive) {
         // 如果是选择模式
-        // 如果不存在选中的元素
+        // 如果不存在选中的组件
         if (this.store.isSelectedEmpty) {
           this._createRange();
         } else if (this._isElementsRotating) {
@@ -595,7 +595,7 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isDragging: true,
     });
-    // 更新元素位置
+    // 更新组件位置
     this.store.updateSelectedElementsMovement({
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
@@ -703,7 +703,7 @@ export default class StageShield
   }
 
   /**
-   * 刷新元素原始数据
+   * 刷新组件原始数据
    *
    * @param elements
    * @param options
@@ -747,7 +747,7 @@ export default class StageShield
   async _handlePressUp(e: MouseEvent): Promise<void> {
     this._isPressDown = false;
     this.calcPressUp(e);
-    // 如果是绘制模式，则完成元素的绘制
+    // 如果是绘制模式，则完成组件的绘制
     if (this.isArbitraryDrawing) {
       this._isPressDown = true;
       this._handleArbitraryPressUp();
@@ -1339,7 +1339,7 @@ export default class StageShield
   }
 
   /**
-   * 删除选中元素
+   * 删除选中组件
    */
   deleteSelectElements(): void {
     if (this.store.isSelectedEmpty) {
@@ -1350,14 +1350,14 @@ export default class StageShield
   }
 
   /**
-   * 处理选中元素删除
+   * 处理选中组件删除
    */
   _handleSelectsDelete(): void {
     this.deleteSelectElements();
   }
 
   /**
-   * 选中所有元素
+   * 选中所有组件
    */
   selectAll(): void {
     this.store.selectAll();

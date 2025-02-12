@@ -6,14 +6,14 @@ import { IPoint } from "@/types";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
-   * 获取子元素
+   * 获取子组件
    */
   get subs(): IElement[] {
     return this.getSubs();
   }
 
   /**
-   * 获取深度子元素
+   * 获取深度子组件
    */
   get deepSubs(): IElement[] {
     return this.getDeepSubs();
@@ -41,7 +41,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 添加子元素
+   * 添加子组件
    *
    * @param sub
    */
@@ -50,7 +50,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 移除子元素
+   * 移除子组件
    *
    * @param sub
    */
@@ -59,7 +59,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 移除子元素
+   * 移除子组件
    *
    * @param id
    */
@@ -68,7 +68,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 判断是否包含子元素
+   * 判断是否包含子组件
    *
    * @param sub
    */
@@ -77,7 +77,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 判断是否包含子元素
+   * 判断是否包含子组件
    *
    * @param id
    */
@@ -86,14 +86,14 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 获取子元素
+   * 获取子组件
    */
   getSubs(): IElement[] {
     return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
   }
 
   /**
-   * 获取深度子元素
+   * 获取深度子组件
    */
   getDeepSubs(): IElement[] {
     const result: IElement[] = [];
@@ -102,7 +102,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 获取深度子元素
+   * 获取深度子组件
    *
    * @param result
    * @param subs
@@ -118,7 +118,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 根据类型获取子元素
+   * 根据类型获取子组件
    *
    * @param type
    */
@@ -129,7 +129,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 获取所有子元素
+   * 获取所有子组件
    */
   getAllSubElements(): IElement[] {
     return this.getSubs().filter(sub => sub.isElement);
@@ -170,7 +170,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
-   * 设置选中状态,子元素也会同步设置
+   * 设置选中状态,子组件也会同步设置
    *
    * @param value
    */

@@ -14,10 +14,10 @@ import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
 
-// 刷新子元素选项
+// 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
 
-// 默认刷新子元素选项
+// 默认刷新子组件选项
 export const DefaultRefreshSubOptions: RefreshSubOptions = {
   subs: false,
   deepSubs: false,
@@ -73,20 +73,20 @@ export const DefaultAngleModel: AngleModel = {
   viewAngle: 0,
 };
 
-// 舞台元素数据模型
+// 舞台组件数据模型
 export type ElementObject = AngleModel &
   FlipModel & {
-    // 元素id
+    // 组件id
     id: string;
-    // 元素坐标
+    // 组件坐标
     coords?: IPoint[];
     // 盒模型坐标
     boxCoords?: IPoint[];
-    // 元素类型
+    // 组件类型
     type?: CreatorTypes;
-    // 元素数据
+    // 组件数据
     data?: any;
-    // 元素名称
+    // 组件名称
     name?: string;
     // 宽度
     width?: number;
@@ -114,7 +114,7 @@ export type ElementObject = AngleModel &
     naturalWidth?: number;
     // 图片自然高度
     naturalHeight?: number;
-    // 子元素id集合
+    // 子组件id集合
     subIds?: Set<string>;
   };
 
@@ -154,7 +154,7 @@ export const DefaultElementRefreshOptions: RefreshOptions = {
   originals: true,
 };
 
-// 舞台元素（组件）
+// 舞台组件（组件）
 export default interface IElement {
   // 组件ID
   id: string;
@@ -165,7 +165,7 @@ export default interface IElement {
   // 舞台
   shield: IStageShield;
 
-  // 是否是元素
+  // 是否是组件
   get isElement(): boolean;
   // 是否是组合
   get isGroup(): boolean;
@@ -173,7 +173,7 @@ export default interface IElement {
   get group(): IElementGroup;
   // 祖先组合
   get ancestorGroup(): IElementGroup;
-  // 是否是组合元素
+  // 是否是组合组件
   get isGroupSubject(): boolean;
   // 宽度是否可修改
   get widthModifyEnable(): boolean;
@@ -511,9 +511,9 @@ export default interface IElement {
   deActiveAllTransformers(): void;
   // 取消所有边框变换器
   deActiveAllBorderTransformers(): void;
-  // 获取激活的元素变换器
+  // 获取激活的组件变换器
   getActiveElementTransformer(): IVerticesTransformer;
-  // 获取激活的元素边框变换器
+  // 获取激活的组件边框变换器
   getActiveElementBorderTransformer(): IBorderTransformer;
   // 变换
   transform(offset: IPoint): void;
@@ -533,7 +533,7 @@ export default interface IElement {
 
   // 刷新旋转
   refreshRotation(): void;
-  // 刷新原始元素属性
+  // 刷新原始组件属性
   refreshOriginalElementProps(): void;
   // 刷新原始模型坐标
   refreshOriginalModelCoords(): void;
@@ -551,22 +551,22 @@ export default interface IElement {
   fromJson(json: ElementObject): void;
 }
 
-// 舞台元素（组件）-React
+// 舞台组件（组件）-React
 export interface IElementReact extends IElement {}
 
-// 舞台元素（组件）-圆形
+// 舞台组件（组件）-圆形
 export interface IElementCircle extends IElement {}
 
-// 舞台元素（组件）-图片
+// 舞台组件（组件）-图片
 export interface IElementImage extends IElementReact {}
 
-// 舞台元素（组件）-任意多边形&线条
+// 舞台组件（组件）-任意多边形&线条
 export interface IElementPolygon extends IElement {}
 
-// 舞台元素（组件）-文本
+// 舞台组件（组件）-文本
 export interface IElementText extends IElement {}
 
-// 舞台元素（组件）-线段
+// 舞台组件（组件）-线段
 export interface IElementLine extends IElement {
   // 开始旋转路径点
   get startRotatePathPoint(): IPoint;
@@ -583,7 +583,7 @@ export interface IElementLine extends IElement {
   calcOuterPathCoords(): IPoint[];
 }
 
-// 舞台元素（组件）-任意多边形&线条
+// 舞台组件（组件）-任意多边形&线条
 export interface IElementArbitrary extends IElement {
   // 尾点索引
   tailCoordIndex: number;

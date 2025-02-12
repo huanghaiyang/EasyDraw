@@ -34,7 +34,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   align: IStageAlign;
   // 当前创建者
   currentCreator: Creator;
-  // 渲染元素
+  // 渲染组件
   renderEl: HTMLDivElement;
   // 舞台矩形
   stageRect: DOMRect;
@@ -45,17 +45,17 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
 
   // 是否需要重绘
   get shouldRedraw(): boolean;
-  // 是否元素繁忙
+  // 是否组件繁忙
   get isElementsBusy(): boolean;
   // 舞台矩形点
   get stageRectPoints(): IPoint[];
   // 舞台世界矩形坐标
   get stageWordRectCoords(): IPoint[];
-  // 是否元素拖动
+  // 是否组件拖动
   get isElementsDragging(): boolean;
-  // 是否元素变换
+  // 是否组件变换
   get isElementsTransforming(): boolean;
-  // 是否元素编辑
+  // 是否组件编辑
   get isElementsEditing(): boolean;
   // 是否舞台移动
   get isStageMoving(): boolean;
@@ -65,7 +65,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isMoveableActive(): boolean;
   // 是否手激活
   get isHandActive(): boolean;
-  // 是否元素旋转
+  // 是否组件旋转
   get isElementsRotating(): boolean;
   // 是否任意绘制
   get isArbitraryDrawing(): boolean;
@@ -76,7 +76,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   calcScaleAutoFitValueByBox(box: IPoint[]): number;
   // 计算自动缩放值
   calcScaleAutoFitValue(): number;
-  // 计算元素自动缩放值
+  // 计算组件自动缩放值
   calcElementAutoFitValue(element: IElement): number;
   // 设置缩放
   setScale(value: number): void;
@@ -88,7 +88,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   setScaleReduce(): void;
   // 设置放大
   setScaleIncrease(): void;
-  // 删除选区元素
+  // 删除选区组件
   deleteSelectElements(): void;
   // 全选
   selectAll(): void;

@@ -35,31 +35,31 @@ export default interface IStageSelection {
   selectTargets(): void;
   // 清除选区
   clearSelects(): void;
-  // 命中目标元素
+  // 命中目标组件
   hitTargetElements(point: IPoint): void;
   // 尝试激活控制器
   tryActiveController(point: IPoint): IController;
-  // 尝试激活元素旋转
+  // 尝试激活组件旋转
   tryActiveElementRotation(point: IPoint): IElementRotation;
-  // 尝试激活元素变换
+  // 尝试激活组件变换
   tryActiveElementTransformer(point: IPoint): IVerticesTransformer;
-  // 尝试激活元素边框变换
+  // 尝试激活组件边框变换
   tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer;
-  // 清除元素变换
+  // 清除组件变换
   deActiveElementsTransformers(): void;
-  // 清除元素边框变换
+  // 清除组件边框变换
   deActiveElementsBorderTransformers(): void;
-  // 清除元素旋转
+  // 清除组件旋转
   deActiveElementsRotations(): void;
-  // 获取激活元素变换
+  // 获取激活组件变换
   getActiveElementTransformer(): IVerticesTransformer;
-  // 获取激活元素边框变换
+  // 获取激活组件边框变换
   getActiveElementBorderTransformer(): IBorderTransformer;
-  // 获取激活元素旋转
+  // 获取激活组件旋转
   getActiveElementRotation(): IElementRotation;
-  // 刷新范围元素
+  // 刷新范围组件
   refreshRangeElements(rangePoints: IPoint[]): void;
-  // 获取点上元素
+  // 获取点上组件
   getElementOnPoint(point: IPoint): IElement;
   // 获取激活控制器
   getActiveController(): IController;

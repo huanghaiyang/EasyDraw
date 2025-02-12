@@ -181,7 +181,7 @@ export default class ElementUtils {
   }
 
   /**
-   * 根据对象创建元素
+   * 根据对象创建组件
    *
    * @param model
    * @returns

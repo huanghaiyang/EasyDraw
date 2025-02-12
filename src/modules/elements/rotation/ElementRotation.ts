@@ -20,7 +20,7 @@ export default class ElementRotation implements IElementRotation, IController {
     angle: -90,
     points: [],
   };
-  // 元素
+  // 组件
   element: IElement;
   // 是否激活
   isActive: boolean = false;
@@ -59,12 +59,12 @@ export default class ElementRotation implements IElementRotation, IController {
    * @returns
    */
   isContainsPoint(point: IPoint): boolean {
-    // 如果元素旋转启用，则检查点是否在旋转路径点内
+    // 如果组件旋转启用，则检查点是否在旋转路径点内
     if (this.element.rotationEnable) {
       // 使用射线法检查点是否在旋转路径点内
       return MathUtils.isPointInPolygonByRayCasting(point, this.model.points);
     }
-    // 如果元素旋转未启用，则返回 false
+    // 如果组件旋转未启用，则返回 false
     return false;
   }
 }

@@ -79,7 +79,7 @@ export type ScaleValue = {
 
 // 舞台通知名称
 export enum ShieldDispatcherNames {
-  // 元素创建
+  // 组件创建
   elementCreated = "elementCreated",
   // 选中改变
   selectedChanged = "selectedChanged",

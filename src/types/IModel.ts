@@ -16,7 +16,7 @@ export interface IMaskModel extends AngleModel, FlipModel {
   text?: string;
   // 半径
   radius?: number;
-  // 元素
+  // 组件
   element?: {
     // 变换器类型
     transformerType?: TransformerTypes;

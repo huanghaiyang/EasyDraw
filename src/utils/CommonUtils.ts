@@ -281,7 +281,7 @@ export default class CommonUtils {
   }
 
   /**
-   * 获取数组中前一个元素
+   * 获取数组中前一个组件
    *
    * @param array
    * @param index
@@ -317,7 +317,7 @@ export default class CommonUtils {
     return result;
   }
   /**
-   * 获取数组中后一个元素
+   * 获取数组中后一个组件
    *
    * @param array
    * @param index

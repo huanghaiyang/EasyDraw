@@ -7,7 +7,7 @@ export default interface IElementRotation {
   id: string;
   // 旋转模型
   model: IRotationModel;
-  // 元素
+  // 组件
   element: IElement;
   // 是否激活
   isActive: boolean;

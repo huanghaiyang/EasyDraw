@@ -186,7 +186,7 @@ export default class MaskRenderer
   }
 
   /**
-   * 给出一个元素创建一个绘制尺寸指示器的任务
+   * 给出一个组件创建一个绘制尺寸指示器的任务
    *
    * @param element
    */

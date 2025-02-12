@@ -33,11 +33,11 @@ import ElementGroup from "@/modules/elements/ElementGroup";
 export default class StageStore implements IStageStore {
   shield: IStageShield;
 
-  // 画板上绘制的元素列表（形状、文字、图片等）
+  // 画板上绘制的组件列表（形状、文字、图片等）
   private _elementList: ElementList;
-  // 当前正在创建的元素
+  // 当前正在创建的组件
   private _currentCreatingElementId;
-  // 元素对象映射关系，加快查询
+  // 组件对象映射关系，加快查询
   private _elementsMap = new ElementSortedMap<string, IElement>();
   // 已渲染的组件映射关系
   private _provisionalElementsMap = new ElementSortedMap<string, IElement>();
@@ -45,17 +45,17 @@ export default class StageStore implements IStageStore {
   private _selectedElementsMap = new ElementSortedMap<string, IElement>();
   // 命中的组件映射关系，加快查询
   private _targetElementsMap = new ElementSortedMap<string, IElement>();
-  // 舞台元素映射关系，加快查询
+  // 舞台组件映射关系，加快查询
   private _stageElementsMap = new ElementSortedMap<string, IElement>();
-  // 未在舞台的元素映射关系，加快查询
+  // 未在舞台的组件映射关系，加快查询
   private _noneStageElementsMap = new ElementSortedMap<string, IElement>();
-  // 可见元素映射关系，加快查询
+  // 可见组件映射关系，加快查询
   private _visibleElementsMap = new ElementSortedMap<string, IElement>();
-  // 编辑中的元素映射关系，加快查询
+  // 编辑中的组件映射关系，加快查询
   private _editingElementsMap = new ElementSortedMap<string, IElement>();
-  // 选区元素映射关系，加快查询
+  // 选区组件映射关系，加快查询
   private _rangeElementsMap = new ElementSortedMap<string, IElement>();
-  // 旋转目标元素映射关系，加快查询
+  // 旋转目标组件映射关系，加快查询
   private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
@@ -129,14 +129,18 @@ export default class StageStore implements IStageStore {
     return this._visibleElementsMap.valuesArray();
   }
 
-  // 选中的根元素
+  // 选中的根组件
   get selectedAncestorElement(): IElement {
     return this.getAncestorGroup(this.selectedElements);
   }
 
-  // 选中的唯一组件
+  /**
+   * 获取选中的主要组件
+   */
   get primarySelectedElement(): IElement {
+    // 选中的根节点，根组件不可以是子组件
     const ancestorElement = this.selectedAncestorElement;
+    // 选中的组件不能是创建中的临时组件
     if (ancestorElement && !ancestorElement.isProvisional)
       return ancestorElement;
   }
@@ -161,7 +165,7 @@ export default class StageStore implements IStageStore {
     return this.visibleElements.length === 0;
   }
 
-  // 是否元素列表为空
+  // 是否组件列表为空
   get isEmpty(): boolean {
     return this._elementList.length === 0;
   }
@@ -228,30 +232,30 @@ export default class StageStore implements IStageStore {
       ElementListEventNames.removed,
       (node: ILinkedNode<IElement>) => {
         const element = node.value;
-        // 删除元素在舞台上的映射关系
+        // 删除组件在舞台上的映射关系
         this._stageElementsMap.delete(element.id);
-        // 删除元素在选中的映射关系
+        // 删除组件在选中的映射关系
         this._selectedElementsMap.delete(element.id);
-        // 删除元素在未在舞台上的映射关系
+        // 删除组件在未在舞台上的映射关系
         this._noneStageElementsMap.delete(element.id);
-        // 删除元素在临时元素的映射关系
+        // 删除组件在临时组件的映射关系
         this._provisionalElementsMap.delete(element.id);
-        // 删除元素在命中的映射关系
+        // 删除组件在命中的映射关系
         this._targetElementsMap.delete(element.id);
-        // 删除元素在选区范围内的映射关系
+        // 删除组件在选区范围内的映射关系
         this._rangeElementsMap.delete(element.id);
-        // 删除元素在可见的映射关系
+        // 删除组件在可见的映射关系
         this._visibleElementsMap.delete(element.id);
-        // 删除元素在旋转目标的映射关系
+        // 删除组件在旋转目标的映射关系
         this._rotatingTargetElementsMap.delete(element.id);
-        // 删除元素在编辑中的映射关系
+        // 删除组件在编辑中的映射关系
         this._editingElementsMap.delete(element.id);
       },
     );
   }
 
   /**
-   * 元素属性变化时，更新元素映射关系
+   * 组件属性变化时，更新组件映射关系
    */
   private _reactionElementsPropsChanged(): void {
     Object.keys(ElementReactionPropNames).forEach(propName => {
@@ -262,7 +266,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 元素属性发生变化时，更新元素映射关系
+   * 组件属性发生变化时，更新组件映射关系
    *
    * @param propName
    * @param element
@@ -274,7 +278,7 @@ export default class StageStore implements IStageStore {
     value: boolean | ElementStatus | IPoint,
   ): void {
     switch (propName) {
-      // 选中元素
+      // 选中组件
       case ElementReactionPropNames.isSelected: {
         if (value) {
           this._selectedElementsMap.set(element.id, element);
@@ -294,7 +298,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
-      // 是否临时元素
+      // 是否临时组件
       case ElementReactionPropNames.isProvisional: {
         if (value) {
           this._provisionalElementsMap.set(element.id, element);
@@ -339,7 +343,7 @@ export default class StageStore implements IStageStore {
         }
         break;
       }
-      // 元素状态
+      // 组件状态
       case ElementReactionPropNames.status: {
         if (
           this._currentCreatingElementId &&
@@ -401,7 +405,7 @@ export default class StageStore implements IStageStore {
     ...args: any[]
   ): void {
     if (!element) return;
-    // 如果元素是创建中的元素或者选中的元素且元素没有组合，则发送事件
+    // 如果组件是创建中的组件或者选中的组件且组件没有组合，则发送事件
     if (
       element.id === this.primarySelectedElement?.id ||
       element.id === this._currentCreatingElementId
@@ -473,7 +477,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 缩放子元素
+   * 缩放子组件
    *
    * @param element
    * @param matrix
@@ -733,7 +737,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判断元素是否存在
+   * 判断组件是否存在
    *
    * @param id
    * @returns
@@ -743,7 +747,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 通过id获取元素
+   * 通过id获取组件
    *
    * @param id
    * @returns
@@ -753,7 +757,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 通过id获取元素
+   * 通过id获取组件
    *
    * @param ids
    * @returns
@@ -765,7 +769,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取元素在列表中的索引
+   * 获取组件在列表中的索引
    *
    * @param id
    * @returns
@@ -789,7 +793,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 添加元素
+   * 添加组件
    *
    * @param element
    */
@@ -800,7 +804,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 删除元素
+   * 删除组件
    *
    * @param id
    */
@@ -815,7 +819,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 更新元素属性
+   * 更新组件属性
    *
    * @param id
    * @param data
@@ -831,7 +835,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 批量更新元素属性
+   * 批量更新组件属性
    *
    * @param elements
    * @param props
@@ -845,7 +849,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 更新元素数据
+   * 更新组件数据
    *
    * @param id
    * @param data
@@ -860,7 +864,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 更新元素数据
+   * 更新组件数据
    *
    * @param elements
    * @param props
@@ -875,7 +879,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 创建元素的数据对象
+   * 创建组件的数据对象
    *
    * @param type
    * @param points
@@ -940,7 +944,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 选中并刷新元素
+   * 选中并刷新组件
    *
    * @param element
    */
@@ -952,7 +956,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 在当前鼠标位置创建临时元素
+   * 在当前鼠标位置创建临时组件
    *
    * @param coords
    */
@@ -995,7 +999,7 @@ export default class StageStore implements IStageStore {
   creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement {
     let element: IElementArbitrary;
     let model: ElementObject;
-    // 如果当前创建的元素id存在，则获取该元素
+    // 如果当前创建的组件id存在，则获取该组件
     if (this._currentCreatingElementId) {
       element = this.getElementById(
         this._currentCreatingElementId,
@@ -1030,7 +1034,7 @@ export default class StageStore implements IStageStore {
       element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
       this._setElementProvisionalCreating(element);
     } else {
-      // 如果当前创建的元素id不存在，则创建一个新的元素
+      // 如果当前创建的组件id不存在，则创建一个新的组件
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);
       model.isFold = false;
       element = this._createProvisionalElement(model) as ElementArbitrary;
@@ -1041,7 +1045,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 完成创建自由绘制元素
+   * 完成创建自由绘制组件
    *
    * @param element
    */
@@ -1054,7 +1058,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 完成创建元素
+   * 完成创建组件
    */
   finishCreatingElement(): IElement {
     if (this._currentCreatingElementId) {
@@ -1081,7 +1085,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 查找元素
+   * 查找组件
    *
    * @param predicate
    * @returns
@@ -1185,7 +1189,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 刷新元素角度
+   * 刷新组件角度
    *
    * @param elements
    * @param func
@@ -1203,7 +1207,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 刷新元素属性
+   * 刷新组件属性
    *
    * @param elements
    * @param func
@@ -1218,7 +1222,7 @@ export default class StageStore implements IStageStore {
 
     let ids = new Set<string>();
     /**
-     * 刷新单个元素
+     * 刷新单个组件
      *
      * @param element
      */
@@ -1447,7 +1451,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判断元素是否被选中
+   * 判断组件是否被选中
    *
    * @param element
    * @returns
@@ -1457,7 +1461,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 删除选中元素
+   * 删除选中组件
    */
   deleteSelects(): void {
     this._selectedElementsMap.keysArray().forEach(id => {
@@ -1547,7 +1551,7 @@ export default class StageStore implements IStageStore {
     });
   }
   /**
-   * 取消高亮目标元素
+   * 取消高亮目标组件
    */
   cancelTargetElements(): void {
     this.targetElements.forEach(element => {
@@ -1555,7 +1559,7 @@ export default class StageStore implements IStageStore {
     });
   }
   /**
-   * 开始编辑元素
+   * 开始编辑组件
    *
    * @param elements
    */
@@ -1564,7 +1568,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 结束编辑元素
+   * 结束编辑组件
    *
    * @param elements
    */
@@ -1573,7 +1577,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取已完成的选中元素
+   * 获取已完成的选中组件
    *
    * @returns
    */
@@ -1586,7 +1590,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取选中的元素
+   * 获取选中的组件
    *
    * @returns
    */
@@ -1597,7 +1601,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 设置元素编辑状态
+   * 设置组件编辑状态
    *
    * @param elements
    * @param value
@@ -1618,7 +1622,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判断选中的元素是否等于正在绘制的元素
+   * 判断选中的组件是否等于正在绘制的组件
    *
    * @returns
    */
@@ -1633,7 +1637,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 绑定元素组合
+   * 绑定组件组合
    *
    * @param group
    */
@@ -1644,7 +1648,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 取消元素组合
+   * 取消组件组合
    *
    * @param group
    */
@@ -1661,17 +1665,17 @@ export default class StageStore implements IStageStore {
   private _createElementGroupObject(
     elements: (IElement | IElementGroup)[],
   ): ElementObject {
-    // 过滤掉组合元素
+    // 过滤掉组合组件
     elements = elements.filter(element => !element.isGroupSubject);
-    // 获取组合元素的子元素id
+    // 获取组合组件的子组件id
     const subIds = new Set(elements.map(element => element.id));
-    // 获取组合元素的坐标
+    // 获取组合组件的坐标
     const coords = CommonUtils.getBoxPoints(
       flatten(elements.map(element => element.rotateBoxCoords)),
     );
-    // 获取组合元素的宽高
+    // 获取组合组件的宽高
     const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
-    // 返回组合元素的数据对象
+    // 返回组合组件的数据对象
     return {
       id: CommonUtils.getRandomDateId(),
       subIds,
@@ -1693,21 +1697,21 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
-    // 创建组合元素
+    // 创建组合组件
     const group = new ElementGroup(
       this._createElementGroupObject(elements),
       this.shield,
     );
-    // 绑定组合元素的子元素
+    // 绑定组合组件的子组件
     this._bindElementsGroup(group);
-    // 添加组合元素
+    // 添加组合组件
     this.addElement(group);
-    // 设置组合元素状态
+    // 设置组合组件状态
     this.updateElementById(group.id, {
       status: ElementStatus.finished,
       isOnStage: true,
     });
-    // 刷新组合元素
+    // 刷新组合组件
     group.refresh();
     return group;
   }
@@ -1719,11 +1723,11 @@ export default class StageStore implements IStageStore {
    */
   removeElementGroup(group: IElementGroup): void {
     if (this.hasElementGroup(group.id)) {
-      // 取消绑定组合元素的子元素
+      // 取消绑定组合组件的子组件
       this._unbindElementsGroup(group);
       // 取消选中组合
       this.deSelectGroup(group);
-      // 删除组合元素
+      // 删除组合组件
       this.removeElement(group.id);
     }
   }
@@ -1739,7 +1743,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 将选中的元素转换为组合
+   * 将选中的组件转换为组合
    */
   selectToGroup(): IElementGroup {
     const elements = this.selectedElements;
@@ -1816,7 +1820,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判定给定的元素是否属于同一个组合
+   * 判定给定的组件是否属于同一个组合
    *
    * @param elements
    */
@@ -1827,7 +1831,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取选中的根元素
+   * 获取选中的根组件
    *
    * @param elements
    */
@@ -1839,7 +1843,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取非组合元素
+   * 获取非组合组件
    *
    * @param elements
    */

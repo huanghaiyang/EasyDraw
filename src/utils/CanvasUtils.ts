@@ -502,7 +502,7 @@ export default class CanvasUtils {
   }
 
   /**
-   * 从图片元素中提取ImageData
+   * 从图片组件中提取ImageData
    *
    * @param image
    * @returns

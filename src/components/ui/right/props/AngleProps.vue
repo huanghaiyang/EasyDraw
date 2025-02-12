@@ -38,7 +38,7 @@ function setElementsAngle(value: string) {
 }
 
 /**
- * 设置元素Y倾斜角度
+ * 设置组件Y倾斜角度
  *
  * @param value
  */

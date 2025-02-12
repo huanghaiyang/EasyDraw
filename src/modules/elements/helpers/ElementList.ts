@@ -38,7 +38,7 @@ export default class ElementList
   }
 
   /**
-   * 插入元素
+   * 插入组件
    *
    * @param node
    */
@@ -51,7 +51,7 @@ export default class ElementList
   }
 
   /**
-   * 向前插入元素
+   * 向前插入组件
    *
    * @param node
    * @param target
@@ -68,7 +68,7 @@ export default class ElementList
   }
 
   /**
-   * 向后插入元素
+   * 向后插入组件
    *
    * @param node
    * @param target
@@ -85,7 +85,7 @@ export default class ElementList
   }
 
   /**
-   * 向头部插入元素
+   * 向头部插入组件
    *
    * @param node
    */
@@ -98,7 +98,7 @@ export default class ElementList
   }
 
   /**
-   * 移除元素
+   * 移除组件
    *
    * @param node
    */
@@ -110,7 +110,7 @@ export default class ElementList
   }
 
   /**
-   * 根据条件移除元素
+   * 根据条件移除组件
    *
    * @param predicate
    */

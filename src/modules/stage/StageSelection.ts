@@ -96,7 +96,7 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 获取元素模型
+   * 获取组件模型
    *
    * @param elements
    * @returns
@@ -422,7 +422,7 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 获取激活元素旋转
+   * 获取激活组件旋转
    *
    * @returns
    */
@@ -436,7 +436,7 @@ export default class StageSelection implements IStageSelection {
   /**
    * 刷新选区
    *
-   * 如果当前鼠标所在的元素是命中状态，则将命中元素设置为选中状态
+   * 如果当前鼠标所在的组件是命中状态，则将命中组件设置为选中状态
    */
   selectTargets(): void {
     this.shield.store.updateElements(this.shield.store.targetElements, {
@@ -446,7 +446,7 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 刷新给定区域的元素，将其设置为命中状态
+   * 刷新给定区域的组件，将其设置为命中状态
    *
    * @param rangePoints
    */
@@ -497,7 +497,7 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 取消所有选中元素的边框变换器
+   * 取消所有选中组件的边框变换器
    */
   deActiveElementsBorderTransformers(): void {
     const element = this.shield.store.primarySelectedElement;
@@ -505,7 +505,7 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 取消所有选中元素的旋转
+   * 取消所有选中组件的旋转
    */
   deActiveElementsRotations(): void {
     const element = this.shield.store.primarySelectedElement;

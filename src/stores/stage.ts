@@ -74,18 +74,18 @@ export const useStageStore = defineStore("stage", {
       currentShapeCreator: RectangleCreator,
       // 当前自由工具
       currentArbitraryCreator: PenCreator,
-      // 选中元素
+      // 选中组件
       selectedElements: [],
-      // 目标元素
+      // 目标组件
       targetElements: [],
       // 舞台默认数据
       ...cloneDeep(DefaultStage),
     };
   },
   getters: {
-    // 选中的唯一元素
+    // 选中的唯一组件
     primarySelectedElement(): IElement {
-      // 选中的非组合元素
+      // 选中的非组合组件
       const elements = shield.store.getNoParentElements(this.selectedElements);
       if (elements.length !== 1) return null;
       return elements[0];

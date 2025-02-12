@@ -37,9 +37,9 @@ export const LineStrokeTypes: StrokeTypePair[] = [
 ];
 
 /**
- * 根据画板元素类型获取对应的描边类型数组
+ * 根据画板组件类型获取对应的描边类型数组
  *
- * @param type 画板元素类型
+ * @param type 画板组件类型
  * @returns 描边类型数组
  */
 export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
@@ -57,7 +57,7 @@ export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   }
 }
 
-// 画板元素样式定义
+// 画板组件样式定义
 export type ElementStyles = {
   // 边框颜色
   strokeColor?: string;
@@ -106,7 +106,7 @@ export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
 
-// 默认元素样式
+// 默认组件样式
 export const DefaultElementStyle: ElementStyles = {
   strokeColor: DefaultStrokeColor,
   strokeColorOpacity: DefaultStrokeColorOpacity,

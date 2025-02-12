@@ -86,7 +86,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
 
-  // 是否是元素
+  // 是否是组件
   get isElement(): boolean {
     return [
       CreatorTypes.image,
@@ -124,7 +124,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return group;
   }
 
-  // 是否是组合元素
+  // 是否是组合组件
   get isGroupSubject(): boolean {
     return this.model.groupId !== undefined;
   }
@@ -1268,7 +1268,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshOriginalModelCoords();
     // 维护原始变换器坐标
     this.refreshOriginalTransformerPoints();
-    // 维护原始元素属性
+    // 维护原始组件属性
     this.refreshOriginalElementProps();
   }
 
