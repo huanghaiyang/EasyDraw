@@ -76,6 +76,7 @@ export default class StageStore implements IStageStore {
         ShieldDispatcherNames.selectedChanged,
         this.selectedElements,
       );
+      this.shield.selection.refresh();
     });
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(
@@ -433,7 +434,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
-        const { left: prevLeft, top: prevTop } = element.model;
+        const { x: prevLeft, y: prevTop } = element.model;
         const { x, y } = value;
         if (prevLeft === x && prevTop === y) return;
         const offset = { x: x - prevLeft, y: y - prevTop };
@@ -441,8 +442,8 @@ export default class StageStore implements IStageStore {
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
             sub.setPosition(
-              sub.model.left + offset.x,
-              sub.model.top + offset.y,
+              sub.model.x + offset.x,
+              sub.model.y + offset.y,
               offset,
             );
           });
@@ -916,11 +917,10 @@ export default class StageStore implements IStageStore {
       data,
       width: size.width,
       height: size.height,
-      left: position.x,
-      top: position.y,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
+      ...position,
       ...DefaultAngleModel,
     };
     return model;
@@ -1118,26 +1118,36 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
-      const coords = ElementUtils.translateCoords(
-        element.originalModelCoords,
-        offset,
-      );
-      const boxCoords = ElementUtils.translateCoords(
-        element.originalModelBoxCoords,
-        offset,
-      );
-      const { x, y } = ElementUtils.calcPosition({
-        type: element.model.type,
-        coords,
-      });
-      this.updateElementModel(element.id, {
-        coords,
-        boxCoords,
-        left: x,
-        top: y,
-      });
-      element.refresh({ points: true, rotation: true, position: true });
+      this._moveElement(element, offset);
     });
+  }
+
+  /**
+   * 移动组件
+   *
+   * @param element 
+   * @param offset 
+   */
+  private _moveElement(element: IElement, offset: IPoint): void {
+    const coords = ElementUtils.translateCoords(
+      element.originalModelCoords,
+      offset,
+    );
+    const boxCoords = ElementUtils.translateCoords(
+      element.originalModelBoxCoords,
+      offset,
+    );
+    const { x, y } = ElementUtils.calcPosition({
+      type: element.model.type,
+      coords,
+    });
+    this.updateElementModel(element.id, {
+      coords,
+      boxCoords,
+      x,
+      y,
+    });
+    element.refresh({ points: true, rotation: true, position: true });
   }
 
   /**
@@ -1420,16 +1430,15 @@ export default class StageStore implements IStageStore {
       type: CreatorTypes.image,
       data: image,
       name: "image",
-      left: center.x,
-      top: center.y,
-      width: width,
-      height: height,
+      width,
+      height,
       length: 0,
       styles: getDefaultElementStyle(CreatorTypes.image),
       colorSpace,
       naturalWidth: width,
       naturalHeight: height,
       isRatioLocked: true,
+      ...center,
       ...DefaultAngleModel,
     };
     const element = ElementUtils.createElement(object, this.shield);
@@ -1685,20 +1694,17 @@ export default class StageStore implements IStageStore {
       flatten(elements.map(element => element.rotateBoxCoords)),
     );
     // 获取组合组件的宽高
-    const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
+    const { width, height, x, y } = CommonUtils.getRect(coords);
     // 返回组合组件的数据对象
     return {
-      id: CommonUtils.getRandomDateId(),
+      ...ElementUtils.createEmptyGroupObject(),
       subIds,
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
       width,
       height,
-      styles: {},
-      left: left + width / 2,
-      top: top + height / 2,
-      type: CreatorTypes.group,
-      ...DefaultAngleModel,
+      x: x + width / 2,
+      y: y + height / 2,
     };
   }
 

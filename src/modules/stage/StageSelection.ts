@@ -1,5 +1,5 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
-import IElement from "@/types/IElement";
+import IElement, { ElementObject } from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import {
   TransformerTypes,
@@ -11,45 +11,16 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
-import { flatten } from "lodash";
+import { cloneDeep, flatten } from "lodash";
 import IController from "@/types/IController";
-import IStageSelectionRange from "@/types/IStageSelectionRange";
-import ElementRotation from "@/modules/elements/rotation/ElementRotation";
-import MathUtils from "@/utils/MathUtils";
-
-export class StageSelectionRange implements IStageSelectionRange {
-  id: string;
-  shield: IStageShield;
-  rotation: IElementRotation;
-  model: IMaskModel;
-
-  get angle(): number {
-    return this.model.angle;
-  }
-  get viewAngle(): number {
-    return this.model.viewAngle;
-  }
-
-  get rotationEnable(): boolean {
-    return true;
-  }
-
-  get center(): IPoint {
-    return MathUtils.calcCenter(this.model.points);
-  }
-
-  constructor(shield: IStageShield, model: IMaskModel) {
-    this.id = CommonUtils.getRandomDateId();
-    this.shield = shield;
-    this.rotation = new ElementRotation(this);
-    this.model = model;
-  }
-}
+import { IElementGroup } from "@/types/IElementGroup";
+import ElementGroup from "@/modules/elements/ElementGroup";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class StageSelection implements IStageSelection {
   shield: IStageShield;
   // 选区范围
-  range: IStageSelectionRange;
+  rangeElement: IElementGroup;
 
   // 选区模型
   private _selectionModel: IMaskModel;
@@ -91,10 +62,12 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this._selectionModel = {
-      type: DrawerMaskModelTypes.selection,
-    } as IMaskModel;
-    this.range = new StageSelectionRange(shield, this._selectionModel);
+    this.rangeElement = new ElementGroup(
+      {
+        ...ElementUtils.createEmptyGroupObject(),
+      } as ElementObject,
+      this.shield,
+    );
   }
 
   /**
@@ -553,32 +526,7 @@ export default class StageSelection implements IStageSelection {
    * 刷新选区模型
    */
   refreshSelectionModel(): void {
-    const model = this.calcSelectionModel();
-    if (model) {
-      Object.assign(this._selectionModel, model);
-    } else {
-      Object.assign(this._selectionModel, {
-        points: [],
-        width: null,
-        height: null,
-        angle: 0,
-        viewAngle: 0,
-      } as IMaskModel);
-    }
-    if (this._selectionModel.points.length > 0) {
-      const angle = MathUtils.calcViewAngleByPoints(
-        this._selectionModel.points,
-      );
-      Object.assign(
-        this._selectionModel,
-        {
-          angle,
-          viewAngle: angle,
-        },
-        CommonUtils.calcRectangleSize(this._selectionModel.points),
-      );
-      this.range.rotation.refresh();
-    }
+    this._selectionModel = this.calcSelectionModel();
   }
 
   /**
@@ -589,11 +537,36 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 刷新范围组件
+   */
+  refreshRangeElement(): void {
+    if (this._selectionModel) {
+      const elements = this.shield.store.selectedElements;
+      const coords = CommonUtils.getBoxPoints(
+        elements.map(element => element.rotatePathCoords).flat(),
+      );
+      Object.assign(this.rangeElement.model, {
+        coords,
+        boxCoords: cloneDeep(coords),
+        ...CommonUtils.getRect(coords),
+        subIds: new Set(elements.map(element => element.id)),
+      });
+      this.rangeElement.refresh({ rotation: true });
+    } else {
+      Object.assign(
+        this.rangeElement.model,
+        ElementUtils.createEmptyGroupObject(),
+      );
+    }
+  }
+
+  /**
    * 刷新选区模型
    */
   refresh(): void {
     this.refreshSelectionModel();
     this.refreshTransformerModels();
+    this.refreshRangeElement();
   }
 
   /**

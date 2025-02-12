@@ -282,8 +282,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   @computed
   get position(): IPoint {
     return {
-      x: this.model.left,
-      y: this.model.top,
+      x: this.model.x,
+      y: this.model.y,
     };
   }
 
@@ -1321,8 +1321,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshPosition(): void {
     const centerCoord = this.calcCenterCoord();
-    this.model.left = centerCoord.x;
-    this.model.top = centerCoord.y;
+    Object.assign(this.model, centerCoord);
   }
 
   /**
@@ -2037,8 +2036,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setPosition(x: number, y: number, offset: IPoint): void {
     // 设置位置
-    this.model.left = x;
-    this.model.top = y;
+    this.model.x = x;
+    this.model.y = y;
     // 设置变换坐标
     this.model.coords = ElementUtils.translateCoords(this.model.coords, offset);
     // 设置变换盒模型坐标

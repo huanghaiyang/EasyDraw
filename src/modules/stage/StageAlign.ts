@@ -139,15 +139,15 @@ export default class StageAlign implements IStageAlign {
   ): void {
     const offset = { x: offsetX, y: offsetY };
     element.setPosition(
-      element.model.left + offsetX,
-      element.model.top + offsetY,
+      element.model.x + offsetX,
+      element.model.y + offsetY,
       offset,
     );
     if (element.isGroup && !element.isGroupSubject) {
       (element as IElementGroup).deepSubs.forEach(sub => {
         sub.setPosition(
-          sub.model.left + offsetX,
-          sub.model.top + offsetY,
+          sub.model.x + offsetX,
+          sub.model.y + offsetY,
           offset,
         );
       });

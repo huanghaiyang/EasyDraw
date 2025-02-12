@@ -75,7 +75,8 @@ export const DefaultAngleModel: AngleModel = {
 
 // 舞台组件数据模型
 export type ElementObject = AngleModel &
-  FlipModel & {
+  FlipModel &
+  IPoint & {
     // 组件id
     id: string;
     // 组件坐标
@@ -96,10 +97,6 @@ export type ElementObject = AngleModel &
     length?: number;
     // 样式
     styles?: ElementStyles;
-    // 左上角坐标
-    left?: number;
-    // 上边坐标
-    top?: number;
     // 是否锁定比例
     isRatioLocked?: boolean;
     // 比例

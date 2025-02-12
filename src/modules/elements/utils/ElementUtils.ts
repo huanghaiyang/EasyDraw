@@ -4,7 +4,11 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import IElement, { AngleModel, ElementObject } from "@/types/IElement";
+import IElement, {
+  AngleModel,
+  DefaultAngleModel,
+  ElementObject,
+} from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
@@ -22,7 +26,6 @@ import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
 import { multiply } from "mathjs";
-import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -234,9 +237,7 @@ export default class ElementUtils {
    * @param element
    * @returns
    */
-  static calcElementRotatePoint(
-    element: IElement | IStageSelectionRange,
-  ): IPoint {
+  static calcElementRotatePoint(element: IElement): IPoint {
     const {
       center,
       rotation: {
@@ -691,5 +692,24 @@ export default class ElementUtils {
    */
   static getNoParentElements(elements: IElement[]): IElement[] {
     return elements.filter(element => !element.isGroupSubject);
+  }
+
+  /**
+   * 创建组合对象
+   */
+  static createEmptyGroupObject(): ElementObject {
+    return {
+      id: CommonUtils.getRandomDateId(),
+      subIds: new Set(),
+      coords: [],
+      boxCoords: [],
+      width: 0,
+      height: 0,
+      styles: {},
+      x: 0,
+      y: 0,
+      type: CreatorTypes.group,
+      ...DefaultAngleModel,
+    };
   }
 }
