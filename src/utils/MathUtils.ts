@@ -720,7 +720,14 @@ export default class MathUtils {
    * @returns
    */
   static mirrorAngle(angle: number): number {
-    return angle > 180 ? angle - 360 : angle;
+    // 将角度限制在[-180, 180]之间
+    while (angle > 180) {
+      angle -= 360;
+    }
+    while (angle < -180) {
+      angle += 360;
+    }
+    return angle;
   }
 
   /**

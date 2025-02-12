@@ -1341,11 +1341,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 角度修正
    */
   protected flipAngle(): void {
+    let angle;
     if (this.model.angle > 0) {
-      this.model.angle = this.model.angle - 180;
+      angle = this.model.angle - 180;
     } else {
-      this.model.angle = this.model.angle + 180;
+      angle = this.model.angle + 180;
     }
+    this.model.angle = MathUtils.mirrorAngle(angle);
   }
 
   /**
@@ -1528,7 +1530,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       MathUtils.calcFlipXByPoints(boxPoints),
     );
     // 计算变换后的角度
-    this.model.angle = MathUtils.calcActualAngleByPoints(boxPoints);
+    this.model.angle = MathUtils.mirrorAngle(MathUtils.calcActualAngleByPoints(boxPoints));
     // 计算变换后的坐标
     const coords = ElementUtils.calcCoordsByTransPathPoints(
       points,
