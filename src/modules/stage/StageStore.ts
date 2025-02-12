@@ -421,10 +421,17 @@ export default class StageStore implements IStageStore {
     value: IPoint,
   ): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id)) {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
         const { left: prevLeft, top: prevTop } = element.model;
         const { x, y } = value;
-        element.setPosition(x, y, { x: x - prevLeft, y: y - prevTop });
+        if (prevLeft === x && prevTop === y) return;
+        const offset = { x: x - prevLeft, y: y - prevTop };
+        element.setPosition(x, y, offset);
+        if (element.isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => {
+            sub.setPosition(sub.model.left, sub.model.top, offset);
+          });
+        }
       }
     });
   }
