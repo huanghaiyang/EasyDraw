@@ -4,6 +4,8 @@ import IStageAlign from "@/types/IStageAlign";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
 import { flatten, sortBy } from "lodash";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import { IElementGroup } from "@/types/IElementGroup";
 
 export default class StageAlign implements IStageAlign {
   shield: IStageShield;
@@ -135,11 +137,21 @@ export default class StageAlign implements IStageAlign {
     offsetX: number,
     offsetY: number,
   ): void {
+    const offset = { x: offsetX, y: offsetY };
     element.setPosition(
-      element.centerCoord.x + offsetX,
-      element.centerCoord.y + offsetY,
-      { x: offsetX, y: offsetY },
+      element.model.left + offsetX,
+      element.model.top + offsetY,
+      offset,
     );
+    if (element.isGroup && !element.isGroupSubject) {
+      (element as IElementGroup).deepSubs.forEach(sub => {
+        sub.setPosition(
+          sub.model.left + offsetX,
+          sub.model.top + offsetY,
+          offset,
+        );
+      });
+    }
   }
 
   /**
@@ -148,6 +160,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignLeft(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { x } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX } = CommonUtils.getRect(
@@ -166,6 +179,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignRight(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(
@@ -184,6 +198,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignTop(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { y } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY } = CommonUtils.getRect(
@@ -202,6 +217,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignBottom(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(
@@ -220,6 +236,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignCenter(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(
@@ -238,6 +255,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignMiddle(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(
@@ -256,6 +274,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAverageVertical(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     elements = this._sortElementsByY(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(
@@ -285,6 +304,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAverageHorizontal(elements: IElement[]): void {
+    elements = ElementUtils.getNoParentElements(elements);
     elements = this._sortElementsByX(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(

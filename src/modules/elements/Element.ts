@@ -649,10 +649,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotatePathCoords;
   }
 
-  get alignOutlinePoints(): IPoint[] {
-    return this._rotateOutlinePathPoints;
-  }
-
   get alignOutlineCoords(): IPoint[] {
     return this._rotateOutlinePathCoords;
   }

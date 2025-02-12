@@ -3,6 +3,7 @@ import IElement from "@/types/IElement";
 import { IElementGroup } from "@/types/IElementGroup";
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
@@ -38,6 +39,13 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   get editingEnable(): boolean {
     return false;
+  }
+
+  /**
+   * 对齐外框坐标
+   */
+  get alignOutlineCoords(): IPoint[] {
+    return CommonUtils.getBoxPoints(this.subs.map(sub => sub.alignOutlineCoords).flat());
   }
 
   /**

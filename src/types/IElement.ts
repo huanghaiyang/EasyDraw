@@ -313,8 +313,6 @@ export default interface IElement {
   get alignPoints(): IPoint[];
   // 对齐坐标
   get alignCoords(): IPoint[];
-  // 对齐外框点
-  get alignOutlinePoints(): IPoint[];
   // 对齐外框坐标
   get alignOutlineCoords(): IPoint[];
 

@@ -433,7 +433,7 @@ export default class StageStore implements IStageStore {
         element.setPosition(x, y, offset);
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
-            sub.setPosition(sub.model.left, sub.model.top, offset);
+            sub.setPosition(sub.model.left + offset.x, sub.model.top + offset.y, offset);
           });
         }
       }
