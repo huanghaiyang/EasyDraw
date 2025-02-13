@@ -614,6 +614,7 @@ export default class StageShield
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
     });
+    this.selection.refresh();
   }
 
   /**
@@ -624,6 +625,7 @@ export default class StageShield
       isRotating: true,
     });
     this.store.updateSelectedElementsRotation(this._pressMovePosition);
+    this.selection.refresh();
   }
 
   /**
@@ -813,6 +815,7 @@ export default class StageShield
       this.provisional.redraw(),
       this.redraw(),
       this.triggerElementCreated(),
+      this.selection.refresh(),
     ]);
   }
 
@@ -1437,6 +1440,7 @@ export default class StageShield
    */
   setElementsAlignLeft(elements: IElement[]): void {
     this.align.setElementsAlignLeft(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1447,6 +1451,7 @@ export default class StageShield
    */
   setElementsAlignRight(elements: IElement[]): void {
     this.align.setElementsAlignRight(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1457,6 +1462,7 @@ export default class StageShield
    */
   setElementsAlignTop(elements: IElement[]): void {
     this.align.setElementsAlignTop(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1467,6 +1473,7 @@ export default class StageShield
    */
   setElementsAlignBottom(elements: IElement[]): void {
     this.align.setElementsAlignBottom(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1477,6 +1484,7 @@ export default class StageShield
    */
   setElementsAlignCenter(elements: IElement[]): void {
     this.align.setElementsAlignCenter(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1487,6 +1495,7 @@ export default class StageShield
    */
   setElementsAlignMiddle(elements: IElement[]): void {
     this.align.setElementsAlignMiddle(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 

@@ -71,6 +71,7 @@ export default class StageStore implements IStageStore {
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
 
+    // 监听选中组件变更事件通知外部监听者
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(
         ShieldDispatcherNames.selectedChanged,
@@ -78,6 +79,7 @@ export default class StageStore implements IStageStore {
       );
       this.shield.selection.refresh();
     });
+    // 监听目标组件变更事件通知外部监听者
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(
         ShieldDispatcherNames.targetChanged,
@@ -450,6 +452,7 @@ export default class StageStore implements IStageStore {
         }
       }
     });
+    this.shield.selection.refresh();
   }
 
   /**
@@ -468,6 +471,7 @@ export default class StageStore implements IStageStore {
         }
       }
     });
+    this.shield.selection.refresh();
   }
 
   /**
@@ -486,6 +490,7 @@ export default class StageStore implements IStageStore {
         }
       }
     });
+    this.shield.selection.refresh();
   }
 
   /**
@@ -523,6 +528,7 @@ export default class StageStore implements IStageStore {
         );
       }
     });
+    this.shield.selection.refresh();
   }
 
   /**
@@ -548,6 +554,7 @@ export default class StageStore implements IStageStore {
         }
       }
     });
+    this.shield.selection.refresh();
   }
 
   /**

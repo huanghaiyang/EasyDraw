@@ -70,10 +70,6 @@ export default interface IStageSelection {
   calcSelectionModel(): IMaskModel;
   // 计算变换器模型
   calcTransformerModels(): IMaskModel[];
-  // 获取实时选区模型
-  getRealTimeSelectionModel(): IMaskModel;
-  // 获取实时变换器模型
-  getRealTimeTransformerModels(): IMaskModel[];
   // 刷新
   refresh(): void;
   // 刷新选区模型

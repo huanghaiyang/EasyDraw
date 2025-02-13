@@ -135,7 +135,7 @@ export default class MaskRenderer
     const tasks: IRenderTask[] = [];
     const models: IMaskModel[] = [
       ...selection.getModels(),
-      selection.getRealTimeSelectionModel(),
+      selection.selectionModel,
     ];
     models.forEach(model => {
       if (model && model.points.length > 0) {
@@ -165,8 +165,7 @@ export default class MaskRenderer
    * @returns
    */
   private createMaskTransformerTasks(): IRenderTask[] {
-    const models: IMaskModel[] =
-      this.drawer.shield.selection.getRealTimeTransformerModels();
+    const models: IMaskModel[] = this.drawer.shield.selection.transformerModels;
     return models.map(model => {
       switch (model.element.transformerType) {
         case TransformerTypes.circle: {

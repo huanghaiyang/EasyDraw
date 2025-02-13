@@ -11,21 +11,21 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
-import { cloneDeep, flatten } from "lodash";
+import { cloneDeep } from "lodash";
 import IController from "@/types/IController";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class StageSelection implements IStageSelection {
+  // 舞台
   shield: IStageShield;
   // 选区范围
   rangeElement: IElementGroup;
-
   // 选区模型
   private _selectionModel: IMaskModel;
   // 变换控制器模型
-  private _transformerModels: IMaskModel[];
+  private _transformerModels: IMaskModel[] = [];
   // 选区范围点
   private _rangePoints: IPoint[] = null;
 
@@ -62,6 +62,7 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
+    // 创建一个用于存放选区的组合组件
     this.rangeElement = new ElementGroup(
       {
         ...ElementUtils.createEmptyGroupObject(),
@@ -491,8 +492,13 @@ export default class StageSelection implements IStageSelection {
    * 刷新范围组件
    */
   refreshRangeElement(): void {
-    if (this._selectionModel) {
-      const elements = this.shield.store.selectedElements;
+    const elements = this.shield.store.selectedElements;
+    if (elements.length === 0) {
+      Object.assign(
+        this.rangeElement.model,
+        ElementUtils.createEmptyGroupObject(),
+      );
+    } else {
       const coords = CommonUtils.getBoxPoints(
         elements.map(element => element.rotatePathCoords).flat(),
       );
@@ -503,11 +509,6 @@ export default class StageSelection implements IStageSelection {
         subIds: new Set(elements.map(element => element.id)),
       });
       this.rangeElement.refresh();
-    } else {
-      Object.assign(
-        this.rangeElement.model,
-        ElementUtils.createEmptyGroupObject(),
-      );
     }
   }
 
@@ -515,29 +516,9 @@ export default class StageSelection implements IStageSelection {
    * 刷新选区模型
    */
   refresh(): void {
-    this.refreshSelectionModel();
-    this.refreshTransformerModels();
     this.refreshRangeElement();
-  }
-
-  /**
-   * 获取实时选区模型
-   *
-   * @returns
-   */
-  getRealTimeSelectionModel(): IMaskModel {
     this.refreshSelectionModel();
-    return this._selectionModel;
-  }
-
-  /**
-   * 获取实时变换控制器模型
-   *
-   * @returns
-   */
-  getRealTimeTransformerModels(): IMaskModel[] {
     this.refreshTransformerModels();
-    return this._transformerModels;
   }
 
   /**
