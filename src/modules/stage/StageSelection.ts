@@ -1,5 +1,5 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
-import IElement from "@/types/IElement";
+import IElement, { DefaultAngleModel, ElementObject } from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import {
   TransformerTypes,
@@ -11,50 +11,21 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
-import { flatten } from "lodash";
+import { cloneDeep } from "lodash";
 import IController from "@/types/IController";
-import IStageSelectionRange from "@/types/IStageSelectionRange";
-import ElementRotation from "@/modules/elements/rotation/ElementRotation";
-import MathUtils from "@/utils/MathUtils";
-
-export class StageSelectionRange implements IStageSelectionRange {
-  id: string;
-  shield: IStageShield;
-  rotation: IElementRotation;
-  model: IMaskModel;
-
-  get angle(): number {
-    return this.model.angle;
-  }
-  get viewAngle(): number {
-    return this.model.viewAngle;
-  }
-
-  get rotationEnable(): boolean {
-    return true;
-  }
-
-  get center(): IPoint {
-    return MathUtils.calcCenter(this.model.points);
-  }
-
-  constructor(shield: IStageShield, model: IMaskModel) {
-    this.id = CommonUtils.getRandomDateId();
-    this.shield = shield;
-    this.rotation = new ElementRotation(this);
-    this.model = model;
-  }
-}
+import { IElementGroup } from "@/types/IElementGroup";
+import ElementGroup from "@/modules/elements/ElementGroup";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class StageSelection implements IStageSelection {
+  // 舞台
   shield: IStageShield;
   // 选区范围
-  range: IStageSelectionRange;
-
+  rangeElement: IElementGroup;
   // 选区模型
   private _selectionModel: IMaskModel;
   // 变换控制器模型
-  private _transformerModels: IMaskModel[];
+  private _transformerModels: IMaskModel[] = [];
   // 选区范围点
   private _rangePoints: IPoint[] = null;
 
@@ -91,10 +62,13 @@ export default class StageSelection implements IStageSelection {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this._selectionModel = {
-      type: DrawerMaskModelTypes.selection,
-    } as IMaskModel;
-    this.range = new StageSelectionRange(shield, this._selectionModel);
+    // 创建一个用于存放选区的组合组件
+    this.rangeElement = new ElementGroup(
+      {
+        ...ElementUtils.createEmptyGroupObject(),
+      } as ElementObject,
+      this.shield,
+    );
   }
 
   /**
@@ -211,63 +185,35 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 计算单选选区模型
-   *
-   * @returns
-   */
-  calcSingleSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements(true);
-    if (elements.length === 1) {
-      const element = elements[0];
-      if (element.boxVerticesTransformEnable) {
-        return {
-          type: DrawerMaskModelTypes.selection,
-          points: element.rotateBoxPoints,
-          angle: element.model.angle,
-        };
-      }
-    }
-  }
-
-  /**
-   * 计算多选选区模型
-   *
-   * @returns
-   */
-  calcMultiSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements(true);
-    if (elements.length >= 2) {
-      return {
-        type: DrawerMaskModelTypes.selection,
-        points: CommonUtils.getBoxPoints(
-          flatten(elements.map(element => element.rotateBoxPoints)),
-        ),
-        angle: 0,
-      };
-    }
-  }
-
-  /**
    * 获取选区对象
    *
    * @returns
    */
   calcSelectionModel(): IMaskModel {
-    const singleSelectionModel = this.calcSingleSelectionModel();
-    if (singleSelectionModel) {
-      return singleSelectionModel;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (
+      element &&
+      element.boxVerticesTransformEnable &&
+      element.model.coords.length > 0
+    ) {
+      return {
+        type: DrawerMaskModelTypes.selection,
+        points: element.rotateBoxPoints,
+        angle: element.model.angle,
+      };
     }
-    return this.calcMultiSelectionModel();
   }
 
   /**
-   * 计算单选变换控制器对象
+   * 获取变换控制器对象
    *
    * @returns
    */
-  calcSingleTransformerModels(): IMaskModel[] {
-    const elements = this.shield.store.getSelectedElements(true);
-    if (elements.length === 1) {
+  calcTransformerModels(): IMaskModel[] {
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (element && element.model.coords.length > 0) {
       const {
         transformerType,
         angle,
@@ -277,7 +223,7 @@ export default class StageSelection implements IStageSelection {
         verticesTransformEnable,
         flipX,
         flipY,
-      } = elements[0];
+      } = element;
       return this.calcTransformerModelsByPoints(
         transformers,
         {
@@ -291,36 +237,6 @@ export default class StageSelection implements IStageSelection {
       );
     }
     return [];
-  }
-
-  /**
-   * 计算多选变换控制器对象
-   *
-   * @returns
-   */
-  calcMultiTransformerModels(): IMaskModel[] {
-    const selectionModel = this.calcSelectionModel();
-    if (selectionModel) {
-      return this.calcTransformerModelsByPoints(
-        selectionModel.points,
-        selectionModel,
-        TransformerTypes.rect,
-      );
-    }
-    return [];
-  }
-
-  /**
-   * 获取变换控制器对象
-   *
-   * @returns
-   */
-  calcTransformerModels(): IMaskModel[] {
-    const singleTransformerModels = this.calcSingleTransformerModels();
-    if (singleTransformerModels.length) {
-      return singleTransformerModels;
-    }
-    return this.calcMultiTransformerModels();
   }
 
   /**
@@ -387,7 +303,8 @@ export default class StageSelection implements IStageSelection {
    */
   tryActiveElementRotation(point: IPoint): IElementRotation {
     if (this.shield.configure.rotationIconEnable) {
-      const element = this.shield.store.primarySelectedElement;
+      const element =
+        this.shield.store.primarySelectedElement || this.rangeElement;
       if (element && element.rotation.isContainsPoint(point)) {
         element.activeRotation();
         return element.rotation;
@@ -401,7 +318,8 @@ export default class StageSelection implements IStageSelection {
    * @param point
    */
   tryActiveElementTransformer(point: IPoint): IVerticesTransformer {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       const transformer = element.getTransformerByPoint(point);
       if (transformer) {
@@ -420,7 +338,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       if (element.borderTransformEnable) {
         const borderTransformer = element.getBorderTransformerByPoint(point);
@@ -440,7 +359,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementTransformer(): IVerticesTransformer {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       return element.getActiveElementTransformer();
     }
@@ -452,7 +372,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementBorderTransformer(): IBorderTransformer {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       return element.getActiveElementBorderTransformer();
     }
@@ -464,7 +385,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveElementRotation(): IElementRotation {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     if (element && element.rotation.isActive) {
       return element.rotation;
     }
@@ -529,7 +451,8 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中组件的变换器
    */
   deActiveElementsTransformers(): void {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     element?.deActiveAllTransformers();
   }
 
@@ -537,7 +460,8 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中组件的边框变换器
    */
   deActiveElementsBorderTransformers(): void {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     element?.deActiveAllBorderTransformers();
   }
 
@@ -545,7 +469,8 @@ export default class StageSelection implements IStageSelection {
    * 取消所有选中组件的旋转
    */
   deActiveElementsRotations(): void {
-    const element = this.shield.store.primarySelectedElement;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
     element?.deActiveRotation();
   }
 
@@ -553,32 +478,7 @@ export default class StageSelection implements IStageSelection {
    * 刷新选区模型
    */
   refreshSelectionModel(): void {
-    const model = this.calcSelectionModel();
-    if (model) {
-      Object.assign(this._selectionModel, model);
-    } else {
-      Object.assign(this._selectionModel, {
-        points: [],
-        width: null,
-        height: null,
-        angle: 0,
-        viewAngle: 0,
-      } as IMaskModel);
-    }
-    if (this._selectionModel.points.length > 0) {
-      const angle = MathUtils.calcViewAngleByPoints(
-        this._selectionModel.points,
-      );
-      Object.assign(
-        this._selectionModel,
-        {
-          angle,
-          viewAngle: angle,
-        },
-        CommonUtils.calcRectangleSize(this._selectionModel.points),
-      );
-      this.range.rotation.refresh();
-    }
+    this._selectionModel = this.calcSelectionModel();
   }
 
   /**
@@ -589,31 +489,48 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 刷新范围组件
+   */
+  refreshRangeElement(): void {
+    const elements = this.shield.store.selectedElements;
+    if (elements.length === 0) {
+      Object.assign(
+        this.rangeElement.model,
+        ElementUtils.createEmptyGroupObject(),
+      );
+    } else {
+      if (!this.rangeElement.isRotating && !this.rangeElement.isTransforming) {
+        const coords = CommonUtils.getBoxPoints(
+          elements.map(element => element.rotatePathCoords).flat(),
+        );
+        Object.assign(this.rangeElement.model, {
+          coords,
+          boxCoords: cloneDeep(coords),
+          ...CommonUtils.getRect(coords),
+          subIds: new Set(elements.map(element => element.id)),
+          ...DefaultAngleModel,
+        });
+      }
+      if (this.rangeElement.isTransforming) {
+        this.rangeElement.refresh({
+          points: true,
+          size: true,
+          rotation: true,
+          angles: true,
+        });
+      } else {
+        this.rangeElement.refresh();
+      }
+    }
+  }
+
+  /**
    * 刷新选区模型
    */
   refresh(): void {
+    this.refreshRangeElement();
     this.refreshSelectionModel();
     this.refreshTransformerModels();
-  }
-
-  /**
-   * 获取实时选区模型
-   *
-   * @returns
-   */
-  getRealTimeSelectionModel(): IMaskModel {
-    this.refreshSelectionModel();
-    return this._selectionModel;
-  }
-
-  /**
-   * 获取实时变换控制器模型
-   *
-   * @returns
-   */
-  getRealTimeTransformerModels(): IMaskModel[] {
-    this.refreshTransformerModels();
-    return this._transformerModels;
   }
 
   /**

@@ -52,6 +52,8 @@ export default interface IStageStore extends IStageSetter {
   get selectedAncestorElement(): IElement;
   // 不属于任何组合的组件
   get noParentElements(): IElement[];
+  // 是否多选
+  get isMultiSelection(): boolean;
 
   // 创建组件数据模型
   createElementModel(
@@ -94,10 +96,16 @@ export default interface IStageStore extends IStageSetter {
   updateSelectedElementsMovement(offset: IPoint): void;
   // 更新选中组件旋转
   updateSelectedElementsRotation(point: IPoint): void;
+  // 更新组件旋转
+  updateElementsRotation(elements: IElement[], point: IPoint): void;
   // 更新选中组件形变
-  updateSelectedElementsTransform(point: IPoint): void;
+  updateSelectedElementsTransform(offset: IPoint): void;
+  // 更新组件形变
+  updateElementsTransform(elements: IElement[], offset: IPoint): void;
   // 计算旋转组件中心
   refreshRotatingStates(point: IPoint): void;
+  // 计算给定组件旋转状态
+  refreshElementsRotationStates(elements: IElement[], point: IPoint): void;
   // 清除旋转组件中心
   clearRotatingStates(): void;
   // 恢复组件原始属性

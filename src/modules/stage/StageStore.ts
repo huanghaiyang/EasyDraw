@@ -4,7 +4,7 @@ import ElementUtils, {
   ElementListEventNames,
   ElementReactionPropNames,
 } from "@/modules/elements/utils/ElementUtils";
-import { every, flatten, includes, isEqual } from "lodash";
+import { every, includes, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -71,12 +71,15 @@ export default class StageStore implements IStageStore {
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
 
+    // 监听选中组件变更事件通知外部监听者
     this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(
         ShieldDispatcherNames.selectedChanged,
         this.selectedElements,
       );
+      this.shield.selection.refresh();
     });
+    // 监听目标组件变更事件通知外部监听者
     this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
       this.shield.emit(
         ShieldDispatcherNames.targetChanged,
@@ -210,6 +213,11 @@ export default class StageStore implements IStageStore {
     return ElementUtils.getNoParentElements(
       this.selectedElements,
     ) as IElement[];
+  }
+
+  // 是否多选
+  get isMultiSelection(): boolean {
+    return this.noParentElements.length > 1;
   }
 
   /**
@@ -433,7 +441,7 @@ export default class StageStore implements IStageStore {
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
-        const { left: prevLeft, top: prevTop } = element.model;
+        const { x: prevLeft, y: prevTop } = element.model;
         const { x, y } = value;
         if (prevLeft === x && prevTop === y) return;
         const offset = { x: x - prevLeft, y: y - prevTop };
@@ -441,8 +449,8 @@ export default class StageStore implements IStageStore {
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
             sub.setPosition(
-              sub.model.left + offset.x,
-              sub.model.top + offset.y,
+              sub.model.x + offset.x,
+              sub.model.y + offset.y,
               offset,
             );
           });
@@ -916,11 +924,10 @@ export default class StageStore implements IStageStore {
       data,
       width: size.width,
       height: size.height,
-      left: position.x,
-      top: position.y,
       name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
+      ...position,
       ...DefaultAngleModel,
     };
     return model;
@@ -1118,26 +1125,36 @@ export default class StageStore implements IStageStore {
    */
   updateSelectedElementsMovement(offset: IPoint): void {
     this.selectedElements.forEach(element => {
-      const coords = ElementUtils.translateCoords(
-        element.originalModelCoords,
-        offset,
-      );
-      const boxCoords = ElementUtils.translateCoords(
-        element.originalModelBoxCoords,
-        offset,
-      );
-      const { x, y } = ElementUtils.calcPosition({
-        type: element.model.type,
-        coords,
-      });
-      this.updateElementModel(element.id, {
-        coords,
-        boxCoords,
-        left: x,
-        top: y,
-      });
-      element.refresh({ points: true, rotation: true, position: true });
+      this._moveElement(element, offset);
     });
+  }
+
+  /**
+   * 移动组件
+   *
+   * @param element
+   * @param offset
+   */
+  private _moveElement(element: IElement, offset: IPoint): void {
+    const coords = ElementUtils.translateCoords(
+      element.originalModelCoords,
+      offset,
+    );
+    const boxCoords = ElementUtils.translateCoords(
+      element.originalModelBoxCoords,
+      offset,
+    );
+    const { x, y } = ElementUtils.calcPosition({
+      type: element.model.type,
+      coords,
+    });
+    this.updateElementModel(element.id, {
+      coords,
+      boxCoords,
+      x,
+      y,
+    });
+    element.refresh({ points: true, rotation: true, position: true });
   }
 
   /**
@@ -1146,7 +1163,17 @@ export default class StageStore implements IStageStore {
    * @param offset
    */
   updateSelectedElementsTransform(offset: IPoint): void {
-    this.selectedElements.forEach(element => {
+    this.updateElementsTransform(this.selectedElements, offset);
+  }
+
+  /**
+   * 形变
+   *
+   * @param elements
+   * @param offset
+   */
+  updateElementsTransform(elements: IElement[], offset: IPoint): void {
+    elements.forEach(element => {
       element.transform(offset);
       if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach(sub => {
@@ -1311,9 +1338,21 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   refreshRotatingStates(point: IPoint): void {
+    this.refreshElementsRotationStates(this.rotatingTargetElements, point);
+  }
+
+  /**
+   * 计算给定旋转组件的中心点
+   *
+   * @param point
+   * @param elements
+   *
+   * @returns
+   */
+  refreshElementsRotationStates(elements: IElement[], point: IPoint): void {
     const { center, centerCoord, angle } = this.calcRotatingStatesByElements(
       point,
-      this.rotatingTargetElements,
+      elements,
     );
     this._rotatingCenter = center;
     this._rotatingCenterCoord = centerCoord;
@@ -1333,7 +1372,7 @@ export default class StageStore implements IStageStore {
     elements: IElement[],
   ): { center: IPoint; centerCoord: IPoint; angle: number } {
     const center = MathUtils.calcCenter(
-      flatten(elements.map(element => element.pathPoints)),
+      elements.map(element => element.pathPoints).flat(),
     );
     const centerCoord = ElementUtils.calcWorldPoint(
       center,
@@ -1358,11 +1397,23 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   updateSelectedElementsRotation(point: IPoint): void {
+    this.updateElementsRotation(this.rotatingTargetElements, point);
+  }
+
+  /**
+   * 组件旋转操作
+   *
+   * @param elements
+   * @param angle
+   * @param originalAngle
+   * @param centerCoord
+   */
+  updateElementsRotation(elements: IElement[], point: IPoint): void {
     const angle = MathUtils.preciseToFixed(
       MathUtils.calcAngle(this._rotatingCenter, point),
     );
     this.rotateElements(
-      this.rotatingTargetElements,
+      elements,
       angle,
       this._rotatingOriginalAngle,
       this._rotatingCenterCoord,
@@ -1420,16 +1471,15 @@ export default class StageStore implements IStageStore {
       type: CreatorTypes.image,
       data: image,
       name: "image",
-      left: center.x,
-      top: center.y,
-      width: width,
-      height: height,
+      width,
+      height,
       length: 0,
       styles: getDefaultElementStyle(CreatorTypes.image),
       colorSpace,
       naturalWidth: width,
       naturalHeight: height,
       isRatioLocked: true,
+      ...center,
       ...DefaultAngleModel,
     };
     const element = ElementUtils.createElement(object, this.shield);
@@ -1682,23 +1732,20 @@ export default class StageStore implements IStageStore {
     const subIds = new Set(elements.map(element => element.id));
     // 获取组合组件的坐标
     const coords = CommonUtils.getBoxPoints(
-      flatten(elements.map(element => element.rotateBoxCoords)),
+      elements.map(element => element.rotateBoxCoords).flat(),
     );
     // 获取组合组件的宽高
-    const { width, height, x: left, y: top } = CommonUtils.getRect(coords);
+    const { width, height, x, y } = CommonUtils.getRect(coords);
     // 返回组合组件的数据对象
     return {
-      id: CommonUtils.getRandomDateId(),
+      ...ElementUtils.createEmptyGroupObject(),
       subIds,
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
       width,
       height,
-      styles: {},
-      left: left + width / 2,
-      top: top + height / 2,
-      type: CreatorTypes.group,
-      ...DefaultAngleModel,
+      x: x + width / 2,
+      y: y + height / 2,
     };
   }
 

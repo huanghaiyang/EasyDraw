@@ -23,14 +23,15 @@ export interface IMaskModel extends AngleModel, FlipModel {
     // 是否闭合
     isFold?: boolean;
   };
-  // 宽度
-  width?: number;
-  // 高度
-  height?: number;
 }
 
 // 图标模型
-export interface IIconModel extends IMaskModel {}
+export interface IIconModel extends IMaskModel {
+  // 宽度
+  width: number;
+  // 高度
+  height: number;
+}
 
 // 组件旋转图标绘制任务对象
 export interface IRotationModel extends IIconModel {

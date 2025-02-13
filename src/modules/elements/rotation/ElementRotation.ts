@@ -7,7 +7,6 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import IController from "@/types/IController";
-import IStageSelectionRange from "@/types/IStageSelectionRange";
 
 export default class ElementRotation implements IElementRotation, IController {
   // id
@@ -22,11 +21,11 @@ export default class ElementRotation implements IElementRotation, IController {
     points: [],
   };
   // 组件
-  element: IElement | IStageSelectionRange;
+  element: IElement;
   // 是否激活
   isActive: boolean = false;
 
-  constructor(element: IElement | IStageSelectionRange) {
+  constructor(element: IElement) {
     this.id = element.id;
     this.element = element;
   }
@@ -36,16 +35,17 @@ export default class ElementRotation implements IElementRotation, IController {
    */
   refresh(): void {
     if (!this.element.rotationEnable) return;
+    const stageScale = this.element.shield.stageScale;
     // 设置缩放
-    this.model.scale = 1 / this.element.shield.stageScale;
+    this.model.scale = 1 / stageScale;
     // 设置旋转角度
     this.model.angle = this.element.viewAngle - 90;
     // 设置旋转点
     this.model.point = ElementUtils.calcElementRotatePoint(this.element);
     // 设置旋转路径点
     this.model.points = CommonUtils.getBoxVertices(this.model.point, {
-      width: this.model.width / this.element.shield.stageScale,
-      height: this.model.height / this.element.shield.stageScale,
+      width: this.model.width / stageScale,
+      height: this.model.height / stageScale,
     }).map(point =>
       MathUtils.rotateWithCenter(
         point,

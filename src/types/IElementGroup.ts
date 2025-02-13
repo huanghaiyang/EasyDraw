@@ -26,4 +26,6 @@ export interface IElementGroup extends IElement {
   getAllSubElements(): IElement[];
   // 获取所有子组合
   getAllSubElementGroups(): IElementGroup[];
+  // 清除子组件
+  clearSubs(): void;
 }

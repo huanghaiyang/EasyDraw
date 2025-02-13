@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, cloneDeep, flatten, isBoolean } from "lodash";
+import { clamp, cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { RefreshSubOptions } from "@/types/IElement";
@@ -218,6 +218,7 @@ export default class StageShield
     value: IPoint,
   ): Promise<void> {
     await this.store.setElementsPosition(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -229,6 +230,7 @@ export default class StageShield
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsWidth(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -240,6 +242,7 @@ export default class StageShield
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsHeight(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -255,6 +258,7 @@ export default class StageShield
   ): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true, mask: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
   }
@@ -268,6 +272,7 @@ export default class StageShield
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsAngle(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
   }
@@ -585,6 +590,7 @@ export default class StageShield
   private _dragStage(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
+    this.selection.refresh();
   }
 
   /**
@@ -600,6 +606,7 @@ export default class StageShield
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
     });
+    this.selection.refresh();
   }
 
   /**
@@ -609,10 +616,17 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: true,
     });
-    this.store.updateSelectedElementsTransform({
+    const offset = {
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-    });
+    };
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isTransforming = true;
+      this.store.updateElementsTransform([this.selection.rangeElement], offset);
+    } else {
+      this.store.updateSelectedElementsTransform(offset);
+    }
+    this.selection.refresh();
   }
 
   /**
@@ -622,7 +636,16 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isRotating: true,
     });
-    this.store.updateSelectedElementsRotation(this._pressMovePosition);
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isRotating = true;
+      this.store.updateElementsRotation(
+        [this.selection.rangeElement],
+        this._pressMovePosition,
+      );
+    } else {
+      this.store.updateSelectedElementsRotation(this._pressMovePosition);
+    }
+    this.selection.refresh();
   }
 
   /**
@@ -663,15 +686,27 @@ export default class StageShield
       // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller) {
-        this._refreshElementsOriginals(this.store.selectedElements, {
-          deepSubs: true,
-        });
+        this._refreshElementsOriginals(
+          [...this.store.selectedElements, this.selection.rangeElement],
+          {
+            deepSubs: true,
+          },
+        );
       }
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, {
           isRotatingTarget: true,
         });
-        this.store.refreshRotatingStates(this._pressDownPosition);
+        // 如果是选区旋转，则只处理选区组件
+        if (this.store.isMultiSelection) {
+          // 计算选区旋转的中心点等数据信息
+          this.store.refreshElementsRotationStates(
+            [this.selection.rangeElement],
+            this._pressDownPosition,
+          );
+        } else {
+          this.store.refreshRotatingStates(this._pressDownPosition);
+        }
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
         this._isElementsTransforming = true;
@@ -812,6 +847,7 @@ export default class StageShield
       this.provisional.redraw(),
       this.redraw(),
       this.triggerElementCreated(),
+      this.selection.refresh(),
     ]);
   }
 
@@ -826,6 +862,9 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isDragging: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isDragging = false;
+    }
     // 刷新组件坐标数据
     this.store.refreshElementsPosition(this.store.selectedElements);
   }
@@ -842,6 +881,9 @@ export default class StageShield
       isRotatingTarget: false,
       isRotating: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isRotating = false;
+    }
     this.store.clearRotatingStates();
   }
 
@@ -856,6 +898,9 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isTransforming = false;
+    }
   }
 
   /**
@@ -895,6 +940,7 @@ export default class StageShield
   private _processHandCreatorMove(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
+    this.selection.refresh();
     this._isStageMoving = false;
   }
 
@@ -998,8 +1044,9 @@ export default class StageShield
   private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
-    this._setCanvasSize(rect);
+    this._updateCanvasSize(rect);
     this.store.refreshStageElements();
+    this.selection.refresh();
     await this._redrawAll(true);
   }
 
@@ -1008,7 +1055,7 @@ export default class StageShield
    *
    * @param size
    */
-  private _setCanvasSize(size: DOMRect): void {
+  private _updateCanvasSize(size: DOMRect): void {
     this.mask.updateCanvasSize(size);
     this.provisional.updateCanvasSize(size);
     this.updateCanvasSize(size);
@@ -1143,6 +1190,7 @@ export default class StageShield
     CanvasUtils.scale = value;
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
+    this.selection.refresh();
     await this._redrawAll(true);
   }
 
@@ -1187,6 +1235,7 @@ export default class StageShield
     this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
     this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1217,9 +1266,9 @@ export default class StageShield
    */
   calcScaleAutoFitValue(): number {
     const elementsBox = CommonUtils.getBoxPoints(
-      flatten(
-        this.store.visibleElements.map(element => element.maxOutlineBoxPoints),
-      ),
+      this.store.visibleElements
+        .map(element => element.maxOutlineBoxPoints)
+        .flat(),
     );
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
@@ -1240,11 +1289,9 @@ export default class StageShield
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
       const center = MathUtils.calcCenter(
-        flatten(
-          this.store.visibleElements.map(
-            element => element.rotateOutlinePathCoords,
-          ),
-        ),
+        this.store.visibleElements
+          .map(element => element.rotateOutlinePathCoords)
+          .flat(),
       );
       this.stageWorldCoord = center;
       this.store.refreshStageElements();
@@ -1435,6 +1482,7 @@ export default class StageShield
    */
   setElementsAlignLeft(elements: IElement[]): void {
     this.align.setElementsAlignLeft(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1445,6 +1493,7 @@ export default class StageShield
    */
   setElementsAlignRight(elements: IElement[]): void {
     this.align.setElementsAlignRight(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1455,6 +1504,7 @@ export default class StageShield
    */
   setElementsAlignTop(elements: IElement[]): void {
     this.align.setElementsAlignTop(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1465,6 +1515,7 @@ export default class StageShield
    */
   setElementsAlignBottom(elements: IElement[]): void {
     this.align.setElementsAlignBottom(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1475,6 +1526,7 @@ export default class StageShield
    */
   setElementsAlignCenter(elements: IElement[]): void {
     this.align.setElementsAlignCenter(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1485,6 +1537,7 @@ export default class StageShield
    */
   setElementsAlignMiddle(elements: IElement[]): void {
     this.align.setElementsAlignMiddle(elements);
+    this.selection.refresh();
     this._redrawAll(true);
   }
 

@@ -151,6 +151,13 @@ export default class ElementGroup extends Element implements IElementGroup {
   }
 
   /**
+   * 清除子组件
+   */
+  clearSubs(): void {
+    this.model.subIds.clear();
+  }
+
+  /**
    * 是否包含点
    *
    * @param point
