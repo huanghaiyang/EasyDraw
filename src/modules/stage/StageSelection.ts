@@ -1,5 +1,5 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { DefaultAngleModel, ElementObject } from "@/types/IElement";
 import IElementRotation from "@/types/IElementRotation";
 import {
   TransformerTypes,
@@ -499,15 +499,18 @@ export default class StageSelection implements IStageSelection {
         ElementUtils.createEmptyGroupObject(),
       );
     } else {
-      const coords = CommonUtils.getBoxPoints(
-        elements.map(element => element.rotatePathCoords).flat(),
-      );
-      Object.assign(this.rangeElement.model, {
-        coords,
-        boxCoords: cloneDeep(coords),
-        ...CommonUtils.getRect(coords),
-        subIds: new Set(elements.map(element => element.id)),
-      });
+      if (!this.rangeElement.isRotating) {
+        const coords = CommonUtils.getBoxPoints(
+          elements.map(element => element.rotatePathCoords).flat(),
+        );
+        Object.assign(this.rangeElement.model, {
+          coords,
+          boxCoords: cloneDeep(coords),
+          ...CommonUtils.getRect(coords),
+          subIds: new Set(elements.map(element => element.id)),
+          ...DefaultAngleModel,
+        });
+      }
       this.rangeElement.refresh();
     }
   }

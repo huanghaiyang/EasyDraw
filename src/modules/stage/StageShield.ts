@@ -629,7 +629,15 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isRotating: true,
     });
-    this.store.updateSelectedElementsRotation(this._pressMovePosition);
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isRotating = true;
+      this.store.updateElementsRotation(
+        [this.selection.rangeElement],
+        this._pressMovePosition,
+      );
+    } else {
+      this.store.updateSelectedElementsRotation(this._pressMovePosition);
+    }
     this.selection.refresh();
   }
 
@@ -671,15 +679,27 @@ export default class StageShield
       // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller) {
-        this._refreshElementsOriginals(this.store.selectedElements, {
-          deepSubs: true,
-        });
+        this._refreshElementsOriginals(
+          [...this.store.selectedElements, this.selection.rangeElement],
+          {
+            deepSubs: true,
+          },
+        );
       }
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.element.id, {
           isRotatingTarget: true,
         });
-        this.store.refreshRotatingStates(this._pressDownPosition);
+        // 如果是选区旋转，则只处理选区组件
+        if (this.store.isMultiSelection) {
+          // 计算选区旋转的中心点等数据信息
+          this.store.refreshElementsRotationStates(
+            [this.selection.rangeElement],
+            this._pressDownPosition,
+          );
+        } else {
+          this.store.refreshRotatingStates(this._pressDownPosition);
+        }
         this._isElementsRotating = true;
       } else if (controller instanceof VerticesTransformer) {
         this._isElementsTransforming = true;
@@ -851,6 +871,9 @@ export default class StageShield
       isRotatingTarget: false,
       isRotating: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isRotating = false;
+    }
     this.store.clearRotatingStates();
   }
 

@@ -215,6 +215,11 @@ export default class StageStore implements IStageStore {
     ) as IElement[];
   }
 
+  // 是否多选
+  get isMultiSelection(): boolean {
+    return this.noParentElements.length > 1;
+  }
+
   /**
    * 组件新增
    */
@@ -1127,8 +1132,8 @@ export default class StageStore implements IStageStore {
   /**
    * 移动组件
    *
-   * @param element 
-   * @param offset 
+   * @param element
+   * @param offset
    */
   private _moveElement(element: IElement, offset: IPoint): void {
     const coords = ElementUtils.translateCoords(
@@ -1323,9 +1328,21 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   refreshRotatingStates(point: IPoint): void {
+    this.refreshElementsRotationStates(this.rotatingTargetElements, point);
+  }
+
+  /**
+   * 计算给定旋转组件的中心点
+   *
+   * @param point
+   * @param elements
+   *
+   * @returns
+   */
+  refreshElementsRotationStates(elements: IElement[], point: IPoint): void {
     const { center, centerCoord, angle } = this.calcRotatingStatesByElements(
       point,
-      this.rotatingTargetElements,
+      elements,
     );
     this._rotatingCenter = center;
     this._rotatingCenterCoord = centerCoord;
@@ -1370,11 +1387,23 @@ export default class StageStore implements IStageStore {
    * @param point
    */
   updateSelectedElementsRotation(point: IPoint): void {
+    this.updateElementsRotation(this.rotatingTargetElements, point);
+  }
+
+  /**
+   * 组件旋转操作
+   *
+   * @param elements
+   * @param angle
+   * @param originalAngle
+   * @param centerCoord
+   */
+  updateElementsRotation(elements: IElement[], point: IPoint): void {
     const angle = MathUtils.preciseToFixed(
       MathUtils.calcAngle(this._rotatingCenter, point),
     );
     this.rotateElements(
-      this.rotatingTargetElements,
+      elements,
       angle,
       this._rotatingOriginalAngle,
       this._rotatingCenterCoord,
