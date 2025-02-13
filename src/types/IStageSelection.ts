@@ -66,19 +66,10 @@ export default interface IStageSelection {
   getElementOnPoint(point: IPoint): IElement;
   // 获取激活控制器
   getActiveController(): IController;
-
   // 计算选区模型
   calcSelectionModel(): IMaskModel;
   // 计算变换器模型
   calcTransformerModels(): IMaskModel[];
-  // 计算多选区模型
-  calcMultiSelectionModel(): IMaskModel;
-  // 计算单选区模型
-  calcSingleSelectionModel(): IMaskModel;
-  // 计算单选区变换器模型
-  calcSingleTransformerModels(): IMaskModel[];
-  // 计算多选区变换器模型
-  calcMultiTransformerModels(): IMaskModel[];
   // 获取实时选区模型
   getRealTimeSelectionModel(): IMaskModel;
   // 获取实时变换器模型

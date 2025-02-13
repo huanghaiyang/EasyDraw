@@ -184,63 +184,35 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 计算单选选区模型
-   *
-   * @returns
-   */
-  calcSingleSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements(true);
-    if (elements.length === 1) {
-      const element = elements[0];
-      if (element.boxVerticesTransformEnable) {
-        return {
-          type: DrawerMaskModelTypes.selection,
-          points: element.rotateBoxPoints,
-          angle: element.model.angle,
-        };
-      }
-    }
-  }
-
-  /**
-   * 计算多选选区模型
-   *
-   * @returns
-   */
-  calcMultiSelectionModel(): IMaskModel {
-    const elements = this.shield.store.getFinishedSelectedElements(true);
-    if (elements.length >= 2) {
-      return {
-        type: DrawerMaskModelTypes.selection,
-        points: CommonUtils.getBoxPoints(
-          flatten(elements.map(element => element.rotateBoxPoints)),
-        ),
-        angle: 0,
-      };
-    }
-  }
-
-  /**
    * 获取选区对象
    *
    * @returns
    */
   calcSelectionModel(): IMaskModel {
-    const singleSelectionModel = this.calcSingleSelectionModel();
-    if (singleSelectionModel) {
-      return singleSelectionModel;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (
+      element &&
+      element.boxVerticesTransformEnable &&
+      element.model.coords.length > 0
+    ) {
+      return {
+        type: DrawerMaskModelTypes.selection,
+        points: element.rotateBoxPoints,
+        angle: element.model.angle,
+      };
     }
-    return this.calcMultiSelectionModel();
   }
 
   /**
-   * 计算单选变换控制器对象
+   * 获取变换控制器对象
    *
    * @returns
    */
-  calcSingleTransformerModels(): IMaskModel[] {
-    const elements = this.shield.store.getSelectedElements(true);
-    if (elements.length === 1) {
+  calcTransformerModels(): IMaskModel[] {
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (element && element.model.coords.length > 0) {
       const {
         transformerType,
         angle,
@@ -250,7 +222,7 @@ export default class StageSelection implements IStageSelection {
         verticesTransformEnable,
         flipX,
         flipY,
-      } = elements[0];
+      } = element;
       return this.calcTransformerModelsByPoints(
         transformers,
         {
@@ -264,36 +236,6 @@ export default class StageSelection implements IStageSelection {
       );
     }
     return [];
-  }
-
-  /**
-   * 计算多选变换控制器对象
-   *
-   * @returns
-   */
-  calcMultiTransformerModels(): IMaskModel[] {
-    const selectionModel = this.calcSelectionModel();
-    if (selectionModel) {
-      return this.calcTransformerModelsByPoints(
-        selectionModel.points,
-        selectionModel,
-        TransformerTypes.rect,
-      );
-    }
-    return [];
-  }
-
-  /**
-   * 获取变换控制器对象
-   *
-   * @returns
-   */
-  calcTransformerModels(): IMaskModel[] {
-    const singleTransformerModels = this.calcSingleTransformerModels();
-    if (singleTransformerModels.length) {
-      return singleTransformerModels;
-    }
-    return this.calcMultiTransformerModels();
   }
 
   /**
@@ -560,7 +502,7 @@ export default class StageSelection implements IStageSelection {
         ...CommonUtils.getRect(coords),
         subIds: new Set(elements.map(element => element.id)),
       });
-      this.rangeElement.refresh({ rotation: true });
+      this.rangeElement.refresh();
     } else {
       Object.assign(
         this.rangeElement.model,
