@@ -452,7 +452,6 @@ export default class StageStore implements IStageStore {
         }
       }
     });
-    this.shield.selection.refresh();
   }
 
   /**
@@ -471,7 +470,6 @@ export default class StageStore implements IStageStore {
         }
       }
     });
-    this.shield.selection.refresh();
   }
 
   /**
@@ -490,7 +488,6 @@ export default class StageStore implements IStageStore {
         }
       }
     });
-    this.shield.selection.refresh();
   }
 
   /**
@@ -528,7 +525,6 @@ export default class StageStore implements IStageStore {
         );
       }
     });
-    this.shield.selection.refresh();
   }
 
   /**
@@ -554,7 +550,6 @@ export default class StageStore implements IStageStore {
         }
       }
     });
-    this.shield.selection.refresh();
   }
 
   /**

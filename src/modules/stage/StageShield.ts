@@ -218,6 +218,7 @@ export default class StageShield
     value: IPoint,
   ): Promise<void> {
     await this.store.setElementsPosition(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -229,6 +230,7 @@ export default class StageShield
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsWidth(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -240,6 +242,7 @@ export default class StageShield
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsHeight(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
   }
 
@@ -255,6 +258,7 @@ export default class StageShield
   ): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true, mask: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
   }
@@ -268,6 +272,7 @@ export default class StageShield
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsAngle(elements, value);
+    this.selection.refresh();
     await this._redrawAll({ shield: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
   }
