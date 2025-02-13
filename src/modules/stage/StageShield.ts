@@ -829,6 +829,7 @@ export default class StageShield
     if (this.isMoveableActive) {
       this._selectTopAElement(this.store.stageElements);
       this.store.beginEditingElements(this.store.selectedElements);
+      this.selection.refresh();
       this._isElementsEditing = !this.store.isEditingEmpty;
       this._redrawAllIfy({
         mask: true,
@@ -1578,6 +1579,7 @@ export default class StageShield
   async commitEditingDrawing(): Promise<void> {
     if (!this.store.isEditingEmpty) {
       this.store.endEditingElements(this.store.editingElements);
+      this.selection.refresh();
       this._isElementsEditing = false;
       await this._redrawAll(true);
     }

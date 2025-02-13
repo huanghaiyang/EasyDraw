@@ -1035,7 +1035,7 @@ export default class StageStore implements IStageStore {
           if (element.tailCoordIndex > 0) {
             model.isFold = true;
           } else {
-            // 最后一个点与第一个点重合，无法形图案
+            // 最后一个点与第一个点重合，无法形成闭合图案
           }
         } else {
           model.coords.splice(model.coords.length - 1, 1, coord);
@@ -1058,6 +1058,7 @@ export default class StageStore implements IStageStore {
       element = this._createProvisionalElement(model) as ElementArbitrary;
       element.tailCoordIndex = 0;
     }
+    element.refresh({ size: true });
     this._selectAndRefreshProvisionalElement(element);
     return element;
   }
