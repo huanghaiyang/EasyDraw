@@ -3,7 +3,7 @@ import Element from "@/modules/elements/Element";
 import IStageShield from "@/types/IStageShield";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
-import { cloneDeep, flatten, some } from "lodash";
+import { cloneDeep, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/constants";
 import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
@@ -199,7 +199,7 @@ export default class ElementArbitrary
    * @returns
    */
   calcRotateOutlinePathPoints(): IPoint[] {
-    return flatten(this._outerPaths);
+    return this._outerPaths.flat();
   }
 
   /**
@@ -208,7 +208,7 @@ export default class ElementArbitrary
    * @returns
    */
   calcRotateOutlinePathCoords(): IPoint[] {
-    return flatten(this._outerWorldPaths);
+    return this._outerWorldPaths.flat();
   }
 
   /**

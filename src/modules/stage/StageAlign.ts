@@ -3,7 +3,7 @@ import IElement from "@/types/IElement";
 import IStageAlign from "@/types/IStageAlign";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
-import { flatten, sortBy } from "lodash";
+import { sortBy } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IElementGroup } from "@/types/IElementGroup";
 
@@ -22,7 +22,7 @@ export default class StageAlign implements IStageAlign {
    */
   private _getElementsCoordsRect(elements: IElement[]): Partial<DOMRect> {
     return CommonUtils.getRect(
-      flatten(elements.map(element => this._getElementAlignCoords(element))),
+      elements.map(element => this._getElementAlignCoords(element)).flat(),
     );
   }
 
@@ -145,11 +145,7 @@ export default class StageAlign implements IStageAlign {
     );
     if (element.isGroup && !element.isGroupSubject) {
       (element as IElementGroup).deepSubs.forEach(sub => {
-        sub.setPosition(
-          sub.model.x + offsetX,
-          sub.model.y + offsetY,
-          offset,
-        );
+        sub.setPosition(sub.model.x + offsetX, sub.model.y + offsetY, offset);
       });
     }
   }

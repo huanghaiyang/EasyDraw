@@ -4,7 +4,7 @@ import ElementUtils, {
   ElementListEventNames,
   ElementReactionPropNames,
 } from "@/modules/elements/utils/ElementUtils";
-import { every, flatten, includes, isEqual } from "lodash";
+import { every, includes, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -1163,7 +1163,17 @@ export default class StageStore implements IStageStore {
    * @param offset
    */
   updateSelectedElementsTransform(offset: IPoint): void {
-    this.selectedElements.forEach(element => {
+    this.updateElementsTransform(this.selectedElements, offset);
+  }
+
+  /**
+   * 形变
+   *
+   * @param elements
+   * @param offset
+   */
+  updateElementsTransform(elements: IElement[], offset: IPoint): void {
+    elements.forEach(element => {
       element.transform(offset);
       if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach(sub => {
@@ -1362,7 +1372,7 @@ export default class StageStore implements IStageStore {
     elements: IElement[],
   ): { center: IPoint; centerCoord: IPoint; angle: number } {
     const center = MathUtils.calcCenter(
-      flatten(elements.map(element => element.pathPoints)),
+      elements.map(element => element.pathPoints).flat(),
     );
     const centerCoord = ElementUtils.calcWorldPoint(
       center,
@@ -1722,7 +1732,7 @@ export default class StageStore implements IStageStore {
     const subIds = new Set(elements.map(element => element.id));
     // 获取组合组件的坐标
     const coords = CommonUtils.getBoxPoints(
-      flatten(elements.map(element => element.rotateBoxCoords)),
+      elements.map(element => element.rotateBoxCoords).flat(),
     );
     // 获取组合组件的宽高
     const { width, height, x, y } = CommonUtils.getRect(coords);

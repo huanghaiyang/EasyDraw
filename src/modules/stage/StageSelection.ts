@@ -499,7 +499,7 @@ export default class StageSelection implements IStageSelection {
         ElementUtils.createEmptyGroupObject(),
       );
     } else {
-      if (!this.rangeElement.isRotating) {
+      if (!this.rangeElement.isRotating && !this.rangeElement.isTransforming) {
         const coords = CommonUtils.getBoxPoints(
           elements.map(element => element.rotatePathCoords).flat(),
         );
@@ -511,7 +511,16 @@ export default class StageSelection implements IStageSelection {
           ...DefaultAngleModel,
         });
       }
-      this.rangeElement.refresh();
+      if (this.rangeElement.isTransforming) {
+        this.rangeElement.refresh({
+          points: true,
+          size: true,
+          rotation: true,
+          angles: true,
+        });
+      } else {
+        this.rangeElement.refresh();
+      }
     }
   }
 

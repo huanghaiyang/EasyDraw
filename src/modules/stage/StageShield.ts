@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, cloneDeep, flatten, isBoolean } from "lodash";
+import { clamp, cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { RefreshSubOptions } from "@/types/IElement";
@@ -590,6 +590,7 @@ export default class StageShield
   private _dragStage(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
+    this.selection.refresh();
   }
 
   /**
@@ -615,10 +616,16 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: true,
     });
-    this.store.updateSelectedElementsTransform({
+    const offset = {
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-    });
+    };
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isTransforming = true;
+      this.store.updateElementsTransform([this.selection.rangeElement], offset);
+    } else {
+      this.store.updateSelectedElementsTransform(offset);
+    }
     this.selection.refresh();
   }
 
@@ -855,6 +862,9 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isDragging: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isDragging = false;
+    }
     // 刷新组件坐标数据
     this.store.refreshElementsPosition(this.store.selectedElements);
   }
@@ -888,6 +898,9 @@ export default class StageShield
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
     });
+    if (this.store.isMultiSelection) {
+      this.selection.rangeElement.isTransforming = false;
+    }
   }
 
   /**
@@ -927,6 +940,7 @@ export default class StageShield
   private _processHandCreatorMove(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
+    this.selection.refresh();
     this._isStageMoving = false;
   }
 
@@ -1176,6 +1190,7 @@ export default class StageShield
     CanvasUtils.scale = value;
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
+    this.selection.refresh();
     await this._redrawAll(true);
   }
 
@@ -1220,6 +1235,7 @@ export default class StageShield
     this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
     this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
+    this.selection.refresh();
     this._redrawAll(true);
   }
 
@@ -1250,9 +1266,9 @@ export default class StageShield
    */
   calcScaleAutoFitValue(): number {
     const elementsBox = CommonUtils.getBoxPoints(
-      flatten(
-        this.store.visibleElements.map(element => element.maxOutlineBoxPoints),
-      ),
+      this.store.visibleElements
+        .map(element => element.maxOutlineBoxPoints)
+        .flat(),
     );
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
@@ -1273,11 +1289,9 @@ export default class StageShield
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
       const center = MathUtils.calcCenter(
-        flatten(
-          this.store.visibleElements.map(
-            element => element.rotateOutlinePathCoords,
-          ),
-        ),
+        this.store.visibleElements
+          .map(element => element.rotateOutlinePathCoords)
+          .flat(),
       );
       this.stageWorldCoord = center;
       this.store.refreshStageElements();
