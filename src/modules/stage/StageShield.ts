@@ -600,6 +600,7 @@ export default class StageShield
       x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
       y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
     });
+    this.selection.refresh();
   }
 
   /**
@@ -998,8 +999,9 @@ export default class StageShield
   private async _refreshSize(): Promise<void> {
     const rect = this.renderEl.getBoundingClientRect();
     this.stageRect = rect;
-    this._setCanvasSize(rect);
+    this._updateCanvasSize(rect);
     this.store.refreshStageElements();
+    this.selection.refresh();
     await this._redrawAll(true);
   }
 
@@ -1008,7 +1010,7 @@ export default class StageShield
    *
    * @param size
    */
-  private _setCanvasSize(size: DOMRect): void {
+  private _updateCanvasSize(size: DOMRect): void {
     this.mask.updateCanvasSize(size);
     this.provisional.updateCanvasSize(size);
     this.updateCanvasSize(size);
