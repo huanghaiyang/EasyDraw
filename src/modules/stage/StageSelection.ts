@@ -211,8 +211,10 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   calcTransformerModels(): IMaskModel[] {
+    const { primarySelectedElement, creatingElements } = this.shield.store;
     const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
+      primarySelectedElement || creatingElements[0] || this.rangeElement;
+
     if (element && element.model.coords.length > 0) {
       const {
         transformerType,

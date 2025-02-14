@@ -545,9 +545,11 @@ export default class StageShield
       if (this.isArbitraryDrawing) {
         // 移动过程中创建组件
         this._updatingArbitraryElementOnMovement(e);
+        this.selection.refreshTransformerModels();
       } else if (this.isDrawerActive) {
         // 移动过程中创建组件
         this._creatingElementOnMovement(e);
+        this.selection.refreshTransformerModels();
       } else if (this.isMoveableActive) {
         // 如果是选择模式
         // 如果不存在选中的组件
