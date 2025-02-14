@@ -166,8 +166,8 @@ export const useStageStore = defineStore("stage", {
       );
       // 监听描边
       shield.on(
-        ShieldDispatcherNames.strokeChanged,
-        throttle(this.onStrokeChanged.bind(this), 100),
+        ShieldDispatcherNames.strokesChanged,
+        throttle(this.onStrokesChanged.bind(this), 100),
       );
       // 监听填充颜色
       shield.on(
@@ -383,7 +383,7 @@ export const useStageStore = defineStore("stage", {
      * @param element
      * @param stroke
      */
-    onStrokeChanged(element: IElement, strokes: StrokeStyle[]) {
+    onStrokesChanged(element: IElement, strokes: StrokeStyle[]) {
       this.strokes = strokes;
     },
     /**
@@ -563,6 +563,24 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsStrokeColorOpacity(value: number, index: number): void {
       shield.setElementsStrokeColorOpacity(this.selectedElements, value, index);
+    },
+
+    /**
+     *  添加组件描边
+     *
+     * @param prevIndex 添加描边的索引位置（从0开始）
+     */
+    addElementsStroke(prevIndex: number): void {
+      shield.addElementsStroke(this.selectedElements, prevIndex);
+    },
+
+    /**
+     * 删除组件描边
+     *
+     * @param prevIndex 删除描边的索引位置（从0开始）
+     */
+    removeElementsStroke(prevIndex: number): void {
+      shield.removeElementsStroke(this.selectedElements, prevIndex);
     },
 
     /**

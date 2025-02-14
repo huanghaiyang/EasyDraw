@@ -91,9 +91,9 @@ export const DefaultStrokeColor = "#000000";
 // 默认描边透明度
 export const DefaultStrokeColorOpacity = 1;
 // 默认填充颜色
-export const DefaultFillColor = "#000000";
+export const DefaultFillColor = "#999999";
 // 默认填充透明度
-export const DefaultFillColorOpacity = 0.05;
+export const DefaultFillColorOpacity = 0.15;
 // 默认边框宽度
 export const DefaultStrokeWidth = 1;
 // 默认字体大小
@@ -148,7 +148,6 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
     });
   }
   if ([CreatorTypes.image, CreatorTypes.arbitrary].includes(type)) {
-    style.fillColor = "";
     style.fillColorOpacity = 0;
   }
   return style;

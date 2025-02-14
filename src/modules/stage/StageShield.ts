@@ -342,6 +342,34 @@ export default class StageShield
   }
 
   /**
+   * 添加组件描边
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async addElementsStroke(
+    elements: IElement[],
+    prevIndex: number,
+  ): Promise<void> {
+    await this.store.addElementsStroke(elements, prevIndex);
+    await this._redrawAll({ shield: true });
+  }
+
+  /**
+   * 删除组件描边
+   *
+   * @param elements
+   * @param index
+   */
+  async removeElementsStroke(
+    elements: IElement[],
+    index: number,
+  ): Promise<void> {
+    await this.store.removeElementsStroke(elements, index);
+    await this._redrawAll({ shield: true });
+  }
+
+  /**
    * 设置组件填充颜色
    *
    * @param elements

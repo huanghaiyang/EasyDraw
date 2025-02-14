@@ -100,7 +100,7 @@ export enum ShieldDispatcherNames {
   // 比例改变
   scaleChanged = "scaleChanged",
   // 描边改变
-  strokeChanged = "strokeChanged",
+  strokesChanged = "strokesChanged",
   // 填充颜色改变
   fillColorChanged = "fillColorChanged",
   // 填充颜色透明度改变

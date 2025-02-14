@@ -386,7 +386,7 @@ export default class StageStore implements IStageStore {
           ShieldDispatcherNames.widthChanged,
           ShieldDispatcherNames.heightChanged,
           ShieldDispatcherNames.scaleChanged,
-          ShieldDispatcherNames.strokeChanged,
+          ShieldDispatcherNames.strokesChanged,
           ShieldDispatcherNames.fillColorChanged,
           ShieldDispatcherNames.fillColorOpacityChanged,
           ShieldDispatcherNames.textAlignChanged,
@@ -630,6 +630,40 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id)) {
         if (element.model.styles.strokes[index].colorOpacity === value) return;
         element.setStrokeColorOpacity(value, index);
+      }
+    });
+  }
+
+  /**
+   * 添加组件描边
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async addElementsStroke(
+    elements: IElement[],
+    prevIndex: number,
+  ): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.addStroke(prevIndex);
+      }
+    });
+  }
+
+  /**
+   * 删除组件描边
+   *
+   * @param elements
+   * @param index
+   */
+  async removeElementsStroke(
+    elements: IElement[],
+    index: number,
+  ): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.removeStroke(index);
       }
     });
   }

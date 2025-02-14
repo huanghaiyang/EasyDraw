@@ -11,12 +11,17 @@ export default class ElementTaskLine extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    this.node.strokePathPoints.forEach((points, index) => {
+    const {
+      strokePathPoints,
+      model: { styles },
+    } = this.node;
+
+    strokePathPoints.forEach((points, index) => {
       CanvasUtils.drawPathWithScale(
         this.canvas,
         points,
-        this.node.model.styles,
-        this.node.model.styles.strokes[index],
+        styles,
+        styles.strokes[index],
       );
     });
   }

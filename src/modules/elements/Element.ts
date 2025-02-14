@@ -15,7 +15,11 @@ import IElement, {
   RefreshOptions,
   TransformByOptions,
 } from "@/types/IElement";
-import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import {
+  DefaultStrokeStyle,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -133,14 +137,41 @@ export default class Element implements IElement, ILinkedNodeValue {
   get strokePathPoints(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return this.convertPointsByStrokeType(this._rotatePathPoints, stroke);
-    })
+    });
   }
 
   // 获取边框线段坐标
   get strokePathCoords(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return this.convertPointsByStrokeType(this._rotatePathCoords, stroke);
-    })
+    });
+  }
+
+  /**
+   * 获取最内边框线段点索引
+   */
+  get innerestStrokePathPointsIndex(): number {
+    let result = 0;
+    let innerWidth = 0;
+    this.strokePathPoints.forEach((points, index) => {
+      const { width, type } = this.model.styles.strokes[index];
+      if (type === StrokeTypes.middle && innerWidth < width / 2) {
+        innerWidth = width / 2;
+        result = index;
+      }
+      if (type === StrokeTypes.inside && innerWidth < width) {
+        innerWidth = width;
+        result = index;
+      }
+    });
+    return result;
+  }
+
+  /**
+   * 获取最内边框线段点
+   */
+  get innerestStrokePathPoints(): IPoint[] {
+    return this.strokePathPoints[this.innerestStrokePathPointsIndex];
   }
 
   // 是否翻转X轴
@@ -2176,6 +2207,30 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeWidth(value: number, index: number): void {
     this.model.styles.strokes[index].width = value;
+    this._refreshOutlinePoints();
+  }
+
+  /**
+   * 添加边框
+   *
+   * @param prevIndex
+   */
+  addStroke(prevIndex: number): void {
+    const strokes = cloneDeep(this.model.styles.strokes);
+    strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
+    this.model.styles.strokes = strokes;
+    this._refreshOutlinePoints();
+  }
+
+  /**
+   * 删除边框
+   *
+   * @param index
+   */
+  removeStroke(index: number): void {
+    const strokes = cloneDeep(this.model.styles.strokes);
+    strokes.splice(index, 1);
+    this.model.styles.strokes = strokes;
     this._refreshOutlinePoints();
   }
 

@@ -253,21 +253,80 @@ export default class CanvasUtils {
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ): void {
-    const { calcVertices = true } = options;
     [points, strokeStyle] = CanvasUtils.transParamsWithScale(
       points,
       strokeStyle,
     );
-    if (styles.fillColorOpacity && calcVertices) {
-      const innerPoints = ArbitraryUtils.getArbitraryInnerVertices(
+    if (styles.fillColorOpacity) {
+      CanvasUtils.drawInnerPathFill(
+        target,
+        points,
+        styles,
+        strokeStyle,
+        options,
+      );
+    }
+    if (strokeStyle.width && strokeStyle.colorOpacity) {
+      CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
+    }
+  }
+
+  /**
+   * 绘制路径
+   *
+   * @param target
+   * @param points
+   * @param styles
+   * @param options
+   */
+  static drawInnerPathFill(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ): void {
+    const { calcVertices = true } = options;
+    let innerPoints: IPoint[];
+    if (calcVertices) {
+      innerPoints = ArbitraryUtils.getArbitraryInnerVertices(
         points,
         strokeStyle.width / 2,
         options,
       );
-      CanvasUtils.drawPathFill(target, innerPoints, styles);
+    } else {
+      innerPoints = points;
     }
-    if (strokeStyle.width && strokeStyle.colorOpacity) {
-      CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
+    CanvasUtils.drawPathFill(target, innerPoints, styles);
+  }
+
+  /**
+   * 绘制内填充
+   *
+   * @param target
+   * @param points
+   * @param styles
+   * @param options
+   */
+  static drawInnerPathFillWithScale(
+    target: HTMLCanvasElement,
+    points: IPoint[],
+    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ): void {
+    [points, strokeStyle] = CanvasUtils.transParamsWithScale(
+      points,
+      strokeStyle,
+    );
+    if (styles.fillColorOpacity) {
+      CanvasUtils.drawInnerPathFill(
+        target,
+        points,
+        styles,
+        strokeStyle,
+        options,
+      );
     }
   }
 
@@ -278,7 +337,7 @@ export default class CanvasUtils {
    * @param points
    * @param styles
    */
-  static drawPathStokeWidthScale(
+  static drawPathStrokeWidthScale(
     target: HTMLCanvasElement,
     points: IPoint[],
     strokeStyle: StrokeStyle,

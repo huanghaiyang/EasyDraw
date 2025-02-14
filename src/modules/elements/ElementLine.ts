@@ -103,7 +103,9 @@ export default class ElementLine extends Element implements IElementLine {
   private refreshBentOutline() {
     this._outerPathPoints = this.calcOuterPathPoints();
     this._outerPathCoords = this.calcOuterPathCoords();
-    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(this._outerPathPoints.flat());
+    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(
+      this._outerPathPoints.flat(),
+    );
   }
 
   /**
@@ -120,9 +122,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   calcOuterPathPoints(): IPoint[][] {
-    return this.model.styles.strokes.map((stroke, index) => {
+    return this.model.styles.strokes.map(stroke => {
       return PolygonUtils.calcBentLineOuterVertices(
-        [this.rotatePathPoints[index]],
+        this.rotatePathPoints,
         stroke.width / 2,
       );
     });
@@ -134,10 +136,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   calcOuterPathCoords(): IPoint[][] {
-    const rotateCoords = this.calcRotatePathCoords();
-    return this.model.styles.strokes.map((stroke, index) => {
+    return this.model.styles.strokes.map(stroke => {
       return PolygonUtils.calcBentLineOuterVertices(
-        [rotateCoords[index]],
+        this.rotatePathCoords,
         stroke.width / 2,
       );
     });

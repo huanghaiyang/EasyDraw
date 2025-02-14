@@ -2,6 +2,7 @@
 import { useStageStore } from "@/stores/stage";
 import { CreatorTypes } from "@/types/Creator";
 import { DefaultStrokeStyle, getStokeTypes } from "@/styles/ElementStyles";
+import { Plus } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();
@@ -32,7 +33,12 @@ const toggleColorPickerVisible = () => {
     class="stroke-props right-props"
     v-if="stageStore.primarySelectedElement?.strokeEnable"
   >
-    <div class="stroke-props__title">描边</div>
+    <div class="stroke-props__title">
+      <span class="stroke-props__title-text">描边</span>
+      <el-icon
+        ><Plus @click="stageStore.addElementsStroke(strokes.length - 1)"
+      /></el-icon>
+    </div>
 
     <div v-for="(stroke, index) in strokes" :key="index">
       <div class="stroke-props__row color">
