@@ -1,4 +1,4 @@
-import { ElementStyles } from "@/styles/ElementStyles";
+import { ElementStyles, StrokeStyle } from "@/styles/ElementStyles";
 import ColorUtils from "@/utils/ColorUtils";
 
 export default class StyleUtils {
@@ -8,8 +8,8 @@ export default class StyleUtils {
   }
 
   // 计算描边颜色
-  static joinStrokeColor(style: ElementStyles): string {
-    return `${ColorUtils.hashToRgba(style.strokeColor, style.strokeColorOpacity)}`;
+  static joinStrokeColor(strokeStyle: StrokeStyle): string {
+    return `${ColorUtils.hashToRgba(strokeStyle.color, strokeStyle.colorOpacity)}`;
   }
 
   // 计算字体

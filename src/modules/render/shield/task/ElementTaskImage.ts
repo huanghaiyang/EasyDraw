@@ -25,6 +25,7 @@ export default class ElementTaskImage extends ElementTaskBase {
       internalAngle,
       rotateBoxPoints,
       center,
+      model: { styles },
     } = this.node;
     // 计算倾斜后的图片的宽度，此宽的值实际上与倾斜之前的值相同
     const width = MathUtils.calcDistance(
@@ -41,8 +42,8 @@ export default class ElementTaskImage extends ElementTaskBase {
     const rect = {
       x: center.x - width / 2,
       y: center.y - height / 2,
-      width: width,
-      height: height,
+      width,
+      height,
     };
 
     // 绘制图片
@@ -61,11 +62,14 @@ export default class ElementTaskImage extends ElementTaskBase {
         actualAngle,
       },
     );
-    // 绘制描边
-    CanvasUtils.drawPathStokeWidthScale(
-      this.canvas,
-      this.node.strokePathPoints,
-      model.styles,
-    );
+
+    // 绘制边框
+    this.node.strokePathPoints.forEach((points, index) => {
+      CanvasUtils.drawPathStrokeWidthScale(
+        this.canvas,
+        points,
+        styles.strokes[index],
+      );
+    });
   }
 }

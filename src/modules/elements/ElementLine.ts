@@ -7,6 +7,7 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
 import { TransformerTypes } from "@/types/ITransformer";
+import { some } from "lodash";
 
 export default class ElementLine extends Element implements IElementLine {
   get editingEnable(): boolean {
@@ -77,14 +78,14 @@ export default class ElementLine extends Element implements IElementLine {
     return this.model.coords[1];
   }
 
-  private _outerPathPoints: IPoint[] = [];
-  private _outerPathCoords: IPoint[] = [];
+  private _outerPathPoints: IPoint[][] = [];
+  private _outerPathCoords: IPoint[][] = [];
 
-  get outerPathPoints(): IPoint[] {
+  get outerPathPoints(): IPoint[][] {
     return this._outerPathPoints;
   }
 
-  get outerPathCoords(): IPoint[] {
+  get outerPathCoords(): IPoint[][] {
     return this._outerPathCoords;
   }
 
@@ -92,7 +93,7 @@ export default class ElementLine extends Element implements IElementLine {
     return TransformerTypes.circle;
   }
 
-  get alignOutlineCoords(): IPoint[] {
+  get alignOutlineCoords(): IPoint[][] {
     return this._outerPathCoords;
   }
 
@@ -102,7 +103,9 @@ export default class ElementLine extends Element implements IElementLine {
   private refreshBentOutline() {
     this._outerPathPoints = this.calcOuterPathPoints();
     this._outerPathCoords = this.calcOuterPathCoords();
-    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(this.outerPathPoints);
+    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(
+      this._outerPathPoints.flat(),
+    );
   }
 
   /**
@@ -118,11 +121,13 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  calcOuterPathPoints(): IPoint[] {
-    return PolygonUtils.calcBentLineOuterVertices(
-      this.rotatePathPoints,
-      this.model.styles.strokeWidth / 2,
-    );
+  calcOuterPathPoints(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return PolygonUtils.calcBentLineOuterVertices(
+        this.rotatePathPoints,
+        stroke.width / 2,
+      );
+    });
   }
 
   /**
@@ -130,12 +135,13 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  calcOuterPathCoords(): IPoint[] {
-    const rotateCoords = this.calcRotatePathCoords();
-    return PolygonUtils.calcBentLineOuterVertices(
-      rotateCoords,
-      this.model.styles.strokeWidth / 2,
-    );
+  calcOuterPathCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return PolygonUtils.calcBentLineOuterVertices(
+        this.rotatePathCoords,
+        stroke.width / 2,
+      );
+    });
   }
 
   /**
@@ -164,13 +170,14 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(
-      point,
-      this.startRotatePathPoint,
-      this.endRotatePathPoint,
-      LineClosestMargin +
-        this.model.styles.strokeWidth / 2 / this.shield.stageScale,
-    );
+    return some(this.model.styles.strokes, stroke => {
+      return MathUtils.isPointClosestSegment(
+        point,
+        this.startRotatePathPoint,
+        this.endRotatePathPoint,
+        LineClosestMargin + stroke.width / 2 / this.shield.stageScale,
+      );
+    });
   }
 
   /**
@@ -179,7 +186,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @param points
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return MathUtils.isPolygonsOverlap(this.outerPathPoints, points);
+    return some(this._outerPathPoints, pathPoints => {
+      return MathUtils.isPolygonsOverlap(pathPoints, points);
+    });
   }
 
   /**
@@ -189,7 +198,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return MathUtils.isPolygonsOverlap(this._outerPathCoords, coords);
+    return some(this._outerPathPoints, pathCoords => {
+      return MathUtils.isPolygonsOverlap(pathCoords, coords);
+    });
   }
 
   /**

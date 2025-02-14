@@ -11,10 +11,25 @@ export default class ElementTaskRect extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPathWithScale(
+    const {
+      innerestStrokePathPointsIndex,
+      strokePathPoints,
+      model: { styles },
+    } = this.node;
+
+    CanvasUtils.drawInnerPathFillWithScale(
       this.canvas,
-      this.node.strokePathPoints,
-      this.node.model.styles,
+      strokePathPoints[innerestStrokePathPointsIndex],
+      styles,
+      styles.strokes[innerestStrokePathPointsIndex],
     );
+
+    strokePathPoints.forEach((points, index) => {
+      CanvasUtils.drawPathStrokeWidthScale(
+        this.canvas,
+        points,
+        styles.strokes[index],
+      );
+    });
   }
 }

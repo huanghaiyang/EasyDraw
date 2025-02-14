@@ -3,7 +3,12 @@ import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
-import { DefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
+import {
+  DefaultElementStyle,
+  DefaultStrokeStyle,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import { cloneDeep, throttle } from "lodash";
 import { defineStore } from "pinia";
 import {
@@ -40,14 +45,12 @@ const DefaultStage = {
   leanYAngle: 0,
   // 缩放比例
   scale: 1,
-  // 描边类型
-  strokeType: DefaultElementStyle.strokeType,
-  // 描边宽度
-  strokeWidth: DefaultElementStyle.strokeWidth,
-  // 描边颜色
-  strokeColor: DefaultElementStyle.strokeColor,
-  // 描边透明度
-  strokeColorOpacity: DefaultElementStyle.strokeColorOpacity,
+  // 描边
+  strokes: [
+    {
+      ...DefaultStrokeStyle,
+    },
+  ],
   // 填充颜色
   fillColor: DefaultElementStyle.fillColor,
   // 填充透明度
@@ -161,25 +164,10 @@ export const useStageStore = defineStore("stage", {
         ShieldDispatcherNames.scaleChanged,
         throttle(this.onScaleChanged.bind(this), 100),
       );
-      // 监听描边类型
+      // 监听描边
       shield.on(
-        ShieldDispatcherNames.strokeTypeChanged,
-        throttle(this.onStrokeTypeChanged.bind(this), 100),
-      );
-      // 监听描边颜色透明度
-      shield.on(
-        ShieldDispatcherNames.strokeColorOpacityChanged,
-        throttle(this.onStrokeColorOpacityChanged.bind(this), 100),
-      );
-      // 监听描边宽度
-      shield.on(
-        ShieldDispatcherNames.strokeWidthChanged,
-        throttle(this.onStrokeWidthChanged.bind(this), 100),
-      );
-      // 监听描边颜色
-      shield.on(
-        ShieldDispatcherNames.strokeColorChanged,
-        throttle(this.onStrokeColorChanged.bind(this), 100),
+        ShieldDispatcherNames.strokesChanged,
+        throttle(this.onStrokesChanged.bind(this), 100),
       );
       // 监听填充颜色
       shield.on(
@@ -278,10 +266,6 @@ export const useStageStore = defineStore("stage", {
           angle,
           flipX,
           leanYAngle,
-          strokeType,
-          strokeWidth,
-          strokeColor,
-          strokeColorOpacity,
           fillColor,
           fillColorOpacity,
           fontSize,
@@ -302,14 +286,6 @@ export const useStageStore = defineStore("stage", {
         this.onFlipXChanged(element, flipX);
         // Y轴偏移角度
         this.onLeanYAngleChanged(element, leanYAngle);
-        // 描边类型
-        this.onStrokeTypeChanged(element, strokeType);
-        // 描边宽度
-        this.onStrokeWidthChanged(element, strokeWidth);
-        // 描边颜色
-        this.onStrokeColorChanged(element, strokeColor);
-        // 描边颜色透明度
-        this.onStrokeColorOpacityChanged(element, strokeColorOpacity);
         // 填充颜色
         this.onFillColorChanged(element, fillColor);
         // 填充颜色透明度
@@ -405,28 +381,10 @@ export const useStageStore = defineStore("stage", {
      * 组件描边类型变化
      *
      * @param element
-     * @param strokeType
+     * @param stroke
      */
-    onStrokeTypeChanged(element: IElement, strokeType: StrokeTypes) {
-      this.strokeType = strokeType;
-    },
-    /**
-     * 组件描边宽度变化
-     *
-     * @param element
-     * @param strokeWidth
-     */
-    onStrokeWidthChanged(element: IElement, strokeWidth: number) {
-      this.strokeWidth = strokeWidth;
-    },
-    /**
-     * 组件描边颜色变化
-     *
-     * @param element
-     * @param strokeColor
-     */
-    onStrokeColorChanged(element: IElement, strokeColor: string) {
-      this.strokeColor = strokeColor;
+    onStrokesChanged(element: IElement, strokes: StrokeStyle[]) {
+      this.strokes = strokes;
     },
     /**
      * 组件填充颜色变化
@@ -436,15 +394,6 @@ export const useStageStore = defineStore("stage", {
      */
     onFillColorChanged(element: IElement, fillColor: string) {
       this.fillColor = fillColor;
-    },
-    /**
-     * 组件描边透明度变化
-     *
-     * @param element
-     * @param strokeColorOpacity
-     */
-    onStrokeColorOpacityChanged(element: IElement, strokeColorOpacity: number) {
-      this.strokeColorOpacity = strokeColorOpacity;
     },
     /**
      * 组件填充透明度变化
@@ -577,9 +526,10 @@ export const useStageStore = defineStore("stage", {
      *
      * @param elements
      * @param value
+     * @param index
      */
-    setElementsStrokeType(value: StrokeTypes): void {
-      shield.setElementsStrokeType(this.selectedElements, value);
+    setElementsStrokeType(value: StrokeTypes, index: number): void {
+      shield.setElementsStrokeType(this.selectedElements, value, index);
     },
 
     /**
@@ -587,9 +537,10 @@ export const useStageStore = defineStore("stage", {
      *
      * @param elements
      * @param value
+     * @param index
      */
-    setElementsStrokeWidth(value: number): void {
-      shield.setElementsStrokeWidth(this.selectedElements, value);
+    setElementsStrokeWidth(value: number, index: number): void {
+      shield.setElementsStrokeWidth(this.selectedElements, value, index);
     },
 
     /**
@@ -597,9 +548,10 @@ export const useStageStore = defineStore("stage", {
      *
      * @param elements
      * @param value
+     * @param index
      */
-    setElementsStrokeColor(value: string): void {
-      shield.setElementsStrokeColor(this.selectedElements, value);
+    setElementsStrokeColor(value: string, index: number): void {
+      shield.setElementsStrokeColor(this.selectedElements, value, index);
     },
 
     /**
@@ -607,9 +559,28 @@ export const useStageStore = defineStore("stage", {
      *
      * @param elements
      * @param value
+     * @param index
      */
-    setElementsStrokeColorOpacity(value: number): void {
-      shield.setElementsStrokeColorOpacity(this.selectedElements, value);
+    setElementsStrokeColorOpacity(value: number, index: number): void {
+      shield.setElementsStrokeColorOpacity(this.selectedElements, value, index);
+    },
+
+    /**
+     *  添加组件描边
+     *
+     * @param prevIndex 添加描边的索引位置（从0开始）
+     */
+    addElementsStroke(prevIndex: number): void {
+      shield.addElementsStroke(this.selectedElements, prevIndex);
+    },
+
+    /**
+     * 删除组件描边
+     *
+     * @param prevIndex 删除描边的索引位置（从0开始）
+     */
+    removeElementsStroke(prevIndex: number): void {
+      shield.removeElementsStroke(this.selectedElements, prevIndex);
     },
 
     /**

@@ -5,7 +5,11 @@
  */
 import { ElementStatus, IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import {
+  ElementStyles,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -240,14 +244,8 @@ export default interface IElement {
   get angle(): number;
   // 位置
   get position(): IPoint;
-  // 描边类型
-  get strokeType(): StrokeTypes;
-  // 描边宽度
-  get strokeWidth(): number;
-  // 描边颜色
-  get strokeColor(): string;
-  // 描边颜色透明度
-  get strokeColorOpacity(): number;
+  // 描边样式
+  get strokes(): StrokeStyle[];
   // 填充颜色
   get fillColor(): string;
   // 填充颜色透明度
@@ -281,7 +279,7 @@ export default interface IElement {
   // 旋转路径坐标
   get rotatePathCoords(): IPoint[];
   // 旋转路径外框点
-  get rotateOutlinePathPoints(): IPoint[];
+  get rotateOutlinePathPoints(): IPoint[][];
   // 旋转盒模型顶点
   get rotateBoxPoints(): IPoint[];
   // 旋转盒模型坐标
@@ -289,11 +287,15 @@ export default interface IElement {
   // 最大外框盒模型顶点
   get maxOutlineBoxPoints(): IPoint[];
   // 旋转路径外框坐标
-  get rotateOutlinePathCoords(): IPoint[];
+  get rotateOutlinePathCoords(): IPoint[][];
   // 描边路径点
-  get strokePathPoints(): IPoint[];
+  get strokePathPoints(): IPoint[][];
   // 描边路径坐标
-  get strokePathCoords(): IPoint[];
+  get strokePathCoords(): IPoint[][];
+  // 中心内边框线段点
+  get innerestStrokePathPoints(): IPoint[];
+  // 中心内边框线段索引
+  get innerestStrokePathPointsIndex(): number;
   // 中心点
   get center(): IPoint;
   // 中心点坐标
@@ -311,7 +313,7 @@ export default interface IElement {
   // 对齐坐标
   get alignCoords(): IPoint[];
   // 对齐外框坐标
-  get alignOutlineCoords(): IPoint[];
+  get alignOutlineCoords(): IPoint[][];
 
   // 是否选中
   get isSelected(): boolean;
@@ -380,145 +382,396 @@ export default interface IElement {
   // 变换器类型
   get transformType(): TransformTypes;
 
-  // 设置位置
+  /**
+   * 设置位置
+   * @param x 新的x坐标
+   * @param y 新的y坐标
+   * @param offset 偏移量
+   */
   setPosition(x: number, y: number, offset: IPoint): void;
-  // 设置宽度
+
+  /**
+   * 设置宽度
+   * @param value 宽度值（像素）
+   */
   setWidth(value: number): number[][];
-  // 设置高度
+
+  /**
+   * 设置高度
+   * @param value 高度值（像素）
+   */
   setHeight(value: number): number[][];
-  // 设置旋转角度
+
+  /**
+   * 设置旋转角度
+   * @param value 旋转角度值（度）
+   */
   setAngle(value: number): void;
-  // 设置Y倾斜角度
+
+  /**
+   * 设置Y倾斜角度
+   * @param value Y倾斜角度值（度）
+   */
   setLeanYAngle(value: number): void;
-  // 设置描边类型
-  setStrokeType(value: StrokeTypes): void;
-  // 设置描边宽度
-  setStrokeWidth(value: number): void;
-  // 设置描边颜色
-  setStrokeColor(value: string): void;
-  // 设置描边颜色透明度
-  setStrokeColorOpacity(value: number): void;
-  // 设置填充颜色
+
+  /**
+   * 设置描边类型
+   * @param value 描边类型值
+   * @param index 描边索引位置（从0开始）
+   */
+  setStrokeType(value: StrokeTypes, index: number): void;
+
+  /**
+   * 设置描边宽度
+   * @param value 描边宽度值（像素）
+   * @param index 描边索引位置（从0开始）
+   */
+  setStrokeWidth(value: number, index: number): void;
+
+  /**
+   * 设置描边颜色
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   * @param index 描边索引位置（从0开始）
+   */
+  setStrokeColor(value: string, index: number): void;
+
+  /**
+   * 设置描边颜色透明度
+   * @param value 透明度值（0-1）
+   * @param index 描边索引位置（从0开始）
+   */
+  setStrokeColorOpacity(value: number, index: number): void;
+
+  /**
+   * 添加描边
+   * @param prevIndex 新描边要插入的索引位置（从0开始）
+   */
+  addStroke(prevIndex: number): void;
+
+  /**
+   * 删除描边
+   * @param index 要删除的描边索引位置（从0开始）
+   * @throws 当索引超出范围时抛出错误
+   */
+  removeStroke(index: number): void;
+
+  /**
+   * 设置填充颜色
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   */
   setFillColor(value: string): void;
-  // 设置填充颜色透明度
+
+  /**
+   * 设置填充颜色透明度
+   * @param value 透明度值（0-1）
+   */
   setFillColorOpacity(value: number): void;
-  // 设置字体大小
+
+  /**
+   * 设置字体大小
+   * @param value 字体大小值（像素）
+   */
   setFontSize(value: number): void;
-  // 设置字体
+
+  /**
+   * 设置字体
+   * @param value 字体名称（如'Microsoft YaHei'）
+   */
   setFontFamily(value: string): void;
-  // 设置文本对齐
+
+  /**
+   * 设置文本对齐
+   * @param value 文本对齐值
+   */
   setTextAlign(value: CanvasTextAlign): void;
-  // 设置文本基线
+
+  /**
+   * 设置文本基线对齐方式
+   * @param value 文本基线值
+   */
   setTextBaseline(value: CanvasTextBaseline): void;
-  // 设置比例锁定
+
+  /**
+   * 设置比例锁定
+   * @param value 是否锁定比例
+   */
   setRatioLocked(value: boolean): void;
-  // 拉伸
+
+  /**
+   * 拉伸
+   * @param center 中心点坐标
+   * @param scaleX X轴缩放值
+   * @param scaleY Y轴缩放值
+   * @param group 组合角度
+   */
   scaleBy(
     center: IPoint,
     scaleX: number,
     scaleY: number,
     group?: Partial<AngleModel>,
   ): void;
-  // 旋转
+
+  /**
+   * 旋转
+   * @param deltaAngle 旋转角度值（度）
+   * @param lockCenterCoord 锁定中心点坐标
+   */
   rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void;
-  // 刷新尺寸
+
+  /**
+   * 刷新尺寸
+   */
   refreshSize(): void;
-  // 刷新位置
+
+  /**
+   * 刷新位置
+   */
   refreshPosition(): void;
-  // 刷新坐标
+
+  /**
+   * 刷新坐标
+   */
   refreshPoints(): void;
-  // 刷新旋转
+
+  /**
+   * 刷新旋转
+   */
   refreshRotation(): void;
-  // 刷新角度
+
+  /**
+   * 刷新角度
+   * @param options 刷新角度选项
+   */
   refreshAngles(options?: RefreshAnglesOptions): void;
-  // 刷新原始角度
+
+  /**
+   * 刷新原始角度
+   */
   refreshOriginalAngle(): void;
-  // 刷新
+
+  /**
+   * 刷新
+   * @param options 刷新选项
+   * @param subOptions 子选项
+   */
   refresh(
     options?: RefreshOptions,
     subOptions?: { angles?: RefreshAnglesOptions },
   ): void;
-  // 是否包含点
+
+  /**
+   * 是否包含点
+   * @param point 点坐标
+   */
   isContainsPoint(point: IPoint): boolean;
-  // 是否多边形重叠
+
+  /**
+   * 是否多边形重叠
+   * @param points 多边形点坐标
+   */
   isPolygonOverlap(points: IPoint[]): boolean;
-  // 是否模型多边形重叠
+
+  /**
+   * 是否模型多边形重叠
+   * @param points 模型多边形点坐标
+   */
   isModelPolygonOverlap(points: IPoint[]): boolean;
-  // 计算路径点
+
+  /**
+   * 计算路径点
+   */
   calcPathPoints(): IPoint[];
-  // 计算旋转路径点
+
+  /**
+   * 计算旋转路径点
+   */
   calcRotatePathPoints(): IPoint[];
-  // 计算旋转外框路径点
-  calcRotateOutlinePathPoints(): IPoint[];
-  // 计算最大盒模型顶点
+
+  /**
+   * 计算旋转外框路径点
+   */
+  calcRotateOutlinePathPoints(): IPoint[][];
+
+  /**
+   * 计算最大盒模型顶点
+   */
   calcMaxBoxPoints(): IPoint[];
-  // 计算最大外框盒模型顶点
+
+  /**
+   * 计算最大外框盒模型顶点
+   */
   calcMaxOutlineBoxPoints(): IPoint[];
-  // 计算旋转外框坐标
-  calcRotateOutlinePathCoords(): IPoint[];
-  // 计算旋转盒模型顶点
+
+  /**
+   * 计算旋转外框坐标
+   */
+  calcRotateOutlinePathCoords(): IPoint[][];
+
+  /**
+   * 计算旋转盒模型顶点
+   */
   calcRotateBoxPoints(): IPoint[];
-  // 计算中心点
+
+  /**
+   * 计算中心点
+   */
   calcCenter(): IPoint;
-  // 计算中心点坐标
+
+  /**
+   * 计算中心点坐标
+   */
   calcCenterCoord(): IPoint;
-  // 计算变换器
+
+  /**
+   * 计算变换器
+   */
   calcTransformers(): IPoint[];
-  // 计算顶点变换器
+
+  /**
+   * 计算顶点变换器
+   */
   calcVerticesTransformers(): IPoint[];
-  // 计算盒模型顶点变换器
+
+  /**
+   * 计算盒模型顶点变换器
+   */
   calcBoxVerticesTransformers(): IPoint[];
-  // 计算旋转路径坐标
+
+  /**
+   * 计算旋转路径坐标
+   */
   calcRotatePathCoords(): IPoint[];
-  // 计算矩形
+
+  /**
+   * 计算矩形
+   */
   calcRect(): Partial<DOMRect>;
-  // 计算非倾斜坐标
+
+  /**
+   * 计算非倾斜坐标
+   */
   calcUnLeanCoords(): IPoint[];
-  // 计算非倾斜盒模型坐标
+
+  /**
+   * 计算非倾斜盒模型坐标
+   */
   calcUnleanBoxCoords(): IPoint[];
-  // 计算非倾斜点-舞台坐标
+
+  /**
+   * 计算非倾斜点-舞台坐标
+   */
   calcUnLeanPoints(): IPoint[];
-  // 计算非倾斜盒模型点-舞台坐标
+
+  /**
+   * 计算非倾斜盒模型点-舞台坐标
+   */
   calcUnLeanBoxPoints(): IPoint[];
-  // 计算倾斜Y角度
+
+  /**
+   * 计算倾斜Y角度
+   */
   calcLeanYAngle(): number;
-  // 计算内部角度
+
+  /**
+   * 计算内部角度
+   */
   calcInternalAngle(): number;
-  // 计算视角角度
+
+  /**
+   * 计算视角角度
+   */
   calcViewAngle(): number;
-  // 计算实际角度
+
+  /**
+   * 计算实际角度
+   */
   calcActualAngle(): number;
 
-  // 激活旋转
+  /**
+   * 激活旋转
+   */
   activeRotation(): void;
-  // 取消旋转
+
+  /**
+   * 取消旋转
+   */
   deActiveRotation(): void;
 
-  // 获取变换器
+  /**
+   * 获取变换器
+   * @param point 点坐标
+   */
   getTransformerByPoint(point: IPoint): IVerticesTransformer;
-  // 获取边框变换器
+
+  /**
+   * 获取边框变换器
+   * @param point 点坐标
+   */
   getBorderTransformerByPoint(point: IPoint): IBorderTransformer;
-  // 激活变换器
+
+  /**
+   * 激活变换器
+   * @param transformer 变换器
+   */
   activeTransformer(transformer: IVerticesTransformer): void;
-  // 激活边框变换器
+
+  /**
+   * 激活边框变换器
+   * @param transformer 边框变换器
+   */
   activeBorderTransformer(transformer: IBorderTransformer): void;
-  // 取消所有变换器
+
+  /**
+   * 取消所有变换器
+   */
   deActiveAllTransformers(): void;
-  // 取消所有边框变换器
+
+  /**
+   * 取消所有边框变换器
+   */
   deActiveAllBorderTransformers(): void;
-  // 获取激活的组件变换器
+
+  /**
+   * 获取激活的组件变换器
+   */
   getActiveElementTransformer(): IVerticesTransformer;
-  // 获取激活的组件边框变换器
+
+  /**
+   * 获取激活的组件边框变换器
+   */
   getActiveElementBorderTransformer(): IBorderTransformer;
-  // 变换
+
+  /**
+   * 变换
+   * @param offset 偏移量
+   */
   transform(offset: IPoint): void;
-  // 顶点变换
+
+  /**
+   * 顶点变换
+   * @param offset 偏移量
+   */
   transformByVertices(offset: IPoint): void;
-  // 边框变换
+
+  /**
+   * 边框变换
+   * @param offset 偏移量
+   */
   transformByBorder(offset: IPoint): void;
-  // 矩阵变换
+
+  /**
+   * 矩阵变换
+   * @param options 变换选项
+   */
   transformBy(options: TransformByOptions): void;
-  // 组合子组件倾斜
+
+  /**
+   * 组合子组件倾斜
+   * @param value 倾斜值
+   * @param prevValue 前一次倾斜值
+   * @param groupAngle 组合角度
+   * @param center 中心点坐标
+   */
   leanYBy(
     value: number,
     prevValue: number,
@@ -526,23 +779,45 @@ export default interface IElement {
     center: IPoint,
   ): void;
 
-  // 刷新旋转
+  /**
+   * 刷新旋转
+   */
   refreshRotation(): void;
-  // 刷新原始组件属性
+
+  /**
+   * 刷新原始组件属性
+   */
   refreshOriginalElementProps(): void;
-  // 刷新原始模型坐标
+
+  /**
+   * 刷新原始模型坐标
+   */
   refreshOriginalModelCoords(): void;
-  // 刷新原始变换器点坐标
+
+  /**
+   * 刷新原始变换器点坐标
+   */
   refreshOriginalTransformerPoints(): void;
-  // 刷新原始属性
+
+  /**
+   * 刷新原始属性
+   */
   refreshOriginalProps(): void;
-  // 刷新变换器
+
+  /**
+   * 刷新变换器
+   */
   refreshTransformers(): void;
 
-  // 转换为JSON
+  /**
+   * 转换为JSON
+   */
   toJson(): ElementObject;
 
-  // 从JSON转换
+  /**
+   * 从JSON转换
+   * @param json JSON数据
+   */
   fromJson(json: ElementObject): void;
 }
 
@@ -568,14 +843,19 @@ export interface IElementLine extends IElement {
   // 结束旋转路径点
   get endRotatePathPoint(): IPoint;
   // 外框点
-  get outerPathPoints(): IPoint[];
+  get outerPathPoints(): IPoint[][];
   // 外框坐标
-  get outerPathCoords(): IPoint[];
+  get outerPathCoords(): IPoint[][];
 
-  // 计算外框点
-  calcOuterPathPoints(): IPoint[];
-  // 计算外框坐标
-  calcOuterPathCoords(): IPoint[];
+  /**
+   * 计算外框点
+   */
+  calcOuterPathPoints(): IPoint[][];
+
+  /**
+   * 计算外框坐标
+   */
+  calcOuterPathCoords(): IPoint[][];
 }
 
 // 舞台组件（组件）-任意多边形&线条
@@ -586,17 +866,28 @@ export interface IElementArbitrary extends IElement {
   editingCoordIndex: number;
 
   // 外框路径
-  get outerPaths(): IPoint[][];
+  get outerPaths(): IPoint[][][];
   // 外框世界路径
-  get outerWorldPaths(): IPoint[][];
+  get outerWorldPaths(): IPoint[][][];
 
-  // 计算外框路径
-  calcOuterPaths(): IPoint[][];
-  // 计算外框世界路径
-  calcOuterWorldPaths(): IPoint[][];
+  /**
+   * 计算外框路径
+   */
+  calcOuterPaths(): IPoint[][][];
 
-  // 激活编辑点
+  /**
+   * 计算外框世界路径
+   */
+  calcOuterWorldPaths(): IPoint[][][];
+
+  /**
+   * 激活编辑点
+   * @param index 编辑点索引
+   */
   activeEditingCoord(index: number): void;
-  // 取消编辑点
+
+  /**
+   * 取消编辑点
+   */
   deActiveEditingCoord(): void;
 }

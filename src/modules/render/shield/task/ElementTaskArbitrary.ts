@@ -12,14 +12,31 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawPathWithScale(
-      this.canvas,
-      this.node.strokePathPoints,
-      this.node.model.styles,
-      {
-        isFold: this.node.model.isFold,
-        miterLimit: DefaultLineMeterLimit,
-      },
-    );
+    const {
+      innerestStrokePathPointsIndex,
+      strokePathPoints,
+      model: { styles, isFold },
+    } = this.node;
+
+    if (isFold) {
+      CanvasUtils.drawInnerPathFillWithScale(
+        this.canvas,
+        strokePathPoints[innerestStrokePathPointsIndex],
+        styles,
+        styles.strokes[innerestStrokePathPointsIndex],
+      );
+    }
+
+    strokePathPoints.forEach((points, index) => {
+      CanvasUtils.drawPathStrokeWidthScale(
+        this.canvas,
+        points,
+        styles.strokes[index],
+        {
+          isFold,
+          miterLimit: DefaultLineMeterLimit,
+        },
+      );
+    });
   }
 }

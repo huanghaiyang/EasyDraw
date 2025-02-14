@@ -99,14 +99,8 @@ export enum ShieldDispatcherNames {
   leanYAngleChanged = "leanYAngleChanged",
   // 比例改变
   scaleChanged = "scaleChanged",
-  // 描边颜色改变
-  strokeColorChanged = "strokeColorChanged",
-  // 描边颜色透明度改变
-  strokeColorOpacityChanged = "strokeColorOpacityChanged",
-  // 描边宽度改变
-  strokeWidthChanged = "strokeWidthChanged",
-  // 描边类型改变
-  strokeTypeChanged = "strokeTypeChanged",
+  // 描边改变
+  strokesChanged = "strokesChanged",
   // 填充颜色改变
   fillColorChanged = "fillColorChanged",
   // 填充颜色透明度改变

@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, cloneDeep } from "lodash";
+import { clamp, cloneDeep, some } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import IElement, {
   AngleModel,
@@ -15,7 +15,11 @@ import IElement, {
   RefreshOptions,
   TransformByOptions,
 } from "@/types/IElement";
-import { StrokeTypes } from "@/styles/ElementStyles";
+import {
+  DefaultStrokeStyle,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import { TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -130,13 +134,44 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 获取边框线段点坐标
-  get strokePathPoints(): IPoint[] {
-    return this.convertPointsByStrokeType(this._rotatePathPoints);
+  get strokePathPoints(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._rotatePathPoints, stroke);
+    });
   }
 
   // 获取边框线段坐标
-  get strokePathCoords(): IPoint[] {
-    return this.convertPointsByStrokeType(this._rotatePathCoords);
+  get strokePathCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._rotatePathCoords, stroke);
+    });
+  }
+
+  /**
+   * 获取最内边框线段点索引
+   */
+  get innerestStrokePathPointsIndex(): number {
+    let result = 0;
+    let innerWidth = 0;
+    this.strokePathPoints.forEach((points, index) => {
+      const { width, type } = this.model.styles.strokes[index];
+      if (type === StrokeTypes.middle && innerWidth < width / 2) {
+        innerWidth = width / 2;
+        result = index;
+      }
+      if (type === StrokeTypes.inside && innerWidth < width) {
+        innerWidth = width;
+        result = index;
+      }
+    });
+    return result;
+  }
+
+  /**
+   * 获取最内边框线段点
+   */
+  get innerestStrokePathPoints(): IPoint[] {
+    return this.strokePathPoints[this.innerestStrokePathPointsIndex];
   }
 
   // 是否翻转X轴
@@ -288,23 +323,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
-  get strokeType(): StrokeTypes {
-    return this.model.styles.strokeType;
-  }
-
-  @computed
-  get strokeWidth(): number {
-    return this.model.styles.strokeWidth;
-  }
-
-  @computed
-  get strokeColor(): string {
-    return this.model.styles.strokeColor;
-  }
-
-  @computed
-  get strokeColorOpacity(): number {
-    return this.model.styles.strokeColorOpacity;
+  get strokes(): StrokeStyle[] {
+    return this.model.styles.strokes;
   }
 
   @computed
@@ -555,7 +575,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 旋转坐标-世界坐标系
   protected _rotatePathCoords: IPoint[] = [];
   // 旋转外框线坐标-舞台坐标系（组件命中处理）
-  protected _rotateOutlinePathPoints: IPoint[] = [];
+  protected _rotateOutlinePathPoints: IPoint[][] = [];
   // 旋转盒模型-舞台坐标系
   protected _rotateBoxPoints: IPoint[] = [];
   // 旋转盒模型坐标-舞台坐标系
@@ -563,7 +583,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
   protected _maxOutlineBoxPoints: IPoint[] = [];
   // 旋转外框线坐标-世界坐标系(组件对齐时使用)
-  protected _rotateOutlinePathCoords: IPoint[] = [];
+  protected _rotateOutlinePathCoords: IPoint[][] = [];
   // 盒模型，同_maxBoxPoints-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
   // 顶点变换器-舞台坐标系
@@ -605,7 +625,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotatePathCoords;
   }
 
-  get rotateOutlinePathPoints(): IPoint[] {
+  get rotateOutlinePathPoints(): IPoint[][] {
     return this._rotateOutlinePathPoints;
   }
 
@@ -617,7 +637,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotateBoxCoords;
   }
 
-  get rotateOutlinePathCoords(): IPoint[] {
+  get rotateOutlinePathCoords(): IPoint[][] {
     return this._rotateOutlinePathCoords;
   }
 
@@ -649,12 +669,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotatePathCoords;
   }
 
-  get alignOutlineCoords(): IPoint[] {
+  get alignOutlineCoords(): IPoint[][] {
     return this._rotateOutlinePathCoords;
   }
 
   get visualStrokeWidth(): number {
-    return this.strokeWidth * this.shield.stageScale;
+    return Math.max(
+      ...this.strokes.map(stroke => stroke.width * this.shield.stageScale),
+    );
   }
 
   get visualFontSize(): number {
@@ -745,13 +767,17 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 将坐标根据描边类型进行转换
    *
    * @param points
+   * @param strokeStyle
    * @returns
    */
-  private convertPointsByStrokeType(points: IPoint[]): IPoint[] {
+  private convertPointsByStrokeType(
+    points: IPoint[],
+    strokeStyle: StrokeStyle,
+  ): IPoint[] {
     return CanvasUtils.convertPointsByStrokeType(
       points,
-      this.model.styles.strokeType,
-      this.model.styles.strokeWidth,
+      strokeStyle.type,
+      strokeStyle.width,
       {
         ...this.flip,
         isFold: this.model.isFold,
@@ -798,14 +824,15 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotateOutlinePathPoints(): IPoint[] {
-    const { strokeType, strokeWidth } = this.model.styles;
-    return ElementUtils.calcOutlinePoints(
-      this._rotatePathPoints,
-      strokeType,
-      strokeWidth,
-      this.flip,
-    );
+  calcRotateOutlinePathPoints(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return ElementUtils.calcOutlinePoints(
+        this._rotatePathPoints,
+        stroke.type,
+        stroke.width,
+        this.flip,
+      );
+    });
   }
 
   /**
@@ -850,7 +877,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcMaxOutlineBoxPoints(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotateOutlinePathPoints);
+    return CommonUtils.getBoxPoints(this._rotateOutlinePathPoints.flat());
   }
 
   /**
@@ -870,16 +897,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotateOutlinePathCoords(): IPoint[] {
-    return ElementUtils.calcOutlinePoints(
-      this._rotatePathCoords,
-      this.model.styles.strokeType,
-      this.model.styles.strokeWidth,
-      {
-        ...this.flip,
-        isFold: this.model.isFold,
-      },
-    );
+  calcRotateOutlinePathCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return ElementUtils.calcOutlinePoints(
+        this._rotatePathCoords,
+        stroke.type,
+        stroke.width,
+        {
+          ...this.flip,
+          isFold: this.model.isFold,
+        },
+      );
+    });
   }
 
   /**
@@ -1149,10 +1178,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point
    */
   isContainsPoint(point: IPoint): boolean {
-    return MathUtils.isPointInPolygonByRayCasting(
-      point,
-      this.rotateOutlinePathPoints,
-    );
+    return some(this._rotateOutlinePathPoints, paths => {
+      return MathUtils.isPointInPolygonByRayCasting(point, paths);
+    });
   }
 
   /**
@@ -1162,7 +1190,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return MathUtils.isPolygonsOverlap(this.rotateOutlinePathPoints, points);
+    return some(this._rotateOutlinePathPoints, paths => {
+      return MathUtils.isPolygonsOverlap(paths, points);
+    });
   }
   /**
    * 判断世界模型是否与多边形相交、
@@ -1171,7 +1201,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return MathUtils.isPolygonsOverlap(this._rotateOutlinePathCoords, coords);
+    return some(this._rotateOutlinePathCoords, paths => {
+      return MathUtils.isPolygonsOverlap(paths, coords);
+    });
   }
 
   /**
@@ -2140,9 +2172,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 设置边框样式
    *
    * @param value
+   * @param index
    */
-  setStrokeType(value: StrokeTypes): void {
-    this.model.styles.strokeType = value;
+  setStrokeType(value: StrokeTypes, index: number): void {
+    this.model.styles.strokes[index].type = value;
     this._refreshOutlinePoints();
   }
 
@@ -2150,27 +2183,54 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 设置边框颜色
    *
    * @param value
+   * @param index
    */
-  setStrokeColor(value: string): void {
-    this.model.styles.strokeColor = value;
+  setStrokeColor(value: string, index: number): void {
+    this.model.styles.strokes[index].color = value;
   }
 
   /**
    * 设置边框透明度
    *
    * @param value
+   * @param index
    */
-  setStrokeColorOpacity(value: number): void {
-    this.model.styles.strokeColorOpacity = value;
+  setStrokeColorOpacity(value: number, index: number): void {
+    this.model.styles.strokes[index].colorOpacity = value;
   }
 
   /**
    * 设置边框宽度
    *
    * @param value
+   * @param index
    */
-  setStrokeWidth(value: number): void {
-    this.model.styles.strokeWidth = value;
+  setStrokeWidth(value: number, index: number): void {
+    this.model.styles.strokes[index].width = value;
+    this._refreshOutlinePoints();
+  }
+
+  /**
+   * 添加边框
+   *
+   * @param prevIndex
+   */
+  addStroke(prevIndex: number): void {
+    const strokes = cloneDeep(this.model.styles.strokes);
+    strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
+    this.model.styles.strokes = strokes;
+    this._refreshOutlinePoints();
+  }
+
+  /**
+   * 删除边框
+   *
+   * @param index
+   */
+  removeStroke(index: number): void {
+    const strokes = cloneDeep(this.model.styles.strokes);
+    strokes.splice(index, 1);
+    this.model.styles.strokes = strokes;
     this._refreshOutlinePoints();
   }
 

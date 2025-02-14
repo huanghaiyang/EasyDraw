@@ -14,7 +14,7 @@ import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
 import ElementLine from "@/modules/elements/ElementLine";
 import ElementTaskLine from "@/modules/render/shield/task/ElementTaskLine";
-import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
@@ -48,10 +48,7 @@ export enum ElementReactionPropNames {
   angle = "angle",
   flipX = "flipX",
   leanYAngle = "leanYAngle",
-  strokeType = "strokeType",
-  strokeWidth = "strokeWidth",
-  strokeColor = "strokeColor",
-  strokeColorOpacity = "strokeColorOpacity",
+  strokes = "strokes",
   fillColor = "fillColor",
   fillColorOpacity = "fillColorOpacity",
   fontSize = "fontSize",
@@ -398,18 +395,15 @@ export default class ElementUtils {
    */
   static calcNoFoldArbitraryBorderRegions(
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ): IPoint[][] {
-    const { strokeWidth } = styles;
+    const { width } = strokeStyle;
     const result: IPoint[][] = [];
     points.forEach((current, index) => {
       if (index < points.length - 1) {
         const next = points[index + 1];
         result.push(
-          PolygonUtils.calcBentLineOuterVertices(
-            [current, next],
-            strokeWidth / 2,
-          ),
+          PolygonUtils.calcBentLineOuterVertices([current, next], width / 2),
         );
         if (index !== 0) {
           const prev = points[index - 1];
@@ -418,7 +412,7 @@ export default class ElementUtils {
               prev,
               current,
               next,
-              styles,
+              strokeStyle,
             ),
           );
         }
@@ -436,21 +430,23 @@ export default class ElementUtils {
    */
   static calcFoldArbitraryBorderRegions(
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ): IPoint[][] {
-    const { strokeWidth } = styles;
+    const { width } = strokeStyle;
     const result: IPoint[][] = [];
     points.forEach((current, index) => {
       const prev = CommonUtils.getPrevOfArray(points, index);
       const next = CommonUtils.getNextOfArray(points, index);
       result.push(
-        PolygonUtils.calcBentLineOuterVertices(
-          [current, next],
-          strokeWidth / 2,
-        ),
+        PolygonUtils.calcBentLineOuterVertices([current, next], width / 2),
       );
       result.push(
-        ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, styles),
+        ElementUtils.calc3PArbitraryBorderRegions(
+          prev,
+          current,
+          next,
+          strokeStyle,
+        ),
       );
     });
     return result;
@@ -466,12 +462,12 @@ export default class ElementUtils {
    */
   static calcArbitraryBorderRegions(
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
     isFold: boolean,
   ): IPoint[][] {
     if (isFold)
-      return ElementUtils.calcFoldArbitraryBorderRegions(points, styles);
-    return ElementUtils.calcNoFoldArbitraryBorderRegions(points, styles);
+      return ElementUtils.calcFoldArbitraryBorderRegions(points, strokeStyle);
+    return ElementUtils.calcNoFoldArbitraryBorderRegions(points, strokeStyle);
   }
 
   /**
@@ -486,10 +482,10 @@ export default class ElementUtils {
     prev: IPoint,
     current: IPoint,
     next: IPoint,
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ): IPoint[] {
     // 描边宽度
-    const { strokeWidth } = styles;
+    const { width } = strokeStyle;
     // 是否顺时针
     const isClockwise = MathUtils.isPointClockwise(next, prev, current);
     // 三角形角度
@@ -499,7 +495,7 @@ export default class ElementUtils {
     // 计算三角形第三边长度
     const pcAngle = MathUtils.calcAngle(prev, current);
     // 计算三角形第三边长度
-    const side3Length = MathUtils.calcTriangleSide3By2(aAngle, strokeWidth / 2);
+    const side3Length = MathUtils.calcTriangleSide3By2(aAngle, width / 2);
     // 计算三角形第三边终点
     const point = MathUtils.calcTargetPoint(
       current,
@@ -509,14 +505,12 @@ export default class ElementUtils {
     // 计算三角形区域
     const region: IPoint[] = [];
     region.push(current);
-    region.push(
-      MathUtils.calcTargetPoint(current, strokeWidth / 2, pcAngle - 90),
-    );
+    region.push(MathUtils.calcTargetPoint(current, width / 2, pcAngle - 90));
     region.push(point);
     region.push(
       MathUtils.calcTargetPoint(
         current,
-        strokeWidth / 2,
+        width / 2,
         MathUtils.calcAngle(next, current) + 90,
       ),
     );
@@ -705,7 +699,9 @@ export default class ElementUtils {
       boxCoords: [],
       width: 0,
       height: 0,
-      styles: {},
+      styles: {
+        strokes: [],
+      },
       x: 0,
       y: 0,
       type: CreatorTypes.group,
