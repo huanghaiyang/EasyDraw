@@ -992,11 +992,11 @@ export default class StageStore implements IStageStore {
    */
   private _createProvisionalElement(model: ElementObject): IElement {
     const element = ElementUtils.createElement(model, this.shield);
+    this._currentCreatingElementId = element.id;
     this.updateElementById(element.id, {
       status: ElementStatus.startCreating,
     });
     this.addElement(element);
-    this._currentCreatingElementId = element.id;
     return element;
   }
 
