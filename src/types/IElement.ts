@@ -5,7 +5,11 @@
  */
 import { ElementStatus, IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import {
+  ElementStyles,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -240,14 +244,8 @@ export default interface IElement {
   get angle(): number;
   // 位置
   get position(): IPoint;
-  // 描边类型
-  get strokeType(): StrokeTypes;
-  // 描边宽度
-  get strokeWidth(): number;
-  // 描边颜色
-  get strokeColor(): string;
-  // 描边颜色透明度
-  get strokeColorOpacity(): number;
+  // 描边样式
+  get strokes(): StrokeStyle[];
   // 填充颜色
   get fillColor(): string;
   // 填充颜色透明度
@@ -281,7 +279,7 @@ export default interface IElement {
   // 旋转路径坐标
   get rotatePathCoords(): IPoint[];
   // 旋转路径外框点
-  get rotateOutlinePathPoints(): IPoint[];
+  get rotateOutlinePathPoints(): IPoint[][];
   // 旋转盒模型顶点
   get rotateBoxPoints(): IPoint[];
   // 旋转盒模型坐标
@@ -289,11 +287,11 @@ export default interface IElement {
   // 最大外框盒模型顶点
   get maxOutlineBoxPoints(): IPoint[];
   // 旋转路径外框坐标
-  get rotateOutlinePathCoords(): IPoint[];
+  get rotateOutlinePathCoords(): IPoint[][];
   // 描边路径点
-  get strokePathPoints(): IPoint[];
+  get strokePathPoints(): IPoint[][];
   // 描边路径坐标
-  get strokePathCoords(): IPoint[];
+  get strokePathCoords(): IPoint[][];
   // 中心点
   get center(): IPoint;
   // 中心点坐标
@@ -311,7 +309,7 @@ export default interface IElement {
   // 对齐坐标
   get alignCoords(): IPoint[];
   // 对齐外框坐标
-  get alignOutlineCoords(): IPoint[];
+  get alignOutlineCoords(): IPoint[][];
 
   // 是否选中
   get isSelected(): boolean;
@@ -391,13 +389,13 @@ export default interface IElement {
   // 设置Y倾斜角度
   setLeanYAngle(value: number): void;
   // 设置描边类型
-  setStrokeType(value: StrokeTypes): void;
+  setStrokeType(value: StrokeTypes, index: number): void;
   // 设置描边宽度
-  setStrokeWidth(value: number): void;
+  setStrokeWidth(value: number, index: number): void;
   // 设置描边颜色
-  setStrokeColor(value: string): void;
+  setStrokeColor(value: string, index: number): void;
   // 设置描边颜色透明度
-  setStrokeColorOpacity(value: number): void;
+  setStrokeColorOpacity(value: number, index: number): void;
   // 设置填充颜色
   setFillColor(value: string): void;
   // 设置填充颜色透明度
@@ -449,13 +447,13 @@ export default interface IElement {
   // 计算旋转路径点
   calcRotatePathPoints(): IPoint[];
   // 计算旋转外框路径点
-  calcRotateOutlinePathPoints(): IPoint[];
+  calcRotateOutlinePathPoints(): IPoint[][];
   // 计算最大盒模型顶点
   calcMaxBoxPoints(): IPoint[];
   // 计算最大外框盒模型顶点
   calcMaxOutlineBoxPoints(): IPoint[];
   // 计算旋转外框坐标
-  calcRotateOutlinePathCoords(): IPoint[];
+  calcRotateOutlinePathCoords(): IPoint[][];
   // 计算旋转盒模型顶点
   calcRotateBoxPoints(): IPoint[];
   // 计算中心点
@@ -568,14 +566,14 @@ export interface IElementLine extends IElement {
   // 结束旋转路径点
   get endRotatePathPoint(): IPoint;
   // 外框点
-  get outerPathPoints(): IPoint[];
+  get outerPathPoints(): IPoint[][];
   // 外框坐标
-  get outerPathCoords(): IPoint[];
+  get outerPathCoords(): IPoint[][];
 
   // 计算外框点
-  calcOuterPathPoints(): IPoint[];
+  calcOuterPathPoints(): IPoint[][];
   // 计算外框坐标
-  calcOuterPathCoords(): IPoint[];
+  calcOuterPathCoords(): IPoint[][];
 }
 
 // 舞台组件（组件）-任意多边形&线条
@@ -586,14 +584,14 @@ export interface IElementArbitrary extends IElement {
   editingCoordIndex: number;
 
   // 外框路径
-  get outerPaths(): IPoint[][];
+  get outerPaths(): IPoint[][][];
   // 外框世界路径
-  get outerWorldPaths(): IPoint[][];
+  get outerWorldPaths(): IPoint[][][];
 
   // 计算外框路径
-  calcOuterPaths(): IPoint[][];
+  calcOuterPaths(): IPoint[][][];
   // 计算外框世界路径
-  calcOuterWorldPaths(): IPoint[][];
+  calcOuterWorldPaths(): IPoint[][][];
 
   // 激活编辑点
   activeEditingCoord(index: number): void;

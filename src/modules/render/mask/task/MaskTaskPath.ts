@@ -9,7 +9,7 @@ export default class MaskTaskPath extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    const { strokeWidth } = SelectionStyle;
+    const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
     if (
       [DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(
@@ -21,13 +21,11 @@ export default class MaskTaskPath extends MaskTaskBase {
     CanvasUtils.drawPathWithScale(
       this.canvas,
       this.data.points,
-      Object.assign(
-        {},
-        { ...SelectionStyle, ...specialStyles },
-        {
-          strokeWidth: strokeWidth * this.data.scale,
-        },
-      ),
+      Object.assign({}, { ...SelectionStyle, ...specialStyles }),
+      {
+        ...SelectionStyle.strokes[0],
+        width: width * this.data.scale,
+      },
       {
         isFold:
           typeof this.data.element?.isFold === "undefined"

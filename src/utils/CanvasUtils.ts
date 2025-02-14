@@ -1,5 +1,9 @@
 import { IPoint } from "@/types";
-import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import {
+  ElementStyles,
+  StrokeStyle,
+  StrokeTypes,
+} from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -224,11 +228,14 @@ export default class CanvasUtils {
    */
   static transParamsWithScale(
     points: IPoint[],
-    styles: ElementStyles,
-  ): [IPoint[], ElementStyles] {
+    strokeStyle: StrokeStyle,
+  ): [IPoint[], StrokeStyle] {
     points = CommonUtils.scalePoints(points, CanvasUtils.scale);
-    styles = { ...styles, strokeWidth: styles.strokeWidth * CanvasUtils.scale };
-    return [points, styles];
+    strokeStyle = {
+      ...strokeStyle,
+      width: strokeStyle.width * CanvasUtils.scale,
+    };
+    return [points, strokeStyle];
   }
 
   /**
@@ -243,20 +250,24 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     points: IPoint[],
     styles: ElementStyles,
+    strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ): void {
     const { calcVertices = true } = options;
-    [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
+    [points, strokeStyle] = CanvasUtils.transParamsWithScale(
+      points,
+      strokeStyle,
+    );
     if (styles.fillColorOpacity && calcVertices) {
       const innerPoints = ArbitraryUtils.getArbitraryInnerVertices(
         points,
-        styles.strokeWidth / 2,
+        strokeStyle.width / 2,
         options,
       );
       CanvasUtils.drawPathFill(target, innerPoints, styles);
     }
-    if (styles.strokeWidth && styles.strokeColorOpacity) {
-      CanvasUtils.drawPathStroke(target, points, styles, options);
+    if (strokeStyle.width && strokeStyle.colorOpacity) {
+      CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
     }
   }
 
@@ -270,11 +281,14 @@ export default class CanvasUtils {
   static drawPathStokeWidthScale(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
-    [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
-    CanvasUtils.drawPathStroke(target, points, styles, options);
+    [points, strokeStyle] = CanvasUtils.transParamsWithScale(
+      points,
+      strokeStyle,
+    );
+    CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
   }
 
   /**
@@ -288,7 +302,7 @@ export default class CanvasUtils {
   static drawPathStroke(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
     const { isFold = true, miterLimit } = options;
@@ -297,7 +311,7 @@ export default class CanvasUtils {
     if (miterLimit) {
       ctx.miterLimit = miterLimit;
     }
-    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {
@@ -308,8 +322,8 @@ export default class CanvasUtils {
     });
     isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
-    if (styles.strokeWidth) {
-      ctx.lineWidth = styles.strokeWidth;
+    if (strokeStyle.width) {
+      ctx.lineWidth = strokeStyle.width;
       ctx.stroke();
     }
     ctx.restore();
@@ -379,11 +393,11 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     point: IPoint,
     radius: number,
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
-    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
     ctx.closePath();
@@ -403,11 +417,11 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     point: IPoint,
     radius: number,
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ) {
     const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
       [point],
-      styles,
+      strokeStyle,
     );
     CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
   }
@@ -424,13 +438,13 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     point: IPoint,
     radius: number,
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ) {
     const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
       [point],
-      styles,
+      strokeStyle,
     );
-    CanvasUtils.drawCircleFill(target, points[0], radius, scaleStyles);
+    CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
   }
 
   /**
@@ -443,13 +457,13 @@ export default class CanvasUtils {
   static drawLine(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.beginPath();
-    ctx.lineWidth = styles.strokeWidth;
-    ctx.strokeStyle = StyleUtils.joinStrokeColor(styles);
+    ctx.lineWidth = strokeStyle.width;
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     points.forEach((point, index) => {
       if (index === 0) {
         ctx.moveTo(point.x, point.y);
@@ -472,10 +486,13 @@ export default class CanvasUtils {
   static drawLineWidthScale(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    strokeStyle: StrokeStyle,
   ) {
-    [points, styles] = CanvasUtils.transParamsWithScale(points, styles);
-    CanvasUtils.drawLine(target, points, styles);
+    [points, strokeStyle] = CanvasUtils.transParamsWithScale(
+      points,
+      strokeStyle,
+    );
+    CanvasUtils.drawLine(target, points, strokeStyle);
   }
 
   /**

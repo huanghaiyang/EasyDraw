@@ -44,8 +44,12 @@ export default class ElementGroup extends Element implements IElementGroup {
   /**
    * 对齐外框坐标
    */
-  get alignOutlineCoords(): IPoint[] {
-    return CommonUtils.getBoxPoints(this.subs.map(sub => sub.alignOutlineCoords).flat());
+  get alignOutlineCoords(): IPoint[][] {
+    return [
+      CommonUtils.getBoxPoints(
+        this.subs.map(sub => sub.alignOutlineCoords.flat()).flat(),
+      ),
+    ];
   }
 
   /**

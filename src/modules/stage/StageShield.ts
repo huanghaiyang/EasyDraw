@@ -282,12 +282,14 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeType(
     elements: IElement[],
     value: StrokeTypes,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsStrokeType(elements, value);
+    await this.store.setElementsStrokeType(elements, value, index);
     await this._redrawAll({ shield: true });
   }
 
@@ -296,12 +298,14 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeWidth(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsStrokeWidth(elements, value);
+    await this.store.setElementsStrokeWidth(elements, value, index);
     await this._redrawAll({ shield: true });
   }
 
@@ -310,12 +314,14 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeColor(
     elements: IElement[],
     value: string,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsStrokeColor(elements, value);
+    await this.store.setElementsStrokeColor(elements, value, index);
     await this._redrawAll({ shield: true });
   }
 
@@ -324,12 +330,14 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsStrokeColorOpacity(elements, value);
+    await this.store.setElementsStrokeColorOpacity(elements, value, index);
     await this._redrawAll({ shield: true });
   }
 
@@ -1291,7 +1299,7 @@ export default class StageShield
     if (!this.store.isVisibleEmpty) {
       const center = MathUtils.calcCenter(
         this.store.visibleElements
-          .map(element => element.rotateOutlinePathCoords)
+          .map(element => element.rotateOutlinePathCoords.flat())
           .flat(),
       );
       this.stageWorldCoord = center;

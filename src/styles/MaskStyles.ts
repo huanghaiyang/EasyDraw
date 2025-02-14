@@ -1,4 +1,4 @@
-import { ElementStyles } from "@/styles/ElementStyles";
+import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
 
 // 鼠标样式画布尺寸
 export const MinCursorMXD = 2;
@@ -30,17 +30,27 @@ export const SelectionIndicatorTextAlign = "center";
 export const SelectionIndicatorTextBaseline = "middle";
 
 export const SelectionStyle: ElementStyles = {
-  strokeColor: SelectionStrokeColor,
-  strokeColorOpacity: SelectionStrokeColorOpacity,
-  strokeWidth: SelectionLineWidth,
+  strokes: [
+    {
+      type: StrokeTypes.middle,
+      width: SelectionLineWidth,
+      color: SelectionStrokeColor,
+      colorOpacity: SelectionStrokeColorOpacity,
+    },
+  ],
   fillColor: SelectionFillColor,
   fillColorOpacity: SelectionFillColorOpacity,
 };
 
 export const ControllerStyle: ElementStyles = {
-  strokeColor: TransformerStrokeColor,
-  strokeColorOpacity: TransformerStrokeColorOpacity,
-  strokeWidth: TransformerLineWidth,
+  strokes: [
+    {
+      type: StrokeTypes.middle,
+      width: TransformerLineWidth,
+      color: TransformerStrokeColor,
+      colorOpacity: TransformerStrokeColorOpacity,
+    },
+  ],
   fillColor: TransformerFillColor,
   fillColorOpacity: TransformerFillColorOpacity,
 };

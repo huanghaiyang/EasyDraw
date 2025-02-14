@@ -17,15 +17,25 @@ export default interface IStageSetter {
   setElementsStrokeType(
     elements: IElement[],
     value: StrokeTypes,
+    index: number,
   ): Promise<void>;
   // 设置组件描边宽度
-  setElementsStrokeWidth(elements: IElement[], value: number): Promise<void>;
+  setElementsStrokeWidth(
+    elements: IElement[],
+    value: number,
+    index: number,
+  ): Promise<void>;
   // 设置组件描边颜色
-  setElementsStrokeColor(elements: IElement[], value: string): Promise<void>;
+  setElementsStrokeColor(
+    elements: IElement[],
+    value: string,
+    index: number,
+  ): Promise<void>;
   // 设置组件描边颜色透明度
   setElementsStrokeColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void>;
   // 设置组件填充颜色
   setElementsFillColor(elements: IElement[], value: string): Promise<void>;

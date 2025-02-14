@@ -2,13 +2,14 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { TransformerSize, ControllerStyle } from "@/styles/MaskStyles";
+import { StrokeTypes } from "@/styles/ElementStyles";
 
 export default class MaskTaskTransformer extends MaskTaskBase {
   /**
    * 运行任务
    */
   async run(): Promise<void> {
-    const { strokeWidth } = ControllerStyle;
+    const { width } = ControllerStyle.strokes[0];
     const { scale, point, leanYAngle, actualAngle } = this.data;
     CanvasUtils.drawPathWithScale(
       this.canvas,
@@ -23,9 +24,11 @@ export default class MaskTaskTransformer extends MaskTaskBase {
           leanYAngle,
         },
       ),
-      Object.assign({}, ControllerStyle, {
-        strokeWidth: strokeWidth * scale,
-      }),
+      ControllerStyle,
+      {
+        ...ControllerStyle.strokes[0],
+        width: width * scale,
+      },
       {
         calcVertices: false,
       },

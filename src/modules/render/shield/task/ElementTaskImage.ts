@@ -61,11 +61,13 @@ export default class ElementTaskImage extends ElementTaskBase {
         actualAngle,
       },
     );
-    // 绘制描边
-    CanvasUtils.drawPathStokeWidthScale(
-      this.canvas,
-      this.node.strokePathPoints,
-      model.styles,
-    );
+    this.node.strokePathPoints.forEach((points, index) => {
+      CanvasUtils.drawPathWithScale(
+        this.canvas,
+        points,
+        model.styles,
+        model.styles.strokes[index],
+      );
+    });
   }
 }

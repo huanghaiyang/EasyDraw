@@ -19,9 +19,9 @@ export default class ElementArbitrary
   editingCoordIndex: number;
 
   // 外轮廓区域
-  private _outerPaths: IPoint[][] = [];
+  private _outerPaths: IPoint[][][] = [];
   // 外轮廓区域（世界坐标）
-  private _outerWorldPaths: IPoint[][] = [];
+  private _outerWorldPaths: IPoint[][][] = [];
 
   // 变换器类型
   get transformerType(): TransformerTypes {
@@ -66,12 +66,12 @@ export default class ElementArbitrary
   }
 
   // 外轮廓区域
-  get outerPaths(): IPoint[][] {
+  get outerPaths(): IPoint[][][] {
     return this._outerPaths;
   }
 
   // 外轮廓区域（世界坐标）
-  get outerWorldPaths(): IPoint[][] {
+  get outerWorldPaths(): IPoint[][][] {
     return this._outerWorldPaths;
   }
 
@@ -102,12 +102,14 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcOuterPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(
-      this.strokePathPoints,
-      this.model.styles,
-      this.model.isFold,
-    );
+  calcOuterPaths(): IPoint[][][] {
+    return this.strokePathPoints.map((points: IPoint[], index: number) => {
+      return ElementUtils.calcArbitraryBorderRegions(
+        points,
+        this.model.styles.strokes[index],
+        this.model.isFold,
+      );
+    });
   }
 
   /**
@@ -115,12 +117,14 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcOuterWorldPaths(): IPoint[][] {
-    return ElementUtils.calcArbitraryBorderRegions(
-      this.strokePathCoords,
-      this.model.styles,
-      this.model.isFold,
-    );
+  calcOuterWorldPaths(): IPoint[][][] {
+    return this.strokePathCoords.map((points: IPoint[], index: number) => {
+      return ElementUtils.calcArbitraryBorderRegions(
+        points,
+        this.model.styles.strokes[index],
+        this.model.isFold,
+      );
+    });
   }
 
   /**
@@ -154,18 +158,22 @@ export default class ElementArbitrary
    * @returns
    */
   isContainsPoint(point: IPoint): boolean {
-    let outerPaths: IPoint[][];
+    let outerPaths: IPoint[][][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
-      outerPaths = ElementUtils.calcArbitraryBorderRegions(
-        this.strokePathPoints,
-        { strokeWidth: LineClosestMinWidth / this.shield.stageScale },
-        this.model.isFold,
-      );
+      outerPaths = this.strokePathPoints.map((points: IPoint[]) => {
+        return ElementUtils.calcArbitraryBorderRegions(
+          points,
+          { width: LineClosestMinWidth / this.shield.stageScale },
+          this.model.isFold,
+        );
+      });
     } else {
       outerPaths = this.outerPaths;
     }
-    return some(outerPaths, paths => {
-      return MathUtils.isPointInPolygonByRayCasting(point, paths);
+    return some(outerPaths, groupPaths => {
+      return some(groupPaths, paths => {
+        return MathUtils.isPointInPolygonByRayCasting(point, paths);
+      });
     });
   }
 
@@ -176,8 +184,10 @@ export default class ElementArbitrary
    * @returns
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return some(this.outerPaths, paths => {
-      return MathUtils.isPolygonsOverlap(paths, points);
+    return some(this.outerPaths, groupPaths => {
+      return some(groupPaths, paths => {
+        return MathUtils.isPolygonsOverlap(paths, points);
+      });
     });
   }
 
@@ -188,8 +198,10 @@ export default class ElementArbitrary
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this.outerWorldPaths, paths => {
-      return MathUtils.isPolygonsOverlap(paths, coords);
+    return some(this.outerWorldPaths, groupPaths => {
+      return some(groupPaths, paths => {
+        return MathUtils.isPolygonsOverlap(paths, coords);
+      });
     });
   }
 
@@ -198,7 +210,7 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcRotateOutlinePathPoints(): IPoint[] {
+  calcRotateOutlinePathPoints(): IPoint[][] {
     return this._outerPaths.flat();
   }
 
@@ -207,7 +219,7 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcRotateOutlinePathCoords(): IPoint[] {
+  calcRotateOutlinePathCoords(): IPoint[][] {
     return this._outerWorldPaths.flat();
   }
 

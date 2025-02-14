@@ -1,4 +1,5 @@
 import { CreatorTypes } from "@/types/Creator";
+import { cloneDeep } from "lodash";
 
 export enum StrokeTypes {
   inside = 0,
@@ -57,16 +58,18 @@ export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   }
 }
 
+// 描边样式定义
+export type StrokeStyle = {
+  type?: StrokeTypes;
+  width: number;
+  color?: string;
+  colorOpacity?: number;
+};
+
 // 画板组件样式定义
 export type ElementStyles = {
-  // 边框颜色
-  strokeColor?: string;
-  // 边框颜色透明度
-  strokeColorOpacity?: number;
-  // 边框描边类型
-  strokeType?: StrokeTypes;
-  // 边框宽度
-  strokeWidth?: number;
+  // 描边
+  strokes?: StrokeStyle[];
   // 填充颜色
   fillColor?: string;
   // 填充颜色透明度
@@ -106,12 +109,23 @@ export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
 
+// 默认描边样式
+export const DefaultStrokeStyle: StrokeStyle = {
+  type: DefaultStrokeType,
+  width: DefaultStrokeWidth,
+  color: DefaultStrokeColor,
+  colorOpacity: DefaultStrokeColorOpacity,
+};
+
+// 默认直线描边样式
+export const DefaultLineStrokeStyle: StrokeStyle = {
+  ...DefaultStrokeStyle,
+  width: DefaultLineStrokeWidth,
+};
+
 // 默认组件样式
 export const DefaultElementStyle: ElementStyles = {
-  strokeColor: DefaultStrokeColor,
-  strokeColorOpacity: DefaultStrokeColorOpacity,
-  strokeType: DefaultStrokeType,
-  strokeWidth: DefaultStrokeWidth,
+  strokes: [{ ...DefaultStrokeStyle }],
   fillColor: DefaultFillColor,
   fillColorOpacity: DefaultFillColorOpacity,
   fontSize: DefaultFontSize,
@@ -120,34 +134,22 @@ export const DefaultElementStyle: ElementStyles = {
   textBaseline: DefaultTextBaseline,
 };
 
+/**
+ * 获取默认组件样式
+ *
+ * @param type 组件类型
+ * @returns 组件样式
+ */
 export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
-  switch (type) {
-    case CreatorTypes.line: {
-      return {
-        ...DefaultElementStyle,
-        strokeWidth: DefaultLineStrokeWidth,
-      };
-    }
-    case CreatorTypes.image: {
-      return {
-        ...DefaultElementStyle,
-        fillColor: "",
-        fillColorOpacity: 0,
-      };
-    }
-    case CreatorTypes.arbitrary: {
-      return {
-        ...DefaultElementStyle,
-        fillColor: "",
-        fillColorOpacity: 0,
-        strokeWidth: DefaultLineStrokeWidth,
-      };
-    }
-    case CreatorTypes.rectangle:
-    default: {
-      return {
-        ...DefaultElementStyle,
-      };
-    }
+  const style = cloneDeep(DefaultElementStyle);
+  if ([CreatorTypes.line, CreatorTypes.arbitrary].includes(type)) {
+    style.strokes.forEach(stroke => {
+      stroke.width = DefaultLineStrokeWidth;
+    });
   }
+  if ([CreatorTypes.image, CreatorTypes.arbitrary].includes(type)) {
+    style.fillColor = "";
+    style.fillColorOpacity = 0;
+  }
+  return style;
 };

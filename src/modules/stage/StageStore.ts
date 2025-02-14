@@ -386,10 +386,7 @@ export default class StageStore implements IStageStore {
           ShieldDispatcherNames.widthChanged,
           ShieldDispatcherNames.heightChanged,
           ShieldDispatcherNames.scaleChanged,
-          ShieldDispatcherNames.strokeTypeChanged,
-          ShieldDispatcherNames.strokeColorChanged,
-          ShieldDispatcherNames.strokeColorOpacityChanged,
-          ShieldDispatcherNames.strokeWidthChanged,
+          ShieldDispatcherNames.strokeChanged,
           ShieldDispatcherNames.fillColorChanged,
           ShieldDispatcherNames.fillColorOpacityChanged,
           ShieldDispatcherNames.textAlignChanged,
@@ -562,15 +559,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeType(
     elements: IElement[],
     value: StrokeTypes,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.strokeType === value) return;
-        element.setStrokeType(value);
+        if (element.model.styles.strokes[index].type === value) return;
+        element.setStrokeType(value, index);
       }
     });
   }
@@ -580,15 +579,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeWidth(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.strokeWidth === value) return;
-        element.setStrokeWidth(value);
+        if (element.model.styles.strokes[index].width === value) return;
+        element.setStrokeWidth(value, index);
       }
     });
   }
@@ -598,15 +599,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeColor(
     elements: IElement[],
     value: string,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.strokeColor === value) return;
-        element.setStrokeColor(value);
+        if (element.model.styles.strokes[index].color === value) return;
+        element.setStrokeColor(value, index);
       }
     });
   }
@@ -616,15 +619,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsStrokeColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.strokeColorOpacity === value) return;
-        element.setStrokeColorOpacity(value);
+        if (element.model.styles.strokes[index].colorOpacity === value) return;
+        element.setStrokeColorOpacity(value, index);
       }
     });
   }
