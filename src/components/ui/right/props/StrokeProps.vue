@@ -2,7 +2,7 @@
 import { useStageStore } from "@/stores/stage";
 import { CreatorTypes } from "@/types/Creator";
 import { DefaultStrokeStyle, getStokeTypes } from "@/styles/ElementStyles";
-import { Plus } from "@element-plus/icons-vue";
+import { Plus, Minus } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();
@@ -70,6 +70,13 @@ const toggleColorPickerVisible = () => {
             <template #prepend>o</template>
           </el-input>
         </div>
+
+        <el-icon>
+          <Minus
+            @click="stageStore.removeElementsStroke(index)"
+            v-if="strokes.length > 1"
+          />
+        </el-icon>
       </div>
 
       <div class="stroke-props__row">
@@ -117,5 +124,12 @@ const toggleColorPickerVisible = () => {
 <style lang="less" scoped>
 .color {
   margin-bottom: 8px;
+}
+.stroke-props {
+  &__row {
+    .el-icon {
+      cursor: pointer;
+    }
+  }
 }
 </style>

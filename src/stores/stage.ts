@@ -266,6 +266,7 @@ export const useStageStore = defineStore("stage", {
           angle,
           flipX,
           leanYAngle,
+          strokes,
           fillColor,
           fillColorOpacity,
           fontSize,
@@ -286,6 +287,8 @@ export const useStageStore = defineStore("stage", {
         this.onFlipXChanged(element, flipX);
         // Y轴偏移角度
         this.onLeanYAngleChanged(element, leanYAngle);
+        // 描边
+        this.onStrokesChanged(element, strokes);
         // 填充颜色
         this.onFillColorChanged(element, fillColor);
         // 填充颜色透明度
