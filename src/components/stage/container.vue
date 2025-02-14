@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
-import StageShieldVue from "@/components/stage/Shield.vue";
+import StageShieldVue from "@/components/stage/shield.vue";
 import { StageShieldInstance } from "@/types";
 import { CreatorTypes } from "@/types/Creator";
 
