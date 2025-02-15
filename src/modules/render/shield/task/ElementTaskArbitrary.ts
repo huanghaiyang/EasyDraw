@@ -19,12 +19,14 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
     } = this.node;
 
     if (isFold) {
-      CanvasUtils.drawInnerPathFillWithScale(
-        this.canvas,
-        strokePathPoints[innerestStrokePathPointsIndex],
-        styles,
-        styles.strokes[innerestStrokePathPointsIndex],
-      );
+      styles.fills.forEach(fillStyle => {
+        CanvasUtils.drawInnerPathFillWithScale(
+          this.canvas,
+          strokePathPoints[innerestStrokePathPointsIndex],
+          fillStyle,
+          styles.strokes[innerestStrokePathPointsIndex],
+        );
+      });
     }
 
     strokePathPoints.forEach((points, index) => {

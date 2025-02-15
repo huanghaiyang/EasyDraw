@@ -38,8 +38,12 @@ export const SelectionStyle: ElementStyles = {
       colorOpacity: SelectionStrokeColorOpacity,
     },
   ],
-  fillColor: SelectionFillColor,
-  fillColorOpacity: SelectionFillColorOpacity,
+  fills: [
+    {
+      color: SelectionFillColor,
+      colorOpacity: SelectionFillColorOpacity,
+    },
+  ],
 };
 
 export const ControllerStyle: ElementStyles = {
@@ -51,15 +55,23 @@ export const ControllerStyle: ElementStyles = {
       colorOpacity: TransformerStrokeColorOpacity,
     },
   ],
-  fillColor: TransformerFillColor,
-  fillColorOpacity: TransformerFillColorOpacity,
+  fills: [
+    {
+      color: TransformerFillColor,
+      colorOpacity: TransformerFillColorOpacity,
+    },
+  ],
 };
 
 export const SelectionIndicatorStyle: ElementStyles = {
   fontSize: SelectionIndicatorFontSize,
   fontFamily: SelectionIndicatorFontFamily,
-  fillColor: SelectionIndicatorFillColor,
-  fillColorOpacity: SelectionIndicatorFillColorOpacity,
+  fills: [
+    {
+      color: SelectionIndicatorFillColor,
+      colorOpacity: SelectionIndicatorFillColorOpacity,
+    },
+  ],
   textAlign: SelectionIndicatorTextAlign,
   textBaseline: SelectionIndicatorTextBaseline,
 };

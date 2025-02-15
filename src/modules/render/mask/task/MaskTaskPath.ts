@@ -16,12 +16,17 @@ export default class MaskTaskPath extends MaskTaskBase {
         this.data.type,
       )
     ) {
-      specialStyles.fillColorOpacity = 0;
+      specialStyles.fills = [
+        {
+          colorOpacity: 0,
+        },
+      ];
     }
     CanvasUtils.drawPathWithScale(
       this.canvas,
       this.data.points,
       Object.assign({}, { ...SelectionStyle, ...specialStyles }),
+      {},
       {
         ...SelectionStyle.strokes[0],
         width: width * this.data.scale,

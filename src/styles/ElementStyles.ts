@@ -66,14 +66,20 @@ export type StrokeStyle = {
   colorOpacity?: number;
 };
 
+// 填充样式定义
+export type FillStyle = {
+  // 填充颜色
+  color?: string;
+  // 填充颜色透明度
+  colorOpacity?: number;
+};
+
 // 画板组件样式定义
 export type ElementStyles = {
   // 描边
   strokes?: StrokeStyle[];
-  // 填充颜色
-  fillColor?: string;
-  // 填充颜色透明度
-  fillColorOpacity?: number;
+  // 填充
+  fills?: FillStyle[];
   // 字体大小
   fontSize?: number;
   // 字体
@@ -123,11 +129,16 @@ export const DefaultLineStrokeStyle: StrokeStyle = {
   width: DefaultLineStrokeWidth,
 };
 
+// 默认填充样式
+export const DefaultFillStyle: FillStyle = {
+  color: DefaultFillColor,
+  colorOpacity: DefaultFillColorOpacity,
+};
+
 // 默认组件样式
 export const DefaultElementStyle: ElementStyles = {
   strokes: [{ ...DefaultStrokeStyle }],
-  fillColor: DefaultFillColor,
-  fillColorOpacity: DefaultFillColorOpacity,
+  fills: [{ ...DefaultFillStyle }],
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
   textAlign: DefaultTextAlign,
@@ -148,7 +159,9 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
     });
   }
   if ([CreatorTypes.image, CreatorTypes.arbitrary].includes(type)) {
-    style.fillColorOpacity = 0;
+    style.fills.forEach(fill => {
+      fill.colorOpacity = 0;
+    });
   }
   return style;
 };

@@ -17,12 +17,14 @@ export default class ElementTaskRect extends ElementTaskBase {
       model: { styles },
     } = this.node;
 
-    CanvasUtils.drawInnerPathFillWithScale(
-      this.canvas,
-      strokePathPoints[innerestStrokePathPointsIndex],
-      styles,
-      styles.strokes[innerestStrokePathPointsIndex],
-    );
+    styles.fills.forEach(fillStyle => {
+      CanvasUtils.drawInnerPathFillWithScale(
+        this.canvas,
+        strokePathPoints[innerestStrokePathPointsIndex],
+        fillStyle,
+        styles.strokes[innerestStrokePathPointsIndex],
+      );
+    });
 
     strokePathPoints.forEach((points, index) => {
       CanvasUtils.drawPathStrokeWidthScale(

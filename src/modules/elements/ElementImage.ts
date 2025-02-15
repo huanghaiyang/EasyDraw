@@ -5,4 +5,8 @@ export default class ElementImage extends Element implements IElementImage {
   get editingEnable(): boolean {
     return false;
   }
+
+  get fillEnabled(): boolean {
+    return false;
+  }
 }

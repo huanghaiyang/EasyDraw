@@ -1,25 +1,18 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultElementStyle } from "@/styles/ElementStyles";
+import { DefaultFillStyle } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
+import { Plus, Minus } from "@element-plus/icons-vue";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
 
-const fillColor = ref(DefaultElementStyle.fillColor);
-const fillColorOpacity = ref(DefaultElementStyle.fillColorOpacity);
+const fills = ref([{ ...DefaultFillStyle }]);
 
 watch(
-  () => stageStore.fillColorOpacity,
+  () => stageStore.fills,
   newValue => {
-    fillColorOpacity.value = newValue;
-  },
-);
-
-watch(
-  () => stageStore.fillColor,
-  newValue => {
-    fillColor.value = newValue;
+    fills.value = newValue;
   },
 );
 
@@ -32,35 +25,49 @@ const toggleColorPickerVisible = () => {
     class="fill-props right-props"
     v-if="stageStore.primarySelectedElement?.fillEnabled"
   >
-    <div class="fill-props__title">填充</div>
+    <div class="fill-props__title">
+      <span class="fill-props__title-text">填充</span>
+      <el-icon
+        ><Plus @click="stageStore.addElementsFill(fills.length - 1)"
+      /></el-icon>
+    </div>
 
-    <div class="fill-props__row color">
-      <div class="fill-props__row-item">
-        <el-color-picker
-          v-model="fillColor"
-          @change="stageStore.setElementsFillColor"
-          ref="colorPickerRef"
-          :disabled="stageStore.inputDisabled"
-        />
-        <el-tag type="info" @click="toggleColorPickerVisible">{{
-          fillColor
-        }}</el-tag>
-      </div>
+    <div v-for="(fill, index) in fills" :key="index">
+      <div class="fill-props__row color">
+        <div class="fill-props__row-item">
+          <el-color-picker
+            v-model="fill.color"
+            @change="value => stageStore.setElementsFillColor(value, index)"
+            ref="colorPickerRef"
+            :disabled="stageStore.inputDisabled"
+          />
+          <el-tag type="info" @click="toggleColorPickerVisible">{{
+            fill.color
+          }}</el-tag>
+        </div>
 
-      <div class="fill-props__row-item">
-        <el-input
-          v-model="fillColorOpacity"
-          placeholder="输入数字"
-          type="number"
-          min="0"
-          max="1"
-          @change="
-            value => stageStore.setElementsFillColorOpacity(Number(value))
-          "
-          :disabled="stageStore.inputDisabled"
-        >
-          <template #prepend>o</template>
-        </el-input>
+        <div class="fill-props__row-item">
+          <el-input
+            v-model="fill.colorOpacity"
+            placeholder="输入数字"
+            type="number"
+            min="0"
+            max="1"
+            @change="
+              value =>
+                stageStore.setElementsFillColorOpacity(Number(value), index)
+            "
+            :disabled="stageStore.inputDisabled"
+          >
+            <template #prepend>o</template>
+          </el-input>
+        </div>
+        <el-icon>
+          <Minus
+            @click="stageStore.removeElementsFill(index)"
+            v-if="fills.length > 1"
+          />
+        </el-icon>
       </div>
     </div>
   </div>
@@ -68,5 +75,12 @@ const toggleColorPickerVisible = () => {
 <style lang="less" scoped>
 .color {
   margin-bottom: 8px;
+}
+.fill-props {
+  &__row {
+    .el-icon {
+      cursor: pointer;
+    }
+  }
 }
 </style>

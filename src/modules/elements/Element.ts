@@ -16,7 +16,9 @@ import IElement, {
   TransformByOptions,
 } from "@/types/IElement";
 import {
+  DefaultFillStyle,
   DefaultStrokeStyle,
+  FillStyle,
   StrokeStyle,
   StrokeTypes,
 } from "@/styles/ElementStyles";
@@ -328,13 +330,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
-  get fillColor(): string {
-    return this.model.styles.fillColor;
-  }
-
-  @computed
-  get fillColorOpacity(): number {
-    return this.model.styles.fillColorOpacity;
+  get fills(): FillStyle[] {
+    return this.model.styles.fills;
   }
 
   @computed
@@ -2237,17 +2234,41 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 设置填充颜色
    * @param value
+   * @param index
    */
-  setFillColor(value: string): void {
-    this.model.styles.fillColor = value;
+  setFillColor(value: string, index: number): void {
+    this.model.styles.fills[index].color = value;
   }
 
   /**
    * 设置填充颜色透明度
    * @param value
+   * @param index
    */
-  setFillColorOpacity(value: number): void {
-    this.model.styles.fillColorOpacity = value;
+  setFillColorOpacity(value: number, index: number): void {
+    this.model.styles.fills[index].colorOpacity = value;
+  }
+
+  /**
+   * 添加填充
+   *
+   * @param prevIndex
+   */
+  addFill(prevIndex: number): void {
+    const fills = cloneDeep(this.model.styles.fills);
+    fills.splice(prevIndex + 1, 0, { ...DefaultFillStyle });
+    this.model.styles.fills = fills;
+  }
+
+  /**
+   * 删除填充
+   *
+   * @param index
+   */
+  removeFill(index: number): void {
+    const fills = cloneDeep(this.model.styles.fills);
+    fills.splice(index, 1);
+    this.model.styles.fills = fills;
   }
 
   /**

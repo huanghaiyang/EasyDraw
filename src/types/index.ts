@@ -101,10 +101,8 @@ export enum ShieldDispatcherNames {
   scaleChanged = "scaleChanged",
   // 描边改变
   strokesChanged = "strokesChanged",
-  // 填充颜色改变
-  fillColorChanged = "fillColorChanged",
-  // 填充颜色透明度改变
-  fillColorOpacityChanged = "fillColorOpacityChanged",
+  // 填充改变
+  fillsChanged = "fillsChanged",
   // 字体大小改变
   fontSizeChanged = "fontSizeChanged",
   // 字体改变

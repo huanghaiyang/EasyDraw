@@ -5,6 +5,7 @@ import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement from "@/types/IElement";
 import {
   DefaultElementStyle,
+  DefaultFillStyle,
   DefaultStrokeStyle,
   StrokeStyle,
   StrokeTypes,
@@ -52,9 +53,11 @@ const DefaultStage = {
     },
   ],
   // 填充颜色
-  fillColor: DefaultElementStyle.fillColor,
-  // 填充透明度
-  fillColorOpacity: DefaultElementStyle.fillColorOpacity,
+  fills: [
+    {
+      ...DefaultFillStyle,
+    },
+  ],
   // 字体大小
   fontSize: DefaultElementStyle.fontSize,
   // 字体
@@ -169,15 +172,10 @@ export const useStageStore = defineStore("stage", {
         ShieldDispatcherNames.strokesChanged,
         throttle(this.onStrokesChanged.bind(this), 100),
       );
-      // 监听填充颜色
+      // 监听填充
       shield.on(
-        ShieldDispatcherNames.fillColorChanged,
-        throttle(this.onFillColorChanged.bind(this), 100),
-      );
-      // 监听填充颜色透明度
-      shield.on(
-        ShieldDispatcherNames.fillColorOpacityChanged,
-        throttle(this.onFillColorOpacityChanged.bind(this), 100),
+        ShieldDispatcherNames.fillsChanged,
+        throttle(this.onFillsChanged.bind(this), 100),
       );
       // 监听字体大小
       shield.on(
@@ -267,8 +265,7 @@ export const useStageStore = defineStore("stage", {
           flipX,
           leanYAngle,
           strokes,
-          fillColor,
-          fillColorOpacity,
+          fills,
           fontSize,
           fontFamily,
           textAlign,
@@ -290,9 +287,7 @@ export const useStageStore = defineStore("stage", {
         // 描边
         this.onStrokesChanged(element, strokes);
         // 填充颜色
-        this.onFillColorChanged(element, fillColor);
-        // 填充颜色透明度
-        this.onFillColorOpacityChanged(element, fillColorOpacity);
+        this.onFillsChanged(element, fills);
         // 字体大小
         this.onFontSizeChanged(element, fontSize);
         // 字体
@@ -390,22 +385,13 @@ export const useStageStore = defineStore("stage", {
       this.strokes = strokes;
     },
     /**
-     * 组件填充颜色变化
+     * 组件填充变化
      *
      * @param element
-     * @param fillColor
+     * @param fills
      */
-    onFillColorChanged(element: IElement, fillColor: string) {
-      this.fillColor = fillColor;
-    },
-    /**
-     * 组件填充透明度变化
-     *
-     * @param element
-     * @param fillColorOpacity
-     */
-    onFillColorOpacityChanged(element: IElement, fillColorOpacity: number) {
-      this.fillColorOpacity = fillColorOpacity;
+    onFillsChanged(element: IElement, fills: StrokeStyle[]) {
+      this.fills = fills;
     },
     /**
      * 组件字体大小变化
@@ -456,7 +442,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件位置
      *
-     * @param elements
      * @param value
      */
     setElementsPosition(value: IPoint): void {
@@ -490,7 +475,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件宽度
      *
-     * @param elements
      * @param value
      */
     setElementsWidth(value: number): void {
@@ -500,7 +484,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件高度
      *
-     * @param elements
      * @param value
      */
     setElementsHeight(value: number): void {
@@ -510,7 +493,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件角度
      *
-     * @param elements
      * @param value
      */
     setElementsAngle(value: number): void {
@@ -527,7 +509,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件边框类型
      *
-     * @param elements
      * @param value
      * @param index
      */
@@ -538,7 +519,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件边框宽度
      *
-     * @param elements
      * @param value
      * @param index
      */
@@ -549,7 +529,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件边框颜色
      *
-     * @param elements
      * @param value
      * @param index
      */
@@ -560,7 +539,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件边框颜色透明度
      *
-     * @param elements
      * @param value
      * @param index
      */
@@ -580,36 +558,53 @@ export const useStageStore = defineStore("stage", {
     /**
      * 删除组件描边
      *
-     * @param prevIndex 删除描边的索引位置（从0开始）
+     * @param index 删除描边的索引位置（从0开始）
      */
-    removeElementsStroke(prevIndex: number): void {
-      shield.removeElementsStroke(this.selectedElements, prevIndex);
+    removeElementsStroke(index: number): void {
+      shield.removeElementsStroke(this.selectedElements, index);
     },
 
     /**
      * 设置组件填充颜色
      *
-     * @param elements
      * @param value
+     * @param index
      */
-    setElementsFillColor(value: string): void {
-      shield.setElementsFillColor(this.selectedElements, value);
+    setElementsFillColor(value: string, index: number): void {
+      shield.setElementsFillColor(this.selectedElements, value, index);
     },
 
     /**
      * 设置组件填充颜色透明度
      *
-     * @param elements
      * @param value
+     * @param index
      */
-    setElementsFillColorOpacity(value: number): void {
-      shield.setElementsFillColorOpacity(this.selectedElements, value);
+    setElementsFillColorOpacity(value: number, index: number): void {
+      shield.setElementsFillColorOpacity(this.selectedElements, value, index);
+    },
+
+    /**
+     * 添加组件填充
+     *
+     * @param prevIndex
+     */
+    addElementsFill(prevIndex: number): void {
+      shield.addElementsFill(this.selectedElements, prevIndex);
+    },
+
+    /**
+     * 删除组件填充
+     *
+     * @param index
+     */
+    removeElementsFill(index: number): void {
+      shield.removeElementsFill(this.selectedElements, index);
     },
 
     /**
      * 设置组件文本对齐方式
      *
-     * @param elements
      * @param value
      */
     setElementsTextAlign(value: CanvasTextAlign): void {
@@ -619,7 +614,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件文本基线
      *
-     * @param elements
      * @param value
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
@@ -629,7 +623,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件字体大小
      *
-     * @param elements
      * @param value
      */
     setElementsFontSize(value: number): void {
@@ -639,7 +632,6 @@ export const useStageStore = defineStore("stage", {
     /**
      * 设置组件字体
      *
-     * @param elements
      * @param value
      */
     setElementsFontFamily(value: string): void {

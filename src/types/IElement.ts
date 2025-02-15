@@ -7,6 +7,7 @@ import { ElementStatus, IPoint } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import {
   ElementStyles,
+  FillStyle,
   StrokeStyle,
   StrokeTypes,
 } from "@/styles/ElementStyles";
@@ -246,10 +247,8 @@ export default interface IElement {
   get position(): IPoint;
   // 描边样式
   get strokes(): StrokeStyle[];
-  // 填充颜色
-  get fillColor(): string;
-  // 填充颜色透明度
-  get fillColorOpacity(): number;
+  // 填充样式
+  get fills(): FillStyle[];
   // 文本对齐
   get textAlign(): CanvasTextAlign;
   // 文本基线
@@ -458,14 +457,29 @@ export default interface IElement {
   /**
    * 设置填充颜色
    * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   * @param index 填充索引位置（从0开始）
    */
-  setFillColor(value: string): void;
+  setFillColor(value: string, index: number): void;
 
   /**
    * 设置填充颜色透明度
    * @param value 透明度值（0-1）
+   * @param index 填充索引位置（从0开始）
    */
-  setFillColorOpacity(value: number): void;
+  setFillColorOpacity(value: number, index: number): void;
+
+  /**
+   * 添加填充
+   * @param prevIndex 新填充要插入的索引位置（从0开始）
+   */
+  addFill(prevIndex: number): void;
+
+  /**
+   * 删除填充
+   * @param index 要删除的填充索引位置（从0开始）
+   * @throws 当索引超出范围时抛出错误
+   */
+  removeFill(index: number): void;
 
   /**
    * 设置字体大小

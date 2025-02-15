@@ -115,19 +115,42 @@ export default interface IStageSetter {
    * 设置组件填充颜色
    * @param elements 要修改的元件集合
    * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   * @param index 填充索引位置（从0开始）
    */
-  setElementsFillColor(elements: IElement[], value: string): Promise<void>;
+  setElementsFillColor(
+    elements: IElement[],
+    value: string,
+    index: number,
+  ): Promise<void>;
 
   /**
    * 设置组件填充颜色透明度
    *
    * @param elements 要修改的元件集合
    * @param value 透明度值（0-1）
+   * @param index 填充索引位置（从0开始）
    */
   setElementsFillColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void>;
+
+  /**
+   * 添加组件填充
+   *
+   * @param elements 要修改的元件集合
+   * @param prevIndex 添加填充的索引位置（从0开始）
+   */
+  addElementsFill(elements: IElement[], prevIndex: number): Promise<void>;
+
+  /**
+   * 删除组件填充
+   *
+   * @param elements 要修改的元件集合
+   * @param index 要删除的填充索引位置（从0开始）
+   */
+  removeElementsFill(elements: IElement[], index: number): Promise<void>;
 
   /**
    * 设置组件文本对齐

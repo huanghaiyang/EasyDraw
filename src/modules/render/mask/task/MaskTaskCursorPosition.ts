@@ -13,6 +13,7 @@ export default class MaskTaskCursorPosition extends MaskTaskBase {
         this.data.text,
         this.data.point,
         CursorPositionStyle,
+        CursorPositionStyle.fills[0],
       );
     }
   }

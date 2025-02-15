@@ -12,6 +12,7 @@ export default class MaskTaskIndicator extends MaskTaskBase {
       this.data.text,
       this.data.point,
       SelectionIndicatorStyle,
+      SelectionIndicatorStyle.fills[0],
       {
         angle: this.data.angle,
       },

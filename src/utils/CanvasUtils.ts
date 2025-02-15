@@ -1,6 +1,7 @@
 import { IPoint } from "@/types";
 import {
   ElementStyles,
+  FillStyle,
   StrokeStyle,
   StrokeTypes,
 } from "@/styles/ElementStyles";
@@ -179,6 +180,7 @@ export default class CanvasUtils {
     text: string,
     center: IPoint,
     styles: ElementStyles,
+    fillStyle: FillStyle,
     options: RenderParams = {},
   ): void {
     const { angle = 0 } = options;
@@ -187,7 +189,7 @@ export default class CanvasUtils {
     ctx.translate(center.x, center.y);
     ctx.rotate(MathUtils.angleToRadian(angle));
     ctx.font = StyleUtils.joinFont(styles);
-    ctx.fillStyle = StyleUtils.joinFillColor(styles);
+    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.textAlign = styles.textAlign;
     ctx.textBaseline = styles.textBaseline;
     ctx.fillText(text, 0, 0);
@@ -208,6 +210,7 @@ export default class CanvasUtils {
     text: string,
     center: IPoint,
     styles: ElementStyles,
+    fillStyle: FillStyle,
     options: RenderParams = {},
   ) {
     if (CanvasUtils.scale !== 1) {
@@ -216,7 +219,14 @@ export default class CanvasUtils {
         y: center.y * CanvasUtils.scale,
       };
     }
-    CanvasUtils.drawRotateText(target, text, center, styles, options);
+    CanvasUtils.drawRotateText(
+      target,
+      text,
+      center,
+      styles,
+      fillStyle,
+      options,
+    );
   }
 
   /**
@@ -250,6 +260,7 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     points: IPoint[],
     styles: ElementStyles,
+    fillStyle: FillStyle,
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ): void {
@@ -257,11 +268,11 @@ export default class CanvasUtils {
       points,
       strokeStyle,
     );
-    if (styles.fillColorOpacity) {
+    if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(
         target,
         points,
-        styles,
+        fillStyle,
         strokeStyle,
         options,
       );
@@ -282,7 +293,7 @@ export default class CanvasUtils {
   static drawInnerPathFill(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    fillStyle: FillStyle,
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ): void {
@@ -297,7 +308,7 @@ export default class CanvasUtils {
     } else {
       innerPoints = points;
     }
-    CanvasUtils.drawPathFill(target, innerPoints, styles);
+    CanvasUtils.drawPathFill(target, innerPoints, fillStyle);
   }
 
   /**
@@ -311,7 +322,7 @@ export default class CanvasUtils {
   static drawInnerPathFillWithScale(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    fillStyle: FillStyle,
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ): void {
@@ -319,11 +330,11 @@ export default class CanvasUtils {
       points,
       strokeStyle,
     );
-    if (styles.fillColorOpacity) {
+    if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(
         target,
         points,
-        styles,
+        fillStyle,
         strokeStyle,
         options,
       );
@@ -398,11 +409,11 @@ export default class CanvasUtils {
   static drawPathFill(
     target: HTMLCanvasElement,
     points: IPoint[],
-    styles: ElementStyles,
+    fillStyle: FillStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
-    ctx.fillStyle = StyleUtils.joinFillColor(styles);
+    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
     points.forEach((point, index) => {
       if (index === 0) {
@@ -428,11 +439,11 @@ export default class CanvasUtils {
     target: HTMLCanvasElement,
     point: IPoint,
     radius: number,
-    styles: ElementStyles,
+    fillStyle: FillStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
-    ctx.fillStyle = StyleUtils.joinFillColor(styles);
+    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
     ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
     ctx.closePath();

@@ -374,12 +374,14 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsFillColor(
     elements: IElement[],
     value: string,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsFillColor(elements, value);
+    await this.store.setElementsFillColor(elements, value, index);
     await this._redrawAll({ shield: true });
   }
 
@@ -388,12 +390,39 @@ export default class StageShield
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsFillColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
-    await this.store.setElementsFillColorOpacity(elements, value);
+    await this.store.setElementsFillColorOpacity(elements, value, index);
+    await this._redrawAll({ shield: true });
+  }
+
+  /**
+   * 添加组件填充
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async addElementsFill(
+    elements: IElement[],
+    prevIndex: number,
+  ): Promise<void> {
+    await this.store.addElementsFill(elements, prevIndex);
+    await this._redrawAll({ shield: true });
+  }
+
+  /**
+   * 删除组件填充
+   *
+   * @param elements
+   * @param index
+   */
+  async removeElementsFill(elements: IElement[], index: number): Promise<void> {
+    await this.store.removeElementsFill(elements, index);
     await this._redrawAll({ shield: true });
   }
 

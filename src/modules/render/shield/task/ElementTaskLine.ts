@@ -21,6 +21,7 @@ export default class ElementTaskLine extends ElementTaskBase {
         this.canvas,
         points,
         styles,
+        styles.fills[0],
         styles.strokes[index],
       );
     });

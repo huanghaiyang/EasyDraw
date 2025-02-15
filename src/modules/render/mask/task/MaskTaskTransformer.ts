@@ -24,6 +24,7 @@ export default class MaskTaskTransformer extends MaskTaskBase {
         },
       ),
       ControllerStyle,
+      ControllerStyle.fills[0],
       {
         ...ControllerStyle.strokes[0],
         width: width * scale,

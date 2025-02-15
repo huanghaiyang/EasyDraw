@@ -387,8 +387,7 @@ export default class StageStore implements IStageStore {
           ShieldDispatcherNames.heightChanged,
           ShieldDispatcherNames.scaleChanged,
           ShieldDispatcherNames.strokesChanged,
-          ShieldDispatcherNames.fillColorChanged,
-          ShieldDispatcherNames.fillColorOpacityChanged,
+          ShieldDispatcherNames.fillsChanged,
           ShieldDispatcherNames.textAlignChanged,
           ShieldDispatcherNames.textBaselineChanged,
           ShieldDispatcherNames.ratioLockedChanged,
@@ -673,15 +672,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    * @param value
+   * @param index
    */
   async setElementsFillColor(
     elements: IElement[],
     value: string,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fillColor === value) return;
-        element.setFillColor(value);
+        if (element.model.styles.fills[index].color === value) return;
+        element.setFillColor(value, index);
       }
     });
   }
@@ -695,11 +696,43 @@ export default class StageStore implements IStageStore {
   async setElementsFillColorOpacity(
     elements: IElement[],
     value: number,
+    index: number,
   ): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fillColorOpacity === value) return;
-        element.setFillColorOpacity(value);
+        if (element.model.styles.fills[index].colorOpacity === value) return;
+        element.setFillColorOpacity(value, index);
+      }
+    });
+  }
+
+  /**
+   * 添加组件填充
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async addElementsFill(
+    elements: IElement[],
+    prevIndex: number,
+  ): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.addFill(prevIndex);
+      }
+    });
+  }
+
+  /**
+   * 删除组件填充
+   *
+   * @param elements
+   * @param index
+   */
+  async removeElementsFill(elements: IElement[], index: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.removeFill(index);
       }
     });
   }
