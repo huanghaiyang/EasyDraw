@@ -1,0 +1,22 @@
+# 开发依赖
+node_modules/
+npm-debug.log*
+
+# 版本控制
+.git/
+.gitignore
+
+# 环境文件
+.env*
+*.env.local
+
+# IDE配置
+.vscode/
+.idea/
+
+# 构建产物
+dist/
+
+# 临时文件
+.temp/
+.cache/
