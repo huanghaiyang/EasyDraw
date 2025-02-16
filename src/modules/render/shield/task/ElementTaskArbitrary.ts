@@ -1,11 +1,11 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IElementReact } from "@/types/IElement";
+import { IElementRect } from "@/types/IElement";
 import { DefaultLineMeterLimit } from "@/styles/ElementStyles";
 
 export default class ElementTaskArbitrary extends ElementTaskBase {
   get node() {
-    return this.element as IElementReact;
+    return this.element as IElementRect;
   }
 
   /**

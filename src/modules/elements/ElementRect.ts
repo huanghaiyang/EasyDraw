@@ -1,7 +1,7 @@
 import Element from "@/modules/elements/Element";
-import { IElementReact } from "@/types/IElement";
+import { IElementRect } from "@/types/IElement";
 
-export default class ElementRect extends Element implements IElementReact {
+export default class ElementRect extends Element implements IElementRect {
   get editingEnable(): boolean {
     return false;
   }

@@ -836,13 +836,13 @@ export default interface IElement {
 }
 
 // 舞台组件（组件）-React
-export interface IElementReact extends IElement {}
+export interface IElementRect extends IElement {}
 
 // 舞台组件（组件）-圆形
 export interface IElementCircle extends IElement {}
 
 // 舞台组件（组件）-图片
-export interface IElementImage extends IElementReact {}
+export interface IElementImage extends IElementRect {}
 
 // 舞台组件（组件）-任意多边形&线条
 export interface IElementPolygon extends IElement {}
