@@ -1238,7 +1238,7 @@ export default class StageShield
    * @returns
    */
   private _checkScale(deltaScale: number): number {
-    let value = clamp(this.stageScale + deltaScale, 0.02, 100);
+    let value = clamp(this.stageScale + deltaScale, 0.02, 5);
     value = MathUtils.preciseToFixed(value, 2);
     if (this.stageScale === 0.02) {
       if (deltaScale > 0) {

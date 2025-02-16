@@ -39,3 +39,6 @@ export interface IBorderTransformer extends ITransformer {
   // 是否接近
   isClosest(point: IPoint): boolean;
 }
+
+// 圆角控制器
+export interface IRadiusController extends IVerticesTransformer {}

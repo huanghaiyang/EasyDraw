@@ -939,6 +939,26 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取控制点的盒模型坐标
+   *
+   * @param controllerPoint
+   * @returns
+   */
+  protected getControllerPoints(controllerPoint: IPoint): IPoint[] {
+    return CommonUtils.get4BoxPoints(
+      controllerPoint,
+      {
+        width: TransformerSize / this.shield.stageScale,
+        height: TransformerSize / this.shield.stageScale,
+      },
+      {
+        angle: this.model.actualAngle,
+        leanYAngle: this.model.leanYAngle,
+      },
+    );
+  }
+
+  /**
    * 根据给定的点坐标生成变换器
    *
    * @param points
@@ -947,17 +967,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   private calcTransformersByPoints(points: IPoint[]): IVerticesTransformer[] {
     const result = points.map((point, index) => {
       const { x, y } = point;
-      const points = CommonUtils.get4BoxPoints(
-        point,
-        {
-          width: TransformerSize / this.shield.stageScale,
-          height: TransformerSize / this.shield.stageScale,
-        },
-        {
-          angle: this.model.actualAngle,
-          leanYAngle: this.model.leanYAngle,
-        },
-      );
+      const points = this.getControllerPoints(point);
       let transformer = this._transformers[index];
       if (transformer) {
         transformer.points = points;
