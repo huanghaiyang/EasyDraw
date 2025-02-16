@@ -1,18 +1,19 @@
-import ITransformer from "@/types/ITransformer";
+import IController from "@/types/IController";
 import IElement from "@/types/IElement";
-import IStageSelection from "@/types/IStageSelection";
 import CommonUtils from "@/utils/CommonUtils";
 
-export default class BaseTransformer implements ITransformer {
+export default class BaseController implements IController {
   id: string;
   isActive: boolean;
-  host?: IElement | IStageSelection;
-
+  host?: IElement;
   get angle(): number {
     return 0;
   }
+  get scale(): number {
+    return 1 / this.host.shield.stageScale;
+  }
 
-  constructor(host: IElement | IStageSelection) {
+  constructor(host: IElement) {
     this.host = host;
     this.id = CommonUtils.getRandomId();
     this.isActive = false;

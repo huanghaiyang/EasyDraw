@@ -37,6 +37,7 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
+import { IPointController } from "@/types/IController";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -755,7 +756,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
-  get controllers(): IVerticesTransformer[] {
+  get controllers(): IPointController[] {
     return [];
   }
 
@@ -974,7 +975,11 @@ export default class Element implements IElement, ILinkedNodeValue {
         transformer.x = x;
         transformer.y = y;
       } else {
-        transformer = new VerticesTransformer(this, x, y, points);
+        transformer = new VerticesTransformer(this, {
+          points,
+          x,
+          y,
+        });
       }
       return transformer;
     });
@@ -1025,12 +1030,11 @@ export default class Element implements IElement, ILinkedNodeValue {
         borderTransformer.start = point;
         borderTransformer.end = nextPoint;
       } else {
-        borderTransformer = new BorderTransformer(
-          this,
-          point,
-          nextPoint,
+        borderTransformer = new BorderTransformer(this, {
+          start: point,
+          end: nextPoint,
           index,
-        );
+        });
       }
       return borderTransformer;
     });
@@ -2393,6 +2397,39 @@ export default class Element implements IElement, ILinkedNodeValue {
   deActiveRotation(): void {
     // 设置旋转为非激活状态
     this.rotation.isActive = false;
+  }
+
+  /**
+   * 获取激活的控制器
+   */
+  getActiveController(): IPointController {
+    return this.controllers.find(c => c.isActive);
+  }
+
+  /**
+   * 激活控制器
+   *
+   * @param controller 控制器
+   */
+  activeController(controller: IPointController): void {
+    this.controllers.forEach(c => (c.isActive = c.id === controller.id));
+  }
+
+  /**
+   * 取消控制器激活
+   */
+  deActiveAllControllers(): void {
+    this.controllers.forEach(c => (c.isActive = false));
+  }
+
+  /**
+   * 根据点获取控制器
+   *
+   * @param point 点
+   * @returns 控制器
+   */
+  getControllerByPoint(point: IPoint): IPointController {
+    return this.controllers.find(c => c.isContainsPoint(point));
   }
 
   /**

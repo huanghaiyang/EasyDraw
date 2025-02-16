@@ -1,0 +1,53 @@
+import { IPoint } from "@/types";
+import { BorderTransformerMargin } from "@/types/constants";
+import IElement from "@/types/IElement";
+import MathUtils from "@/utils/MathUtils";
+import { ISegmentController } from "@/types/IController";
+import BaseController from "@/modules/handler/controller/BaseController";
+import { isNumber } from "lodash";
+
+export default class SegmentController
+  extends BaseController
+  implements ISegmentController
+{
+  // 起始点
+  start: IPoint;
+  // 结束点
+  end: IPoint;
+  // 索引
+  index: number;
+
+  get angle(): number {
+    return MathUtils.calcAngle(this.start, this.end);
+  }
+
+  constructor(
+    host: IElement,
+    options?: {
+      start: IPoint;
+      end: IPoint;
+      index: number;
+    },
+  ) {
+    super(host);
+    const { start, end, index } = options || {};
+    if (start) this.start = start;
+    if (end) this.end = end;
+    if (isNumber(index)) this.index = index;
+  }
+
+  /**
+   * 判断点是否在多边形内
+   *
+   * @param point
+   * @returns
+   */
+  isClosest(point: IPoint): boolean {
+    return MathUtils.isPointClosestSegment(
+      point,
+      this.start,
+      this.end,
+      BorderTransformerMargin / this.host.shield.stageScale,
+    );
+  }
+}

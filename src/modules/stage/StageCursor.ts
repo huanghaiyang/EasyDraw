@@ -138,7 +138,7 @@ export default class StageCursor implements IStageCursor {
   private createMaskRotationCursorTask(rotation: IElementRotation): IMaskTask {
     if (!this.value) return;
     return new MaskTaskIconCursor(
-      this._createTransformerCursorModel({ angle: rotation.model.angle }),
+      this._createTransformerCursorModel({ angle: rotation.angle }),
       CursorTypes.move,
       this.renderParams,
     );

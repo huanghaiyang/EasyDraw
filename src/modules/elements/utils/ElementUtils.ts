@@ -236,9 +236,7 @@ export default class ElementUtils {
   static calcElementRotatePoint(element: IElement): IPoint {
     const {
       center,
-      rotation: {
-        model: { angle, scale },
-      },
+      rotation: { angle, scale },
       model: { height },
     } = element;
     return MathUtils.calcTargetPoint(

@@ -1,6 +1,6 @@
-import { IVerticesTransformer } from "@/types/ITransformer";
-import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import PointController from "@/modules/handler/controller/PointController";
+import { IPointController } from "@/types/IController";
 
 export default class RadiusController
-  extends VerticesTransformer
-  implements IVerticesTransformer {}
+  extends PointController
+  implements IPointController {}

@@ -761,7 +761,7 @@ export default class StageShield
         );
       }
       if (controller instanceof ElementRotation) {
-        this.store.updateElementById(controller.element.id, {
+        this.store.updateElementById(controller.host.id, {
           isRotatingTarget: true,
         });
         // 如果是选区旋转，则只处理选区组件

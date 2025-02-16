@@ -13,11 +13,15 @@ import {
 } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
-import { IRadiusController, TransformerTypes } from "@/types/ITransformer";
+import { TransformerTypes } from "@/types/ITransformer";
 import { IBorderTransformer } from "@/types/ITransformer";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
+import IController, {
+  IPointController,
+  IRadiusController,
+} from "@/types/IController";
 
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
@@ -365,7 +369,7 @@ export default interface IElement {
   // 对齐外框坐标
   get alignOutlineCoords(): IPoint[][];
   // 控制器
-  get controllers(): IVerticesTransformer[];
+  get controllers(): IPointController[];
 
   // 是否选中
   get isSelected(): boolean;
@@ -807,6 +811,27 @@ export default interface IElement {
    * 获取激活的组件边框变换器
    */
   getActiveElementBorderTransformer(): IBorderTransformer;
+  /**
+   * 获取激活的控制器
+   */
+  getActiveController(): IPointController;
+  /**
+   * 激活控制器
+   *
+   * @param controller 控制器
+   */
+  activeController(controller: IPointController): void;
+  /**
+   * 取消所有控制器的激活
+   */
+  deActiveAllControllers(): void;
+  /**
+   * 根据点获取控制器
+   *
+   * @param point 点
+   * @returns 控制器
+   */
+  getControllerByPoint(point: IPoint): IPointController;
 
   /**
    * 变换
@@ -891,7 +916,7 @@ export default interface IElement {
 // 舞台组件（组件）-React
 export interface IElementRect extends IElement {
   // 圆角控制器
-  get radiusControllers(): IRadiusController[];
+  get radiusControllers(): IController[];
   // 左上角圆角半径
   get radiusTL(): number;
   // 右上角圆角半径

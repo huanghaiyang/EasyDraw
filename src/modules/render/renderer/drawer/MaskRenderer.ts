@@ -11,11 +11,12 @@ import MaskTaskIndicator from "@/modules/render/mask/task/MaskTaskIndicator";
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskModel } from "@/types/IModel";
+import { IMaskModel, IRotationModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
 import {
   DefaultControllerRadius,
   SelectionIndicatorMargin,
+  SelectionRotationSize,
 } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -252,7 +253,17 @@ export default class MaskRenderer
    * @returns
    */
   private createMaskRotateTask(element: IElement): IRenderTask {
-    return new MaskTaskRotate(element.rotation.model, this.renderParams);
+    const { x, y, points, angle, width, height, scale } = element.rotation;
+    const model: IRotationModel = {
+      point: { x, y },
+      points,
+      angle,
+      type: DrawerMaskModelTypes.rotate,
+      width,
+      height,
+      scale,
+    };
+    return new MaskTaskRotate(model, this.renderParams);
   }
 
   /**

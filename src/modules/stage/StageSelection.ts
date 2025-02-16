@@ -12,7 +12,7 @@ import IStageShield from "@/types/IStageShield";
 import { DefaultControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { cloneDeep } from "lodash";
-import IController from "@/types/IController";
+import IController, { IPointController } from "@/types/IController";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -356,6 +356,25 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 尝试激活控制器
+   *
+   * @param point
+   * @returns
+   */
+  tryActiveCommonController(point: IPoint): IPointController {
+    const element = this.shield.store.primarySelectedElement;
+    if (element) {
+      const controller = element.getControllerByPoint(point);
+      if (controller) {
+        element.activeController(controller);
+        return controller;
+      } else {
+        element.deActiveAllControllers();
+      }
+    }
+  }
+
+  /**
    * 获取处于激活状态的变形器
    *
    * @returns
@@ -391,6 +410,18 @@ export default class StageSelection implements IStageSelection {
       this.shield.store.primarySelectedElement || this.rangeElement;
     if (element && element.rotation.isActive) {
       return element.rotation;
+    }
+  }
+
+  /**
+   * 获取激活组件通用控制器
+   *
+   * @returns
+   */
+  getActiveCommonController(): IPointController {
+    const element = this.shield.store.primarySelectedElement;
+    if (element) {
+      return element.getActiveController();
     }
   }
 
@@ -477,6 +508,14 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
+   * 清除组件通用控制器
+   */
+  deActiveCommonControllers(): void {
+    const element = this.shield.store.primarySelectedElement;
+    element?.deActiveAllControllers();
+  }
+
+  /**
    * 刷新选区模型
    */
   refreshSelectionModel(): void {
@@ -551,6 +590,9 @@ export default class StageSelection implements IStageSelection {
     // 边框变换
     const borderTransformer = this.tryActiveElementBorderTransformer(point);
     if (borderTransformer) return borderTransformer;
+    // 通用控制器
+    const commonController = this.tryActiveCommonController(point);
+    if (commonController) return commonController;
   }
 
   /**
@@ -568,6 +610,9 @@ export default class StageSelection implements IStageSelection {
     if (controller) return controller;
     // 顶点变换
     controller = this.getActiveElementTransformer();
+    if (controller) return controller;
+    // 通用控制器
+    controller = this.getActiveCommonController();
     if (controller) return controller;
   }
 }

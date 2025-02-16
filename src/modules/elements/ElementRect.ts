@@ -10,8 +10,8 @@ import {
 import MathUtils from "@/utils/MathUtils";
 import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { IRadiusController, IVerticesTransformer } from "@/types/ITransformer";
 import RadiusController from "@/modules/handler/controller/RadiusController";
+import { IPointController, IRadiusController } from "@/types/IController";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -96,7 +96,7 @@ export default class ElementRect extends Element implements IElementRect {
     return this._radiusBLPoint;
   }
 
-  get controllers(): IVerticesTransformer[] {
+  get controllers(): IPointController[] {
     return [...this.radiusControllers];
   }
 
@@ -275,7 +275,7 @@ export default class ElementRect extends Element implements IElementRect {
     const { x, y } = this._radiusTLPoint;
     const points = this.getControllerPoints(this._radiusTLPoint);
     if (!this._radiusTLController) {
-      this._radiusTLController = new RadiusController(this, x, y, points);
+      this._radiusTLController = new RadiusController(this, { x, y, points });
     } else {
       this._radiusTLController.x = x;
       this._radiusTLController.y = y;
@@ -290,7 +290,7 @@ export default class ElementRect extends Element implements IElementRect {
     const { x, y } = this._radiusTRPoint;
     const points = this.getControllerPoints(this._radiusTRPoint);
     if (!this._radiusTRController) {
-      this._radiusTRController = new RadiusController(this, x, y, points);
+      this._radiusTRController = new RadiusController(this, { x, y, points });
     } else {
       this._radiusTRController.x = x;
       this._radiusTRController.y = y;
@@ -305,7 +305,7 @@ export default class ElementRect extends Element implements IElementRect {
     const { x, y } = this._radiusBRPoint;
     const points = this.getControllerPoints(this._radiusBRPoint);
     if (!this._radiusBRController) {
-      this._radiusBRController = new RadiusController(this, x, y, points);
+      this._radiusBRController = new RadiusController(this, { x, y, points });
     } else {
       this._radiusBRController.x = x;
       this._radiusBRController.y = y;
@@ -320,7 +320,7 @@ export default class ElementRect extends Element implements IElementRect {
     const { x, y } = this._radiusBLPoint;
     const points = this.getControllerPoints(this._radiusBLPoint);
     if (!this._radiusBLController) {
-      this._radiusBLController = new RadiusController(this, x, y, points);
+      this._radiusBLController = new RadiusController(this, { x, y, points });
     } else {
       this._radiusBLController.x = x;
       this._radiusBLController.y = y;
