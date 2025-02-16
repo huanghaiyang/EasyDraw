@@ -9,7 +9,7 @@ import {
 import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
-import { ArbitraryControllerRadius } from "@/styles/MaskStyles";
+import { DefaultControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { cloneDeep } from "lodash";
 import IController from "@/types/IController";
@@ -262,7 +262,7 @@ export default class StageSelection implements IStageSelection {
         element: {
           transformerType,
         },
-        radius: ArbitraryControllerRadius,
+        radius: DefaultControllerRadius,
         ...props,
       };
       return model;

@@ -1,11 +1,7 @@
-import Element from "@/modules/elements/Element";
 import { IElementImage } from "@/types/IElement";
+import ElementRect from "@/modules/elements/ElementRect";
 
-export default class ElementImage extends Element implements IElementImage {
-  get editingEnable(): boolean {
-    return false;
-  }
-
+export default class ElementImage extends ElementRect implements IElementImage {
   get fillEnabled(): boolean {
     return false;
   }

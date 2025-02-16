@@ -20,6 +20,7 @@ import IElement, {
   IElementArbitrary,
   RefreshSubOptions,
   DefaultRefreshSubOptions,
+  DefaultRadiusModel,
 } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
@@ -1001,6 +1002,7 @@ export default class StageStore implements IStageStore {
       isRatioLocked: false,
       ...position,
       ...DefaultAngleModel,
+      ...DefaultRadiusModel,
     };
     return model;
   }
@@ -1554,6 +1556,7 @@ export default class StageStore implements IStageStore {
       isRatioLocked: true,
       ...center,
       ...DefaultAngleModel,
+      ...DefaultRadiusModel,
     };
     const element = ElementUtils.createElement(object, this.shield);
     return element;

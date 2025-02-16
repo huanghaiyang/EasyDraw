@@ -294,6 +294,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.height;
   }
 
+  get minSize(): number {
+    return Math.min(this.width, this.height);
+  }
+
   /**
    * 获取显示角度
    *
@@ -749,6 +753,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get leanYAngleModifyEnable(): boolean {
     return true;
+  }
+
+  get controllerPoints(): IPoint[] {
+    return [];
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
