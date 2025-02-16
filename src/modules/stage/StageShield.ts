@@ -761,7 +761,7 @@ export default class StageShield
         );
       }
       if (controller instanceof ElementRotation) {
-        this.store.updateElementById(controller.element.id, {
+        this.store.updateElementById(controller.host.id, {
           isRotatingTarget: true,
         });
         // 如果是选区旋转，则只处理选区组件
@@ -1238,7 +1238,7 @@ export default class StageShield
    * @returns
    */
   private _checkScale(deltaScale: number): number {
-    let value = clamp(this.stageScale + deltaScale, 0.02, 100);
+    let value = clamp(this.stageScale + deltaScale, 0.02, 5);
     value = MathUtils.preciseToFixed(value, 2);
     if (this.stageScale === 0.02) {
       if (deltaScale > 0) {

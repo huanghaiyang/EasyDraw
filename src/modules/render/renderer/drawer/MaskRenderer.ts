@@ -11,11 +11,12 @@ import MaskTaskIndicator from "@/modules/render/mask/task/MaskTaskIndicator";
 import IElement from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
-import { IMaskModel } from "@/types/IModel";
+import { IMaskModel, IRotationModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
 import {
-  ArbitraryControllerRadius,
+  DefaultControllerRadius,
   SelectionIndicatorMargin,
+  SelectionRotationSize,
 } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -23,38 +24,61 @@ import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 import { TransformerTypes } from "@/types/ITransformer";
 
+/**
+ * 蒙版渲染器
+ */
 export default class MaskRenderer
   extends BaseRenderer<IDrawerMask>
   implements IMaskRenderer
 {
+  /**
+   * 最后光标渲染状态 - 用于检测是否需要清理残留
+   */
   private _lastCursorRendered = false;
+  /**
+   * 最后选区渲染状态 - 用于检测是否需要清理残留
+   */
   private _lastSelectionRendered = false;
 
   /**
-   * 重绘蒙版
-   *
-   * TODO 需要优化，光标只要移动就会重绘
+   * 执行蒙版渲染的主流程
+   * 1. 创建渲染任务队列
+   * 2. 按顺序处理选区/控制器/光标等元素的绘制
+   * 3. 管理渲染状态缓存(_lastCursorRendered等)
+   * 4. 处理边缘情况（如光标移出舞台时的残留）
+   * @async
    */
   async redraw(): Promise<void> {
+    // 初始化渲染任务容器
     let cargo = new RenderTaskCargo([]);
     let cursorRendered = false;
 
-    // 绘制选区
+    // 选区绘制阶段 ================
     const selectionTasks = this.createMaskSelectionTasks();
     selectionTasks.forEach(task => {
       cargo.add(task);
     });
     if (selectionTasks.length) {
-      this._lastSelectionRendered = true;
+      this._lastSelectionRendered = true; // 标记选区已渲染
     }
+
+    // 形变控制器绘制阶段 ===========
     const transformerTasks = this.createMaskTransformerTasks();
     if (transformerTasks.length) {
       cargo.addAll(transformerTasks);
     }
 
+    // 普通控制器绘制阶段 ============
+    const controllerTasks = this.createControllerTasks();
+    if (controllerTasks.length) {
+      cargo.addAll(controllerTasks);
+    }
+
+    // 特殊元素处理（单个无父元素）===
     const noParentElements = this.drawer.shield.store.noParentElements;
     if (noParentElements.length === 1) {
       const element = noParentElements[0];
+      // 添加旋转图标（当元素允许旋转且处于完成状态）
       if (
         this.drawer.shield.configure.rotationIconEnable &&
         element.rotationEnable &&
@@ -62,30 +86,36 @@ export default class MaskRenderer
       ) {
         cargo.add(this.createMaskRotateTask(element));
       }
+      // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
     } else if (noParentElements.length > 1) {
+      // 多选时添加范围元素的旋转任务
       cargo.add(
         this.createMaskRotateTask(this.drawer.shield.selection.rangeElement),
       );
     }
-    // 绘制光标
+
+    // 光标绘制阶段 ================
     const task = this.drawer.shield.cursor.getTask();
     if (task) {
       cargo.add(task);
       this._lastCursorRendered = true;
-      cursorRendered = true;
-    }
-    if (this.drawer.shield.isDrawerActive) {
-      cargo.add(this.createMaskCursorPositionTask());
-      cargo.add(this.createMaskArbitraryCursorTask());
+      cursorRendered = true; // 标记本次循环已渲染光标
     }
 
-    // 如果有绘制任务，则添加一个清除任务到队列头部
+    // 激活状态下的附加绘制任务 ====
+    if (this.drawer.shield.isDrawerActive) {
+      cargo.add(this.createMaskCursorPositionTask()); // 坐标显示
+      cargo.add(this.createMaskArbitraryCursorTask()); // 自定义光标
+    }
+
+    // 任务执行与状态清理 ==========
     if (!cargo.isEmpty()) {
+      // 添加前置清除任务确保画布干净
       cargo.prepend(this.createMaskClearTask());
       await this.renderCargo(cargo);
     } else {
-      // 解决光标移出舞台出现残留的问题
+      // 处理光标/选区移出舞台的残留
       if (
         (this._lastCursorRendered || this._lastSelectionRendered) &&
         !selectionTasks.length &&
@@ -93,54 +123,71 @@ export default class MaskRenderer
       ) {
         cargo.add(new MaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
+        // 重置状态缓存
         this._lastCursorRendered = false;
         this._lastSelectionRendered = false;
       } else {
-        cargo = null;
+        cargo = null; // 无任务需要执行
       }
     }
   }
 
   /**
-   * 绘制当前鼠标位置的文字任务
-   *
-   * @returns
+   * 创建光标位置坐标显示任务
+   * 在光标右下方20像素处显示当前世界坐标系中的坐标值
+   * @returns {IRenderTask | undefined} 返回渲染任务对象，当光标不存在时返回undefined
    */
   private createMaskCursorPositionTask(): IRenderTask {
+    // 获取当前光标位置（舞台坐标系）
     const point = this.drawer.shield.cursor.value;
     if (!point) return;
+
+    // 将舞台坐标转换为世界坐标
     const coord = ElementUtils.calcWorldPoint(
       point,
       this.drawer.shield.stageCalcParams,
     );
+
+    // 构建坐标显示模型
     const model: IMaskModel = {
       point: {
+        // 在光标右下方20像素处显示（考虑舞台缩放比例）
         x: point.x + 20 / this.drawer.shield.stageScale,
         y: point.y + 20 / this.drawer.shield.stageScale,
       },
       type: DrawerMaskModelTypes.cursorPosition,
-      text: `${coord.x},${coord.y}`,
+      text: `${coord.x},${coord.y}`, // 格式化坐标值
     };
+
+    // 创建并返回渲染任务
     const task = new MaskTaskCursorPosition(model, this.renderParams);
     return task;
   }
 
   /**
-   * 创建一个绘制mask选区的任务
-   *
-   * @returns
+   * 创建选区路径绘制任务
+   * 1. 获取选区模型集合（包含主选区和子选区）
+   * 2. 为每个有效路径模型创建路径渲染任务
+   * 3. 自动适配当前舞台缩放比例
+   * @returns {IRenderTask[]} 选区路径渲染任务数组
    */
   private createMaskSelectionTasks(): IRenderTask[] {
     const selection = this.drawer.shield.selection;
     const tasks: IRenderTask[] = [];
+    // 合并主选区和子选区模型
     const models: IMaskModel[] = [
       ...selection.getModels(),
       selection.selectionModel,
     ];
+
     models.forEach(model => {
       if (model && model.points.length > 0) {
+        // 创建缩放适配的路径任务
         const task = new MaskTaskPath(
-          { ...model, scale: 1 / this.drawer.shield.stageScale },
+          {
+            ...model,
+            scale: 1 / this.drawer.shield.stageScale, // 根据舞台缩放调整路径尺寸
+          },
           this.renderParams,
         );
         tasks.push(task);
@@ -160,22 +207,43 @@ export default class MaskRenderer
   }
 
   /**
-   * 创建选区handler绘制任务
-   *
-   * @returns
+   * 创建形变控制器任务
+   * 根据元素类型分发不同的形变处理器：
+   * - 圆形元素：MaskTaskCircleTransformer
+   * - 矩形元素：MaskTaskTransformer
+   * @returns {IRenderTask[]} 形变控制器任务数组
    */
   private createMaskTransformerTasks(): IRenderTask[] {
     const models: IMaskModel[] = this.drawer.shield.selection.transformerModels;
     return models.map(model => {
       switch (model.element.transformerType) {
-        case TransformerTypes.circle: {
+        case TransformerTypes.circle:
           return new MaskTaskCircleTransformer(model, this.renderParams);
-        }
-        case TransformerTypes.rect: {
+        case TransformerTypes.rect:
           return new MaskTaskTransformer(model, this.renderParams);
-        }
       }
     });
+  }
+
+  /**
+   * 创建控制器任务
+   *
+   * @returns
+   */
+  private createControllerTasks(): IRenderTask[] {
+    const element = this.drawer.shield.store.primarySelectedElement;
+    if (element) {
+      const { controllers = [] } = element;
+      return controllers.map(point => {
+        const model: IMaskModel = {
+          point,
+          type: DrawerMaskModelTypes.transformer,
+          radius: DefaultControllerRadius,
+        };
+        return new MaskTaskCircleTransformer(model, this.renderParams);
+      });
+    }
+    return [];
   }
 
   /**
@@ -185,7 +253,17 @@ export default class MaskRenderer
    * @returns
    */
   private createMaskRotateTask(element: IElement): IRenderTask {
-    return new MaskTaskRotate(element.rotation.model, this.renderParams);
+    const { x, y, points, angle, width, height, scale } = element.rotation;
+    const model: IRotationModel = {
+      point: { x, y },
+      points,
+      angle,
+      type: DrawerMaskModelTypes.rotate,
+      width,
+      height,
+      scale,
+    };
+    return new MaskTaskRotate(model, this.renderParams);
   }
 
   /**
@@ -255,7 +333,7 @@ export default class MaskRenderer
       const model: IMaskModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,
-        radius: ArbitraryControllerRadius,
+        radius: DefaultControllerRadius,
       };
       return new MaskTaskCircleTransformer(model, this.renderParams);
     }

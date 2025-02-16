@@ -1,57 +1,46 @@
-import { DrawerMaskModelTypes, IPoint } from "@/types";
-import IElement from "@/types/IElement";
+import { IPoint } from "@/types";
 import IElementRotation from "@/types/IElementRotation";
-import { IRotationModel } from "@/types/IModel";
-import { SelectionRotationSize } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import IController from "@/types/IController";
+import { SelectionRotationSize } from "@/styles/MaskStyles";
+import PointController from "@/modules/handler/controller/PointController";
 
-export default class ElementRotation implements IElementRotation, IController {
-  // id
-  id: string;
-  // 数据模型
-  model: IRotationModel = {
-    point: null,
-    type: DrawerMaskModelTypes.rotate,
-    width: SelectionRotationSize,
-    height: SelectionRotationSize,
-    angle: -90,
-    points: [],
-  };
-  // 组件
-  element: IElement;
-  // 是否激活
-  isActive: boolean = false;
+export default class ElementRotation
+  extends PointController
+  implements IElementRotation
+{
+  // 宽度
+  width: number = SelectionRotationSize;
+  // 高度
+  height: number = SelectionRotationSize;
 
-  constructor(element: IElement) {
-    this.id = element.id;
-    this.element = element;
+  // 角度
+  get angle(): number {
+    return this.host.viewAngle - 90;
   }
 
   /**
    * 刷新数据
    */
   refresh(): void {
-    if (!this.element.rotationEnable) return;
-    const stageScale = this.element.shield.stageScale;
-    // 设置缩放
-    this.model.scale = 1 / stageScale;
-    // 设置旋转角度
-    this.model.angle = this.element.viewAngle - 90;
+    if (!this.host.rotationEnable) return;
+    const stageScale = this.host.shield.stageScale;
     // 设置旋转点
-    this.model.point = ElementUtils.calcElementRotatePoint(this.element);
+    const { x, y } = ElementUtils.calcElementRotatePoint(this.host);
+    // 横坐标
+    this.x = x;
+    // 纵坐标
+    this.y = y;
     // 设置旋转路径点
-    this.model.points = CommonUtils.getBoxVertices(this.model.point, {
-      width: this.model.width / stageScale,
-      height: this.model.height / stageScale,
-    }).map(point =>
-      MathUtils.rotateWithCenter(
-        point,
-        this.element.viewAngle,
-        this.model.point,
-      ),
+    this.points = CommonUtils.getBoxVertices(
+      { x, y },
+      {
+        width: this.width / stageScale,
+        height: this.height / stageScale,
+      },
+    ).map(point =>
+      MathUtils.rotateWithCenter(point, this.host.viewAngle, { x, y }),
     );
   }
 
@@ -63,9 +52,9 @@ export default class ElementRotation implements IElementRotation, IController {
    */
   isContainsPoint(point: IPoint): boolean {
     // 如果组件旋转启用，则检查点是否在旋转路径点内
-    if (this.element.rotationEnable) {
+    if (this.host.rotationEnable) {
       // 使用射线法检查点是否在旋转路径点内
-      return MathUtils.isPointInPolygonByRayCasting(point, this.model.points);
+      return MathUtils.isPointInPolygonByRayCasting(point, this.points);
     }
     // 如果组件旋转未启用，则返回 false
     return false;

@@ -80,4 +80,4 @@ export const CursorPositionStyle = SelectionIndicatorStyle;
 
 export const CursorSize = 20;
 
-export const ArbitraryControllerRadius = 3;
+export const DefaultControllerRadius = 3;

@@ -37,6 +37,7 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
+import { IPointController } from "@/types/IController";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -292,6 +293,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   @computed
   get height(): number {
     return this.model.height;
+  }
+
+  get minSize(): number {
+    return Math.min(this.width, this.height);
   }
 
   /**
@@ -751,6 +756,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  get controllers(): IPointController[] {
+    return [];
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.id = CommonUtils.getRandomDateId();
@@ -931,6 +940,26 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取控制点的盒模型坐标
+   *
+   * @param controllerPoint
+   * @returns
+   */
+  protected getControllerPoints(controllerPoint: IPoint): IPoint[] {
+    return CommonUtils.get4BoxPoints(
+      controllerPoint,
+      {
+        width: TransformerSize / this.shield.stageScale,
+        height: TransformerSize / this.shield.stageScale,
+      },
+      {
+        angle: this.model.actualAngle,
+        leanYAngle: this.model.leanYAngle,
+      },
+    );
+  }
+
+  /**
    * 根据给定的点坐标生成变换器
    *
    * @param points
@@ -939,24 +968,18 @@ export default class Element implements IElement, ILinkedNodeValue {
   private calcTransformersByPoints(points: IPoint[]): IVerticesTransformer[] {
     const result = points.map((point, index) => {
       const { x, y } = point;
-      const points = CommonUtils.get4BoxPoints(
-        point,
-        {
-          width: TransformerSize / this.shield.stageScale,
-          height: TransformerSize / this.shield.stageScale,
-        },
-        {
-          angle: this.model.actualAngle,
-          leanYAngle: this.model.leanYAngle,
-        },
-      );
+      const points = this.getControllerPoints(point);
       let transformer = this._transformers[index];
       if (transformer) {
         transformer.points = points;
         transformer.x = x;
         transformer.y = y;
       } else {
-        transformer = new VerticesTransformer(this, x, y, points);
+        transformer = new VerticesTransformer(this, {
+          points,
+          x,
+          y,
+        });
       }
       return transformer;
     });
@@ -1007,12 +1030,11 @@ export default class Element implements IElement, ILinkedNodeValue {
         borderTransformer.start = point;
         borderTransformer.end = nextPoint;
       } else {
-        borderTransformer = new BorderTransformer(
-          this,
-          point,
-          nextPoint,
+        borderTransformer = new BorderTransformer(this, {
+          start: point,
+          end: nextPoint,
           index,
-        );
+        });
       }
       return borderTransformer;
     });
@@ -2375,6 +2397,39 @@ export default class Element implements IElement, ILinkedNodeValue {
   deActiveRotation(): void {
     // 设置旋转为非激活状态
     this.rotation.isActive = false;
+  }
+
+  /**
+   * 获取激活的控制器
+   */
+  getActiveController(): IPointController {
+    return this.controllers.find(c => c.isActive);
+  }
+
+  /**
+   * 激活控制器
+   *
+   * @param controller 控制器
+   */
+  activeController(controller: IPointController): void {
+    this.controllers.forEach(c => (c.isActive = c.id === controller.id));
+  }
+
+  /**
+   * 取消控制器激活
+   */
+  deActiveAllControllers(): void {
+    this.controllers.forEach(c => (c.isActive = false));
+  }
+
+  /**
+   * 根据点获取控制器
+   *
+   * @param point 点
+   * @returns 控制器
+   */
+  getControllerByPoint(point: IPoint): IPointController {
+    return this.controllers.find(c => c.isContainsPoint(point));
   }
 
   /**

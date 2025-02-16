@@ -18,6 +18,10 @@ import { IBorderTransformer } from "@/types/ITransformer";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
+import IController, {
+  IPointController,
+  IRadiusController,
+} from "@/types/IController";
 
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
@@ -78,9 +82,58 @@ export const DefaultAngleModel: AngleModel = {
   viewAngle: 0,
 };
 
+// 圆角模型
+export type RadiusModel = {
+  // 左上角圆角半径
+  radiusTL?: number;
+  // 右上角圆角半径
+  radiusTR?: number;
+  // 右下角圆角半径
+  radiusBR?: number;
+  // 左下角圆角半径
+  radiusBL?: number;
+};
+
+// 默认圆角模型
+export const DefaultRadiusModel: RadiusModel = {
+  // 左上角圆角半径
+  radiusTL: 0,
+  // 右上角圆角半径
+  radiusTR: 0,
+  // 右下角圆角半径
+  radiusBR: 0,
+  // 左下角圆角半径
+  radiusBL: 0,
+};
+
+// 圆角刷新选项
+export type RadiusRefreshOptions = {
+  // 左上角圆角半径
+  tl?: boolean;
+  // 右上角圆角半径
+  tr?: boolean;
+  // 右下角圆角半径
+  br?: boolean;
+  // 左下角圆角半径
+  bl?: boolean;
+};
+
+// 默认圆角刷新选项
+export const DefaultRadiusRefreshOptions: RadiusRefreshOptions = {
+  // 左上角圆角半径
+  tl: true,
+  // 右上角圆角半径
+  tr: true,
+  // 右下角圆角半径
+  br: true,
+  // 左下角圆角半径
+  bl: true,
+};
+
 // 舞台组件数据模型
 export type ElementObject = AngleModel &
   FlipModel &
+  RadiusModel &
   IPoint & {
     // 组件id
     id: string;
@@ -241,6 +294,8 @@ export default interface IElement {
   get width(): number;
   // 高度
   get height(): number;
+  // 最小宽高
+  get minSize(): number;
   // 旋转角度
   get angle(): number;
   // 位置
@@ -313,6 +368,8 @@ export default interface IElement {
   get alignCoords(): IPoint[];
   // 对齐外框坐标
   get alignOutlineCoords(): IPoint[][];
+  // 控制器
+  get controllers(): IPointController[];
 
   // 是否选中
   get isSelected(): boolean;
@@ -754,6 +811,27 @@ export default interface IElement {
    * 获取激活的组件边框变换器
    */
   getActiveElementBorderTransformer(): IBorderTransformer;
+  /**
+   * 获取激活的控制器
+   */
+  getActiveController(): IPointController;
+  /**
+   * 激活控制器
+   *
+   * @param controller 控制器
+   */
+  activeController(controller: IPointController): void;
+  /**
+   * 取消所有控制器的激活
+   */
+  deActiveAllControllers(): void;
+  /**
+   * 根据点获取控制器
+   *
+   * @param point 点
+   * @returns 控制器
+   */
+  getControllerByPoint(point: IPoint): IPointController;
 
   /**
    * 变换
@@ -836,7 +914,125 @@ export default interface IElement {
 }
 
 // 舞台组件（组件）-React
-export interface IElementRect extends IElement {}
+export interface IElementRect extends IElement {
+  // 圆角控制器
+  get radiusControllers(): IController[];
+  // 左上角圆角半径
+  get radiusTL(): number;
+  // 右上角圆角半径
+  get radiusTR(): number;
+  // 右下角圆角半径
+  get radiusBR(): number;
+  // 左下角圆角半径
+  get radiusBL(): number;
+  // 可视圆角半径
+  get visualRadiusTL(): number;
+  // 可视圆角半径
+  get visualRadiusTR(): number;
+  // 可视圆角半径
+  get visualRadiusBR(): number;
+  // 可视圆角半径
+  get visualRadiusBL(): number;
+  // 左上角圆角点
+  get radiusTLPoint(): IPoint;
+  // 右上角圆角点
+  get radiusTRPoint(): IPoint;
+  // 右下角圆角点
+  get radiusBRPoint(): IPoint;
+  // 左下角圆角点
+  get radiusBLPoint(): IPoint;
+  /**
+   * 计算左上角圆角坐标
+   */
+  calcRadiusTLCoord(): IPoint;
+  /**
+   * 计算右上角圆角坐标
+   */
+  calcRadiusTRCoord(): IPoint;
+  /**
+   * 计算右下角圆角坐标
+   */
+  calcRadiusBRCoord(): IPoint;
+  /**
+   * 计算左下角圆角坐标
+   */
+  calcRadiusBLCoord(): IPoint;
+  /**
+   * 计算左上角圆角点
+   */
+  calcRadiusTLPoint(): IPoint;
+  /**
+   * 计算右上角圆角点
+   */
+  calcRadiusTRPoint(): IPoint;
+  /**
+   * 计算右下角圆角点
+   */
+  calcRadiusBRPoint(): IPoint;
+  /**
+   * 计算左下角圆角点
+   */
+  calcRadiusBLPoint(): IPoint;
+  /**
+   * 刷新左上角圆角点
+   */
+  refreshRadiusTLPoint(): void;
+  /**
+   * 刷新右上角圆角点
+   */
+  refreshRadiusTRPoint(): void;
+  /**
+   * 刷新右下角圆角点
+   */
+  refreshRadiusBRPoint(): void;
+  /**
+   * 刷新左下角圆角点
+   */
+  refreshRadiusBLPoint(): void;
+  /**
+   * 刷新左上角圆角控制器
+   */
+  refreshRadiusTLController(): void;
+  /**
+   * 刷新右上角圆角控制器
+   */
+  refreshRadiusTRController(): void;
+  /**
+   * 刷新右下角圆角控制器
+   */
+  refreshRadiusBRController(): void;
+  /**
+   * 刷新左下角圆角控制器
+   */
+  refreshRadiusBLController(): void;
+  /**
+   * 刷新圆角控制器
+   * 刷新圆角控制器
+   *
+   * @param options 刷新圆角控制器选项
+   */
+  refreshRadiusControllers(options?: RadiusRefreshOptions): void;
+  /**
+   * 刷新圆角
+   *
+   * @param options 刷新圆角选项
+   */
+  refreshRadiusPoints(options?: RadiusRefreshOptions): void;
+  /**
+   * 激活圆角控制器
+   *
+   * @param controller 圆角控制器
+   */
+  activeRadiusController(controller: IRadiusController): void;
+  /**
+   * 取消圆角控制器激活
+   */
+  deActiveAllRadiusController(): void;
+  /**
+   * 获取激活的圆角控制器
+   */
+  getActiveRadiusController(): IRadiusController;
+}
 
 // 舞台组件（组件）-圆形
 export interface IElementCircle extends IElement {}
