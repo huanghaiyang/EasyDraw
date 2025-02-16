@@ -4,12 +4,13 @@ import {
   DefaultRadiusRefreshOptions,
   IElementRect,
   RadiusRefreshOptions,
+  RefreshAnglesOptions,
   RefreshOptions,
 } from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { IRadiusController } from "@/types/ITransformer";
+import { IRadiusController, IVerticesTransformer } from "@/types/ITransformer";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 
 export default class ElementRect extends Element implements IElementRect {
@@ -60,23 +61,19 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get visualRadiusTL(): number {
-    if (this.model.radiusTL === 0) return this.minSize * 0.05;
-    return this.model.radiusTL;
+    return this._getRadius(this.model.radiusTL);
   }
 
   get visualRadiusTR(): number {
-    if (this.model.radiusTR === 0) return this.minSize * 0.05;
-    return this.model.radiusTR;
+    return this._getRadius(this.model.radiusTR);
   }
 
   get visualRadiusBR(): number {
-    if (this.model.radiusBR === 0) return this.minSize * 0.05;
-    return this.model.radiusBR;
+    return this._getRadius(this.model.radiusBR);
   }
 
   get visualRadiusBL(): number {
-    if (this.model.radiusBL === 0) return this.minSize * 0.05;
-    return this.model.radiusBL;
+    return this._getRadius(this.model.radiusBL);
   }
 
   get editingEnable(): boolean {
@@ -99,13 +96,8 @@ export default class ElementRect extends Element implements IElementRect {
     return this._radiusBLPoint;
   }
 
-  get controllerPoints(): IPoint[] {
-    return [
-      this.radiusTLPoint,
-      this.radiusTRPoint,
-      this.radiusBRPoint,
-      this.radiusBLPoint,
-    ];
+  get controllers(): IVerticesTransformer[] {
+    return [...this.radiusControllers];
   }
 
   /**
@@ -118,7 +110,7 @@ export default class ElementRect extends Element implements IElementRect {
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[0],
-        0,
+        this.model.leanXAngle,
         -this.model.leanYAngle,
         this.centerCoord,
       ),
@@ -140,7 +132,7 @@ export default class ElementRect extends Element implements IElementRect {
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[1],
-        0,
+        this.model.leanXAngle,
         -this.model.leanYAngle,
         this.centerCoord,
       ),
@@ -162,7 +154,7 @@ export default class ElementRect extends Element implements IElementRect {
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[2],
-        0,
+        this.model.leanXAngle,
         -this.model.leanYAngle,
         this.centerCoord,
       ),
@@ -184,7 +176,7 @@ export default class ElementRect extends Element implements IElementRect {
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[3],
-        0,
+        this.model.leanXAngle,
         -this.model.leanYAngle,
         this.centerCoord,
       ),
@@ -206,7 +198,7 @@ export default class ElementRect extends Element implements IElementRect {
       this.calcRadiusTLCoord(),
       this.shield.stageCalcParams,
     );
-    return MathUtils.rotateWithCenter(point, this.model.angle, this.center);
+    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**
@@ -219,7 +211,7 @@ export default class ElementRect extends Element implements IElementRect {
       this.calcRadiusTRCoord(),
       this.shield.stageCalcParams,
     );
-    return MathUtils.rotateWithCenter(point, this.model.angle, this.center);
+    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**
@@ -232,7 +224,7 @@ export default class ElementRect extends Element implements IElementRect {
       this.calcRadiusBRCoord(),
       this.shield.stageCalcParams,
     );
-    return MathUtils.rotateWithCenter(point, this.model.angle, this.center);
+    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**
@@ -245,7 +237,7 @@ export default class ElementRect extends Element implements IElementRect {
       this.calcRadiusBLCoord(),
       this.shield.stageCalcParams,
     );
-    return MathUtils.rotateWithCenter(point, this.model.angle, this.center);
+    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**
@@ -369,9 +361,13 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 刷新
    * @param options
+   * @param subOptions
    */
-  refresh(options?: RefreshOptions): void {
-    super.refresh(options);
+  refresh(
+    options?: RefreshOptions,
+    subOptions?: { angles?: RefreshAnglesOptions },
+  ): void {
+    super.refresh(options, subOptions);
     this.refreshRadiusPoints();
     this.refreshRadiusControllers();
   }
@@ -399,5 +395,14 @@ export default class ElementRect extends Element implements IElementRect {
    */
   getActiveRadiusController(): IRadiusController {
     return this.radiusControllers.find(rc => rc.isActive);
+  }
+
+  /**
+   * 获取圆角值
+   * @param value 圆角值
+   */
+  private _getRadius(value: number): number {
+    if (value === 0) return this.minSize * 0.05;
+    return value;
   }
 }

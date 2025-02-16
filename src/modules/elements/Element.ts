@@ -755,7 +755,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
-  get controllerPoints(): IPoint[] {
+  get controllers(): IVerticesTransformer[] {
     return [];
   }
 

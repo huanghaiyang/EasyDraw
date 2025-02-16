@@ -364,8 +364,8 @@ export default interface IElement {
   get alignCoords(): IPoint[];
   // 对齐外框坐标
   get alignOutlineCoords(): IPoint[][];
-  // 控制点
-  get controllerPoints(): IPoint[];
+  // 控制器
+  get controllers(): IVerticesTransformer[];
 
   // 是否选中
   get isSelected(): boolean;

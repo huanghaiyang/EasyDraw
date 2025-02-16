@@ -232,8 +232,8 @@ export default class MaskRenderer
   private createControllerTasks(): IRenderTask[] {
     const element = this.drawer.shield.store.primarySelectedElement;
     if (element) {
-      const { controllerPoints = [] } = element;
-      return controllerPoints.map(point => {
+      const { controllers = [] } = element;
+      return controllers.map(point => {
         const model: IMaskModel = {
           point,
           type: DrawerMaskModelTypes.transformer,
