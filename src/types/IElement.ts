@@ -386,6 +386,8 @@ export default interface IElement {
   get isRotatingTarget(): boolean;
   // 是否拖动
   get isDragging(): boolean;
+  // 是否修改圆角
+  get isRadiusing(): boolean;
   // 是否临时
   get isProvisional(): boolean;
   // 是否目标
@@ -415,6 +417,8 @@ export default interface IElement {
   set isRotating(value: boolean);
   // 设置是否拖动
   set isDragging(value: boolean);
+  // 设置是否修改圆角
+  set isRadiusing(value: boolean);
   // 设置是否临时
   set isProvisional(value: boolean);
   // 设置是否目标
@@ -964,7 +968,10 @@ export interface IElementRect extends IElement {
    * 刷新原始圆角属性
    */
   refreshOriginalRadiusProps(): void;
-
+  /**
+   * 刷新圆角
+   */
+  refreshRadius(): void;
   /**
    * 通过偏移量更新圆角
    * @param offset 偏移量

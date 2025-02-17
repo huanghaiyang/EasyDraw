@@ -420,6 +420,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param value 圆角值
    */
   private _getRadius(value: number): number {
+    if (this._isRadiusing) return value;
     if (value === 0) return this.minSize * 0.05;
     return value;
   }
@@ -428,15 +429,15 @@ export default class ElementRect extends Element implements IElementRect {
    * 刷新原始圆角属性
    */
   refreshOriginalRadiusProps(): void {
-    this._originalRadiusTL = this.radiusTL;
-    this._originalRadiusTR = this.radiusTR;
-    this._originalRadiusBR = this.radiusBR;
-    this._originalRadiusBL = this.radiusBL;
+    this._originalRadiusTL = this.model.radiusTL;
+    this._originalRadiusTR = this.model.radiusTR;
+    this._originalRadiusBR = this.model.radiusBR;
+    this._originalRadiusBL = this.model.radiusBL;
 
-    this._originalRadiusTLPoint = clone(this.radiusTLPoint);
-    this._originalRadiusTRPoint = clone(this.radiusTRPoint);
-    this._originalRadiusBRPoint = clone(this.radiusBRPoint);
-    this._originalRadiusBLPoint = clone(this.radiusBLPoint);
+    this._originalRadiusTLPoint = clone(this._radiusTLPoint);
+    this._originalRadiusTRPoint = clone(this._radiusTRPoint);
+    this._originalRadiusBRPoint = clone(this._radiusBRPoint);
+    this._originalRadiusBLPoint = clone(this._radiusBLPoint);
   }
 
   /**

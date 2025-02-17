@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp, cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { RefreshSubOptions } from "@/types/IElement";
+import IElement, { IElementRect, RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -643,6 +643,9 @@ export default class StageShield
    * 组件半径
    */
   private _radiusElements(): void {
+    this.store.updateElements(this.store.selectedElements, {
+      isRadiusing: true,
+    });
     this.store.updateSelectedElementsRadius(this.movingOffset);
   }
 
@@ -962,7 +965,15 @@ export default class StageShield
   /**
    * 结束组件圆角半径操作
    */
-  private _endElementsRadius() {}
+  private _endElementsRadius() {
+    this.store.updateElements(this.store.selectedElements, {
+      isRadiusing: false,
+    });
+    this.store.selectedElements.forEach(element => {
+      (element as IElementRect).refreshRadius();
+    });
+    this._refreshElementsOriginals(this.store.selectedElements);
+  }
 
   /**
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态

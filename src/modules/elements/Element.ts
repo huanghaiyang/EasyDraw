@@ -84,6 +84,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isRotatingTarget: boolean = false;
   // 是否正在拖动
   @observable _isDragging: boolean = false;
+  // 是否正在修改圆角
+  @observable _isRadiusing: boolean = false;
   // 是否处于临时状态
   @observable _isProvisional: boolean = false;
   // 是否命中
@@ -296,7 +298,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get minSize(): number {
-    return Math.min(this.width, this.height);
+    return Math.min(this.model.width, this.model.height);
   }
 
   /**
@@ -450,6 +452,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
+  get isRadiusing(): boolean {
+    return this._isRadiusing;
+  }
+
+  set isRadiusing(value: boolean) {
+    this._setisRadiusing(value);
+  }
+
+  @computed
   get isProvisional(): boolean {
     return this._isProvisional;
   }
@@ -566,6 +577,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   @action
   protected _setIsInRange(value: boolean): void {
     this._isInRange = value;
+  }
+
+  @action
+  protected _setisRadiusing(value: boolean): void {
+    this._isRadiusing = value;
   }
 
   // 坐标-舞台坐标系
