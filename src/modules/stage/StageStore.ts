@@ -1274,6 +1274,23 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 组件圆角半径
+   *
+   * @param offset
+   */
+  updateSelectedElementsRadius(offset: IPoint): void {
+    this.updateElementsRadius(this.selectedElements, offset);
+  }
+
+  /**
+   * 组件圆角半径
+   *
+   * @param elements
+   * @param offset
+   */
+  updateElementsRadius(elements: IElement[], offset: IPoint): void {}
+
+  /**
    * 遍历所有节点
    *
    * @param callback

@@ -55,6 +55,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isElementsDragging(): boolean;
   // 是否组件变换
   get isElementsTransforming(): boolean;
+  // 是否组件圆角
+  get isElementsRadiusing(): boolean;
   // 是否组件编辑
   get isElementsEditing(): boolean;
   // 是否舞台移动
