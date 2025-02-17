@@ -772,6 +772,21 @@ export default class MathUtils {
   }
 
   /**
+   * 计算点在线段上的射影坐标
+   *
+   * @param p
+   * @param a
+   * @param b
+   * @returns
+   */
+  static calcProjectionOnSegment(p: IPoint, a: IPoint, b: IPoint): IPoint {
+    const t = MathUtils.calcSegmentProportion(p, a, b);
+    const closetX = a.x + t * (b.x - a.x);
+    const closetY = a.y + t * (b.y - a.y);
+    return { x: closetX, y: closetY };
+  }
+
+  /**
    * 计算点到直线的距离
    *
    * @param point
@@ -779,17 +794,34 @@ export default class MathUtils {
    * @param b
    */
   static calcDistancePointToLine(p: IPoint, a: IPoint, b: IPoint): number {
+    const { x: closetX, y: closetY } = MathUtils.calcProjectionOnSegment(
+      p,
+      a,
+      b,
+    );
+    return Math.sqrt(
+      (p.x - closetX) * (p.x - closetX) + (p.y - closetY) * (p.y - closetY),
+    );
+  }
+
+  /**
+   * 计算线段上一点的内分比或者外分比
+   *
+   * 1. 如果大于1则点在ab的延长线上
+   * 2. 如果小于0则点在ba的延长线上
+   *
+   * @param p
+   * @param a
+   * @param b
+   * @returns
+   */
+  static calcSegmentProportion(p: IPoint, a: IPoint, b: IPoint): number {
     const Abx = b.x - a.x;
     const Aby = b.y - a.y;
     const Apx = p.x - a.x;
     const Apy = p.y - a.y;
     const ab_sq = Abx * Abx + Aby * Aby;
-    const t = (Apx * Abx + Apy * Aby) / ab_sq;
-    const closetX = a.x + t * Abx;
-    const closetY = a.y + t * Aby;
-    return Math.sqrt(
-      (p.x - closetX) * (p.x - closetX) + (p.y - closetY) * (p.y - closetY),
-    );
+    return (Apx * Abx + Apy * Aby) / ab_sq;
   }
 
   /**
@@ -800,15 +832,7 @@ export default class MathUtils {
    * @param b
    */
   static isProjectionOnSegment(p: IPoint, a: IPoint, b: IPoint): boolean {
-    // 计算向量AB和AP
-    const Abx = b.x - a.x;
-    const Aby = b.y - a.y;
-    const Apx = p.x - a.x;
-    const Apy = p.y - a.y;
-    // 计算向量AB的长度平方
-    const ab_sq = Abx * Abx + Aby * Aby;
-    // 计算点P在向量AB上的投影长度比例t
-    const t = (Apx * Abx + Apy * Aby) / ab_sq;
+    const t = MathUtils.calcSegmentProportion(p, a, b);
     // 如果t在0到1之间，则投影在线段上
     return t >= 0 && t <= 1;
   }

@@ -857,6 +857,8 @@ export default interface IElement {
 export interface IElementRect extends IElement {
   // 圆角控制器
   get radiusControllers(): IPointController[];
+  // 是否所有圆角半径相等
+  get isAllRadiusEqual(): boolean;
   // 左上角圆角半径
   get radiusTL(): number;
   // 右上角圆角半径
@@ -958,6 +960,16 @@ export interface IElementRect extends IElement {
    * @param options 刷新圆角选项
    */
   refreshRadiusPoints(options?: RadiusRefreshOptions): void;
+  /**
+   * 刷新原始圆角属性
+   */
+  refreshOriginalRadiusProps(): void;
+
+  /**
+   * 通过偏移量更新圆角
+   * @param offset 偏移量
+   */
+  updateRadiusByOffset(offset: IPoint): void;
 }
 
 // 舞台组件（组件）-圆形

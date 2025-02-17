@@ -12,6 +12,7 @@ import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
+import { clamp, clone, uniq } from "lodash";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -31,6 +32,17 @@ export default class ElementRect extends Element implements IElementRect {
   // 左下角圆角点
   private _radiusBLPoint: IPoint;
 
+  // 原始圆角值
+  private _originalRadiusTL: number;
+  private _originalRadiusTR: number;
+  private _originalRadiusBR: number;
+  private _originalRadiusBL: number;
+  // 原始圆角点
+  private _originalRadiusTLPoint: IPoint;
+  private _originalRadiusTRPoint: IPoint;
+  private _originalRadiusBRPoint: IPoint;
+  private _originalRadiusBLPoint: IPoint;
+
   get radiusControllers(): IRadiusController[] {
     return [
       this._radiusTLController,
@@ -38,6 +50,19 @@ export default class ElementRect extends Element implements IElementRect {
       this._radiusBRController,
       this._radiusBLController,
     ];
+  }
+
+  get radius(): number[] {
+    return [
+      this.model.radiusTL,
+      this.model.radiusTR,
+      this.model.radiusBR,
+      this.model.radiusBL,
+    ];
+  }
+
+  get radiusNames(): string[] {
+    return ["radiusTL", "radiusTR", "radiusBR", "radiusBL"];
   }
 
   @computed
@@ -98,6 +123,17 @@ export default class ElementRect extends Element implements IElementRect {
 
   get controllers(): IController[] {
     return [...super.controllers, ...this.radiusControllers];
+  }
+
+  get isAllRadiusEqual(): boolean {
+    return (
+      uniq([
+        this.model.radiusTL,
+        this.model.radiusTR,
+        this.model.radiusBR,
+        this.model.radiusBL,
+      ]).length === 1
+    );
   }
 
   /**
@@ -359,6 +395,14 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 刷新圆角
+   */
+  refreshRadius(): void {
+    this.refreshRadiusPoints();
+    this.refreshRadiusControllers();
+  }
+
+  /**
    * 刷新
    * @param options
    * @param subOptions
@@ -368,8 +412,7 @@ export default class ElementRect extends Element implements IElementRect {
     subOptions?: { angles?: RefreshAnglesOptions },
   ): void {
     super.refresh(options, subOptions);
-    this.refreshRadiusPoints();
-    this.refreshRadiusControllers();
+    this.refreshRadius();
   }
 
   /**
@@ -379,5 +422,102 @@ export default class ElementRect extends Element implements IElementRect {
   private _getRadius(value: number): number {
     if (value === 0) return this.minSize * 0.05;
     return value;
+  }
+
+  /**
+   * 刷新原始圆角属性
+   */
+  refreshOriginalRadiusProps(): void {
+    this._originalRadiusTL = this.radiusTL;
+    this._originalRadiusTR = this.radiusTR;
+    this._originalRadiusBR = this.radiusBR;
+    this._originalRadiusBL = this.radiusBL;
+
+    this._originalRadiusTLPoint = clone(this.radiusTLPoint);
+    this._originalRadiusTRPoint = clone(this.radiusTRPoint);
+    this._originalRadiusBRPoint = clone(this.radiusBRPoint);
+    this._originalRadiusBLPoint = clone(this.radiusBLPoint);
+  }
+
+  /**
+   * 刷新原始组件属性
+   */
+  refreshOriginalElementProps(): void {
+    super.refreshOriginalElementProps();
+    this.refreshOriginalRadiusProps();
+  }
+
+  /**
+   * 通过偏移量更新圆角
+   * @param offset 偏移量
+   */
+  updateRadiusByOffset(offset: IPoint): void {
+    const controller = this.getActiveController();
+    if (controller instanceof RadiusController) {
+      const index = this.radiusControllers.indexOf(controller);
+      if (index !== -1) {
+        const center = this.calcCenter();
+        let { point: originalPoint } = this._getOriginalRadius(index);
+        const currentPoint = {
+          x: offset.x + originalPoint.x,
+          y: offset.y + originalPoint.y,
+        };
+        let verticesPoint = this.rotateBoxPoints[index];
+        const crossPoint = MathUtils.calcProjectionOnSegment(
+          currentPoint,
+          center,
+          verticesPoint,
+        );
+        let proportion = MathUtils.calcSegmentProportion(
+          crossPoint,
+          center,
+          verticesPoint,
+        );
+        proportion = clamp(proportion, 0, 1);
+        proportion = 1 - proportion;
+        let radius = proportion * (this.minSize / 2);
+        if (this.isAllRadiusEqual) {
+          this.radiusNames.forEach(key => {
+            this.model[key] = radius;
+          });
+        } else {
+          this.model[this.radiusNames[index]] = radius;
+        }
+        this.refreshRadius();
+      }
+    }
+  }
+
+  /**
+   * 获取原始圆角值
+   * @param index 圆角索引
+   * @returns 原始圆角值
+   */
+  private _getOriginalRadius(index: number): {
+    radius: number;
+    point: IPoint;
+  } {
+    switch (index) {
+      case 0:
+        return {
+          radius: this._originalRadiusTL,
+          point: this._originalRadiusTLPoint,
+        };
+      case 1:
+        return {
+          radius: this._originalRadiusTR,
+          point: this._originalRadiusTRPoint,
+        };
+      case 2:
+        return {
+          radius: this._originalRadiusBR,
+          point: this._originalRadiusBRPoint,
+        };
+      case 3:
+        return {
+          radius: this._originalRadiusBL,
+          point: this._originalRadiusBLPoint,
+        };
+    }
   }
 }

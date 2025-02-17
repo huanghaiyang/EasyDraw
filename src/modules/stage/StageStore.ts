@@ -21,6 +21,7 @@ import IElement, {
   RefreshSubOptions,
   DefaultRefreshSubOptions,
   DefaultRadiusModel,
+  IElementRect,
 } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
@@ -1288,7 +1289,11 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param offset
    */
-  updateElementsRadius(elements: IElement[], offset: IPoint): void {}
+  updateElementsRadius(elements: IElement[], offset: IPoint): void {
+    elements.forEach(element => {
+      (element as IElementRect).updateRadiusByOffset(offset);
+    });
+  }
 
   /**
    * 遍历所有节点
