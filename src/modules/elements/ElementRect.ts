@@ -457,22 +457,42 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof RadiusController) {
       const index = this.radiusControllers.indexOf(controller);
       if (index !== -1) {
-        const center = this.calcCenter();
+        const boxPoints = MathUtils.batchTransWithCenter(
+          this.rotateBoxPoints,
+          this.angles,
+          this.center,
+          true,
+        );
+        let segmentStart: IPoint;
+        const [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
+        if (this.width <= this.height) {
+          if ([0, 1].includes(index)) {
+            segmentStart = c1;
+          } else {
+            segmentStart = c2;
+          }
+        } else {
+          if ([0, 3].includes(index)) {
+            segmentStart = c1;
+          } else {
+            segmentStart = c2;
+          }
+        }
         let { point: originalPoint } = this._getOriginalRadius(index);
         const currentPoint = {
           x: offset.x + originalPoint.x,
           y: offset.y + originalPoint.y,
         };
-        let verticesPoint = this.rotateBoxPoints[index];
+        const segmentEnd = this.rotateBoxPoints[index];
         const crossPoint = MathUtils.calcProjectionOnSegment(
           currentPoint,
-          center,
-          verticesPoint,
+          segmentStart,
+          segmentEnd,
         );
         let proportion = MathUtils.calcSegmentProportion(
           crossPoint,
-          center,
-          verticesPoint,
+          segmentStart,
+          segmentEnd,
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;

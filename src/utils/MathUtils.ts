@@ -1225,4 +1225,98 @@ export default class MathUtils {
       scaleY: matrix[1][1],
     };
   }
+
+  /**
+   * 计算平行四边形四个内角平分线的两个交点坐标
+   * 
+   * @param vertices 平行四边形的四个顶点坐标，按顺序排列
+   * @returns 两个交点坐标数组
+   */
+  static calculateAngleBisectorIntersection(vertices: IPoint[]): IPoint[] {
+    if (vertices.length !== 4) {
+      throw new Error("必须提供四个顶点坐标");
+    }
+
+    // 定义四个顶点A, B, C, D
+    const [A, B, C, D] = vertices;
+
+    // 计算每个顶点的角平分线参数方程
+    const bisectors = vertices.map((vertex, index) => {
+      let v1: IPoint, v2: IPoint;
+      switch (index) {
+        case 0: // A: 邻边AB和AD
+          v1 = { x: B.x - A.x, y: B.y - A.y };
+          v2 = { x: D.x - A.x, y: D.y - A.y };
+          break;
+        case 1: // B: 邻边BA和BC
+          v1 = { x: A.x - B.x, y: A.y - B.y };
+          v2 = { x: C.x - B.x, y: C.y - B.y };
+          break;
+        case 2: // C: 邻边CB和CD
+          v1 = { x: B.x - C.x, y: B.y - C.y };
+          v2 = { x: D.x - C.x, y: D.y - C.y };
+          break;
+        case 3: // D: 邻边DC和DA
+          v1 = { x: C.x - D.x, y: C.y - D.y };
+          v2 = { x: A.x - D.x, y: A.y - D.y };
+          break;
+        default:
+          throw new Error("无效的顶点索引");
+      }
+
+      // 计算单位向量
+      const len1 = Math.hypot(v1.x, v1.y);
+      const len2 = Math.hypot(v2.x, v2.y);
+      const uv1 = { x: v1.x / len1, y: v1.y / len1 };
+      const uv2 = { x: v2.x / len2, y: v2.y / len2 };
+
+      // 角平分线方向向量
+      const dir = { x: uv1.x + uv2.x, y: uv1.y + uv2.y };
+
+      return { point: vertex, direction: dir };
+    });
+
+    // 计算交点函数
+    const intersect = (
+      line1: { point: IPoint; direction: IPoint },
+      line2: { point: IPoint; direction: IPoint },
+    ): IPoint | null => {
+      const p1 = line1.point;
+      const d1 = line1.direction;
+      const p2 = line2.point;
+      const d2 = line2.direction;
+
+      // 解参数方程：p1 + t*d1 = p2 + s*d2
+      const denominator = d1.x * d2.y - d1.y * d2.x;
+      if (Math.abs(denominator) < 1e-6) return null; // 平行线无交点
+
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const t = (dx * d2.y - dy * d2.x) / denominator;
+      const s = (dx * d1.y - dy * d1.x) / denominator;
+
+      return {
+        x: p1.x + t * d1.x,
+        y: p1.y + t * d1.y,
+      };
+    };
+
+    // 计算相邻顶点的角平分线交点
+    const intersections: IPoint[] = [];
+    const pairs = [
+      [0, 1],
+      [2, 3],
+    ]; // A-B 和 C-D 的角平分线
+
+    for (const [i, j] of pairs) {
+      const pt = intersect(bisectors[i], bisectors[j]);
+      if (pt) intersections.push(pt);
+    }
+
+    if (intersections.length !== 2) {
+      throw new Error("无法找到两个交点");
+    }
+
+    return intersections;
+  }
 }
