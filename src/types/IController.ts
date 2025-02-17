@@ -13,6 +13,12 @@ export default interface IController {
   host?: IElement;
   // 缩放
   get scale(): number;
+
+  /**
+   * 是否命中点
+   * @param point 点坐标
+   */
+  isPointHitting(point: IPoint): boolean;
 }
 
 // 点控制器

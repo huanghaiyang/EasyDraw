@@ -37,7 +37,7 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
-import { IPointController } from "@/types/IController";
+import IController from "@/types/IController";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -756,8 +756,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
-  get controllers(): IPointController[] {
-    return [];
+  get controllers(): IController[] {
+    const result: IController[] = [];
+    if (this.shield.configure.rotationIconEnable) {
+      result.push(this.rotation);
+    }
+    if (this.verticesTransformEnable || this.boxVerticesTransformEnable) {
+      result.push(...this._transformers);
+    }
+    if (this.borderTransformEnable) {
+      result.push(...this._borderTransformers);
+    }
+    return result;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
@@ -1226,44 +1236,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 获取变换器
-   *
-   * @param point
-   * @returns
-   */
-  getTransformerByPoint(point: IPoint): IVerticesTransformer {
-    return this.transformers.find(item => item.isContainsPoint(point));
-  }
-
-  /**
-   * 获取边框变换器
-   *
-   * @param point
-   * @returns
-   */
-  getBorderTransformerByPoint(point: IPoint): IBorderTransformer {
-    return this.borderTransformers.find(item => item.isClosest(point));
-  }
-
-  /**
-   * 获取处于激活状态的变换器
-   *
-   * @returns
-   */
-  getActiveElementTransformer(): IVerticesTransformer {
-    return this.transformers.find(item => item.isActive);
-  }
-
-  /**
-   * 获取处于激活状态的边框变换器
-   *
-   * @returns
-   */
-  getActiveElementBorderTransformer(): IBorderTransformer {
-    return this.borderTransformers.find(item => item.isActive);
-  }
-
-  /**
    * 重新维护原始变形器坐标
    */
   refreshOriginalElementProps() {
@@ -1316,46 +1288,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshOriginalTransformerPoints();
     // 维护原始组件属性
     this.refreshOriginalElementProps();
-  }
-
-  /**
-   * 激活变形器
-   *
-   * @param transformer
-   */
-  activeTransformer(transformer: IVerticesTransformer): void {
-    this._transformers.forEach(item => {
-      item.isActive = item.id === transformer.id;
-    });
-  }
-
-  /**
-   * 激活边框变形器
-   *
-   * @param transformer
-   */
-  activeBorderTransformer(transformer: IBorderTransformer): void {
-    this._borderTransformers.forEach(item => {
-      item.isActive = item.id === transformer.id;
-    });
-  }
-
-  /**
-   * 将所有变形器设置为未激活状态
-   */
-  deActiveAllTransformers(): void {
-    this._transformers.forEach(item => {
-      item.isActive = false;
-    });
-  }
-
-  /**
-   * 将所有边框变形器设置为未激活状态
-   */
-  deActiveAllBorderTransformers(): void {
-    this._borderTransformers.forEach(item => {
-      item.isActive = false;
-    });
   }
 
   /**
@@ -1457,10 +1389,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   transform(offset: IPoint): void {
     // 如果有顶点变形器激活，则进行顶点变形
-    if (this.getActiveElementTransformer()) {
+    if (this.getActiveController() instanceof VerticesTransformer) {
       this.transformByVertices(offset);
       this._transformType = TransformTypes.vertices;
-    } else if (this.getActiveElementBorderTransformer()) {
+    } else if (this.getActiveController() instanceof BorderTransformer) {
       // 否则如果有边框变形器激活，则进行边框变形
       this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
@@ -2384,42 +2316,20 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 激活旋转
-   */
-  activeRotation(): void {
-    // 设置旋转为激活状态
-    this.rotation.isActive = true;
-  }
-
-  /**
-   * 取消旋转
-   */
-  deActiveRotation(): void {
-    // 设置旋转为非激活状态
-    this.rotation.isActive = false;
-  }
-
-  /**
    * 获取激活的控制器
    */
-  getActiveController(): IPointController {
+  getActiveController(): IController {
     return this.controllers.find(c => c.isActive);
   }
 
   /**
-   * 激活控制器
+   * 切换控制器激活状态
    *
-   * @param controller 控制器
+   * @param controllers 控制器
+   * @param isActive 激活状态
    */
-  activeController(controller: IPointController): void {
-    this.controllers.forEach(c => (c.isActive = c.id === controller.id));
-  }
-
-  /**
-   * 取消控制器激活
-   */
-  deActiveAllControllers(): void {
-    this.controllers.forEach(c => (c.isActive = false));
+  setControllersActive(controllers: IController[], isActive: boolean): void {
+    controllers.forEach(c => (c.isActive = isActive));
   }
 
   /**
@@ -2428,8 +2338,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point 点
    * @returns 控制器
    */
-  getControllerByPoint(point: IPoint): IPointController {
-    return this.controllers.find(c => c.isContainsPoint(point));
+  getControllerByPoint(point: IPoint): IController {
+    return this.controllers.find(c => c.isPointHitting(point));
   }
 
   /**

@@ -6,8 +6,10 @@ import MathUtils from "@/utils/MathUtils";
 import { cloneDeep, some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/constants";
-import { IVerticesTransformer, TransformerTypes } from "@/types/ITransformer";
+import { TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
+import IController from "@/types/IController";
+import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 
 export default class ElementArbitrary
   extends Element
@@ -240,24 +242,26 @@ export default class ElementArbitrary
   }
 
   /**
-   * 激活变换器
+   * 切换控制器激活状态
    *
-   * @param transformer
+   * @param controllers 控制器
+   * @param isActive 激活状态
    */
-  activeTransformer(transformer: IVerticesTransformer): void {
-    super.activeTransformer(transformer);
-    const index = this._transformers.findIndex(
-      item => item.id === transformer.id,
-    );
-    this.activeEditingCoord(index);
-  }
-
-  /**
-   * 取消激活所有变换器
-   */
-  deActiveAllTransformers(): void {
-    super.deActiveAllTransformers();
-    this.deActiveEditingCoord();
+  setControllersActive(controllers: IController[], isActive: boolean): void {
+    super.setControllersActive(controllers, isActive);
+    controllers.forEach(controller => {
+      if (controller instanceof VerticesTransformer) {
+        const index = this._transformers.findIndex(
+          item => item.id === controller.id,
+        );
+        if (index === -1) return;
+        if (isActive) {
+          this.activeEditingCoord(index);
+        } else {
+          this.deActiveEditingCoord();
+        }
+      }
+    });
   }
 
   /**

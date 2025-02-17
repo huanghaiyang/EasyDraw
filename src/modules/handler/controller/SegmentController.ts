@@ -50,4 +50,12 @@ export default class SegmentController
       BorderTransformerMargin / this.host.shield.stageScale,
     );
   }
+
+  /**
+   * 是否命中点
+   * @param point 点坐标
+   */
+  isPointHitting(point: IPoint): boolean {
+    return this.isClosest(point);
+  }
 }

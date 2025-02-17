@@ -18,10 +18,7 @@ import { IBorderTransformer } from "@/types/ITransformer";
 import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
-import IController, {
-  IPointController,
-  IRadiusController,
-} from "@/types/IController";
+import IController, { IPointController } from "@/types/IController";
 
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
@@ -369,7 +366,7 @@ export default interface IElement {
   // 对齐外框坐标
   get alignOutlineCoords(): IPoint[][];
   // 控制器
-  get controllers(): IPointController[];
+  get controllers(): IController[];
 
   // 是否选中
   get isSelected(): boolean;
@@ -757,81 +754,24 @@ export default interface IElement {
    * 计算实际角度
    */
   calcActualAngle(): number;
-
-  /**
-   * 激活旋转
-   */
-  activeRotation(): void;
-
-  /**
-   * 取消旋转
-   */
-  deActiveRotation(): void;
-
-  /**
-   * 获取变换器
-   * @param point 点坐标
-   */
-  getTransformerByPoint(point: IPoint): IVerticesTransformer;
-
-  /**
-   * 获取边框变换器
-   * @param point 点坐标
-   */
-  getBorderTransformerByPoint(point: IPoint): IBorderTransformer;
-
-  /**
-   * 激活变换器
-   * @param transformer 变换器
-   */
-  activeTransformer(transformer: IVerticesTransformer): void;
-
-  /**
-   * 激活边框变换器
-   * @param transformer 边框变换器
-   */
-  activeBorderTransformer(transformer: IBorderTransformer): void;
-
-  /**
-   * 取消所有变换器
-   */
-  deActiveAllTransformers(): void;
-
-  /**
-   * 取消所有边框变换器
-   */
-  deActiveAllBorderTransformers(): void;
-
-  /**
-   * 获取激活的组件变换器
-   */
-  getActiveElementTransformer(): IVerticesTransformer;
-
-  /**
-   * 获取激活的组件边框变换器
-   */
-  getActiveElementBorderTransformer(): IBorderTransformer;
   /**
    * 获取激活的控制器
    */
-  getActiveController(): IPointController;
+  getActiveController(): IController;
   /**
-   * 激活控制器
+   * 切换控制器激活状态
    *
-   * @param controller 控制器
+   * @param controllers 控制器
+   * @param isActive 激活状态
    */
-  activeController(controller: IPointController): void;
-  /**
-   * 取消所有控制器的激活
-   */
-  deActiveAllControllers(): void;
+  setControllersActive(controllers: IController[], isActive: boolean): void;
   /**
    * 根据点获取控制器
    *
    * @param point 点
    * @returns 控制器
    */
-  getControllerByPoint(point: IPoint): IPointController;
+  getControllerByPoint(point: IPoint): IController;
 
   /**
    * 变换
@@ -916,7 +856,7 @@ export default interface IElement {
 // 舞台组件（组件）-React
 export interface IElementRect extends IElement {
   // 圆角控制器
-  get radiusControllers(): IController[];
+  get radiusControllers(): IPointController[];
   // 左上角圆角半径
   get radiusTL(): number;
   // 右上角圆角半径
@@ -1018,20 +958,6 @@ export interface IElementRect extends IElement {
    * @param options 刷新圆角选项
    */
   refreshRadiusPoints(options?: RadiusRefreshOptions): void;
-  /**
-   * 激活圆角控制器
-   *
-   * @param controller 圆角控制器
-   */
-  activeRadiusController(controller: IRadiusController): void;
-  /**
-   * 取消圆角控制器激活
-   */
-  deActiveAllRadiusController(): void;
-  /**
-   * 获取激活的圆角控制器
-   */
-  getActiveRadiusController(): IRadiusController;
 }
 
 // 舞台组件（组件）-圆形

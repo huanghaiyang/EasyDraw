@@ -629,24 +629,7 @@ export default class StageShield
    * @returns
    */
   private _tryActiveController(): IController {
-    const controller = this.selection.tryActiveController(this.cursor.value);
-    // 判断是否是旋转控制器
-    const isRotationController = controller instanceof ElementRotation;
-    if (!isRotationController) {
-      this.selection.deActiveElementsRotations();
-    }
-    // 判断是否是变换控制器
-    const isTransformerController = controller instanceof VerticesTransformer;
-    if (!isTransformerController) {
-      this.selection.deActiveElementsTransformers();
-    }
-    // 判断是否是边框变换控制器
-    const isBorderTransformerController =
-      controller instanceof BorderTransformer;
-    if (!isBorderTransformerController) {
-      this.selection.deActiveElementsBorderTransformers();
-    }
-    return controller;
+    return this.selection.tryActiveController(this.cursor.value);
   }
 
   /**

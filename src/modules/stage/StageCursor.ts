@@ -12,8 +12,9 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
-import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import RadiusController from "@/modules/handler/controller/RadiusController";
+import { IPointController } from "@/types/IController";
 
 export default class StageCursor implements IStageCursor {
   // 光标位置
@@ -83,9 +84,7 @@ export default class StageCursor implements IStageCursor {
    */
   updateStyle(e: MouseEvent): void {
     if (
-      this.shield.selection.getActiveElementBorderTransformer() ||
-      this.shield.selection.getActiveElementTransformer() ||
-      this.shield.selection.getActiveElementRotation() ||
+      this.shield.selection.getActiveController() ||
       this.shield.isDrawerActive
     ) {
       this.setStyle("none");
@@ -106,7 +105,10 @@ export default class StageCursor implements IStageCursor {
       return this.createMaskDrawingCursorTask();
     } else if (this.shield.isMoveableActive) {
       const controller = this.shield.selection.getActiveController();
-      if (controller instanceof ElementRotation) {
+      if (
+        controller instanceof ElementRotation ||
+        controller instanceof RadiusController
+      ) {
         return this.createMaskRotationCursorTask(controller);
       } else if (controller instanceof VerticesTransformer) {
         return this.createMaskTransformerCursorTask(controller);
@@ -135,7 +137,7 @@ export default class StageCursor implements IStageCursor {
    *
    * @returns
    */
-  private createMaskRotationCursorTask(rotation: IElementRotation): IMaskTask {
+  private createMaskRotationCursorTask(rotation: IPointController): IMaskTask {
     if (!this.value) return;
     return new MaskTaskIconCursor(
       this._createTransformerCursorModel({ angle: rotation.angle }),

@@ -1,3 +1,4 @@
+import { IPoint } from "@/types";
 import IController from "@/types/IController";
 import IElement from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
@@ -17,5 +18,13 @@ export default class BaseController implements IController {
     this.host = host;
     this.id = CommonUtils.getRandomId();
     this.isActive = false;
+  }
+
+  /**
+   * 是否命中点
+   * @param point 点坐标
+   */
+  isPointHitting(point: IPoint): boolean {
+    return false;
   }
 }

@@ -1,18 +1,13 @@
 import { IPoint, DrawerMaskModelTypes } from "@/types";
 import IElement, { DefaultAngleModel, ElementObject } from "@/types/IElement";
-import IElementRotation from "@/types/IElementRotation";
-import {
-  TransformerTypes,
-  IBorderTransformer,
-  IVerticesTransformer,
-} from "@/types/ITransformer";
+import { TransformerTypes } from "@/types/ITransformer";
 import { IMaskModel } from "@/types/IModel";
 import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { DefaultControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
 import { cloneDeep } from "lodash";
-import IController, { IPointController } from "@/types/IController";
+import IController from "@/types/IController";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -299,133 +294,6 @@ export default class StageSelection implements IStageSelection {
   }
 
   /**
-   * 检查当前鼠标是否命中组件的旋转句柄区域
-   *
-   * @param point
-   */
-  tryActiveElementRotation(point: IPoint): IElementRotation {
-    if (this.shield.configure.rotationIconEnable) {
-      const element =
-        this.shield.store.primarySelectedElement || this.rangeElement;
-      if (element && element.rotation.isContainsPoint(point)) {
-        element.activeRotation();
-        return element.rotation;
-      }
-    }
-  }
-
-  /**
-   * 检测鼠标当前位置是否在组件的尺寸变换句柄区域
-   *
-   * @param point
-   */
-  tryActiveElementTransformer(point: IPoint): IVerticesTransformer {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (element) {
-      const transformer = element.getTransformerByPoint(point);
-      if (transformer) {
-        element.activeTransformer(transformer);
-        return transformer;
-      } else {
-        element.deActiveAllTransformers();
-      }
-    }
-  }
-
-  /**
-   * 检测鼠标是否在组件的边框上，如果是，可以拖动边框改变宽高
-   *
-   * @param point
-   * @returns
-   */
-  tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (element) {
-      if (element.borderTransformEnable) {
-        const borderTransformer = element.getBorderTransformerByPoint(point);
-        if (borderTransformer) {
-          element.activeBorderTransformer(borderTransformer);
-          return borderTransformer;
-        } else {
-          element.deActiveAllBorderTransformers();
-        }
-      }
-    }
-  }
-
-  /**
-   * 尝试激活控制器
-   *
-   * @param point
-   * @returns
-   */
-  tryActiveCommonController(point: IPoint): IPointController {
-    const element = this.shield.store.primarySelectedElement;
-    if (element) {
-      const controller = element.getControllerByPoint(point);
-      if (controller) {
-        element.activeController(controller);
-        return controller;
-      } else {
-        element.deActiveAllControllers();
-      }
-    }
-  }
-
-  /**
-   * 获取处于激活状态的变形器
-   *
-   * @returns
-   */
-  getActiveElementTransformer(): IVerticesTransformer {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (element) {
-      return element.getActiveElementTransformer();
-    }
-  }
-
-  /**
-   * 获取处于激活状态的边框变形器
-   *
-   * @returns
-   */
-  getActiveElementBorderTransformer(): IBorderTransformer {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (element) {
-      return element.getActiveElementBorderTransformer();
-    }
-  }
-
-  /**
-   * 获取激活组件旋转
-   *
-   * @returns
-   */
-  getActiveElementRotation(): IElementRotation {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (element && element.rotation.isActive) {
-      return element.rotation;
-    }
-  }
-
-  /**
-   * 获取激活组件通用控制器
-   *
-   * @returns
-   */
-  getActiveCommonController(): IPointController {
-    const element = this.shield.store.primarySelectedElement;
-    if (element) {
-      return element.getActiveController();
-    }
-  }
-
-  /**
    * 刷新选区
    *
    * 如果当前鼠标所在的组件是命中状态，则将命中组件设置为选中状态
@@ -478,41 +346,6 @@ export default class StageSelection implements IStageSelection {
         return element;
       }
     }
-  }
-
-  /**
-   * 取消所有选中组件的变换器
-   */
-  deActiveElementsTransformers(): void {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    element?.deActiveAllTransformers();
-  }
-
-  /**
-   * 取消所有选中组件的边框变换器
-   */
-  deActiveElementsBorderTransformers(): void {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    element?.deActiveAllBorderTransformers();
-  }
-
-  /**
-   * 取消所有选中组件的旋转
-   */
-  deActiveElementsRotations(): void {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    element?.deActiveRotation();
-  }
-
-  /**
-   * 清除组件通用控制器
-   */
-  deActiveCommonControllers(): void {
-    const element = this.shield.store.primarySelectedElement;
-    element?.deActiveAllControllers();
   }
 
   /**
@@ -581,18 +414,19 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   tryActiveController(point: IPoint): IController {
-    // 旋转
-    const rotation = this.tryActiveElementRotation(point);
-    if (rotation) return rotation;
-    // 顶点变换
-    const transformer = this.tryActiveElementTransformer(point);
-    if (transformer) return transformer;
-    // 边框变换
-    const borderTransformer = this.tryActiveElementBorderTransformer(point);
-    if (borderTransformer) return borderTransformer;
-    // 通用控制器
-    const commonController = this.tryActiveCommonController(point);
-    if (commonController) return commonController;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (element) {
+      const controller = element.getControllerByPoint(point);
+      element.setControllersActive(
+        element.controllers.filter(c => c.id !== controller?.id),
+        false,
+      );
+      if (controller) {
+        element.setControllersActive([controller], true);
+        return controller;
+      }
+    }
   }
 
   /**
@@ -601,18 +435,10 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveController(): IController {
-    let controller: IController;
-    // 旋转
-    controller = this.getActiveElementRotation();
-    if (controller) return controller;
-    // 边框变换
-    controller = this.getActiveElementBorderTransformer();
-    if (controller) return controller;
-    // 顶点变换
-    controller = this.getActiveElementTransformer();
-    if (controller) return controller;
-    // 通用控制器
-    controller = this.getActiveCommonController();
-    if (controller) return controller;
+    const element =
+      this.shield.store.primarySelectedElement || this.rangeElement;
+    if (element) {
+      return element.getActiveController();
+    }
   }
 }

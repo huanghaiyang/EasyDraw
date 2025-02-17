@@ -11,7 +11,7 @@ import MathUtils from "@/utils/MathUtils";
 import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
-import { IPointController, IRadiusController } from "@/types/IController";
+import IController, { IRadiusController } from "@/types/IController";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -96,8 +96,8 @@ export default class ElementRect extends Element implements IElementRect {
     return this._radiusBLPoint;
   }
 
-  get controllers(): IPointController[] {
-    return [...this.radiusControllers];
+  get controllers(): IController[] {
+    return [...super.controllers, ...this.radiusControllers];
   }
 
   /**
@@ -370,31 +370,6 @@ export default class ElementRect extends Element implements IElementRect {
     super.refresh(options, subOptions);
     this.refreshRadiusPoints();
     this.refreshRadiusControllers();
-  }
-
-  /**
-   * 激活圆角控制器
-   *
-   * @param controller 圆角控制器
-   */
-  activeRadiusController(controller: IRadiusController): void {
-    this.radiusControllers.forEach(
-      rc => (rc.isActive = rc.id === controller.id),
-    );
-  }
-
-  /**
-   * 取消所有圆角控制器激活
-   */
-  deActiveAllRadiusController(): void {
-    this.radiusControllers.forEach(rc => (rc.isActive = false));
-  }
-
-  /**
-   * 获取激活的圆角控制器
-   */
-  getActiveRadiusController(): IRadiusController {
-    return this.radiusControllers.find(rc => rc.isActive);
   }
 
   /**

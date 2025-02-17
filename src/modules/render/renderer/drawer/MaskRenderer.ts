@@ -16,13 +16,16 @@ import { IRenderTask } from "@/types/IRenderTask";
 import {
   DefaultControllerRadius,
   SelectionIndicatorMargin,
-  SelectionRotationSize,
 } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 import { TransformerTypes } from "@/types/ITransformer";
+import ElementRotation from "@/modules/elements/rotation/ElementRotation";
+import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
+import { IPointController } from "@/types/IController";
 
 /**
  * 蒙版渲染器
@@ -231,17 +234,30 @@ export default class MaskRenderer
    * @returns
    */
   private createControllerTasks(): IRenderTask[] {
-    const element = this.drawer.shield.store.primarySelectedElement;
+    const element =
+      this.drawer.shield.store.primarySelectedElement ||
+      this.drawer.shield.selection.rangeElement;
     if (element) {
       const { controllers = [] } = element;
-      return controllers.map(point => {
-        const model: IMaskModel = {
-          point,
-          type: DrawerMaskModelTypes.transformer,
-          radius: DefaultControllerRadius,
-        };
-        return new MaskTaskCircleTransformer(model, this.renderParams);
-      });
+      return controllers
+        .map(controller => {
+          if (
+            !(controller instanceof ElementRotation) &&
+            !(controller instanceof VerticesTransformer) &&
+            !(controller instanceof BorderTransformer)
+          ) {
+            const model: IMaskModel = {
+              point: {
+                x: (controller as IPointController).x,
+                y: (controller as IPointController).y,
+              },
+              type: DrawerMaskModelTypes.transformer,
+              radius: DefaultControllerRadius,
+            };
+            return new MaskTaskCircleTransformer(model, this.renderParams);
+          }
+        })
+        .filter(model => !!model);
     }
     return [];
   }

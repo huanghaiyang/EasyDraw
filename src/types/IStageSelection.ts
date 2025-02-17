@@ -1,11 +1,8 @@
 import { IPoint } from "@/types/index";
 import IElement from "@/types/IElement";
 import { IMaskModel } from "@/types/IModel";
-import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
-import { IVerticesTransformer } from "@/types/ITransformer";
-import { IBorderTransformer } from "@/types/ITransformer";
-import IController, { IPointController } from "@/types/IController";
+import IController from "@/types/IController";
 import { IElementGroup } from "@/types/IElementGroup";
 
 // 舞台选区
@@ -42,36 +39,12 @@ export default interface IStageSelection {
   hitTargetElements(point: IPoint): void;
   // 尝试激活控制器
   tryActiveController(point: IPoint): IController;
-  // 尝试激活组件旋转
-  tryActiveElementRotation(point: IPoint): IElementRotation;
-  // 尝试激活组件变换
-  tryActiveElementTransformer(point: IPoint): IVerticesTransformer;
-  // 尝试激活组件边框变换
-  tryActiveElementBorderTransformer(point: IPoint): IBorderTransformer;
-  // 尝试激活通用控制器
-  tryActiveCommonController(point: IPoint): IVerticesTransformer;
-  // 清除组件变换
-  deActiveElementsTransformers(): void;
-  // 清除组件边框变换
-  deActiveElementsBorderTransformers(): void;
-  // 清除组件旋转
-  deActiveElementsRotations(): void;
-  // 清除组件通用控制器
-  deActiveCommonControllers(): void;
-  // 获取激活组件变换
-  getActiveElementTransformer(): IVerticesTransformer;
-  // 获取激活组件边框变换
-  getActiveElementBorderTransformer(): IBorderTransformer;
-  // 获取激活组件旋转
-  getActiveElementRotation(): IElementRotation;
-  // 获取激活组件通用控制器
-  getActiveCommonController(): IPointController;
+  // 获取激活控制器
+  getActiveController(): IController;
   // 刷新范围组件
   refreshRangeElements(rangePoints: IPoint[]): void;
   // 获取点上组件
   getElementOnPoint(point: IPoint): IElement;
-  // 获取激活控制器
-  getActiveController(): IController;
   // 计算选区模型
   calcSelectionModel(): IMaskModel;
   // 计算变换器模型
