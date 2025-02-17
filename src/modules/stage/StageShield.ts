@@ -17,7 +17,10 @@ import IElement, { RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
-import IStageShield, { StageCalcParams } from "@/types/IStageShield";
+import IStageShield, {
+  StageCalcParams,
+  StageShieldElementsStatus,
+} from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
@@ -67,6 +70,8 @@ export default class StageShield
   stageRect: DOMRect;
   // canvas渲染容器
   renderEl: HTMLDivElement;
+  // 组件状态
+  elementsStatus: StageShieldElementsStatus = StageShieldElementsStatus.NONE;
   // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
     return CommonUtils.getRectVertices(this.stageRect);
@@ -93,53 +98,23 @@ export default class StageShield
   private _pressMoveStageWorldCoord: IPoint;
   // 鼠标是否按下过
   private _isPressDown: boolean = false;
-  // 是否正在拖拽组件
-  private _isElementsDragging: boolean = false;
   // 舞台是否在移动
   private _isStageMoving: boolean = false;
-  // 是否正在调整组件大小
-  private _isElementsTransforming: boolean = false;
-  // 是否正在调整组件边框圆角
-  private _isElementsRadiusing: boolean = false;
-  // 组件是否旋转中
-  private _isElementsRotating: boolean = false;
-  // 是否处于编辑状态
-  private _isElementsEditing: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
   // 是否需要重绘
   get shouldRedraw(): boolean {
-    return (
-      this._isElementsDragging ||
-      this._isElementsRotating ||
-      this._isElementsTransforming ||
-      this._isElementsRadiusing ||
-      this._isStageMoving
-    );
+    return this.isElementsBusy || this._isStageMoving;
   }
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return (
-      this.isElementsRotating ||
-      this.isElementsTransforming ||
-      this.isElementsDragging
-    );
-  }
-
-  // 是否正在拖拽组件
-  get isElementsDragging(): boolean {
-    return this._isElementsDragging;
-  }
-
-  // 是否正在圆角调整
-  get isElementsRadiusing(): boolean {
-    return this._isElementsRadiusing;
-  }
-
-  // 是否正在形变组件
-  get isElementsTransforming(): boolean {
-    return this._isElementsTransforming;
+    return [
+      StageShieldElementsStatus.ROTATING,
+      StageShieldElementsStatus.MOVING,
+      StageShieldElementsStatus.TRANSFORMING,
+      StageShieldElementsStatus.RADIUSING,
+    ].includes(this.elementsStatus);
   }
 
   // 舞台是否在移动
@@ -164,19 +139,9 @@ export default class StageShield
     return this.currentCreator?.type === CreatorTypes.moveable;
   }
 
-  // 是否正在旋转组件
-  get isElementsRotating(): boolean {
-    return this._isElementsRotating;
-  }
-
   // 是否是任意绘制工具
   get isArbitraryDrawing(): boolean {
     return this.currentCreator?.type === CreatorTypes.arbitrary;
-  }
-
-  // 是否处于编辑状态
-  get isElementsEditing(): boolean {
-    return this._isElementsEditing;
   }
 
   // 舞台计算参数
@@ -586,30 +551,41 @@ export default class StageShield
         // 如果不存在选中的组件
         if (this.store.isSelectedEmpty) {
           this._createRange();
-        } else if (this._isElementsRotating) {
-          if (this.checkCursorPressMovedALittle(e)) {
-            this._rotateElements();
-            flag = true;
+        } else if (this.checkCursorPressMovedALittle(e)) {
+          switch (this.elementsStatus) {
+            case StageShieldElementsStatus.ROTATING: {
+              this._rotateElements();
+              flag = true;
+              break;
+            }
+            case StageShieldElementsStatus.MOVING: {
+              this._dragElements();
+              flag = true;
+              break;
+            }
+            case StageShieldElementsStatus.TRANSFORMING: {
+              this._transformElements();
+              flag = true;
+              break;
+            }
+            case StageShieldElementsStatus.RADIUSING: {
+              this._radiusElements();
+              flag = true;
+              break;
+            }
           }
-        } else if (this._isElementsTransforming) {
-          if (this.checkCursorPressMovedALittle(e)) {
-            this._transformElements();
-            flag = true;
-          }
-        } else if (
-          this._isElementsDragging ||
-          this.store.isSelectedContainsTarget()
-        ) {
-          if (this.checkCursorPressMovedALittle(e)) {
-            // 标记拖动
-            this._isElementsDragging = true;
-            this._dragElements();
-            flag = true;
-          }
-        } else if (this._isElementsRadiusing) {
-          if (this.checkCursorPressMovedALittle(e)) {
-            this._radiusElements();
-            flag = true;
+          if (
+            ![
+              StageShieldElementsStatus.ROTATING,
+              StageShieldElementsStatus.TRANSFORMING,
+              StageShieldElementsStatus.RADIUSING,
+            ].includes(this.elementsStatus)
+          ) {
+            if (this.store.isSelectedContainsTarget()) {
+              this.elementsStatus = StageShieldElementsStatus.MOVING;
+              this._dragElements();
+              flag = true;
+            }
           }
         }
       } else if (this.isHandActive) {
@@ -767,13 +743,14 @@ export default class StageShield
         } else {
           this.store.refreshRotatingStates(this._pressDownPosition);
         }
-        this._isElementsRotating = true;
-      } else if (controller instanceof VerticesTransformer) {
-        this._isElementsTransforming = true;
-      } else if (controller instanceof BorderTransformer) {
-        this._isElementsTransforming = true;
+        this.elementsStatus = StageShieldElementsStatus.ROTATING;
+      } else if (
+        controller instanceof VerticesTransformer ||
+        controller instanceof BorderTransformer
+      ) {
+        this.elementsStatus = StageShieldElementsStatus.TRANSFORMING;
       } else if (controller instanceof RadiusController) {
-        this._isElementsRadiusing = true;
+        this.elementsStatus = StageShieldElementsStatus.RADIUSING;
       } else {
         // 获取鼠标点击的组件
         const targetElement = this.selection.getElementOnPoint(
@@ -856,19 +833,33 @@ export default class StageShield
       if (this.store.isSelectedEmpty) {
         this._makeRangeEmpty();
       } else if (this.checkCursorPressUpALittle(e)) {
-        // 如果当前是在拖动中
-        if (this._isElementsDragging) {
-          this._endElementsDrag();
-          // 将拖动状态置为false
-          this._isElementsDragging = false;
-        } else if (this._isElementsRotating) {
-          this._endElementsRotate();
-          // 将旋转状态置为false
-          this._isElementsRotating = false;
-        } else if (this._isElementsTransforming) {
-          this._endElementsTransform();
-          // 将旋转状态置为false
-          this._isElementsTransforming = false;
+        switch (this.elementsStatus) {
+          case StageShieldElementsStatus.MOVING: {
+            this._endElementsDrag();
+            break;
+          }
+          case StageShieldElementsStatus.ROTATING: {
+            this._endElementsRotate();
+            break;
+          }
+          case StageShieldElementsStatus.TRANSFORMING: {
+            this._endElementsTransform();
+            break;
+          }
+          case StageShieldElementsStatus.RADIUSING: {
+            this._endElementsRadius();
+            break;
+          }
+        }
+        if (
+          [
+            StageShieldElementsStatus.ROTATING,
+            StageShieldElementsStatus.TRANSFORMING,
+            StageShieldElementsStatus.RADIUSING,
+            StageShieldElementsStatus.MOVING,
+          ].includes(this.elementsStatus)
+        ) {
+          this.elementsStatus = StageShieldElementsStatus.NONE;
         }
       } else if (!e.ctrlKey && !e.shiftKey) {
         this._selectTopAElement(this.store.selectedElements);
@@ -892,7 +883,9 @@ export default class StageShield
       this._selectTopAElement(this.store.stageElements);
       this.store.beginEditingElements(this.store.selectedElements);
       this.selection.refresh();
-      this._isElementsEditing = !this.store.isEditingEmpty;
+      if (!this.store.isEditingEmpty) {
+        this.elementsStatus = StageShieldElementsStatus.EDITING;
+      }
       this._redrawAllIfy({
         mask: true,
         provisional: false,
@@ -965,6 +958,11 @@ export default class StageShield
       this.selection.rangeElement.isTransforming = false;
     }
   }
+
+  /**
+   * 结束组件圆角半径操作
+   */
+  private _endElementsRadius() {}
 
   /**
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
@@ -1642,7 +1640,7 @@ export default class StageShield
     if (!this.store.isEditingEmpty) {
       this.store.endEditingElements(this.store.editingElements);
       this.selection.refresh();
-      this._isElementsEditing = false;
+      this.elementsStatus = StageShieldElementsStatus.NONE;
       await this._redrawAll(true);
     }
   }

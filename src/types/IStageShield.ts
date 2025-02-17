@@ -14,6 +14,16 @@ import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
 import IStageAlign from "@/types/IStageAlign";
 
+// 组件状态
+export enum StageShieldElementsStatus {
+  NONE,
+  MOVING,
+  ROTATING,
+  TRANSFORMING,
+  RADIUSING,
+  EDITING,
+}
+
 // 舞台主画板
 export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 光标
@@ -42,6 +52,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   stageWorldCoord: IPoint;
   // 舞台缩放
   stageScale: number;
+  // 组件状态
+  elementsStatus: StageShieldElementsStatus;
 
   // 是否需要重绘
   get shouldRedraw(): boolean;
@@ -51,14 +63,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get stageRectPoints(): IPoint[];
   // 舞台世界矩形坐标
   get stageWordRectCoords(): IPoint[];
-  // 是否组件拖动
-  get isElementsDragging(): boolean;
-  // 是否组件变换
-  get isElementsTransforming(): boolean;
-  // 是否组件圆角
-  get isElementsRadiusing(): boolean;
-  // 是否组件编辑
-  get isElementsEditing(): boolean;
   // 是否舞台移动
   get isStageMoving(): boolean;
   // 是否画板激活
@@ -67,8 +71,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isMoveableActive(): boolean;
   // 是否手激活
   get isHandActive(): boolean;
-  // 是否组件旋转
-  get isElementsRotating(): boolean;
   // 是否任意绘制
   get isArbitraryDrawing(): boolean;
   // 舞台计算参数
