@@ -13,6 +13,8 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, clone, uniq } from "lodash";
+import PointController from "../handler/controller/PointController";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -122,7 +124,10 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get controllers(): IController[] {
-    return [...super.controllers, ...this.radiusControllers];
+    return [
+      ...super.controllers,
+      ...this.radiusControllers,
+    ];
   }
 
   get isAllRadiusEqual(): boolean {
@@ -457,14 +462,21 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof RadiusController) {
       const index = this.radiusControllers.indexOf(controller);
       if (index !== -1) {
+        let segmentStart: IPoint;
+        const center = this.center;
         const boxPoints = MathUtils.batchTransWithCenter(
           this.rotateBoxPoints,
           this.angles,
-          this.center,
+          center,
           true,
+        )
+        const { width, height } = CommonUtils.calcRectangleSize(boxPoints);
+        const minSize = Math.min(width, height);
+        let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(
+          boxPoints,
         );
-        let segmentStart: IPoint;
-        const [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
+        c1 = MathUtils.transWithCenter(c1, this.angles, center);
+        c2 = MathUtils.transWithCenter(c2, this.angles, center);
         if (this.width <= this.height) {
           if ([0, 1].includes(index)) {
             segmentStart = c1;
@@ -496,7 +508,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = proportion * (this.minSize / 2);
+        let radius = proportion * (minSize / 2);
         if (this.isAllRadiusEqual) {
           this.radiusNames.forEach(key => {
             this.model[key] = radius;

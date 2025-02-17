@@ -1301,20 +1301,18 @@ export default class MathUtils {
       };
     };
 
+    const width = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
+    const height = Math.sqrt(Math.pow(D.x - A.x, 2) + Math.pow(D.y - A.y, 2));
+
     // 计算相邻顶点的角平分线交点
     const intersections: IPoint[] = [];
-    const pairs = [
-      [0, 1],
-      [2, 3],
-    ]; // A-B 和 C-D 的角平分线
 
-    for (const [i, j] of pairs) {
-      const pt = intersect(bisectors[i], bisectors[j]);
-      if (pt) intersections.push(pt);
-    }
-
-    if (intersections.length !== 2) {
-      throw new Error("无法找到两个交点");
+    if (width < height) {
+     intersections.push(intersect(bisectors[0], bisectors[1])); 
+     intersections.push(intersect(bisectors[2], bisectors[3]));
+    } else {
+     intersections.push(intersect(bisectors[0], bisectors[3]));
+     intersections.push(intersect(bisectors[1], bisectors[2]));
     }
 
     return intersections;
