@@ -902,6 +902,8 @@ export interface IElementRect extends IElement {
   get radiusBLPoint(): IPoint;
   // 曲线路径点
   get curvePathPoints(): BazierCurvePoints[][];
+  // 曲线填充路径点
+  get curveFillPathPoints(): BazierCurvePoints[];
   /**
    * 计算左上角圆角坐标
    */

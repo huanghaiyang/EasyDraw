@@ -12,9 +12,11 @@ import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
-import { clamp, clone, uniq } from "lodash";
+import { clamp, clone, range, uniq } from "lodash";
 import { BazierCurvePoints } from "@/types/IRender";
 import CanvasUtils from "@/utils/CanvasUtils";
+import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -149,15 +151,91 @@ export default class ElementRect extends Element implements IElementRect {
 
   get curvePathPoints(): BazierCurvePoints[][] {
     return this.model.styles.strokes.map(strokeStyle => {
-      const baziers = this._getBazierCurvePoints();
-      return CanvasUtils.convertBazierPointsByStroke(
-        baziers,
-        strokeStyle,
-        points => {
-          return this.convertPointsByStrokeType(points, strokeStyle);
-        },
-      );
+      return this._calcCurvePoints(strokeStyle);
     });
+  }
+
+  get curveFillPathPoints(): BazierCurvePoints[] {
+    const innerestStrokePathPointsIndex = this.innerestStrokePathPointsIndex;
+    let strokeStyle: StrokeStyle =
+      this.model.styles.strokes[innerestStrokePathPointsIndex];
+    strokeStyle = { ...strokeStyle, type: StrokeTypes.inside };
+    return this._calcCurvePoints(strokeStyle);
+  }
+
+  /**
+   * 计算曲线坐标
+   *
+   * @param strokeStyle
+   * @param center
+   * @returns
+   */
+  private _calcCurvePoints(strokeStyle: StrokeStyle): BazierCurvePoints[] {
+    const center = this.center;
+    const boxPoints = MathUtils.batchTransWithCenter(
+      this.rotateBoxPoints,
+      this.angles,
+      center,
+      true,
+    );
+    const baziers: BazierCurvePoints[] = [];
+    let points: IPoint[] = [];
+    const pointCounters = [];
+
+    range(4).forEach(index => {
+      let radiusPoint = this._calcRadiusPoint(index, true);
+      radiusPoint = MathUtils.transWithCenter(
+        radiusPoint,
+        this.angles,
+        center,
+        true,
+      );
+      const curvePoints = this._getRadiusBazierCurvePoints(
+        boxPoints,
+        radiusPoint,
+        index,
+      );
+      const { start, controller, end } = curvePoints;
+      if (
+        MathUtils.preciseToFixed(start.x, 1) ===
+          MathUtils.preciseToFixed(end.x, 1) &&
+        MathUtils.preciseToFixed(start.y, 1) ===
+          MathUtils.preciseToFixed(end.y, 1) &&
+        MathUtils.preciseToFixed(start.x, 1) ===
+          MathUtils.preciseToFixed(controller.x, 1) &&
+        MathUtils.preciseToFixed(start.y, 1) ===
+          MathUtils.preciseToFixed(controller.y, 1)
+      ) {
+        points.push(controller);
+        pointCounters.push(1);
+      } else {
+        points.push(start, controller, end);
+        pointCounters.push(3);
+      }
+    });
+    points = this.convertPointsByStrokeType(points, strokeStyle);
+    points = MathUtils.batchTransWithCenter(points, this.angles, center);
+    console.log(pointCounters, points);
+    let start = 0;
+    pointCounters.forEach((count, index) => {
+      if (count === 1) {
+        baziers.push({
+          start: points[start],
+          controller: points[start],
+          end: points[start],
+          value: this.radius[index],
+        });
+      } else {
+        baziers.push({
+          start: points[start],
+          controller: points[start + 1],
+          end: points[start + 2],
+          value: this.radius[index],
+        });
+      }
+      start += count;
+    });
+    return baziers;
   }
 
   /**
@@ -545,19 +623,19 @@ export default class ElementRect extends Element implements IElementRect {
     let point: IPoint;
     switch (index) {
       case 0: {
-        point = this.calcRadiusTLPoint(true);
+        point = this.calcRadiusTLPoint(real);
         break;
       }
       case 1: {
-        point = this.calcRadiusTRPoint(true);
+        point = this.calcRadiusTRPoint(real);
         break;
       }
       case 2: {
-        point = this.calcRadiusBRPoint(true);
+        point = this.calcRadiusBRPoint(real);
         break;
       }
       case 3: {
-        point = this.calcRadiusBLPoint(true);
+        point = this.calcRadiusBLPoint(real);
         break;
       }
     }
@@ -567,37 +645,68 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 根据圆角的顶点计算曲线点
    *
+   * @param boxPoints 矩形四个顶点
+   * @param radiusPoint 圆角顶点
    * @param index 圆角索引
    * @returns
    */
-  private _getRadiusBazierCurvePoints(index: number): BazierCurvePoints {
+  private _getRadiusBazierCurvePoints(
+    boxPoints: IPoint[],
+    radiusPoint: IPoint,
+    index: number,
+  ): BazierCurvePoints {
     let start: IPoint, end: IPoint;
-    const controller: IPoint = this.rotateBoxPoints[index];
-    const point = this._calcRadiusPoint(index);
-    const points = MathUtils.calcCrossPointsOfParallelLines(
-      point,
-      this.rotateBoxPoints,
-    );
-    switch (index) {
-      case 0: {
-        start = points[3];
-        end = points[0];
-        break;
+    const controller: IPoint = boxPoints[index];
+
+    const value = this.radius[index];
+    if (!value) {
+      switch (index) {
+        case 0:
+          start = boxPoints[0];
+          end = boxPoints[0];
+          break;
+        case 1: {
+          start = boxPoints[1];
+          end = boxPoints[1];
+          break;
+        }
+        case 2: {
+          start = boxPoints[2];
+          end = boxPoints[2];
+          break;
+        }
+        case 3: {
+          start = boxPoints[3];
+          end = boxPoints[3];
+          break;
+        }
       }
-      case 1: {
-        start = points[0];
-        end = points[1];
-        break;
-      }
-      case 2: {
-        start = points[1];
-        end = points[2];
-        break;
-      }
-      case 3: {
-        start = points[2];
-        end = points[3];
-        break;
+    } else {
+      const points = MathUtils.calcCrossPointsOfParallelLines(
+        radiusPoint,
+        boxPoints,
+      );
+      switch (index) {
+        case 0: {
+          start = points[3];
+          end = points[0];
+          break;
+        }
+        case 1: {
+          start = points[0];
+          end = points[1];
+          break;
+        }
+        case 2: {
+          start = points[1];
+          end = points[2];
+          break;
+        }
+        case 3: {
+          start = points[2];
+          end = points[3];
+          break;
+        }
       }
     }
     return {
@@ -605,20 +714,6 @@ export default class ElementRect extends Element implements IElementRect {
       controller,
       end,
     };
-  }
-
-  /**
-   * 获取圆角组件的曲线点
-   *
-   * @param index 圆角索引
-   * @returns 原始圆角值
-   */
-  private _getBazierCurvePoints(): BazierCurvePoints[] {
-    const result: BazierCurvePoints[] = [];
-    this.radiusNames.forEach((key, index) => {
-      result.push(this._getRadiusBazierCurvePoints(index));
-    });
-    return result;
   }
 
   /**

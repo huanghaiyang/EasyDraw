@@ -21,6 +21,12 @@ export default class PolygonUtils {
     r: number,
     innerOrOuter: boolean,
   ): IPoint {
+    if (MathUtils.preciseToFixed(angle) === MathUtils.preciseToFixed(360)) {
+      angle = 180;
+    }
+    if (MathUtils.preciseToFixed(angle) === MathUtils.preciseToFixed(0)) {
+      angle = 180;
+    }
     // 半角度
     const halfAngle = evaluate("angle / 2", { angle });
     // 三角形斜边

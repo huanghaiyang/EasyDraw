@@ -14,13 +14,14 @@ export default class ElementTaskRect extends ElementTaskBase {
     const {
       innerestStrokePathPointsIndex,
       curvePathPoints,
+      curveFillPathPoints,
       model: { styles },
     } = this.node;
 
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawInnerCurvePathFillWithScale(
         this.canvas,
-        curvePathPoints[innerestStrokePathPointsIndex],
+        curveFillPathPoints,
         fillStyle,
         styles.strokes[innerestStrokePathPointsIndex],
       );

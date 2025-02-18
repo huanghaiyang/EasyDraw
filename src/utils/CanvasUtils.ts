@@ -411,20 +411,19 @@ export default class CanvasUtils {
     options: RenderParams = {},
   ): void {
     const { calcVertices = true } = options;
-    if (calcVertices) {
-      console.log(curvePoints);
-      curvePoints = CanvasUtils.convertBazierPointsByStroke(
-        curvePoints,
-        strokeStyle,
-        points => {
-          return ArbitraryUtils.getArbitraryInnerVertices(
-            points,
-            strokeStyle.width / 2,
-            options,
-          );
-        },
-      );
-    }
+    // if (calcVertices) {
+    //   curvePoints = CanvasUtils.convertBazierPointsByStroke(
+    //     curvePoints,
+    //     strokeStyle,
+    //     points => {
+    //       return ArbitraryUtils.getArbitraryInnerVertices(
+    //         points,
+    //         strokeStyle.width / 2,
+    //         options,
+    //       );
+    //     },
+    //   );
+    // }
     CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
   }
 
@@ -589,16 +588,17 @@ export default class CanvasUtils {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.miterLimit = 0;
+    ctx.lineJoin = "miter";
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
     curvePoints.forEach((curve, index) => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       if (index === 0) {
         ctx.moveTo(start.x, start.y);
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      if (!(controller.x === end.x && controller.y === end.y)) {
+      if (!value) {
         ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
       }
     });
@@ -656,13 +656,13 @@ export default class CanvasUtils {
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
     curvePoints.forEach((curve, index) => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       if (index === 0) {
         ctx.moveTo(start.x, start.y);
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      if (!(controller.x === end.x && controller.y === end.y)) {
+      if (!value) {
         ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
       }
     });
