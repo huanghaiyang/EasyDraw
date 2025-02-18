@@ -414,6 +414,56 @@ export default class MathUtils {
   }
 
   /**
+   * 批量缩放
+   *
+   * @param coords
+   * @param value
+   * @returns
+   */
+  static scales(coords: IPoint[], value: ScaleValue): IPoint[] {
+    return coords.map(coord => MathUtils.scale(coord, value));
+  }
+
+  /**
+   * 缩放坐标系上的某一点
+   *
+   * @param coord
+   * @param value
+   * @param center
+   * @returns
+   */
+  static scaleWithCenter(
+    coord: IPoint,
+    value: ScaleValue,
+    center: IPoint,
+  ): IPoint {
+    coord = {
+      x: coord.x - center.x,
+      y: coord.y - center.y,
+    };
+    coord = MathUtils.scale(coord, value);
+    return {
+      x: coord.x + center.x,
+      y: coord.y + center.y,
+    };
+  }
+
+  /**
+   * 批量缩放坐标系上的点集
+   *
+   * @param coords
+   * @param value
+   * @param center
+   * @returns
+   */
+  static batchScaleWithCenter(
+    coords: IPoint[],
+    value: ScaleValue,
+    center: IPoint,
+  ): IPoint[] {
+    return coords.map(coord => MathUtils.scaleWithCenter(coord, value, center));
+  }
+  /**
    * 角度转弧度
    *
    * @param degrees

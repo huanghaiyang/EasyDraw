@@ -149,18 +149,25 @@ export default class ElementRect extends Element implements IElementRect {
   get curvePathPoints(): BazierCurvePoints[][] {
     return this.model.styles.strokes.map(stroke => {
       const baziers = this._getBazierCurvePoints();
-      return baziers.map(bazier => {
-        const { start, controller, end } = bazier;
-        const points = this.convertPointsByStrokeType(
-          [start, controller, end],
-          stroke,
-        );
-        return {
-          start: points[0],
-          controller: points[1],
-          end: points[2],
-        };
+      let points: IPoint[] = [];
+      baziers.forEach(curve => {
+        const { start, controller, end } = curve;
+        points.push(start, controller, end);
       });
+      points = this.convertPointsByStrokeType(points, stroke);
+
+      const result: BazierCurvePoints[] = [];
+      for (let i = 0; i < points.length; i += 3) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[i + 2];
+        result.push({
+          start: p1,
+          controller: p2,
+          end: p3,
+        } as BazierCurvePoints);
+      }
+      return result;
     });
   }
 
