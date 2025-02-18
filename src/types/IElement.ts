@@ -3,7 +3,7 @@
  * points表示舞台坐标
  * coords表示相对于世界中心的坐标
  */
-import { ElementStatus, IPoint } from "@/types/index";
+import { ElementStatus, IPoint, ISize } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import {
   ElementStyles,
@@ -758,6 +758,10 @@ export default interface IElement {
    * 计算实际角度
    */
   calcActualAngle(): number;
+  /**
+   * 计算原始尺寸
+   */
+  calcPrimitiveSize(): ISize;
   /**
    * 获取激活的控制器
    */

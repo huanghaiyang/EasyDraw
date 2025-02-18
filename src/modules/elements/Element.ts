@@ -1,4 +1,4 @@
-import { ElementStatus, IPoint } from "@/types";
+import { ElementStatus, IPoint, ISize } from "@/types";
 import { ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -1164,6 +1164,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcActualAngle(): number {
     return MathUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
+  }
+
+  /**
+   * 计算原始尺寸
+   */
+  calcPrimitiveSize(): ISize {
+    const boxPoints = MathUtils.batchTransWithCenter(
+      this.rotateBoxPoints,
+      this.angles,
+      this.center,
+      true,
+    );
+    return CommonUtils.calcRectangleSize(boxPoints);
   }
 
   /**

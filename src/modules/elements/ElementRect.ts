@@ -13,7 +13,6 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, clone, uniq } from "lodash";
-import PointController from "../handler/controller/PointController";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
@@ -124,10 +123,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get controllers(): IController[] {
-    return [
-      ...super.controllers,
-      ...this.radiusControllers,
-    ];
+    return [...super.controllers, ...this.radiusControllers];
   }
 
   get isAllRadiusEqual(): boolean {
@@ -426,7 +422,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getRadius(value: number): number {
     if (this._isRadiusing) return value;
-    if (value === 0) return this.minSize * 0.05;
+    if (value === 0) return this.minSize * 0.1;
     return value;
   }
 
@@ -469,12 +465,10 @@ export default class ElementRect extends Element implements IElementRect {
           this.angles,
           center,
           true,
-        )
+        );
         const { width, height } = CommonUtils.calcRectangleSize(boxPoints);
         const minSize = Math.min(width, height);
-        let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(
-          boxPoints,
-        );
+        let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
         c1 = MathUtils.transWithCenter(c1, this.angles, center);
         c2 = MathUtils.transWithCenter(c2, this.angles, center);
         if (this.width <= this.height) {
@@ -552,5 +546,24 @@ export default class ElementRect extends Element implements IElementRect {
           point: this._originalRadiusBLPoint,
         };
     }
+  }
+
+  /**
+   * 修正圆角
+   */
+  private _reviseRadius(): void {
+    const { width, height } = this.calcPrimitiveSize();
+    const minSize = Math.min(width, height);
+    this.radiusNames.forEach(key => {
+      this.model[key] = clamp(this.model[key], 0, minSize / 2);
+    });
+  }
+
+  /**
+   * 刷新尺寸
+   */
+  refreshSize(): void {
+    super.refreshSize();
+    this._reviseRadius();
   }
 }

@@ -113,17 +113,14 @@ export default class ElementUtils {
     worldCoord: IPoint,
     params: StageCalcParams,
   ): IPoint {
+    const { scale, rect, worldCoord: center } = params;
     return {
       x: MathUtils.preciseToFixed(
-        worldCoord.x +
-          params.rect.width / 2 / params.scale -
-          params.worldCoord.x,
+        worldCoord.x + rect.width / 2 / scale - center.x,
         2,
       ),
       y: MathUtils.preciseToFixed(
-        worldCoord.y +
-          params.rect.height / 2 / params.scale -
-          params.worldCoord.y,
+        worldCoord.y + rect.height / 2 / scale - center.y,
         2,
       ),
     };
