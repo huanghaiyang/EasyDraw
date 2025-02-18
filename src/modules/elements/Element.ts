@@ -301,6 +301,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return Math.min(this.model.width, this.model.height);
   }
 
+  get minPrimitiveSize(): number {
+    const { width, height } = this.calcPrimitiveSize();
+    return Math.min(width, height);
+  }
+
   /**
    * 获取显示角度
    *
@@ -1170,13 +1175,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 计算原始尺寸
    */
   calcPrimitiveSize(): ISize {
-    const boxPoints = MathUtils.batchTransWithCenter(
-      this.rotateBoxPoints,
-      this.angles,
-      this.center,
-      true,
+    const boxCoords = MathUtils.batchLeanWithCenter(
+      this.model.boxCoords,
+      -this.model.leanXAngle,
+      -this.model.leanYAngle,
+      this.centerCoord,
     );
-    return CommonUtils.calcRectangleSize(boxPoints);
+    return CommonUtils.calcRectangleSize(boxCoords);
   }
 
   /**

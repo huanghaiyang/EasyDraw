@@ -13,7 +13,6 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, clone, uniq } from "lodash";
-import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -422,7 +421,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getRadius(value: number): number {
     if (this._isRadiusing) return value;
-    if (value === 0) return this.minSize * 0.1;
+    if (value === 0) return (this.minPrimitiveSize / 2) * 0.2;
     return value;
   }
 
@@ -466,8 +465,6 @@ export default class ElementRect extends Element implements IElementRect {
           center,
           true,
         );
-        const { width, height } = CommonUtils.calcRectangleSize(boxPoints);
-        const minSize = Math.min(width, height);
         let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
         c1 = MathUtils.transWithCenter(c1, this.angles, center);
         c2 = MathUtils.transWithCenter(c2, this.angles, center);
@@ -502,7 +499,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = proportion * (minSize / 2);
+        let radius = proportion * (this.minPrimitiveSize / 2);
         if (this.isAllRadiusEqual) {
           this.radiusNames.forEach(key => {
             this.model[key] = radius;
@@ -552,10 +549,8 @@ export default class ElementRect extends Element implements IElementRect {
    * 修正圆角
    */
   private _reviseRadius(): void {
-    const { width, height } = this.calcPrimitiveSize();
-    const minSize = Math.min(width, height);
     this.radiusNames.forEach(key => {
-      this.model[key] = clamp(this.model[key], 0, minSize / 2);
+      this.model[key] = clamp(this.model[key], 0, this.minPrimitiveSize / 2);
     });
   }
 

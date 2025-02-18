@@ -293,6 +293,8 @@ export default interface IElement {
   get height(): number;
   // 最小宽高
   get minSize(): number;
+  // 最小实际宽高
+  get minPrimitiveSize(): number;
   // 旋转角度
   get angle(): number;
   // 位置
