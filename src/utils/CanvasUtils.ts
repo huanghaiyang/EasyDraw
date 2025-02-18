@@ -37,10 +37,10 @@ export default class CanvasUtils {
           [start, end],
           controller,
           (obj, oth) =>
-            MathUtils.preciseToFixed(obj.x, 2) ===
-              MathUtils.preciseToFixed(oth.x, 2) &&
-            MathUtils.preciseToFixed(obj.y, 2) ===
-              MathUtils.preciseToFixed(oth.y, 2),
+            MathUtils.preciseToFixed(obj.x, 1) ===
+              MathUtils.preciseToFixed(oth.x, 1) &&
+            MathUtils.preciseToFixed(obj.y, 1) ===
+              MathUtils.preciseToFixed(oth.y, 1),
         )
       ) {
         points.push(controller);
@@ -51,20 +51,23 @@ export default class CanvasUtils {
       }
     });
     points = converter(points, strokeStyle);
+    // console.log(pointCounters, points)
     const result: BazierCurvePoints[] = [];
     let start = 0;
-    pointCounters.forEach(count => {
+    pointCounters.forEach((count, index) => {
       if (count === 1) {
         result.push({
           start: points[start],
           controller: points[start],
           end: points[start],
+          value: bazierPoints[index].value,
         });
       } else {
         result.push({
           start: points[start],
           controller: points[start + 1],
           end: points[start + 2],
+          value: bazierPoints[index].value,
         });
       }
       start += count;
@@ -317,12 +320,12 @@ export default class CanvasUtils {
     strokeStyle: StrokeStyle,
   ): [BazierCurvePoints[], StrokeStyle] {
     curvePoints = curvePoints.map(curve => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       const [p1, p2, p3] = CommonUtils.scalePoints(
         [start, controller, end],
         CanvasUtils.scale,
       );
-      return { start: p1, controller: p2, end: p3 };
+      return { start: p1, controller: p2, end: p3, value };
     });
     strokeStyle = {
       ...strokeStyle,
@@ -412,7 +415,6 @@ export default class CanvasUtils {
   ): void {
     const { calcVertices = true } = options;
     if (calcVertices) {
-      console.log(curvePoints);
       curvePoints = CanvasUtils.convertBazierPointsByStroke(
         curvePoints,
         strokeStyle,
@@ -592,13 +594,13 @@ export default class CanvasUtils {
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
     curvePoints.forEach((curve, index) => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       if (index === 0) {
         ctx.moveTo(start.x, start.y);
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      if (!(controller.x === end.x && controller.y === end.y)) {
+      if (value) {
         ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
       }
     });
@@ -656,13 +658,13 @@ export default class CanvasUtils {
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
     curvePoints.forEach((curve, index) => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       if (index === 0) {
         ctx.moveTo(start.x, start.y);
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      if (!(controller.x === end.x && controller.y === end.y)) {
+      if (value) {
         ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
       }
     });

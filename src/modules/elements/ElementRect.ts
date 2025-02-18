@@ -572,6 +572,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getRadiusBazierCurvePoints(index: number): BazierCurvePoints {
     let start: IPoint, end: IPoint;
+    const value = this.radius[index];
     const controller: IPoint = this.rotateBoxPoints[index];
     const point = this._calcRadiusPoint(index);
     const points = MathUtils.calcCrossPointsOfParallelLines(
@@ -604,6 +605,7 @@ export default class ElementRect extends Element implements IElementRect {
       start,
       controller,
       end,
+      value,
     };
   }
 
