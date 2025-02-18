@@ -8,7 +8,7 @@ import {
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { RenderParams } from "@/types/IRender";
+import { BazierCurvePoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 
 export default class CanvasUtils {
@@ -249,6 +249,32 @@ export default class CanvasUtils {
   }
 
   /**
+   * 曲线参数缩放
+   *
+   * @param curvePoints
+   * @param strokeStyle
+   * @returns
+   */
+  static transCurveParamsWithScale(
+    curvePoints: BazierCurvePoints[],
+    strokeStyle: StrokeStyle,
+  ): [BazierCurvePoints[], StrokeStyle] {
+    curvePoints = curvePoints.map(curve => {
+      const { start, controller, end } = curve;
+      const [p1, p2, p3] = CommonUtils.scalePoints(
+        [start, controller, end],
+        CanvasUtils.scale,
+      );
+      return { start: p1, controller: p2, end: p3 };
+    });
+    strokeStyle = {
+      ...strokeStyle,
+      width: strokeStyle.width * CanvasUtils.scale,
+    };
+    return [curvePoints, strokeStyle];
+  }
+
+  /**
    * 绘制路径
    *
    * @param target
@@ -312,11 +338,49 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制内曲线填充
+   *
+   * @param target
+   * @param curvePoints
+   * @param fillStyle
+   * @param strokeStyle
+   * @param options
+   */
+  static drawInnerCurvePathFill(
+    target: HTMLCanvasElement,
+    curvePoints: BazierCurvePoints[],
+    fillStyle: FillStyle,
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ): void {
+    const { calcVertices = true } = options;
+    if (calcVertices) {
+      curvePoints = curvePoints.map(curve => {
+        const { start, controller, end } = curve;
+        const [p1, p2, p3] = ArbitraryUtils.getArbitraryInnerVertices(
+          [start, controller, end],
+          strokeStyle.width / 2,
+          { ...options, isFold: false },
+        );
+        return {
+          start: p1,
+          controller: p2,
+          end: p3,
+        };
+      });
+    }
+    CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
+  }
+
+  /**
+
+  /**
    * 绘制内填充
    *
    * @param target
    * @param points
-   * @param styles
+   * @param fillStyle
+   * @param strokeStyle
    * @param options
    */
   static drawInnerPathFillWithScale(
@@ -342,6 +406,37 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制曲线内填充
+   *
+   * @param target
+   * @param curvePoints
+   * @param fillStyle
+   * @param strokeStyle
+   * @param options
+   */
+  static drawInnerCurvePathFillWithScale(
+    target: HTMLCanvasElement,
+    curvePoints: BazierCurvePoints[],
+    fillStyle: FillStyle,
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ): void {
+    [curvePoints, strokeStyle] = CanvasUtils.transCurveParamsWithScale(
+      curvePoints,
+      strokeStyle,
+    );
+    if (fillStyle.colorOpacity) {
+      CanvasUtils.drawInnerCurvePathFill(
+        target,
+        curvePoints,
+        fillStyle,
+        strokeStyle,
+        options,
+      );
+    }
+  }
+
+  /**
    * 绘制描边
    *
    * @param target
@@ -359,6 +454,27 @@ export default class CanvasUtils {
       strokeStyle,
     );
     CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
+  }
+
+  /**
+   * 绘制曲线描边
+   *
+   * @param target
+   * @param curvePoints
+   * @param strokeStyle
+   * @param options
+   */
+  static drawCurvePathStrokeWidthScale(
+    target: HTMLCanvasElement,
+    curvePoints: BazierCurvePoints[],
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ) {
+    [curvePoints, strokeStyle] = CanvasUtils.transCurveParamsWithScale(
+      curvePoints,
+      strokeStyle,
+    );
+    CanvasUtils.drawCurvePathStroke(target, curvePoints, strokeStyle, options);
   }
 
   /**
@@ -400,6 +516,44 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制曲线描边
+   *
+   * @param target
+   * @param curvePoints
+   * @param strokeStyle
+   * @param options
+   */
+  static drawCurvePathStroke(
+    target: HTMLCanvasElement,
+    curvePoints: BazierCurvePoints[],
+    strokeStyle: StrokeStyle,
+    options: RenderParams = {},
+  ) {
+    const { isFold = true, miterLimit } = options;
+    const ctx = target.getContext("2d");
+    ctx.save();
+    ctx.miterLimit = 0;
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
+    ctx.beginPath();
+    curvePoints.forEach((curve, index) => {
+      const { start, controller, end } = curve;
+      if (index === 0) {
+        ctx.moveTo(start.x, start.y);
+      } else {
+        ctx.lineTo(start.x, start.y);
+      }
+      ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+    });
+    isFold && ctx.closePath();
+    // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
+    if (strokeStyle.width) {
+      ctx.lineWidth = strokeStyle.width;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /**
    * 绘制填充形状
    *
    * @param target
@@ -421,6 +575,36 @@ export default class CanvasUtils {
       } else {
         ctx.lineTo(point.x, point.y);
       }
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /**
+   * 绘制贝塞尔曲线填充
+   *
+   * @param target
+   * @param curvePoints
+   * @param fillStyle
+   */
+  static drawCurvePathFill(
+    target: HTMLCanvasElement,
+    curvePoints: BazierCurvePoints[],
+    fillStyle: FillStyle,
+  ) {
+    const ctx = target.getContext("2d");
+    ctx.save();
+    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
+    ctx.beginPath();
+    curvePoints.forEach((curve, index) => {
+      const { start, controller, end } = curve;
+      if (index === 0) {
+        ctx.moveTo(start.x, start.y);
+      } else {
+        ctx.lineTo(start.x, start.y);
+      }
+      ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
     });
     ctx.closePath();
     ctx.fill();

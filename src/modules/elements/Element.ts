@@ -807,7 +807,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param strokeStyle
    * @returns
    */
-  private convertPointsByStrokeType(
+  protected convertPointsByStrokeType(
     points: IPoint[],
     strokeStyle: StrokeStyle,
   ): IPoint[] {

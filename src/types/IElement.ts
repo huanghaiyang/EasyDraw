@@ -19,6 +19,7 @@ import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
+import { BazierCurvePoints } from "@/types/IRender";
 
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
@@ -867,6 +868,12 @@ export default interface IElement {
 export interface IElementRect extends IElement {
   // 圆角控制器
   get radiusControllers(): IPointController[];
+  // 圆角点
+  get radiusPoints(): IPoint[];
+  // 圆角
+  get radius(): number[];
+  // 圆角名称
+  get radiusNames(): string[];
   // 是否所有圆角半径相等
   get isAllRadiusEqual(): boolean;
   // 左上角圆角半径
@@ -893,54 +900,56 @@ export interface IElementRect extends IElement {
   get radiusBRPoint(): IPoint;
   // 左下角圆角点
   get radiusBLPoint(): IPoint;
+  // 曲线路径点
+  get curvePathPoints(): BazierCurvePoints[][];
   /**
    * 计算左上角圆角坐标
    */
-  calcRadiusTLCoord(): IPoint;
+  calcRadiusTLCoord(real?: boolean): IPoint;
   /**
    * 计算右上角圆角坐标
    */
-  calcRadiusTRCoord(): IPoint;
+  calcRadiusTRCoord(real?: boolean): IPoint;
   /**
    * 计算右下角圆角坐标
    */
-  calcRadiusBRCoord(): IPoint;
+  calcRadiusBRCoord(real?: boolean): IPoint;
   /**
    * 计算左下角圆角坐标
    */
-  calcRadiusBLCoord(): IPoint;
+  calcRadiusBLCoord(real?: boolean): IPoint;
   /**
    * 计算左上角圆角点
    */
-  calcRadiusTLPoint(): IPoint;
+  calcRadiusTLPoint(real?: boolean): IPoint;
   /**
    * 计算右上角圆角点
    */
-  calcRadiusTRPoint(): IPoint;
+  calcRadiusTRPoint(real?: boolean): IPoint;
   /**
    * 计算右下角圆角点
    */
-  calcRadiusBRPoint(): IPoint;
+  calcRadiusBRPoint(real?: boolean): IPoint;
   /**
    * 计算左下角圆角点
    */
-  calcRadiusBLPoint(): IPoint;
+  calcRadiusBLPoint(real?: boolean): IPoint;
   /**
    * 刷新左上角圆角点
    */
-  refreshRadiusTLPoint(): void;
+  refreshRadiusTLPoint(real?: boolean): void;
   /**
    * 刷新右上角圆角点
    */
-  refreshRadiusTRPoint(): void;
+  refreshRadiusTRPoint(real?: boolean): void;
   /**
    * 刷新右下角圆角点
    */
-  refreshRadiusBRPoint(): void;
+  refreshRadiusBRPoint(real?: boolean): void;
   /**
    * 刷新左下角圆角点
    */
-  refreshRadiusBLPoint(): void;
+  refreshRadiusBLPoint(real?: boolean): void;
   /**
    * 刷新左上角圆角控制器
    */

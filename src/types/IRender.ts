@@ -1,5 +1,6 @@
 import { IRenderTask } from "@/types/IRenderTask";
 import { AngleModel } from "@/types/IElement";
+import { IPoint } from "@/types/index";
 
 // 渲染器
 export interface IQueueRender {
@@ -60,4 +61,11 @@ export type RenderParams = AngleModel & {
   miterLimit?: number;
   // 倾斜y
   leanY?: number;
+};
+
+// 曲线点
+export type BazierCurvePoints = {
+  start: IPoint;
+  controller: IPoint;
+  end: IPoint;
 };

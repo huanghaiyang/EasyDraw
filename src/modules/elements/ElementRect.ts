@@ -13,6 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, clone, uniq } from "lodash";
+import { BazierCurvePoints } from "@/types/IRender";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -58,6 +59,15 @@ export default class ElementRect extends Element implements IElementRect {
       this.model.radiusTR,
       this.model.radiusBR,
       this.model.radiusBL,
+    ];
+  }
+
+  get radiusPoints(): IPoint[] {
+    return [
+      this._radiusTLPoint,
+      this._radiusTRPoint,
+      this._radiusBRPoint,
+      this._radiusBLPoint,
     ];
   }
 
@@ -136,13 +146,31 @@ export default class ElementRect extends Element implements IElementRect {
     );
   }
 
+  get curvePathPoints(): BazierCurvePoints[][] {
+    return this.model.styles.strokes.map(stroke => {
+      const baziers = this._getBazierCurvePoints();
+      return baziers.map(bazier => {
+        const { start, controller, end } = bazier;
+        const points = this.convertPointsByStrokeType(
+          [start, controller, end],
+          stroke,
+        );
+        return {
+          start: points[0],
+          controller: points[1],
+          end: points[2],
+        };
+      });
+    });
+  }
+
   /**
    * 计算左上角圆角点的世界坐标
    *
    * @returns 左上角圆角点
    */
-  calcRadiusTLCoord(): IPoint {
-    const radius = this.visualRadiusTL;
+  calcRadiusTLCoord(real?: boolean): IPoint {
+    const radius = real ? this.model.radiusTL : this.visualRadiusTL;
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[0],
@@ -163,8 +191,8 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 右上角圆角点
    */
-  calcRadiusTRCoord(): IPoint {
-    const radius = this.visualRadiusTR;
+  calcRadiusTRCoord(real?: boolean): IPoint {
+    const radius = real ? this.model.radiusTR : this.visualRadiusTR;
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[1],
@@ -185,8 +213,8 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 右下角圆角点
    */
-  calcRadiusBRCoord(): IPoint {
-    const radius = this.visualRadiusBR;
+  calcRadiusBRCoord(real?: boolean): IPoint {
+    const radius = real ? this.model.radiusBR : this.visualRadiusBR;
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[2],
@@ -207,8 +235,8 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 左下角圆角点
    */
-  calcRadiusBLCoord(): IPoint {
-    const radius = this.visualRadiusBL;
+  calcRadiusBLCoord(real?: boolean): IPoint {
+    const radius = real ? this.model.radiusBL : this.visualRadiusBL;
     const coord = MathUtils.translate(
       MathUtils.leanWithCenter(
         this.model.boxCoords[3],
@@ -229,9 +257,9 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 左上角圆角点
    */
-  calcRadiusTLPoint(): IPoint {
+  calcRadiusTLPoint(real?: boolean): IPoint {
     const point = ElementUtils.calcStageRelativePoint(
-      this.calcRadiusTLCoord(),
+      this.calcRadiusTLCoord(real),
       this.shield.stageCalcParams,
     );
     return MathUtils.transWithCenter(point, this.angles, this.center);
@@ -242,9 +270,9 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 右上角圆角点
    */
-  calcRadiusTRPoint(): IPoint {
+  calcRadiusTRPoint(real?: boolean): IPoint {
     const point = ElementUtils.calcStageRelativePoint(
-      this.calcRadiusTRCoord(),
+      this.calcRadiusTRCoord(real),
       this.shield.stageCalcParams,
     );
     return MathUtils.transWithCenter(point, this.angles, this.center);
@@ -255,9 +283,9 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 右下角圆角点
    */
-  calcRadiusBRPoint(): IPoint {
+  calcRadiusBRPoint(real?: boolean): IPoint {
     const point = ElementUtils.calcStageRelativePoint(
-      this.calcRadiusBRCoord(),
+      this.calcRadiusBRCoord(real),
       this.shield.stageCalcParams,
     );
     return MathUtils.transWithCenter(point, this.angles, this.center);
@@ -268,9 +296,9 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @returns 左下角圆角点
    */
-  calcRadiusBLPoint(): IPoint {
+  calcRadiusBLPoint(real?: boolean): IPoint {
     const point = ElementUtils.calcStageRelativePoint(
-      this.calcRadiusBLCoord(),
+      this.calcRadiusBLCoord(real),
       this.shield.stageCalcParams,
     );
     return MathUtils.transWithCenter(point, this.angles, this.center);
@@ -510,6 +538,91 @@ export default class ElementRect extends Element implements IElementRect {
         this.refreshRadius();
       }
     }
+  }
+
+  /**
+   * 计算圆角点
+   * @param index 圆角索引
+   * @param real 是否实际坐标
+   */
+  private _calcRadiusPoint(index: number, real?: boolean): IPoint {
+    let point: IPoint;
+    switch (index) {
+      case 0: {
+        point = this.calcRadiusTLPoint(true);
+        break;
+      }
+      case 1: {
+        point = this.calcRadiusTRPoint(true);
+        break;
+      }
+      case 2: {
+        point = this.calcRadiusBRPoint(true);
+        break;
+      }
+      case 3: {
+        point = this.calcRadiusBLPoint(true);
+        break;
+      }
+    }
+    return point;
+  }
+
+  /**
+   * 根据圆角的顶点计算曲线点
+   *
+   * @param index 圆角索引
+   * @returns
+   */
+  private _getRadiusBazierCurvePoints(index: number): BazierCurvePoints {
+    let start: IPoint, end: IPoint;
+    const controller: IPoint = this.rotateBoxPoints[index];
+    const point = this._calcRadiusPoint(index);
+    const points = MathUtils.calcCrossPointsOfParallelLines(
+      point,
+      this.rotateBoxPoints,
+    );
+    switch (index) {
+      case 0: {
+        start = points[3];
+        end = points[0];
+        break;
+      }
+      case 1: {
+        start = points[0];
+        end = points[1];
+        break;
+      }
+      case 2: {
+        start = points[1];
+        end = points[2];
+        break;
+      }
+      case 3: {
+        start = points[2];
+        end = points[3];
+        break;
+      }
+    }
+    return {
+      start,
+      controller,
+      end,
+    };
+  }
+
+  /**
+   * 获取圆角组件的曲线点
+   *
+   * @param index 圆角索引
+   * @returns 原始圆角值
+   */
+  private _getBazierCurvePoints(): BazierCurvePoints[] {
+    const result: BazierCurvePoints[] = [];
+    this.radiusNames.forEach((key, index) => {
+      result.push(this._getRadiusBazierCurvePoints(index));
+    });
+    return result;
   }
 
   /**

@@ -3,6 +3,9 @@ import { IPoint, ScaleValue, TranslationValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
 
+// 直线类型
+export type DirectionLine = { point: IPoint; direction: IPoint };
+
 export default class MathUtils {
   /**
    * 计算平移矩阵
@@ -1000,6 +1003,11 @@ export default class MathUtils {
 
   /**
    * 给定三角形的三个坐标点a,b,c计算b的内测夹角
+   *
+   * @param a
+   * @param b
+   * @param c
+   * @returns
    */
   static calcTriangleAngle2(a: IPoint, b: IPoint, c: IPoint): number {
     const angle = Math.acos(
@@ -1011,6 +1019,11 @@ export default class MathUtils {
 
   /**
    * 给定三角形的三个坐标点a,b,c计算b的外侧夹角
+   *
+   * @param a
+   * @param b
+   * @param c
+   * @returns
    */
   static calcTriangleAngle3(a: IPoint, b: IPoint, c: IPoint): number {
     const angle = Math.acos(
@@ -1022,6 +1035,10 @@ export default class MathUtils {
 
   /**
    * 给定a向量和b向量，其中b垂直于a，且a+b=c,求向量c的坐标
+   *
+   * @param a
+   * @param b
+   * @returns
    */
   static calcVectorC(a: IPoint, b: IPoint): IPoint {
     const cx = a.x + b.x;
@@ -1031,10 +1048,27 @@ export default class MathUtils {
 
   /**
    * 给定原点以及坐标，计算向量
+   *
+   * @param origin
+   * @param point
+   * @returns
    */
   static calcVector(origin: IPoint, point: IPoint): IPoint {
     const dx = point.x - origin.x;
     const dy = point.y - origin.y;
+    return { x: dx, y: dy };
+  }
+
+  /**
+   * 向量平移到新的原点
+   *
+   * @param vector
+   * @param origin
+   * @returns
+   */
+  static translateVector(vector: IPoint, origin: IPoint): IPoint {
+    const dx = vector.x - origin.x;
+    const dy = vector.y - origin.y;
     return { x: dx, y: dy };
   }
 
@@ -1181,36 +1215,6 @@ export default class MathUtils {
   }
 
   /**
-   * 计算两条直线的交点
-   */
-  static calcLineCrossPoint(
-    line1Start: IPoint,
-    line1End: IPoint,
-    line2Start: IPoint,
-    line2End: IPoint,
-  ): IPoint | null {
-    const denominator =
-      (line2End.y - line2Start.y) * (line1End.x - line1Start.x) -
-      (line2End.x - line2Start.x) * (line1End.y - line1Start.y);
-    if (denominator === 0) {
-      // 两条直线平行
-      return null;
-    }
-
-    const u =
-      (line2End.x - line2Start.x) * (line1Start.y - line2Start.y) -
-      (line2End.y - line2Start.y) * (line1Start.x - line1End.x);
-    if (u === 0 || u === denominator) {
-      // 两条直线重合
-      return null;
-    }
-    return {
-      x: (line1Start.x + u * (line1End.x - line1Start.x)) / denominator,
-      y: (line1Start.y + u * (line1End.y - line1Start.y)) / denominator,
-    };
-  }
-
-  /**
    * 根据矩阵获取缩放比例
    *
    * @param matrix
@@ -1228,7 +1232,7 @@ export default class MathUtils {
 
   /**
    * 计算平行四边形四个内角平分线的两个交点坐标
-   * 
+   *
    * @param vertices 平行四边形的四个顶点坐标，按顺序排列
    * @returns 两个交点坐标数组
    */
@@ -1241,7 +1245,72 @@ export default class MathUtils {
     const [A, B, C, D] = vertices;
 
     // 计算每个顶点的角平分线参数方程
-    const bisectors = vertices.map((vertex, index) => {
+    const bisectors = MathUtils.calcBisectors(vertices);
+    const width = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
+    const height = Math.sqrt(Math.pow(D.x - A.x, 2) + Math.pow(D.y - A.y, 2));
+
+    // 计算相邻顶点的角平分线交点
+    const intersections: IPoint[] = [];
+
+    if (width < height) {
+      intersections.push(
+        MathUtils.calcIntersection(bisectors[0], bisectors[1]),
+      );
+      intersections.push(
+        MathUtils.calcIntersection(bisectors[2], bisectors[3]),
+      );
+    } else {
+      intersections.push(
+        MathUtils.calcIntersection(bisectors[0], bisectors[3]),
+      );
+      intersections.push(
+        MathUtils.calcIntersection(bisectors[1], bisectors[2]),
+      );
+    }
+
+    return intersections;
+  }
+
+  /**
+   * 计算两条直线的交点
+   *
+   * @param line1
+   * @param line2
+   * @returns
+   */
+  static calcIntersection(
+    line1: DirectionLine,
+    line2: DirectionLine,
+  ): IPoint | null {
+    const p1 = line1.point;
+    const d1 = line1.direction;
+    const p2 = line2.point;
+    const d2 = line2.direction;
+
+    // 解参数方程：p1 + t*d1 = p2 + s*d2
+    const denominator = d1.x * d2.y - d1.y * d2.x;
+    if (Math.abs(denominator) < 1e-6) return null; // 平行线无交点
+
+    const dx = p2.x - p1.x;
+    const dy = p2.y - p1.y;
+    const t = (dx * d2.y - dy * d2.x) / denominator;
+    const s = (dx * d1.y - dy * d1.x) / denominator;
+
+    return {
+      x: p1.x + t * d1.x,
+      y: p1.y + t * d1.y,
+    };
+  }
+
+  /**
+   * 计算给定多边形的角平分线
+   *
+   * @param vertices
+   * @returns
+   */
+  static calcBisectors(vertices: IPoint[]): DirectionLine[] {
+    const [A, B, C, D] = vertices;
+    return vertices.map((vertex, index) => {
       let v1: IPoint, v2: IPoint;
       switch (index) {
         case 0: // A: 邻边AB和AD
@@ -1273,48 +1342,41 @@ export default class MathUtils {
       // 角平分线方向向量
       const dir = { x: uv1.x + uv2.x, y: uv1.y + uv2.y };
 
-      return { point: vertex, direction: dir };
+      return { point: vertex, direction: dir } as DirectionLine;
     });
+  }
 
-    // 计算交点函数
-    const intersect = (
-      line1: { point: IPoint; direction: IPoint },
-      line2: { point: IPoint; direction: IPoint },
-    ): IPoint | null => {
-      const p1 = line1.point;
-      const d1 = line1.direction;
-      const p2 = line2.point;
-      const d2 = line2.direction;
+  /**
+   * 求过平行四边形内一点的两条与平行四边形的四个边平行的线相较于四个边的交点
+   */
+  static calcCrossPointsOfParallelLines(
+    point: IPoint,
+    vertices: IPoint[],
+  ): IPoint[] {
+    const [A, B, C, D] = vertices;
+    const AB = { x: B.x - A.x, y: B.y - A.y };
+    const BC = { x: C.x - B.x, y: C.y - B.y };
+    const CD = { x: D.x - C.x, y: D.y - C.y };
+    const DA = { x: A.x - D.x, y: A.y - D.y };
+    const BA = { x: A.x - B.x, y: A.y - B.y };
 
-      // 解参数方程：p1 + t*d1 = p2 + s*d2
-      const denominator = d1.x * d2.y - d1.y * d2.x;
-      if (Math.abs(denominator) < 1e-6) return null; // 平行线无交点
+    const p_ab = MathUtils.calcIntersection(
+      { point: A, direction: AB },
+      { point: point, direction: DA },
+    );
+    const p_bc = MathUtils.calcIntersection(
+      { point: B, direction: BC },
+      { point: point, direction: AB },
+    );
+    const p_cd = MathUtils.calcIntersection(
+      { point: C, direction: CD },
+      { point: point, direction: BC },
+    );
+    const p_da = MathUtils.calcIntersection(
+      { point: D, direction: DA },
+      { point: point, direction: BA },
+    );
 
-      const dx = p2.x - p1.x;
-      const dy = p2.y - p1.y;
-      const t = (dx * d2.y - dy * d2.x) / denominator;
-      const s = (dx * d1.y - dy * d1.x) / denominator;
-
-      return {
-        x: p1.x + t * d1.x,
-        y: p1.y + t * d1.y,
-      };
-    };
-
-    const width = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
-    const height = Math.sqrt(Math.pow(D.x - A.x, 2) + Math.pow(D.y - A.y, 2));
-
-    // 计算相邻顶点的角平分线交点
-    const intersections: IPoint[] = [];
-
-    if (width < height) {
-     intersections.push(intersect(bisectors[0], bisectors[1])); 
-     intersections.push(intersect(bisectors[2], bisectors[3]));
-    } else {
-     intersections.push(intersect(bisectors[0], bisectors[3]));
-     intersections.push(intersect(bisectors[1], bisectors[2]));
-    }
-
-    return intersections;
+    return [p_ab, p_bc, p_cd, p_da];
   }
 }
