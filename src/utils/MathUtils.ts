@@ -1042,12 +1042,16 @@ export default class MathUtils {
     // 计算向量的模（长度）
     let magnitudeAB = Math.sqrt(AB.x * AB.x + AB.y * AB.y);
     let magnitudeBC = Math.sqrt(BC.x * BC.x + BC.y * BC.y);
-    // 计算夹角的余弦值
+    // 计算夹角的余弦值,值为1表示三点共线
     let cosTheta = dotProduct / (magnitudeAB * magnitudeBC);
     // 计算夹角（以弧度为单位）
     let angleRadians = Math.acos(cosTheta);
     // 将弧度转换为度
     let angleDegrees = angleRadians * (180 / Math.PI);
+    // 如果角度是不合法的值，则返回0，表示三点共线
+    if (isNaN(angleDegrees)) {
+      angleDegrees = 0;
+    }
     return angleDegrees;
   }
 

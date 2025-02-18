@@ -25,4 +25,20 @@ export default class LodashUtils {
     });
     return target;
   }
+
+  /**
+   * 判断数组中是否都等于给定值
+   *
+   * @param array
+   * @param value
+   * @param eqFunc
+   * @returns
+   */
+  static isAllEqualWith<T>(
+    array: T[],
+    value: T,
+    eqFunc: (obj: T, oth: T) => boolean,
+  ): boolean {
+    return array.every(item => eqFunc(item, value));
+  }
 }

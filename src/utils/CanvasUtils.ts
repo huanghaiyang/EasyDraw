@@ -10,10 +10,67 @@ import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { BazierCurvePoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
+
+  /**
+   * 曲线坐标转换
+   *
+   * @param bazierPoints
+   * @param strokeStyle
+   * @returns
+   */
+  static convertBazierPointsByStroke(
+    bazierPoints: BazierCurvePoints[],
+    strokeStyle: StrokeStyle,
+    converter: (points: IPoint[], strokeStyle: StrokeStyle) => IPoint[],
+  ): BazierCurvePoints[] {
+    let points: IPoint[] = [];
+    const pointCounters = [];
+    bazierPoints.forEach(curve => {
+      const { start, controller, end } = curve;
+      if (
+        LodashUtils.isAllEqualWith(
+          [start, end],
+          controller,
+          (obj, oth) =>
+            MathUtils.preciseToFixed(obj.x, 2) ===
+              MathUtils.preciseToFixed(oth.x, 2) &&
+            MathUtils.preciseToFixed(obj.y, 2) ===
+              MathUtils.preciseToFixed(oth.y, 2),
+        )
+      ) {
+        points.push(controller);
+        pointCounters.push(1);
+      } else {
+        points.push(start, controller, end);
+        pointCounters.push(3);
+      }
+    });
+    points = converter(points, strokeStyle);
+    const result: BazierCurvePoints[] = [];
+    let start = 0;
+    pointCounters.forEach(count => {
+      if (count === 1) {
+        result.push({
+          start: points[start],
+          controller: points[start],
+          end: points[start],
+        });
+      } else {
+        result.push({
+          start: points[start],
+          controller: points[start + 1],
+          end: points[start + 2],
+        });
+      }
+      start += count;
+    });
+    return result;
+  }
 
   /**
    * 根据线型转换点坐标
@@ -355,23 +412,18 @@ export default class CanvasUtils {
   ): void {
     const { calcVertices = true } = options;
     if (calcVertices) {
-      let points: IPoint[] = [];
-      curvePoints.forEach(curve => {
-        const { start, controller, end } = curve;
-        points.push(start, controller, end);
-      });
-      points = ArbitraryUtils.getArbitraryInnerVertices(
-        points,
-        strokeStyle.width / 2,
-        options,
+      console.log(curvePoints);
+      curvePoints = CanvasUtils.convertBazierPointsByStroke(
+        curvePoints,
+        strokeStyle,
+        points => {
+          return ArbitraryUtils.getArbitraryInnerVertices(
+            points,
+            strokeStyle.width / 2,
+            options,
+          );
+        },
       );
-      curvePoints = [];
-      for (let i = 0; i < points.length; i += 3) {
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = points[i + 2];
-        curvePoints.push({ start: p1, controller: p2, end: p3 });
-      }
     }
     CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
   }
@@ -533,7 +585,7 @@ export default class CanvasUtils {
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
-    const { isFold = true, miterLimit } = options;
+    const { isFold = true } = options;
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.miterLimit = 0;
@@ -546,7 +598,9 @@ export default class CanvasUtils {
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+      if (!(controller.x === end.x && controller.y === end.y)) {
+        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+      }
     });
     isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
@@ -608,7 +662,9 @@ export default class CanvasUtils {
       } else {
         ctx.lineTo(start.x, start.y);
       }
-      ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+      if (!(controller.x === end.x && controller.y === end.y)) {
+        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+      }
     });
     ctx.closePath();
     ctx.fill();

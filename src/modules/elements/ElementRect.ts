@@ -14,6 +14,7 @@ import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, clone, uniq } from "lodash";
 import { BazierCurvePoints } from "@/types/IRender";
+import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   // 左上角圆角控制器
@@ -147,27 +148,15 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get curvePathPoints(): BazierCurvePoints[][] {
-    return this.model.styles.strokes.map(stroke => {
+    return this.model.styles.strokes.map(strokeStyle => {
       const baziers = this._getBazierCurvePoints();
-      let points: IPoint[] = [];
-      baziers.forEach(curve => {
-        const { start, controller, end } = curve;
-        points.push(start, controller, end);
-      });
-      points = this.convertPointsByStrokeType(points, stroke);
-
-      const result: BazierCurvePoints[] = [];
-      for (let i = 0; i < points.length; i += 3) {
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const p3 = points[i + 2];
-        result.push({
-          start: p1,
-          controller: p2,
-          end: p3,
-        } as BazierCurvePoints);
-      }
-      return result;
+      return CanvasUtils.convertBazierPointsByStroke(
+        baziers,
+        strokeStyle,
+        points => {
+          return this.convertPointsByStrokeType(points, strokeStyle);
+        },
+      );
     });
   }
 
