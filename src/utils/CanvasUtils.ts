@@ -355,19 +355,23 @@ export default class CanvasUtils {
   ): void {
     const { calcVertices = true } = options;
     if (calcVertices) {
-      curvePoints = curvePoints.map(curve => {
+      let points: IPoint[] = [];
+      curvePoints.forEach(curve => {
         const { start, controller, end } = curve;
-        const [p1, p2, p3] = ArbitraryUtils.getArbitraryInnerVertices(
-          [start, controller, end],
-          strokeStyle.width / 2,
-          { ...options, isFold: false },
-        );
-        return {
-          start: p1,
-          controller: p2,
-          end: p3,
-        };
+        points.push(start, controller, end);
       });
+      points = ArbitraryUtils.getArbitraryInnerVertices(
+        points,
+        strokeStyle.width / 2,
+        options,
+      );
+      curvePoints = [];
+      for (let i = 0; i < points.length; i += 3) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const p3 = points[i + 2];
+        curvePoints.push({ start: p1, controller: p2, end: p3 });
+      }
     }
     CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
   }
