@@ -37,10 +37,10 @@ export default class CanvasUtils {
           [start, end],
           controller,
           (obj, oth) =>
-            MathUtils.preciseToFixed(obj.x, 1) ===
-              MathUtils.preciseToFixed(oth.x, 1) &&
-            MathUtils.preciseToFixed(obj.y, 1) ===
-              MathUtils.preciseToFixed(oth.y, 1),
+            Math.round(MathUtils.preciseToFixed(obj.x, 1)) ===
+              Math.round(MathUtils.preciseToFixed(oth.x, 1)) &&
+            Math.round(MathUtils.preciseToFixed(obj.y, 1)) ===
+              Math.round(MathUtils.preciseToFixed(oth.y, 1)),
         )
       ) {
         points.push(controller);

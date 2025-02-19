@@ -12,7 +12,7 @@ import { computed } from "mobx";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
-import { clamp, clone, uniq } from "lodash";
+import { clamp, clone, isNull, uniq } from "lodash";
 import { BazierCurvePoints } from "@/types/IRender";
 import CanvasUtils from "@/utils/CanvasUtils";
 
@@ -150,6 +150,7 @@ export default class ElementRect extends Element implements IElementRect {
   get curvePathPoints(): BazierCurvePoints[][] {
     return this.model.styles.strokes.map(strokeStyle => {
       const baziers = this._getBazierCurvePoints();
+      if (!baziers) return [];
       return CanvasUtils.convertBazierPointsByStroke(
         baziers,
         strokeStyle,
@@ -523,7 +524,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = proportion * (this.minPrimitiveSize / 2);
+        let radius = Math.floor(proportion * (this.minPrimitiveSize / 2));
         if (this.isAllRadiusEqual) {
           this.radiusNames.forEach(key => {
             this.model[key] = radius;
@@ -601,6 +602,7 @@ export default class ElementRect extends Element implements IElementRect {
         break;
       }
     }
+    if (isNull(start) || isNull(end)) return null;
     return {
       start,
       controller,
@@ -617,10 +619,13 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getBazierCurvePoints(): BazierCurvePoints[] {
     const result: BazierCurvePoints[] = [];
+    let hasNull = false;
     this.radiusNames.forEach((key, index) => {
-      result.push(this._getRadiusBazierCurvePoints(index));
+      const curve = this._getRadiusBazierCurvePoints(index);
+      if (curve) result.push(curve);
+      else hasNull = true;
     });
-    return result;
+    return hasNull ? null : result;
   }
 
   /**
@@ -661,7 +666,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _reviseRadius(): void {
     this.radiusNames.forEach(key => {
-      this.model[key] = clamp(this.model[key], 0, this.minPrimitiveSize / 2);
+      this.model[key] = Math.floor(clamp(this.model[key], 0, this.minPrimitiveSize / 2));
     });
   }
 
