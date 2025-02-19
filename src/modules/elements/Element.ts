@@ -796,7 +796,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.id = CommonUtils.getRandomDateId();
     this.rotation = new ElementRotation(this);
     this.shield = shield;
-    this.refresh({ originals: true });
     makeObservable(this);
   }
 

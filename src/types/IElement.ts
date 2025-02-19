@@ -82,50 +82,12 @@ export const DefaultAngleModel: AngleModel = {
 
 // 圆角模型
 export type RadiusModel = {
-  // 左上角圆角半径
-  radiusTL?: number;
-  // 右上角圆角半径
-  radiusTR?: number;
-  // 右下角圆角半径
-  radiusBR?: number;
-  // 左下角圆角半径
-  radiusBL?: number;
+  radius?: number[];
 };
 
 // 默认圆角模型
 export const DefaultRadiusModel: RadiusModel = {
-  // 左上角圆角半径
-  radiusTL: 0,
-  // 右上角圆角半径
-  radiusTR: 0,
-  // 右下角圆角半径
-  radiusBR: 0,
-  // 左下角圆角半径
-  radiusBL: 0,
-};
-
-// 圆角刷新选项
-export type RadiusRefreshOptions = {
-  // 左上角圆角半径
-  tl?: boolean;
-  // 右上角圆角半径
-  tr?: boolean;
-  // 右下角圆角半径
-  br?: boolean;
-  // 左下角圆角半径
-  bl?: boolean;
-};
-
-// 默认圆角刷新选项
-export const DefaultRadiusRefreshOptions: RadiusRefreshOptions = {
-  // 左上角圆角半径
-  tl: true,
-  // 右上角圆角半径
-  tr: true,
-  // 右下角圆角半径
-  br: true,
-  // 左下角圆角半径
-  bl: true,
+  radius: [0, 0, 0, 0],
 };
 
 // 舞台组件数据模型
@@ -872,113 +834,22 @@ export interface IElementRect extends IElement {
   get radiusPoints(): IPoint[];
   // 圆角
   get radius(): number[];
-  // 圆角名称
-  get radiusNames(): string[];
   // 是否所有圆角半径相等
   get isAllRadiusEqual(): boolean;
-  // 左上角圆角半径
-  get radiusTL(): number;
-  // 右上角圆角半径
-  get radiusTR(): number;
-  // 右下角圆角半径
-  get radiusBR(): number;
-  // 左下角圆角半径
-  get radiusBL(): number;
-  // 可视圆角半径
-  get visualRadiusTL(): number;
-  // 可视圆角半径
-  get visualRadiusTR(): number;
-  // 可视圆角半径
-  get visualRadiusBR(): number;
-  // 可视圆角半径
-  get visualRadiusBL(): number;
-  // 左上角圆角点
-  get radiusTLPoint(): IPoint;
-  // 右上角圆角点
-  get radiusTRPoint(): IPoint;
-  // 右下角圆角点
-  get radiusBRPoint(): IPoint;
-  // 左下角圆角点
-  get radiusBLPoint(): IPoint;
   // 曲线路径点
   get curvePathPoints(): BazierCurvePoints[][];
   /**
-   * 计算左上角圆角坐标
-   */
-  calcRadiusTLCoord(real?: boolean): IPoint;
-  /**
-   * 计算右上角圆角坐标
-   */
-  calcRadiusTRCoord(real?: boolean): IPoint;
-  /**
-   * 计算右下角圆角坐标
-   */
-  calcRadiusBRCoord(real?: boolean): IPoint;
-  /**
-   * 计算左下角圆角坐标
-   */
-  calcRadiusBLCoord(real?: boolean): IPoint;
-  /**
-   * 计算左上角圆角点
-   */
-  calcRadiusTLPoint(real?: boolean): IPoint;
-  /**
-   * 计算右上角圆角点
-   */
-  calcRadiusTRPoint(real?: boolean): IPoint;
-  /**
-   * 计算右下角圆角点
-   */
-  calcRadiusBRPoint(real?: boolean): IPoint;
-  /**
-   * 计算左下角圆角点
-   */
-  calcRadiusBLPoint(real?: boolean): IPoint;
-  /**
-   * 刷新左上角圆角点
-   */
-  refreshRadiusTLPoint(real?: boolean): void;
-  /**
-   * 刷新右上角圆角点
-   */
-  refreshRadiusTRPoint(real?: boolean): void;
-  /**
-   * 刷新右下角圆角点
-   */
-  refreshRadiusBRPoint(real?: boolean): void;
-  /**
-   * 刷新左下角圆角点
-   */
-  refreshRadiusBLPoint(real?: boolean): void;
-  /**
-   * 刷新左上角圆角控制器
-   */
-  refreshRadiusTLController(): void;
-  /**
-   * 刷新右上角圆角控制器
-   */
-  refreshRadiusTRController(): void;
-  /**
-   * 刷新右下角圆角控制器
-   */
-  refreshRadiusBRController(): void;
-  /**
-   * 刷新左下角圆角控制器
-   */
-  refreshRadiusBLController(): void;
-  /**
-   * 刷新圆角控制器
    * 刷新圆角控制器
    *
-   * @param options 刷新圆角控制器选项
+   * @param indexes 刷新圆角控制器选项
    */
-  refreshRadiusControllers(options?: RadiusRefreshOptions): void;
+  refreshRadiusControllers(indexes?: number[]): void;
   /**
    * 刷新圆角
    *
-   * @param options 刷新圆角选项
+   * @param indexes 刷新圆角选项
    */
-  refreshRadiusPoints(options?: RadiusRefreshOptions): void;
+  refreshRadiusPoints(indexes?: number[]): void;
   /**
    * 刷新原始圆角属性
    */
