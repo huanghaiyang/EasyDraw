@@ -836,8 +836,10 @@ export interface IElementRect extends IElement {
   get radius(): number[];
   // 是否所有圆角半径相等
   get isAllRadiusEqual(): boolean;
-  // 曲线路径点
-  get curvePathPoints(): BazierCurvePoints[][];
+  // 曲线点
+  get curvePoints(): BazierCurvePoints[][];
+  // 曲线填充点
+  get curveFillPoints(): BazierCurvePoints[];
   /**
    * 刷新圆角控制器
    *

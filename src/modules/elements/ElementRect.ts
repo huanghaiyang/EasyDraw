@@ -9,10 +9,11 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
-import { clamp, cloneDeep, isNull, range, uniq } from "lodash";
+import { clamp, cloneDeep, range, uniq } from "lodash";
 import { BazierCurvePoints } from "@/types/IRender";
-import CanvasUtils from "@/utils/CanvasUtils";
 import { computed } from "mobx";
+import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   _radiusControllers: IRadiusController[] = [];
@@ -49,18 +50,141 @@ export default class ElementRect extends Element implements IElementRect {
     return uniq(this.model.radius).length === 1;
   }
 
-  get curvePathPoints(): BazierCurvePoints[][] {
+  get curvePoints(): BazierCurvePoints[][] {
     return this.model.styles.strokes.map(strokeStyle => {
-      const baziers = this._getBazierCurvePoints();
-      if (!baziers) return [];
-      return CanvasUtils.convertBazierPointsByStroke(
-        baziers,
-        strokeStyle,
-        points => {
-          return this.convertPointsByStrokeType(points, strokeStyle);
-        },
-      );
+      return this._getCurvePoints(strokeStyle);
     });
+  }
+
+  get curveFillPoints(): BazierCurvePoints[] {
+    const index = this.innerestStrokePathPointsIndex;
+    let strokeStyle = this.model.styles.strokes[index];
+    let { width, type } = strokeStyle;
+    switch (type) {
+      case StrokeTypes.inside: {
+        width = width * 2;
+        break;
+      }
+      case StrokeTypes.middle: {
+        width = width;
+        break;
+      }
+      case StrokeTypes.outside: {
+        width = 0;
+        break;
+      }
+    }
+    strokeStyle = { ...strokeStyle, type: StrokeTypes.inside, width };
+    return this._getCurvePoints(strokeStyle);
+  }
+
+  /**
+   * 获取曲线点
+   *
+   * @param strokeStyle
+   * @returns
+   */
+  private _getCurvePoints(strokeStyle: StrokeStyle): BazierCurvePoints[] {
+    const { type, width: sWidth } = strokeStyle;
+    let { radius } = this.model;
+    let coords = this.calcUnleanBoxCoords();
+    const { width: oWidth, height: oHeight } =
+      CommonUtils.calcRectangleSize(coords);
+    const center = this.centerCoord;
+    let sx: number = 1,
+      sy: number = 1;
+
+    switch (type) {
+      case StrokeTypes.outside: {
+        sx = (oWidth + sWidth) / oWidth;
+        sy = (oHeight + sWidth) / oHeight;
+        break;
+      }
+      case StrokeTypes.inside: {
+        sx = (oWidth - sWidth) / oWidth;
+        sy = (oHeight - sWidth) / oHeight;
+        break;
+      }
+    }
+    if ([StrokeTypes.inside, StrokeTypes.outside].includes(type)) {
+      coords = MathUtils.batchScaleWithCenter(
+        coords,
+        {
+          sx,
+          sy,
+        },
+        center,
+      );
+    }
+    const { width, height } = CommonUtils.calcRectangleSize(coords);
+    const minSize = Math.min(width, height);
+    radius = radius.map(value => {
+      if (value === 0) return value;
+      switch (type) {
+        case StrokeTypes.inside: {
+          return clamp(value - sWidth / 2, 0, minSize / 2);
+        }
+        case StrokeTypes.outside: {
+          return clamp(value + sWidth / 2, 0, minSize / 2);
+        }
+        default: {
+          return value;
+        }
+      }
+    });
+
+    const result: BazierCurvePoints[] = [];
+    range(4).forEach(index => {
+      const coord = coords[index];
+      const value = radius[index];
+      const rCoord = this.calcRadiusCoordBy(coord, index, radius[index]);
+      let start: IPoint, end: IPoint, controller: IPoint;
+      if (!value) {
+        start = coord;
+        end = coord;
+        controller = coord;
+      } else {
+        const parrallelPoints = MathUtils.calcCrossPointsOfParallelLines(
+          rCoord,
+          coords,
+        );
+        const indexes: number[][] = [
+          [3, 0],
+          [0, 1],
+          [1, 2],
+          [2, 3],
+        ];
+        start = parrallelPoints[indexes[index][0]];
+        end = parrallelPoints[indexes[index][1]];
+        start = MathUtils.precisePoint(start, 1);
+        end = MathUtils.precisePoint(end, 1);
+      }
+      start = this._calcTransPointByCoord(start);
+      end = this._calcTransPointByCoord(end);
+      controller = this._calcTransPointByCoord(coord);
+      result.push({
+        start,
+        controller,
+        end,
+        value,
+        radius: rCoord,
+      });
+    });
+    return result;
+  }
+
+  /**
+   * 计算转换后的点
+   *
+   * @param coord
+   * @returns
+   */
+  private _calcTransPointByCoord(coord: IPoint): IPoint {
+    const point = ElementUtils.calcStageRelativePoint(
+      coord,
+      this.shield.stageCalcParams,
+    );
+    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**
@@ -72,6 +196,24 @@ export default class ElementRect extends Element implements IElementRect {
    */
   calcRadiusCoord(index: number, real?: boolean): IPoint {
     const value = real ? this.model.radius[index] : this.visualRadius[index];
+    const coord = MathUtils.leanWithCenter(
+      this.model.boxCoords[index],
+      this.model.leanXAngle,
+      -this.model.leanYAngle,
+      this.centerCoord,
+    );
+    return this.calcRadiusCoordBy(coord, index, value);
+  }
+
+  /**
+   * 计算圆角点的世界坐标
+   *
+   * @param boxCoords
+   * @param index
+   * @param value
+   * @returns
+   */
+  calcRadiusCoordBy(point: IPoint, index: number, value: number): IPoint {
     let dx: number, dy: number;
     if ([0, 3].includes(index)) {
       dx = this.flipX ? -value : value;
@@ -83,18 +225,10 @@ export default class ElementRect extends Element implements IElementRect {
     } else {
       dy = -value;
     }
-    const coord = MathUtils.translate(
-      MathUtils.leanWithCenter(
-        this.model.boxCoords[index],
-        this.model.leanXAngle,
-        -this.model.leanYAngle,
-        this.centerCoord,
-      ),
-      {
-        dx,
-        dy,
-      },
-    );
+    const coord = MathUtils.translate(point, {
+      dx,
+      dy,
+    });
     return coord;
   }
 
@@ -266,7 +400,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = Math.floor(proportion * (this.minPrimitiveSize / 2));
+        let radius = proportion * (this.minPrimitiveSize / 2);
         if (this.isAllRadiusEqual) {
           [0, 1, 2, 3].forEach(key => {
             this.model.radius[key] = radius;
@@ -280,70 +414,14 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
-   * 根据圆角的顶点计算曲线点
-   *
-   * @param index 圆角索引
-   * @returns
-   */
-  private _getRadiusBazierCurvePoints(index: number): BazierCurvePoints {
-    let start: IPoint, end: IPoint;
-    const value = this.radius[index];
-    const controller: IPoint = this.rotateBoxPoints[index];
-    const radiusPoint = this.radiusPoints[index];
-    if (!value) {
-      start = this.rotateBoxPoints[index];
-      end = this.rotateBoxPoints[index];
-    } else {
-      const point = this.calcRadiusPoint(index, true);
-      const points = MathUtils.calcCrossPointsOfParallelLines(
-        point,
-        this.rotateBoxPoints,
-      );
-      const indexes: number[][] = [
-        [3, 0],
-        [0, 1],
-        [1, 2],
-        [2, 3],
-      ];
-      start = points[indexes[index][0]];
-      end = points[indexes[index][1]];
-      start = MathUtils.precisePoint(start, 1);
-      end = MathUtils.precisePoint(end, 1);
-    }
-    if (isNull(start) || isNull(end)) return null;
-    return {
-      start,
-      controller,
-      end,
-      value,
-      radius: radiusPoint,
-    };
-  }
-
-  /**
-   * 获取圆角组件的曲线点
-   *
-   * @param index 圆角索引
-   * @returns 原始圆角值
-   */
-  private _getBazierCurvePoints(): BazierCurvePoints[] {
-    const result: BazierCurvePoints[] = [];
-    let hasNull = false;
-    range(4).forEach(index => {
-      const curve = this._getRadiusBazierCurvePoints(index);
-      if (curve) result.push(curve);
-      else hasNull = true;
-    });
-    return hasNull ? null : result;
-  }
-
-  /**
    * 修正圆角
    */
   private _reviseRadius(): void {
     range(4).forEach(index => {
-      this.model.radius[index] = Math.floor(
-        clamp(this.model.radius[index], 0, this.minPrimitiveSize / 2),
+      this.model.radius[index] = clamp(
+        this.model.radius[index],
+        0,
+        this.minPrimitiveSize / 2,
       );
     });
   }

@@ -10,75 +10,10 @@ import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { BazierCurvePoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
-import LodashUtils from "@/utils/LodashUtils";
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
-
-  /**
-   * 曲线坐标转换
-   *
-   * @param bazierPoints
-   * @param strokeStyle
-   * @returns
-   */
-  static convertBazierPointsByStroke(
-    bazierPoints: BazierCurvePoints[],
-    strokeStyle: StrokeStyle,
-    converter: (points: IPoint[], strokeStyle: StrokeStyle) => IPoint[],
-  ): BazierCurvePoints[] {
-    let points: IPoint[] = [];
-    const pointCounters = [];
-    bazierPoints.forEach(curve => {
-      const { start, controller, end, value, radius } = curve;
-      if (
-        value === 0 ||
-        LodashUtils.isAllEqualWith(
-          [start, end],
-          controller,
-          (obj, oth) =>
-            Math.round(MathUtils.precise(obj.x, 1)) ===
-              Math.round(MathUtils.precise(oth.x, 1)) &&
-            Math.round(MathUtils.precise(obj.y, 1)) ===
-              Math.round(MathUtils.precise(oth.y, 1)),
-        ) ||
-        !MathUtils.isPointClockwise(radius, start, controller) ||
-        !MathUtils.isPointClockwise(radius, controller, end)
-      ) {
-        points.push(controller);
-        pointCounters.push(1);
-      } else {
-        points.push(start, controller, end);
-        pointCounters.push(3);
-      }
-    });
-    points = converter(points, strokeStyle);
-    points = MathUtils.batchPrecisePoint(points, 1);
-    const result: BazierCurvePoints[] = [];
-    let prevIndex = 0;
-    pointCounters.forEach((count, index) => {
-      const start: IPoint = points[prevIndex];
-      let controller: IPoint, end: IPoint;
-      if (count === 1) {
-        controller = points[prevIndex];
-        end = points[prevIndex];
-      } else {
-        controller = points[prevIndex + 1];
-        end = points[prevIndex + 2];
-      }
-      const { radius, value } = bazierPoints[index];
-      result.push({
-        start,
-        controller,
-        end,
-        value,
-        radius,
-      });
-      prevIndex += count;
-    });
-    return result;
-  }
 
   /**
    * 根据线型转换点坐标
@@ -408,30 +343,13 @@ export default class CanvasUtils {
    * @param target
    * @param curvePoints
    * @param fillStyle
-   * @param strokeStyle
    * @param options
    */
   static drawInnerCurvePathFill(
     target: HTMLCanvasElement,
     curvePoints: BazierCurvePoints[],
     fillStyle: FillStyle,
-    strokeStyle: StrokeStyle,
-    options: RenderParams = {},
   ): void {
-    const { calcVertices = true } = options;
-    if (calcVertices) {
-      curvePoints = CanvasUtils.convertBazierPointsByStroke(
-        curvePoints,
-        strokeStyle,
-        points => {
-          return ArbitraryUtils.getArbitraryInnerVertices(
-            points,
-            strokeStyle.width / 2,
-            options,
-          );
-        },
-      );
-    }
     CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
   }
 
@@ -474,28 +392,23 @@ export default class CanvasUtils {
    * @param target
    * @param curvePoints
    * @param fillStyle
-   * @param strokeStyle
    * @param options
    */
   static drawInnerCurvePathFillWithScale(
     target: HTMLCanvasElement,
     curvePoints: BazierCurvePoints[],
     fillStyle: FillStyle,
-    strokeStyle: StrokeStyle,
-    options: RenderParams = {},
   ): void {
-    [curvePoints, strokeStyle] = CanvasUtils.transCurveParamsWithScale(
-      curvePoints,
-      strokeStyle,
-    );
-    if (fillStyle.colorOpacity) {
-      CanvasUtils.drawInnerCurvePathFill(
-        target,
-        curvePoints,
-        fillStyle,
-        strokeStyle,
-        options,
+    curvePoints = curvePoints.map(curve => {
+      const { start, controller, end, value, radius } = curve;
+      const [p1, p2, p3] = CommonUtils.scalePoints(
+        [start, controller, end],
+        CanvasUtils.scale,
       );
+      return { start: p1, controller: p2, end: p3, value, radius };
+    });
+    if (fillStyle.colorOpacity) {
+      CanvasUtils.drawInnerCurvePathFill(target, curvePoints, fillStyle);
     }
   }
 
