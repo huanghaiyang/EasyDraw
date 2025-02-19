@@ -544,6 +544,7 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
         if (element.leanYAngle === value) return;
         const prevValue = element.leanYAngle;
+        value = MathUtils.precise(value, 1);
         element.setLeanYAngle(value);
         if (element.isGroup) {
           const center = element.center;
@@ -1475,7 +1476,7 @@ export default class StageStore implements IStageStore {
       center,
       this.shield.stageCalcParams,
     );
-    const angle = MathUtils.preciseToFixed(MathUtils.calcAngle(center, point));
+    const angle = MathUtils.precise(MathUtils.calcAngle(center, point));
     return { center, centerCoord, angle };
   }
 
@@ -1506,7 +1507,7 @@ export default class StageStore implements IStageStore {
    * @param centerCoord
    */
   updateElementsRotation(elements: IElement[], point: IPoint): void {
-    const angle = MathUtils.preciseToFixed(
+    const angle = MathUtils.precise(
       MathUtils.calcAngle(this._rotatingCenter, point),
     );
     this.rotateElements(
@@ -1535,6 +1536,7 @@ export default class StageStore implements IStageStore {
       angle = MathUtils.mirrorAngle(
         element.originalAngle + angle - originalAngle,
       );
+      angle = MathUtils.precise(angle, 1);
       element.setAngle(angle);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {

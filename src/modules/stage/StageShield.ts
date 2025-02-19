@@ -156,8 +156,8 @@ export default class StageShield
   // 移动偏移量
   get movingOffset(): IPoint {
     return {
-      x: this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      y: this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
+      x: Math.floor(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x),
+      y: Math.floor(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y),
     };
   }
 
@@ -1243,7 +1243,7 @@ export default class StageShield
    */
   private _checkScale(deltaScale: number): number {
     let value = clamp(this.stageScale + deltaScale, 0.02, 5);
-    value = MathUtils.preciseToFixed(value, 2);
+    value = MathUtils.precise(value, 1);
     if (this.stageScale === 0.02) {
       if (deltaScale > 0) {
         value = 0.1;
@@ -1319,7 +1319,7 @@ export default class StageShield
    */
   calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
-    let scale = MathUtils.preciseToFixed(
+    let scale = MathUtils.precise(
       CommonUtils.calcScale(
         this.stageRect,
         { width, height },

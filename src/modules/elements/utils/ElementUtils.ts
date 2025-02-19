@@ -115,13 +115,10 @@ export default class ElementUtils {
   ): IPoint {
     const { scale, rect, worldCoord: center } = params;
     return {
-      x: MathUtils.preciseToFixed(
-        worldCoord.x + rect.width / 2 / scale - center.x,
-        2,
-      ),
-      y: MathUtils.preciseToFixed(
+      x: MathUtils.precise(worldCoord.x + rect.width / 2 / scale - center.x, 1),
+      y: MathUtils.precise(
         worldCoord.y + rect.height / 2 / scale - center.y,
-        2,
+        1,
       ),
     };
   }
@@ -146,11 +143,11 @@ export default class ElementUtils {
    */
   static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint {
     return {
-      x: MathUtils.preciseToFixed(
+      x: MathUtils.precise(
         point.x - params.rect.width / 2 / params.scale + params.worldCoord.x,
         2,
       ),
-      y: MathUtils.preciseToFixed(
+      y: MathUtils.precise(
         point.y - params.rect.height / 2 / params.scale + params.worldCoord.y,
         2,
       ),
@@ -272,8 +269,8 @@ export default class ElementUtils {
   static translateCoords(coords: IPoint[], offset: IPoint): IPoint[] {
     return coords.map(p => {
       return {
-        x: p.x + offset.x,
-        y: p.y + offset.y,
+        x: MathUtils.precise(p.x + offset.x, 1),
+        y: MathUtils.precise(p.y + offset.y, 1),
       };
     });
   }
@@ -297,7 +294,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return {
-          width: MathUtils.preciseToFixed(
+          width: MathUtils.precise(
             MathUtils.calcDistance(coords[0], coords[1]),
             2,
           ),
@@ -370,8 +367,8 @@ export default class ElementUtils {
         CommonUtils.scaleRect(params.rect, 1 / params.scale),
         padding / params.scale,
       );
-    innerWidth = MathUtils.preciseToFixed(innerWidth * params.scale, 2);
-    innerHeight = MathUtils.preciseToFixed(innerHeight * params.scale, 2);
+    innerWidth = MathUtils.precise(innerWidth * params.scale, 1);
+    innerHeight = MathUtils.precise(innerHeight * params.scale, 1);
     const points = CommonUtils.calcCenterInnerRectPoints(
       { width: innerWidth, height: innerHeight },
       params.rect,

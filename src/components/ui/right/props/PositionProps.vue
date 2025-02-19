@@ -12,8 +12,8 @@ watch(
   () => stageStore.position,
   newValue => {
     if (newValue) {
-      xValue.value = MathUtils.preciseToFixed(newValue.x);
-      yValue.value = MathUtils.preciseToFixed(newValue.y);
+      xValue.value = MathUtils.precise(newValue.x);
+      yValue.value = MathUtils.precise(newValue.y);
     }
   },
 );
@@ -29,6 +29,7 @@ watch(
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
           type="number"
+          precision="1"
           @change="
             value =>
               stageStore.setElementsPosition({ x: Number(value), y: yValue })
@@ -45,6 +46,7 @@ watch(
           placeholder="输入数字"
           :disabled="stageStore.inputDisabled"
           type="number"
+          precision="1"
           @change="
             value =>
               stageStore.setElementsPosition({ x: xValue, y: Number(value) })

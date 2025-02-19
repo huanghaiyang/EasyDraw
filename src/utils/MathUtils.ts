@@ -1005,7 +1005,7 @@ export default class MathUtils {
    * @param precision
    * @returns
    */
-  static preciseToFixed(number: number, digits: number = 2): number {
+  static precise(number: number, digits: number = 2): number {
     if (typeof number !== "number" || typeof digits !== "number") {
       throw new TypeError("Both arguments must be numbers");
     }
@@ -1030,6 +1030,43 @@ export default class MathUtils {
 
     return Number(resultArray.join("."));
   }
+
+  /**
+   * 批量保留小数点后几位
+   *
+   * @param numbers
+   * @param digits
+   * @returns
+   */
+  static batchPrecise(numbers: number[], digits: number): number[] {
+    return numbers.map(num => MathUtils.precise(num, digits));
+  }
+
+  /**
+   * 保留小数点后几位
+   *
+   * @param point
+   * @param digits
+   * @returns
+   */
+  static precisePoint(point: IPoint, digits: number): IPoint {
+    return {
+      x: MathUtils.precise(point.x, digits),
+      y: MathUtils.precise(point.y, digits),
+    };
+  }
+
+  /**
+   * 批量保留小数点后几位
+   *
+   * @param points
+   * @param digits
+   * @returns
+   */
+  static batchPrecisePoint(points: IPoint[], digits: number): IPoint[] {
+    return points.map(point => MathUtils.precisePoint(point, digits));
+  }
+
   /**
    * 给定三角形的三个坐标点a,b,c计算b的夹角
    */

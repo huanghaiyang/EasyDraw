@@ -37,10 +37,10 @@ export default class CanvasUtils {
           [start, end],
           controller,
           (obj, oth) =>
-            Math.round(MathUtils.preciseToFixed(obj.x, 1)) ===
-              Math.round(MathUtils.preciseToFixed(oth.x, 1)) &&
-            Math.round(MathUtils.preciseToFixed(obj.y, 1)) ===
-              Math.round(MathUtils.preciseToFixed(oth.y, 1)),
+            Math.round(MathUtils.precise(obj.x, 1)) ===
+              Math.round(MathUtils.precise(oth.x, 1)) &&
+            Math.round(MathUtils.precise(obj.y, 1)) ===
+              Math.round(MathUtils.precise(oth.y, 1)),
         )
       ) {
         points.push(controller);
@@ -51,6 +51,7 @@ export default class CanvasUtils {
       }
     });
     points = converter(points, strokeStyle);
+    points = MathUtils.batchPrecisePoint(points, 1);
     // console.log(pointCounters, points)
     const result: BazierCurvePoints[] = [];
     let start = 0;

@@ -334,10 +334,10 @@ export default class CommonUtils {
    * @returns
    */
   static calcRectangleSize(coords: IPoint[]): ISize {
-    const width = MathUtils.preciseToFixed(
+    const width = MathUtils.precise(
       MathUtils.calcDistance(coords[0], coords[1]),
     );
-    const height = MathUtils.preciseToFixed(
+    const height = MathUtils.precise(
       MathUtils.calcDistance(coords[0], coords[3]),
     );
     return { width, height };
@@ -350,8 +350,8 @@ export default class CommonUtils {
    * @returns
    */
   static calcLineSize(coords: IPoint[]): ISize {
-    const width = MathUtils.preciseToFixed(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.preciseToFixed(
+    const width = MathUtils.precise(Math.abs(coords[0].x - coords[1].x));
+    const height = MathUtils.precise(
       Math.abs(coords[0].y - coords[1].y),
     );
     return { width, height };
@@ -417,17 +417,17 @@ export default class CommonUtils {
     const innerWidth = stageRect.width - padding * 2;
     const innerHeight = stageRect.height - padding * 2;
     if (width > innerWidth || height > innerHeight) {
-      const ratio = MathUtils.preciseToFixed(width / height, 2);
-      const rectRatio = MathUtils.preciseToFixed(
+      const ratio = MathUtils.precise(width / height, 1);
+      const rectRatio = MathUtils.precise(
         stageRect.width / stageRect.height,
         2,
       );
       if (ratio > rectRatio) {
         width = innerWidth;
-        height = MathUtils.preciseToFixed(width / ratio, 2);
+        height = MathUtils.precise(width / ratio, 1);
       } else {
         height = innerHeight;
-        width = MathUtils.preciseToFixed(height * ratio, 2);
+        width = MathUtils.precise(height * ratio, 1);
       }
     }
     return {
@@ -451,20 +451,20 @@ export default class CommonUtils {
     const { width: outerWidth, height: outerHeight } = outerRect;
     return [
       {
-        x: MathUtils.preciseToFixed(outerWidth / 2 - width / 2),
-        y: MathUtils.preciseToFixed(outerHeight / 2 - height / 2),
+        x: MathUtils.precise(outerWidth / 2 - width / 2),
+        y: MathUtils.precise(outerHeight / 2 - height / 2),
       },
       {
-        x: MathUtils.preciseToFixed(outerWidth / 2 + width / 2),
-        y: MathUtils.preciseToFixed(outerHeight / 2 - height / 2),
+        x: MathUtils.precise(outerWidth / 2 + width / 2),
+        y: MathUtils.precise(outerHeight / 2 - height / 2),
       },
       {
-        x: MathUtils.preciseToFixed(outerWidth / 2 + width / 2),
-        y: MathUtils.preciseToFixed(outerHeight / 2 + height / 2),
+        x: MathUtils.precise(outerWidth / 2 + width / 2),
+        y: MathUtils.precise(outerHeight / 2 + height / 2),
       },
       {
-        x: MathUtils.preciseToFixed(outerWidth / 2 - width / 2),
-        y: MathUtils.preciseToFixed(outerHeight / 2 + height / 2),
+        x: MathUtils.precise(outerWidth / 2 - width / 2),
+        y: MathUtils.precise(outerHeight / 2 + height / 2),
       },
     ];
   }
@@ -482,7 +482,7 @@ export default class CommonUtils {
       key => {
         const value = rect[key as keyof Partial<DOMRect>];
         if (isNumber(value)) {
-          result[key] = MathUtils.preciseToFixed(value * scale);
+          result[key] = MathUtils.precise(value * scale);
         }
       },
     );

@@ -15,7 +15,7 @@ const stageStore = useStageStore();
         :hide-on-click="false"
       >
         <span class="el-dropdown-link">
-          {{ MathUtils.preciseToFixed(stageStore.scale * 100, 0) + "%" }}
+          {{ MathUtils.precise(stageStore.scale * 100, 0) + "%" }}
           <el-icon class="el-icon--right">
             <arrow-down />
           </el-icon>
@@ -41,7 +41,7 @@ const stageStore = useStageStore();
               @click="stageStore.setScale(value)"
             >
               <span
-                >缩放{{ MathUtils.preciseToFixed(value * 100, 0) + "%" }}</span
+                >缩放{{ MathUtils.precise(value * 100, 0) + "%" }}</span
               >
               <span>{{ value === 1 ? "ctrl + 0" : "" }}</span>
             </el-dropdown-item>

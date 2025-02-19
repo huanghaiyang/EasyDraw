@@ -291,23 +291,29 @@ export default class ElementArbitrary
         y: points[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxPoints[0];
-      this.model.coords = ElementUtils.calcCoordsByTransPathPoints(
-        points,
-        this.angles,
-        lockPoint,
-        this.shield.stageCalcParams,
-      );
-      this.model.boxCoords = MathUtils.batchLeanWithCenter(
-        CommonUtils.getBoxPoints(
-          MathUtils.calcUnLeanByPoints(
-            this.model.coords,
-            0,
-            this.model.leanYAngle,
-          ),
+      this.model.coords = MathUtils.batchPrecisePoint(
+        ElementUtils.calcCoordsByTransPathPoints(
+          points,
+          this.angles,
+          lockPoint,
+          this.shield.stageCalcParams,
         ),
-        0,
-        this.model.leanYAngle,
-        this.calcCenterCoord(),
+        1,
+      );
+      this.model.boxCoords = MathUtils.batchPrecisePoint(
+        MathUtils.batchLeanWithCenter(
+          CommonUtils.getBoxPoints(
+            MathUtils.calcUnLeanByPoints(
+              this.model.coords,
+              0,
+              this.model.leanYAngle,
+            ),
+          ),
+          0,
+          this.model.leanYAngle,
+          this.calcCenterCoord(),
+        ),
+        1,
       );
     }
   }

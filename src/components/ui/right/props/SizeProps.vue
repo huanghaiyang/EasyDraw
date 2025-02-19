@@ -2,6 +2,7 @@
 import { useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 import { Lock, Unlock } from "@element-plus/icons-vue";
+import MathUtils from "@/utils/MathUtils";
 
 const stageStore = useStageStore();
 
@@ -11,14 +12,14 @@ const hValue = ref(0);
 watch(
   () => stageStore.width,
   newValue => {
-    wValue.value = newValue;
+    wValue.value = MathUtils.precise(newValue, 1);
   },
 );
 
 watch(
   () => stageStore.height,
   newValue => {
-    hValue.value = newValue;
+    hValue.value = MathUtils.precise(newValue, 1);
   },
 );
 </script>
@@ -36,6 +37,7 @@ watch(
           :disabled="stageStore.inputDisabled"
           min="2"
           type="number"
+          precision="1"
           @change="value => stageStore.setElementsWidth(Number(value))"
         >
           <template #prepend>w</template>
@@ -52,6 +54,7 @@ watch(
           "
           min="2"
           type="number"
+          precision="1"
           @change="value => stageStore.setElementsHeight(Number(value))"
         >
           <template #prepend>h</template>

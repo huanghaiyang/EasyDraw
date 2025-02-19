@@ -3,6 +3,7 @@ import { useStageStore } from "@/stores/stage";
 import { DefaultFillStyle } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 import { Plus, Minus } from "@element-plus/icons-vue";
+import MathUtils from "@/utils/MathUtils";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
@@ -12,7 +13,12 @@ const fills = ref([{ ...DefaultFillStyle }]);
 watch(
   () => stageStore.fills,
   newValue => {
-    fills.value = newValue;
+    fills.value = newValue.map(fill => {
+      return {
+        ...fill,
+        colorOpacity: MathUtils.precise(fill.colorOpacity, 1),
+      }
+    });
   },
 );
 
@@ -53,6 +59,7 @@ const toggleColorPickerVisible = () => {
             type="number"
             min="0"
             max="1"
+            precision="1"
             @change="
               value =>
                 stageStore.setElementsFillColorOpacity(Number(value), index)

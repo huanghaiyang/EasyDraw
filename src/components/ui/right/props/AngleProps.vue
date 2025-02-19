@@ -2,6 +2,7 @@
 import { useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 import { clamp } from "lodash";
+import MathUtils from "@/utils/MathUtils";
 
 const stageStore = useStageStore();
 const aValue = ref(0);
@@ -10,14 +11,14 @@ const leanYValue = ref(0);
 watch(
   () => stageStore.angle,
   newValue => {
-    aValue.value = newValue;
+    aValue.value = MathUtils.precise(newValue, 1);
   },
 );
 
 watch(
   () => stageStore.leanYAngle,
   newValue => {
-    leanYValue.value = newValue;
+    leanYValue.value = MathUtils.precise(newValue, 1);
   },
 );
 
@@ -68,6 +69,7 @@ function setElementsLeanYAngle(value: string) {
           type="number"
           min="-180"
           max="180"
+          precision="1"
           @change="setElementsAngle"
         >
           <template #prepend>a</template>
@@ -86,6 +88,7 @@ function setElementsLeanYAngle(value: string) {
           type="number"
           min="-89"
           max="89"
+          precision="1"
           @change="setElementsLeanYAngle"
         >
           <template #prepend>ly</template>

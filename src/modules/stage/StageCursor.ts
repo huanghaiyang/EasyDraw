@@ -65,8 +65,8 @@ export default class StageCursor implements IStageCursor {
       this.shield.stageRect,
       this.shield.stageScale,
     );
-    this.value.x = MathUtils.preciseToFixed(this.value.x, 0);
-    this.value.y = MathUtils.preciseToFixed(this.value.y, 0);
+    this.value.x = Math.round(this.value.x);
+    this.value.y = Math.round(this.value.y);
     return this.value;
   }
 

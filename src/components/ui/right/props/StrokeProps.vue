@@ -4,6 +4,7 @@ import { CreatorTypes } from "@/types/Creator";
 import { DefaultStrokeStyle, getStokeTypes } from "@/styles/ElementStyles";
 import { Plus, Minus } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
+import MathUtils from "@/utils/MathUtils";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
@@ -12,7 +13,13 @@ const strokes = ref([{ ...DefaultStrokeStyle }]);
 watch(
   () => stageStore.strokes,
   newValue => {
-    strokes.value = newValue;
+    strokes.value = newValue.map(stroke => {
+      return {
+        ...stroke,
+        width: MathUtils.precise(stroke.width, 1),
+        colorOpacity: MathUtils.precise(stroke.colorOpacity, 1),
+      };
+    });
   },
 );
 
@@ -61,6 +68,7 @@ const toggleColorPickerVisible = () => {
             type="number"
             min="0"
             max="1"
+            precision="1"
             @change="
               value =>
                 stageStore.setElementsStrokeColorOpacity(Number(value), index)
@@ -102,6 +110,7 @@ const toggleColorPickerVisible = () => {
             v-model="stroke.width"
             placeholder="输入数字"
             type="number"
+            precision="1"
             :min="
               stageStore.primarySelectedElement?.model.type ===
               CreatorTypes.line

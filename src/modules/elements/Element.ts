@@ -1329,8 +1329,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshSize(): void {
     const { width, height } = ElementUtils.calcSize(this.model);
-    this.model.width = width;
-    this.model.height = height;
+    this.model.width = MathUtils.precise(width, 1);
+    this.model.height = MathUtils.precise(height, 1);
   }
 
   /**
@@ -1559,9 +1559,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.shield.stageCalcParams,
     );
     // 设置变换后的坐标
-    this.model.coords = coords;
+    this.model.coords = MathUtils.batchPrecisePoint(coords, 1);
     // 设置变换后的盒模型坐标
-    this.model.boxCoords = boxCoords;
+    this.model.boxCoords = MathUtils.batchPrecisePoint(boxCoords, 1);
     // 判断是否需要翻转角度
     if (originalMovingPoint && matrix) {
       this._tryFlipAngle(lockPoint, originalMovingPoint, matrix);
@@ -1644,18 +1644,24 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换不动点索引
     this._transformLockIndex = lockIndex;
     // 设置变换坐标
-    this.model.coords = this.batchCalcTransformPointsByCenter(
-      this._originalRotatePathPoints,
-      matrix,
-      lockPoint,
-      this._originalCenter,
+    this.model.coords = MathUtils.batchPrecisePoint(
+      this.batchCalcTransformPointsByCenter(
+        this._originalRotatePathPoints,
+        matrix,
+        lockPoint,
+        this._originalCenter,
+      ),
+      1,
     );
     // 设置变换盒模型坐标
-    this.model.boxCoords = this.batchCalcTransformPointsByCenter(
-      this._originalRotateBoxPoints,
-      matrix,
-      lockPoint,
-      this._originalCenter,
+    this.model.boxCoords = MathUtils.batchPrecisePoint(
+      this.batchCalcTransformPointsByCenter(
+        this._originalRotateBoxPoints,
+        matrix,
+        lockPoint,
+        this._originalCenter,
+      ),
+      1,
     );
     // 判断是否需要翻转角度
     this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
@@ -1870,18 +1876,24 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 设置变换不动点索引
       this._transformLockIndex = index;
       // 设置变换坐标
-      this.model.coords = this.batchCalcTransformPointsByCenter(
-        this._originalRotatePathPoints,
-        matrix,
-        lockPoint,
-        this._originalCenter,
+      this.model.coords = MathUtils.batchPrecisePoint(
+        this.batchCalcTransformPointsByCenter(
+          this._originalRotatePathPoints,
+          matrix,
+          lockPoint,
+          this._originalCenter,
+        ),
+        1,
       );
       // 设置变换盒模型坐标
-      this.model.boxCoords = this.batchCalcTransformPointsByCenter(
-        this._originalRotateBoxPoints,
-        matrix,
-        lockPoint,
-        this._originalCenter,
+      this.model.boxCoords = MathUtils.batchPrecisePoint(
+        this.batchCalcTransformPointsByCenter(
+          this._originalRotateBoxPoints,
+          matrix,
+          lockPoint,
+          this._originalCenter,
+        ),
+        1,
       );
       // 尝试翻转角度
       this._tryFlipAngle(lockPoint, currentPointOriginal, matrix);
@@ -1988,17 +2000,23 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (group) {
       this._doTransformBy(matrix, center, group);
     } else {
-      this.model.coords = this.batchCalcTransformPointsByCenter(
-        this._originalRotatePathPoints,
-        matrix,
-        center,
-        this._originalCenter,
+      this.model.coords = MathUtils.batchPrecisePoint(
+        this.batchCalcTransformPointsByCenter(
+          this._originalRotatePathPoints,
+          matrix,
+          center,
+          this._originalCenter,
+        ),
+        1,
       );
-      this.model.boxCoords = this.batchCalcTransformPointsByCenter(
-        this._originalRotateBoxPoints,
-        matrix,
-        center,
-        this._originalCenter,
+      this.model.boxCoords = MathUtils.batchPrecisePoint(
+        this.batchCalcTransformPointsByCenter(
+          this._originalRotateBoxPoints,
+          matrix,
+          center,
+          this._originalCenter,
+        ),
+        1,
       );
     }
     this.refresh({
@@ -2021,18 +2039,24 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换不动点
     this._transformLockPoint = this._originalCenter;
     // 设置变换坐标
-    this.model.coords = this.batchCalcTransformPointsByCenter(
-      this._originalRotatePathPoints,
-      matrix,
-      this._originalCenter,
-      this._originalCenter,
+    this.model.coords = MathUtils.batchPrecisePoint(
+      this.batchCalcTransformPointsByCenter(
+        this._originalRotatePathPoints,
+        matrix,
+        this._originalCenter,
+        this._originalCenter,
+      ),
+      1,
     );
     // 设置变换盒模型坐标
-    this.model.boxCoords = this.batchCalcTransformPointsByCenter(
-      this._originalRotateBoxPoints,
-      matrix,
-      this._originalCenter,
-      this._originalCenter,
+    this.model.boxCoords = MathUtils.batchPrecisePoint(
+      this.batchCalcTransformPointsByCenter(
+        this._originalRotateBoxPoints,
+        matrix,
+        this._originalCenter,
+        this._originalCenter,
+      ),
+      1,
     );
     // 刷新组件
     this.refresh({
@@ -2052,15 +2076,24 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    */
   setPosition(x: number, y: number, offset: IPoint): void {
+    x = MathUtils.precise(x, 1);
+    y = MathUtils.precise(y, 1);
+    offset = {
+      x: MathUtils.precise(offset.x, 1),
+      y: MathUtils.precise(offset.y, 1),
+    };
     // 设置位置
     this.model.x = x;
     this.model.y = y;
     // 设置变换坐标
-    this.model.coords = ElementUtils.translateCoords(this.model.coords, offset);
+    this.model.coords = MathUtils.batchPrecisePoint(
+      ElementUtils.translateCoords(this.model.coords, offset),
+      1,
+    );
     // 设置变换盒模型坐标
-    this.model.boxCoords = ElementUtils.translateCoords(
-      this.model.boxCoords,
-      offset,
+    this.model.boxCoords = MathUtils.batchPrecisePoint(
+      ElementUtils.translateCoords(this.model.boxCoords, offset),
+      1,
     );
     // 刷新组件
     this.refresh();
@@ -2089,18 +2122,16 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算中心坐标
     const centerCoord = this.calcCenterCoord();
     // 重新计算倾斜坐标
-    this.model.coords = MathUtils.batchLeanYWithCenter(
-      coords,
-      value,
-      centerCoord,
+    this.model.coords = MathUtils.batchPrecisePoint(
+      MathUtils.batchLeanYWithCenter(coords, value, centerCoord),
+      1,
     );
     // 计算非倾斜盒模型坐标
     const boxCoords = this.calcUnleanBoxCoords();
     // 重新计算倾斜盒模型坐标
-    this.model.boxCoords = MathUtils.batchLeanYWithCenter(
-      boxCoords,
-      value,
-      centerCoord,
+    this.model.boxCoords = MathUtils.batchPrecisePoint(
+      MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord),
+      1,
     );
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
@@ -2332,9 +2363,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       MathUtils.translate(coord, offset),
     );
     // 设置变换坐标
-    this.model.coords = coords;
+    this.model.coords = MathUtils.batchPrecisePoint(coords, 1);
     // 设置变换盒模型坐标
-    this.model.boxCoords = boxCoords;
+    this.model.boxCoords = MathUtils.batchPrecisePoint(boxCoords, 1);
     // 设置变换角度
     this.model.angle = MathUtils.mirrorAngle(
       MathUtils.normalizeAngle(this._originalAngle) +
