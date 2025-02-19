@@ -2075,12 +2075,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    */
   setPosition(x: number, y: number, offset: IPoint): void {
-    x = MathUtils.precise(x, 1);
-    y = MathUtils.precise(y, 1);
-    offset = {
-      x: MathUtils.precise(offset.x, 1),
-      y: MathUtils.precise(offset.y, 1),
-    };
     // 设置位置
     this.model.x = x;
     this.model.y = y;

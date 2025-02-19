@@ -351,9 +351,7 @@ export default class CommonUtils {
    */
   static calcLineSize(coords: IPoint[]): ISize {
     const width = MathUtils.precise(Math.abs(coords[0].x - coords[1].x));
-    const height = MathUtils.precise(
-      Math.abs(coords[0].y - coords[1].y),
-    );
+    const height = MathUtils.precise(Math.abs(coords[0].y - coords[1].y));
     return { width, height };
   }
 
@@ -451,20 +449,20 @@ export default class CommonUtils {
     const { width: outerWidth, height: outerHeight } = outerRect;
     return [
       {
-        x: MathUtils.precise(outerWidth / 2 - width / 2),
-        y: MathUtils.precise(outerHeight / 2 - height / 2),
+        x: outerWidth / 2 - width / 2,
+        y: outerHeight / 2 - height / 2,
       },
       {
-        x: MathUtils.precise(outerWidth / 2 + width / 2),
-        y: MathUtils.precise(outerHeight / 2 - height / 2),
+        x: outerWidth / 2 + width / 2,
+        y: outerHeight / 2 - height / 2,
       },
       {
-        x: MathUtils.precise(outerWidth / 2 + width / 2),
-        y: MathUtils.precise(outerHeight / 2 + height / 2),
+        x: outerWidth / 2 + width / 2,
+        y: outerHeight / 2 + height / 2,
       },
       {
-        x: MathUtils.precise(outerWidth / 2 - width / 2),
-        y: MathUtils.precise(outerHeight / 2 + height / 2),
+        x: outerWidth / 2 - width / 2,
+        y: outerHeight / 2 + height / 2,
       },
     ];
   }

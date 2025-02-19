@@ -115,11 +115,8 @@ export default class ElementUtils {
   ): IPoint {
     const { scale, rect, worldCoord: center } = params;
     return {
-      x: MathUtils.precise(worldCoord.x + rect.width / 2 / scale - center.x, 1),
-      y: MathUtils.precise(
-        worldCoord.y + rect.height / 2 / scale - center.y,
-        1,
-      ),
+      x: worldCoord.x + rect.width / 2 / scale - center.x,
+      y: worldCoord.y + rect.height / 2 / scale - center.y,
     };
   }
 
@@ -143,14 +140,8 @@ export default class ElementUtils {
    */
   static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint {
     return {
-      x: MathUtils.precise(
-        point.x - params.rect.width / 2 / params.scale + params.worldCoord.x,
-        2,
-      ),
-      y: MathUtils.precise(
-        point.y - params.rect.height / 2 / params.scale + params.worldCoord.y,
-        2,
-      ),
+      x: point.x - params.rect.width / 2 / params.scale + params.worldCoord.x,
+      y: point.y - params.rect.height / 2 / params.scale + params.worldCoord.y,
     };
   }
 
@@ -269,8 +260,8 @@ export default class ElementUtils {
   static translateCoords(coords: IPoint[], offset: IPoint): IPoint[] {
     return coords.map(p => {
       return {
-        x: MathUtils.precise(p.x + offset.x, 1),
-        y: MathUtils.precise(p.y + offset.y, 1),
+        x: p.x + offset.x,
+        y: p.y + offset.y,
       };
     });
   }

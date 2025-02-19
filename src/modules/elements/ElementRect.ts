@@ -156,8 +156,6 @@ export default class ElementRect extends Element implements IElementRect {
         ];
         start = parrallelPoints[indexes[index][0]];
         end = parrallelPoints[indexes[index][1]];
-        start = MathUtils.precisePoint(start, 1);
-        end = MathUtils.precisePoint(end, 1);
       }
       start = this._calcTransPointByCoord(start);
       end = this._calcTransPointByCoord(end);

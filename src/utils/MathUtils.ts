@@ -31,13 +31,10 @@ export default class MathUtils {
   static translate(coord: IPoint, value: TranslationValue): IPoint {
     const translationMatrix = MathUtils.calcTranslateMatrix(value.dx, value.dy);
     const translatedPoint = multiply(translationMatrix, [coord.x, coord.y, 1]);
-    return MathUtils.precisePoint(
-      {
-        x: translatedPoint[0],
-        y: translatedPoint[1],
-      },
-      1,
-    );
+    return {
+      x: translatedPoint[0],
+      y: translatedPoint[1],
+    };
   }
 
   /**
@@ -63,13 +60,10 @@ export default class MathUtils {
   static rotate(coord: IPoint, angle: number): IPoint {
     const rotationMatrix = MathUtils.calcRotateMatrix(angle);
     const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
-    return MathUtils.precisePoint(
-      {
-        x: rotatedPoint[0],
-        y: rotatedPoint[1],
-      },
-      1,
-    );
+    return {
+      x: rotatedPoint[0],
+      y: rotatedPoint[1],
+    };
   }
 
   /**
@@ -157,13 +151,10 @@ export default class MathUtils {
       y: point.y - center.y,
     };
     const result = MathUtils.rotate(point, angle);
-    return MathUtils.precisePoint(
-      {
-        x: result.x + center.x,
-        y: result.y + center.y,
-      },
-      1,
-    );
+    return {
+      x: result.x + center.x,
+      y: result.y + center.y,
+    };
   }
 
   /**
@@ -309,13 +300,10 @@ export default class MathUtils {
       coord.y - center.y,
       1,
     ]);
-    return MathUtils.precisePoint(
-      {
-        x: add(result[0], center.x),
-        y: add(result[1], center.y),
-      },
-      1,
-    );
+    return {
+      x: add(result[0], center.x),
+      y: add(result[1], center.y),
+    };
   }
 
   /**
@@ -368,13 +356,10 @@ export default class MathUtils {
       matrix = multiply(rotateMatrix, leanMatrix) as unknown as number[][];
     }
     let result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
-    return MathUtils.precisePoint(
-      {
-        x: add(result[0], center.x),
-        y: add(result[1], center.y),
-      },
-      1,
-    );
+    return {
+      x: add(result[0], center.x),
+      y: add(result[1], center.y),
+    };
   }
 
   /**
@@ -422,13 +407,10 @@ export default class MathUtils {
   static scale(coord: IPoint, value: ScaleValue): IPoint {
     const scaleMatrix = MathUtils.calcScaleMatrix(value.sx, value.sy);
     const scaledPoint = multiply(scaleMatrix, [coord.x, coord.y, 1]);
-    return MathUtils.precisePoint(
-      {
-        x: scaledPoint[0],
-        y: scaledPoint[1],
-      },
-      1,
-    );
+    return {
+      x: scaledPoint[0],
+      y: scaledPoint[1],
+    };
   }
 
   /**
@@ -460,13 +442,10 @@ export default class MathUtils {
       y: coord.y - center.y,
     };
     coord = MathUtils.scale(coord, value);
-    return MathUtils.precisePoint(
-      {
-        x: coord.x + center.x,
-        y: coord.y + center.y,
-      },
-      1,
-    );
+    return {
+      x: coord.x + center.x,
+      y: coord.y + center.y,
+    };
   }
 
   /**
@@ -637,7 +616,10 @@ export default class MathUtils {
     centerX /= numPoints;
     centerY /= numPoints;
 
-    return MathUtils.precisePoint({ x: centerX, y: centerY }, 1);
+    return {
+      x: centerX,
+      y: centerY,
+    };
   }
 
   /**
@@ -667,7 +649,10 @@ export default class MathUtils {
     // 计算目标点的坐标
     const targetX = center.x + distance * cos(angleRad);
     const targetY = center.y + distance * sin(angleRad);
-    return MathUtils.precisePoint({ x: targetX, y: targetY }, 1);
+    return {
+      x: targetX,
+      y: targetY,
+    };
   }
 
   /**
@@ -857,7 +842,10 @@ export default class MathUtils {
     const t = MathUtils.calcSegmentProportion(p, a, b);
     const closetX = a.x + t * (b.x - a.x);
     const closetY = a.y + t * (b.y - a.y);
-    return MathUtils.precisePoint({ x: closetX, y: closetY }, 1);
+    return {
+      x: closetX,
+      y: closetY,
+    };
   }
 
   /**
