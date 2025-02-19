@@ -31,8 +31,9 @@ export default class CanvasUtils {
     let points: IPoint[] = [];
     const pointCounters = [];
     bazierPoints.forEach(curve => {
-      const { start, controller, end } = curve;
+      const { start, controller, end, value } = curve;
       if (
+        value === 0 ||
         LodashUtils.isAllEqualWith(
           [start, end],
           controller,

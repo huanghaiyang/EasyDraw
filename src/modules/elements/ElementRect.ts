@@ -306,6 +306,8 @@ export default class ElementRect extends Element implements IElementRect {
       ];
       start = points[indexes[index][0]];
       end = points[indexes[index][1]];
+      start = MathUtils.precisePoint(start, 1);
+      end = MathUtils.precisePoint(end, 1);
     }
     if (isNull(start) || isNull(end)) return null;
     return {
