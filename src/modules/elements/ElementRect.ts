@@ -289,6 +289,7 @@ export default class ElementRect extends Element implements IElementRect {
     let start: IPoint, end: IPoint;
     const value = this.radius[index];
     const controller: IPoint = this.rotateBoxPoints[index];
+    const radiusPoint = this.radiusPoints[index];
     if (!value) {
       start = this.rotateBoxPoints[index];
       end = this.rotateBoxPoints[index];
@@ -315,6 +316,7 @@ export default class ElementRect extends Element implements IElementRect {
       controller,
       end,
       value,
+      radius: radiusPoint,
     };
   }
 

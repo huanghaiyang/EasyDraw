@@ -69,4 +69,5 @@ export type BazierCurvePoints = {
   controller: IPoint;
   end: IPoint;
   value: number;
+  radius?: IPoint;
 };

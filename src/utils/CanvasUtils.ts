@@ -31,7 +31,7 @@ export default class CanvasUtils {
     let points: IPoint[] = [];
     const pointCounters = [];
     bazierPoints.forEach(curve => {
-      const { start, controller, end, value } = curve;
+      const { start, controller, end, value, radius } = curve;
       if (
         value === 0 ||
         LodashUtils.isAllEqualWith(
@@ -42,7 +42,9 @@ export default class CanvasUtils {
               Math.round(MathUtils.precise(oth.x, 1)) &&
             Math.round(MathUtils.precise(obj.y, 1)) ===
               Math.round(MathUtils.precise(oth.y, 1)),
-        )
+        ) ||
+        !MathUtils.isPointClockwise(radius, start, controller) ||
+        !MathUtils.isPointClockwise(radius, controller, end)
       ) {
         points.push(controller);
         pointCounters.push(1);
@@ -53,26 +55,27 @@ export default class CanvasUtils {
     });
     points = converter(points, strokeStyle);
     points = MathUtils.batchPrecisePoint(points, 1);
-    // console.log(pointCounters, points)
     const result: BazierCurvePoints[] = [];
-    let start = 0;
+    let prevIndex = 0;
     pointCounters.forEach((count, index) => {
+      const start: IPoint = points[prevIndex];
+      let controller: IPoint, end: IPoint;
       if (count === 1) {
-        result.push({
-          start: points[start],
-          controller: points[start],
-          end: points[start],
-          value: bazierPoints[index].value,
-        });
+        controller = points[prevIndex];
+        end = points[prevIndex];
       } else {
-        result.push({
-          start: points[start],
-          controller: points[start + 1],
-          end: points[start + 2],
-          value: bazierPoints[index].value,
-        });
+        controller = points[prevIndex + 1];
+        end = points[prevIndex + 2];
       }
-      start += count;
+      const { radius, value } = bazierPoints[index];
+      result.push({
+        start,
+        controller,
+        end,
+        value,
+        radius,
+      });
+      prevIndex += count;
     });
     return result;
   }
@@ -322,12 +325,12 @@ export default class CanvasUtils {
     strokeStyle: StrokeStyle,
   ): [BazierCurvePoints[], StrokeStyle] {
     curvePoints = curvePoints.map(curve => {
-      const { start, controller, end, value } = curve;
+      const { start, controller, end, value, radius } = curve;
       const [p1, p2, p3] = CommonUtils.scalePoints(
         [start, controller, end],
         CanvasUtils.scale,
       );
-      return { start: p1, controller: p2, end: p3, value };
+      return { start: p1, controller: p2, end: p3, value, radius };
     });
     strokeStyle = {
       ...strokeStyle,

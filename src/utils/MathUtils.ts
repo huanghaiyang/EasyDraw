@@ -1494,4 +1494,15 @@ export default class MathUtils {
 
     return [p_ab, p_bc, p_cd, p_da];
   }
+
+  /**
+   * 给定三个坐标，计算三角形的面积
+   */
+  static calcTriangleArea(a: IPoint, b: IPoint, c: IPoint): number {
+    const side1 = MathUtils.calcDistance(a, b);
+    const side2 = MathUtils.calcDistance(b, c);
+    const side3 = MathUtils.calcDistance(c, a);
+    const s = (side1 + side2 + side3) / 2;
+    return Math.sqrt(s * (s - side1) * (s - side2) * (s - side3));
+  }
 }
