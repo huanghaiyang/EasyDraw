@@ -30,3 +30,7 @@ EasyDraw 是一款基于canvas的ui设计软件，支持自由绘制、旋转、
 - 透明度
 - 素材库
 - 预览
+
+# 预览
+
+<image src="./markdown/intro.png" width="1920" />
