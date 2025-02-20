@@ -85,22 +85,26 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   private _getArcBoxCoords(strokeStyle: StrokeStyle): IPoint[] {
-    const { type, width: sWidth } = strokeStyle;
+    const { type, width: strokeWidth } = strokeStyle;
+    // 计算原始矩形的坐标
     let coords = this.calcUnleanBoxCoords();
-    const { width: oWidth, height: oHeight } =
-      CommonUtils.calcRectangleSize(coords);
+    // 计算原始矩形的宽和高
+    const { width, height } = CommonUtils.calcRectangleSize(coords);
     let sx: number = 1,
       sy: number = 1;
+    // 因为y轴偏移，所以在计算横坐标缩放的时候需要通过内角计算实际需要减去的描边宽度
+    const delta =
+      strokeWidth / Math.sin(MathUtils.angleToRadian(this.internalAngle));
 
     switch (type) {
       case StrokeTypes.outside: {
-        sx = (oWidth + sWidth) / oWidth;
-        sy = (oHeight + sWidth) / oHeight;
+        sx = (width + delta) / width;
+        sy = (height + strokeWidth) / height;
         break;
       }
       case StrokeTypes.inside: {
-        sx = (oWidth - sWidth) / oWidth;
-        sy = (oHeight - sWidth) / oHeight;
+        sx = (width - delta) / width;
+        sy = (height - strokeWidth) / height;
         break;
       }
     }
@@ -126,7 +130,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getArcRadius(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
     let { radius } = this.model;
-    const { type, width: sWidth } = strokeStyle;
+    const { type, width: strokeWidth } = strokeStyle;
     const { width, height } = MathUtils.calcVerticalSize(coords);
     const minSize = Math.min(width, height);
 
@@ -134,10 +138,10 @@ export default class ElementRect extends Element implements IElementRect {
       if (value === 0) return value;
       switch (type) {
         case StrokeTypes.inside: {
-          return clamp(value - sWidth / 2, 0, minSize / 2);
+          return clamp(value - strokeWidth / 2, 0, minSize / 2);
         }
         case StrokeTypes.outside: {
-          return clamp(value + sWidth / 2, 0, minSize / 2);
+          return clamp(value + strokeWidth / 2, 0, minSize / 2);
         }
         default: {
           return value;
@@ -154,29 +158,40 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   private _getArcVerticalPoints(strokeStyle: StrokeStyle): ArcPoints[] {
+    // 计算原始矩形的坐标
     let boxCoords = this.calcUnleanBoxCoords();
+    // 计算描边矩形坐标
     boxCoords = this._getArcBoxCoords(strokeStyle);
+    // 计算旋转及偏移过的矩形坐标
     const rotateBoxCoords = MathUtils.batchTransWithCenter(
       boxCoords,
       this.angles,
       this.centerCoord,
     );
+    // 计算圆角半径
     const radius = this._getArcRadius(rotateBoxCoords, strokeStyle);
+    // 结果集
     const result: ArcPoints[] = [];
     range(4).forEach(index => {
+      // 当前顶点坐标
       const coord = boxCoords[index];
+      // 当前圆角半径
       const value = radius[index];
+      // 计算圆角控制点并转换为旋转过的坐标
       const rCoord = MathUtils.transWithCenter(
         this.calcRadiusCoordBy(coord, index, value),
         this.angles,
         this.centerCoord,
       );
+      // 当前顶点（旋转过的坐标）
       let controller: IPoint = rotateBoxCoords[index];
       let start: IPoint, end: IPoint;
+      // 圆角半径为0，直接返回顶点坐标
       if (!value) {
         start = rotateBoxCoords[index];
         end = rotateBoxCoords[index];
       } else {
+        // 计算控制点与矩形的垂直交点
         const crossPoints = MathUtils.calcVerticalIntersectionPoints(
           rCoord,
           rotateBoxCoords,
