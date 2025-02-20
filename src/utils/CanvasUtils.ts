@@ -259,14 +259,7 @@ export default class CanvasUtils {
     arcPoints: ArcPoints[],
     strokeStyle: StrokeStyle,
   ): [ArcPoints[], StrokeStyle] {
-    arcPoints = arcPoints.map(arc => {
-      const { start, controller, end, value, radius } = arc;
-      const [p1, p2, p3] = CommonUtils.scalePoints(
-        [start, controller, end],
-        CanvasUtils.scale,
-      );
-      return { start: p1, controller: p2, end: p3, value, radius };
-    });
+    arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     strokeStyle = {
       ...strokeStyle,
       width: strokeStyle.width * CanvasUtils.scale,
@@ -387,6 +380,25 @@ export default class CanvasUtils {
   }
 
   /**
+   * 缩放曲线点数组
+   *
+   * @param arcPoints
+   * @param scale
+   * @returns
+   */
+  static scaleArcPoints(arcPoints: ArcPoints[]) {
+    arcPoints = arcPoints.map(arc => {
+      const { start, controller, end, value, radius } = arc;
+      const [p1, p2, p3, p4] = CommonUtils.scalePoints(
+        [start, controller, end, radius],
+        CanvasUtils.scale,
+      );
+      return { start: p1, controller: p2, end: p3, radius: p4, value };
+    });
+    return arcPoints;
+  }
+
+  /**
    * 绘制曲线内填充
    *
    * @param target
@@ -399,14 +411,7 @@ export default class CanvasUtils {
     arcPoints: ArcPoints[],
     fillStyle: FillStyle,
   ): void {
-    arcPoints = arcPoints.map(arc => {
-      const { start, controller, end, value, radius } = arc;
-      const [p1, p2, p3] = CommonUtils.scalePoints(
-        [start, controller, end],
-        CanvasUtils.scale,
-      );
-      return { start: p1, controller: p2, end: p3, value, radius };
-    });
+    arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerArcPathFill(target, arcPoints, fillStyle);
     }
