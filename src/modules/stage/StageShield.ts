@@ -1243,7 +1243,8 @@ export default class StageShield
    */
   private _checkScale(deltaScale: number): number {
     let value = clamp(this.stageScale + deltaScale, 0.02, 5);
-    value = MathUtils.precise(value, 1);
+    // 2位小数精度
+    value = MathUtils.precise(value, 2);
     if (this.stageScale === 0.02) {
       if (deltaScale > 0) {
         value = 0.1;
