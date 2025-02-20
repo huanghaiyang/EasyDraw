@@ -917,6 +917,32 @@ export default class MathUtils {
   }
 
   /**
+   * 计算点在给定的线段上的内限点
+   *
+   * @param p
+   * @param a
+   * @param b
+   * @param value
+   * @returns
+   */
+  static calcInnerLimitPointOnSegment(
+    p: IPoint,
+    a: IPoint,
+    b: IPoint,
+    value: number,
+  ): IPoint {
+    const t = MathUtils.calcSegmentProportion(p, a, b);
+    if (t < 0) {
+      const angle = MathUtils.calcAngle(a, b);
+      return MathUtils.calcTargetPoint(a, value, angle);
+    } else if (t > 1) {
+      const angle = MathUtils.calcAngle(b, a);
+      return MathUtils.calcTargetPoint(b, value, angle);
+    }
+    return p;
+  }
+
+  /**
    * 判断点是否在给定的线段附近位置上
    *
    * @param point
@@ -1517,7 +1543,7 @@ export default class MathUtils {
   static calcVerticalIntersectionPoints(
     point: IPoint,
     vertices: IPoint[],
-    overflowLimit?: boolean,
+    smooth?: boolean,
   ): IPoint[] {
     const [A, B, C, D] = vertices;
     let p1 = MathUtils.calcProjectionOnSegment(point, D, A);
@@ -1525,18 +1551,18 @@ export default class MathUtils {
     let p3 = MathUtils.calcProjectionOnSegment(point, B, C);
     let p4 = MathUtils.calcProjectionOnSegment(point, C, D);
 
-    if (overflowLimit) {
+    if (smooth) {
       if (!MathUtils.isProjectionOnSegment(p1, D, A)) {
-        p1 = MathUtils.calcLimitPointOnSegment(p1, D, A);
+        p1 = MathUtils.calcInnerLimitPointOnSegment(p1, D, A, 0.01);
       }
       if (!MathUtils.isProjectionOnSegment(p2, A, B)) {
-        p2 = MathUtils.calcLimitPointOnSegment(p2, A, B);
+        p2 = MathUtils.calcInnerLimitPointOnSegment(p2, A, B, 0.01);
       }
       if (!MathUtils.isProjectionOnSegment(p3, B, C)) {
-        p3 = MathUtils.calcLimitPointOnSegment(p3, B, C);
+        p3 = MathUtils.calcInnerLimitPointOnSegment(p3, B, C, 0.01);
       }
       if (!MathUtils.isProjectionOnSegment(p4, C, D)) {
-        p4 = MathUtils.calcLimitPointOnSegment(p4, C, D);
+        p4 = MathUtils.calcInnerLimitPointOnSegment(p4, C, D, 0.01);
       }
     }
 
