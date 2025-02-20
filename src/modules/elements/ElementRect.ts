@@ -127,7 +127,7 @@ export default class ElementRect extends Element implements IElementRect {
   private _getArcRadius(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
     let { radius } = this.model;
     const { type, width: sWidth } = strokeStyle;
-    const { width, height } = CommonUtils.calcRectangleSize(coords);
+    const { width, height } = MathUtils.calcVerticalSize(coords);
     const minSize = Math.min(width, height);
 
     radius = radius.map(value => {
@@ -156,12 +156,12 @@ export default class ElementRect extends Element implements IElementRect {
   private _getArcVerticalPoints(strokeStyle: StrokeStyle): ArcPoints[] {
     let boxCoords = this.calcUnleanBoxCoords();
     boxCoords = this._getArcBoxCoords(strokeStyle);
-    const radius = this._getArcRadius(boxCoords, strokeStyle);
     const rotateBoxCoords = MathUtils.batchTransWithCenter(
       boxCoords,
       this.angles,
       this.centerCoord,
     );
+    const radius = this._getArcRadius(rotateBoxCoords, strokeStyle);
     const result: ArcPoints[] = [];
     range(4).forEach(index => {
       const coord = boxCoords[index];
@@ -358,7 +358,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getRadius(value: number): number {
     if (this._isRadiusing) return value;
-    if (value === 0) return (this.minPrimitiveSize / 2) * 0.2;
+    if (value === 0) return (this.minVerticalSize / 2) * 0.2;
     return value;
   }
 
@@ -429,7 +429,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = proportion * (this.minPrimitiveSize / 2);
+        let radius = proportion * (this.minVerticalSize / 2);
         if (this.isAllRadiusEqual) {
           [0, 1, 2, 3].forEach(key => {
             this.model.radius[key] = radius;
@@ -450,7 +450,7 @@ export default class ElementRect extends Element implements IElementRect {
       this.model.radius[index] = clamp(
         this.model.radius[index],
         0,
-        this.minPrimitiveSize / 2,
+        this.minVerticalSize / 2,
       );
     });
   }

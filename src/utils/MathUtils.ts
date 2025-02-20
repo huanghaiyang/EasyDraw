@@ -1,5 +1,5 @@
 import { multiply, cos, sin, add, isPositive } from "mathjs";
-import { IPoint, ScaleValue, TranslationValue } from "@/types";
+import { IPoint, ISize, ScaleValue, TranslationValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
 
@@ -1508,5 +1508,17 @@ export default class MathUtils {
       MathUtils.calcProjectionOnSegment(point, B, C),
       MathUtils.calcProjectionOnSegment(point, C, D),
     ];
+  }
+
+  /**
+   * 给定平行四边形及其内部的一点，计算点到四个边的垂直相交点
+   *
+   * @param vertices
+   */
+  static calcVerticalSize(vertices: IPoint[]): ISize {
+    const [A, B, C, D] = vertices;
+    const height = MathUtils.calcDistancePointToLine(A, C, D);
+    const width = MathUtils.calcDistancePointToLine(A, B, C);
+    return { width, height };
   }
 }
