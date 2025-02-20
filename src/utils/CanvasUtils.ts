@@ -8,7 +8,7 @@ import {
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { BazierCurvePoints, RenderParams } from "@/types/IRender";
+import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 
 export default class CanvasUtils {
@@ -251,16 +251,16 @@ export default class CanvasUtils {
   /**
    * 曲线参数缩放
    *
-   * @param curvePoints
+   * @param arcPoints
    * @param strokeStyle
    * @returns
    */
-  static transCurveParamsWithScale(
-    curvePoints: BazierCurvePoints[],
+  static transArcParamsWithScale(
+    arcPoints: ArcPoints[],
     strokeStyle: StrokeStyle,
-  ): [BazierCurvePoints[], StrokeStyle] {
-    curvePoints = curvePoints.map(curve => {
-      const { start, controller, end, value, radius } = curve;
+  ): [ArcPoints[], StrokeStyle] {
+    arcPoints = arcPoints.map(arc => {
+      const { start, controller, end, value, radius } = arc;
       const [p1, p2, p3] = CommonUtils.scalePoints(
         [start, controller, end],
         CanvasUtils.scale,
@@ -271,7 +271,7 @@ export default class CanvasUtils {
       ...strokeStyle,
       width: strokeStyle.width * CanvasUtils.scale,
     };
-    return [curvePoints, strokeStyle];
+    return [arcPoints, strokeStyle];
   }
 
   /**
@@ -341,16 +341,16 @@ export default class CanvasUtils {
    * 绘制内曲线填充
    *
    * @param target
-   * @param curvePoints
+   * @param arcPoints
    * @param fillStyle
    * @param options
    */
-  static drawInnerCurvePathFill(
+  static drawInnerArcPathFill(
     target: HTMLCanvasElement,
-    curvePoints: BazierCurvePoints[],
+    arcPoints: ArcPoints[],
     fillStyle: FillStyle,
   ): void {
-    CanvasUtils.drawCurvePathFill(target, curvePoints, fillStyle);
+    CanvasUtils.drawArcPathFill(target, arcPoints, fillStyle);
   }
 
   /**
@@ -390,17 +390,17 @@ export default class CanvasUtils {
    * 绘制曲线内填充
    *
    * @param target
-   * @param curvePoints
+   * @param arcPoints
    * @param fillStyle
    * @param options
    */
-  static drawInnerCurvePathFillWithScale(
+  static drawInnerArcPathFillWithScale(
     target: HTMLCanvasElement,
-    curvePoints: BazierCurvePoints[],
+    arcPoints: ArcPoints[],
     fillStyle: FillStyle,
   ): void {
-    curvePoints = curvePoints.map(curve => {
-      const { start, controller, end, value, radius } = curve;
+    arcPoints = arcPoints.map(arc => {
+      const { start, controller, end, value, radius } = arc;
       const [p1, p2, p3] = CommonUtils.scalePoints(
         [start, controller, end],
         CanvasUtils.scale,
@@ -408,7 +408,7 @@ export default class CanvasUtils {
       return { start: p1, controller: p2, end: p3, value, radius };
     });
     if (fillStyle.colorOpacity) {
-      CanvasUtils.drawInnerCurvePathFill(target, curvePoints, fillStyle);
+      CanvasUtils.drawInnerArcPathFill(target, arcPoints, fillStyle);
     }
   }
 
@@ -436,21 +436,21 @@ export default class CanvasUtils {
    * 绘制曲线描边
    *
    * @param target
-   * @param curvePoints
+   * @param arcPoints
    * @param strokeStyle
    * @param options
    */
-  static drawCurvePathStrokeWidthScale(
+  static drawArcPathStrokeWidthScale(
     target: HTMLCanvasElement,
-    curvePoints: BazierCurvePoints[],
+    arcPoints: ArcPoints[],
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
-    [curvePoints, strokeStyle] = CanvasUtils.transCurveParamsWithScale(
-      curvePoints,
+    [arcPoints, strokeStyle] = CanvasUtils.transArcParamsWithScale(
+      arcPoints,
       strokeStyle,
     );
-    CanvasUtils.drawCurvePathStroke(target, curvePoints, strokeStyle, options);
+    CanvasUtils.drawArcPathStroke(target, arcPoints, strokeStyle, options);
   }
 
   /**
@@ -492,16 +492,46 @@ export default class CanvasUtils {
   }
 
   /**
+   * 将曲线点转换为贝塞尔曲线
+   *
+   * 1. 通过顶点到对边的距离计算圆角的最大半径
+   * 2. 通过最后一个点到AD边的垂直交点做绘制的起始坐标
+   *
+   * @param arcPoints
+   * @param ctx
+   */
+  static arcToBezierPoints(
+    arcPoints: ArcPoints[],
+    ctx: CanvasRenderingContext2D,
+  ) {
+    arcPoints.forEach((arc, index) => {
+      const { start, controller, end, radius, value } = arc;
+      if (index === 0) {
+        const {
+          end: { x, y },
+        } = arcPoints[arcPoints.length - 1];
+        ctx.moveTo(x, y);
+      }
+      if (value) {
+        const r = MathUtils.calcDistance(start, radius);
+        ctx.arcTo(controller.x, controller.y, end.x, end.y, r);
+      } else {
+        ctx.lineTo(controller.x, controller.y);
+      }
+    });
+  }
+
+  /**
    * 绘制曲线描边
    *
    * @param target
-   * @param curvePoints
+   * @param arcPoints
    * @param strokeStyle
    * @param options
    */
-  static drawCurvePathStroke(
+  static drawArcPathStroke(
     target: HTMLCanvasElement,
-    curvePoints: BazierCurvePoints[],
+    arcPoints: ArcPoints[],
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
@@ -511,17 +541,7 @@ export default class CanvasUtils {
     ctx.miterLimit = 0;
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
-    curvePoints.forEach((curve, index) => {
-      const { start, controller, end, value } = curve;
-      if (index === 0) {
-        ctx.moveTo(start.x, start.y);
-      } else {
-        ctx.lineTo(start.x, start.y);
-      }
-      if (value) {
-        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
-      }
-    });
+    CanvasUtils.arcToBezierPoints(arcPoints, ctx);
     isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (strokeStyle.width) {
@@ -563,29 +583,19 @@ export default class CanvasUtils {
    * 绘制贝塞尔曲线填充
    *
    * @param target
-   * @param curvePoints
+   * @param arcPoints
    * @param fillStyle
    */
-  static drawCurvePathFill(
+  static drawArcPathFill(
     target: HTMLCanvasElement,
-    curvePoints: BazierCurvePoints[],
+    arcPoints: ArcPoints[],
     fillStyle: FillStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
-    curvePoints.forEach((curve, index) => {
-      const { start, controller, end, value } = curve;
-      if (index === 0) {
-        ctx.moveTo(start.x, start.y);
-      } else {
-        ctx.lineTo(start.x, start.y);
-      }
-      if (value) {
-        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
-      }
-    });
+    CanvasUtils.arcToBezierPoints(arcPoints, ctx);
     ctx.closePath();
     ctx.fill();
     ctx.restore();

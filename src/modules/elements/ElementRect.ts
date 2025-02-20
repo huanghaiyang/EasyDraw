@@ -10,7 +10,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import RadiusController from "@/modules/handler/controller/RadiusController";
 import IController, { IRadiusController } from "@/types/IController";
 import { clamp, cloneDeep, range, uniq } from "lodash";
-import { BazierCurvePoints } from "@/types/IRender";
+import { ArcPoints } from "@/types/IRender";
 import { computed } from "mobx";
 import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
@@ -50,13 +50,13 @@ export default class ElementRect extends Element implements IElementRect {
     return uniq(this.model.radius).length === 1;
   }
 
-  get curvePoints(): BazierCurvePoints[][] {
+  get arcPoints(): ArcPoints[][] {
     return this.model.styles.strokes.map(strokeStyle => {
-      return this._getCurvePoints(strokeStyle);
+      return this._getArcVerticalPoints(strokeStyle);
     });
   }
 
-  get curveFillPoints(): BazierCurvePoints[] {
+  get arcFillPoints(): ArcPoints[] {
     const index = this.innerestStrokePathPointsIndex;
     let strokeStyle = this.model.styles.strokes[index];
     let { width, type } = strokeStyle;
@@ -75,22 +75,20 @@ export default class ElementRect extends Element implements IElementRect {
       }
     }
     strokeStyle = { ...strokeStyle, type: StrokeTypes.inside, width };
-    return this._getCurvePoints(strokeStyle);
+    return this._getArcVerticalPoints(strokeStyle);
   }
 
   /**
-   * 获取曲线点
+   * 计算出绘制边框需要的盒模型坐标
    *
    * @param strokeStyle
    * @returns
    */
-  private _getCurvePoints(strokeStyle: StrokeStyle): BazierCurvePoints[] {
+  private _getArcBoxCoords(strokeStyle: StrokeStyle): IPoint[] {
     const { type, width: sWidth } = strokeStyle;
-    let { radius } = this.model;
     let coords = this.calcUnleanBoxCoords();
     const { width: oWidth, height: oHeight } =
       CommonUtils.calcRectangleSize(coords);
-    const center = this.centerCoord;
     let sx: number = 1,
       sy: number = 1;
 
@@ -113,11 +111,25 @@ export default class ElementRect extends Element implements IElementRect {
           sx,
           sy,
         },
-        center,
+        this.centerCoord,
       );
     }
+    return coords;
+  }
+
+  /**
+   * 计算出绘制边框需要的圆角半径
+   *
+   * @param coords
+   * @param strokeStyle
+   * @returns
+   */
+  private _getArcRadius(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
+    let { radius } = this.model;
+    const { type, width: sWidth } = strokeStyle;
     const { width, height } = CommonUtils.calcRectangleSize(coords);
     const minSize = Math.min(width, height);
+
     radius = radius.map(value => {
       if (value === 0) return value;
       switch (type) {
@@ -132,57 +144,76 @@ export default class ElementRect extends Element implements IElementRect {
         }
       }
     });
+    return radius;
+  }
 
-    const result: BazierCurvePoints[] = [];
+  /**
+   * 计算出绘制边框需要的圆角点
+   *
+   * @param strokeStyle
+   * @returns
+   */
+  private _getArcVerticalPoints(strokeStyle: StrokeStyle): ArcPoints[] {
+    let boxCoords = this.calcUnleanBoxCoords();
+    boxCoords = this._getArcBoxCoords(strokeStyle);
+    const radius = this._getArcRadius(boxCoords, strokeStyle);
+    const rotateBoxCoords = MathUtils.batchTransWithCenter(
+      boxCoords,
+      this.angles,
+      this.centerCoord,
+    );
+    const result: ArcPoints[] = [];
     range(4).forEach(index => {
-      const coord = coords[index];
+      const coord = boxCoords[index];
       const value = radius[index];
-      const rCoord = this.calcRadiusCoordBy(coord, index, radius[index]);
-      let start: IPoint, end: IPoint, controller: IPoint;
+      const rCoord = MathUtils.transWithCenter(
+        this.calcRadiusCoordBy(coord, index, value),
+        this.angles,
+        this.centerCoord,
+      );
+      let controller: IPoint = rotateBoxCoords[index];
+      let start: IPoint, end: IPoint;
       if (!value) {
-        start = coord;
-        end = coord;
-        controller = coord;
+        start = rotateBoxCoords[index];
+        end = rotateBoxCoords[index];
       } else {
-        const parrallelPoints = MathUtils.calcCrossPointsOfParallelLines(
+        const crossPoints = MathUtils.calcVerticalIntersectionPoints(
           rCoord,
-          coords,
+          rotateBoxCoords,
         );
         const indexes: number[][] = [
-          [3, 0],
           [0, 1],
           [1, 2],
           [2, 3],
+          [3, 0],
         ];
-        start = parrallelPoints[indexes[index][0]];
-        end = parrallelPoints[indexes[index][1]];
+        start = crossPoints[indexes[index][0]];
+        end = crossPoints[indexes[index][1]];
       }
-      start = this._calcTransPointByCoord(start);
-      end = this._calcTransPointByCoord(end);
-      controller = this._calcTransPointByCoord(coord);
+      start = ElementUtils.calcStageRelativePoint(
+        start,
+        this.shield.stageCalcParams,
+      );
+      end = ElementUtils.calcStageRelativePoint(
+        end,
+        this.shield.stageCalcParams,
+      );
+      controller = ElementUtils.calcStageRelativePoint(
+        controller,
+        this.shield.stageCalcParams,
+      );
       result.push({
         start,
         controller,
         end,
         value,
-        radius: rCoord,
+        radius: ElementUtils.calcStageRelativePoint(
+          rCoord,
+          this.shield.stageCalcParams,
+        ),
       });
     });
     return result;
-  }
-
-  /**
-   * 计算转换后的点
-   *
-   * @param coord
-   * @returns
-   */
-  private _calcTransPointByCoord(coord: IPoint): IPoint {
-    const point = ElementUtils.calcStageRelativePoint(
-      coord,
-      this.shield.stageCalcParams,
-    );
-    return MathUtils.transWithCenter(point, this.angles, this.center);
   }
 
   /**

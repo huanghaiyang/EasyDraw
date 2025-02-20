@@ -12,21 +12,21 @@ export default class ElementTaskRect extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const {
-      curvePoints,
-      curveFillPoints,
+      arcPoints,
+      arcFillPoints,
       model: { styles },
     } = this.node;
 
     styles.fills.forEach(fillStyle => {
-      CanvasUtils.drawInnerCurvePathFillWithScale(
+      CanvasUtils.drawInnerArcPathFillWithScale(
         this.canvas,
-        curveFillPoints,
+        arcFillPoints,
         fillStyle,
       );
     });
 
-    curvePoints.forEach((points, index) => {
-      CanvasUtils.drawCurvePathStrokeWidthScale(
+    arcPoints.forEach((points, index) => {
+      CanvasUtils.drawArcPathStrokeWidthScale(
         this.canvas,
         points,
         styles.strokes[index],

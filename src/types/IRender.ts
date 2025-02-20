@@ -64,7 +64,7 @@ export type RenderParams = AngleModel & {
 };
 
 // 曲线点
-export type BazierCurvePoints = {
+export type ArcPoints = {
   start: IPoint;
   controller: IPoint;
   end: IPoint;

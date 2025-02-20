@@ -19,7 +19,7 @@ import { IVerticesTransformer } from "@/types/ITransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
-import { BazierCurvePoints } from "@/types/IRender";
+import { ArcPoints } from "@/types/IRender";
 
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
@@ -837,9 +837,9 @@ export interface IElementRect extends IElement {
   // 是否所有圆角半径相等
   get isAllRadiusEqual(): boolean;
   // 曲线点
-  get curvePoints(): BazierCurvePoints[][];
+  get arcPoints(): ArcPoints[][];
   // 曲线填充点
-  get curveFillPoints(): BazierCurvePoints[];
+  get arcFillPoints(): ArcPoints[];
   /**
    * 刷新圆角控制器
    *

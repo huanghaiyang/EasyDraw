@@ -44,7 +44,7 @@ export default class MathUtils {
    * @param value
    * @returns
    */
-  static batchTraslate(coords: IPoint[], value: TranslationValue): IPoint[] {
+  static batchTranslate(coords: IPoint[], value: TranslationValue): IPoint[] {
     return coords.map(coord => this.translate(coord, value));
   }
 
@@ -1492,5 +1492,21 @@ export default class MathUtils {
     const side3 = MathUtils.calcDistance(c, a);
     const s = (side1 + side2 + side3) / 2;
     return Math.sqrt(s * (s - side1) * (s - side2) * (s - side3));
+  }
+
+  /**
+   * 给定平行四边形及其内部的一点，计算点到四个边的垂直相交点
+   */
+  static calcVerticalIntersectionPoints(
+    point: IPoint,
+    vertices: IPoint[],
+  ): IPoint[] {
+    const [A, B, C, D] = vertices;
+    return [
+      MathUtils.calcProjectionOnSegment(point, D, A),
+      MathUtils.calcProjectionOnSegment(point, A, B),
+      MathUtils.calcProjectionOnSegment(point, B, C),
+      MathUtils.calcProjectionOnSegment(point, C, D),
+    ];
   }
 }
