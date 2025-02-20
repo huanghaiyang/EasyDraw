@@ -180,6 +180,7 @@ export default class ElementRect extends Element implements IElementRect {
         const crossPoints = MathUtils.calcVerticalIntersectionPoints(
           rCoord,
           rotateBoxCoords,
+          true,
         );
         const indexes: number[][] = [
           [0, 1],

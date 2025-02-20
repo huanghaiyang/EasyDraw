@@ -900,6 +900,23 @@ export default class MathUtils {
   }
 
   /**
+   * 计算点在给定的线段上的限制点
+   *
+   * @param p
+   * @param a
+   * @param b
+   * @returns
+   */
+  static calcLimitPointOnSegment(p: IPoint, a: IPoint, b: IPoint): IPoint {
+    const t = MathUtils.calcSegmentProportion(p, a, b);
+    if (t < 0) {
+      return a;
+    } else if (t > 1) {
+      return b;
+    }
+  }
+
+  /**
    * 判断点是否在给定的线段附近位置上
    *
    * @param point
@@ -1500,14 +1517,30 @@ export default class MathUtils {
   static calcVerticalIntersectionPoints(
     point: IPoint,
     vertices: IPoint[],
+    overflowLimit?: boolean,
   ): IPoint[] {
     const [A, B, C, D] = vertices;
-    return [
-      MathUtils.calcProjectionOnSegment(point, D, A),
-      MathUtils.calcProjectionOnSegment(point, A, B),
-      MathUtils.calcProjectionOnSegment(point, B, C),
-      MathUtils.calcProjectionOnSegment(point, C, D),
-    ];
+    let p1 = MathUtils.calcProjectionOnSegment(point, D, A);
+    let p2 = MathUtils.calcProjectionOnSegment(point, A, B);
+    let p3 = MathUtils.calcProjectionOnSegment(point, B, C);
+    let p4 = MathUtils.calcProjectionOnSegment(point, C, D);
+
+    if (overflowLimit) {
+      if (!MathUtils.isProjectionOnSegment(p1, D, A)) {
+        p1 = MathUtils.calcLimitPointOnSegment(p1, D, A);
+      }
+      if (!MathUtils.isProjectionOnSegment(p2, A, B)) {
+        p2 = MathUtils.calcLimitPointOnSegment(p2, A, B);
+      }
+      if (!MathUtils.isProjectionOnSegment(p3, B, C)) {
+        p3 = MathUtils.calcLimitPointOnSegment(p3, B, C);
+      }
+      if (!MathUtils.isProjectionOnSegment(p4, C, D)) {
+        p4 = MathUtils.calcLimitPointOnSegment(p4, C, D);
+      }
+    }
+
+    return [p1, p2, p3, p4];
   }
 
   /**

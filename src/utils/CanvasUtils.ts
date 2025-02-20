@@ -492,10 +492,32 @@ export default class CanvasUtils {
   }
 
   /**
-   * 将曲线点转换为贝塞尔曲线
+   * 计算曲线起点
    *
-   * 1. 通过顶点到对边的距离计算圆角的最大半径
-   * 2. 通过最后一个点到AD边的垂直交点做绘制的起始坐标
+   * @param arcPoints
+   * @returns
+   */
+  static calcStartOfArcPoints(arcPoints: ArcPoints[]): {
+    point: IPoint;
+    index: number;
+  } {
+    let index = 0;
+    let point: IPoint;
+    const [A, B, C] = arcPoints;
+    const controllers = arcPoints.map(arc => arc.controller);
+    const { width, height } = MathUtils.calcVerticalSize(controllers);
+    if (width >= height) {
+      point = MathUtils.calcCenter([A.end, B.start]);
+      index = 1;
+    } else {
+      point = MathUtils.calcCenter([B.end, C.start]);
+      index = 2;
+    }
+    return { point, index };
+  }
+
+  /**
+   * 将曲线点转换为贝塞尔曲线
    *
    * @param arcPoints
    * @param ctx
@@ -504,13 +526,14 @@ export default class CanvasUtils {
     arcPoints: ArcPoints[],
     ctx: CanvasRenderingContext2D,
   ) {
-    arcPoints.forEach((arc, index) => {
-      const { start, controller, end, radius, value } = arc;
-      if (index === 0) {
-        const {
-          end: { x, y },
-        } = arcPoints[arcPoints.length - 1];
-        ctx.moveTo(x, y);
+    let { point, index } = CanvasUtils.calcStartOfArcPoints(arcPoints);
+    // 从index开始绘制
+    let counter = 0;
+    let current = arcPoints[index];
+    while (current) {
+      const { start, controller, end, radius, value } = current;
+      if (counter === 0) {
+        ctx.moveTo(point.x, point.y);
       }
       if (value) {
         const r = MathUtils.calcDistance(start, radius);
@@ -518,7 +541,16 @@ export default class CanvasUtils {
       } else {
         ctx.lineTo(controller.x, controller.y);
       }
-    });
+      current = CommonUtils.getNextOfArray(arcPoints, index, 1);
+      index++;
+      if (index >= arcPoints.length) {
+        index = 0;
+      }
+      counter++;
+      if (counter >= arcPoints.length) {
+        break;
+      }
+    }
   }
 
   /**
@@ -539,6 +571,7 @@ export default class CanvasUtils {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.miterLimit = 0;
+    ctx.lineCap = "round";
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
     CanvasUtils.arcToBezierPoints(arcPoints, ctx);
