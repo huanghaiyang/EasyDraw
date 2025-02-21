@@ -156,8 +156,12 @@ export default class StageShield
   // 移动偏移量
   get movingOffset(): IPoint {
     return {
-      x: Math.floor(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x),
-      y: Math.floor(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y),
+      x: Math.floor(
+        this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
+      ),
+      y: Math.floor(
+        this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
+      ),
     };
   }
 
@@ -242,6 +246,22 @@ export default class StageShield
     this.selection.refresh();
     await this._redrawAll({ shield: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
+  }
+
+  /**
+   * 设置组件圆角
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async setElementsCorners(
+    elements: IElement[],
+    value: number,
+    index?: number,
+  ): Promise<void> {
+    await this.store.setElementsCorners(elements, value, index);
+    await this._redrawAll({ shield: true });
   }
 
   /**
@@ -970,7 +990,7 @@ export default class StageShield
       isCornerMoving: false,
     });
     this.store.selectedElements.forEach(element => {
-      (element as IElementRect).refreshCorner();
+      (element as IElementRect).refreshCorners();
     });
     this._refreshElementsOriginals(this.store.selectedElements);
   }

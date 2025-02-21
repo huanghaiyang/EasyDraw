@@ -93,6 +93,8 @@ export enum ShieldDispatcherNames {
   heightChanged = "heightChanged",
   // 角度改变
   angleChanged = "angleChanged",
+  // 圆角改变
+  cornersChanged = "cornersChanged",
   // x轴翻转改变
   flipXChanged = "flipXChanged",
   // y偏移角度改变

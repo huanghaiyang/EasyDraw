@@ -224,6 +224,8 @@ export default interface IElement {
   get leanYAngleCalcEnable(): boolean;
   // y倾斜角度是否可修改
   get leanYAngleModifyEnable(): boolean;
+  // 圆角是否可修改
+  get cornersModifyEnable(): boolean;
   // 是否在编辑后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
@@ -276,6 +278,8 @@ export default interface IElement {
   get fontSize(): number;
   // 字体
   get fontFamily(): string;
+  // 圆角
+  get corners(): number[];
 
   // 视觉描边宽度
   get visualStrokeWidth(): number;
@@ -437,6 +441,13 @@ export default interface IElement {
    * @param value Y倾斜角度值（度）
    */
   setLeanYAngle(value: number): void;
+
+  /**
+   * 设置圆角
+   * @param value 圆角值
+   * @param index 圆角索引位置（从0开始）
+   */
+  setCorners(value: number, index?: number): void;
 
   /**
    * 设置描边类型
@@ -817,6 +828,11 @@ export default interface IElement {
   refreshTransformers(): void;
 
   /**
+   * 刷新圆角
+   */
+  refreshCorners(): void;
+
+  /**
    * 转换为JSON
    */
   toJson(): ElementObject;
@@ -834,8 +850,6 @@ export interface IElementRect extends IElement {
   get cornerControllers(): IPointController[];
   // 圆角点
   get cornerPoints(): IPoint[];
-  // 圆角
-  get corners(): number[];
   // 是否所有圆角半径相等
   get isAllCornerEqual(): boolean;
   // 曲线点
@@ -847,21 +861,17 @@ export interface IElementRect extends IElement {
    *
    * @param indexes 刷新圆角控制器选项
    */
-  refreshCornerControllers(indexes?: number[]): void;
+  refreshCornersControllers(indexes?: number[]): void;
   /**
    * 刷新圆角
    *
    * @param indexes 刷新圆角选项
    */
-  refreshCornerPoints(indexes?: number[]): void;
+  refreshCornersPoints(indexes?: number[]): void;
   /**
    * 刷新原始圆角属性
    */
   refreshOriginalCornerProps(): void;
-  /**
-   * 刷新圆角
-   */
-  refreshCorner(): void;
   /**
    * 通过偏移量更新圆角
    * @param offset 偏移量

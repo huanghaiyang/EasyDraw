@@ -383,6 +383,7 @@ export default class StageStore implements IStageStore {
         const names: ShieldDispatcherNames[] = [
           ShieldDispatcherNames.positionChanged,
           ShieldDispatcherNames.angleChanged,
+          ShieldDispatcherNames.cornersChanged,
           ShieldDispatcherNames.flipXChanged,
           ShieldDispatcherNames.leanYAngleChanged,
           ShieldDispatcherNames.widthChanged,
@@ -526,6 +527,26 @@ export default class StageStore implements IStageStore {
           element.angle,
           element.centerCoord,
         );
+      }
+    });
+  }
+
+  /**
+   * 设置组件圆角
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async setElementsCorners(
+    elements: IElement[],
+    value: number,
+    index?: number,
+  ): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (isEqual(element.corners, [value, value, value, value])) return;
+        element.setCorners(value, index);
       }
     });
   }

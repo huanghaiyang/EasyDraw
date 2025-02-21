@@ -36,6 +36,19 @@ export default interface IStageSetter {
   setElementsAngle(elements: IElement[], value: number): Promise<void>;
 
   /**
+   * 设置圆角
+   *
+   * @param elements 要修改的元件集合
+   * @param value 圆角值
+   * @param index 圆角索引位置（从0开始）
+   */
+  setElementsCorners(
+    elements: IElement[],
+    value: number,
+    index?: number,
+  ): Promise<void>;
+
+  /**
    * 设置组件Y倾斜角度
    *
    * @param elements 要修改的元件集合

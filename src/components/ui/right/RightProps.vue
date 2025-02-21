@@ -6,6 +6,7 @@
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>
+    <corner-props></corner-props>
     <fill-props></fill-props>
     <stroke-props></stroke-props>
   </div>
@@ -25,6 +26,7 @@
   .size-props,
   .angle-props,
   .stroke-props,
+  .corners-props,
   .fill-props {
     &__title {
       font-size: 12px;

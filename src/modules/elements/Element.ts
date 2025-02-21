@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, cloneDeep, some } from "lodash";
+import { clamp, clone, cloneDeep, isNumber, some } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import IElement, {
   AngleModel,
@@ -323,6 +323,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   @computed
   get angle(): number {
     return this.getAngle();
+  }
+
+  @computed
+  get corners(): number[] {
+    return this.model.corners;
   }
 
   get center(): IPoint {
@@ -780,6 +785,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get leanYAngleModifyEnable(): boolean {
     return true;
+  }
+
+  get cornersModifyEnable(): boolean {
+    return false;
   }
 
   get controllers(): IController[] {
@@ -2180,6 +2189,23 @@ export default class Element implements IElement, ILinkedNodeValue {
       center,
     );
     this._doTransformByPoints(points, boxPoints, center);
+  }
+
+  /**
+   * 刷新圆角
+   */
+  refreshCorners(): void {}
+
+  /**
+   * 设置圆角
+   *
+   * @param value
+   * @param index
+   */
+  setCorners(value: number, index?: number): void {
+    if (isNumber(index)) this.model.corners[index] = value;
+    else this.model.corners = [value, value, value, value];
+    this.refreshCorners();
   }
 
   /**

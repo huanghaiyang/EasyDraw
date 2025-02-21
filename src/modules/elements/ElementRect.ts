@@ -11,7 +11,6 @@ import CornerController from "@/modules/handler/controller/CornerController";
 import IController, { ICornerController } from "@/types/IController";
 import { clamp, cloneDeep, range, uniq } from "lodash";
 import { ArcPoints } from "@/types/IRender";
-import { computed } from "mobx";
 import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -21,13 +20,16 @@ export default class ElementRect extends Element implements IElementRect {
   _originalCorner: number[] = [];
   _originalCornerPoints: IPoint[] = [];
 
+  get cornersModifyEnable(): boolean {
+    return true;
+  }
+
   get cornerControllers(): ICornerController[] {
     return this._cornerControllers;
   }
 
-  @computed
-  get corners(): number[] {
-    return this.model.corners;
+  get limitCorners(): number[] {
+    return this._reviseCorner();
   }
 
   get cornerPoints(): IPoint[] {
@@ -35,7 +37,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get visualCorner(): number[] {
-    return this.model.corners.map(value => this._getCorner(value));
+    return this.limitCorners.map(value => this._getCorner(value));
   }
 
   get editingEnable(): boolean {
@@ -125,7 +127,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   private _getArcCorner(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
-    let { corners } = this.model;
+    let corners = this.limitCorners;
     const { type, width: strokeWidth } = strokeStyle;
     const { width, height } = MathUtils.calcVerticalSize(coords);
     const minSize = Math.min(width, height);
@@ -246,7 +248,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   calcCornerCoord(index: number, real?: boolean): IPoint {
-    const value = real ? this.model.corners[index] : this.visualCorner[index];
+    const value = real ? this.limitCorners[index] : this.visualCorner[index];
     const coord = MathUtils.leanWithCenter(
       this.model.boxCoords[index],
       this.model.leanXAngle,
@@ -304,7 +306,7 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param index
    */
-  refreshCornerController(index: number): void {
+  refreshCornersController(index: number): void {
     const { x, y } = this._cornerPoints[index];
     const points = this.getControllerPoints(this._cornerPoints[index]);
     if (!this._cornerControllers[index]) {
@@ -325,7 +327,7 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param index
    */
-  refreshCornerPoint(index: number): void {
+  refreshCornersPoint(index: number): void {
     this._cornerPoints[index] = this.calcCornerPoint(index);
   }
 
@@ -334,10 +336,10 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param options 刷新圆角选项
    */
-  refreshCornerPoints(indexes?: number[]): void {
+  refreshCornersPoints(indexes?: number[]): void {
     indexes = indexes || [0, 1, 2, 3];
     indexes.forEach(index => {
-      this.refreshCornerPoint(index);
+      this.refreshCornersPoint(index);
     });
   }
 
@@ -346,19 +348,20 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param options 刷新圆角控制器选项
    */
-  refreshCornerControllers(indexes?: number[]): void {
+  refreshCornersControllers(indexes?: number[]): void {
     indexes = indexes || [0, 1, 2, 3];
     indexes.forEach(index => {
-      this.refreshCornerController(index);
+      this.refreshCornersController(index);
     });
   }
 
   /**
    * 刷新圆角
    */
-  refreshCorner(): void {
-    this.refreshCornerPoints();
-    this.refreshCornerControllers();
+  refreshCorners(): void {
+    super.refreshCorners();
+    this.refreshCornersPoints();
+    this.refreshCornersControllers();
   }
 
   /**
@@ -371,7 +374,7 @@ export default class ElementRect extends Element implements IElementRect {
     subOptions?: { angles?: RefreshAnglesOptions },
   ): void {
     super.refresh(options, subOptions);
-    this.refreshCorner();
+    this.refreshCorners();
   }
 
   /**
@@ -388,7 +391,7 @@ export default class ElementRect extends Element implements IElementRect {
    * 刷新原始圆角属性
    */
   refreshOriginalCornerProps(): void {
-    this._originalCorner = cloneDeep(this.model.corners);
+    this._originalCorner = cloneDeep(this.limitCorners);
     this._originalCornerPoints = cloneDeep(this._cornerPoints);
   }
 
@@ -459,7 +462,7 @@ export default class ElementRect extends Element implements IElementRect {
         } else {
           this.model.corners[index] = corner;
         }
-        this.refreshCorner();
+        this.refreshCorners();
       }
     }
   }
@@ -467,21 +470,11 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 修正圆角
    */
-  private _reviseCorner(): void {
+  private _reviseCorner(): number[] {
+    const values = cloneDeep(this.model.corners);
     range(4).forEach(index => {
-      this.model.corners[index] = clamp(
-        this.model.corners[index],
-        0,
-        this.minVerticalSize / 2,
-      );
+      values[index] = clamp(values[index], 0, this.minVerticalSize / 2);
     });
-  }
-
-  /**
-   * 刷新尺寸
-   */
-  refreshSize(): void {
-    super.refreshSize();
-    this._reviseCorner();
+    return values;
   }
 }

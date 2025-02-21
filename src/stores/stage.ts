@@ -2,7 +2,7 @@ import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
-import IElement from "@/types/IElement";
+import IElement, { DefaultCornerModel } from "@/types/IElement";
 import {
   DefaultElementStyle,
   DefaultFillStyle,
@@ -40,6 +40,8 @@ const DefaultStage = {
   height: 0,
   // 组件角度
   angle: 0,
+  // 组件圆角
+  corners: [...DefaultCornerModel.corners],
   // X轴翻转
   flipX: false,
   // Y偏移角度
@@ -152,6 +154,11 @@ export const useStageStore = defineStore("stage", {
         ShieldDispatcherNames.angleChanged,
         throttle(this.onAngleChanged.bind(this), 100),
       );
+      // 监听圆角
+      shield.on(
+        ShieldDispatcherNames.cornersChanged,
+        throttle(this.onCornersChanged.bind(this), 100),
+      );
       // 监听X轴翻转
       shield.on(
         ShieldDispatcherNames.flipXChanged,
@@ -262,6 +269,7 @@ export const useStageStore = defineStore("stage", {
           width,
           height,
           angle,
+          corners,
           flipX,
           leanYAngle,
           strokes,
@@ -280,6 +288,8 @@ export const useStageStore = defineStore("stage", {
         this.onHeightChanged(element, height);
         // 组件旋转角度
         this.onAngleChanged(element, angle);
+        // 组件圆角
+        this.onCornersChanged(element, corners);
         // X轴翻转
         this.onFlipXChanged(element, flipX);
         // Y轴偏移角度
@@ -347,6 +357,15 @@ export const useStageStore = defineStore("stage", {
      */
     onAngleChanged(element: IElement, angle: number) {
       this.angle = angle;
+    },
+    /**
+     * 圆角变化
+     *
+     * @param element
+     * @param corners
+     */
+    onCornersChanged(element: IElement, corners: number[]) {
+      this.corners = corners;
     },
     /**
      * X轴翻转变化
@@ -500,7 +519,19 @@ export const useStageStore = defineStore("stage", {
     },
 
     /**
+     * 设置圆角
+     *
+     * @param value
+     * @param index
+     */
+    setElementsCorners(value: number, index?: number): void {
+      shield.setElementsCorners(this.selectedElements, value, index);
+    },
+
+    /**
      * 设置组件Y倾斜角度
+     *
+     * @param value
      */
     setElementsLeanYAngle(value: number): void {
       shield.setElementsLeanYAngle(this.selectedElements, value);
