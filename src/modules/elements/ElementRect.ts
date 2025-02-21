@@ -152,6 +152,56 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 计算控制点与矩形的垂直交点
+   *
+   * @param rCoord
+   * @param rotateBoxCoords
+   * @returns
+   */
+  private _getVerticalIntersection(
+    rCoord: IPoint,
+    rotateBoxCoords: IPoint[],
+  ): { coords: IPoint[]; indexes: number[][] } {
+    // 计算控制点与矩形的垂直交点
+    const coords = MathUtils.calcVerticalIntersectionPoints(
+      rCoord,
+      rotateBoxCoords,
+      true,
+    );
+    const indexes: number[][] = [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 0],
+    ];
+    return { coords, indexes };
+  }
+
+  /**
+   * 计算平行线交点
+   *
+   * @param rCoord
+   * @param rotateBoxCoords
+   * @returns
+   */
+  private _getCrossPointsOfParallelLines(
+    rCoord: IPoint,
+    rotateBoxCoords: IPoint[],
+  ): { coords: IPoint[]; indexes: number[][] } {
+    const coords = MathUtils.calcCrossPointsOfParallelLines(
+      rCoord,
+      rotateBoxCoords,
+    );
+    const indexes: number[][] = [
+      [3, 0],
+      [0, 1],
+      [1, 2],
+      [2, 3],
+    ];
+    return { coords, indexes };
+  }
+
+  /**
    * 计算出绘制边框需要的圆角点
    *
    * @param strokeStyle
@@ -191,18 +241,10 @@ export default class ElementRect extends Element implements IElementRect {
         start = rotateBoxCoords[index];
         end = rotateBoxCoords[index];
       } else {
-        // 计算控制点与矩形的垂直交点
-        const crossPoints = MathUtils.calcVerticalIntersectionPoints(
+        const { coords: crossPoints, indexes } = this._getVerticalIntersection(
           rCoord,
           rotateBoxCoords,
-          true,
         );
-        const indexes: number[][] = [
-          [0, 1],
-          [1, 2],
-          [2, 3],
-          [3, 0],
-        ];
         start = crossPoints[indexes[index][0]];
         end = crossPoints[indexes[index][1]];
       }

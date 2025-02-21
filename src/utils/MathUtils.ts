@@ -1494,6 +1494,10 @@ export default class MathUtils {
 
   /**
    * 求过平行四边形内一点的两条与平行四边形的四个边平行的线相较于四个边的交点
+   *
+   * @param point
+   * @param vertices
+   * @returns
    */
   static calcCrossPointsOfParallelLines(
     point: IPoint,
@@ -1528,6 +1532,11 @@ export default class MathUtils {
 
   /**
    * 给定三个坐标，计算三角形的面积
+   *
+   * @param a
+   * @param b
+   * @param c
+   * @returns
    */
   static calcTriangleArea(a: IPoint, b: IPoint, c: IPoint): number {
     const side1 = MathUtils.calcDistance(a, b);
@@ -1539,6 +1548,11 @@ export default class MathUtils {
 
   /**
    * 给定平行四边形及其内部的一点，计算点到四个边的垂直相交点
+   *
+   * @param point 点
+   * @param vertices 平行四边形的四个顶点
+   * @param smooth 是否平滑处理
+   * @returns 垂直相交点数组
    */
   static calcVerticalIntersectionPoints(
     point: IPoint,

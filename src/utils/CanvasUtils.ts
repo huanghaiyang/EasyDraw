@@ -559,6 +559,31 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制二次贝塞尔曲线
+   *
+   * @param arcPoints
+   * @param ctx
+   */
+  static drawBazierPoints(
+    arcPoints: ArcPoints[],
+    ctx: CanvasRenderingContext2D,
+  ) {
+    arcPoints.forEach((arc, index) => {
+      const { start, controller, end, value } = arc;
+      if (index === 0) {
+        ctx.moveTo(start.x, start.y);
+      } else {
+        ctx.lineTo(start.x, start.y);
+      }
+      if (value) {
+        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+      } else {
+        ctx.lineTo(controller.x, controller.y);
+      }
+    });
+  }
+
+  /**
    * 绘制曲线描边
    *
    * @param target
