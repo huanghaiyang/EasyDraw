@@ -20,7 +20,7 @@ import IElement, {
   IElementArbitrary,
   RefreshSubOptions,
   DefaultRefreshSubOptions,
-  DefaultRadiusModel,
+  DefaultCornerModel,
   IElementRect,
 } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
@@ -1004,7 +1004,7 @@ export default class StageStore implements IStageStore {
       isRatioLocked: false,
       ...position,
       ...DefaultAngleModel,
-      ...DefaultRadiusModel,
+      ...DefaultCornerModel,
     };
     return model;
   }
@@ -1280,8 +1280,8 @@ export default class StageStore implements IStageStore {
    *
    * @param offset
    */
-  updateSelectedElementsRadius(offset: IPoint): void {
-    this.updateElementsRadius(this.selectedElements, offset);
+  updateSelectedElementsCorner(offset: IPoint): void {
+    this.updateElementsCorner(this.selectedElements, offset);
   }
 
   /**
@@ -1290,9 +1290,9 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param offset
    */
-  updateElementsRadius(elements: IElement[], offset: IPoint): void {
+  updateElementsCorner(elements: IElement[], offset: IPoint): void {
     elements.forEach(element => {
-      (element as IElementRect).updateRadiusByOffset(offset);
+      (element as IElementRect).updateCornerByOffset(offset);
     });
   }
 
@@ -1580,7 +1580,7 @@ export default class StageStore implements IStageStore {
       isRatioLocked: true,
       ...center,
       ...DefaultAngleModel,
-      ...DefaultRadiusModel,
+      ...DefaultCornerModel,
     };
     const element = ElementUtils.createElement(object, this.shield);
     return element;

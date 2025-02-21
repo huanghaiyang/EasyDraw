@@ -201,13 +201,13 @@ export default class CanvasUtils {
   ): ArcPoints[] {
     const offset = CanvasUtils.calcOffsetByRect(rect);
     return arcPoints.map(arc => {
-      let { start, controller, end, radius, value } = arc;
+      let { start, controller, end, corner, value } = arc;
       start = MathUtils.translate(start, offset);
       controller = MathUtils.translate(controller, offset);
       end = MathUtils.translate(end, offset);
-      radius = MathUtils.translate(radius, offset);
+      corner = MathUtils.translate(corner, offset);
 
-      return { start, controller, end, radius, value };
+      return { start, controller, end, corner, value };
     });
   }
 
@@ -459,12 +459,12 @@ export default class CanvasUtils {
    */
   static scaleArcPoints(arcPoints: ArcPoints[]) {
     arcPoints = arcPoints.map(arc => {
-      const { start, controller, end, value, radius } = arc;
+      const { start, controller, end, value, corner } = arc;
       const [p1, p2, p3, p4] = CommonUtils.scalePoints(
-        [start, controller, end, radius],
+        [start, controller, end, corner],
         CanvasUtils.scale,
       );
-      return { start: p1, controller: p2, end: p3, radius: p4, value };
+      return { start: p1, controller: p2, end: p3, corner: p4, value };
     });
     return arcPoints;
   }
@@ -618,12 +618,12 @@ export default class CanvasUtils {
     let counter = 0;
     let current = arcPoints[index];
     while (current) {
-      const { start, controller, end, radius, value } = current;
+      const { start, controller, end, corner, value } = current;
       if (counter === 0) {
         ctx.moveTo(point.x, point.y);
       }
       if (value) {
-        const r = MathUtils.calcDistance(start, radius);
+        const r = MathUtils.calcDistance(start, corner);
         ctx.arcTo(controller.x, controller.y, end.x, end.y, r);
       } else {
         ctx.lineTo(controller.x, controller.y);
@@ -766,20 +766,20 @@ export default class CanvasUtils {
    *
    * @param target
    * @param point
-   * @param radius
+   * @param corner
    * @param styles
    */
   static drawCircleFill(
     target: HTMLCanvasElement,
     point: IPoint,
-    radius: number,
+    corner: number,
     fillStyle: FillStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
-    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, corner, 0, Math.PI * 2);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -790,20 +790,20 @@ export default class CanvasUtils {
    *
    * @param target
    * @param point
-   * @param radius
+   * @param corner
    * @param styles
    */
   static drawCircleStroke(
     target: HTMLCanvasElement,
     point: IPoint,
-    radius: number,
+    corner: number,
     strokeStyle: StrokeStyle,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
-    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.arc(point.x, point.y, corner, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
     ctx.restore();
@@ -814,20 +814,20 @@ export default class CanvasUtils {
    *
    * @param target
    * @param point
-   * @param radius
+   * @param corner
    * @param styles
    */
   static drawCircleStrokeWithScale(
     target: HTMLCanvasElement,
     point: IPoint,
-    radius: number,
+    corner: number,
     strokeStyle: StrokeStyle,
   ) {
     const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
       [point],
       strokeStyle,
     );
-    CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
+    CanvasUtils.drawCircleStroke(target, points[0], corner, scaleStyles);
   }
 
   /**
@@ -835,20 +835,20 @@ export default class CanvasUtils {
    *
    * @param target
    * @param point
-   * @param radius
+   * @param corner
    * @param styles
    */
   static drawCircleFillWithScale(
     target: HTMLCanvasElement,
     point: IPoint,
-    radius: number,
+    corner: number,
     strokeStyle: StrokeStyle,
   ) {
     const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
       [point],
       strokeStyle,
     );
-    CanvasUtils.drawCircleStroke(target, points[0], radius, scaleStyles);
+    CanvasUtils.drawCircleStroke(target, points[0], corner, scaleStyles);
   }
 
   /**

@@ -81,19 +81,19 @@ export const DefaultAngleModel: AngleModel = {
 };
 
 // 圆角模型
-export type RadiusModel = {
-  radius?: number[];
+export type CornerModel = {
+  corners?: number[];
 };
 
 // 默认圆角模型
-export const DefaultRadiusModel: RadiusModel = {
-  radius: [0, 0, 0, 0],
+export const DefaultCornerModel: CornerModel = {
+  corners: [0, 0, 0, 0],
 };
 
 // 舞台组件数据模型
 export type ElementObject = AngleModel &
   FlipModel &
-  RadiusModel &
+  CornerModel &
   IPoint & {
     // 组件id
     id: string;
@@ -354,7 +354,7 @@ export default interface IElement {
   // 是否拖动
   get isDragging(): boolean;
   // 是否修改圆角
-  get isRadiusing(): boolean;
+  get isCornerMoving(): boolean;
   // 是否临时
   get isProvisional(): boolean;
   // 是否目标
@@ -385,7 +385,7 @@ export default interface IElement {
   // 设置是否拖动
   set isDragging(value: boolean);
   // 设置是否修改圆角
-  set isRadiusing(value: boolean);
+  set isCornerMoving(value: boolean);
   // 设置是否临时
   set isProvisional(value: boolean);
   // 设置是否目标
@@ -831,13 +831,13 @@ export default interface IElement {
 // 舞台组件（组件）-React
 export interface IElementRect extends IElement {
   // 圆角控制器
-  get radiusControllers(): IPointController[];
+  get cornerControllers(): IPointController[];
   // 圆角点
-  get radiusPoints(): IPoint[];
+  get cornerPoints(): IPoint[];
   // 圆角
-  get radius(): number[];
+  get corners(): number[];
   // 是否所有圆角半径相等
-  get isAllRadiusEqual(): boolean;
+  get isAllCornerEqual(): boolean;
   // 曲线点
   get arcPoints(): ArcPoints[][];
   // 曲线填充点
@@ -847,26 +847,26 @@ export interface IElementRect extends IElement {
    *
    * @param indexes 刷新圆角控制器选项
    */
-  refreshRadiusControllers(indexes?: number[]): void;
+  refreshCornerControllers(indexes?: number[]): void;
   /**
    * 刷新圆角
    *
    * @param indexes 刷新圆角选项
    */
-  refreshRadiusPoints(indexes?: number[]): void;
+  refreshCornerPoints(indexes?: number[]): void;
   /**
    * 刷新原始圆角属性
    */
-  refreshOriginalRadiusProps(): void;
+  refreshOriginalCornerProps(): void;
   /**
    * 刷新圆角
    */
-  refreshRadius(): void;
+  refreshCorner(): void;
   /**
    * 通过偏移量更新圆角
    * @param offset 偏移量
    */
-  updateRadiusByOffset(offset: IPoint): void;
+  updateCornerByOffset(offset: IPoint): void;
 }
 
 // 舞台组件（组件）-圆形

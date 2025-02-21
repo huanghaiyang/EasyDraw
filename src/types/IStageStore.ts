@@ -103,9 +103,9 @@ export default interface IStageStore extends IStageSetter {
   // 更新组件形变
   updateElementsTransform(elements: IElement[], offset: IPoint): void;
   // 更新选中组件圆角半径
-  updateSelectedElementsRadius(offset: IPoint): void;
+  updateSelectedElementsCorner(offset: IPoint): void;
   // 更新组件圆角半径
-  updateElementsRadius(elements: IElement[], offset: IPoint): void;
+  updateElementsCorner(elements: IElement[], offset: IPoint): void;
   // 计算旋转组件中心
   refreshRotatingStates(point: IPoint): void;
   // 计算给定组件旋转状态

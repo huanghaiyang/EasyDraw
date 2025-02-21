@@ -35,7 +35,7 @@ import { AutoFitPadding } from "@/types/Stage";
 import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
 import StageAlign from "@/modules/stage/StageAlign";
 import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
-import RadiusController from "@/modules/handler/controller/RadiusController";
+import CornerController from "@/modules/handler/controller/CornerController";
 
 export default class StageShield
   extends DrawerBase
@@ -113,7 +113,7 @@ export default class StageShield
       StageShieldElementsStatus.ROTATING,
       StageShieldElementsStatus.MOVING,
       StageShieldElementsStatus.TRANSFORMING,
-      StageShieldElementsStatus.RADIUSING,
+      StageShieldElementsStatus.CORNER_MOVING,
     ].includes(this.elementsStatus);
   }
 
@@ -568,8 +568,8 @@ export default class StageShield
               flag = true;
               break;
             }
-            case StageShieldElementsStatus.RADIUSING: {
-              this._radiusElements();
+            case StageShieldElementsStatus.CORNER_MOVING: {
+              this._cornerElements();
               flag = true;
               break;
             }
@@ -578,7 +578,7 @@ export default class StageShield
             ![
               StageShieldElementsStatus.ROTATING,
               StageShieldElementsStatus.TRANSFORMING,
-              StageShieldElementsStatus.RADIUSING,
+              StageShieldElementsStatus.CORNER_MOVING,
             ].includes(this.elementsStatus)
           ) {
             if (this.store.isSelectedContainsTarget()) {
@@ -642,11 +642,11 @@ export default class StageShield
   /**
    * 组件半径
    */
-  private _radiusElements(): void {
+  private _cornerElements(): void {
     this.store.updateElements(this.store.selectedElements, {
-      isRadiusing: true,
+      isCornerMoving: true,
     });
-    this.store.updateSelectedElementsRadius(this.movingOffset);
+    this.store.updateSelectedElementsCorner(this.movingOffset);
   }
 
   /**
@@ -752,8 +752,8 @@ export default class StageShield
         controller instanceof BorderTransformer
       ) {
         this.elementsStatus = StageShieldElementsStatus.TRANSFORMING;
-      } else if (controller instanceof RadiusController) {
-        this.elementsStatus = StageShieldElementsStatus.RADIUSING;
+      } else if (controller instanceof CornerController) {
+        this.elementsStatus = StageShieldElementsStatus.CORNER_MOVING;
       } else {
         // 获取鼠标点击的组件
         const targetElement = this.selection.getElementOnPoint(
@@ -849,8 +849,8 @@ export default class StageShield
             this._endElementsTransform();
             break;
           }
-          case StageShieldElementsStatus.RADIUSING: {
-            this._endElementsRadius();
+          case StageShieldElementsStatus.CORNER_MOVING: {
+            this._endElementsCorner();
             break;
           }
         }
@@ -858,7 +858,7 @@ export default class StageShield
           [
             StageShieldElementsStatus.ROTATING,
             StageShieldElementsStatus.TRANSFORMING,
-            StageShieldElementsStatus.RADIUSING,
+            StageShieldElementsStatus.CORNER_MOVING,
             StageShieldElementsStatus.MOVING,
           ].includes(this.elementsStatus)
         ) {
@@ -965,12 +965,12 @@ export default class StageShield
   /**
    * 结束组件圆角半径操作
    */
-  private _endElementsRadius() {
+  private _endElementsCorner() {
     this.store.updateElements(this.store.selectedElements, {
-      isRadiusing: false,
+      isCornerMoving: false,
     });
     this.store.selectedElements.forEach(element => {
-      (element as IElementRect).refreshRadius();
+      (element as IElementRect).refreshCorner();
     });
     this._refreshElementsOriginals(this.store.selectedElements);
   }

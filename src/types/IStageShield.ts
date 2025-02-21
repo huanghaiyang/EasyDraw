@@ -20,7 +20,7 @@ export enum StageShieldElementsStatus {
   MOVING,
   ROTATING,
   TRANSFORMING,
-  RADIUSING,
+  CORNER_MOVING,
   EDITING,
 }
 

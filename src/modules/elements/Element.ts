@@ -85,7 +85,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否正在拖动
   @observable _isDragging: boolean = false;
   // 是否正在修改圆角
-  @observable _isRadiusing: boolean = false;
+  @observable _isCornerMoving: boolean = false;
   // 是否处于临时状态
   @observable _isProvisional: boolean = false;
   // 是否命中
@@ -462,12 +462,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @computed
-  get isRadiusing(): boolean {
-    return this._isRadiusing;
+  get isCornerMoving(): boolean {
+    return this._isCornerMoving;
   }
 
-  set isRadiusing(value: boolean) {
-    this._setisRadiusing(value);
+  set isCornerMoving(value: boolean) {
+    this._setIsCornerMoving(value);
   }
 
   @computed
@@ -590,8 +590,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @action
-  protected _setisRadiusing(value: boolean): void {
-    this._isRadiusing = value;
+  protected _setIsCornerMoving(value: boolean): void {
+    this._isCornerMoving = value;
   }
 
   // 坐标-舞台坐标系

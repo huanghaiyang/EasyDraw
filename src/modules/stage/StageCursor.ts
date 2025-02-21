@@ -4,7 +4,6 @@ import { IMaskTask } from "@/types/IRenderTask";
 import IStageCursor from "@/types/IStageCursor";
 import IStageShield from "@/types/IStageShield";
 import CommonUtils from "@/utils/CommonUtils";
-import MathUtils from "@/utils/MathUtils";
 import { CursorSize } from "@/styles/MaskStyles";
 import MaskTaskIconCursor from "@/modules/render/mask/task/MaskTaskIconCursor";
 import { CursorTypes } from "@/types/Stage";
@@ -13,7 +12,7 @@ import { IBorderTransformer, IVerticesTransformer } from "@/types/ITransformer";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
-import RadiusController from "@/modules/handler/controller/RadiusController";
+import CornerController from "@/modules/handler/controller/CornerController";
 import { IPointController } from "@/types/IController";
 
 export default class StageCursor implements IStageCursor {
@@ -107,7 +106,7 @@ export default class StageCursor implements IStageCursor {
       const controller = this.shield.selection.getActiveController();
       if (
         controller instanceof ElementRotation ||
-        controller instanceof RadiusController
+        controller instanceof CornerController
       ) {
         return this.createMaskRotationCursorTask(controller);
       } else if (controller instanceof VerticesTransformer) {

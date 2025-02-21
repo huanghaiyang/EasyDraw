@@ -7,8 +7,8 @@ import {
 } from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import RadiusController from "@/modules/handler/controller/RadiusController";
-import IController, { IRadiusController } from "@/types/IController";
+import CornerController from "@/modules/handler/controller/CornerController";
+import IController, { ICornerController } from "@/types/IController";
 import { clamp, cloneDeep, range, uniq } from "lodash";
 import { ArcPoints } from "@/types/IRender";
 import { computed } from "mobx";
@@ -16,26 +16,26 @@ import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
-  _radiusControllers: IRadiusController[] = [];
-  _radiusPoints: IPoint[] = [];
-  _originalRadius: number[] = [];
-  _originalRadiusPoints: IPoint[] = [];
+  _cornerControllers: ICornerController[] = [];
+  _cornerPoints: IPoint[] = [];
+  _originalCorner: number[] = [];
+  _originalCornerPoints: IPoint[] = [];
 
-  get radiusControllers(): IRadiusController[] {
-    return this._radiusControllers;
+  get cornerControllers(): ICornerController[] {
+    return this._cornerControllers;
   }
 
   @computed
-  get radius(): number[] {
-    return this.model.radius;
+  get corners(): number[] {
+    return this.model.corners;
   }
 
-  get radiusPoints(): IPoint[] {
-    return this._radiusPoints;
+  get cornerPoints(): IPoint[] {
+    return this._cornerPoints;
   }
 
-  get visualRadius(): number[] {
-    return this.model.radius.map(value => this._getRadius(value));
+  get visualCorner(): number[] {
+    return this.model.corners.map(value => this._getCorner(value));
   }
 
   get editingEnable(): boolean {
@@ -43,11 +43,11 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get controllers(): IController[] {
-    return [...super.controllers, ...this.radiusControllers];
+    return [...super.controllers, ...this.cornerControllers];
   }
 
-  get isAllRadiusEqual(): boolean {
-    return uniq(this.model.radius).length === 1;
+  get isAllCornerEqual(): boolean {
+    return uniq(this.model.corners).length === 1;
   }
 
   get arcPoints(): ArcPoints[][] {
@@ -124,13 +124,13 @@ export default class ElementRect extends Element implements IElementRect {
    * @param strokeStyle
    * @returns
    */
-  private _getArcRadius(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
-    let { radius } = this.model;
+  private _getArcCorner(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
+    let { corners } = this.model;
     const { type, width: strokeWidth } = strokeStyle;
     const { width, height } = MathUtils.calcVerticalSize(coords);
     const minSize = Math.min(width, height);
 
-    radius = radius.map(value => {
+    corners = corners.map(value => {
       if (value === 0) return value;
       switch (type) {
         case StrokeTypes.inside: {
@@ -144,7 +144,7 @@ export default class ElementRect extends Element implements IElementRect {
         }
       }
     });
-    return radius;
+    return corners;
   }
 
   /**
@@ -187,16 +187,16 @@ export default class ElementRect extends Element implements IElementRect {
     // 计算描边矩形坐标
     boxCoords = this._getArcBoxCoords(strokeStyle);
     // 计算圆角半径
-    const radius = this._getArcRadius(boxCoords, strokeStyle);
+    const corner = this._getArcCorner(boxCoords, strokeStyle);
     // 结果集
     const result: ArcPoints[] = [];
     range(4).forEach(index => {
       // 当前顶点坐标
       const coord = boxCoords[index];
       // 当前圆角半径
-      const value = radius[index];
+      const value = corner[index];
       // 计算圆角控制点并转换为旋转过的坐标
-      const rCoord = this.calcRadiusCoordBy(coord, index, value);
+      const rCoord = this.calcCornerCoordBy(coord, index, value);
       // 当前顶点（旋转过的坐标）
       let controller: IPoint = boxCoords[index];
       let start: IPoint, end: IPoint;
@@ -229,7 +229,7 @@ export default class ElementRect extends Element implements IElementRect {
         controller,
         end,
         value,
-        radius: ElementUtils.calcStageRelativePoint(
+        corner: ElementUtils.calcStageRelativePoint(
           rCoord,
           this.shield.stageCalcParams,
         ),
@@ -245,15 +245,15 @@ export default class ElementRect extends Element implements IElementRect {
    * @param real
    * @returns
    */
-  calcRadiusCoord(index: number, real?: boolean): IPoint {
-    const value = real ? this.model.radius[index] : this.visualRadius[index];
+  calcCornerCoord(index: number, real?: boolean): IPoint {
+    const value = real ? this.model.corners[index] : this.visualCorner[index];
     const coord = MathUtils.leanWithCenter(
       this.model.boxCoords[index],
       this.model.leanXAngle,
       -this.model.leanYAngle,
       this.centerCoord,
     );
-    return this.calcRadiusCoordBy(coord, index, value);
+    return this.calcCornerCoordBy(coord, index, value);
   }
 
   /**
@@ -264,7 +264,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param value
    * @returns
    */
-  calcRadiusCoordBy(point: IPoint, index: number, value: number): IPoint {
+  calcCornerCoordBy(point: IPoint, index: number, value: number): IPoint {
     let dx: number, dy: number;
     if ([0, 3].includes(index)) {
       dx = this.flipX ? -value : value;
@@ -290,8 +290,8 @@ export default class ElementRect extends Element implements IElementRect {
    * @param real
    * @returns
    */
-  calcRadiusPoint(index: number, real?: boolean): IPoint {
-    const coord = this.calcRadiusCoord(index, real);
+  calcCornerPoint(index: number, real?: boolean): IPoint {
+    const coord = this.calcCornerCoord(index, real);
     const point = ElementUtils.calcStageRelativePoint(
       coord,
       this.shield.stageCalcParams,
@@ -304,19 +304,19 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param index
    */
-  refreshRadiusController(index: number): void {
-    const { x, y } = this._radiusPoints[index];
-    const points = this.getControllerPoints(this._radiusPoints[index]);
-    if (!this._radiusControllers[index]) {
-      this._radiusControllers[index] = new RadiusController(this, {
+  refreshCornerController(index: number): void {
+    const { x, y } = this._cornerPoints[index];
+    const points = this.getControllerPoints(this._cornerPoints[index]);
+    if (!this._cornerControllers[index]) {
+      this._cornerControllers[index] = new CornerController(this, {
         x,
         y,
         points,
       });
     } else {
-      this._radiusControllers[index].x = x;
-      this._radiusControllers[index].y = y;
-      this._radiusControllers[index].points = points;
+      this._cornerControllers[index].x = x;
+      this._cornerControllers[index].y = y;
+      this._cornerControllers[index].points = points;
     }
   }
 
@@ -325,8 +325,8 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param index
    */
-  refreshRadiusPoint(index: number): void {
-    this._radiusPoints[index] = this.calcRadiusPoint(index);
+  refreshCornerPoint(index: number): void {
+    this._cornerPoints[index] = this.calcCornerPoint(index);
   }
 
   /**
@@ -334,10 +334,10 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param options 刷新圆角选项
    */
-  refreshRadiusPoints(indexes?: number[]): void {
+  refreshCornerPoints(indexes?: number[]): void {
     indexes = indexes || [0, 1, 2, 3];
     indexes.forEach(index => {
-      this.refreshRadiusPoint(index);
+      this.refreshCornerPoint(index);
     });
   }
 
@@ -346,19 +346,19 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param options 刷新圆角控制器选项
    */
-  refreshRadiusControllers(indexes?: number[]): void {
+  refreshCornerControllers(indexes?: number[]): void {
     indexes = indexes || [0, 1, 2, 3];
     indexes.forEach(index => {
-      this.refreshRadiusController(index);
+      this.refreshCornerController(index);
     });
   }
 
   /**
    * 刷新圆角
    */
-  refreshRadius(): void {
-    this.refreshRadiusPoints();
-    this.refreshRadiusControllers();
+  refreshCorner(): void {
+    this.refreshCornerPoints();
+    this.refreshCornerControllers();
   }
 
   /**
@@ -371,15 +371,15 @@ export default class ElementRect extends Element implements IElementRect {
     subOptions?: { angles?: RefreshAnglesOptions },
   ): void {
     super.refresh(options, subOptions);
-    this.refreshRadius();
+    this.refreshCorner();
   }
 
   /**
    * 获取圆角值
    * @param value 圆角值
    */
-  private _getRadius(value: number): number {
-    if (this._isRadiusing) return value;
+  private _getCorner(value: number): number {
+    if (this._isCornerMoving) return value;
     if (value === 0) return (this.minVerticalSize / 2) * 0.2;
     return value;
   }
@@ -387,9 +387,9 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 刷新原始圆角属性
    */
-  refreshOriginalRadiusProps(): void {
-    this._originalRadius = cloneDeep(this.model.radius);
-    this._originalRadiusPoints = cloneDeep(this._radiusPoints);
+  refreshOriginalCornerProps(): void {
+    this._originalCorner = cloneDeep(this.model.corners);
+    this._originalCornerPoints = cloneDeep(this._cornerPoints);
   }
 
   /**
@@ -397,17 +397,17 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
-    this.refreshOriginalRadiusProps();
+    this.refreshOriginalCornerProps();
   }
 
   /**
    * 通过偏移量更新圆角
    * @param offset 偏移量
    */
-  updateRadiusByOffset(offset: IPoint): void {
+  updateCornerByOffset(offset: IPoint): void {
     const controller = this.getActiveController();
-    if (controller instanceof RadiusController) {
-      const index = this.radiusControllers.indexOf(controller);
+    if (controller instanceof CornerController) {
+      const index = this.cornerControllers.indexOf(controller);
       if (index !== -1) {
         let segmentStart: IPoint;
         const center = this.center;
@@ -433,7 +433,7 @@ export default class ElementRect extends Element implements IElementRect {
             segmentStart = c2;
           }
         }
-        const originalPoint = this._originalRadiusPoints[index];
+        const originalPoint = this._originalCornerPoints[index];
         const currentPoint = {
           x: offset.x + originalPoint.x,
           y: offset.y + originalPoint.y,
@@ -451,15 +451,15 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let radius = proportion * (this.minVerticalSize / 2);
-        if (this.isAllRadiusEqual) {
+        let corner = proportion * (this.minVerticalSize / 2);
+        if (this.isAllCornerEqual) {
           [0, 1, 2, 3].forEach(key => {
-            this.model.radius[key] = radius;
+            this.model.corners[key] = corner;
           });
         } else {
-          this.model.radius[index] = radius;
+          this.model.corners[index] = corner;
         }
-        this.refreshRadius();
+        this.refreshCorner();
       }
     }
   }
@@ -467,10 +467,10 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 修正圆角
    */
-  private _reviseRadius(): void {
+  private _reviseCorner(): void {
     range(4).forEach(index => {
-      this.model.radius[index] = clamp(
-        this.model.radius[index],
+      this.model.corners[index] = clamp(
+        this.model.corners[index],
         0,
         this.minVerticalSize / 2,
       );
@@ -482,6 +482,6 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshSize(): void {
     super.refreshSize();
-    this._reviseRadius();
+    this._reviseCorner();
   }
 }

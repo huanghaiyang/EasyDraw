@@ -69,5 +69,5 @@ export type ArcPoints = {
   controller: IPoint;
   end: IPoint;
   value: number;
-  radius?: IPoint;
+  corner?: IPoint;
 };

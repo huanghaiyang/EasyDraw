@@ -44,4 +44,4 @@ export interface ISegmentController extends IController {
 }
 
 // 圆角控制器
-export interface IRadiusController extends IPointController {}
+export interface ICornerController extends IPointController {}
