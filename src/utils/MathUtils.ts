@@ -1495,6 +1495,10 @@ export default class MathUtils {
   /**
    * 求过平行四边形内一点的两条与平行四边形的四个边平行的线相较于四个边的交点
    *
+   * 需要使用时，需按照一下所以进行坐标获取
+   *
+   * [3, 0],[0, 1],[1, 2],[2, 3]
+   *
    * @param point
    * @param vertices
    * @returns

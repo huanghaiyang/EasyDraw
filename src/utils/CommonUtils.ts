@@ -506,4 +506,35 @@ export default class CommonUtils {
   static sortPointsByX(points: IPoint[]) {
     return points.sort((a, b) => a.x - b.x);
   }
+
+  /**
+   * 计算矩形倾斜后的rect
+   *
+   * @param rotateBoxPoints
+   * @param center
+   */
+  static calcImageRotateBoxRect(
+    rotateBoxPoints: IPoint[],
+    center: IPoint,
+  ): Partial<DOMRect> {
+    // 计算倾斜后的图片的宽度
+    const width = MathUtils.calcDistance(
+      rotateBoxPoints[0],
+      rotateBoxPoints[1],
+    );
+    // 计算倾斜后的图片的高度
+    const height = MathUtils.calcDistancePointToLine(
+      rotateBoxPoints[0],
+      rotateBoxPoints[2],
+      rotateBoxPoints[3],
+    );
+    // 计算绘制后的图片的rect
+    const rect = {
+      x: center.x - width / 2,
+      y: center.y - height / 2,
+      width,
+      height,
+    };
+    return rect;
+  }
 }

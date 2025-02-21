@@ -161,6 +161,57 @@ export default class CanvasUtils {
   }
 
   /**
+   * 根据矩形计算偏移量
+   *
+   * @param rect
+   * @returns
+   */
+  static calcOffsetByRect(rect: Partial<DOMRect>) {
+    return {
+      dx: -(rect.x + rect.width / 2),
+      dy: -(rect.y + rect.height / 2),
+    };
+  }
+
+  /**
+   * 如果路径绘制是以组件中心点开始的，则需要将组件的坐标以组件中心点开始的坐标系转换回来
+   *
+   * @param points
+   * @param rect
+   * @returns
+   */
+  static translatePoints(points: IPoint[], rect: Partial<DOMRect>) {
+    const offset = CanvasUtils.calcOffsetByRect(rect);
+    return points.map(point => {
+      return MathUtils.translate(point, offset);
+    });
+  }
+
+  /**
+   * 平移弧线点
+   *
+   * @param arcPoints
+   * @param rect
+   * @param rect
+   * @returns
+   */
+  static translateArcPoints(
+    arcPoints: ArcPoints[],
+    rect: Partial<DOMRect>,
+  ): ArcPoints[] {
+    const offset = CanvasUtils.calcOffsetByRect(rect);
+    return arcPoints.map(arc => {
+      let { start, controller, end, radius, value } = arc;
+      start = MathUtils.translate(start, offset);
+      controller = MathUtils.translate(controller, offset);
+      end = MathUtils.translate(end, offset);
+      radius = MathUtils.translate(radius, offset);
+
+      return { start, controller, end, radius, value };
+    });
+  }
+
+  /**
    * 绘制一张旋转过的图片
    *
    * canvas是以x的正方向为0，顺时针为正角度旋转的
@@ -367,22 +418,6 @@ export default class CanvasUtils {
   }
 
   /**
-   * 绘制内曲线填充
-   *
-   * @param target
-   * @param arcPoints
-   * @param fillStyle
-   * @param options
-   */
-  static drawInnerArcPathFill(
-    target: HTMLCanvasElement,
-    arcPoints: ArcPoints[],
-    fillStyle: FillStyle,
-  ): void {
-    CanvasUtils.drawArcPathFill(target, arcPoints, fillStyle);
-  }
-
-  /**
 
   /**
    * 绘制内填充
@@ -444,12 +479,14 @@ export default class CanvasUtils {
    */
   static drawInnerArcPathFillWithScale(
     target: HTMLCanvasElement,
+    rect: Partial<DOMRect>,
     arcPoints: ArcPoints[],
     fillStyle: FillStyle,
+    options: RenderParams = {},
   ): void {
     arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     if (fillStyle.colorOpacity) {
-      CanvasUtils.drawInnerArcPathFill(target, arcPoints, fillStyle);
+      CanvasUtils.drawArcPathFill(target, arcPoints, rect, fillStyle, options);
     }
   }
 
@@ -484,6 +521,7 @@ export default class CanvasUtils {
   static drawArcPathStrokeWidthScale(
     target: HTMLCanvasElement,
     arcPoints: ArcPoints[],
+    rect: Partial<DOMRect>,
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
@@ -491,7 +529,13 @@ export default class CanvasUtils {
       arcPoints,
       strokeStyle,
     );
-    CanvasUtils.drawArcPathStroke(target, arcPoints, strokeStyle, options);
+    CanvasUtils.drawArcPathStroke(
+      target,
+      arcPoints,
+      rect,
+      strokeStyle,
+      options,
+    );
   }
 
   /**
@@ -562,6 +606,8 @@ export default class CanvasUtils {
    *
    * @param arcPoints
    * @param ctx
+   *
+   * @deprecated 此圆角绘制在组件y轴倾斜状态下不美观~
    */
   static arcToBezierPoints(
     arcPoints: ArcPoints[],
@@ -630,17 +676,24 @@ export default class CanvasUtils {
   static drawArcPathStroke(
     target: HTMLCanvasElement,
     arcPoints: ArcPoints[],
+    rect: Partial<DOMRect>,
     strokeStyle: StrokeStyle,
     options: RenderParams = {},
   ) {
     const { isFold = true } = options;
     const ctx = target.getContext("2d");
     ctx.save();
+    CanvasUtils.transformCtx(
+      ctx,
+      rect,
+      CanvasUtils.getTransformValues(options),
+    );
     ctx.miterLimit = 0;
     ctx.lineCap = "round";
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
-    CanvasUtils.arcToBezierPoints(arcPoints, ctx);
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    CanvasUtils.drawBazierPoints(arcPoints, ctx);
     isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
     if (strokeStyle.width) {
@@ -688,13 +741,21 @@ export default class CanvasUtils {
   static drawArcPathFill(
     target: HTMLCanvasElement,
     arcPoints: ArcPoints[],
+    rect: Partial<DOMRect>,
     fillStyle: FillStyle,
+    options: RenderParams = {},
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
+    CanvasUtils.transformCtx(
+      ctx,
+      rect,
+      CanvasUtils.getTransformValues(options),
+    );
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
-    CanvasUtils.arcToBezierPoints(arcPoints, ctx);
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    CanvasUtils.drawBazierPoints(arcPoints, ctx);
     ctx.closePath();
     ctx.fill();
     ctx.restore();

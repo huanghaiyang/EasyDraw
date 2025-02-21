@@ -1,6 +1,8 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementRect } from "@/types/IElement";
+import MathUtils from "@/utils/MathUtils";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementTaskRect extends ElementTaskBase {
   get node() {
@@ -15,13 +17,37 @@ export default class ElementTaskRect extends ElementTaskBase {
       arcPoints,
       arcFillPoints,
       model: { styles },
+      angle,
+      flipX,
+      leanY,
+      actualAngle,
+      rotateBoxPoints,
+      center,
+      angles,
     } = this.node;
+
+    const options = {
+      angle,
+      flipX,
+      leanY,
+      actualAngle,
+    };
+    const boxPoints = MathUtils.batchTransWithCenter(
+      rotateBoxPoints,
+      angles,
+      center,
+      true,
+    );
+    let rect = CommonUtils.getRect(boxPoints);
+    rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
 
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawInnerArcPathFillWithScale(
         this.canvas,
+        rect,
         arcFillPoints,
         fillStyle,
+        options,
       );
     });
 
@@ -29,7 +55,9 @@ export default class ElementTaskRect extends ElementTaskBase {
       CanvasUtils.drawArcPathStrokeWidthScale(
         this.canvas,
         points,
+        rect,
         styles.strokes[index],
+        options,
       );
     });
   }
