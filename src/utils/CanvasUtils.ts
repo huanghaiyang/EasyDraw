@@ -11,6 +11,14 @@ import CommonUtils from "@/utils/CommonUtils";
 import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 
+//
+type CtxTransformOptions = {
+  radian: number;
+  scaleX: number;
+  scaleY: number;
+  leanY: number;
+};
+
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
@@ -100,6 +108,59 @@ export default class CanvasUtils {
   }
 
   /**
+   * 获取需要的变换参数
+   *
+   * @param rect
+   * @param options
+   * @returns
+   */
+  static getTransformValues(options: RenderParams): CtxTransformOptions {
+    let { angle = 0, flipX = false, leanY, actualAngle } = options;
+    // 以实际组件角度替换angle
+    if (typeof actualAngle === "number") {
+      angle = actualAngle;
+    }
+    // 计算弧度
+    let radian = MathUtils.angleToRadian(angle);
+    let scaleX = 1;
+    let scaleY = 1;
+    // 如果组件翻转
+    if (flipX) {
+      // 翻转显示
+      scaleX = -1;
+      // 翻转角度
+      radian = -radian;
+      // 倾斜翻转
+      leanY = -leanY;
+    }
+    return { radian, scaleX, scaleY, leanY };
+  }
+
+  /**
+   * 变换上下文
+   *
+   * @param ctx
+   * @param rect
+   * @param options
+   */
+  static transformCtx(
+    ctx: CanvasRenderingContext2D,
+    rect: Partial<DOMRect>,
+    options: CtxTransformOptions,
+  ) {
+    const { x, y, width, height } = rect;
+    const { radian, scaleX, scaleY, leanY } = options;
+
+    ctx.translate(x + width / 2, y + height / 2);
+    // 缩放
+    ctx.scale(scaleX, scaleY);
+    // 旋转
+    ctx.rotate(radian);
+    // 倾斜
+    ctx.transform(1, 0, leanY, 1, 0, 0);
+  }
+
+  /**
    * 绘制一张旋转过的图片
    *
    * canvas是以x的正方向为0，顺时针为正角度旋转的
@@ -115,35 +176,10 @@ export default class CanvasUtils {
     rect: Partial<DOMRect>,
     options: RenderParams = {},
   ): void {
-    let { x, y, width, height } = rect;
-    let { angle = 0, flipX = false, leanY, actualAngle } = options;
+    const { width, height } = rect;
     const ctx = target.getContext("2d");
-    // 以实际组件角度替换angle
-    if (typeof actualAngle === "number") {
-      angle = actualAngle;
-    }
-    // 计算弧度
-    let radian = MathUtils.angleToRadian(angle);
     ctx.save();
-    ctx.translate(x + width / 2, y + height / 2);
-    let scaleX = 1;
-    let scaleY = 1;
-    // 如果组件翻转
-    if (flipX) {
-      // 翻转显示
-      scaleX = -1;
-      // 翻转角度
-      radian = -radian;
-      // 倾斜翻转
-      leanY = -leanY;
-    }
-    // 缩放
-    ctx.scale(scaleX, scaleY);
-    // 旋转
-    ctx.rotate(radian);
-    // 倾斜
-    ctx.transform(1, 0, leanY, 1, 0, 0);
-    // 绘制
+    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
     ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();
   }
