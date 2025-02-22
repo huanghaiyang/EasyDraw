@@ -212,6 +212,26 @@ export default class CanvasUtils {
   }
 
   /**
+   * 绘制裁剪路径
+   *
+   * @param ctx
+   * @param arcPoints
+   * @param rect
+   */
+  static drawClipArcPoints(
+    ctx: CanvasRenderingContext2D,
+    arcPoints: ArcPoints[],
+    rect: Partial<DOMRect>,
+  ) {
+    arcPoints = CanvasUtils.transArcParamsWithScale(arcPoints)[0];
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    ctx.beginPath();
+    CanvasUtils.drawBazierPoints(arcPoints, ctx);
+    ctx.closePath();
+    ctx.clip();
+  }
+
+  /**
    * 绘制一张旋转过的图片
    *
    * canvas是以x的正方向为0，顺时针为正角度旋转的
@@ -231,6 +251,9 @@ export default class CanvasUtils {
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
+    if (options.clipArcPoints) {
+      CanvasUtils.drawClipArcPoints(ctx, options.clipArcPoints, rect);
+    }
     ctx.drawImage(img, -width / 2, -height / 2, width, height);
     ctx.restore();
   }
@@ -344,13 +367,15 @@ export default class CanvasUtils {
    */
   static transArcParamsWithScale(
     arcPoints: ArcPoints[],
-    strokeStyle: StrokeStyle,
+    strokeStyle?: StrokeStyle,
   ): [ArcPoints[], StrokeStyle] {
     arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
-    strokeStyle = {
-      ...strokeStyle,
-      width: strokeStyle.width * CanvasUtils.scale,
-    };
+    if (strokeStyle) {
+      strokeStyle = {
+        ...strokeStyle,
+        width: strokeStyle.width * CanvasUtils.scale,
+      };
+    }
     return [arcPoints, strokeStyle];
   }
 
@@ -590,7 +615,8 @@ export default class CanvasUtils {
     let point: IPoint;
     const [A, B, C] = arcPoints;
     const controllers = arcPoints.map(arc => arc.controller);
-    const { width, height } = MathUtils.calcParallelogramVerticalSize(controllers);
+    const { width, height } =
+      MathUtils.calcParallelogramVerticalSize(controllers);
     if (width >= height) {
       point = MathUtils.calcCenter([A.end, B.start]);
       index = 1;

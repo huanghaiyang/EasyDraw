@@ -513,7 +513,7 @@ export default class CommonUtils {
    * @param rotateBoxPoints
    * @param center
    */
-  static calcImageRotateBoxRect(
+  static calcRotateBoxRect(
     rotateBoxPoints: IPoint[],
     center: IPoint,
   ): Partial<DOMRect> {

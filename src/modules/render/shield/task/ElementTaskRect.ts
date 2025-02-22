@@ -1,7 +1,6 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementRect } from "@/types/IElement";
-import MathUtils from "@/utils/MathUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementTaskRect extends ElementTaskBase {
@@ -23,7 +22,6 @@ export default class ElementTaskRect extends ElementTaskBase {
       actualAngle,
       rotateBoxPoints,
       center,
-      angles,
     } = this.node;
 
     const options = {
@@ -32,13 +30,7 @@ export default class ElementTaskRect extends ElementTaskBase {
       leanY,
       actualAngle,
     };
-    const boxPoints = MathUtils.batchTransWithCenter(
-      rotateBoxPoints,
-      angles,
-      center,
-      true,
-    );
-    let rect = CommonUtils.getRect(boxPoints);
+    let rect = CommonUtils.calcRotateBoxRect(rotateBoxPoints, center);
     rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
 
     styles.fills.forEach(fillStyle => {

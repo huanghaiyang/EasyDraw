@@ -13,32 +13,41 @@ export default class ElementTaskImage extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const {
-      model,
+      arcPoints,
+      arcFillPoints,
+      model: { styles },
       angle,
       flipX,
-      actualAngle,
       leanY,
+      actualAngle,
       rotateBoxPoints,
       center,
-      model: { styles },
     } = this.node;
-    let rect = CommonUtils.calcImageRotateBoxRect(rotateBoxPoints, center);
+
+    const options = {
+      angle,
+      flipX,
+      leanY,
+      actualAngle,
+    };
+
+    let rect = CommonUtils.calcRotateBoxRect(rotateBoxPoints, center);
     rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
 
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, model.data, rect, {
-      angle,
-      flipX,
-      leanY,
-      actualAngle,
+    CanvasUtils.drawImgLike(this.canvas, this.node.model.data, rect, {
+      ...options,
+      clipArcPoints: arcFillPoints,
     });
 
     // 绘制边框
-    this.node.strokePathPoints.forEach((points, index) => {
-      CanvasUtils.drawPathStrokeWidthScale(
+    arcPoints.forEach((points, index) => {
+      CanvasUtils.drawArcPathStrokeWidthScale(
         this.canvas,
         points,
+        rect,
         styles.strokes[index],
+        options,
       );
     });
   }

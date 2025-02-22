@@ -61,6 +61,8 @@ export type RenderParams = AngleModel & {
   miterLimit?: number;
   // 倾斜y
   leanY?: number;
+  // 裁剪曲线点
+  clipArcPoints?: ArcPoints[];
 };
 
 // 曲线点
