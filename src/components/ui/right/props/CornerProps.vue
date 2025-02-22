@@ -7,6 +7,7 @@ import { uniq } from "lodash";
 const stageStore = useStageStore();
 const corners = ref(DefaultCornerModel.corners);
 const value = ref(0);
+const isAllCornerEqual = ref(false);
 
 watch(
   () => stageStore.corners,
@@ -14,9 +15,11 @@ watch(
     corners.value = newValue;
     const values = uniq(corners.value);
     if (values.length === 1) {
+      isAllCornerEqual.value = true;
       value.value = values[0];
     } else {
-      value.value = -1;
+      isAllCornerEqual.value = false;
+      value.value = 0;
     }
   },
 );
@@ -35,13 +38,13 @@ watch(
         <el-input
           v-model="value"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !isAllCornerEqual"
           type="number"
           min="0"
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val))"
         >
-          <template #prepend>c</template>
+          <template #prepend>C</template>
           <template #append>px</template>
         </el-input>
       </div>
@@ -61,7 +64,6 @@ watch(
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val), index)"
         >
-          <template #append>px</template>
         </el-input>
       </div>
     </div>

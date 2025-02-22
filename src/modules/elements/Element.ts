@@ -307,7 +307,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get minParallelogramVerticalSize(): number {
-    const { width, height } = MathUtils.calcParallelogramVerticalSize(this.rotateBoxCoords);
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(
+      this.rotateBoxCoords,
+    );
     return Math.min(width, height);
   }
 
@@ -2203,9 +2205,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setCorners(value: number, index?: number): void {
-    const values = cloneDeep(this.model.corners);
+    let values = cloneDeep(this.model.corners);
     if (isNumber(index)) values[index] = value;
     else values.fill(value);
+    values = ElementUtils.fixCornersBasedOnMinSize(
+      values,
+      this.minParallelogramVerticalSize,
+    );
     this.model.corners = values;
     this.refreshCorners();
   }

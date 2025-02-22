@@ -72,7 +72,7 @@ function setElementsLeanYAngle(value: string) {
           precision="1"
           @change="setElementsAngle"
         >
-          <template #prepend>a</template>
+          <template #prepend>A</template>
           <template #append>°</template>
         </el-input>
       </div>
@@ -91,7 +91,7 @@ function setElementsLeanYAngle(value: string) {
           precision="1"
           @change="setElementsLeanYAngle"
         >
-          <template #prepend>ly</template>
+          <template #prepend>LY</template>
           <template #append>°</template>
         </el-input>
       </div>

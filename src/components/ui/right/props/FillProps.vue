@@ -60,7 +60,7 @@ const toggleColorPickerVisible = () => {
             "
             :disabled="stageStore.inputDisabled"
           >
-            <template #prepend>o</template>
+            <template #prepend>O</template>
           </el-input>
         </div>
         <el-icon>

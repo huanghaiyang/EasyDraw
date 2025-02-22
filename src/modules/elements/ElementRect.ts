@@ -28,16 +28,16 @@ export default class ElementRect extends Element implements IElementRect {
     return this._cornerControllers;
   }
 
-  get limitCorners(): number[] {
-    return this._reviseCorner();
+  get normalizeCorners(): number[] {
+    return this._normalizeCorners();
   }
 
   get cornerPoints(): IPoint[] {
     return this._cornerPoints;
   }
 
-  get visualCorner(): number[] {
-    return this.limitCorners.map(value => this._getCorner(value));
+  get visualCorners(): number[] {
+    return this.normalizeCorners.map(value => this._getCorner(value));
   }
 
   get editingEnable(): boolean {
@@ -127,7 +127,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   private _getArcCorner(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
-    let corners = this.limitCorners;
+    let corners = this.normalizeCorners;
     const { type, width: strokeWidth } = strokeStyle;
     const { width, height } = MathUtils.calcParallelogramVerticalSize(coords);
     const minSize = Math.min(width, height);
@@ -248,7 +248,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   calcCornerCoord(index: number, real?: boolean): IPoint {
-    const value = real ? this.limitCorners[index] : this.visualCorner[index];
+    const value = real ? this.normalizeCorners[index] : this.visualCorners[index];
     const coord = MathUtils.leanWithCenter(
       this.model.boxCoords[index],
       this.model.leanXAngle,
@@ -391,7 +391,7 @@ export default class ElementRect extends Element implements IElementRect {
    * 刷新原始圆角属性
    */
   refreshOriginalCornerProps(): void {
-    this._originalCorner = cloneDeep(this.limitCorners);
+    this._originalCorner = cloneDeep(this.normalizeCorners);
     this._originalCornerPoints = cloneDeep(this._cornerPoints);
   }
 
@@ -467,11 +467,11 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 修正圆角
    */
-  private _reviseCorner(): number[] {
+  private _normalizeCorners(): number[] {
     const values = cloneDeep(this.model.corners);
-    range(4).forEach(index => {
-      values[index] = clamp(values[index], 0, this.minParallelogramVerticalSize / 2);
-    });
-    return values;
+    return ElementUtils.fixCornersBasedOnMinSize(
+      values,
+      this.minParallelogramVerticalSize,
+    );
   }
 }

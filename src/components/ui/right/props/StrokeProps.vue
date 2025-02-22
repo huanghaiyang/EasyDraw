@@ -68,7 +68,7 @@ const toggleColorPickerVisible = () => {
             "
             :disabled="stageStore.inputDisabled"
           >
-            <template #prepend>o</template>
+            <template #prepend>O</template>
           </el-input>
         </div>
 
@@ -115,7 +115,7 @@ const toggleColorPickerVisible = () => {
             "
             :disabled="stageStore.inputDisabled"
           >
-            <template #prepend>s</template>
+            <template #prepend>S</template>
             <template #append>px</template>
           </el-input>
         </div>

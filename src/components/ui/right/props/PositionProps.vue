@@ -35,7 +35,7 @@ watch(
               stageStore.setElementsPosition({ x: Number(value), y: yValue })
           "
         >
-          <template #prepend>x</template>
+          <template #prepend>X</template>
           <template #append>px</template>
         </el-input>
       </div>
@@ -52,7 +52,7 @@ watch(
               stageStore.setElementsPosition({ x: xValue, y: Number(value) })
           "
         >
-          <template #prepend>y</template>
+          <template #prepend>Y</template>
           <template #append>px</template>
         </el-input>
       </div>

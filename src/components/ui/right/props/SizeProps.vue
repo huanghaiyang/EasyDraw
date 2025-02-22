@@ -40,7 +40,7 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsWidth(Number(value))"
         >
-          <template #prepend>w</template>
+          <template #prepend>W</template>
           <template #append>px</template>
         </el-input>
       </div>
@@ -57,7 +57,7 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsHeight(Number(value))"
         >
-          <template #prepend>h</template>
+          <template #prepend>H</template>
           <template #append>px</template>
         </el-input>
       </div>

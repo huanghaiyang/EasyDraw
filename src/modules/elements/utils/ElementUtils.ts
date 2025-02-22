@@ -26,6 +26,7 @@ import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
 import { multiply } from "mathjs";
+import { clamp, range } from "lodash";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -690,5 +691,19 @@ export default class ElementUtils {
       type: CreatorTypes.group,
       ...DefaultAngleModel,
     };
+  }
+
+  /**
+   * 修正圆角
+   *
+   * @param values
+   * @param minSize
+   * @returns
+   */
+  static fixCornersBasedOnMinSize(values: number[], minSize: number): number[] {
+    range(4).forEach(index => {
+      values[index] = clamp(values[index], 0, minSize / 2);
+    });
+    return values;
   }
 }
