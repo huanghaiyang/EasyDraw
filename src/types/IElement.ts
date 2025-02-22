@@ -261,7 +261,7 @@ export default interface IElement {
   // 最小实际宽高
   get minPrimitiveSize(): number;
   // 最小内边框宽高
-  get minVerticalSize(): number;
+  get minParallelogramVerticalSize(): number;
   // 旋转角度
   get angle(): number;
   // 位置

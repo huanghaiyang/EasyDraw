@@ -742,7 +742,7 @@ export default class MathUtils {
    */
   static calcFlipXByPoints(boxPoints: IPoint[]): boolean {
     const centerCoord = MathUtils.calcCenter(boxPoints);
-    return MathUtils.isPointClockwise(centerCoord, boxPoints[0], boxPoints[3]);
+    return MathUtils.isPointClockwiseOfLine(centerCoord, boxPoints[0], boxPoints[3]);
   }
 
   /**
@@ -1276,10 +1276,10 @@ export default class MathUtils {
    * @param vertices
    * @returns
    */
-  static sortVerticesClockwise(vertices: IPoint[]) {
+  static sortPointsClockwise(vertices: IPoint[]) {
     // 计算质心
     let center = MathUtils.calcCenter(vertices);
-    return MathUtils.sortVerticesClockwiseByCenter(vertices, center);
+    return MathUtils.sortPointsClockwiseByCenter(vertices, center);
   }
 
   /**
@@ -1289,7 +1289,7 @@ export default class MathUtils {
    * @param center
    * @returns
    */
-  static sortVerticesClockwiseByCenter(
+  static sortPointsClockwiseByCenter(
     vertices: IPoint[],
     center: IPoint,
   ): IPoint[] {
@@ -1318,7 +1318,7 @@ export default class MathUtils {
    * @param segmentStart
    * @param segmentEnd
    */
-  static calcAngleBetweenPointAndSegment(
+  static calcPointToSegmentCenterAngle(
     point: IPoint,
     segmentStart: IPoint,
     segmentEnd: IPoint,
@@ -1346,7 +1346,7 @@ export default class MathUtils {
    * @param lineStart
    * @param lineEnd
    */
-  static isPointClockwise(
+  static isPointClockwiseOfLine(
     point: IPoint,
     lineStart: IPoint,
     lineEnd: IPoint,
@@ -1397,17 +1397,17 @@ export default class MathUtils {
 
     if (width < height) {
       intersections.push(
-        MathUtils.calcIntersection(bisectors[0], bisectors[1]),
+        MathUtils.calcIntersectionOfLines(bisectors[0], bisectors[1]),
       );
       intersections.push(
-        MathUtils.calcIntersection(bisectors[2], bisectors[3]),
+        MathUtils.calcIntersectionOfLines(bisectors[2], bisectors[3]),
       );
     } else {
       intersections.push(
-        MathUtils.calcIntersection(bisectors[0], bisectors[3]),
+        MathUtils.calcIntersectionOfLines(bisectors[0], bisectors[3]),
       );
       intersections.push(
-        MathUtils.calcIntersection(bisectors[1], bisectors[2]),
+        MathUtils.calcIntersectionOfLines(bisectors[1], bisectors[2]),
       );
     }
 
@@ -1421,7 +1421,7 @@ export default class MathUtils {
    * @param line2
    * @returns
    */
-  static calcIntersection(
+  static calcIntersectionOfLines(
     line1: DirectionLine,
     line2: DirectionLine,
   ): IPoint | null {
@@ -1514,19 +1514,19 @@ export default class MathUtils {
     const DA = { x: A.x - D.x, y: A.y - D.y };
     const BA = { x: A.x - B.x, y: A.y - B.y };
 
-    const p_ab = MathUtils.calcIntersection(
+    const p_ab = MathUtils.calcIntersectionOfLines(
       { point: A, direction: AB },
       { point: point, direction: DA },
     );
-    const p_bc = MathUtils.calcIntersection(
+    const p_bc = MathUtils.calcIntersectionOfLines(
       { point: B, direction: BC },
       { point: point, direction: AB },
     );
-    const p_cd = MathUtils.calcIntersection(
+    const p_cd = MathUtils.calcIntersectionOfLines(
       { point: C, direction: CD },
       { point: point, direction: BC },
     );
-    const p_da = MathUtils.calcIntersection(
+    const p_da = MathUtils.calcIntersectionOfLines(
       { point: D, direction: DA },
       { point: point, direction: BA },
     );
@@ -1558,7 +1558,7 @@ export default class MathUtils {
    * @param smooth 是否平滑处理
    * @returns 垂直相交点数组
    */
-  static calcVerticalIntersectionPoints(
+  static calcParallelogramVerticalIntersectionPoints(
     point: IPoint,
     vertices: IPoint[],
     smooth?: boolean,
@@ -1588,11 +1588,12 @@ export default class MathUtils {
   }
 
   /**
-   * 给定平行四边形及其内部的一点，计算点到四个边的垂直相交点
+   * 计算平行四边形内部的垂直尺寸
    *
-   * @param vertices
+   * @param vertices 平行四边形的四个顶点坐标
+   * @returns 返回平行四边形的垂直宽度和高度
    */
-  static calcVerticalSize(vertices: IPoint[]): ISize {
+  static calcParallelogramVerticalSize(vertices: IPoint[]): ISize {
     const [A, B, C, D] = vertices;
     const height = MathUtils.calcDistancePointToLine(A, C, D);
     const width = MathUtils.calcDistancePointToLine(A, B, C);

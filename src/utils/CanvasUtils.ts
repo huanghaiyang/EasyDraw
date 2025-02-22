@@ -590,7 +590,7 @@ export default class CanvasUtils {
     let point: IPoint;
     const [A, B, C] = arcPoints;
     const controllers = arcPoints.map(arc => arc.controller);
-    const { width, height } = MathUtils.calcVerticalSize(controllers);
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(controllers);
     if (width >= height) {
       point = MathUtils.calcCenter([A.end, B.start]);
       index = 1;

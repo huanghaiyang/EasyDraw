@@ -59,7 +59,7 @@ export default class PolygonUtils {
     innerOrOuter: boolean,
   ): IPoint[] {
     // 排序顶点
-    const sortedVertices = MathUtils.sortVerticesClockwise(vertices);
+    const sortedVertices = MathUtils.sortPointsClockwise(vertices);
     // 计算内外顶点
     return sortedVertices.map((ver, index) => {
       // 上一个顶点

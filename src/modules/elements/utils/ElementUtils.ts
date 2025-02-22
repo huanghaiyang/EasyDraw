@@ -469,7 +469,7 @@ export default class ElementUtils {
     // 描边宽度
     const { width } = strokeStyle;
     // 是否顺时针
-    const isClockwise = MathUtils.isPointClockwise(next, prev, current);
+    const isClockwise = MathUtils.isPointClockwiseOfLine(next, prev, current);
     // 三角形角度
     const angle = MathUtils.calcTriangleAngle(prev, current, next);
     // 三角形角度的一半

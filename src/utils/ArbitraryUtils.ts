@@ -66,7 +66,7 @@ export default class ArbitraryUtils {
       // 后一个顶点
       const next = CommonUtils.getNextOfArray(vertices, index);
       // 判断顺时针
-      const isClockwise = MathUtils.isPointClockwise(next, prev, ver);
+      const isClockwise = MathUtils.isPointClockwiseOfLine(next, prev, ver);
       // 计算角度
       let angle = MathUtils.calcTriangleAngle(prev, ver, next);
       // 判断是否顺时针

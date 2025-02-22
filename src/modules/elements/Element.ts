@@ -306,8 +306,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     return Math.min(width, height);
   }
 
-  get minVerticalSize(): number {
-    const { width, height } = MathUtils.calcVerticalSize(this.rotateBoxCoords);
+  get minParallelogramVerticalSize(): number {
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(this.rotateBoxCoords);
     return Math.min(width, height);
   }
 

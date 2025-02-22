@@ -129,7 +129,7 @@ export default class ElementRect extends Element implements IElementRect {
   private _getArcCorner(coords: IPoint[], strokeStyle: StrokeStyle): number[] {
     let corners = this.limitCorners;
     const { type, width: strokeWidth } = strokeStyle;
-    const { width, height } = MathUtils.calcVerticalSize(coords);
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(coords);
     const minSize = Math.min(width, height);
 
     corners = corners.map(value => {
@@ -161,7 +161,7 @@ export default class ElementRect extends Element implements IElementRect {
     rotateBoxCoords: IPoint[],
   ): { coords: IPoint[]; indexes: number[][] } {
     // 计算控制点与矩形的垂直交点
-    const coords = MathUtils.calcVerticalIntersectionPoints(
+    const coords = MathUtils.calcParallelogramVerticalIntersectionPoints(
       rCoord,
       rotateBoxCoords,
       true,
@@ -383,7 +383,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getCorner(value: number): number {
     if (this._isCornerMoving) return value;
-    if (value === 0) return (this.minVerticalSize / 2) * 0.2;
+    if (value === 0) return (this.minParallelogramVerticalSize / 2) * 0.2;
     return value;
   }
 
@@ -454,7 +454,7 @@ export default class ElementRect extends Element implements IElementRect {
         );
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
-        let corner = proportion * (this.minVerticalSize / 2);
+        let corner = proportion * (this.minParallelogramVerticalSize / 2);
         if (this.isAllCornerEqual) {
           [0, 1, 2, 3].forEach(key => {
             this.model.corners[key] = corner;
@@ -473,7 +473,7 @@ export default class ElementRect extends Element implements IElementRect {
   private _reviseCorner(): number[] {
     const values = cloneDeep(this.model.corners);
     range(4).forEach(index => {
-      values[index] = clamp(values[index], 0, this.minVerticalSize / 2);
+      values[index] = clamp(values[index], 0, this.minParallelogramVerticalSize / 2);
     });
     return values;
   }
