@@ -10,10 +10,11 @@ EasyDraw 是一款基于canvas的ui设计软件，支持自由绘制、旋转、
 - 组件旋转、形变、移动、删除、对齐、填充、多重填充、描边、多重描边
 - 组合旋转、移动、形变
 - 选区旋转、移动、形变
+- 矩形圆角
+- 图片圆角
 
 # 待实现功能
 
-- 矩形圆角
 - 组件、组合等比形变
 - 组件复制
 - 组件撤销
@@ -34,3 +35,4 @@ EasyDraw 是一款基于canvas的ui设计软件，支持自由绘制、旋转、
 # 预览
 
 <image src="./markdown/intro.png" width="1920" />
+<image src="./markdown/corner.png" width="1920" />
