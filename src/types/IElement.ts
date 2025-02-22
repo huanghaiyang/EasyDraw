@@ -315,9 +315,9 @@ export default interface IElement {
   // 描边路径坐标
   get strokePathCoords(): IPoint[][];
   // 中心内边框线段点
-  get innerestStrokePathPoints(): IPoint[];
+  get innermostStrokePathPoints(): IPoint[];
   // 中心内边框线段索引
-  get innerestStrokePathPointsIndex(): number;
+  get innermostStrokePathPointsIndex(): number;
   // 中心点
   get center(): IPoint;
   // 中心点坐标

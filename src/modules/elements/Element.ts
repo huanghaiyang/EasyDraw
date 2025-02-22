@@ -155,7 +155,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 获取最内边框线段点索引
    */
-  get innerestStrokePathPointsIndex(): number {
+  get innermostStrokePathPointsIndex(): number {
     let result = 0;
     let innerWidth = 0;
     this.strokePathPoints.forEach((points, index) => {
@@ -175,8 +175,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 获取最内边框线段点
    */
-  get innerestStrokePathPoints(): IPoint[] {
-    return this.strokePathPoints[this.innerestStrokePathPointsIndex];
+  get innermostStrokePathPoints(): IPoint[] {
+    return this.strokePathPoints[this.innermostStrokePathPointsIndex];
   }
 
   // 是否翻转X轴

@@ -59,7 +59,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get arcFillPoints(): ArcPoints[] {
-    const index = this.innerestStrokePathPointsIndex;
+    const index = this.innermostStrokePathPointsIndex;
     let strokeStyle = this.model.styles.strokes[index];
     let { width, type } = strokeStyle;
     switch (type) {
