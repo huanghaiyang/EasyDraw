@@ -489,7 +489,13 @@ export default class CanvasUtils {
         [start, controller, end, corner],
         CanvasUtils.scale,
       );
-      return { start: p1, controller: p2, end: p3, corner: p4, value };
+      return {
+        start: p1,
+        controller: p2,
+        end: p3,
+        corner: p4,
+        value: value * CanvasUtils.scale,
+      };
     });
     return arcPoints;
   }
@@ -684,7 +690,7 @@ export default class CanvasUtils {
         ctx.lineTo(start.x, start.y);
       }
       if (value) {
-        ctx.quadraticCurveTo(controller.x, controller.y, end.x, end.y);
+        ctx.arcTo(controller.x, controller.y, end.x, end.y, value);
       } else {
         ctx.lineTo(controller.x, controller.y);
       }
@@ -874,7 +880,7 @@ export default class CanvasUtils {
       [point],
       strokeStyle,
     );
-    CanvasUtils.drawCircleStroke(target, points[0], corner, scaleStyles);
+    CanvasUtils.drawCircleFill(target, points[0], corner, scaleStyles);
   }
 
   /**
