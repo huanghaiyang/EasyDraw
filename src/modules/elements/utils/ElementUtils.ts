@@ -48,6 +48,7 @@ export enum ElementReactionPropNames {
   angle = "angle",
   flipX = "flipX",
   leanYAngle = "leanYAngle",
+  corners = "corners",
   strokes = "strokes",
   fills = "fills",
   fontSize = "fontSize",

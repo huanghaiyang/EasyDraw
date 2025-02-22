@@ -2203,8 +2203,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setCorners(value: number, index?: number): void {
-    if (isNumber(index)) this.model.corners[index] = value;
-    else this.model.corners = [value, value, value, value];
+    const values = cloneDeep(this.model.corners);
+    if (isNumber(index)) values[index] = value;
+    else values.fill(value);
+    this.model.corners = values;
     this.refreshCorners();
   }
 
