@@ -742,7 +742,11 @@ export default class MathUtils {
    */
   static calcFlipXByPoints(boxPoints: IPoint[]): boolean {
     const centerCoord = MathUtils.calcCenter(boxPoints);
-    return MathUtils.isPointClockwiseOfLine(centerCoord, boxPoints[0], boxPoints[3]);
+    return MathUtils.isPointClockwiseOfLine(
+      centerCoord,
+      boxPoints[0],
+      boxPoints[3],
+    );
   }
 
   /**
@@ -1121,6 +1125,11 @@ export default class MathUtils {
 
   /**
    * 给定三角形的三个坐标点a,b,c计算b的夹角
+   *
+   * @param a
+   * @param b
+   * @param c
+   * @returns
    */
   static calcTriangleAngle(a: IPoint, b: IPoint, c: IPoint): number {
     // 计算向量AB和BC
@@ -1142,6 +1151,27 @@ export default class MathUtils {
       angleDegrees = 0;
     }
     return angleDegrees;
+  }
+
+  /**
+   * 给定三角形的三个坐标点a,b,c,按顺时针方向计算b的内测夹角
+   *
+   * @param a
+   * @param b
+   * @param c
+   * @returns
+   */
+  static calcTriangleAngleWithClockwise(
+    a: IPoint,
+    b: IPoint,
+    c: IPoint,
+  ): number {
+    const angle = MathUtils.calcTriangleAngle(a, b, c);
+    const isClockwise = MathUtils.isPointClockwiseOfLine(b, a, c);
+    if (!isClockwise) {
+      return 180 - angle;
+    }
+    return angle;
   }
 
   /**
@@ -1384,13 +1414,9 @@ export default class MathUtils {
       throw new Error("必须提供四个顶点坐标");
     }
 
-    // 定义四个顶点A, B, C, D
-    const [A, B, C, D] = vertices;
-
     // 计算每个顶点的角平分线参数方程
     const bisectors = MathUtils.calcBisectors(vertices);
-    const width = Math.sqrt(Math.pow(B.x - A.x, 2) + Math.pow(B.y - A.y, 2));
-    const height = Math.sqrt(Math.pow(D.x - A.x, 2) + Math.pow(D.y - A.y, 2));
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(vertices);
 
     // 计算相邻顶点的角平分线交点
     const intersections: IPoint[] = [];
@@ -1595,8 +1621,23 @@ export default class MathUtils {
    */
   static calcParallelogramVerticalSize(vertices: IPoint[]): ISize {
     const [A, B, C, D] = vertices;
-    const height = MathUtils.calcDistancePointToLine(A, C, D);
     const width = MathUtils.calcDistancePointToLine(A, B, C);
+    const height = MathUtils.calcDistancePointToLine(A, C, D);
     return { width, height };
+  }
+
+  /**
+   * 计算点相对直线的镜像坐标
+   */
+  static calcMirrorPointToLine(
+    point: IPoint,
+    start: IPoint,
+    end: IPoint,
+  ): IPoint {
+    // 射影坐标
+    const projection = MathUtils.calcProjectionOnSegment(point, start, end);
+    const distance = MathUtils.calcDistance(point, projection);
+    const angle = MathUtils.calcAngle(start, end);
+    return MathUtils.calcTargetPoint(projection, distance * 2, angle);
   }
 }

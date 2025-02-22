@@ -41,6 +41,9 @@ watch(
           :disabled="stageStore.inputDisabled || !isAllCornerEqual"
           type="number"
           min="0"
+          :max="
+            stageStore.primarySelectedElement?.minParallelogramVerticalSize / 2
+          "
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val))"
         >
@@ -61,6 +64,9 @@ watch(
           :disabled="stageStore.inputDisabled"
           type="number"
           min="0"
+          :max="
+            stageStore.primarySelectedElement?.minParallelogramVerticalSize / 2
+          "
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val), index)"
         >

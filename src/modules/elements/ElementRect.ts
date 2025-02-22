@@ -176,6 +176,30 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 计算平行线交点
+   *
+   * @param rCoord
+   * @param rotateBoxCoords
+   * @returns
+   */
+  private _getCrossPointsOfParallelLines(
+    rCoord: IPoint,
+    rotateBoxCoords: IPoint[],
+  ): { coords: IPoint[]; indexes: number[][] } {
+    const coords = MathUtils.calcCrossPointsOfParallelLines(
+      rCoord,
+      rotateBoxCoords,
+    );
+    const indexes: number[][] = [
+      [3, 0],
+      [0, 1],
+      [1, 2],
+      [2, 3],
+    ];
+    return { coords, indexes };
+  }
+
+  /**
    * 计算出绘制边框需要的圆角点
    *
    * 注意此处需要使用未旋转偏移的原始坐标进行计算
@@ -241,14 +265,16 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
-   * 计算圆角点的世界坐标
+   * 计算圆角点的世界坐标(非旋转倾斜过的坐标)
    *
    * @param index
    * @param real
    * @returns
    */
   calcCornerCoord(index: number, real?: boolean): IPoint {
-    const value = real ? this.normalizeCorners[index] : this.visualCorners[index];
+    const value = real
+      ? this.normalizeCorners[index]
+      : this.visualCorners[index];
     const coord = MathUtils.leanWithCenter(
       this.model.boxCoords[index],
       this.model.leanXAngle,
@@ -259,7 +285,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
-   * 计算圆角点的世界坐标
+   * 计算圆角点的世界坐标（非旋转倾斜过的坐标）
    *
    * @param boxCoords
    * @param index
@@ -293,12 +319,37 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   calcCornerPoint(index: number, real?: boolean): IPoint {
+    const value = this.visualCorners[index];
     const coord = this.calcCornerCoord(index, real);
-    const point = ElementUtils.calcStageRelativePoint(
+    let point = ElementUtils.calcStageRelativePoint(
       coord,
       this.shield.stageCalcParams,
     );
-    return MathUtils.transWithCenter(point, this.angles, this.center);
+    point = MathUtils.transWithCenter(point, this.angles, this.center);
+    const { coords: crossPoints, indexes } =
+      this._getCrossPointsOfParallelLines(point, this.rotateBoxPoints);
+    const start = crossPoints[indexes[index][0]];
+    const end = crossPoints[indexes[index][1]];
+    const controller = this.rotateBoxPoints[index];
+    let tAngle = MathUtils.calcTriangleAngleWithClockwise(
+      start,
+      controller,
+      end,
+    );
+    const flipX = this.flipX;
+    if (flipX) {
+      tAngle = 180 - tAngle;
+    }
+    const targetAngle =
+      MathUtils.calcAngle(controller, end) + (flipX ? -tAngle / 2 : tAngle / 2);
+    const targetCenter = this._getCornerTargetPoint(
+      index,
+      this.rotateBoxPoints,
+    );
+    const ctLen = MathUtils.calcDistance(controller, targetCenter) * 2;
+    const ratio = value / this.minParallelogramVerticalSize;
+    const len = ctLen * ratio;
+    return MathUtils.calcTargetPoint(controller, len, targetAngle);
   }
 
   /**
@@ -404,6 +455,32 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 获取圆角目标点
+   * @param index 圆角索引
+   * @param boxPoints 原始点
+   */
+  private _getCornerTargetPoint(index: number, boxPoints: IPoint[]): IPoint {
+    let point: IPoint;
+    let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
+    const { width, height } =
+      MathUtils.calcParallelogramVerticalSize(boxPoints);
+    if (width <= height) {
+      if ([0, 1].includes(index)) {
+        point = c1;
+      } else {
+        point = c2;
+      }
+    } else {
+      if ([0, 3].includes(index)) {
+        point = c1;
+      } else {
+        point = c2;
+      }
+    }
+    return point;
+  }
+
+  /**
    * 通过偏移量更新圆角
    * @param offset 偏移量
    */
@@ -412,30 +489,10 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof CornerController) {
       const index = this.cornerControllers.indexOf(controller);
       if (index !== -1) {
-        let segmentStart: IPoint;
-        const center = this.center;
-        const boxPoints = MathUtils.batchTransWithCenter(
+        const segmentStart = this._getCornerTargetPoint(
+          index,
           this.rotateBoxPoints,
-          this.angles,
-          center,
-          true,
         );
-        let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
-        c1 = MathUtils.transWithCenter(c1, this.angles, center);
-        c2 = MathUtils.transWithCenter(c2, this.angles, center);
-        if (this.width <= this.height) {
-          if ([0, 1].includes(index)) {
-            segmentStart = c1;
-          } else {
-            segmentStart = c2;
-          }
-        } else {
-          if ([0, 3].includes(index)) {
-            segmentStart = c1;
-          } else {
-            segmentStart = c2;
-          }
-        }
         const originalPoint = this._originalCornerPoints[index];
         const currentPoint = {
           x: offset.x + originalPoint.x,
