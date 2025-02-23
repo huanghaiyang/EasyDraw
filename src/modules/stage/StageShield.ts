@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp, cloneDeep, isBoolean } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { IElementRect, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementObject, IElementRect, RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -36,6 +36,7 @@ import IStageAlign, { IStageAlignFuncs } from "@/types/IStageAlign";
 import StageAlign from "@/modules/stage/StageAlign";
 import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
+import DOMUtils from "@/utils/DOMUtils";
 
 export default class StageShield
   extends DrawerBase
@@ -512,6 +513,8 @@ export default class StageShield
     this.event.on("pasteImage", this._handleImagePasted.bind(this));
     this.event.on("deleteSelects", this._handleSelectsDelete.bind(this));
     this.event.on("selectAll", this._handleSelectAll.bind(this));
+    this.event.on("selectCopy", this._handleSelectCopy.bind(this));
+    this.event.on("pasteElements", this._handlePasteElements.bind(this));
     this.event.on("cancel", this._handleCancel.bind(this));
     this.event.on("selectMoveable", this._handleSelectMoveable.bind(this));
     this.event.on("selectHand", this._handleSelectHand.bind(this));
@@ -1509,6 +1512,28 @@ export default class StageShield
    */
   _handleSelectAll(): void {
     this.selectAll();
+  }
+
+  /**
+   * 处理选中组件复制
+   */
+  _handleSelectCopy(e): void {
+    const elementsJson = this.store.copySelectElements();
+    const data = JSON.stringify(elementsJson);
+    DOMUtils.copyValueToClipboard(data);
+  }
+
+  /**
+   * 处理粘贴组件
+   * @param elementsJson
+   * @param elementsJson
+   */
+  _handlePasteElements(elementsJson: Array<ElementObject>): void {
+    if (elementsJson && elementsJson.length) {
+      this._clearStageSelects();
+    }
+    this.store.pasteElements(elementsJson);
+    this._redrawAll(true);
   }
 
   /**

@@ -83,7 +83,7 @@ export default class CommonUtils {
    * @returns
    */
   static getRandomDateId() {
-    return `${+new Date()}_${nanoid(8)}`;
+    return `${+new Date()}_${performance.now() * 1000}_${nanoid(8)}`;
   }
 
   /**

@@ -177,8 +177,6 @@ export const DefaultElementRefreshOptions: RefreshOptions = {
 
 // 舞台组件（组件）
 export default interface IElement {
-  // 组件ID
-  id: string;
   // 组件模型
   model: ElementObject;
   // 组件旋转
@@ -186,6 +184,8 @@ export default interface IElement {
   // 舞台
   shield: IStageShield;
 
+  // 组件ID
+  get id(): string;
   // 是否是组件
   get isElement(): boolean;
   // 是否是组合

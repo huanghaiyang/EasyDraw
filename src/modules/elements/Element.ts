@@ -45,8 +45,6 @@ import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
 
 export default class Element implements IElement, ILinkedNodeValue {
-  // 组件ID
-  id: string;
   // 组件模型
   model: ElementObject;
   // 组件旋转
@@ -99,6 +97,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
+
+  // 组件ID
+  get id(): string {
+    return this.model.id;
+  }
 
   // 是否是组件
   get isElement(): boolean {
@@ -844,7 +847,6 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
-    this.id = CommonUtils.getRandomDateId();
     this.rotation = new ElementRotation(this);
     this.shield = shield;
     makeObservable(this);
@@ -2531,7 +2533,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   toJson(): ElementObject {
-    return JSON.parse(JSON.stringify({ ...this.model, ...this.flip }));
+    return JSON.parse(JSON.stringify({ ...this.model, ...this.flip })) as ElementObject;
   }
 
   /**

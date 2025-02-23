@@ -192,4 +192,8 @@ export default interface IStageStore extends IStageSetter {
   deSelectGroup(group: IElementGroup): void;
   // 取消选中组合
   deSelectGroups(groups: IElementGroup[]): void;
+  // 复制选中的组件
+  copySelectElements(): Array<ElementObject>;
+  // 粘贴组件
+  pasteElements(elementsJson: Array<ElementObject>): void;
 }
