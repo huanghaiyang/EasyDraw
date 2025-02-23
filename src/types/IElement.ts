@@ -350,6 +350,8 @@ export default interface IElement {
   get alignOutlineCoords(): IPoint[][];
   // 控制器
   get controllers(): IController[];
+  // 旋转控制器
+  get rotateControllers(): IController[];
 
   // 是否选中
   get isSelected(): boolean;
@@ -698,6 +700,11 @@ export default interface IElement {
    * 计算盒模型顶点变换器
    */
   calcBoxVerticesTransformers(): IPoint[];
+
+  /**
+   * 计算旋转控制器
+   */
+  calcRotateControllers(): IPoint[];
 
   /**
    * 计算旋转路径坐标

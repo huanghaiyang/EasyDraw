@@ -8,6 +8,10 @@ export default class MaskTaskRotate extends MaskTaskBase {
     return this.model as IRotationModel;
   }
 
+  get svg() {
+    return RotateSvg;
+  }
+
   /**
    * 运行绘制任务
    */
@@ -21,7 +25,7 @@ export default class MaskTaskRotate extends MaskTaskBase {
       } = this.data;
       await CanvasUtils.drawImgLike(
         this.canvas,
-        RotateSvg,
+        this.svg,
         {
           x: (x - (width * scale) / 2) / scale,
           y: (y - (height * scale) / 2) / scale,

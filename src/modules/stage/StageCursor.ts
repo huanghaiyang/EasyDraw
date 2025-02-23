@@ -14,6 +14,7 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import CornerController from "@/modules/handler/controller/CornerController";
 import { IPointController } from "@/types/IController";
+import RotateController from "@/modules/handler/controller/RotateController";
 
 export default class StageCursor implements IStageCursor {
   // 光标位置
@@ -104,7 +105,9 @@ export default class StageCursor implements IStageCursor {
       return this.createMaskDrawingCursorTask();
     } else if (this.shield.isMoveableActive) {
       const controller = this.shield.selection.getActiveController();
-      if (
+      if (controller instanceof RotateController) {
+        return this.createMaskRotationControllerCursorTask(controller);
+      } else if (
         controller instanceof ElementRotation ||
         controller instanceof CornerController
       ) {
@@ -141,6 +144,23 @@ export default class StageCursor implements IStageCursor {
     return new MaskTaskIconCursor(
       this._createTransformerCursorModel({ angle: rotation.angle }),
       CursorTypes.move,
+      this.renderParams,
+    );
+  }
+
+  /**
+   * 创建一个旋转控制器光标任务
+   *
+   * @param rotationController
+   * @returns
+   */
+  private createMaskRotationControllerCursorTask(
+    rotationController: RotateController,
+  ) {
+    if (!this.value) return;
+    return new MaskTaskIconCursor(
+      this._createTransformerCursorModel({ angle: rotationController.angle }),
+      CursorTypes.rotation,
       this.renderParams,
     );
   }

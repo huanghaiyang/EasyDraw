@@ -3,7 +3,7 @@ import IElementRotation from "@/types/IElementRotation";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { SelectionRotationSize } from "@/styles/MaskStyles";
+import { RotationSize } from "@/styles/MaskStyles";
 import PointController from "@/modules/handler/controller/PointController";
 
 export default class ElementRotation
@@ -11,9 +11,9 @@ export default class ElementRotation
   implements IElementRotation
 {
   // 宽度
-  width: number = SelectionRotationSize;
+  width: number = RotationSize;
   // 高度
-  height: number = SelectionRotationSize;
+  height: number = RotationSize;
 
   // 角度
   get angle(): number {

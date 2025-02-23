@@ -19,6 +19,8 @@ export enum CursorTypes {
   cross,
   // 移动
   move,
+  // 旋转
+  rotation,
 }
 
 // 舞台自动缩放时的内边距

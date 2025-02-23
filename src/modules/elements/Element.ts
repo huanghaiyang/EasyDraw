@@ -22,7 +22,11 @@ import {
   StrokeStyle,
   StrokeTypes,
 } from "@/styles/ElementStyles";
-import { TransformerSize } from "@/styles/MaskStyles";
+import {
+  RotateControllerMargin,
+  RotationSize,
+  TransformerSize,
+} from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import IStageShield from "@/types/IStageShield";
@@ -37,7 +41,8 @@ import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IElementGroup } from "@/types/IElementGroup";
 import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
-import IController from "@/types/IController";
+import IController, { IPointController } from "@/types/IController";
+import RotateController from "@/modules/handler/controller/RotateController";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件ID
@@ -655,6 +660,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   protected _originalCenter: IPoint;
   // 变换器类型
   protected _transformType: TransformTypes;
+  // 旋转控制器
+  protected _rotateControllers: IPointController[] = [];
 
   get points(): IPoint[] {
     return this._points;
@@ -813,10 +820,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get rotateControllers(): IPointController[] {
+    return this._rotateControllers;
+  }
+
   get controllers(): IController[] {
     const result: IController[] = [];
-    if (this.shield.configure.rotationIconEnable) {
-      result.push(this.rotation);
+
+    if (this.rotationEnable) {
+      if (this.shield.configure.rotationIconEnable) {
+        result.push(this.rotation);
+      }
+      result.push(...this._rotateControllers);
     }
     if (this.verticesTransformEnable || this.boxVerticesTransformEnable) {
       result.push(...this._transformers);
@@ -1009,14 +1024,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 获取控制点的盒模型坐标
    *
    * @param controllerPoint
+   * @param size
    * @returns
    */
-  protected getControllerPoints(controllerPoint: IPoint): IPoint[] {
+  protected getControllerPoints(
+    controllerPoint: IPoint,
+    size?: number,
+  ): IPoint[] {
+    size = size || TransformerSize;
     return CommonUtils.get4BoxPoints(
       controllerPoint,
       {
-        width: TransformerSize / this.shield.stageScale,
-        height: TransformerSize / this.shield.stageScale,
+        width: size / this.shield.stageScale,
+        height: size / this.shield.stageScale,
       },
       {
         angle: this.model.actualAngle,
@@ -1080,6 +1100,35 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (this.boxVerticesTransformEnable) {
       return this.calcBoxVerticesTransformers();
     }
+  }
+
+  /**
+   * 计算旋转控制器
+   */
+  calcRotateControllers(): IPointController[] {
+    const center = this.center;
+    return this._rotateBoxPoints.map((point, index) => {
+      const angle = MathUtils.calcAngle(center, point);
+      const { x, y } = MathUtils.calcTargetPoint(
+        point,
+        RotateControllerMargin / this.shield.stageScale,
+        angle,
+      );
+      const points = this.getControllerPoints({ x, y }, RotationSize);
+      let controller = this._rotateControllers[index];
+      if (controller) {
+        controller.points = points;
+        controller.x = x;
+        controller.y = y;
+      } else {
+        controller = new RotateController(this, {
+          x,
+          y,
+          points,
+        });
+      }
+      return controller;
+    });
   }
 
   /**
@@ -1261,6 +1310,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._unLeanPoints = this.calcUnLeanPoints();
     // 计算变换器
     this._transformers = this.calcTransformers();
+    // 判断是否启用旋转
+    if (this.rotationEnable) {
+      // 计算旋转控制器
+      this._rotateControllers = this.calcRotateControllers();
+    }
     // 判断是否启用边框变换
     if (this.borderTransformEnable) {
       // 计算边框变换器

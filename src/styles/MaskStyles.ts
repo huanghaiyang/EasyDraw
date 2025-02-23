@@ -17,7 +17,7 @@ export const TransformerFillColorOpacity = 1;
 export const TransformerLineWidth = 1;
 
 export const TransformerSize = 6;
-export const SelectionRotationSize = 12;
+export const RotationSize = 12;
 export const SelectionRotationMargin = 12;
 export const SelectionIndicatorMargin = 12;
 // 尺寸指示文本
@@ -28,6 +28,10 @@ export const SelectionIndicatorFontSize = 12;
 export const SelectionIndicatorFontFamily = "Arial";
 export const SelectionIndicatorTextAlign = "center";
 export const SelectionIndicatorTextBaseline = "middle";
+
+// 旋转控制器边距
+export const RotateControllerMargin =
+  TransformerSize + Math.sqrt(Math.pow(RotationSize / 2, 2));
 
 export const SelectionStyle: ElementStyles = {
   strokes: [

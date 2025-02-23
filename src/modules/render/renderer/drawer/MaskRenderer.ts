@@ -26,6 +26,7 @@ import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IPointController } from "@/types/IController";
+import IElementRotation from "@/types/IElementRotation";
 
 /**
  * 蒙版渲染器
@@ -87,14 +88,16 @@ export default class MaskRenderer
         element.rotationEnable &&
         element.status === ElementStatus.finished
       ) {
-        cargo.add(this.createMaskRotateTask(element));
+        cargo.add(this.createMaskRotateTask(element.rotation));
       }
       // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
     } else if (noParentElements.length > 1) {
       // 多选时添加范围元素的旋转任务
       cargo.add(
-        this.createMaskRotateTask(this.drawer.shield.selection.rangeElement),
+        this.createMaskRotateTask(
+          this.drawer.shield.selection.rangeElement.rotation,
+        ),
       );
     }
 
@@ -268,8 +271,8 @@ export default class MaskRenderer
    * @param element
    * @returns
    */
-  private createMaskRotateTask(element: IElement): IRenderTask {
-    const { x, y, points, angle, width, height, scale } = element.rotation;
+  private createMaskRotateTask(rotation: IElementRotation): IRenderTask {
+    const { x, y, points, angle, width, height, scale } = rotation;
     const model: IRotationModel = {
       point: { x, y },
       points,

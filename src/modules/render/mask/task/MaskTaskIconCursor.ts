@@ -7,6 +7,7 @@ import SplitV from "@/assets/svg/split-v.svg";
 import Hand from "@/assets/svg/hand.svg";
 import Cross from "@/assets/svg/cross.svg";
 import Move from "@/assets/svg/move.svg";
+import RotateNE from "@/assets/svg/rotate-ne.svg";
 
 export default class MaskTaskIconCursor extends MaskTaskBase {
   type: CursorTypes = CursorTypes.vertices;
@@ -41,6 +42,9 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
       }
       case CursorTypes.move: {
         return Move;
+      }
+      case CursorTypes.rotation: {
+        return RotateNE;
       }
     }
   }
