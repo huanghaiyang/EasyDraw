@@ -169,7 +169,7 @@ export default class StageSelection implements IStageSelection {
       result.push(...this._getRangeElementsMaskModels());
     }
     result.push(...this._getTargetElementsMaskModels());
-    result.push(...this._getSelectedElementsMaskModels());
+    // result.push(...this._getSelectedElementsMaskModels());
     if (this.isRange) {
       result.push({
         points: this._rangePoints,
