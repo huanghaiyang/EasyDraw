@@ -19,6 +19,7 @@ export default class ElementRect extends Element implements IElementRect {
   _cornerPoints: IPoint[] = [];
   _originalCorner: number[] = [];
   _originalCornerPoints: IPoint[] = [];
+  _originalAllCornerEqual: boolean = false;
 
   get cornersModifyEnable(): boolean {
     return true;
@@ -444,6 +445,7 @@ export default class ElementRect extends Element implements IElementRect {
   refreshOriginalCornerProps(): void {
     this._originalCorner = cloneDeep(this.normalizeCorners);
     this._originalCornerPoints = cloneDeep(this._cornerPoints);
+    this._originalAllCornerEqual = this.isAllCornerEqual;
   }
 
   /**
@@ -512,7 +514,7 @@ export default class ElementRect extends Element implements IElementRect {
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
         let corner = proportion * (this.minParallelogramVerticalSize / 2);
-        if (this.isAllCornerEqual) {
+        if (this._originalAllCornerEqual) {
           this.setCorners(corner);
         } else {
           this.setCorners(corner, index);
