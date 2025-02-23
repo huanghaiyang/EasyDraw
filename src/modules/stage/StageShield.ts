@@ -1383,7 +1383,7 @@ export default class StageShield
     if (!this.store.isVisibleEmpty) {
       const center = MathUtils.calcCenter(
         this.store.visibleElements
-          .map(element => element.rotateOutlinePathCoords.flat())
+          .map(element => element.rotateOutlineCoords.flat())
           .flat(),
       );
       this.stageWorldCoord = center;

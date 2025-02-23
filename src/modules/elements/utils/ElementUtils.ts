@@ -27,6 +27,8 @@ import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
 import { multiply } from "mathjs";
 import { clamp, range } from "lodash";
+import ElementTaskEllipse from "@/modules/render/shield/task/ElementTaskEllipse";
+import ElementEllipse from "@/modules/elements/ElementEllipse";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -79,6 +81,10 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         task = new ElementTaskLine(element, params);
+        break;
+      }
+      case CreatorTypes.ellipse: {
+        task = new ElementTaskEllipse(element, params);
         break;
       }
       case CreatorTypes.arbitrary: {
@@ -154,12 +160,16 @@ export default class ElementUtils {
    * @param creatorType
    * @returns
    */
-  static calcCreatorPoints(points: IPoint[], creatorType: CreatorTypes) {
+  static calcCreatorPoints(
+    points: IPoint[],
+    creatorType: CreatorTypes,
+  ): IPoint[] {
     switch (creatorType) {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
       case CreatorTypes.arbitrary:
       case CreatorTypes.text:
+      case CreatorTypes.ellipse:
       case CreatorTypes.group:
         return CommonUtils.getBoxPoints(points);
       default:
@@ -181,6 +191,9 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return new ElementLine(model, shield);
+      }
+      case CreatorTypes.ellipse: {
+        return new ElementEllipse(model, shield);
       }
       case CreatorTypes.image: {
         return new ElementImage(model, shield);
@@ -244,6 +257,7 @@ export default class ElementUtils {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
       case CreatorTypes.line:
+      case CreatorTypes.ellipse:
       case CreatorTypes.arbitrary:
       case CreatorTypes.text:
       case CreatorTypes.group: {
@@ -282,6 +296,7 @@ export default class ElementUtils {
       case CreatorTypes.text:
       case CreatorTypes.group:
       case CreatorTypes.image:
+      case CreatorTypes.ellipse:
       case CreatorTypes.arbitrary: {
         return CommonUtils.calcRectangleSize(boxCoords);
       }
@@ -510,7 +525,7 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcCoordsByTransPathPoints(
+  static calcCoordsByTransPoints(
     rotatePoints: IPoint[],
     angles: Partial<AngleModel>,
     lockPoint: IPoint,
@@ -543,7 +558,7 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcCoordsByRotatePathPoints(
+  static calcCoordsByRotatePoints(
     rotatePoints: IPoint[],
     angle: number,
     lockPoint: IPoint,

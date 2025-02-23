@@ -8,26 +8,29 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (!this.data.point) return;
+    let { radius, point } = this.data;
     const strokeStyle = { ...ControllerStyle.strokes[0] };
     const fillStyle = { ...ControllerStyle.fills[0] };
-    const { width } = strokeStyle;
+    radius /= CanvasUtils.scale;
 
-    CanvasUtils.drawCircleFillWithScale(
+    CanvasUtils.drawEllipseFillWithScale(
       this.canvas,
-      this.data.point,
-      this.data.radius,
-      Object.assign({}, fillStyle, {
-        width: width * this.data.scale,
-      }),
+      point,
+      {
+        rx: radius,
+        ry: radius,
+      },
+      fillStyle,
     );
 
-    CanvasUtils.drawCircleStrokeWithScale(
+    CanvasUtils.drawEllipseStrokeWithScale(
       this.canvas,
-      this.data.point,
-      this.data.radius,
-      Object.assign({}, strokeStyle, {
-        width: width * this.data.scale,
-      }),
+      point,
+      {
+        rx: radius,
+        ry: radius,
+      },
+      strokeStyle,
     );
   }
 }

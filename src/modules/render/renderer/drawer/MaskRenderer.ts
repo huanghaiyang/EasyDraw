@@ -291,7 +291,7 @@ export default class MaskRenderer
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
-        [p1, p2] = element.rotatePathPoints.sort((a, b) => a.x - b.x);
+        [p1, p2] = element.rotatePoints.sort((a, b) => a.x - b.x);
         break;
       }
       default: {

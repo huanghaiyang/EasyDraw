@@ -10,6 +10,7 @@ import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
+import { EllipseModel } from "@/types/IElement";
 
 //
 type CtxTransformOptions = {
@@ -348,13 +349,15 @@ export default class CanvasUtils {
    */
   static transParamsWithScale(
     points: IPoint[],
-    strokeStyle: StrokeStyle,
+    strokeStyle?: StrokeStyle,
   ): [IPoint[], StrokeStyle] {
     points = CommonUtils.scalePoints(points, CanvasUtils.scale);
-    strokeStyle = {
-      ...strokeStyle,
-      width: strokeStyle.width * CanvasUtils.scale,
-    };
+    if (strokeStyle) {
+      strokeStyle = {
+        ...strokeStyle,
+        width: strokeStyle.width * CanvasUtils.scale,
+      };
+    }
     return [points, strokeStyle];
   }
 
@@ -377,6 +380,21 @@ export default class CanvasUtils {
       };
     }
     return [arcPoints, strokeStyle];
+  }
+
+  /**
+   * 椭圆模型缩放
+   *
+   * @param ellipseModel
+   * @returns
+   */
+  static transEllipseModelWithScale(ellipseModel: EllipseModel) {
+    ellipseModel = {
+      ...ellipseModel,
+      rx: ellipseModel.rx * CanvasUtils.scale,
+      ry: ellipseModel.ry * CanvasUtils.scale,
+    };
+    return ellipseModel;
   }
 
   /**
@@ -794,6 +812,34 @@ export default class CanvasUtils {
   }
 
   /**
+   * 变换椭圆
+   *
+   * @param ctx
+   * @param point
+   * @param model
+   * @param rect
+   * @param options
+   */
+  static transformEllipse(
+    ctx: CanvasRenderingContext2D,
+    point: IPoint,
+    model: EllipseModel,
+    rect?: Partial<DOMRect>,
+    options?: RenderParams,
+  ): { point: IPoint; model: EllipseModel } {
+    if (rect && options) {
+      CanvasUtils.transformCtx(
+        ctx,
+        rect,
+        CanvasUtils.getTransformValues(options),
+      );
+      point = CanvasUtils.translatePoints([point], rect)[0];
+    }
+    model = CanvasUtils.transEllipseModelWithScale(model);
+    return { point, model };
+  }
+
+  /**
    * 绘制填充圆形
    *
    * @param target
@@ -801,17 +847,23 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawCircleFill(
+  static drawEllipseFill(
     target: HTMLCanvasElement,
     point: IPoint,
-    corner: number,
+    model: EllipseModel,
     fillStyle: FillStyle,
+    rect?: Partial<DOMRect>,
+    options?: RenderParams,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
+    const {
+      point: { x, y },
+      model: { rx, ry },
+    } = CanvasUtils.transformEllipse(ctx, point, model, rect, options);
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
-    ctx.arc(point.x, point.y, corner, 0, Math.PI * 2);
+    ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
     ctx.closePath();
     ctx.fill();
     ctx.restore();
@@ -825,17 +877,24 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawCircleStroke(
+  static drawEllipseStroke(
     target: HTMLCanvasElement,
     point: IPoint,
-    corner: number,
+    model: EllipseModel,
     strokeStyle: StrokeStyle,
+    rect?: Partial<DOMRect>,
+    options?: RenderParams,
   ) {
     const ctx = target.getContext("2d");
     ctx.save();
+    const {
+      point: { x, y },
+      model: { rx, ry },
+    } = CanvasUtils.transformEllipse(ctx, point, model, rect, options);
+    ctx.lineWidth = strokeStyle.width;
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
-    ctx.arc(point.x, point.y, corner, 0, Math.PI * 2);
+    ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
     ctx.closePath();
     ctx.stroke();
     ctx.restore();
@@ -849,17 +908,26 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawCircleStrokeWithScale(
+  static drawEllipseStrokeWithScale(
     target: HTMLCanvasElement,
     point: IPoint,
-    corner: number,
+    model: EllipseModel,
     strokeStyle: StrokeStyle,
+    rect?: Partial<DOMRect>,
+    options?: RenderParams,
   ) {
     const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
       [point],
       strokeStyle,
     );
-    CanvasUtils.drawCircleStroke(target, points[0], corner, scaleStyles);
+    CanvasUtils.drawEllipseStroke(
+      target,
+      points[0],
+      model,
+      scaleStyles,
+      rect,
+      options,
+    );
   }
 
   /**
@@ -870,17 +938,23 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawCircleFillWithScale(
+  static drawEllipseFillWithScale(
     target: HTMLCanvasElement,
     point: IPoint,
-    corner: number,
-    strokeStyle: StrokeStyle,
+    model: EllipseModel,
+    fillStyle: FillStyle,
+    rect?: Partial<DOMRect>,
+    options?: RenderParams,
   ) {
-    const [points, scaleStyles] = CanvasUtils.transParamsWithScale(
-      [point],
-      strokeStyle,
+    const [points] = CanvasUtils.transParamsWithScale([point]);
+    CanvasUtils.drawEllipseFill(
+      target,
+      points[0],
+      model,
+      fillStyle,
+      rect,
+      options,
     );
-    CanvasUtils.drawCircleFill(target, points[0], corner, scaleStyles);
   }
 
   /**

@@ -105,7 +105,7 @@ export default class ElementArbitrary
    * @returns
    */
   calcOuterPaths(): IPoint[][][] {
-    return this.strokePathPoints.map((points: IPoint[], index: number) => {
+    return this.strokePoints.map((points: IPoint[], index: number) => {
       return ElementUtils.calcArbitraryBorderRegions(
         points,
         this.model.styles.strokes[index],
@@ -120,7 +120,7 @@ export default class ElementArbitrary
    * @returns
    */
   calcOuterWorldPaths(): IPoint[][][] {
-    return this.strokePathCoords.map((points: IPoint[], index: number) => {
+    return this.strokeCoords.map((points: IPoint[], index: number) => {
       return ElementUtils.calcArbitraryBorderRegions(
         points,
         this.model.styles.strokes[index],
@@ -162,7 +162,7 @@ export default class ElementArbitrary
   isContainsPoint(point: IPoint): boolean {
     let outerPaths: IPoint[][][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
-      outerPaths = this.strokePathPoints.map((points: IPoint[]) => {
+      outerPaths = this.strokePoints.map((points: IPoint[]) => {
         return ElementUtils.calcArbitraryBorderRegions(
           points,
           { width: LineClosestMinWidth / this.shield.stageScale },
@@ -212,7 +212,7 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcRotateOutlinePathPoints(): IPoint[][] {
+  calcRotateOutlinePoints(): IPoint[][] {
     return this._outerPaths.flat();
   }
 
@@ -221,7 +221,7 @@ export default class ElementArbitrary
    *
    * @returns
    */
-  calcRotateOutlinePathCoords(): IPoint[][] {
+  calcRotateOutlineCoords(): IPoint[][] {
     return this._outerWorldPaths.flat();
   }
 
@@ -285,14 +285,14 @@ export default class ElementArbitrary
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      const points = cloneDeep(this._originalRotatePathPoints);
+      const points = cloneDeep(this._originalRotatePoints);
       points[this.editingCoordIndex] = {
         x: points[this.editingCoordIndex].x + offset.x,
         y: points[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxPoints[0];
       this.model.coords = MathUtils.batchPrecisePoint(
-        ElementUtils.calcCoordsByTransPathPoints(
+        ElementUtils.calcCoordsByTransPoints(
           points,
           this.angles,
           lockPoint,

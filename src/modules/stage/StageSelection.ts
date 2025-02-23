@@ -88,12 +88,12 @@ export default class StageSelection implements IStageSelection {
     boxRender?: boolean,
   ): Partial<IMaskModel> {
     const {
-      rotatePathPoints,
+      rotatePoints,
       rotateBoxPoints,
       model: { angle, isFold },
     } = element;
     return {
-      points: boxRender ? rotateBoxPoints : rotatePathPoints,
+      points: boxRender ? rotateBoxPoints : rotatePoints,
       angle,
       element: {
         isFold,
@@ -375,7 +375,7 @@ export default class StageSelection implements IStageSelection {
     } else {
       if (!this.rangeElement.isRotating && !this.rangeElement.isTransforming) {
         const coords = CommonUtils.getBoxPoints(
-          elements.map(element => element.rotatePathCoords).flat(),
+          elements.map(element => element.rotateCoords).flat(),
         );
         Object.assign(this.rangeElement.model, {
           coords,

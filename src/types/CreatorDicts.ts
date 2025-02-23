@@ -66,6 +66,14 @@ export const PencilCreator: Creator = {
   icon: "icon-verbise-pencil",
 };
 
+// 椭圆
+export const EllipseCreator: Creator = {
+  type: CreatorTypes.ellipse,
+  name: "椭圆",
+  category: CreatorCategories.shapes,
+  icon: "icon-verbise-eclipse",
+};
+
 // 光标工具
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 
@@ -73,6 +81,7 @@ export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 export const ShapeCreators: Creator[] = [
   RectangleCreator,
   LineRectangleCreator,
+  EllipseCreator,
   PolygonCreator,
   ImageCreator,
 ];

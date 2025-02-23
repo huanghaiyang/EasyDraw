@@ -21,8 +21,8 @@ export enum CreatorTypes {
   text = "text",
   // 组合
   group = "group",
-  // 圆
-  circle = "circle",
+  // 椭圆
+  ellipse = "ellipse",
 }
 
 // 创作工具分类

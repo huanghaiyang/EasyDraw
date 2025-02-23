@@ -21,6 +21,12 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 
+// 椭圆模型
+export type EllipseModel = {
+  rx: number;
+  ry: number;
+};
+
 // 刷新子组件选项
 export type RefreshSubOptions = { subs?: boolean; deepSubs?: boolean };
 
@@ -293,15 +299,17 @@ export default interface IElement {
   // 原始模型盒模型坐标
   get originalModelBoxCoords(): IPoint[];
   // 路径点-相对于舞台画布的坐标
-  get pathPoints(): IPoint[];
+  get points(): IPoint[];
+  // 不倾斜路径点
+  get unLeanPoints(): IPoint[];
   // 最大盒模型顶点
   get maxBoxPoints(): IPoint[];
   // 旋转路径点
-  get rotatePathPoints(): IPoint[];
+  get rotatePoints(): IPoint[];
   // 旋转路径坐标
-  get rotatePathCoords(): IPoint[];
+  get rotateCoords(): IPoint[];
   // 旋转路径外框点
-  get rotateOutlinePathPoints(): IPoint[][];
+  get rotateOutlinePoints(): IPoint[][];
   // 旋转盒模型顶点
   get rotateBoxPoints(): IPoint[];
   // 旋转盒模型坐标
@@ -309,15 +317,19 @@ export default interface IElement {
   // 最大外框盒模型顶点
   get maxOutlineBoxPoints(): IPoint[];
   // 旋转路径外框坐标
-  get rotateOutlinePathCoords(): IPoint[][];
+  get rotateOutlineCoords(): IPoint[][];
   // 描边路径点
-  get strokePathPoints(): IPoint[][];
+  get strokePoints(): IPoint[][];
   // 描边路径坐标
-  get strokePathCoords(): IPoint[][];
+  get strokeCoords(): IPoint[][];
+  // 不倾斜描边路径点
+  get unLeanStrokePoints(): IPoint[][];
+  // 不倾斜描边路径坐标
+  get unLeanStrokeCoords(): IPoint[][];
   // 中心内边框线段点
-  get innermostStrokePathPoints(): IPoint[];
+  get innermostStrokePoints(): IPoint[];
   // 中心内边框线段索引
-  get innermostStrokePathPointsIndex(): number;
+  get innermostStrokePointsIndex(): number;
   // 中心点
   get center(): IPoint;
   // 中心点坐标
@@ -630,17 +642,17 @@ export default interface IElement {
   /**
    * 计算路径点
    */
-  calcPathPoints(): IPoint[];
+  calcPoints(): IPoint[];
 
   /**
    * 计算旋转路径点
    */
-  calcRotatePathPoints(): IPoint[];
+  calcRotatePoints(): IPoint[];
 
   /**
    * 计算旋转外框路径点
    */
-  calcRotateOutlinePathPoints(): IPoint[][];
+  calcRotateOutlinePoints(): IPoint[][];
 
   /**
    * 计算最大盒模型顶点
@@ -655,7 +667,7 @@ export default interface IElement {
   /**
    * 计算旋转外框坐标
    */
-  calcRotateOutlinePathCoords(): IPoint[][];
+  calcRotateOutlineCoords(): IPoint[][];
 
   /**
    * 计算旋转盒模型顶点
@@ -690,7 +702,7 @@ export default interface IElement {
   /**
    * 计算旋转路径坐标
    */
-  calcRotatePathCoords(): IPoint[];
+  calcRotateCoords(): IPoint[];
 
   /**
    * 计算矩形
@@ -880,7 +892,7 @@ export interface IElementRect extends IElement {
 }
 
 // 舞台组件（组件）-圆形
-export interface IElementCircle extends IElement {}
+export interface IElementEllipse extends IElement {}
 
 // 舞台组件（组件）-图片
 export interface IElementImage extends IElementRect {}
@@ -898,19 +910,19 @@ export interface IElementLine extends IElement {
   // 结束旋转路径点
   get endRotatePathPoint(): IPoint;
   // 外框点
-  get outerPathPoints(): IPoint[][];
+  get outerPoints(): IPoint[][];
   // 外框坐标
-  get outerPathCoords(): IPoint[][];
+  get outerCoords(): IPoint[][];
 
   /**
    * 计算外框点
    */
-  calcOuterPathPoints(): IPoint[][];
+  calcOuterPoints(): IPoint[][];
 
   /**
    * 计算外框坐标
    */
-  calcOuterPathCoords(): IPoint[][];
+  calcOuterCoords(): IPoint[][];
 }
 
 // 舞台组件（组件）-任意多边形&线条

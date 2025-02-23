@@ -1491,7 +1491,7 @@ export default class StageStore implements IStageStore {
     elements: IElement[],
   ): { center: IPoint; centerCoord: IPoint; angle: number } {
     const center = MathUtils.calcCenter(
-      elements.map(element => element.pathPoints).flat(),
+      elements.map(element => element.points).flat(),
     );
     const centerCoord = ElementUtils.calcWorldPoint(
       center,

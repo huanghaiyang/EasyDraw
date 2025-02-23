@@ -13,8 +13,8 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const {
-      innermostStrokePathPointsIndex,
-      strokePathPoints,
+      innermostStrokePointsIndex,
+      strokePoints,
       model: { styles, isFold },
     } = this.node;
 
@@ -22,14 +22,14 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
       styles.fills.forEach(fillStyle => {
         CanvasUtils.drawInnerPathFillWithScale(
           this.canvas,
-          strokePathPoints[innermostStrokePathPointsIndex],
+          strokePoints[innermostStrokePointsIndex],
           fillStyle,
-          styles.strokes[innermostStrokePathPointsIndex],
+          styles.strokes[innermostStrokePointsIndex],
         );
       });
     }
 
-    strokePathPoints.forEach((points, index) => {
+    strokePoints.forEach((points, index) => {
       CanvasUtils.drawPathStrokeWidthScale(
         this.canvas,
         points,

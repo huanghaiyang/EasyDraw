@@ -3,7 +3,7 @@ import { ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, clone, cloneDeep, isNumber, some } from "lodash";
+import { clamp, cloneDeep, isNumber, some } from "lodash";
 import { action, makeObservable, observable, computed } from "mobx";
 import IElement, {
   AngleModel,
@@ -102,7 +102,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       CreatorTypes.text,
       CreatorTypes.arbitrary,
       CreatorTypes.rectangle,
-      CreatorTypes.circle,
+      CreatorTypes.ellipse,
       CreatorTypes.polygon,
       CreatorTypes.line,
       CreatorTypes.text,
@@ -139,26 +139,38 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 获取边框线段点坐标
-  get strokePathPoints(): IPoint[][] {
+  get strokePoints(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._rotatePathPoints, stroke);
+      return this.convertPointsByStrokeType(this._rotatePoints, stroke);
     });
   }
 
   // 获取边框线段坐标
-  get strokePathCoords(): IPoint[][] {
+  get strokeCoords(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._rotatePathCoords, stroke);
+      return this.convertPointsByStrokeType(this._rotateCoords, stroke);
+    });
+  }
+
+  get unLeanStrokePoints(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._unLeanPoints, stroke);
+    });
+  }
+
+  get unLeanStrokeCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._unLeanCoords, stroke);
     });
   }
 
   /**
    * 获取最内边框线段点索引
    */
-  get innermostStrokePathPointsIndex(): number {
+  get innermostStrokePointsIndex(): number {
     let result = 0;
     let innerWidth = 0;
-    this.strokePathPoints.forEach((points, index) => {
+    this.strokePoints.forEach((points, index) => {
       const { width, type } = this.model.styles.strokes[index];
       if (type === StrokeTypes.middle && innerWidth < width / 2) {
         innerWidth = width / 2;
@@ -175,8 +187,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 获取最内边框线段点
    */
-  get innermostStrokePathPoints(): IPoint[] {
-    return this.strokePathPoints[this.innermostStrokePathPointsIndex];
+  get innermostStrokePoints(): IPoint[] {
+    return this.strokePoints[this.innermostStrokePointsIndex];
   }
 
   // 是否翻转X轴
@@ -602,15 +614,19 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 坐标-舞台坐标系
-  protected _pathPoints: IPoint[] = [];
+  protected _points: IPoint[] = [];
+  // 不倾斜路径点-舞台坐标系
+  protected _unLeanPoints: IPoint[] = [];
+  // 不倾斜路径点-世界坐标系
+  protected _unLeanCoords: IPoint[] = [];
   // 最大盒模型-舞台坐标系
   protected _maxBoxPoints: IPoint[] = [];
   // 旋转坐标-舞台坐标系
-  protected _rotatePathPoints: IPoint[] = [];
+  protected _rotatePoints: IPoint[] = [];
   // 旋转坐标-世界坐标系
-  protected _rotatePathCoords: IPoint[] = [];
-  // 旋转外框线坐标-舞台坐标系（组件命中处理）
-  protected _rotateOutlinePathPoints: IPoint[][] = [];
+  protected _rotateCoords: IPoint[] = [];
+  // 旋转外框线坐标-舞台坐标系（组件命中处理)
+  protected _rotateOutlinePoints: IPoint[][] = [];
   // 旋转盒模型-舞台坐标系
   protected _rotateBoxPoints: IPoint[] = [];
   // 旋转盒模型坐标-舞台坐标系
@@ -618,7 +634,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
   protected _maxOutlineBoxPoints: IPoint[] = [];
   // 旋转外框线坐标-世界坐标系(组件对齐时使用)
-  protected _rotateOutlinePathCoords: IPoint[][] = [];
+  protected _rotateOutlineCoords: IPoint[][] = [];
   // 盒模型，同_maxBoxPoints-舞台坐标系
   protected _rect: Partial<DOMRect> = {};
   // 顶点变换器-舞台坐标系
@@ -628,7 +644,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 原始中心点-世界坐标系
   protected _originalCenterCoord: IPoint;
   // 原始旋转的组件坐标-世界坐标系
-  protected _originalRotatePathPoints: IPoint[] = [];
+  protected _originalRotatePoints: IPoint[] = [];
   // 原始的盒模型坐标
   protected _originalRotateBoxPoints: IPoint[] = [];
   // 原始角度-舞台坐标系&世界坐标系
@@ -640,8 +656,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 变换器类型
   protected _transformType: TransformTypes;
 
-  get pathPoints(): IPoint[] {
-    return this._pathPoints;
+  get points(): IPoint[] {
+    return this._points;
+  }
+
+  get unLeanPoints(): IPoint[] {
+    return this._unLeanPoints;
   }
 
   get maxBoxPoints(): IPoint[] {
@@ -652,16 +672,16 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._maxOutlineBoxPoints;
   }
 
-  get rotatePathPoints(): IPoint[] {
-    return this._rotatePathPoints;
+  get rotatePoints(): IPoint[] {
+    return this._rotatePoints;
   }
 
-  get rotatePathCoords(): IPoint[] {
-    return this._rotatePathCoords;
+  get rotateCoords(): IPoint[] {
+    return this._rotateCoords;
   }
 
-  get rotateOutlinePathPoints(): IPoint[][] {
-    return this._rotateOutlinePathPoints;
+  get rotateOutlinePoints(): IPoint[][] {
+    return this._rotateOutlinePoints;
   }
 
   get rotateBoxPoints(): IPoint[] {
@@ -672,8 +692,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._rotateBoxCoords;
   }
 
-  get rotateOutlinePathCoords(): IPoint[][] {
-    return this._rotateOutlinePathCoords;
+  get rotateOutlineCoords(): IPoint[][] {
+    return this._rotateOutlineCoords;
   }
 
   get transformers(): IVerticesTransformer[] {
@@ -697,15 +717,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get alignPoints(): IPoint[] {
-    return this._rotatePathPoints;
+    return this._rotatePoints;
   }
 
   get alignCoords(): IPoint[] {
-    return this._rotatePathCoords;
+    return this._rotateCoords;
   }
 
   get alignOutlineCoords(): IPoint[][] {
-    return this._rotateOutlinePathCoords;
+    return this._rotateOutlineCoords;
   }
 
   get visualStrokeWidth(): number {
@@ -842,8 +862,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcPathPoints(): IPoint[] {
-    let points = this._pathPoints;
+  calcPoints(): IPoint[] {
+    let points = this._points;
     if (this.activeCoordIndex !== -1) {
       const newCoord: IPoint = ElementUtils.calcStageRelativePoint(
         this.model.coords[this.activeCoordIndex],
@@ -864,9 +884,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotatePathPoints(): IPoint[] {
+  calcRotatePoints(): IPoint[] {
     const center = this.calcCenter();
-    return this._pathPoints.map(point =>
+    return this._points.map(point =>
       MathUtils.rotateWithCenter(point, this.model.angle, center),
     );
   }
@@ -876,10 +896,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotateOutlinePathPoints(): IPoint[][] {
+  calcRotateOutlinePoints(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return ElementUtils.calcOutlinePoints(
-        this._rotatePathPoints,
+        this._rotatePoints,
         stroke.type,
         stroke.width,
         this.flip,
@@ -920,7 +940,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcMaxBoxPoints(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotatePathPoints);
+    return CommonUtils.getBoxPoints(this._rotatePoints);
   }
 
   /**
@@ -929,7 +949,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcMaxOutlineBoxPoints(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotateOutlinePathPoints.flat());
+    return CommonUtils.getBoxPoints(this._rotateOutlinePoints.flat());
   }
 
   /**
@@ -937,7 +957,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotatePathCoords(): IPoint[] {
+  calcRotateCoords(): IPoint[] {
     const centerCoord = this.calcCenterCoord();
     return this.model.coords.map(coord =>
       MathUtils.rotateWithCenter(coord, this.model.angle, centerCoord),
@@ -949,10 +969,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcRotateOutlinePathCoords(): IPoint[][] {
+  calcRotateOutlineCoords(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return ElementUtils.calcOutlinePoints(
-        this._rotatePathCoords,
+        this._rotateCoords,
         stroke.type,
         stroke.width,
         {
@@ -1045,7 +1065,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcVerticesTransformers(): IVerticesTransformer[] {
-    return this.calcTransformersByPoints(this._rotatePathPoints);
+    return this.calcTransformersByPoints(this._rotatePoints);
   }
 
   /**
@@ -1093,7 +1113,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcRect(): Partial<DOMRect> {
-    return CommonUtils.getRect(this._pathPoints);
+    return CommonUtils.getRect(this._points);
   }
 
   /**
@@ -1226,15 +1246,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshPoints() {
     // 计算舞台坐标
-    this._pathPoints = this.calcPathPoints();
+    this._points = this.calcPoints();
     // 计算旋转后的路径点
-    this._rotatePathPoints = this.calcRotatePathPoints();
+    this._rotatePoints = this.calcRotatePoints();
     // 计算旋转后的路径坐标
-    this._rotatePathCoords = this.calcRotatePathCoords();
+    this._rotateCoords = this.calcRotateCoords();
     // 计算旋转后的盒模型点
     this._rotateBoxPoints = this.calcRotateBoxPoints();
     // 计算旋转后的盒模型坐标
     this._rotateBoxCoords = this.calcRotateBoxCoords();
+    // 计算不倾斜路径坐标
+    this._unLeanCoords = this.calcUnLeanCoords();
+    // 计算不倾斜路径点
+    this._unLeanPoints = this.calcUnLeanPoints();
     // 计算变换器
     this._transformers = this.calcTransformers();
     // 判断是否启用边框变换
@@ -1256,7 +1280,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param point
    */
   isContainsPoint(point: IPoint): boolean {
-    return some(this._rotateOutlinePathPoints, paths => {
+    return some(this._rotateOutlinePoints, paths => {
       return MathUtils.isPointInPolygonByRayCasting(point, paths);
     });
   }
@@ -1268,7 +1292,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return some(this._rotateOutlinePathPoints, paths => {
+    return some(this._rotateOutlinePoints, paths => {
       return MathUtils.isPolygonsOverlap(paths, points);
     });
   }
@@ -1279,7 +1303,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this._rotateOutlinePathCoords, paths => {
+    return some(this._rotateOutlineCoords, paths => {
       return MathUtils.isPolygonsOverlap(paths, coords);
     });
   }
@@ -1289,7 +1313,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalElementProps() {
     // 维护原始旋转路径点
-    this._originalRotatePathPoints = cloneDeep(this._rotatePathPoints);
+    this._originalRotatePoints = cloneDeep(this._rotatePoints);
     // 维护原始旋转盒模型点
     this._originalRotateBoxPoints = cloneDeep(this._rotateBoxPoints);
     // 维护原始矩形
@@ -1297,7 +1321,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 维护原始变换矩阵
     this._originalTransformMatrix = [];
     // 如果路径点存在，则维护原始中心点
-    if (this.pathPoints.length) {
+    if (this._points.length) {
       this._originalCenter = cloneDeep(this.calcCenter());
     }
   }
@@ -1510,7 +1534,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   ): void {
     // 计算变换后的点
     const points = ElementUtils.calcMatrixPoints(
-      this._originalRotatePathPoints,
+      this._originalRotatePoints,
       matrix,
       lockPoint,
       groupAngles,
@@ -1560,14 +1584,14 @@ export default class Element implements IElement, ILinkedNodeValue {
       MathUtils.calcActualAngleByPoints(boxPoints),
     );
     // 计算变换后的坐标
-    const coords = ElementUtils.calcCoordsByTransPathPoints(
+    const coords = ElementUtils.calcCoordsByTransPoints(
       points,
       this.angles,
       lockPoint,
       this.shield.stageCalcParams,
     );
     // 计算变换后的盒模型坐标
-    const boxCoords = ElementUtils.calcCoordsByTransPathPoints(
+    const boxCoords = ElementUtils.calcCoordsByTransPoints(
       boxPoints,
       this.angles,
       lockPoint,
@@ -1661,7 +1685,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换坐标
     this.model.coords = MathUtils.batchPrecisePoint(
       this.batchCalcTransformPointsByCenter(
-        this._originalRotatePathPoints,
+        this._originalRotatePoints,
         matrix,
         lockPoint,
         this._originalCenter,
@@ -1893,7 +1917,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 设置变换坐标
       this.model.coords = MathUtils.batchPrecisePoint(
         this.batchCalcTransformPointsByCenter(
-          this._originalRotatePathPoints,
+          this._originalRotatePoints,
           matrix,
           lockPoint,
           this._originalCenter,
@@ -1953,9 +1977,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   protected _refreshOutlinePoints(): void {
     // 计算旋转后的边框路径点
-    this._rotateOutlinePathPoints = this.calcRotateOutlinePathPoints();
+    this._rotateOutlinePoints = this.calcRotateOutlinePoints();
     // 计算旋转后的边框路径坐标
-    this._rotateOutlinePathCoords = this.calcRotateOutlinePathCoords();
+    this._rotateOutlineCoords = this.calcRotateOutlineCoords();
     // 计算最大边框盒模型点
     this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
   }
@@ -2017,7 +2041,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else {
       this.model.coords = MathUtils.batchPrecisePoint(
         this.batchCalcTransformPointsByCenter(
-          this._originalRotatePathPoints,
+          this._originalRotatePoints,
           matrix,
           center,
           this._originalCenter,
@@ -2056,7 +2080,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换坐标
     this.model.coords = MathUtils.batchPrecisePoint(
       this.batchCalcTransformPointsByCenter(
-        this._originalRotatePathPoints,
+        this._originalRotatePoints,
         matrix,
         this._originalCenter,
         this._originalCenter,
@@ -2166,7 +2190,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   ): void {
     // 计算旋转偏移前的坐标
     let points = MathUtils.batchTransWithCenter(
-      this._rotatePathPoints,
+      this._rotatePoints,
       { angle: groupAngle, leanYAngle: prevValue },
       center,
       true,

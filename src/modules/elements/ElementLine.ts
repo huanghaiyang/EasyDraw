@@ -63,11 +63,11 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   get startRotatePathPoint(): IPoint {
-    return this.rotatePathPoints[0];
+    return this.rotatePoints[0];
   }
 
   get endRotatePathPoint(): IPoint {
-    return this.rotatePathPoints[1];
+    return this.rotatePoints[1];
   }
 
   get startCoord(): IPoint {
@@ -78,15 +78,15 @@ export default class ElementLine extends Element implements IElementLine {
     return this.model.coords[1];
   }
 
-  private _outerPathPoints: IPoint[][] = [];
-  private _outerPathCoords: IPoint[][] = [];
+  private _outerPoints: IPoint[][] = [];
+  private _outerCoords: IPoint[][] = [];
 
-  get outerPathPoints(): IPoint[][] {
-    return this._outerPathPoints;
+  get outerPoints(): IPoint[][] {
+    return this._outerPoints;
   }
 
-  get outerPathCoords(): IPoint[][] {
-    return this._outerPathCoords;
+  get outerCoords(): IPoint[][] {
+    return this._outerCoords;
   }
 
   get transformerType(): TransformerTypes {
@@ -94,17 +94,17 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   get alignOutlineCoords(): IPoint[][] {
-    return this._outerPathCoords;
+    return this._outerCoords;
   }
 
   /**
    * 刷新 bent 外轮廓
    */
   private refreshBentOutline() {
-    this._outerPathPoints = this.calcOuterPathPoints();
-    this._outerPathCoords = this.calcOuterPathCoords();
+    this._outerPoints = this.calcOuterPoints();
+    this._outerCoords = this.calcOuterCoords();
     this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(
-      this._outerPathPoints.flat(),
+      this._outerPoints.flat(),
     );
   }
 
@@ -121,10 +121,10 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  calcOuterPathPoints(): IPoint[][] {
+  calcOuterPoints(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return PolygonUtils.calcBentLineOuterVertices(
-        this.rotatePathPoints,
+        this.rotatePoints,
         stroke.width / 2,
       );
     });
@@ -135,10 +135,10 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  calcOuterPathCoords(): IPoint[][] {
+  calcOuterCoords(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
       return PolygonUtils.calcBentLineOuterVertices(
-        this.rotatePathCoords,
+        this.rotateCoords,
         stroke.width / 2,
       );
     });
@@ -186,8 +186,8 @@ export default class ElementLine extends Element implements IElementLine {
    * @param points
    */
   isPolygonOverlap(points: IPoint[]): boolean {
-    return some(this._outerPathPoints, pathPoints => {
-      return MathUtils.isPolygonsOverlap(pathPoints, points);
+    return some(this._outerPoints, ps => {
+      return MathUtils.isPolygonsOverlap(ps, points);
     });
   }
 
@@ -198,8 +198,8 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this._outerPathPoints, pathCoords => {
-      return MathUtils.isPolygonsOverlap(pathCoords, coords);
+    return some(this._outerPoints, ps => {
+      return MathUtils.isPolygonsOverlap(ps, coords);
     });
   }
 

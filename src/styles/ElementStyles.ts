@@ -47,6 +47,7 @@ export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   switch (type) {
     case CreatorTypes.arbitrary:
     case CreatorTypes.rectangle:
+    case CreatorTypes.ellipse:
     case CreatorTypes.image: {
       return StrokeTypesArray;
     }
@@ -58,20 +59,18 @@ export function getStokeTypes(type: CreatorTypes): StrokeTypePair[] {
   }
 }
 
-// 描边样式定义
-export type StrokeStyle = {
-  type?: StrokeTypes;
-  width: number;
-  color?: string;
-  colorOpacity?: number;
-};
-
 // 填充样式定义
 export type FillStyle = {
   // 填充颜色
   color?: string;
   // 填充颜色透明度
   colorOpacity?: number;
+};
+
+// 描边样式定义
+export type StrokeStyle = FillStyle & {
+  type?: StrokeTypes;
+  width: number;
 };
 
 // 画板组件样式定义
