@@ -43,6 +43,7 @@ import { CreatorTypes } from "@/types/Creator";
 import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
+import CreatorHelper from "@/types/CreatorHelper";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
@@ -52,21 +53,65 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 舞台
   shield: IStageShield;
   // 原始变换器点坐标
-  protected _originalTransformerPoints: IPoint[];
+  _originalTransformerPoints: IPoint[];
   // 原始模型坐标
-  protected _originalModelCoords: IPoint[];
+  _originalCoords: IPoint[];
   // 原始模型盒模型坐标
-  protected _originalModelBoxCoords: IPoint[];
+  _originalBoxCoords: IPoint[];
   // 原始变换矩阵
-  protected _originalTransformMatrix: number[][] = [];
+  _originalTransformMatrix: number[][] = [];
   // 变换矩阵
-  protected _transformMatrix: number[][] = [];
+  _transformMatrix: number[][] = [];
   // 变换不动点
-  protected _transformLockPoint: IPoint;
+  _transformLockPoint: IPoint;
   // 变换不动点索引
-  protected _transformLockIndex: number;
+  _transformLockIndex: number;
   // 变换原始拖动点
-  protected _transformOriginalMovingPoint: IPoint;
+  _originalTransformMovePoint: IPoint;
+  // 坐标-舞台坐标系
+  _points: IPoint[] = [];
+  // 不倾斜路径点-舞台坐标系
+  _unLeanPoints: IPoint[] = [];
+  // 不倾斜路径点-世界坐标系
+  _unLeanCoords: IPoint[] = [];
+  // 最大盒模型-舞台坐标系
+  _maxBoxPoints: IPoint[] = [];
+  // 旋转坐标-舞台坐标系
+  _rotatePoints: IPoint[] = [];
+  // 旋转坐标-世界坐标系
+  _rotateCoords: IPoint[] = [];
+  // 旋转外框线坐标-舞台坐标系（组件命中处理)
+  _rotateOutlinePoints: IPoint[][] = [];
+  // 旋转盒模型-舞台坐标系
+  _rotateBoxPoints: IPoint[] = [];
+  // 旋转盒模型坐标-舞台坐标系
+  _rotateBoxCoords: IPoint[] = [];
+  // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
+  _maxOutlineBoxPoints: IPoint[] = [];
+  // 旋转外框线坐标-世界坐标系(组件对齐时使用)
+  _rotateOutlineCoords: IPoint[][] = [];
+  // 盒模型，同_maxBoxPoints-舞台坐标系
+  _rect: Partial<DOMRect> = {};
+  // 顶点变换器-舞台坐标系
+  _transformers: IVerticesTransformer[] = [];
+  // 边框变换器-舞台坐标系
+  _borderTransformers: IBorderTransformer[] = [];
+  // 原始中心点-世界坐标系
+  _originalCenterCoord: IPoint;
+  // 原始旋转的组件坐标-世界坐标系
+  _originalRotatePoints: IPoint[] = [];
+  // 原始的盒模型坐标
+  _originalRotateBoxPoints: IPoint[] = [];
+  // 原始角度-舞台坐标系&世界坐标系
+  _originalAngle: number = 0;
+  // 原始盒模型-舞台坐标系
+  _originalSize: Partial<DOMRect> = {};
+  // 原始中心点-舞台坐标系
+  _originalCenter: IPoint;
+  // 变换器类型
+  _transformType: TransformTypes;
+  // 旋转控制器
+  _rotateControllers: IPointController[] = [];
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
@@ -105,17 +150,7 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否是组件
   get isElement(): boolean {
-    return [
-      CreatorTypes.image,
-      CreatorTypes.text,
-      CreatorTypes.arbitrary,
-      CreatorTypes.rectangle,
-      CreatorTypes.ellipse,
-      CreatorTypes.polygon,
-      CreatorTypes.line,
-      CreatorTypes.text,
-      CreatorTypes.pencil,
-    ].includes(this.model.type);
+    return CreatorHelper.isElement(this.model.type);
   }
 
   // 是否是组合
@@ -298,13 +333,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 获取变形/移动/旋转操作之前的原始坐标
-  get originalModelCoords(): IPoint[] {
-    return this._originalModelCoords;
+  get originalCoords(): IPoint[] {
+    return this._originalCoords;
   }
 
   // 获取原始模型盒模型坐标
-  get originalModelBoxCoords(): IPoint[] {
-    return this._originalModelBoxCoords;
+  get originalBoxCoords(): IPoint[] {
+    return this._originalBoxCoords;
   }
 
   @computed
@@ -331,15 +366,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.rotateBoxCoords,
     );
     return Math.min(width, height);
-  }
-
-  /**
-   * 获取显示角度
-   *
-   * @returns
-   */
-  protected getAngle(): number {
-    return this.model.angle;
   }
 
   @computed
@@ -539,132 +565,87 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   @action
-  protected _setStatus(status: ElementStatus): void {
+  _setStatus(status: ElementStatus): void {
     this.__setStatus(status);
   }
 
-  protected __setStatus(status: ElementStatus): void {
+  __setStatus(status: ElementStatus): void {
     this._status = status;
   }
 
   @action
-  protected _setIsSelected(value: boolean): void {
+  _setIsSelected(value: boolean): void {
     this.__setIsSelected(value);
   }
 
-  protected __setIsSelected(value: boolean): void {
+  __setIsSelected(value: boolean): void {
     this._isSelected = value;
   }
 
   @action
-  protected _setIsVisible(value: boolean): void {
+  _setIsVisible(value: boolean): void {
     this._isVisible = value;
   }
 
   @action
-  protected _setIsEditing(value: boolean): void {
+  _setIsEditing(value: boolean): void {
     this._isEditing = value;
   }
 
   @action
-  protected _setIsLocked(value: boolean): void {
+  _setIsLocked(value: boolean): void {
     this._isLocked = value;
   }
 
   @action
-  protected _setIsMoving(value: boolean): void {
+  _setIsMoving(value: boolean): void {
     this._isMoving = value;
   }
 
   @action
-  protected _setIsTransforming(value: boolean): void {
+  _setIsTransforming(value: boolean): void {
     this._isTransforming = value;
   }
 
   @action
-  protected _setIsRotating(value: boolean): void {
+  _setIsRotating(value: boolean): void {
     this._isRotating = value;
   }
 
   @action
-  protected _setIsRotatingTarget(value: boolean): void {
+  _setIsRotatingTarget(value: boolean): void {
     this._isRotatingTarget = value;
   }
 
   @action
-  protected _setIsDragging(value: boolean): void {
+  _setIsDragging(value: boolean): void {
     this._isDragging = value;
   }
 
   @action
-  protected _setIsRendered(value: boolean): void {
+  _setIsRendered(value: boolean): void {
     this._isProvisional = value;
   }
 
   @action
-  protected _setIsTarget(value: boolean): void {
+  _setIsTarget(value: boolean): void {
     this._isTarget = value;
   }
 
   @action
-  protected _setIsOnStage(value: boolean): void {
+  _setIsOnStage(value: boolean): void {
     this._isOnStage = value;
   }
 
   @action
-  protected _setIsInRange(value: boolean): void {
+  _setIsInRange(value: boolean): void {
     this._isInRange = value;
   }
 
   @action
-  protected _setIsCornerMoving(value: boolean): void {
+  _setIsCornerMoving(value: boolean): void {
     this._isCornerMoving = value;
   }
-
-  // 坐标-舞台坐标系
-  protected _points: IPoint[] = [];
-  // 不倾斜路径点-舞台坐标系
-  protected _unLeanPoints: IPoint[] = [];
-  // 不倾斜路径点-世界坐标系
-  protected _unLeanCoords: IPoint[] = [];
-  // 最大盒模型-舞台坐标系
-  protected _maxBoxPoints: IPoint[] = [];
-  // 旋转坐标-舞台坐标系
-  protected _rotatePoints: IPoint[] = [];
-  // 旋转坐标-世界坐标系
-  protected _rotateCoords: IPoint[] = [];
-  // 旋转外框线坐标-舞台坐标系（组件命中处理)
-  protected _rotateOutlinePoints: IPoint[][] = [];
-  // 旋转盒模型-舞台坐标系
-  protected _rotateBoxPoints: IPoint[] = [];
-  // 旋转盒模型坐标-舞台坐标系
-  protected _rotateBoxCoords: IPoint[] = [];
-  // 旋转坐标计算出来的最大外框盒模型-舞台坐标系
-  protected _maxOutlineBoxPoints: IPoint[] = [];
-  // 旋转外框线坐标-世界坐标系(组件对齐时使用)
-  protected _rotateOutlineCoords: IPoint[][] = [];
-  // 盒模型，同_maxBoxPoints-舞台坐标系
-  protected _rect: Partial<DOMRect> = {};
-  // 顶点变换器-舞台坐标系
-  protected _transformers: IVerticesTransformer[] = [];
-  // 边框变换器-舞台坐标系
-  protected _borderTransformers: IBorderTransformer[] = [];
-  // 原始中心点-世界坐标系
-  protected _originalCenterCoord: IPoint;
-  // 原始旋转的组件坐标-世界坐标系
-  protected _originalRotatePoints: IPoint[] = [];
-  // 原始的盒模型坐标
-  protected _originalRotateBoxPoints: IPoint[] = [];
-  // 原始角度-舞台坐标系&世界坐标系
-  protected _originalAngle: number = 0;
-  // 原始盒模型-舞台坐标系
-  protected _originalSize: Partial<DOMRect> = {};
-  // 原始中心点-舞台坐标系
-  protected _originalCenter: IPoint;
-  // 变换器类型
-  protected _transformType: TransformTypes;
-  // 旋转控制器
-  protected _rotateControllers: IPointController[] = [];
 
   get points(): IPoint[] {
     return this._points;
@@ -768,8 +749,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._transformLockPoint;
   }
 
-  get transformOriginalMovingPoint(): IPoint {
-    return this._transformOriginalMovingPoint;
+  get originalTransformMovePoint(): IPoint {
+    return this._originalTransformMovePoint;
   }
 
   get transformType(): TransformTypes {
@@ -853,13 +834,22 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取显示角度
+   *
+   * @returns
+   */
+  getAngle(): number {
+    return this.model.angle;
+  }
+
+  /**
    * 将坐标根据描边类型进行转换
    *
    * @param points
    * @param strokeStyle
    * @returns
    */
-  protected convertPointsByStrokeType(
+  convertPointsByStrokeType(
     points: IPoint[],
     strokeStyle: StrokeStyle,
   ): IPoint[] {
@@ -1029,10 +1019,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param size
    * @returns
    */
-  protected getControllerPoints(
-    controllerPoint: IPoint,
-    size?: number,
-  ): IPoint[] {
+  getControllerPoints(controllerPoint: IPoint, size?: number): IPoint[] {
     size = size || TransformerSize;
     return CommonUtils.get4BoxPoints(
       controllerPoint,
@@ -1398,11 +1385,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始坐标
    */
-  refreshOriginalModelCoords() {
+  refreshoriginalCoords() {
     // 维护原始模型坐标
-    this._originalModelCoords = cloneDeep(this.model.coords);
+    this._originalCoords = cloneDeep(this.model.coords);
     // 维护原始模型盒模型坐标
-    this._originalModelBoxCoords = cloneDeep(this.model.boxCoords);
+    this._originalBoxCoords = cloneDeep(this.model.boxCoords);
     // 维护原始中心点坐标
     this._originalCenterCoord = cloneDeep(this.calcCenterCoord());
   }
@@ -1412,7 +1399,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalProps(): void {
     // 维护原始模型坐标
-    this.refreshOriginalModelCoords();
+    this.refreshoriginalCoords();
     // 维护原始变换器坐标
     this.refreshOriginalTransformerPoints();
     // 维护原始组件属性
@@ -1446,7 +1433,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 角度修正
    */
-  protected flipAngle(): void {
+  flipAngle(): void {
     let angle;
     if (this.model.angle > 0) {
       angle = this.model.angle - 180;
@@ -1465,7 +1452,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param centroid
    * @returns
    */
-  protected batchCalcTransformPointsByCenter(
+  batchCalcTransformPointsByCenter(
     points: IPoint[],
     matrix: number[][],
     lockPoint: IPoint,
@@ -1491,7 +1478,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param angles
    * @returns
    */
-  protected calcTransformPointsByCenter(
+  calcTransformPointsByCenter(
     points: IPoint[],
     matrix: number[][],
     lockPoint: IPoint,
@@ -1691,7 +1678,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    * @returns
    */
-  protected doVerticesTransform(offset: IPoint): void {
+  doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点坐标索引
@@ -1705,7 +1692,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 当前拖动的点的原始位置
-      this._transformOriginalMovingPoint = currentPointOriginal;
+      this._originalTransformMovePoint = currentPointOriginal;
       // 根据不动点进行形变
       this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
     }
@@ -1719,7 +1706,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param offset
    * @param index
    */
-  protected transformByLockPoint(
+  transformByLockPoint(
     lockPoint: IPoint,
     currentPointOriginal: IPoint,
     offset: IPoint,
@@ -1772,7 +1759,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param wouldBeRatioLock
    * @returns
    */
-  protected getTransformMatrix(
+  getTransformMatrix(
     lockPoint: IPoint,
     currentPointOriginal: IPoint,
     offset: IPoint,
@@ -1809,7 +1796,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param currentPointOriginal
    * @param matrix
    */
-  protected _tryFlipAngle(
+  _tryFlipAngle(
     lockPoint: IPoint,
     currentPointOriginal: IPoint,
     matrix: number[][],
@@ -1841,10 +1828,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param originalMatrix
    * @returns
    */
-  protected _doFlipAngle(
-    matrix: number[][],
-    originalMatrix: number[][],
-  ): boolean {
+  _doFlipAngle(matrix: number[][], originalMatrix: number[][]): boolean {
     // 原始的纵轴缩放系数
     const xScaleOriginal = originalMatrix[0][0];
     const yScaleOriginal = originalMatrix[1][1];
@@ -1877,7 +1861,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    * @returns
    */
-  protected getBorderTransformLockPoint(index: number): IPoint {
+  getBorderTransformLockPoint(index: number): IPoint {
     // 不动边的点1索引
     const lockIndex = CommonUtils.getPrevIndexOfArray(
       this._borderTransformers.length,
@@ -1941,7 +1925,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param offset
    */
-  protected doBorderTransform(offset: IPoint): void {
+  doBorderTransform(offset: IPoint): void {
     const index = this._borderTransformers.findIndex(item => item.isActive);
     if (index !== -1) {
       // 不动点
@@ -1949,7 +1933,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 当前拖动的点的原始位置
-      this._transformOriginalMovingPoint = currentPointOriginal;
+      this._originalTransformMovePoint = currentPointOriginal;
       // 当前拖动的点当前的位置
       const currentPoint = {
         x: currentPointOriginal.x + offset.x,
@@ -2000,7 +1984,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  protected getTransformPointForSizeChange(): IPoint {
+  getTransformPointForSizeChange(): IPoint {
     return this._originalTransformerPoints[2];
   }
 
@@ -2031,7 +2015,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新与边框设置相关的坐标
    */
-  protected _refreshOutlinePoints(): void {
+  _refreshOutlinePoints(): void {
     // 计算旋转后的边框路径点
     this._rotateOutlinePoints = this.calcRotateOutlinePoints();
     // 计算旋转后的边框路径坐标
@@ -2467,11 +2451,11 @@ export default class Element implements IElement, ILinkedNodeValue {
       dy: newCenterCoord.y - this._originalCenterCoord.y,
     };
     // 计算变换后的坐标
-    const coords = this._originalModelCoords.map(coord =>
+    const coords = this._originalCoords.map(coord =>
       MathUtils.translate(coord, offset),
     );
     // 计算变换后的盒模型坐标
-    const boxCoords = this._originalModelBoxCoords.map(coord =>
+    const boxCoords = this._originalBoxCoords.map(coord =>
       MathUtils.translate(coord, offset),
     );
     // 设置变换坐标
@@ -2533,7 +2517,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   toJson(): ElementObject {
-    return JSON.parse(JSON.stringify({ ...this.model, ...this.flip })) as ElementObject;
+    return JSON.parse(
+      JSON.stringify({ ...this.model, ...this.flip }),
+    ) as ElementObject;
   }
 
   /**

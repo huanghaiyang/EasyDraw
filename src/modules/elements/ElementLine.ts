@@ -147,7 +147,7 @@ export default class ElementLine extends Element implements IElementLine {
   /**
    * 刷新轮廓坐标
    */
-  protected _refreshOutlinePoints(): void {
+  _refreshOutlinePoints(): void {
     super._refreshOutlinePoints();
     this.refreshBentOutline();
   }
@@ -157,7 +157,7 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  protected getAngle(): number {
+  getAngle(): number {
     return ElementUtils.fixAngle(
       MathUtils.calcAngle(this.startCoord, this.endCoord) + 90,
     );
@@ -208,7 +208,7 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @param offset
    */
-  protected doVerticesTransform(offset: IPoint): void {
+  doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(
       transformer => transformer.isActive,
     );
@@ -229,7 +229,7 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @returns
    */
-  protected getTransformPointForSizeChange(): IPoint {
+  getTransformPointForSizeChange(): IPoint {
     return this._originalTransformerPoints[1];
   }
 

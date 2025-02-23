@@ -1235,11 +1235,11 @@ export default class StageStore implements IStageStore {
    */
   private _moveElement(element: IElement, offset: IPoint): void {
     const coords = ElementUtils.translateCoords(
-      element.originalModelCoords,
+      element.originalCoords,
       offset,
     );
     const boxCoords = ElementUtils.translateCoords(
-      element.originalModelBoxCoords,
+      element.originalBoxCoords,
       offset,
     );
     const { x, y } = ElementUtils.calcPosition({
@@ -1278,14 +1278,14 @@ export default class StageStore implements IStageStore {
           const {
             transformLockPoint,
             transformLockIndex,
-            transformOriginalMovingPoint,
+            originalTransformMovePoint,
             transformType,
             model: { angle, leanYAngle },
           } = element;
           sub.transformBy({
             lockPoint: transformLockPoint,
             lockIndex: transformLockIndex,
-            originalMovingPoint: transformOriginalMovingPoint,
+            originalMovingPoint: originalTransformMovePoint,
             offset,
             groupAngle: angle,
             groupLeanYAngle: leanYAngle,
@@ -2074,7 +2074,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 使元素偏移
+   * 使组件偏移
    *
    * @param model
    * @param dValue

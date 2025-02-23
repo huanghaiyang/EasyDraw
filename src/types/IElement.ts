@@ -257,7 +257,7 @@ export default interface IElement {
   // 变换不动点
   get transformLockPoint(): IPoint;
   // 变换原始拖动点
-  get transformOriginalMovingPoint(): IPoint;
+  get originalTransformMovePoint(): IPoint;
   // 宽度
   get width(): number;
   // 高度
@@ -295,9 +295,9 @@ export default interface IElement {
   // 激活的顶点索引
   get activeCoordIndex(): number;
   // 原始模型坐标
-  get originalModelCoords(): IPoint[];
+  get originalCoords(): IPoint[];
   // 原始模型盒模型坐标
-  get originalModelBoxCoords(): IPoint[];
+  get originalBoxCoords(): IPoint[];
   // 路径点-相对于舞台画布的坐标
   get points(): IPoint[];
   // 不倾斜路径点
@@ -829,7 +829,7 @@ export default interface IElement {
   /**
    * 刷新原始模型坐标
    */
-  refreshOriginalModelCoords(): void;
+  refreshoriginalCoords(): void;
 
   /**
    * 刷新原始变换器点坐标

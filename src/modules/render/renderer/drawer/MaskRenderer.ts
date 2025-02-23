@@ -47,7 +47,7 @@ export default class MaskRenderer
   /**
    * 执行蒙版渲染的主流程
    * 1. 创建渲染任务队列
-   * 2. 按顺序处理选区/控制器/光标等元素的绘制
+   * 2. 按顺序处理选区/控制器/光标等组件的绘制
    * 3. 管理渲染状态缓存(_lastCursorRendered等)
    * 4. 处理边缘情况（如光标移出舞台时的残留）
    * @async
@@ -78,11 +78,11 @@ export default class MaskRenderer
       cargo.addAll(controllerTasks);
     }
 
-    // 特殊元素处理（单个无父元素）===
+    // 特殊组件处理（单个无父组件）===
     const noParentElements = this.drawer.shield.store.noParentElements;
     if (noParentElements.length === 1) {
       const element = noParentElements[0];
-      // 添加旋转图标（当元素允许旋转且处于完成状态）
+      // 添加旋转图标（当组件允许旋转且处于完成状态）
       if (
         this.drawer.shield.configure.rotationIconEnable &&
         element.rotationEnable &&
@@ -93,7 +93,7 @@ export default class MaskRenderer
       // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
     } else if (noParentElements.length > 1) {
-      // 多选时添加范围元素的旋转任务
+      // 多选时添加范围组件的旋转任务
       cargo.add(
         this.createMaskRotateTask(
           this.drawer.shield.selection.rangeElement.rotation,
@@ -214,9 +214,9 @@ export default class MaskRenderer
 
   /**
    * 创建形变控制器任务
-   * 根据元素类型分发不同的形变处理器：
-   * - 圆形元素：MaskTaskCircleTransformer
-   * - 矩形元素：MaskTaskTransformer
+   * 根据组件类型分发不同的形变处理器：
+   * - 圆形组件：MaskTaskCircleTransformer
+   * - 矩形组件：MaskTaskTransformer
    * @returns {IRenderTask[]} 形变控制器任务数组
    */
   private createMaskTransformerTasks(): IRenderTask[] {
