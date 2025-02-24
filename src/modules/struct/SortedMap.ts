@@ -1,25 +1,33 @@
 import { EventEmitter } from "events";
 
+export type CompareFn<K, V> = (a: V, b: V) => number;
+
 export default class SortedMap<K, V> extends EventEmitter {
   protected map: Map<K, V>;
   protected keys: K[];
+  protected compareFn: CompareFn<K, V>;
 
   get size(): number {
     return this.map.size;
   }
 
-  constructor() {
+  constructor(compareFn: CompareFn<K, V>) {
     super();
     this.map = new Map<K, V>();
     this.keys = [];
+    this.compareFn = compareFn;
   }
 
   set(key: K, value: V): void {
     if (!this.map.has(key)) {
       this.keys.push(key);
-      this.keys.sort((a, b) => this.compareKeys(a, b));
     }
     this.map.set(key, value);
+    this.keys.sort((a, b) => {
+      const aValue = this.map.get(a);
+      const bValue = this.map.get(b);
+      return this.compareFn(aValue, bValue);
+    });
   }
 
   get(key: K): V | undefined {
@@ -56,15 +64,5 @@ export default class SortedMap<K, V> extends EventEmitter {
 
   valuesArray(): V[] {
     return this.keys.map(key => this.map.get(key) as V);
-  }
-
-  private compareKeys(a: K, b: K): number {
-    if (typeof a === "string" && typeof b === "string") {
-      return a.localeCompare(b, "en", { numeric: true });
-    } else if (typeof a === "number" && typeof b === "number") {
-      return a - b;
-    } else {
-      throw new Error("Unsupported key type");
-    }
   }
 }

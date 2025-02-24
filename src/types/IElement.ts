@@ -15,6 +15,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
+import { ILinkedNode } from "@/modules/struct/LinkedNode";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -180,6 +181,8 @@ export default interface IElement {
   rotation: IElementRotation;
   // 舞台
   shield: IStageShield;
+  // 所属节点
+  node: ILinkedNode<IElement>;
 
   // 组件ID
   get id(): string;
@@ -283,6 +286,11 @@ export default interface IElement {
   get fontFamily(): string;
   // 圆角
   get corners(): number[];
+
+  // 是否最顶层
+  get isTopmost(): boolean;
+  // 是否最底层
+  get isBottommost(): boolean;
 
   // 视觉描边宽度
   get visualStrokeWidth(): number;

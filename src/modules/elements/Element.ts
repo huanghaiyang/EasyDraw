@@ -1,5 +1,5 @@
 import { ElementStatus, IPoint, ISize } from "@/types";
-import { ILinkedNodeValue } from "@/modules/struct/LinkedNode";
+import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -29,6 +29,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   rotation: IElementRotation;
   // 舞台
   shield: IStageShield;
+  // 所属节点
+  node: ILinkedNode<IElement>;
   // 原始变换器点坐标
   _originalTransformerPoints: IPoint[];
   // 原始模型坐标
@@ -792,6 +794,14 @@ export default class Element implements IElement, ILinkedNodeValue {
       result.push(...this._borderTransformers);
     }
     return result;
+  }
+
+  get isTopmost(): boolean {
+    return this.node.next === null;
+  }
+
+  get isBottommost(): boolean {
+    return this.node.prev === null;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {

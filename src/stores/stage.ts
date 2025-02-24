@@ -82,6 +82,10 @@ export const useStageStore = defineStore("stage", {
     };
   },
   getters: {
+    // 是否多选
+    isMultipleSelected(): boolean {
+      return ElementUtils.getNoParentElements(this.selectedElements).length > 1;
+    },
     // 选中的唯一组件
     primarySelectedElement(): IElement {
       // 选中的非组合组件
@@ -104,6 +108,14 @@ export const useStageStore = defineStore("stage", {
     // 自由线条绘制是否可见
     arbitraryVisible(): boolean {
       return this.currentCreator?.type === CreatorTypes.arbitrary;
+    },
+    // 是否可以上移
+    layerShiftMoveEnable(): boolean {
+      return this.primarySelectedElement && !this.primarySelectedElement.isTopmost;
+    },
+    // 是否可以下移
+    layerGoDownEnable(): boolean {
+      return this.primarySelectedElement && !this.primarySelectedElement.isBottommost;
     },
   },
   actions: {
@@ -682,6 +694,24 @@ export const useStageStore = defineStore("stage", {
     setElementsAverageHorizontal(): void {
       if (!this.averageEnable) return;
       shield.setElementsAverageHorizontal(this.selectedElements);
+    },
+    /**
+     * 组件下移
+     *
+     * @returns
+     */
+    setElementsGoDown(): void {
+      if (!this.layerGoDownEnable) return;
+      shield.setElementsGoDown(this.selectedElements);
+    },
+    /**
+     * 组件上移
+     *
+     * @returns
+     */
+    setElementsShiftMove(): void {
+      if (!this.layerShiftMoveEnable) return;
+      shield.setElementsShiftMove(this.selectedElements);
     },
     /**
      * 上传图片

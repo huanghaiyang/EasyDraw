@@ -19,6 +19,19 @@ import { ArbitraryPointClosestMargin } from "@/types/constants";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 
+/**
+ * 比较两个元素的层级
+ *
+ * @param aElement
+ * @param bElement
+ * @returns
+ */
+function CompareKeys(aElement: IElement, bElement: IElement): number {
+  const a = aElement.model.layerId;
+  const b = bElement.model.layerId;
+  return a - b;
+}
+
 export default class StageStore implements IStageStore {
   shield: IStageShield;
 
@@ -27,25 +40,25 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的组件
   private _currentCreatingElementId;
   // 组件对象映射关系，加快查询
-  private _elementsMap = new ElementSortedMap<string, IElement>();
+  private _elementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 已渲染的组件映射关系
-  private _provisionalElementsMap = new ElementSortedMap<string, IElement>();
+  private _provisionalElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 被选中的组件映射关系，加快查询
-  private _selectedElementsMap = new ElementSortedMap<string, IElement>();
+  private _selectedElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 命中的组件映射关系，加快查询
-  private _targetElementsMap = new ElementSortedMap<string, IElement>();
+  private _targetElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 舞台组件映射关系，加快查询
-  private _stageElementsMap = new ElementSortedMap<string, IElement>();
+  private _stageElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 未在舞台的组件映射关系，加快查询
-  private _noneStageElementsMap = new ElementSortedMap<string, IElement>();
+  private _noneStageElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 可见组件映射关系，加快查询
-  private _visibleElementsMap = new ElementSortedMap<string, IElement>();
+  private _visibleElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 编辑中的组件映射关系，加快查询
-  private _editingElementsMap = new ElementSortedMap<string, IElement>();
+  private _editingElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 选区组件映射关系，加快查询
-  private _rangeElementsMap = new ElementSortedMap<string, IElement>();
+  private _rangeElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 旋转目标组件映射关系，加快查询
-  private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>();
+  private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
@@ -798,7 +811,9 @@ export default class StageStore implements IStageStore {
    * @param element
    */
   addElement(element: IElement): IElement {
-    this._elementList.insert(new LinkedNode(element));
+    const node = new LinkedNode(element);
+    element.node = node;
+    this._elementList.insert(node);
     this._elementsMap.set(element.id, element);
     return element;
   }
@@ -1812,4 +1827,18 @@ export default class StageStore implements IStageStore {
     }
     return result;
   }
+
+  /**
+   * 组件下移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsGoDown(elements: IElement[]): Promise<void> {}
+
+  /**
+   * 组件上移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsShiftMove(elements: IElement[]): Promise<void> {}
 }

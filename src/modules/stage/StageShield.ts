@@ -1509,4 +1509,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       await this._redrawAll(true);
     }
   }
+
+  /**
+   * 组件下移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsGoDown(elements: IElement[]): Promise<void> {}
+
+  /**
+   * 组件上移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsShiftMove(elements: IElement[]): Promise<void> {}
 }

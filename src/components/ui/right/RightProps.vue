@@ -9,6 +9,7 @@
     <corner-props></corner-props>
     <fill-props></fill-props>
     <stroke-props></stroke-props>
+    <layer-props></layer-props>
   </div>
 </template>
 <style lang="less" scoped>
@@ -27,7 +28,8 @@
   .angle-props,
   .stroke-props,
   .corners-props,
-  .fill-props {
+  .fill-props,
+  .layer-props {
     &__title {
       font-size: 12px;
       font-weight: 500;

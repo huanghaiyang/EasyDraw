@@ -176,4 +176,18 @@ export default interface IStageSetter {
    * @param value 是否锁定比例
    */
   setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void>;
+
+  /**
+   * 组件上移
+   *
+   * @param elements 要修改的元件集合
+   */
+  setElementsShiftMove(elements: IElement[]): Promise<void>;
+
+  /**
+   * 组件下移
+   *
+   * @param elements 要修改的元件集合
+   */
+  setElementsGoDown(elements: IElement[]): Promise<void>;
 }

@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "11782842",
+      "name": "layer-go-down",
+      "font_class": "layer-go-down",
+      "unicode": "e7d9",
+      "unicode_decimal": 59353
+    },
+    {
+      "icon_id": "11789085",
+      "name": "layer-shift-move",
+      "font_class": "layer-shift-move",
+      "unicode": "e7da",
+      "unicode_decimal": 59354
+    },
+    {
       "icon_id": "3423028",
       "name": "eclipse",
       "font_class": "eclipse",
