@@ -1,3 +1,8 @@
+/**
+ * ＴＯＤＯ
+ * 
+ * 1. 与描边及填充相关的样式坐标计算非常耗费性能，需要优化
+ */
 import { ElementStatus, IPoint, ISize } from "@/types";
 import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -91,6 +96,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   _transformType: TransformTypes;
   // 旋转控制器
   _rotateControllers: IPointController[] = [];
+  // 最小倾斜矩阵垂直尺寸
+  _minParallelogramVerticalSize: number;
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
@@ -330,14 +337,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     return Math.min(this.model.width, this.model.height);
   }
 
-  get minPrimitiveSize(): number {
-    const { width, height } = this.calcPrimitiveSize();
-    return Math.min(width, height);
-  }
-
   get minParallelogramVerticalSize(): number {
-    const { width, height } = MathUtils.calcParallelogramVerticalSize(this.rotateBoxCoords);
-    return Math.min(width, height);
+    return this._minParallelogramVerticalSize;
   }
 
   @computed
@@ -1329,6 +1330,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     const { width, height } = ElementUtils.calcSize(this.model);
     this.model.width = MathUtils.precise(width, 1);
     this.model.height = MathUtils.precise(height, 1);
+    const { width: verticalSize, height: horizontalSize } = MathUtils.calcParallelogramVerticalSize(this.rotateBoxCoords);
+    this._minParallelogramVerticalSize = Math.min(verticalSize, horizontalSize);
   }
 
   /**
@@ -1934,7 +1937,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     let values = cloneDeep(this.model.corners);
     if (isNumber(index)) values[index] = value;
     else values.fill(value);
-    values = ElementUtils.fixCornersBasedOnMinSize(values, this.minParallelogramVerticalSize);
+    values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
     this.model.corners = values;
     this.refreshCorners();
   }

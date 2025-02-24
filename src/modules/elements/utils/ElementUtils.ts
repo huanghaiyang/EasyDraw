@@ -597,6 +597,7 @@ export default class ElementUtils {
    */
   static fixCornersBasedOnMinSize(values: number[], minSize: number): number[] {
     range(4).forEach(index => {
+      if (values[index] === 0) return;
       values[index] = clamp(values[index], 0, minSize / 2);
     });
     return values;

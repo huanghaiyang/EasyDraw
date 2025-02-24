@@ -5,7 +5,7 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CornerController from "@/modules/handler/controller/CornerController";
 import IController, { ICornerController } from "@/types/IController";
-import { clamp, cloneDeep, range, uniq } from "lodash";
+import { clamp, cloneDeep, every, range, uniq } from "lodash";
 import { ArcPoints } from "@/types/IRender";
 import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
@@ -262,6 +262,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   calcCornerCoordBy(point: IPoint, index: number, value: number): IPoint {
+    if (value === 0) return point;
     let dx: number, dy: number;
     if ([0, 3].includes(index)) {
       dx = this.flipX ? -value : value;
@@ -471,7 +472,8 @@ export default class ElementRect extends Element implements IElementRect {
    * 修正圆角
    */
   private _normalizeCorners(): number[] {
-    const values = cloneDeep(this.model.corners);
+    const values = [...this.model.corners];
+    if (every(values, value => value === 0)) return values;
     return ElementUtils.fixCornersBasedOnMinSize(values, this.minParallelogramVerticalSize);
   }
 }
