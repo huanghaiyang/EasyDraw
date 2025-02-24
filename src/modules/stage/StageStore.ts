@@ -890,8 +890,8 @@ export default class StageStore implements IStageStore {
       type,
     });
     const position: IPoint = ElementUtils.calcPosition({ type, coords });
-    const model: ElementObject = {
-      id: CommonUtils.getRandomDateId(),
+    const model: Partial<ElementObject> = {
+      ...ElementUtils.createEmptyObject(),
       type,
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
@@ -905,7 +905,7 @@ export default class StageStore implements IStageStore {
       ...DefaultAngleModel,
       ...DefaultCornerModel,
     };
-    return model;
+    return model as ElementObject;
   }
 
   /**
@@ -960,6 +960,9 @@ export default class StageStore implements IStageStore {
       case CreatorCategories.shapes: {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type));
         if (this._currentCreatingElementId) {
+          ["id", "layerId"].forEach(key => {
+            delete model[key];
+          });
           element = this.updateElementModel(this._currentCreatingElementId, model);
           element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
           this._setElementProvisionalCreating(element);
@@ -1395,7 +1398,7 @@ export default class StageStore implements IStageStore {
     });
     const center = MathUtils.calcCenter(coords);
     const object: ElementObject = {
-      id: CommonUtils.getRandomDateId(),
+      ...ElementUtils.createEmptyObject(),
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
       type: CreatorTypes.image,
@@ -1410,9 +1413,8 @@ export default class StageStore implements IStageStore {
       naturalHeight: height,
       isRatioLocked: true,
       ...center,
-      ...DefaultAngleModel,
       ...DefaultCornerModel,
-    };
+    } as ElementObject;
     const element = ElementUtils.createElement(object, this.shield);
     return element;
   }
@@ -1661,7 +1663,7 @@ export default class StageStore implements IStageStore {
       height,
       x: x + width / 2,
       y: y + height / 2,
-    };
+    } as ElementObject;
   }
 
   /**

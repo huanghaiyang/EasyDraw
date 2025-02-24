@@ -5,7 +5,7 @@ export default abstract class RenderTaskBase implements IRenderTask {
   id: string;
 
   constructor() {
-    this.id = CommonUtils.getRandomDateId();
+    this.id = `${CommonUtils.getDateId()}`;
   }
 
   run(): Promise<void> {

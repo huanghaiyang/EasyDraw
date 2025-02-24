@@ -4,7 +4,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import IElement, { AngleModel, DefaultAngleModel, ElementObject } from "@/types/IElement";
+import IElement, { AngleModel, DefaultAngleModel, DefaultCornerModel, ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
@@ -561,9 +561,21 @@ export default class ElementUtils {
   /**
    * 创建组合对象
    */
-  static createEmptyGroupObject(): ElementObject {
+  static createEmptyGroupObject(): Partial<ElementObject> {
     return {
-      id: CommonUtils.getRandomDateId(),
+      ...ElementUtils.createEmptyObject(),
+      type: CreatorTypes.group,
+    };
+  }
+
+  /**
+   * 创建空对象
+   */
+  static createEmptyObject(): Partial<ElementObject> {
+    const id = CommonUtils.getDateId();
+    return {
+      id: `${id}`,
+      layerId: Number(id),
       subIds: new Set(),
       coords: [],
       boxCoords: [],
@@ -574,8 +586,8 @@ export default class ElementUtils {
       },
       x: 0,
       y: 0,
-      type: CreatorTypes.group,
       ...DefaultAngleModel,
+      ...DefaultCornerModel,
     };
   }
 
@@ -602,16 +614,19 @@ export default class ElementUtils {
   static convertElementsJson(elementsJson: Array<ElementObject>): Array<ElementObject> {
     const models = elementsJson as unknown as Array<ElementObject>;
     const modelsMap: Map<String, ElementObject> = new Map();
-    models.forEach(model => {
+    const ids: number[] = [];
+    const timestamp = +new Date();
+    models.forEach((model, index) => {
       modelsMap.set(model.id, model);
       if (model.subIds) {
         model.subIds = new Set(model.subIds);
       }
+      const id = timestamp + index;
+      ids.push(id);
+      model.layerId = id;
     });
-    let prevId: string;
-    models.forEach(model => {
-      ElementUtils.reBindGroup(model, modelsMap, prevId);
-      prevId = model.id;
+    models.forEach((model, index) => {
+      ElementUtils.reBindGroup(model, modelsMap, `${ids[index]}`);
       ElementUtils.divateCoords(model, 40);
     });
     return models;
@@ -623,17 +638,8 @@ export default class ElementUtils {
    * @param model
    * @param modelsMap
    */
-  static reBindGroup(model: ElementObject, modelsMap: Map<String, ElementObject>, prevId: string): void {
+  static reBindGroup(model: ElementObject, modelsMap: Map<String, ElementObject>, newId: string): void {
     const { subIds, groupId, id } = model;
-    let newId = CommonUtils.getRandomDateId();
-    if (prevId) {
-      const prevArr = prevId.split("_");
-      const curArr = newId.split("_");
-      if (prevArr[0] === curArr[0] && prevArr[1] === curArr[1]) {
-        curArr[1] = prevArr[1] + 1;
-        newId = curArr.join("_");
-      }
-    }
     model.id = newId;
     modelsMap.set(newId, model);
     modelsMap.delete(id);

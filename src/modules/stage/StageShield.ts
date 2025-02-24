@@ -1333,11 +1333,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsJson
    */
   async _handlePasteElements(elementsJson: Array<ElementObject>): Promise<void> {
-    if (elementsJson && elementsJson.length) {
+    const isEmpty = !elementsJson || elementsJson.length === 0;
+    if (!isEmpty) {
       this._clearStageSelects();
     }
     await this.store.pasteElements(elementsJson);
-    await this._redrawAll(true);
+    if (!isEmpty) {
+      this.selection.refresh();
+      await this._redrawAll({ shield: true });
+    }
   }
 
   /**

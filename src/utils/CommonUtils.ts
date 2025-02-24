@@ -78,12 +78,12 @@ export default class CommonUtils {
   }
 
   /**
-   * 获取随机id, 以时间戳加随机字符串组合
+   * 获取时间戳
    *
    * @returns
    */
-  static getRandomDateId() {
-    return `${+new Date()}_${performance.now() * 1000}_${nanoid(8)}`;
+  static getDateId() {
+    return +new Date();
   }
 
   /**
