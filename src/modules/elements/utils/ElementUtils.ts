@@ -61,8 +61,6 @@ export enum ElementReactionPropNames {
 export enum ElementListEventNames {
   added,
   removed,
-  updated,
-  sizeChanged,
 }
 
 export default class ElementUtils {

@@ -9,10 +9,6 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
   constructor() {
     super();
     this.nodes = observable.set(this.nodes);
-    reaction(
-      () => this.nodes.size,
-      size => this.emit(ElementListEventNames.sizeChanged, size),
-    );
   }
 
   /**
@@ -35,12 +31,15 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * 插入组件
    *
    * @param node
+   * @param autoEmit
    */
-  insert(node: ILinkedNode<IElement>): void {
+  insert(node: ILinkedNode<IElement>, autoEmit: boolean = true): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insert(node);
-      this.emit(ElementListEventNames.added, node);
+      if (autoEmit) {
+        this.emit(ElementListEventNames.added, node);
+      }
     });
   }
 
@@ -50,11 +49,13 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * @param node
    * @param target
    */
-  insertBefore(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>): void {
+  insertBefore(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>, autoEmit: boolean = true): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insertBefore(node, target);
-      this.emit(ElementListEventNames.added, node);
+      if (autoEmit) {
+        this.emit(ElementListEventNames.added, node);
+      }
     });
   }
 
@@ -64,11 +65,13 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * @param node
    * @param target
    */
-  insertAfter(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>): void {
+  insertAfter(node: ILinkedNode<IElement>, target: ILinkedNode<IElement>, autoEmit: boolean = true): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.insertAfter(node, target);
-      this.emit(ElementListEventNames.added, node);
+      if (autoEmit) {
+        this.emit(ElementListEventNames.added, node);
+      }
     });
   }
 
@@ -76,12 +79,15 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * 向头部插入组件
    *
    * @param node
+   * @param autoEmit
    */
-  prepend(node: ILinkedNode<IElement>): void {
+  prepend(node: ILinkedNode<IElement>, autoEmit: boolean = true): void {
     runInAction(() => {
       this._addElementObserve(node);
       super.prepend(node);
-      this.emit(ElementListEventNames.added, node);
+      if (autoEmit) {
+        this.emit(ElementListEventNames.added, node);
+      }
     });
   }
 
@@ -89,11 +95,14 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * 移除组件
    *
    * @param node
+   * @param autoEmit
    */
-  remove(node: ILinkedNode<IElement>): void {
+  remove(node: ILinkedNode<IElement>, autoEmit: boolean = true): void {
     runInAction(() => {
       super.remove(node);
-      this.emit(ElementListEventNames.removed, node);
+      if (autoEmit) {
+        this.emit(ElementListEventNames.removed, node);
+      }
     });
   }
 
@@ -101,14 +110,17 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
    * 根据条件移除组件
    *
    * @param predicate
+   * @param autoEmit
    */
-  removeBy(predicate: (node: ILinkedNode<IElement>) => boolean): ILinkedNode<IElement>[] {
+  removeBy(predicate: (node: ILinkedNode<IElement>) => boolean, autoEmit: boolean = true): ILinkedNode<IElement>[] {
     let result: ILinkedNode<IElement>[] = [];
     runInAction(() => {
       result = super.removeBy(predicate);
-      result.forEach(node => {
-        this.emit(ElementListEventNames.removed, node);
-      });
+      if (autoEmit) {
+        result.forEach(node => {
+          this.emit(ElementListEventNames.removed, node);
+        });
+      }
     });
     return result;
   }
