@@ -20,25 +20,15 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
 
     if (isFold) {
       styles.fills.forEach(fillStyle => {
-        CanvasUtils.drawInnerPathFillWithScale(
-          this.canvas,
-          strokePoints[innermostStrokePointsIndex],
-          fillStyle,
-          styles.strokes[innermostStrokePointsIndex],
-        );
+        CanvasUtils.drawInnerPathFillWithScale(this.canvas, strokePoints[innermostStrokePointsIndex], fillStyle, styles.strokes[innermostStrokePointsIndex]);
       });
     }
 
     strokePoints.forEach((points, index) => {
-      CanvasUtils.drawPathStrokeWidthScale(
-        this.canvas,
-        points,
-        styles.strokes[index],
-        {
-          isFold,
-          miterLimit: DefaultLineMeterLimit,
-        },
-      );
+      CanvasUtils.drawPathStrokeWidthScale(this.canvas, points, styles.strokes[index], {
+        isFold,
+        miterLimit: DefaultLineMeterLimit,
+      });
     });
   }
 }

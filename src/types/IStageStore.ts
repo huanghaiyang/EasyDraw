@@ -56,11 +56,7 @@ export default interface IStageStore extends IStageSetter {
   get isMultiSelection(): boolean;
 
   // 创建组件数据模型
-  createElementModel(
-    type: CreatorTypes,
-    coords: IPoint[],
-    data?: any,
-  ): ElementObject;
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject;
   // 添加组件
   addElement(element: IElement): IElement;
   // 移除组件
@@ -72,10 +68,7 @@ export default interface IStageStore extends IStageSetter {
   // 更新组件数据模型
   updateElementModel(id: string, data: Partial<ElementObject>): IElement;
   // 批量更新组件数据模型
-  updateElementsModel(
-    elements: IElement[],
-    props: Partial<ElementObject>,
-  ): void;
+  updateElementsModel(elements: IElement[], props: Partial<ElementObject>): void;
   // 判断组件是否存在
   hasElement(id: string): boolean;
   // 查找组件
@@ -113,15 +106,9 @@ export default interface IStageStore extends IStageSetter {
   // 清除旋转组件中心
   clearRotatingStates(): void;
   // 恢复组件原始属性
-  refreshElementsOriginals(
-    elements: IElement[],
-    options?: RefreshSubOptions,
-  ): void;
+  refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void;
   // 刷新组件角度
-  refreshElementsOriginalAngles(
-    elements: IElement[],
-    options?: RefreshSubOptions,
-  ): void;
+  refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void;
   // 刷新组件位置
   refreshElementsPosition(elements: IElement[]): void;
   // 遍历组件
@@ -131,10 +118,7 @@ export default interface IStageStore extends IStageSetter {
   // 刷新组件
   refreshElements(elements: IElement[]): void;
   // 创建图片组件
-  createImageElement(
-    image: HTMLImageElement | ImageData,
-    options: Partial<ImageData>,
-  ): Promise<IElement>;
+  createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement>;
   // 插入图片组件
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   // 删除选中组件

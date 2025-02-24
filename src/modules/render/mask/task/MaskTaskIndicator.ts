@@ -7,15 +7,8 @@ export default class MaskTaskIndicator extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    CanvasUtils.drawRotateTextWithScale(
-      this.canvas,
-      this.data.text,
-      this.data.point,
-      SelectionIndicatorStyle,
-      SelectionIndicatorStyle.fills[0],
-      {
-        angle: this.data.angle,
-      },
-    );
+    CanvasUtils.drawRotateTextWithScale(this.canvas, this.data.text, this.data.point, SelectionIndicatorStyle, SelectionIndicatorStyle.fills[0], {
+      angle: this.data.angle,
+    });
   }
 }

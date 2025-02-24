@@ -78,23 +78,10 @@ export const EllipseCreator: Creator = {
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 
 // 形状工具
-export const ShapeCreators: Creator[] = [
-  RectangleCreator,
-  LineRectangleCreator,
-  EllipseCreator,
-  PolygonCreator,
-  ImageCreator,
-];
+export const ShapeCreators: Creator[] = [RectangleCreator, LineRectangleCreator, EllipseCreator, PolygonCreator, ImageCreator];
 
 // 自由绘制工具
 export const FreedomCreators: Creator[] = [PenCreator, PencilCreator];
 
 // 所有工具
-export const Creators: Creator[] = [
-  MoveableCreator,
-  ...CursorCreators,
-  RectangleCreator,
-  ...ShapeCreators,
-  PenCreator,
-  ...FreedomCreators,
-];
+export const Creators: Creator[] = [MoveableCreator, ...CursorCreators, RectangleCreator, ...ShapeCreators, PenCreator, ...FreedomCreators];

@@ -12,11 +12,7 @@ export default class ArbitraryUtils {
    * @param r
    * @returns
    */
-  static getArbitraryInnerVertices(
-    vertices: IPoint[],
-    r: number,
-    options: RenderParams,
-  ): IPoint[] {
+  static getArbitraryInnerVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
     return ArbitraryUtils.getArbitraryVertices(vertices, r, true, options);
   }
 
@@ -27,11 +23,7 @@ export default class ArbitraryUtils {
    * @param r
    * @returns
    */
-  static getArbitraryOuterVertices(
-    vertices: IPoint[],
-    r: number,
-    options: RenderParams,
-  ): IPoint[] {
+  static getArbitraryOuterVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {
     return ArbitraryUtils.getArbitraryVertices(vertices, r, false, options);
   }
 
@@ -43,22 +35,13 @@ export default class ArbitraryUtils {
    * @param innerOrOuter
    * @returns
    */
-  static getArbitraryVertices(
-    vertices: IPoint[],
-    r: number,
-    innerOrOuter: boolean,
-    options: RenderParams,
-  ): IPoint[] {
+  static getArbitraryVertices(vertices: IPoint[], r: number, innerOrOuter: boolean, options: RenderParams): IPoint[] {
     // 顶点个数为1时，直接返回当前坐标点，无需计算
     if (vertices.length === 1) return vertices;
     // 顶点个数为2时，按照直线进行计算
     if (vertices.length === 2) {
       // 计算直线的外轮廓坐标
-      return PolygonUtils.calcBentLineClockWisePoints(
-        vertices,
-        r,
-        innerOrOuter,
-      );
+      return PolygonUtils.calcBentLineClockWisePoints(vertices, r, innerOrOuter);
     }
     return vertices.map((ver, index) => {
       // 前一个顶点

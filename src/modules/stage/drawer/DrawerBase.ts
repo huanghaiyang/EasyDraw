@@ -31,9 +31,7 @@ export default class DrawerBase extends EventEmitter implements IStageDrawer {
    * 画布清空
    */
   clearCanvas(): void {
-    this.canvas
-      .getContext("2d")
-      ?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.canvas.getContext("2d")?.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
   /**

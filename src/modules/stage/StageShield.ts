@@ -17,10 +17,7 @@ import IElement, { ElementObject, IElementRect, RefreshSubOptions } from "@/type
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
-import IStageShield, {
-  StageCalcParams,
-  StageShieldElementsStatus,
-} from "@/types/IStageShield";
+import IStageShield, { StageCalcParams, StageShieldElementsStatus } from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
@@ -38,10 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 
-export default class StageShield
-  extends DrawerBase
-  implements IStageShield, IStageAlignFuncs
-{
+export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
@@ -110,12 +104,7 @@ export default class StageShield
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return [
-      StageShieldElementsStatus.ROTATING,
-      StageShieldElementsStatus.MOVING,
-      StageShieldElementsStatus.TRANSFORMING,
-      StageShieldElementsStatus.CORNER_MOVING,
-    ].includes(this.elementsStatus);
+    return [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.MOVING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus);
   }
 
   // 舞台是否在移动
@@ -125,9 +114,7 @@ export default class StageShield
 
   // 是否是绘制工具
   get isDrawerActive(): boolean {
-    return [CreatorCategories.shapes, CreatorCategories.freedom].includes(
-      this.currentCreator?.category,
-    );
+    return [CreatorCategories.shapes, CreatorCategories.freedom].includes(this.currentCreator?.category);
   }
 
   // 是否是手绘工具
@@ -157,12 +144,8 @@ export default class StageShield
   // 移动偏移量
   get movingOffset(): IPoint {
     return {
-      x: Math.floor(
-        this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      ),
-      y: Math.floor(
-        this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-      ),
+      x: Math.floor(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x),
+      y: Math.floor(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y),
     };
   }
 
@@ -185,10 +168,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsPosition(
-    elements: IElement[],
-    value: IPoint,
-  ): Promise<void> {
+  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     await this.store.setElementsPosition(elements, value);
     this.selection.refresh();
     await this._redrawAll({ shield: true });
@@ -224,10 +204,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsLeanYAngle(
-    elements: IElement[],
-    value: number,
-  ): Promise<void> {
+  async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
     this.selection.refresh();
@@ -256,11 +233,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsCorners(
-    elements: IElement[],
-    value: number,
-    index?: number,
-  ): Promise<void> {
+  async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
     await this.store.setElementsCorners(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -272,11 +245,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsStrokeType(
-    elements: IElement[],
-    value: StrokeTypes,
-    index: number,
-  ): Promise<void> {
+  async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
     await this.store.setElementsStrokeType(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -288,11 +257,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsStrokeWidth(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void> {
+  async setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -304,11 +269,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsStrokeColor(
-    elements: IElement[],
-    value: string,
-    index: number,
-  ): Promise<void> {
+  async setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsStrokeColor(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -320,11 +281,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsStrokeColorOpacity(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void> {
+  async setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeColorOpacity(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -335,10 +292,7 @@ export default class StageShield
    * @param elements
    * @param prevIndex
    */
-  async addElementsStroke(
-    elements: IElement[],
-    prevIndex: number,
-  ): Promise<void> {
+  async addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsStroke(elements, prevIndex);
     await this._redrawAll({ shield: true });
   }
@@ -349,10 +303,7 @@ export default class StageShield
    * @param elements
    * @param index
    */
-  async removeElementsStroke(
-    elements: IElement[],
-    index: number,
-  ): Promise<void> {
+  async removeElementsStroke(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsStroke(elements, index);
     await this._redrawAll({ shield: true });
   }
@@ -364,11 +315,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsFillColor(
-    elements: IElement[],
-    value: string,
-    index: number,
-  ): Promise<void> {
+  async setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsFillColor(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -380,11 +327,7 @@ export default class StageShield
    * @param value
    * @param index
    */
-  async setElementsFillColorOpacity(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void> {
+  async setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsFillColorOpacity(elements, value, index);
     await this._redrawAll({ shield: true });
   }
@@ -395,10 +338,7 @@ export default class StageShield
    * @param elements
    * @param prevIndex
    */
-  async addElementsFill(
-    elements: IElement[],
-    prevIndex: number,
-  ): Promise<void> {
+  async addElementsFill(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsFill(elements, prevIndex);
     await this._redrawAll({ shield: true });
   }
@@ -420,10 +360,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsTextAlign(
-    elements: IElement[],
-    value: CanvasTextAlign,
-  ): Promise<void> {
+  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -434,10 +371,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsTextBaseline(
-    elements: IElement[],
-    value: CanvasTextBaseline,
-  ): Promise<void> {
+  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -448,10 +382,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsFontSize(
-    elements: IElement[],
-    value: number,
-  ): Promise<void> {
+  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -462,10 +393,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsFontFamily(
-    elements: IElement[],
-    value: string,
-  ): Promise<void> {
+  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
     await this._redrawAll({ shield: true });
   }
@@ -476,10 +404,7 @@ export default class StageShield
    * @param elements
    * @param value
    */
-  async setElementsRatioLocked(
-    elements: IElement[],
-    value: boolean,
-  ): Promise<void> {
+  async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
     await this.store.setElementsRatioLocked(elements, value);
   }
 
@@ -519,10 +444,7 @@ export default class StageShield
     this.event.on("selectMoveable", this._handleSelectMoveable.bind(this));
     this.event.on("selectHand", this._handleSelectHand.bind(this));
     this.event.on("selectGroup", this._handleSelectGroup.bind(this));
-    this.event.on(
-      "selectGroupCancel",
-      this._handleSelectGroupCancel.bind(this),
-    );
+    this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
   }
 
   /**
@@ -597,13 +519,7 @@ export default class StageShield
               break;
             }
           }
-          if (
-            ![
-              StageShieldElementsStatus.ROTATING,
-              StageShieldElementsStatus.TRANSFORMING,
-              StageShieldElementsStatus.CORNER_MOVING,
-            ].includes(this.elementsStatus)
-          ) {
+          if (![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus)) {
             if (this.store.isSelectedContainsTarget()) {
               this.elementsStatus = StageShieldElementsStatus.MOVING;
               this._dragElements();
@@ -681,10 +597,7 @@ export default class StageShield
     });
     if (this.store.isMultiSelection) {
       this.selection.rangeElement.isTransforming = true;
-      this.store.updateElementsTransform(
-        [this.selection.rangeElement],
-        this.movingOffset,
-      );
+      this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
     } else {
       this.store.updateSelectedElementsTransform(this.movingOffset);
     }
@@ -700,10 +613,7 @@ export default class StageShield
     });
     if (this.store.isMultiSelection) {
       this.selection.rangeElement.isRotating = true;
-      this.store.updateElementsRotation(
-        [this.selection.rangeElement],
-        this._pressMovePosition,
-      );
+      this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
     } else {
       this.store.updateSelectedElementsRotation(this._pressMovePosition);
     }
@@ -715,10 +625,7 @@ export default class StageShield
    */
   private _createRange(): void {
     // 计算选区
-    const rangePoints = CommonUtils.getBoxPoints([
-      this._pressDownPosition,
-      this._pressMovePosition,
-    ]);
+    const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
     // 更新选区，命中组件
     this.selection.setRange(rangePoints);
   }
@@ -748,12 +655,9 @@ export default class StageShield
       // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller) {
-        this._refreshElementsOriginals(
-          [...this.store.selectedElements, this.selection.rangeElement],
-          {
-            deepSubs: true,
-          },
-        );
+        this._refreshElementsOriginals([...this.store.selectedElements, this.selection.rangeElement], {
+          deepSubs: true,
+        });
       }
       if (controller instanceof ElementRotation) {
         this.store.updateElementById(controller.host.id, {
@@ -762,26 +666,18 @@ export default class StageShield
         // 如果是选区旋转，则只处理选区组件
         if (this.store.isMultiSelection) {
           // 计算选区旋转的中心点等数据信息
-          this.store.refreshElementsRotationStates(
-            [this.selection.rangeElement],
-            this._pressDownPosition,
-          );
+          this.store.refreshElementsRotationStates([this.selection.rangeElement], this._pressDownPosition);
         } else {
           this.store.refreshRotatingStates(this._pressDownPosition);
         }
         this.elementsStatus = StageShieldElementsStatus.ROTATING;
-      } else if (
-        controller instanceof VerticesTransformer ||
-        controller instanceof BorderTransformer
-      ) {
+      } else if (controller instanceof VerticesTransformer || controller instanceof BorderTransformer) {
         this.elementsStatus = StageShieldElementsStatus.TRANSFORMING;
       } else if (controller instanceof CornerController) {
         this.elementsStatus = StageShieldElementsStatus.CORNER_MOVING;
       } else {
         // 获取鼠标点击的组件
-        const targetElement = this.selection.getElementOnPoint(
-          this.cursor.value,
-        );
+        const targetElement = this.selection.getElementOnPoint(this.cursor.value);
         // 判断当前鼠标位置的组件是否已经被选中
         const isSelectContainsTarget = this.store.isSelectedContainsTarget();
         if (e.ctrlKey) {
@@ -808,10 +704,7 @@ export default class StageShield
    * @param elements
    * @param options
    */
-  private _refreshElementsOriginals(
-    elements: IElement[],
-    options?: RefreshSubOptions,
-  ): void {
+  private _refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
     this.store.refreshElementsOriginalAngles(elements, options);
     this.store.refreshElementsOriginals(elements, options);
   }
@@ -820,10 +713,7 @@ export default class StageShield
    * 处理自由绘制下的鼠标按下事件
    */
   private _handleArbitraryPressUp(): void {
-    const element = this.store.creatingArbitraryElement(
-      this.cursor.worldValue,
-      true,
-    );
+    const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
     }
@@ -877,14 +767,7 @@ export default class StageShield
             break;
           }
         }
-        if (
-          [
-            StageShieldElementsStatus.ROTATING,
-            StageShieldElementsStatus.TRANSFORMING,
-            StageShieldElementsStatus.CORNER_MOVING,
-            StageShieldElementsStatus.MOVING,
-          ].includes(this.elementsStatus)
-        ) {
+        if ([StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus)) {
           this.elementsStatus = StageShieldElementsStatus.NONE;
         }
       } else if (!e.ctrlKey && !e.shiftKey) {
@@ -924,13 +807,7 @@ export default class StageShield
    * 绘制完成之后的重绘
    */
   private async _redrawAfterCreated(): Promise<void> {
-    await Promise.all([
-      this.mask.redraw(),
-      this.provisional.redraw(),
-      this.redraw(),
-      this.triggerElementCreated(),
-      this.selection.refresh(),
-    ]);
+    await Promise.all([this.mask.redraw(), this.provisional.redraw(), this.redraw(), this.triggerElementCreated(), this.selection.refresh()]);
   }
 
   /**
@@ -1002,10 +879,7 @@ export default class StageShield
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
   private _selectTopAElement(elements: IElement[]): void {
-    const topAElement = ElementUtils.getTopAElementByPoint(
-      elements,
-      this.cursor.value,
-    );
+    const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
     this.store.deSelectElements(
       this.store.selectedElements.filter(element => {
         if (topAElement && topAElement.isGroup) {
@@ -1063,9 +937,7 @@ export default class StageShield
    */
   calcPressDown(e: MouseEvent): void {
     this._pressDownPosition = this.cursor.transform(e);
-    this._pressDownStageWorldCoord = this.calcWorldCoord(
-      this._pressDownPosition,
-    );
+    this._pressDownStageWorldCoord = this.calcWorldCoord(this._pressDownPosition);
   }
 
   /**
@@ -1085,9 +957,7 @@ export default class StageShield
    */
   calcPressMove(e: MouseEvent): void {
     this._pressMovePosition = this.cursor.transform(e);
-    this._pressMoveStageWorldCoord = this.calcWorldCoord(
-      this._pressMovePosition,
-    );
+    this._pressMoveStageWorldCoord = this.calcWorldCoord(this._pressMovePosition);
   }
 
   /**
@@ -1098,12 +968,7 @@ export default class StageShield
    */
   checkCursorPressMovedALittle(e: MouseEvent): boolean {
     return (
-      Math.abs(
-        this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      ) >= MinCursorMXD ||
-      Math.abs(
-        this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-      ) >= MinCursorMYD
+      Math.abs(this._pressMoveStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD || Math.abs(this._pressMoveStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD
     );
   }
 
@@ -1114,14 +979,7 @@ export default class StageShield
    * @returns
    */
   checkCursorPressUpALittle(e: MouseEvent): boolean {
-    return (
-      Math.abs(
-        this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x,
-      ) >= MinCursorMXD ||
-      Math.abs(
-        this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y,
-      ) >= MinCursorMYD
-    );
+    return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD;
   }
 
   /**
@@ -1159,23 +1017,11 @@ export default class StageShield
   /**
    * 重新绘制所有内容
    */
-  private async _redrawAll(
-    force?:
-      | boolean
-      | { mask?: boolean; provisional?: boolean; shield?: boolean },
-  ): Promise<void> {
+  private async _redrawAll(force?: boolean | { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
     if (isBoolean(force)) {
-      await Promise.all([
-        this.mask.redraw(force),
-        this.provisional.redraw(force),
-        this.redraw(force),
-      ]);
+      await Promise.all([this.mask.redraw(force), this.provisional.redraw(force), this.redraw(force)]);
     } else {
-      await Promise.all([
-        this.mask.redraw(force.mask),
-        this.provisional.redraw(force.provisional),
-        this.redraw(force.shield),
-      ]);
+      await Promise.all([this.mask.redraw(force.mask), this.provisional.redraw(force.provisional), this.redraw(force.shield)]);
     }
   }
 
@@ -1184,11 +1030,7 @@ export default class StageShield
    *
    * @param options
    */
-  private async _redrawAllIfy(options: {
-    mask?: boolean;
-    provisional?: boolean;
-    shield?: boolean;
-  }): Promise<void> {
+  private async _redrawAllIfy(options: { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
     const funcs: Function[] = [];
     if (options.shield) {
       funcs.push(() => this.redraw());
@@ -1219,10 +1061,7 @@ export default class StageShield
    */
   _creatingElementOnMovement(e: MouseEvent): IElement {
     if (this.checkCursorPressMovedALittle(e)) {
-      return this.store.creatingElement([
-        this._pressDownStageWorldCoord,
-        this._pressMoveStageWorldCoord,
-      ]);
+      return this.store.creatingElement([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
     }
   }
 
@@ -1234,10 +1073,7 @@ export default class StageShield
    */
   _updatingArbitraryElementOnMovement(e: MouseEvent): IElement {
     if (this.checkCursorPressMovedALittle(e)) {
-      return this.store.creatingArbitraryElement(
-        this._pressMoveStageWorldCoord,
-        false,
-      );
+      return this.store.creatingArbitraryElement(this._pressMoveStageWorldCoord, false);
     }
   }
 
@@ -1245,16 +1081,10 @@ export default class StageShield
    * 刷新当前舞台世界坐标
    */
   private _refreshStageWorldCoord(e: MouseEvent): void {
-    const point = CommonUtils.getEventPosition(
-      e,
-      this.stageRect,
-      this.stageScale,
-    );
+    const point = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
     this.stageWorldCoord = {
-      x:
-        this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
-      y:
-        this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y),
+      x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
+      y: this._originalStageWorldCoord.y - (point.y - this._pressDownPosition.y),
     };
   }
 
@@ -1297,23 +1127,15 @@ export default class StageShield
    * @param e
    */
   private _handleWheelScale(deltaScale: number, e: MouseEvent): void {
-    const prevCursorPosition = CommonUtils.getEventPosition(
-      e,
-      this.stageRect,
-      this.stageScale,
-    );
-    const cursorCoord = ElementUtils.calcWorldPoint(
-      prevCursorPosition,
-      this.stageCalcParams,
-    );
+    const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
+    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageCalcParams);
     const value = this._checkScale(deltaScale);
     const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
     const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;
     const stageRectCoordX = cursorCoord.x - cursorCoordOffsetX;
     const stageRectCoordY = cursorCoord.y - cursorCoordOffsetY;
     const stageWorldCoordX = stageRectCoordX + this.stageRect.width / 2 / value;
-    const stageWorldCoordY =
-      stageRectCoordY + this.stageRect.height / 2 / value;
+    const stageWorldCoordY = stageRectCoordY + this.stageRect.height / 2 / value;
     this.stageWorldCoord = {
       x: stageWorldCoordX,
       y: stageWorldCoordY,
@@ -1343,14 +1165,7 @@ export default class StageShield
    */
   calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
-    let scale = MathUtils.precise(
-      CommonUtils.calcScale(
-        this.stageRect,
-        { width, height },
-        AutoFitPadding * this.stageScale,
-      ),
-      2,
-    );
+    let scale = MathUtils.precise(CommonUtils.calcScale(this.stageRect, { width, height }, AutoFitPadding * this.stageScale), 2);
     scale = clamp(scale, 0.02, 1);
     return scale;
   }
@@ -1361,11 +1176,7 @@ export default class StageShield
    * @returns
    */
   calcScaleAutoFitValue(): number {
-    const elementsBox = CommonUtils.getBoxPoints(
-      this.store.visibleElements
-        .map(element => element.maxOutlineBoxPoints)
-        .flat(),
-    );
+    const elementsBox = CommonUtils.getBoxPoints(this.store.visibleElements.map(element => element.maxOutlineBoxPoints).flat());
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
 
@@ -1384,11 +1195,7 @@ export default class StageShield
    */
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
-      const center = MathUtils.calcCenter(
-        this.store.visibleElements
-          .map(element => element.rotateOutlineCoords.flat())
-          .flat(),
-      );
+      const center = MathUtils.calcCenter(this.store.visibleElements.map(element => element.rotateOutlineCoords.flat()).flat());
       this.stageWorldCoord = center;
       this.store.refreshStageElements();
       this.setScale(this.calcScaleAutoFitValue());
@@ -1455,10 +1262,7 @@ export default class StageShield
    * @param imageData
    * @param callback
    */
-  async _handleImagePasted(
-    imageData: ImageData,
-    callback?: Function,
-  ): Promise<void> {
+  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);

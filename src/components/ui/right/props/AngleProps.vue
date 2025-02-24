@@ -53,44 +53,19 @@ function setElementsLeanYAngle(value: string) {
   <div class="angle-props right-props">
     <div class="angle-props__title">
       <span class="angle-props__title-text">角度</span>
-      <el-icon
-        :class="['iconfont', 'icon-verbise-flip-horizontal']"
-        v-if="stageStore.flipX"
-      >
-      </el-icon>
+      <el-icon :class="['iconfont', 'icon-verbise-flip-horizontal']" v-if="stageStore.flipX"> </el-icon>
     </div>
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input
-          v-model="aValue"
-          placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
-          type="number"
-          min="-180"
-          max="180"
-          precision="1"
-          @change="setElementsAngle"
-        >
+        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-180" max="180" precision="1" @change="setElementsAngle">
           <template #prepend>A</template>
           <template #append>°</template>
         </el-input>
       </div>
 
-      <div
-        class="angle-props__row-item"
-        v-if="stageStore.primarySelectedElement?.leanYAngleModifyEnable"
-      >
-        <el-input
-          v-model="leanYValue"
-          placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
-          type="number"
-          min="-89"
-          max="89"
-          precision="1"
-          @change="setElementsLeanYAngle"
-        >
+      <div class="angle-props__row-item" v-if="stageStore.primarySelectedElement?.leanYAngleModifyEnable">
+        <el-input v-model="leanYValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-89" max="89" precision="1" @change="setElementsLeanYAngle">
           <template #prepend>LY</template>
           <template #append>°</template>
         </el-input>

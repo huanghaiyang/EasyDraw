@@ -30,10 +30,7 @@ watch(
           :disabled="stageStore.inputDisabled"
           type="number"
           precision="1"
-          @change="
-            value =>
-              stageStore.setElementsPosition({ x: Number(value), y: yValue })
-          "
+          @change="value => stageStore.setElementsPosition({ x: Number(value), y: yValue })"
         >
           <template #prepend>X</template>
           <template #append>px</template>
@@ -47,10 +44,7 @@ watch(
           :disabled="stageStore.inputDisabled"
           type="number"
           precision="1"
-          @change="
-            value =>
-              stageStore.setElementsPosition({ x: xValue, y: Number(value) })
-          "
+          @change="value => stageStore.setElementsPosition({ x: xValue, y: Number(value) })"
         >
           <template #prepend>Y</template>
           <template #append>px</template>

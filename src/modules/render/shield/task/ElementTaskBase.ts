@@ -2,10 +2,7 @@ import RenderTaskBase from "@/modules/render/RenderTaskBase";
 import IElement from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 
-export default abstract class ElementTaskBase
-  extends RenderTaskBase
-  implements IElementTask
-{
+export default abstract class ElementTaskBase extends RenderTaskBase implements IElementTask {
   element: IElement;
   protected _canvas: HTMLCanvasElement;
 

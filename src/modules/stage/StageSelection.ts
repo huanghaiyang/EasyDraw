@@ -83,10 +83,7 @@ export default class StageSelection implements IStageSelection {
    * @param boxRender
    * @returns
    */
-  private _getElementMaskModelProps(
-    element: IElement,
-    boxRender?: boolean,
-  ): Partial<IMaskModel> {
+  private _getElementMaskModelProps(element: IElement, boxRender?: boolean): Partial<IMaskModel> {
     const {
       rotatePoints,
       rotateBoxPoints,
@@ -107,10 +104,7 @@ export default class StageSelection implements IStageSelection {
    * @param elements
    * @returns
    */
-  private _getElementsMaskModels(
-    elements: IElement[],
-    type: DrawerMaskModelTypes,
-  ): IMaskModel[] {
+  private _getElementsMaskModels(elements: IElement[], type: DrawerMaskModelTypes): IMaskModel[] {
     const result: IMaskModel[] = [];
     elements.forEach(element => {
       if (element.isGroupSubject) return;
@@ -128,10 +122,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   private _getRangeElementsMaskModels(): IMaskModel[] {
-    return this._getElementsMaskModels(
-      this.shield.store.rangeElements,
-      DrawerMaskModelTypes.path,
-    );
+    return this._getElementsMaskModels(this.shield.store.rangeElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -140,10 +131,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   private _getTargetElementsMaskModels(): IMaskModel[] {
-    return this._getElementsMaskModels(
-      this.shield.store.targetElements,
-      DrawerMaskModelTypes.path,
-    );
+    return this._getElementsMaskModels(this.shield.store.targetElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -152,10 +140,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   private _getSelectedElementsMaskModels(): IMaskModel[] {
-    return this._getElementsMaskModels(
-      this.shield.store.selectedElements,
-      DrawerMaskModelTypes.path,
-    );
+    return this._getElementsMaskModels(this.shield.store.selectedElements, DrawerMaskModelTypes.path);
   }
 
   /**
@@ -185,13 +170,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   calcSelectionModel(): IMaskModel {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
-    if (
-      element &&
-      element.boxVerticesTransformEnable &&
-      element.model.coords.length > 0
-    ) {
+    const element = this.shield.store.primarySelectedElement || this.rangeElement;
+    if (element && element.boxVerticesTransformEnable && element.model.coords.length > 0) {
       return {
         type: DrawerMaskModelTypes.selection,
         points: element.rotateBoxPoints,
@@ -207,20 +187,10 @@ export default class StageSelection implements IStageSelection {
    */
   calcTransformerModels(): IMaskModel[] {
     const { primarySelectedElement, creatingElements } = this.shield.store;
-    const element =
-      primarySelectedElement || creatingElements[0] || this.rangeElement;
+    const element = primarySelectedElement || creatingElements[0] || this.rangeElement;
 
     if (element && element.model.coords.length > 0) {
-      const {
-        transformerType,
-        angle,
-        leanYAngle,
-        actualAngle,
-        transformers,
-        verticesTransformEnable,
-        flipX,
-        flipY,
-      } = element;
+      const { transformerType, angle, leanYAngle, actualAngle, transformers, verticesTransformEnable, flipX, flipY } = element;
       return this.calcTransformerModelsByPoints(
         transformers,
         {
@@ -244,11 +214,7 @@ export default class StageSelection implements IStageSelection {
    * @param transformerType
    * @returns
    */
-  private calcTransformerModelsByPoints(
-    points: IPoint[],
-    props: Partial<IMaskModel>,
-    transformerType: TransformerTypes,
-  ): IMaskModel[] {
+  private calcTransformerModelsByPoints(points: IPoint[], props: Partial<IMaskModel>, transformerType: TransformerTypes): IMaskModel[] {
     return points.map(point => {
       const model: IMaskModel = {
         point,
@@ -368,15 +334,10 @@ export default class StageSelection implements IStageSelection {
   refreshRangeElement(): void {
     const elements = this.shield.store.selectedElements;
     if (elements.length === 0) {
-      Object.assign(
-        this.rangeElement.model,
-        ElementUtils.createEmptyGroupObject(),
-      );
+      Object.assign(this.rangeElement.model, ElementUtils.createEmptyGroupObject());
     } else {
       if (!this.rangeElement.isRotating && !this.rangeElement.isTransforming) {
-        const coords = CommonUtils.getBoxPoints(
-          elements.map(element => element.rotateCoords).flat(),
-        );
+        const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateCoords).flat());
         Object.assign(this.rangeElement.model, {
           coords,
           boxCoords: cloneDeep(coords),
@@ -414,8 +375,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   tryActiveController(point: IPoint): IController {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
+    const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       const controller = element.getControllerByPoint(point);
       element.setControllersActive(
@@ -435,8 +395,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveController(): IController {
-    const element =
-      this.shield.store.primarySelectedElement || this.rangeElement;
+    const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       return element.getActiveController();
     }

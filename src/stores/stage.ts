@@ -3,20 +3,10 @@ import StageShield from "@/modules/stage/StageShield";
 import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
-import {
-  DefaultElementStyle,
-  DefaultFillStyle,
-  DefaultStrokeStyle,
-  StrokeStyle,
-  StrokeTypes,
-} from "@/styles/ElementStyles";
+import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import { cloneDeep, throttle } from "lodash";
 import { defineStore } from "pinia";
-import {
-  MoveableCreator,
-  PenCreator,
-  RectangleCreator,
-} from "@/types/CreatorDicts";
+import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 // 舞台实例
@@ -135,85 +125,37 @@ export const useStageStore = defineStore("stage", {
       // 监听目标
       shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
       // 监听位置
-      shield.on(
-        ShieldDispatcherNames.positionChanged,
-        throttle(this.onPositionChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), 100));
       // 监听宽度
-      shield.on(
-        ShieldDispatcherNames.widthChanged,
-        throttle(this.onWidthChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
       // 监听高度
-      shield.on(
-        ShieldDispatcherNames.heightChanged,
-        throttle(this.onHeightChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
       // 监听角度
-      shield.on(
-        ShieldDispatcherNames.angleChanged,
-        throttle(this.onAngleChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
       // 监听圆角
-      shield.on(
-        ShieldDispatcherNames.cornersChanged,
-        throttle(this.onCornersChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), 100));
       // 监听X轴翻转
-      shield.on(
-        ShieldDispatcherNames.flipXChanged,
-        throttle(this.onFlipXChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), 100));
       // 监听Y偏移角度
-      shield.on(
-        ShieldDispatcherNames.leanYAngleChanged,
-        throttle(this.onLeanYAngleChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
       // 监听缩放
-      shield.on(
-        ShieldDispatcherNames.scaleChanged,
-        throttle(this.onScaleChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
       // 监听描边
-      shield.on(
-        ShieldDispatcherNames.strokesChanged,
-        throttle(this.onStrokesChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), 100));
       // 监听填充
-      shield.on(
-        ShieldDispatcherNames.fillsChanged,
-        throttle(this.onFillsChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), 100));
       // 监听字体大小
-      shield.on(
-        ShieldDispatcherNames.fontSizeChanged,
-        throttle(this.onFontSizeChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), 100));
       // 监听字体
-      shield.on(
-        ShieldDispatcherNames.fontFamilyChanged,
-        throttle(this.onFontFamilyChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
       // 监听文本对齐方式
-      shield.on(
-        ShieldDispatcherNames.textAlignChanged,
-        throttle(this.onTextAlignChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
       // 监听文本基线
-      shield.on(
-        ShieldDispatcherNames.textBaselineChanged,
-        throttle(this.onTextBaselineChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
       // 监听宽高比锁定
-      shield.on(
-        ShieldDispatcherNames.ratioLockedChanged,
-        throttle(this.onRatioLockedChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
       // 监听绘制工具
-      shield.on(
-        ShieldDispatcherNames.creatorChanged,
-        throttle(this.onCreatorChanged.bind(this), 100),
-      );
+      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -257,29 +199,12 @@ export const useStageStore = defineStore("stage", {
       this.selectedElements = selectedElements;
       if (!!this.selectedElements.length) {
         // 获取组合或者组件
-        const element: IElement = ElementUtils.getAncestorGroup(
-          this.selectedElements,
-        );
+        const element: IElement = ElementUtils.getAncestorGroup(this.selectedElements);
         if (!element) {
           Object.assign(this, cloneDeep(DefaultStage));
           return;
         }
-        const {
-          position,
-          width,
-          height,
-          angle,
-          corners,
-          flipX,
-          leanYAngle,
-          strokes,
-          fills,
-          fontSize,
-          fontFamily,
-          textAlign,
-          textBaseline,
-          isRatioLocked,
-        } = element;
+        const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, textAlign, textBaseline, isRatioLocked } = element;
         // 组件位置
         this.onPositionChanged(element, position);
         // 组件宽度

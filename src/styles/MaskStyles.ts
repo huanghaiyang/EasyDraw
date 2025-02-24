@@ -30,8 +30,7 @@ export const SelectionIndicatorTextAlign = "center";
 export const SelectionIndicatorTextBaseline = "middle";
 
 // 旋转控制器边距
-export const RotateControllerMargin =
-  TransformerSize + Math.sqrt(Math.pow(RotationSize / 2, 2));
+export const RotateControllerMargin = TransformerSize + Math.sqrt(Math.pow(RotationSize / 2, 2));
 
 export const SelectionStyle: ElementStyles = {
   strokes: [

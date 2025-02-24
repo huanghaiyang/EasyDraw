@@ -1,10 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import {
-  FreedomCreators,
-  CursorCreators,
-  ShapeCreators,
-} from "@/types/CreatorDicts";
+import { FreedomCreators, CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
 import { computed } from "vue";
 
 const emits = defineEmits(["select"]);
@@ -12,9 +8,7 @@ const stageStore = useStageStore();
 const currentCreator = computed(() => stageStore.currentCreator);
 const currentCursorCreator = computed(() => stageStore.currentCursorCreator);
 const currentShapeCreator = computed(() => stageStore.currentShapeCreator);
-const currentArbitraryCreator = computed(
-  () => stageStore.currentArbitraryCreator,
-);
+const currentArbitraryCreator = computed(() => stageStore.currentArbitraryCreator);
 
 const select = item => {
   emits("select", item);
@@ -22,44 +16,23 @@ const select = item => {
 </script>
 <template>
   <div class="create-bar">
-    <div
-      :class="[
-        'tool-item',
-        { selected: currentCursorCreator.category === currentCreator.category },
-      ]"
-      @click="select(currentCursorCreator)"
-    >
+    <div :class="['tool-item', { selected: currentCursorCreator.category === currentCreator.category }]" @click="select(currentCursorCreator)">
       <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="CursorCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="CursorCreators" :current-creator="currentCreator" :select="select" />
 
-    <div
-      :class="[
-        'tool-item',
-        { selected: currentShapeCreator.category === currentCreator.category },
-      ]"
-      @click="select(currentShapeCreator)"
-    >
+    <div :class="['tool-item', { selected: currentShapeCreator.category === currentCreator.category }]" @click="select(currentShapeCreator)">
       <el-icon :class="['iconfont', currentShapeCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="ShapeCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="ShapeCreators" :current-creator="currentCreator" :select="select" />
 
     <div
       :class="[
         'tool-item',
         {
-          selected:
-            currentArbitraryCreator.category === currentCreator.category,
+          selected: currentArbitraryCreator.category === currentCreator.category,
         },
       ]"
       @click="select(currentArbitraryCreator)"
@@ -67,11 +40,7 @@ const select = item => {
       <el-icon :class="['iconfont', currentArbitraryCreator.icon]"></el-icon>
     </div>
 
-    <creator-dropdown
-      :creators="FreedomCreators"
-      :current-creator="currentCreator"
-      :select="select"
-    />
+    <creator-dropdown :creators="FreedomCreators" :current-creator="currentCreator" :select="select" />
   </div>
 </template>
 <style lang="less">

@@ -31,15 +31,7 @@ watch(
 
     <div class="size-props__row">
       <div class="angle-props__row-item">
-        <el-input
-          v-model="wValue"
-          placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
-          min="2"
-          type="number"
-          precision="1"
-          @change="value => stageStore.setElementsWidth(Number(value))"
-        >
+        <el-input v-model="wValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" min="2" type="number" precision="1" @change="value => stageStore.setElementsWidth(Number(value))">
           <template #prepend>W</template>
           <template #append>px</template>
         </el-input>
@@ -48,10 +40,7 @@ watch(
         <el-input
           v-model="hValue"
           placeholder="输入数字"
-          :disabled="
-            stageStore.inputDisabled ||
-            !stageStore.primarySelectedElement?.heightModifyEnable
-          "
+          :disabled="stageStore.inputDisabled || !stageStore.primarySelectedElement?.heightModifyEnable"
           min="2"
           type="number"
           precision="1"
@@ -61,22 +50,9 @@ watch(
           <template #append>px</template>
         </el-input>
       </div>
-      <el-icon
-        v-if="
-          !!stageStore.primarySelectedElement &&
-          stageStore.primarySelectedElement.ratioLockedEnable
-        "
-      >
-        <Unlock
-          v-if="!stageStore.isRatioLocked"
-          @click="stageStore.setRatioLocked(true)"
-          title="锁定宽高比"
-        />
-        <Lock
-          v-else
-          @click="stageStore.setRatioLocked(false)"
-          title="解除宽高比锁定"
-        />
+      <el-icon v-if="!!stageStore.primarySelectedElement && stageStore.primarySelectedElement.ratioLockedEnable">
+        <Unlock v-if="!stageStore.isRatioLocked" @click="stageStore.setRatioLocked(true)" title="锁定宽高比" />
+        <Lock v-else @click="stageStore.setRatioLocked(false)" title="解除宽高比锁定" />
       </el-icon>
     </div>
   </div>

@@ -103,9 +103,7 @@ export default class ElementLine extends Element implements IElementLine {
   private refreshBentOutline() {
     this._outerPoints = this.calcOuterPoints();
     this._outerCoords = this.calcOuterCoords();
-    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(
-      this._outerPoints.flat(),
-    );
+    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(this._outerPoints.flat());
   }
 
   /**
@@ -123,10 +121,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   calcOuterPoints(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
-      return PolygonUtils.calcBentLineOuterVertices(
-        this.rotatePoints,
-        stroke.width / 2,
-      );
+      return PolygonUtils.calcBentLineOuterVertices(this.rotatePoints, stroke.width / 2);
     });
   }
 
@@ -137,10 +132,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   calcOuterCoords(): IPoint[][] {
     return this.model.styles.strokes.map(stroke => {
-      return PolygonUtils.calcBentLineOuterVertices(
-        this.rotateCoords,
-        stroke.width / 2,
-      );
+      return PolygonUtils.calcBentLineOuterVertices(this.rotateCoords, stroke.width / 2);
     });
   }
 
@@ -158,9 +150,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   getAngle(): number {
-    return ElementUtils.fixAngle(
-      MathUtils.calcAngle(this.startCoord, this.endCoord) + 90,
-    );
+    return ElementUtils.fixAngle(MathUtils.calcAngle(this.startCoord, this.endCoord) + 90);
   }
 
   /**
@@ -171,12 +161,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   isContainsPoint(point: IPoint): boolean {
     return some(this.model.styles.strokes, stroke => {
-      return MathUtils.isPointClosestSegment(
-        point,
-        this.startRotatePathPoint,
-        this.endRotatePathPoint,
-        LineClosestMargin + stroke.width / 2 / this.shield.stageScale,
-      );
+      return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + stroke.width / 2 / this.shield.stageScale);
     });
   }
 
@@ -209,14 +194,9 @@ export default class ElementLine extends Element implements IElementLine {
    * @param offset
    */
   doVerticesTransform(offset: IPoint): void {
-    const index = this._transformers.findIndex(
-      transformer => transformer.isActive,
-    );
+    const index = this._transformers.findIndex(transformer => transformer.isActive);
     if (index !== -1) {
-      const lockPoint =
-        this._originalTransformerPoints[
-          CommonUtils.getNextIndexOfArray(2, index, 1)
-        ];
+      const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
       // 当前拖动的点的原始位置
       const currentPointOriginal = this._originalTransformerPoints[index];
       // 根据不动点进行形变
@@ -239,11 +219,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @param value
    */
   setWidth(value: number): number[][] {
-    const newCoord = MathUtils.calcTargetPoint(
-      this.startCoord,
-      value,
-      this.angle - 90,
-    );
+    const newCoord = MathUtils.calcTargetPoint(this.startCoord, value, this.angle - 90);
     this.model.coords[1] = newCoord;
     this.model.width = value;
     this.refresh();
@@ -257,16 +233,8 @@ export default class ElementLine extends Element implements IElementLine {
    */
   setAngle(value: number): void {
     const center = MathUtils.calcCenter(this.model.coords);
-    const startCoord = MathUtils.calcTargetPoint(
-      center,
-      this.width / 2,
-      value + 90,
-    );
-    const endCoord = MathUtils.calcTargetPoint(
-      center,
-      this.width / 2,
-      value - 90,
-    );
+    const startCoord = MathUtils.calcTargetPoint(center, this.width / 2, value + 90);
+    const endCoord = MathUtils.calcTargetPoint(center, this.width / 2, value - 90);
     this.model.coords = [startCoord, endCoord];
     this.refresh();
   }

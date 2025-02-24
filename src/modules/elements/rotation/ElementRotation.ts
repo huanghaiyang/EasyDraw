@@ -6,10 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { RotationSize } from "@/styles/MaskStyles";
 import PointController from "@/modules/handler/controller/PointController";
 
-export default class ElementRotation
-  extends PointController
-  implements IElementRotation
-{
+export default class ElementRotation extends PointController implements IElementRotation {
   // 宽度
   width: number = RotationSize;
   // 高度
@@ -39,9 +36,7 @@ export default class ElementRotation
         width: this.width / stageScale,
         height: this.height / stageScale,
       },
-    ).map(point =>
-      MathUtils.rotateWithCenter(point, this.host.viewAngle, { x, y }),
-    );
+    ).map(point => MathUtils.rotateWithCenter(point, this.host.viewAngle, { x, y }));
   }
 
   /**

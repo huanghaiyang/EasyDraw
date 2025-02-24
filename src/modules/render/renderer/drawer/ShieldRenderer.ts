@@ -5,10 +5,7 @@ import ElementTaskClear from "@/modules/render/shield/task/ElementTaskClear";
 import IStageShield from "@/types/IStageShield";
 import { IShieldRenderer } from "@/types/IStageRenderer";
 
-export default class ShieldRenderer
-  extends BaseRenderer<IStageShield>
-  implements IShieldRenderer
-{
+export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
   /**
    * 绘制舞台内容
    *

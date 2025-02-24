@@ -11,10 +11,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 
-export default class ElementArbitrary
-  extends Element
-  implements IElementArbitrary
-{
+export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
   tailCoordIndex: number;
   // 编辑坐标索引
@@ -50,13 +47,7 @@ export default class ElementArbitrary
    */
   get activeCoordIndex(): number {
     // 如果组件处于创建状态，则返回下一个点索引
-    if (
-      [
-        ElementStatus.startCreating,
-        ElementStatus.creating,
-        ElementStatus.initialed,
-      ].includes(this.status)
-    ) {
+    if ([ElementStatus.startCreating, ElementStatus.creating, ElementStatus.initialed].includes(this.status)) {
       // 如果坐标点索引小于坐标点数量，则返回下一个点索引
       if (this.model.coords.length > this.tailCoordIndex + 1) {
         return this.tailCoordIndex + 1;
@@ -92,7 +83,7 @@ export default class ElementArbitrary
    *
    * @param status
    */
-  protected __setStatus(status: ElementStatus): void {
+  __setStatus(status: ElementStatus): void {
     super.__setStatus(status);
     if (status === ElementStatus.finished) {
       this.tailCoordIndex = -1;
@@ -106,11 +97,7 @@ export default class ElementArbitrary
    */
   calcOuterPaths(): IPoint[][][] {
     return this.strokePoints.map((points: IPoint[], index: number) => {
-      return ElementUtils.calcArbitraryBorderRegions(
-        points,
-        this.model.styles.strokes[index],
-        this.model.isFold,
-      );
+      return ElementUtils.calcArbitraryBorderRegions(points, this.model.styles.strokes[index], this.model.isFold);
     });
   }
 
@@ -121,11 +108,7 @@ export default class ElementArbitrary
    */
   calcOuterWorldPaths(): IPoint[][][] {
     return this.strokeCoords.map((points: IPoint[], index: number) => {
-      return ElementUtils.calcArbitraryBorderRegions(
-        points,
-        this.model.styles.strokes[index],
-        this.model.isFold,
-      );
+      return ElementUtils.calcArbitraryBorderRegions(points, this.model.styles.strokes[index], this.model.isFold);
     });
   }
 
@@ -148,7 +131,7 @@ export default class ElementArbitrary
   /**
    * 刷新边框线段点坐标数据
    */
-  protected _refreshOutlinePoints(): void {
+  _refreshOutlinePoints(): void {
     this.refreshOuters();
     super._refreshOutlinePoints();
   }
@@ -163,11 +146,7 @@ export default class ElementArbitrary
     let outerPaths: IPoint[][][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
       outerPaths = this.strokePoints.map((points: IPoint[]) => {
-        return ElementUtils.calcArbitraryBorderRegions(
-          points,
-          { width: LineClosestMinWidth / this.shield.stageScale },
-          this.model.isFold,
-        );
+        return ElementUtils.calcArbitraryBorderRegions(points, { width: LineClosestMinWidth / this.shield.stageScale }, this.model.isFold);
       });
     } else {
       outerPaths = this.outerPaths;
@@ -251,9 +230,7 @@ export default class ElementArbitrary
     super.setControllersActive(controllers, isActive);
     controllers.forEach(controller => {
       if (controller instanceof VerticesTransformer) {
-        const index = this._transformers.findIndex(
-          item => item.id === controller.id,
-        );
+        const index = this._transformers.findIndex(item => item.id === controller.id);
         if (index === -1) return;
         if (isActive) {
           this.activeEditingCoord(index);
@@ -291,28 +268,9 @@ export default class ElementArbitrary
         y: points[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxPoints[0];
-      this.model.coords = MathUtils.batchPrecisePoint(
-        ElementUtils.calcCoordsByTransPoints(
-          points,
-          this.angles,
-          lockPoint,
-          this.shield.stageCalcParams,
-        ),
-        1,
-      );
+      this.model.coords = MathUtils.batchPrecisePoint(ElementUtils.calcCoordsByTransPoints(points, this.angles, lockPoint, this.shield.stageCalcParams), 1);
       this.model.boxCoords = MathUtils.batchPrecisePoint(
-        MathUtils.batchLeanWithCenter(
-          CommonUtils.getBoxPoints(
-            MathUtils.calcUnLeanByPoints(
-              this.model.coords,
-              0,
-              this.model.leanYAngle,
-            ),
-          ),
-          0,
-          this.model.leanYAngle,
-          this.calcCenterCoord(),
-        ),
+        MathUtils.batchLeanWithCenter(CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)), 0, this.model.leanYAngle, this.calcCenterCoord()),
         1,
       );
     }

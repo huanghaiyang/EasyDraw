@@ -4,11 +4,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementRect from "@/modules/elements/ElementRect";
 import Element from "@/modules/elements/Element";
 import MathUtils from "@/utils/MathUtils";
-import IElement, {
-  AngleModel,
-  DefaultAngleModel,
-  ElementObject,
-} from "@/types/IElement";
+import IElement, { AngleModel, DefaultAngleModel, ElementObject } from "@/types/IElement";
 import { IElementTask } from "@/types/IRenderTask";
 import { CreatorTypes } from "@/types/Creator";
 import { SelectionRotationMargin } from "@/styles/MaskStyles";
@@ -103,10 +99,7 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcStageRelativePoints(
-    worldCoords: IPoint[],
-    params: StageCalcParams,
-  ): IPoint[] {
+  static calcStageRelativePoints(worldCoords: IPoint[], params: StageCalcParams): IPoint[] {
     return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, params));
   }
 
@@ -117,10 +110,7 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcStageRelativePoint(
-    worldCoord: IPoint,
-    params: StageCalcParams,
-  ): IPoint {
+  static calcStageRelativePoint(worldCoord: IPoint, params: StageCalcParams): IPoint {
     const { scale, rect, worldCoord: center } = params;
     return {
       x: worldCoord.x + rect.width / 2 / scale - center.x,
@@ -160,10 +150,7 @@ export default class ElementUtils {
    * @param creatorType
    * @returns
    */
-  static calcCreatorPoints(
-    points: IPoint[],
-    creatorType: CreatorTypes,
-  ): IPoint[] {
+  static calcCreatorPoints(points: IPoint[], creatorType: CreatorTypes): IPoint[] {
     switch (creatorType) {
       case CreatorTypes.rectangle:
       case CreatorTypes.image:
@@ -239,11 +226,7 @@ export default class ElementUtils {
       rotation: { angle, scale },
       model: { height },
     } = element;
-    return MathUtils.calcTargetPoint(
-      center,
-      height / 2 + SelectionRotationMargin * scale,
-      angle,
-    );
+    return MathUtils.calcTargetPoint(center, height / 2 + SelectionRotationMargin * scale, angle);
   }
 
   /**
@@ -302,10 +285,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.line: {
         return {
-          width: MathUtils.precise(
-            MathUtils.calcDistance(coords[0], coords[1]),
-            2,
-          ),
+          width: MathUtils.precise(MathUtils.calcDistance(coords[0], coords[1]), 2),
           height: 0,
         };
       }
@@ -334,21 +314,14 @@ export default class ElementUtils {
    * @param options
    * @returns
    */
-  static calcOutlinePoints(
-    points: IPoint[],
-    strokeType: StrokeTypes,
-    strokeWidth: number,
-    options: RenderParams,
-  ): IPoint[] {
+  static calcOutlinePoints(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
     if (strokeWidth && strokeType !== StrokeTypes.inside) {
       let r = strokeWidth / 2;
       if (strokeType === StrokeTypes.outside) {
         r = strokeWidth;
       }
       const { flipX, flipY } = options;
-      return flipX !== flipY
-        ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options)
-        : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
+      return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options) : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
     }
     return points;
   }
@@ -362,25 +335,11 @@ export default class ElementUtils {
    * @param padding
    * @returns
    */
-  static calcRectangleCoordsInStage(
-    width: number,
-    height: number,
-    params: StageCalcParams,
-    padding: number = 0,
-  ): IPoint[] {
-    let { width: innerWidth, height: innerHeight } =
-      CommonUtils.calcRectangleSizeInRect(
-        width,
-        height,
-        CommonUtils.scaleRect(params.rect, 1 / params.scale),
-        padding / params.scale,
-      );
+  static calcRectangleCoordsInStage(width: number, height: number, params: StageCalcParams, padding: number = 0): IPoint[] {
+    let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(params.rect, 1 / params.scale), padding / params.scale);
     innerWidth = MathUtils.precise(innerWidth * params.scale, 1);
     innerHeight = MathUtils.precise(innerHeight * params.scale, 1);
-    const points = CommonUtils.calcCenterInnerRectPoints(
-      { width: innerWidth, height: innerHeight },
-      params.rect,
-    );
+    const points = CommonUtils.calcCenterInnerRectPoints({ width: innerWidth, height: innerHeight }, params.rect);
     return ElementUtils.calcWorldPoints(points, params);
   }
 
@@ -392,28 +351,16 @@ export default class ElementUtils {
    * @param isFold
    * @returns
    */
-  static calcNoFoldArbitraryBorderRegions(
-    points: IPoint[],
-    strokeStyle: StrokeStyle,
-  ): IPoint[][] {
+  static calcNoFoldArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
     const { width } = strokeStyle;
     const result: IPoint[][] = [];
     points.forEach((current, index) => {
       if (index < points.length - 1) {
         const next = points[index + 1];
-        result.push(
-          PolygonUtils.calcBentLineOuterVertices([current, next], width / 2),
-        );
+        result.push(PolygonUtils.calcBentLineOuterVertices([current, next], width / 2));
         if (index !== 0) {
           const prev = points[index - 1];
-          result.push(
-            ElementUtils.calc3PArbitraryBorderRegions(
-              prev,
-              current,
-              next,
-              strokeStyle,
-            ),
-          );
+          result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, strokeStyle));
         }
       }
     });
@@ -427,26 +374,14 @@ export default class ElementUtils {
    * @param styles
    * @returns
    */
-  static calcFoldArbitraryBorderRegions(
-    points: IPoint[],
-    strokeStyle: StrokeStyle,
-  ): IPoint[][] {
+  static calcFoldArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
     const { width } = strokeStyle;
     const result: IPoint[][] = [];
     points.forEach((current, index) => {
       const prev = CommonUtils.getPrevOfArray(points, index);
       const next = CommonUtils.getNextOfArray(points, index);
-      result.push(
-        PolygonUtils.calcBentLineOuterVertices([current, next], width / 2),
-      );
-      result.push(
-        ElementUtils.calc3PArbitraryBorderRegions(
-          prev,
-          current,
-          next,
-          strokeStyle,
-        ),
-      );
+      result.push(PolygonUtils.calcBentLineOuterVertices([current, next], width / 2));
+      result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, strokeStyle));
     });
     return result;
   }
@@ -459,13 +394,8 @@ export default class ElementUtils {
    * @param isFold
    * @returns
    */
-  static calcArbitraryBorderRegions(
-    points: IPoint[],
-    strokeStyle: StrokeStyle,
-    isFold: boolean,
-  ): IPoint[][] {
-    if (isFold)
-      return ElementUtils.calcFoldArbitraryBorderRegions(points, strokeStyle);
+  static calcArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle, isFold: boolean): IPoint[][] {
+    if (isFold) return ElementUtils.calcFoldArbitraryBorderRegions(points, strokeStyle);
     return ElementUtils.calcNoFoldArbitraryBorderRegions(points, strokeStyle);
   }
 
@@ -477,12 +407,7 @@ export default class ElementUtils {
    * @param next
    * @param styles
    */
-  static calc3PArbitraryBorderRegions(
-    prev: IPoint,
-    current: IPoint,
-    next: IPoint,
-    strokeStyle: StrokeStyle,
-  ): IPoint[] {
+  static calc3PArbitraryBorderRegions(prev: IPoint, current: IPoint, next: IPoint, strokeStyle: StrokeStyle): IPoint[] {
     // 描边宽度
     const { width } = strokeStyle;
     // 是否顺时针
@@ -496,23 +421,13 @@ export default class ElementUtils {
     // 计算三角形第三边长度
     const side3Length = MathUtils.calcTriangleSide3By2(aAngle, width / 2);
     // 计算三角形第三边终点
-    const point = MathUtils.calcTargetPoint(
-      current,
-      side3Length,
-      pcAngle + (isClockwise ? -aAngle : aAngle),
-    );
+    const point = MathUtils.calcTargetPoint(current, side3Length, pcAngle + (isClockwise ? -aAngle : aAngle));
     // 计算三角形区域
     const region: IPoint[] = [];
     region.push(current);
     region.push(MathUtils.calcTargetPoint(current, width / 2, pcAngle - 90));
     region.push(point);
-    region.push(
-      MathUtils.calcTargetPoint(
-        current,
-        width / 2,
-        MathUtils.calcAngle(next, current) + 90,
-      ),
-    );
+    region.push(MathUtils.calcTargetPoint(current, width / 2, MathUtils.calcAngle(next, current) + 90));
     return region;
   }
 
@@ -525,18 +440,9 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcCoordsByTransPoints(
-    rotatePoints: IPoint[],
-    angles: Partial<AngleModel>,
-    lockPoint: IPoint,
-    params: StageCalcParams,
-  ): IPoint[] {
+  static calcCoordsByTransPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(
-      rotatePoints.map(point =>
-        MathUtils.transWithCenter(point, angles, lockPoint, true),
-      ),
-    );
+    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.transWithCenter(point, angles, lockPoint, true)));
     // 计算旋转后的中心点
     center = MathUtils.transWithCenter(center, angles, lockPoint);
     // 计算中心点世界坐标
@@ -544,9 +450,7 @@ export default class ElementUtils {
     // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
-    return rotateCoords.map(point =>
-      MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord),
-    );
+    return rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord));
   }
 
   /**
@@ -558,18 +462,9 @@ export default class ElementUtils {
    * @param params
    * @returns
    */
-  static calcCoordsByRotatePoints(
-    rotatePoints: IPoint[],
-    angle: number,
-    lockPoint: IPoint,
-    params: StageCalcParams,
-  ): IPoint[] {
+  static calcCoordsByRotatePoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(
-      rotatePoints.map(point =>
-        MathUtils.rotateWithCenter(point, -angle, lockPoint),
-      ),
-    );
+    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateWithCenter(point, -angle, lockPoint)));
     // 计算旋转后的中心点
     center = MathUtils.rotateWithCenter(center, angle, lockPoint);
     // 计算中心点世界坐标
@@ -577,9 +472,7 @@ export default class ElementUtils {
     // 计算旋转后的坐标
     const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
     // 计算旋转后的坐标
-    return rotateCoords.map(point =>
-      MathUtils.rotateWithCenter(point, -angle, newCenterCoord),
-    );
+    return rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angle, newCenterCoord));
   }
 
   /**
@@ -591,20 +484,11 @@ export default class ElementUtils {
    * @param angles
    * @returns
    */
-  static normalizeMatrixPoint(
-    point: IPoint,
-    matrix: number[][],
-    lockPoint: IPoint,
-    angles: Partial<AngleModel>,
-  ): IPoint {
+  static normalizeMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
     // 坐标重新按照角度反向偏转
     point = MathUtils.transWithCenter(point, angles, lockPoint, true);
     // 以不动点为圆心，计算形变
-    const [x, y] = multiply(matrix, [
-      point.x - lockPoint.x,
-      point.y - lockPoint.y,
-      1,
-    ]);
+    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
     // 重新计算坐标
     return { x: x + lockPoint.x, y: y + lockPoint.y };
   }
@@ -618,19 +502,9 @@ export default class ElementUtils {
    * @param angles
    * @returns
    */
-  static calcMatrixPoint(
-    point: IPoint,
-    matrix: number[][],
-    lockPoint: IPoint,
-    angles: Partial<AngleModel>,
-  ): IPoint {
+  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
     // 还原并计算
-    const normalizedPoint = ElementUtils.normalizeMatrixPoint(
-      point,
-      matrix,
-      lockPoint,
-      angles,
-    );
+    const normalizedPoint = ElementUtils.normalizeMatrixPoint(point, matrix, lockPoint, angles);
     // 坐标重新按照角度偏转
     return MathUtils.transWithCenter(normalizedPoint, angles, lockPoint);
   }
@@ -644,15 +518,8 @@ export default class ElementUtils {
    * @param angles
    * @returns
    */
-  static calcMatrixPoints(
-    points: IPoint[],
-    matrix: number[][],
-    lockPoint: IPoint,
-    angles: Partial<AngleModel>,
-  ): IPoint[] {
-    return points.map(point =>
-      ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles),
-    );
+  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint[] {
+    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles));
   }
 
   /**

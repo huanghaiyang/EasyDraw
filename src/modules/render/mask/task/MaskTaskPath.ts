@@ -11,11 +11,7 @@ export default class MaskTaskPath extends MaskTaskBase {
   async run(): Promise<void> {
     const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
-    if (
-      [DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(
-        this.data.type,
-      )
-    ) {
+    if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.data.type)) {
       specialStyles.fills = [
         {
           colorOpacity: 0,
@@ -32,10 +28,7 @@ export default class MaskTaskPath extends MaskTaskBase {
         width: width * this.data.scale,
       },
       {
-        isFold:
-          typeof this.data.element?.isFold === "undefined"
-            ? true
-            : this.data.element?.isFold,
+        isFold: typeof this.data.element?.isFold === "undefined" ? true : this.data.element?.isFold,
       },
     );
   }

@@ -34,23 +34,11 @@ export default class ElementTaskRect extends ElementTaskBase {
     rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
 
     styles.fills.forEach(fillStyle => {
-      CanvasUtils.drawInnerArcPathFillWithScale(
-        this.canvas,
-        rect,
-        arcFillPoints,
-        fillStyle,
-        options,
-      );
+      CanvasUtils.drawInnerArcPathFillWithScale(this.canvas, rect, arcFillPoints, fillStyle, options);
     });
 
     arcPoints.forEach((points, index) => {
-      CanvasUtils.drawArcPathStrokeWidthScale(
-        this.canvas,
-        points,
-        rect,
-        styles.strokes[index],
-        options,
-      );
+      CanvasUtils.drawArcPathStrokeWidthScale(this.canvas, points, rect, styles.strokes[index], options);
     });
   }
 }

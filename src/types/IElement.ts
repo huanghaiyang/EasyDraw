@@ -5,12 +5,7 @@
  */
 import { ElementStatus, IPoint, ISize } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import {
-  ElementStyles,
-  FillStyle,
-  StrokeStyle,
-  StrokeTypes,
-} from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -568,12 +563,7 @@ export default interface IElement {
    * @param scaleY Y轴缩放值
    * @param group 组合角度
    */
-  scaleBy(
-    center: IPoint,
-    scaleX: number,
-    scaleY: number,
-    group?: Partial<AngleModel>,
-  ): void;
+  scaleBy(center: IPoint, scaleX: number, scaleY: number, group?: Partial<AngleModel>): void;
 
   /**
    * 旋转
@@ -618,10 +608,7 @@ export default interface IElement {
    * @param options 刷新选项
    * @param subOptions 子选项
    */
-  refresh(
-    options?: RefreshOptions,
-    subOptions?: { angles?: RefreshAnglesOptions },
-  ): void;
+  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void;
 
   /**
    * 是否包含点
@@ -809,12 +796,7 @@ export default interface IElement {
    * @param groupAngle 组合角度
    * @param center 中心点坐标
    */
-  leanYBy(
-    value: number,
-    prevValue: number,
-    groupAngle: number,
-    center: IPoint,
-  ): void;
+  leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void;
 
   /**
    * 刷新旋转

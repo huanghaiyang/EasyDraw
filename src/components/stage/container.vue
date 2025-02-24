@@ -7,9 +7,7 @@ import { CreatorTypes } from "@/types/Creator";
 
 const stageStore = useStageStore();
 const stageRef = ref<HTMLElement | null>(null);
-const stageShieldRef = ref<
-  InstanceType<typeof StageShieldVue> & StageShieldInstance
->();
+const stageShieldRef = ref<InstanceType<typeof StageShieldVue> & StageShieldInstance>();
 const handleCreatorSelect = creator => {
   const { type } = creator;
   if (type !== CreatorTypes.image) {

@@ -1,10 +1,6 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
-import {
-  IElementRect,
-  RefreshAnglesOptions,
-  RefreshOptions,
-} from "@/types/IElement";
+import { IElementRect, RefreshAnglesOptions, RefreshOptions } from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CornerController from "@/modules/handler/controller/CornerController";
@@ -157,16 +153,9 @@ export default class ElementRect extends Element implements IElementRect {
    * @param rotateBoxCoords
    * @returns
    */
-  private _getVerticalIntersection(
-    rCoord: IPoint,
-    rotateBoxCoords: IPoint[],
-  ): { coords: IPoint[]; indexes: number[][] } {
+  private _getVerticalIntersection(rCoord: IPoint, rotateBoxCoords: IPoint[]): { coords: IPoint[]; indexes: number[][] } {
     // 计算控制点与矩形的垂直交点
-    const coords = MathUtils.calcParallelogramVerticalIntersectionPoints(
-      rCoord,
-      rotateBoxCoords,
-      true,
-    );
+    const coords = MathUtils.calcParallelogramVerticalIntersectionPoints(rCoord, rotateBoxCoords, true);
     const indexes: number[][] = [
       [0, 1],
       [1, 2],
@@ -183,14 +172,8 @@ export default class ElementRect extends Element implements IElementRect {
    * @param rotateBoxCoords
    * @returns
    */
-  private _getCrossPointsOfParallelLines(
-    rCoord: IPoint,
-    rotateBoxCoords: IPoint[],
-  ): { coords: IPoint[]; indexes: number[][] } {
-    const coords = MathUtils.calcCrossPointsOfParallelLines(
-      rCoord,
-      rotateBoxCoords,
-    );
+  private _getCrossPointsOfParallelLines(rCoord: IPoint, rotateBoxCoords: IPoint[]): { coords: IPoint[]; indexes: number[][] } {
+    const coords = MathUtils.calcCrossPointsOfParallelLines(rCoord, rotateBoxCoords);
     const indexes: number[][] = [
       [3, 0],
       [0, 1],
@@ -232,34 +215,26 @@ export default class ElementRect extends Element implements IElementRect {
         start = boxCoords[index];
         end = boxCoords[index];
       } else {
-        const { coords: crossPoints, indexes } = this._getVerticalIntersection(
-          rCoord,
-          boxCoords,
-        );
+        const { coords: crossPoints, indexes } = this._getVerticalIntersection(rCoord, boxCoords);
         start = crossPoints[indexes[index][0]];
         end = crossPoints[indexes[index][1]];
+        // 平行线无交点
+        if (!start) {
+          start = boxCoords[index];
+        }
+        if (!end) {
+          end = boxCoords[index];
+        }
       }
-      start = ElementUtils.calcStageRelativePoint(
-        start,
-        this.shield.stageCalcParams,
-      );
-      end = ElementUtils.calcStageRelativePoint(
-        end,
-        this.shield.stageCalcParams,
-      );
-      controller = ElementUtils.calcStageRelativePoint(
-        controller,
-        this.shield.stageCalcParams,
-      );
+      start = ElementUtils.calcStageRelativePoint(start, this.shield.stageCalcParams);
+      end = ElementUtils.calcStageRelativePoint(end, this.shield.stageCalcParams);
+      controller = ElementUtils.calcStageRelativePoint(controller, this.shield.stageCalcParams);
       result.push({
         start,
         controller,
         end,
         value,
-        corner: ElementUtils.calcStageRelativePoint(
-          rCoord,
-          this.shield.stageCalcParams,
-        ),
+        corner: ElementUtils.calcStageRelativePoint(rCoord, this.shield.stageCalcParams),
       });
     });
     return result;
@@ -273,15 +248,8 @@ export default class ElementRect extends Element implements IElementRect {
    * @returns
    */
   calcCornerCoord(index: number, real?: boolean): IPoint {
-    const value = real
-      ? this.normalizeCorners[index]
-      : this.visualCorners[index];
-    const coord = MathUtils.leanWithCenter(
-      this.model.boxCoords[index],
-      this.model.leanXAngle,
-      -this.model.leanYAngle,
-      this.centerCoord,
-    );
+    const value = real ? this.normalizeCorners[index] : this.visualCorners[index];
+    const coord = MathUtils.leanWithCenter(this.model.boxCoords[index], this.model.leanXAngle, -this.model.leanYAngle, this.centerCoord);
     return this.calcCornerCoordBy(coord, index, value);
   }
 
@@ -322,31 +290,19 @@ export default class ElementRect extends Element implements IElementRect {
   calcCornerPoint(index: number, real?: boolean): IPoint {
     const value = this.visualCorners[index];
     const coord = this.calcCornerCoord(index, real);
-    let point = ElementUtils.calcStageRelativePoint(
-      coord,
-      this.shield.stageCalcParams,
-    );
+    let point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
     point = MathUtils.transWithCenter(point, this.angles, this.center);
-    const { coords: crossPoints, indexes } =
-      this._getCrossPointsOfParallelLines(point, this.rotateBoxPoints);
+    const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(point, this.rotateBoxPoints);
     const start = crossPoints[indexes[index][0]];
     const end = crossPoints[indexes[index][1]];
     const controller = this.rotateBoxPoints[index];
-    let tAngle = MathUtils.calcTriangleAngleWithClockwise(
-      start,
-      controller,
-      end,
-    );
+    let tAngle = MathUtils.calcTriangleAngleWithClockwise(start, controller, end);
     const flipX = this.flipX;
     if (flipX) {
       tAngle = 180 - tAngle;
     }
-    const targetAngle =
-      MathUtils.calcAngle(controller, end) + (flipX ? -tAngle / 2 : tAngle / 2);
-    const targetCenter = this._getCornerTargetPoint(
-      index,
-      this.rotateBoxPoints,
-    );
+    const targetAngle = MathUtils.calcAngle(controller, end) + (flipX ? -tAngle / 2 : tAngle / 2);
+    const targetCenter = this._getCornerTargetPoint(index, this.rotateBoxPoints);
     const ctLen = MathUtils.calcDistance(controller, targetCenter) * 2;
     const ratio = value / this.minParallelogramVerticalSize;
     const len = ctLen * ratio;
@@ -421,10 +377,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param options
    * @param subOptions
    */
-  refresh(
-    options?: RefreshOptions,
-    subOptions?: { angles?: RefreshAnglesOptions },
-  ): void {
+  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void {
     super.refresh(options, subOptions);
     this.refreshCorners();
   }
@@ -464,8 +417,7 @@ export default class ElementRect extends Element implements IElementRect {
   private _getCornerTargetPoint(index: number, boxPoints: IPoint[]): IPoint {
     let point: IPoint;
     let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
-    const { width, height } =
-      MathUtils.calcParallelogramVerticalSize(boxPoints);
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(boxPoints);
     if (width <= height) {
       if ([0, 1].includes(index)) {
         point = c1;
@@ -491,26 +443,15 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof CornerController) {
       const index = this.cornerControllers.indexOf(controller);
       if (index !== -1) {
-        const segmentStart = this._getCornerTargetPoint(
-          index,
-          this.rotateBoxPoints,
-        );
+        const segmentStart = this._getCornerTargetPoint(index, this.rotateBoxPoints);
         const originalPoint = this._originalCornerPoints[index];
         const currentPoint = {
           x: offset.x + originalPoint.x,
           y: offset.y + originalPoint.y,
         };
         const segmentEnd = this.rotateBoxPoints[index];
-        const crossPoint = MathUtils.calcProjectionOnSegment(
-          currentPoint,
-          segmentStart,
-          segmentEnd,
-        );
-        let proportion = MathUtils.calcSegmentProportion(
-          crossPoint,
-          segmentStart,
-          segmentEnd,
-        );
+        const crossPoint = MathUtils.calcProjectionOnSegment(currentPoint, segmentStart, segmentEnd);
+        let proportion = MathUtils.calcSegmentProportion(crossPoint, segmentStart, segmentEnd);
         proportion = clamp(proportion, 0, 1);
         proportion = 1 - proportion;
         let corner = proportion * (this.minParallelogramVerticalSize / 2);
@@ -528,9 +469,6 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _normalizeCorners(): number[] {
     const values = cloneDeep(this.model.corners);
-    return ElementUtils.fixCornersBasedOnMinSize(
-      values,
-      this.minParallelogramVerticalSize,
-    );
+    return ElementUtils.fixCornersBasedOnMinSize(values, this.minParallelogramVerticalSize);
   }
 }

@@ -102,11 +102,7 @@ export default class CommonUtils {
    * @param rect
    * @returns
    */
-  static getEventPosition(
-    e: MouseEvent,
-    rect: DOMRect,
-    scale?: number,
-  ): IPoint {
+  static getEventPosition(e: MouseEvent, rect: DOMRect, scale?: number): IPoint {
     scale = scale || 1;
     return {
       x: (e.clientX - rect.x) / scale,
@@ -176,10 +172,7 @@ export default class CommonUtils {
    * @param isRectangle 是否是矩形
    */
   static getLBRPoints(points: IPoint[], isRectangle?: boolean): IPoint[] {
-    let [left, bottom, right] = CommonUtils.getLBRPointIndexes(
-      points,
-      isRectangle,
-    );
+    let [left, bottom, right] = CommonUtils.getLBRPointIndexes(points, isRectangle);
     if (left === bottom) {
       left = CommonUtils.getPrevIndexOfArray(points.length, left);
     }
@@ -227,11 +220,7 @@ export default class CommonUtils {
    * @param options
    * @returns
    */
-  static get4BoxPoints(
-    center: IPoint,
-    size: ISize,
-    angles?: Partial<AngleModel>,
-  ): IPoint[] {
+  static get4BoxPoints(center: IPoint, size: ISize, angles?: Partial<AngleModel>): IPoint[] {
     const points = [
       {
         x: center.x - size.width / 2,
@@ -262,11 +251,7 @@ export default class CommonUtils {
    * @param index
    * @returns
    */
-  static getPrevIndexOfArray(
-    length: number,
-    index: number,
-    step: number = 1,
-  ): number {
+  static getPrevIndexOfArray(length: number, index: number, step: number = 1): number {
     let result;
     while (true) {
       result = index - step;
@@ -299,11 +284,7 @@ export default class CommonUtils {
    * @param index
    * @returns
    */
-  static getNextIndexOfArray(
-    length: number,
-    index: number,
-    step: number = 1,
-  ): number {
+  static getNextIndexOfArray(length: number, index: number, step: number = 1): number {
     let result;
     while (true) {
       result = index + step;
@@ -334,12 +315,8 @@ export default class CommonUtils {
    * @returns
    */
   static calcRectangleSize(coords: IPoint[]): ISize {
-    const width = MathUtils.precise(
-      MathUtils.calcDistance(coords[0], coords[1]),
-    );
-    const height = MathUtils.precise(
-      MathUtils.calcDistance(coords[0], coords[3]),
-    );
+    const width = MathUtils.precise(MathUtils.calcDistance(coords[0], coords[1]));
+    const height = MathUtils.precise(MathUtils.calcDistance(coords[0], coords[3]));
     return { width, height };
   }
 
@@ -389,11 +366,7 @@ export default class CommonUtils {
    * @param padding
    * @returns
    */
-  static calcScale(
-    targetRect: DOMRect | ISize,
-    sourceRect: DOMRect | ISize,
-    padding: number = 0,
-  ): number {
+  static calcScale(targetRect: DOMRect | ISize, sourceRect: DOMRect | ISize, padding: number = 0): number {
     const widthScale = (targetRect.width - padding * 2) / sourceRect.width;
     const heightScale = (targetRect.height - padding * 2) / sourceRect.height;
     return Math.min(widthScale, heightScale);
@@ -406,20 +379,12 @@ export default class CommonUtils {
    * @param height
    * @param stageRect
    */
-  static calcRectangleSizeInRect(
-    width: number,
-    height: number,
-    stageRect: Partial<DOMRect>,
-    padding: number = 0,
-  ): ISize {
+  static calcRectangleSizeInRect(width: number, height: number, stageRect: Partial<DOMRect>, padding: number = 0): ISize {
     const innerWidth = stageRect.width - padding * 2;
     const innerHeight = stageRect.height - padding * 2;
     if (width > innerWidth || height > innerHeight) {
       const ratio = MathUtils.precise(width / height, 1);
-      const rectRatio = MathUtils.precise(
-        stageRect.width / stageRect.height,
-        2,
-      );
+      const rectRatio = MathUtils.precise(stageRect.width / stageRect.height, 2);
       if (ratio > rectRatio) {
         width = innerWidth;
         height = MathUtils.precise(width / ratio, 1);
@@ -441,10 +406,7 @@ export default class CommonUtils {
    * @param outerRect
    * @returns
    */
-  static calcCenterInnerRectPoints(
-    innerRect: ISize,
-    outerRect: ISize,
-  ): IPoint[] {
+  static calcCenterInnerRectPoints(innerRect: ISize, outerRect: ISize): IPoint[] {
     const { width, height } = innerRect;
     const { width: outerWidth, height: outerHeight } = outerRect;
     return [
@@ -476,14 +438,12 @@ export default class CommonUtils {
    */
   static scaleRect(rect: Partial<DOMRect>, scale: number): Partial<DOMRect> {
     const result: Partial<DOMRect> = {};
-    ["x", "y", "width", "height", "left", "top", "right", "bottom"].forEach(
-      key => {
-        const value = rect[key as keyof Partial<DOMRect>];
-        if (isNumber(value)) {
-          result[key] = MathUtils.precise(value * scale);
-        }
-      },
-    );
+    ["x", "y", "width", "height", "left", "top", "right", "bottom"].forEach(key => {
+      const value = rect[key as keyof Partial<DOMRect>];
+      if (isNumber(value)) {
+        result[key] = MathUtils.precise(value * scale);
+      }
+    });
     return result;
   }
 
@@ -513,21 +473,11 @@ export default class CommonUtils {
    * @param rotateBoxPoints
    * @param center
    */
-  static calcRotateBoxRect(
-    rotateBoxPoints: IPoint[],
-    center: IPoint,
-  ): Partial<DOMRect> {
+  static calcRotateBoxRect(rotateBoxPoints: IPoint[], center: IPoint): Partial<DOMRect> {
     // 计算倾斜后的图片的宽度
-    const width = MathUtils.calcDistance(
-      rotateBoxPoints[0],
-      rotateBoxPoints[1],
-    );
+    const width = MathUtils.calcDistance(rotateBoxPoints[0], rotateBoxPoints[1]);
     // 计算倾斜后的图片的高度
-    const height = MathUtils.calcDistancePointToLine(
-      rotateBoxPoints[0],
-      rotateBoxPoints[2],
-      rotateBoxPoints[3],
-    );
+    const height = MathUtils.calcDistancePointToLine(rotateBoxPoints[0], rotateBoxPoints[2], rotateBoxPoints[3]);
     // 计算绘制后的图片的rect
     const rect = {
       x: center.x - width / 2,

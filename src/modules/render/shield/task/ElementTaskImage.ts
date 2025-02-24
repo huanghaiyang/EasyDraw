@@ -42,13 +42,7 @@ export default class ElementTaskImage extends ElementTaskBase {
 
     // 绘制边框
     arcPoints.forEach((points, index) => {
-      CanvasUtils.drawArcPathStrokeWidthScale(
-        this.canvas,
-        points,
-        rect,
-        styles.strokes[index],
-        options,
-      );
+      CanvasUtils.drawArcPathStrokeWidthScale(this.canvas, points, rect, styles.strokes[index], options);
     });
   }
 }

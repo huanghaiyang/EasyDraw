@@ -13,10 +13,7 @@ import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel, IRotationModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
-import {
-  DefaultControllerRadius,
-  SelectionIndicatorMargin,
-} from "@/styles/MaskStyles";
+import { DefaultControllerRadius, SelectionIndicatorMargin } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
@@ -31,10 +28,7 @@ import IElementRotation from "@/types/IElementRotation";
 /**
  * 蒙版渲染器
  */
-export default class MaskRenderer
-  extends BaseRenderer<IDrawerMask>
-  implements IMaskRenderer
-{
+export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements IMaskRenderer {
   /**
    * 最后光标渲染状态 - 用于检测是否需要清理残留
    */
@@ -83,22 +77,14 @@ export default class MaskRenderer
     if (noParentElements.length === 1) {
       const element = noParentElements[0];
       // 添加旋转图标（当组件允许旋转且处于完成状态）
-      if (
-        this.drawer.shield.configure.rotationIconEnable &&
-        element.rotationEnable &&
-        element.status === ElementStatus.finished
-      ) {
+      if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
         cargo.add(this.createMaskRotateTask(element.rotation));
       }
       // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
     } else if (noParentElements.length > 1) {
       // 多选时添加范围组件的旋转任务
-      cargo.add(
-        this.createMaskRotateTask(
-          this.drawer.shield.selection.rangeElement.rotation,
-        ),
-      );
+      cargo.add(this.createMaskRotateTask(this.drawer.shield.selection.rangeElement.rotation));
     }
 
     // 光标绘制阶段 ================
@@ -122,11 +108,7 @@ export default class MaskRenderer
       await this.renderCargo(cargo);
     } else {
       // 处理光标/选区移出舞台的残留
-      if (
-        (this._lastCursorRendered || this._lastSelectionRendered) &&
-        !selectionTasks.length &&
-        !cursorRendered
-      ) {
+      if ((this._lastCursorRendered || this._lastSelectionRendered) && !selectionTasks.length && !cursorRendered) {
         cargo.add(new MaskTaskClear(null, this.renderParams));
         await this.renderCargo(cargo);
         // 重置状态缓存
@@ -149,10 +131,7 @@ export default class MaskRenderer
     if (!point) return;
 
     // 将舞台坐标转换为世界坐标
-    const coord = ElementUtils.calcWorldPoint(
-      point,
-      this.drawer.shield.stageCalcParams,
-    );
+    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageCalcParams);
 
     // 构建坐标显示模型
     const model: IMaskModel = {
@@ -181,10 +160,7 @@ export default class MaskRenderer
     const selection = this.drawer.shield.selection;
     const tasks: IRenderTask[] = [];
     // 合并主选区和子选区模型
-    const models: IMaskModel[] = [
-      ...selection.getModels(),
-      selection.selectionModel,
-    ];
+    const models: IMaskModel[] = [...selection.getModels(), selection.selectionModel];
 
     models.forEach(model => {
       if (model && model.points.length > 0) {
@@ -237,18 +213,12 @@ export default class MaskRenderer
    * @returns
    */
   private createControllerTasks(): IRenderTask[] {
-    const element =
-      this.drawer.shield.store.primarySelectedElement ||
-      this.drawer.shield.selection.rangeElement;
+    const element = this.drawer.shield.store.primarySelectedElement || this.drawer.shield.selection.rangeElement;
     if (element) {
       const { controllers = [] } = element;
       return controllers
         .map(controller => {
-          if (
-            !(controller instanceof ElementRotation) &&
-            !(controller instanceof VerticesTransformer) &&
-            !(controller instanceof BorderTransformer)
-          ) {
+          if (!(controller instanceof ElementRotation) && !(controller instanceof VerticesTransformer) && !(controller instanceof BorderTransformer)) {
             const model: IMaskModel = {
               point: {
                 x: (controller as IPointController).x,
@@ -303,18 +273,11 @@ export default class MaskRenderer
           p2 = element.maxBoxPoints[2];
         } else {
           // 获取最左侧，最下侧，最右侧三个点
-          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(
-            element.rotateBoxPoints,
-            true,
-          );
+          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints, true);
           // 计算最下侧点与最左侧点，最下侧点与最右侧点的夹角
-          let leftAngle = MathUtils.transformToAcuteAngle(
-            MathUtils.calcAngle(bottomPoint, leftPoint) + 180,
-          );
+          let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
           // 计算最下侧点与最右侧点，最下侧点与最右侧点的夹角
-          let rightAngle = MathUtils.transformToAcuteAngle(
-            MathUtils.calcAngle(bottomPoint, rightPoint) + 180,
-          );
+          let rightAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, rightPoint) + 180);
           // 取夹角较小的点
           const point = leftAngle < rightAngle ? leftPoint : rightPoint;
           // 将点按x坐标排序
@@ -327,12 +290,7 @@ export default class MaskRenderer
     const angle = MathUtils.calcAngle(p1, p2);
     // 生成指示器数据对象
     const model: IMaskModel = {
-      point: MathUtils.calcSegmentLineCenterCrossPoint(
-        p1,
-        p2,
-        true,
-        SelectionIndicatorMargin / this.drawer.shield.stageScale,
-      ),
+      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
@@ -346,9 +304,7 @@ export default class MaskRenderer
    * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    if (
-      this.drawer.shield.currentCreator.category === CreatorCategories.freedom
-    ) {
+    if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
       const model: IMaskModel = {
         point: this.drawer.shield.cursor.value,
         type: DrawerMaskModelTypes.cursor,

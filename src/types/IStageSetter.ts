@@ -42,11 +42,7 @@ export default interface IStageSetter {
    * @param value 圆角值
    * @param index 圆角索引位置（从0开始）
    */
-  setElementsCorners(
-    elements: IElement[],
-    value: number,
-    index?: number,
-  ): Promise<void>;
+  setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void>;
 
   /**
    * 设置组件Y倾斜角度
@@ -63,11 +59,7 @@ export default interface IStageSetter {
    * @param value 描边类型
    * @param index 描边索引位置（从0开始）
    */
-  setElementsStrokeType(
-    elements: IElement[],
-    value: StrokeTypes,
-    index: number,
-  ): Promise<void>;
+  setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void>;
 
   /**
    * 设置组件描边宽度
@@ -76,11 +68,7 @@ export default interface IStageSetter {
    * @param value 描边宽度值（像素）
    * @param index 描边索引位置（从0开始）
    */
-  setElementsStrokeWidth(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void>;
+  setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void>;
 
   /**
    * 设置组件描边颜色
@@ -89,11 +77,7 @@ export default interface IStageSetter {
    * @param value 颜色值（十六进制字符串，如#RRGGBB）
    * @param index 描边索引位置（从0开始）
    */
-  setElementsStrokeColor(
-    elements: IElement[],
-    value: string,
-    index: number,
-  ): Promise<void>;
+  setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void>;
 
   /**
    * 设置组件描边颜色透明度
@@ -102,11 +86,7 @@ export default interface IStageSetter {
    * @param value 透明度值（0-1）
    * @param index 描边索引位置（从0开始）
    */
-  setElementsStrokeColorOpacity(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void>;
+  setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void>;
 
   /**
    * 添加组件描边
@@ -130,11 +110,7 @@ export default interface IStageSetter {
    * @param value 颜色值（十六进制字符串，如#RRGGBB）
    * @param index 填充索引位置（从0开始）
    */
-  setElementsFillColor(
-    elements: IElement[],
-    value: string,
-    index: number,
-  ): Promise<void>;
+  setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void>;
 
   /**
    * 设置组件填充颜色透明度
@@ -143,11 +119,7 @@ export default interface IStageSetter {
    * @param value 透明度值（0-1）
    * @param index 填充索引位置（从0开始）
    */
-  setElementsFillColorOpacity(
-    elements: IElement[],
-    value: number,
-    index: number,
-  ): Promise<void>;
+  setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void>;
 
   /**
    * 添加组件填充
@@ -171,10 +143,7 @@ export default interface IStageSetter {
    * @param elements 要修改的元件集合
    * @param value 文本对齐方式
    */
-  setElementsTextAlign(
-    elements: IElement[],
-    value: CanvasTextAlign,
-  ): Promise<void>;
+  setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void>;
 
   /**
    * 设置组件文本基线
@@ -182,10 +151,7 @@ export default interface IStageSetter {
    * @param elements 要修改的元件集合
    * @param value 文本基线方式
    */
-  setElementsTextBaseline(
-    elements: IElement[],
-    value: CanvasTextBaseline,
-  ): Promise<void>;
+  setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void>;
 
   /**
    * 设置组件字体大小

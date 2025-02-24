@@ -89,10 +89,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * @returns
    */
   private _isInputEvent(e: Event): boolean {
-    return (
-      e.target instanceof HTMLInputElement ||
-      e.target instanceof HTMLTextAreaElement
-    );
+    return e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement;
   }
 
   /**
@@ -284,9 +281,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
           e && console.warn(e);
           // 读取剪贴板，获取组件数组
           try {
-            const elementsJson = JSON.parse(
-              evt.clipboardData.getData("text/plain"),
-            );
+            const elementsJson = JSON.parse(evt.clipboardData.getData("text/plain"));
             if (elementsJson) {
               this.emit("pasteElements", elementsJson);
             }

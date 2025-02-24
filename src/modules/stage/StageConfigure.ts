@@ -1,7 +1,4 @@
-import IStageConfigure, {
-  StageConfigs,
-  StageConfigValues,
-} from "@/types/IStageConfigure";
+import IStageConfigure, { StageConfigs, StageConfigValues } from "@/types/IStageConfigure";
 import { configure } from "mobx";
 
 export default class StageConfigure implements IStageConfigure {

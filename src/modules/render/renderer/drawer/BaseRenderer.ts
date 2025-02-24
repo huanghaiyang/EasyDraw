@@ -3,9 +3,7 @@ import { IQueueRender, IRenderQueue, IRenderTaskCargo } from "@/types/IRender";
 import { IStageDrawer } from "@/types/IStageDrawer";
 import { IStageRenderer } from "@/types/IStageRenderer";
 
-export default class BaseRenderer<T extends IStageDrawer>
-  implements IStageRenderer, IQueueRender
-{
+export default class BaseRenderer<T extends IStageDrawer> implements IStageRenderer, IQueueRender {
   drawer: T;
   renderQueue: IRenderQueue;
 

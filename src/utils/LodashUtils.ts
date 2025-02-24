@@ -34,11 +34,7 @@ export default class LodashUtils {
    * @param eqFunc
    * @returns
    */
-  static isAllEqualWith<T>(
-    array: T[],
-    value: T,
-    eqFunc: (obj: T, oth: T) => boolean,
-  ): boolean {
+  static isAllEqualWith<T>(array: T[], value: T, eqFunc: (obj: T, oth: T) => boolean): boolean {
     return array.every(item => eqFunc(item, value));
   }
 }

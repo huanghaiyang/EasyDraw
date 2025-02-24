@@ -4,10 +4,7 @@ import MathUtils from "@/utils/MathUtils";
 import { IPointController } from "@/types/IController";
 import BaseController from "@/modules/handler/controller/BaseController";
 
-export default class PointController
-  extends BaseController
-  implements IPointController
-{
+export default class PointController extends BaseController implements IPointController {
   width: number;
   height: number;
   x: number;

@@ -42,13 +42,7 @@ const onBeforeUpload = (file: File) => {
           ]"
           @click="select(creator)"
         >
-          <el-upload
-            v-if="creator.type === CreatorTypes.image"
-            action=""
-            multiple
-            accept="image/*"
-            :before-upload="onBeforeUpload"
-          >
+          <el-upload v-if="creator.type === CreatorTypes.image" action="" multiple accept="image/*" :before-upload="onBeforeUpload">
             <creator-drop-down-item :creator="creator" />
           </el-upload>
           <creator-drop-down-item :creator="creator" v-else />

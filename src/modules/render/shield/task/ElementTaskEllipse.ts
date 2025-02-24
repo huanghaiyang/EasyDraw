@@ -33,8 +33,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       actualAngle,
     };
 
-    const innermostStrokePoints =
-      unLeanStrokePoints[innermostStrokePointsIndex];
+    const innermostStrokePoints = unLeanStrokePoints[innermostStrokePointsIndex];
     const rect = CommonUtils.getRect(innermostStrokePoints);
 
     styles.fills.forEach(fillStyle => {

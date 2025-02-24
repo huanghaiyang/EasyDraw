@@ -14,9 +14,7 @@ export default class FileUtils {
         console.warn("No clipboard data");
         return reject();
       }
-      const images = Array.from(items).filter(item =>
-        item.type.startsWith("image/"),
-      );
+      const images = Array.from(items).filter(item => item.type.startsWith("image/"));
       if (!images.length) {
         console.warn("No image in clipboard");
         return reject();
@@ -73,14 +71,8 @@ export default class FileUtils {
    * @param reject
    * @returns
    */
-  static parseImageFiles(
-    files: File[],
-    resolve: Function,
-    reject: Function,
-  ): Promise<void> {
-    const images = Array.from(files).filter(file =>
-      file.type.startsWith("image/"),
-    );
+  static parseImageFiles(files: File[], resolve: Function, reject: Function): Promise<void> {
+    const images = Array.from(files).filter(file => file.type.startsWith("image/"));
     if (!images.length) {
       console.warn("No image in files");
       return reject();

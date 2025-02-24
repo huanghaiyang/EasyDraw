@@ -17,13 +17,7 @@ export default class ElementTaskLine extends ElementTaskBase {
     } = this.node;
 
     strokePoints.forEach((points, index) => {
-      CanvasUtils.drawPathWithScale(
-        this.canvas,
-        points,
-        styles,
-        styles.fills[0],
-        styles.strokes[index],
-      );
+      CanvasUtils.drawPathWithScale(this.canvas, points, styles, styles.fills[0], styles.strokes[index]);
     });
   }
 }

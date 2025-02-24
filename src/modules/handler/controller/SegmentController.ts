@@ -6,10 +6,7 @@ import { ISegmentController } from "@/types/IController";
 import BaseController from "@/modules/handler/controller/BaseController";
 import { isNumber } from "lodash";
 
-export default class SegmentController
-  extends BaseController
-  implements ISegmentController
-{
+export default class SegmentController extends BaseController implements ISegmentController {
   // 起始点
   start: IPoint;
   // 结束点
@@ -43,12 +40,7 @@ export default class SegmentController
    * @returns
    */
   isClosest(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(
-      point,
-      this.start,
-      this.end,
-      BorderTransformerMargin / this.host.shield.stageScale,
-    );
+    return MathUtils.isPointClosestSegment(point, this.start, this.end, BorderTransformerMargin / this.host.shield.stageScale);
   }
 
   /**

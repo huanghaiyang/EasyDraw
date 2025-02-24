@@ -21,29 +21,17 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div
-    class="fill-props right-props"
-    v-if="stageStore.primarySelectedElement?.fillEnabled"
-  >
+  <div class="fill-props right-props" v-if="stageStore.primarySelectedElement?.fillEnabled">
     <div class="fill-props__title">
       <span class="fill-props__title-text">填充</span>
-      <el-icon
-        ><Plus @click="stageStore.addElementsFill(fills.length - 1)"
-      /></el-icon>
+      <el-icon><Plus @click="stageStore.addElementsFill(fills.length - 1)" /></el-icon>
     </div>
 
     <div v-for="(fill, index) in fills" :key="index">
       <div class="fill-props__row color">
         <div class="fill-props__row-item">
-          <el-color-picker
-            v-model="fill.color"
-            @change="value => stageStore.setElementsFillColor(value, index)"
-            ref="colorPickerRef"
-            :disabled="stageStore.inputDisabled"
-          />
-          <el-tag type="info" @click="toggleColorPickerVisible">{{
-            fill.color
-          }}</el-tag>
+          <el-color-picker v-model="fill.color" @change="value => stageStore.setElementsFillColor(value, index)" ref="colorPickerRef" :disabled="stageStore.inputDisabled" />
+          <el-tag type="info" @click="toggleColorPickerVisible">{{ fill.color }}</el-tag>
         </div>
 
         <div class="fill-props__row-item">
@@ -54,20 +42,14 @@ const toggleColorPickerVisible = () => {
             min="0"
             max="1"
             precision="1"
-            @change="
-              value =>
-                stageStore.setElementsFillColorOpacity(Number(value), index)
-            "
+            @change="value => stageStore.setElementsFillColorOpacity(Number(value), index)"
             :disabled="stageStore.inputDisabled"
           >
             <template #prepend>O</template>
           </el-input>
         </div>
         <el-icon>
-          <Minus
-            @click="stageStore.removeElementsFill(index)"
-            v-if="fills.length > 1"
-          />
+          <Minus @click="stageStore.removeElementsFill(index)" v-if="fills.length > 1" />
         </el-icon>
       </div>
     </div>

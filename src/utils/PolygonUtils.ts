@@ -14,13 +14,7 @@ export default class PolygonUtils {
    * @param innerOrOuter
    * @returns
    */
-  static calcIOPoint(
-    current: IPoint,
-    next: IPoint,
-    angle: number,
-    r: number,
-    innerOrOuter: boolean,
-  ): IPoint {
+  static calcIOPoint(current: IPoint, next: IPoint, angle: number, r: number, innerOrOuter: boolean): IPoint {
     // 半角度
     const halfAngle = evaluate("angle / 2", { angle });
     // 三角形斜边
@@ -37,11 +31,7 @@ export default class PolygonUtils {
       nextAngle,
     });
     // 计算目标点
-    const point = MathUtils.calcTargetPoint(
-      current,
-      hypotenuse,
-      innerOrOuter ? finalAngle : evaluate("finalAngle + 180", { finalAngle }),
-    );
+    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate("finalAngle + 180", { finalAngle }));
     return point;
   }
 
@@ -53,11 +43,7 @@ export default class PolygonUtils {
    * @param innerOrOuter
    * @returns
    */
-  static getPolygonVertices(
-    vertices: IPoint[],
-    r: number,
-    innerOrOuter: boolean,
-  ): IPoint[] {
+  static getPolygonVertices(vertices: IPoint[], r: number, innerOrOuter: boolean): IPoint[] {
     // 排序顶点
     const sortedVertices = MathUtils.sortPointsClockwise(vertices);
     // 计算内外顶点
@@ -103,9 +89,7 @@ export default class PolygonUtils {
   static calcBentLineOuterVertices(points: IPoint[], r: number): IPoint[] {
     const result: IPoint[] = [];
     result.push(...PolygonUtils.calcBentLineClockWisePoints(points, r, true));
-    result.push(
-      ...PolygonUtils.calcBentLineClockWisePoints(points.reverse(), r, true),
-    );
+    result.push(...PolygonUtils.calcBentLineClockWisePoints(points.reverse(), r, true));
     return result;
   }
 
@@ -117,11 +101,7 @@ export default class PolygonUtils {
    * @param isClockWise
    * @returns
    */
-  static calcBentLineClockWisePoints(
-    points: IPoint[],
-    r: number,
-    isClockWise: boolean,
-  ): IPoint[] {
+  static calcBentLineClockWisePoints(points: IPoint[], r: number, isClockWise: boolean): IPoint[] {
     // 结果
     const result: IPoint[] = [];
     // 遍历坐标

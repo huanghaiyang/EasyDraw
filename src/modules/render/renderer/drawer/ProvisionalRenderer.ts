@@ -5,10 +5,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IDrawerProvisional } from "@/types/IStageDrawer";
 import { IProvisionalRenderer } from "@/types/IStageRenderer";
 
-export default class ProvisionalRenderer
-  extends BaseRenderer<IDrawerProvisional>
-  implements IProvisionalRenderer
-{
+export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional> implements IProvisionalRenderer {
   private _latestElementRendered: boolean;
   private _latestClearRendered: boolean;
 
