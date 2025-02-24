@@ -290,12 +290,15 @@ export default class ElementRect extends Element implements IElementRect {
   calcCornerPoint(index: number, real?: boolean): IPoint {
     const value = this.visualCorners[index];
     const coord = this.calcCornerCoord(index, real);
+    const controller = this.rotateBoxPoints[index];
     let point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
     point = MathUtils.transWithCenter(point, this.angles, this.center);
     const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(point, this.rotateBoxPoints);
-    const start = crossPoints[indexes[index][0]];
-    const end = crossPoints[indexes[index][1]];
-    const controller = this.rotateBoxPoints[index];
+    let start = crossPoints[indexes[index][0]];
+    let end = crossPoints[indexes[index][1]];
+    if (!start || !end) {
+      return controller;
+    }
     let tAngle = MathUtils.calcTriangleAngleWithClockwise(start, controller, end);
     const flipX = this.flipX;
     if (flipX) {
