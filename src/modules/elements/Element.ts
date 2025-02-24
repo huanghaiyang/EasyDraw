@@ -2154,7 +2154,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  toJson(): ElementObject {
+  async toJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify({ ...this.model, ...this.flip })) as ElementObject;
   }
 

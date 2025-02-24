@@ -1321,8 +1321,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理选中组件复制
    */
-  _handleSelectCopy(e): void {
-    const elementsJson = this.store.copySelectElements();
+  async _handleSelectCopy(): Promise<void> {
+    const elementsJson = await this.store.copySelectElements();
     const data = JSON.stringify(elementsJson);
     DOMUtils.copyValueToClipboard(data);
   }
@@ -1332,12 +1332,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsJson
    * @param elementsJson
    */
-  _handlePasteElements(elementsJson: Array<ElementObject>): void {
+  async _handlePasteElements(elementsJson: Array<ElementObject>): Promise<void> {
     if (elementsJson && elementsJson.length) {
       this._clearStageSelects();
     }
-    this.store.pasteElements(elementsJson);
-    this._redrawAll(true);
+    await this.store.pasteElements(elementsJson);
+    await this._redrawAll(true);
   }
 
   /**

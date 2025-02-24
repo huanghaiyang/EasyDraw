@@ -815,4 +815,25 @@ export default class CanvasUtils {
     }
     return canvas;
   }
+
+  /**
+   * 从图片组件中提取DataURL
+   *
+   * @param image
+   * @returns
+   */
+  static getDataUrlFromImage(image: HTMLImageElement): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.width;
+      canvas.height = image.height;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(image, 0, 0);
+        resolve(canvas.toDataURL());
+      } else {
+        reject(new Error("Failed to get 2d context from canvas"));
+      }
+    });
+  }
 }

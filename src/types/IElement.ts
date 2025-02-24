@@ -836,7 +836,7 @@ export default interface IElement {
   /**
    * 转换为JSON
    */
-  toJson(): ElementObject;
+  toJson(): Promise<ElementObject>;
 
   /**
    * 从JSON转换

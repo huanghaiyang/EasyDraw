@@ -25,6 +25,7 @@ import { multiply } from "mathjs";
 import { clamp, range } from "lodash";
 import ElementTaskEllipse from "@/modules/render/shield/task/ElementTaskEllipse";
 import ElementEllipse from "@/modules/elements/ElementEllipse";
+import ImageUtils from "@/utils/ImageUtils";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -193,6 +194,9 @@ export default class ElementUtils {
       }
       case CreatorTypes.group: {
         return new ElementGroup(model, shield);
+      }
+      case CreatorTypes.image: {
+        return new ElementImage(model, shield);
       }
       default:
         return new Element(model, shield);
@@ -587,5 +591,104 @@ export default class ElementUtils {
       values[index] = clamp(values[index], 0, minSize / 2);
     });
     return values;
+  }
+
+  /**
+   * 转换JSON
+   *
+   * @param elementsJson
+   * @returns
+   */
+  static convertElementsJson(elementsJson: Array<ElementObject>): Array<ElementObject> {
+    const models = elementsJson as unknown as Array<ElementObject>;
+    const modelsMap: Map<String, ElementObject> = new Map();
+    models.forEach(model => {
+      modelsMap.set(model.id, model);
+      if (model.subIds) {
+        model.subIds = new Set(model.subIds);
+      }
+    });
+    let prevId: string;
+    models.forEach(model => {
+      ElementUtils.reBindGroup(model, modelsMap, prevId);
+      prevId = model.id;
+      ElementUtils.divateCoords(model, 40);
+    });
+    return models;
+  }
+
+  /**
+   * 重新绑定组合关系
+   *
+   * @param model
+   * @param modelsMap
+   */
+  static reBindGroup(model: ElementObject, modelsMap: Map<String, ElementObject>, prevId: string): void {
+    const { subIds, groupId, id } = model;
+    let newId = CommonUtils.getRandomDateId();
+    if (prevId) {
+      const prevArr = prevId.split("_");
+      const curArr = newId.split("_");
+      if (prevArr[0] === curArr[0] && prevArr[1] === curArr[1]) {
+        curArr[1] = prevArr[1] + 1;
+        newId = curArr.join("_");
+      }
+    }
+    model.id = newId;
+    modelsMap.set(newId, model);
+    modelsMap.delete(id);
+
+    if (subIds) {
+      subIds.forEach(subId => {
+        const subModel = modelsMap.get(subId);
+        if (subModel) {
+          subModel.groupId = newId;
+        }
+      });
+    }
+    if (groupId) {
+      const group = modelsMap.get(groupId);
+      if (group) {
+        group.subIds.delete(id);
+        group.subIds.add(newId);
+      }
+    }
+  }
+
+  /**
+   * 使组件偏移
+   *
+   * @param model
+   * @param dValue
+   * @returns
+   */
+  static divateCoords(model: ElementObject, dValue: number): ElementObject {
+    const { coords, boxCoords } = model;
+    model.x += dValue;
+    model.y += dValue;
+    model.coords = MathUtils.batchTranslate(coords, { dx: dValue, dy: dValue });
+    model.boxCoords = MathUtils.batchTranslate(boxCoords, {
+      dx: dValue,
+      dy: dValue,
+    });
+    return model;
+  }
+
+  /**
+   * 转换组件模型
+   *
+   * @param model
+   * @returns
+   */
+  static async convertElementModel(model: ElementObject): Promise<ElementObject> {
+    const { type, data } = model;
+    switch (type) {
+      case CreatorTypes.image: {
+        model.data = await ImageUtils.createImageFromUrl(data);
+      }
+      default:
+        break;
+    }
+    return model;
   }
 }

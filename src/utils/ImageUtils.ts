@@ -30,4 +30,17 @@ export default class ImageUtils {
       };
     });
   }
+
+  /**
+   * 通过Url创建Image
+   *
+   * @param url
+   * @returns
+   */
+  static async createImageFromUrl(url: string): Promise<HTMLImageElement> {
+    const img = new Image();
+    img.src = url;
+    await this.waitForImageLoad(img);
+    return img;
+  }
 }

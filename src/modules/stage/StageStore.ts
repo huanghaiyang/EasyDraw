@@ -1788,89 +1788,8 @@ export default class StageStore implements IStageStore {
   /**
    * 复制组件
    */
-  copySelectElements(): Array<ElementObject> {
-    return this.selectedElements.map(element => element.toJson());
-  }
-
-  /**
-   * 转换JSON
-   *
-   * @param elementsJson
-   * @returns
-   */
-  private _convertElementsJson(elementsJson: Array<ElementObject>): Array<ElementObject> {
-    const models = elementsJson as unknown as Array<ElementObject>;
-    const modelsMap: Map<String, ElementObject> = new Map();
-    models.forEach(model => {
-      modelsMap.set(model.id, model);
-      if (model.subIds) {
-        model.subIds = new Set(model.subIds);
-      }
-    });
-    let prevId: string;
-    models.forEach(model => {
-      this._reBindGroup(model, modelsMap, prevId);
-      prevId = model.id;
-      this._divateCoords(model, 40);
-    });
-    return models;
-  }
-
-  /**
-   * 重新绑定组合关系
-   *
-   * @param model
-   * @param modelsMap
-   */
-  private _reBindGroup(model: ElementObject, modelsMap: Map<String, ElementObject>, prevId: string): void {
-    const { subIds, groupId, id } = model;
-    let newId = CommonUtils.getRandomDateId();
-    if (prevId) {
-      const prevArr = prevId.split("_");
-      const curArr = newId.split("_");
-      if (prevArr[0] === curArr[0] && prevArr[1] === curArr[1]) {
-        curArr[1] = prevArr[1] + 1;
-        newId = curArr.join("_");
-      }
-    }
-    model.id = newId;
-    modelsMap.set(newId, model);
-    modelsMap.delete(id);
-
-    if (subIds) {
-      subIds.forEach(subId => {
-        const subModel = modelsMap.get(subId);
-        if (subModel) {
-          subModel.groupId = newId;
-        }
-      });
-    }
-    if (groupId) {
-      const group = modelsMap.get(groupId);
-      if (group) {
-        group.subIds.delete(id);
-        group.subIds.add(newId);
-      }
-    }
-  }
-
-  /**
-   * 使组件偏移
-   *
-   * @param model
-   * @param dValue
-   * @returns
-   */
-  private _divateCoords(model: ElementObject, dValue: number): ElementObject {
-    const { coords, boxCoords } = model;
-    model.x += dValue;
-    model.y += dValue;
-    model.coords = MathUtils.batchTranslate(coords, { dx: dValue, dy: dValue });
-    model.boxCoords = MathUtils.batchTranslate(boxCoords, {
-      dx: dValue,
-      dy: dValue,
-    });
-    return model;
+  async copySelectElements(): Promise<Array<ElementObject>> {
+    return Promise.all(this.selectedElements.map(async element => await element.toJson()));
   }
 
   /**
@@ -1878,18 +1797,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elementsJson
    */
-  pasteElements(elementsJson: Array<ElementObject>): void {
-    const models = this._convertElementsJson(elementsJson);
-    models.forEach(model => {
+  async pasteElements(elementsJson: Array<ElementObject>): Promise<IElement[]> {
+    const result: IElement[] = [];
+    const models = ElementUtils.convertElementsJson(elementsJson);
+    for (const model of models) {
+      await ElementUtils.convertElementModel(model);
       const element = ElementUtils.createElement(model, this.shield);
-      Object.assign(element, {
-        status: ElementStatus.finished,
-        isOnStage: true,
-        isSelected: true,
-        isProvisional: false,
-      });
+      Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
       this.addElement(element);
       element.refresh();
-    });
+      result.push(element);
+    }
+    return result;
   }
 }
