@@ -17,6 +17,7 @@ export interface ILinkedList<T> extends EventEmitter {
   forEachBreak(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
   forEachBreakRevert(callback: (node: T, index: number) => void, predicate?: (node: T, index: number) => boolean): void;
   getIndex(node: T): number;
+  filter(predicate: (node: T) => boolean): T[];
 }
 
 export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter implements ILinkedList<ILinkedNode<ILinkedNodeValue>> {
@@ -225,5 +226,21 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
       current = current.next;
     }
     return index;
+  }
+
+  /**
+   * 过滤链表中满足条件的节点
+   *
+   * @param predicate
+   * @returns
+   */
+  filter(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T>[] {
+    const result: ILinkedNode<T>[] = [];
+    this.forEach(node => {
+      if (predicate(node)) {
+        result.push(node);
+      }
+    });
+    return result;
   }
 }

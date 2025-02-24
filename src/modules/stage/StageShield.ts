@@ -595,7 +595,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: true,
     });
-    if (this.store.isMultiSelection) {
+    if (this.store.isMultiSelected) {
       this.selection.rangeElement.isTransforming = true;
       this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
     } else {
@@ -611,7 +611,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(this.store.selectedElements, {
       isRotating: true,
     });
-    if (this.store.isMultiSelection) {
+    if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = true;
       this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
     } else {
@@ -664,7 +664,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           isRotatingTarget: true,
         });
         // 如果是选区旋转，则只处理选区组件
-        if (this.store.isMultiSelection) {
+        if (this.store.isMultiSelected) {
           // 计算选区旋转的中心点等数据信息
           this.store.refreshElementsRotationStates([this.selection.rangeElement], this._pressDownPosition);
         } else {
@@ -821,7 +821,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(this.store.selectedElements, {
       isDragging: false,
     });
-    if (this.store.isMultiSelection) {
+    if (this.store.isMultiSelected) {
       this.selection.rangeElement.isDragging = false;
     }
     // 刷新组件坐标数据
@@ -840,7 +840,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       isRotatingTarget: false,
       isRotating: false,
     });
-    if (this.store.isMultiSelection) {
+    if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = false;
     }
     this.store.clearRotatingStates();
@@ -857,7 +857,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(this.store.selectedElements, {
       isTransforming: false,
     });
-    if (this.store.isMultiSelection) {
+    if (this.store.isMultiSelected) {
       this.selection.rangeElement.isTransforming = false;
     }
   }

@@ -575,7 +575,6 @@ export default class ElementUtils {
     const id = CommonUtils.getDateId();
     return {
       id: `${id}`,
-      layerId: Number(id),
       subIds: new Set(),
       coords: [],
       boxCoords: [],
@@ -615,7 +614,7 @@ export default class ElementUtils {
     const models = elementsJson as unknown as Array<ElementObject>;
     const modelsMap: Map<String, ElementObject> = new Map();
     const ids: number[] = [];
-    const timestamp = +new Date();
+    const timestamp = CommonUtils.getDateId();
     models.forEach((model, index) => {
       modelsMap.set(model.id, model);
       if (model.subIds) {
@@ -623,7 +622,6 @@ export default class ElementUtils {
       }
       const id = timestamp + index;
       ids.push(id);
-      model.layerId = id;
     });
     models.forEach((model, index) => {
       ElementUtils.reBindGroup(model, modelsMap, `${ids[index]}`);

@@ -99,8 +99,6 @@ export type ElementObject = AngleModel &
   IPoint & {
     // 组件id
     id: string;
-    // 层级id
-    layerId?: number;
     // 组件坐标
     coords?: IPoint[];
     // 盒模型坐标

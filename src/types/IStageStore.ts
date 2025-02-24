@@ -18,8 +18,6 @@ export default interface IStageStore extends IStageSetter {
   get targetElements(): IElement[];
   // 舞台组件
   get stageElements(): IElement[];
-  // 非舞台组件
-  get noneStageElements(): IElement[];
   // 范围组件
   get rangeElements(): IElement[];
   // 唯一选中的组件
@@ -38,8 +36,6 @@ export default interface IStageStore extends IStageSetter {
   get isEditingEmpty(): boolean;
   // 是否舞台组件为空
   get isStageEmpty(): boolean;
-  // 是否非舞台组件为空
-  get isNoneStageEmpty(): boolean;
   // 是否为空
   get isEmpty(): boolean;
   // 是否可见组件为空
@@ -53,7 +49,7 @@ export default interface IStageStore extends IStageSetter {
   // 不属于任何组合的组件
   get noParentElements(): IElement[];
   // 是否多选
-  get isMultiSelection(): boolean;
+  get isMultiSelected(): boolean;
 
   // 创建组件数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): Partial<ElementObject>;
@@ -123,8 +119,6 @@ export default interface IStageStore extends IStageSetter {
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   // 删除选中组件
   deleteSelects(): void;
-  // 判断组件是否选中
-  isElementSelected(element: IElement): boolean;
   // 检查选区是否包含目标
   isSelectedContainsTarget(): boolean;
   // 全选

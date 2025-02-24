@@ -5,7 +5,6 @@ import { every, includes, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import ElementSortedMap, { ElementSortedMapEventNames } from "@/modules/elements/helpers/ElementSortedMap";
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
@@ -18,19 +17,7 @@ import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArbitraryPointClosestMargin } from "@/types/constants";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
-
-/**
- * 比较两个元素的层级
- *
- * @param aElement
- * @param bElement
- * @returns
- */
-function CompareKeys(aElement: IElement, bElement: IElement): number {
-  const a = aElement.model.layerId;
-  const b = bElement.model.layerId;
-  return a - b;
-}
+import { observable, reaction } from "mobx";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -40,25 +27,11 @@ export default class StageStore implements IStageStore {
   // 当前正在创建的组件
   private _currentCreatingElementId;
   // 组件对象映射关系，加快查询
-  private _elementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 已渲染的组件映射关系
-  private _provisionalElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 被选中的组件映射关系，加快查询
-  private _selectedElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 命中的组件映射关系，加快查询
-  private _targetElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 舞台组件映射关系，加快查询
-  private _stageElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 未在舞台的组件映射关系，加快查询
-  private _noneStageElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 可见组件映射关系，加快查询
-  private _visibleElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 编辑中的组件映射关系，加快查询
-  private _editingElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 选区组件映射关系，加快查询
-  private _rangeElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
-  // 旋转目标组件映射关系，加快查询
-  private _rotatingTargetElementsMap = new ElementSortedMap<string, IElement>(CompareKeys);
+  private _elementsMap: Map<string, IElement>;
+  // 选中的组件
+  private _selectedElementIds: Set<string>;
+  // 目标组件
+  private _targetElementIds: Set<string>;
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
@@ -69,19 +42,13 @@ export default class StageStore implements IStageStore {
   constructor(shield: IStageShield) {
     this.shield = shield;
     this._elementList = new ElementList();
+    this._elementsMap = new Map<string, IElement>();
+    this._selectedElementIds = observable.set(new Set<string>());
+    this._targetElementIds = observable.set(new Set<string>());
     this._reactionElementAdded();
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
-
-    // 监听选中组件变更事件通知外部监听者
-    this._selectedElementsMap.on(ElementSortedMapEventNames.changed, () => {
-      this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements);
-      this.shield.selection.refresh();
-    });
-    // 监听目标组件变更事件通知外部监听者
-    this._targetElementsMap.on(ElementSortedMapEventNames.changed, () => {
-      this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements);
-    });
+    this._reactionElementsSelectionChanged();
   }
 
   // 当前创建并更新中的组件
@@ -95,37 +62,32 @@ export default class StageStore implements IStageStore {
 
   // 已经渲染到舞台的组件
   get provisionalElements(): IElement[] {
-    return this._provisionalElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isProvisional).map(node => node.value);
   }
 
   // 选中的组件
   get selectedElements(): IElement[] {
-    return this._selectedElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isSelected).map(node => node.value);
   }
 
   // 命中的组件
   get targetElements(): IElement[] {
-    return this._targetElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isTarget).map(node => node.value);
   }
 
   // 舞台上的组件
   get stageElements(): IElement[] {
-    return this._stageElementsMap.valuesArray();
-  }
-
-  // 未在舞台的组件
-  get noneStageElements(): IElement[] {
-    return this._noneStageElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isOnStage).map(node => node.value);
   }
 
   // 选区范围内的组件
   get rangeElements(): IElement[] {
-    return this._rangeElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isInRange).map(node => node.value);
   }
 
   // 可见的组件
   get visibleElements(): IElement[] {
-    return this._visibleElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isVisible).map(node => node.value);
   }
 
   // 选中的根组件
@@ -145,12 +107,12 @@ export default class StageStore implements IStageStore {
 
   // 旋转目标组件
   get rotatingTargetElements(): IElement[] {
-    return this._rotatingTargetElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isRotatingTarget).map(node => node.value);
   }
 
   // 编辑中的组件
   get editingElements(): IElement[] {
-    return this._editingElementsMap.valuesArray();
+    return this._elementList.filter(node => node.value.isEditing).map(node => node.value);
   }
 
   // 是否选中组件为空
@@ -188,11 +150,6 @@ export default class StageStore implements IStageStore {
     return this.stageElements.length === 0;
   }
 
-  // 是否未在舞台的组件为空
-  get isNoneStageEmpty(): boolean {
-    return this.noneStageElements.length === 0;
-  }
-
   // 选中的组合
   get selectedElementGroups(): IElementGroup[] {
     return this.getSelectedElementGroups();
@@ -209,7 +166,7 @@ export default class StageStore implements IStageStore {
   }
 
   // 是否多选
-  get isMultiSelection(): boolean {
+  get isMultiSelected(): boolean {
     return this.noParentElements.length > 1;
   }
 
@@ -230,25 +187,10 @@ export default class StageStore implements IStageStore {
    */
   private _reactionElementRemoved(): void {
     this._elementList.on(ElementListEventNames.removed, (node: ILinkedNode<IElement>) => {
-      const element = node.value;
-      // 删除组件在舞台上的映射关系
-      this._stageElementsMap.delete(element.id);
-      // 删除组件在选中的映射关系
-      this._selectedElementsMap.delete(element.id);
-      // 删除组件在未在舞台上的映射关系
-      this._noneStageElementsMap.delete(element.id);
-      // 删除组件在临时组件的映射关系
-      this._provisionalElementsMap.delete(element.id);
-      // 删除组件在命中的映射关系
-      this._targetElementsMap.delete(element.id);
-      // 删除组件在选区范围内的映射关系
-      this._rangeElementsMap.delete(element.id);
-      // 删除组件在可见的映射关系
-      this._visibleElementsMap.delete(element.id);
-      // 删除组件在旋转目标的映射关系
-      this._rotatingTargetElementsMap.delete(element.id);
-      // 删除组件在编辑中的映射关系
-      this._editingElementsMap.delete(element.id);
+      const { id } = node.value;
+      this._elementsMap.delete(id);
+      this._selectedElementIds.delete(id);
+      this._targetElementIds.delete(id);
     });
   }
 
@@ -264,6 +206,27 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 组件选中状态发生变化时，更新选中状态映射关系
+   */
+  private _reactionElementsSelectionChanged(): void {
+    // 监听选中组件变更事件通知外部监听者
+    reaction(
+      () => Array.from(this._selectedElementIds),
+      () => {
+        this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements);
+        this.shield.selection.refresh();
+      },
+    );
+    // 监听目标组件变更事件通知外部监听者
+    reaction(
+      () => Array.from(this._targetElementIds),
+      () => {
+        this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements);
+      },
+    );
+  }
+
+  /**
    * 组件属性发生变化时，更新组件映射关系
    *
    * @param propName
@@ -272,84 +235,19 @@ export default class StageStore implements IStageStore {
    */
   private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
     switch (propName) {
-      // 选中组件
       case ElementReactionPropNames.isSelected: {
         if (value) {
-          this._selectedElementsMap.set(element.id, element);
+          this._selectedElementIds.add(element.id);
         } else {
-          this._selectedElementsMap.delete(element.id);
+          this._selectedElementIds.delete(element.id);
         }
         break;
       }
-      // 是否在舞台上
-      case ElementReactionPropNames.isOnStage: {
-        if (value) {
-          this._stageElementsMap.set(element.id, element);
-          this._noneStageElementsMap.delete(element.id);
-        } else {
-          this._stageElementsMap.delete(element.id);
-          this._noneStageElementsMap.set(element.id, element);
-        }
-        break;
-      }
-      // 是否临时组件
-      case ElementReactionPropNames.isProvisional: {
-        if (value) {
-          this._provisionalElementsMap.set(element.id, element);
-        } else {
-          this._provisionalElementsMap.delete(element.id);
-        }
-        break;
-      }
-      // 是否命中
       case ElementReactionPropNames.isTarget: {
         if (value) {
-          this._targetElementsMap.set(element.id, element);
+          this._targetElementIds.add(element.id);
         } else {
-          this._targetElementsMap.delete(element.id);
-        }
-        break;
-      }
-      // 是否在选区范围内
-      case ElementReactionPropNames.isInRange: {
-        if (value) {
-          this._rangeElementsMap.set(element.id, element);
-        } else {
-          this._rangeElementsMap.delete(element.id);
-        }
-        break;
-      }
-      // 是否可见
-      case ElementReactionPropNames.isVisible: {
-        if (value) {
-          this._visibleElementsMap.set(element.id, element);
-        } else {
-          this._visibleElementsMap.delete(element.id);
-        }
-        break;
-      }
-      // 是否编辑中
-      case ElementReactionPropNames.isEditing: {
-        if (value) {
-          this._editingElementsMap.set(element.id, element);
-        } else {
-          this._editingElementsMap.delete(element.id);
-        }
-        break;
-      }
-      // 组件状态
-      case ElementReactionPropNames.status: {
-        if (this._currentCreatingElementId && value === ElementStatus.creating) {
-          this._selectedElementsMap.set(element.id, element);
-        }
-        break;
-      }
-      // 是否旋转目标
-      case ElementReactionPropNames.isRotatingTarget: {
-        if (value) {
-          this._rotatingTargetElementsMap.set(element.id, element);
-        } else {
-          this._rotatingTargetElementsMap.delete(element.id);
+          this._targetElementIds.delete(element.id);
         }
         break;
       }
@@ -975,9 +873,7 @@ export default class StageStore implements IStageStore {
       case CreatorCategories.shapes: {
         const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type));
         if (this._currentCreatingElementId) {
-          ["id", "layerId"].forEach(key => {
-            delete model[key];
-          });
+          delete model.id;
           element = this.updateElementModel(this._currentCreatingElementId, model);
           element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
           this._setElementProvisionalCreating(element);
@@ -1458,21 +1354,11 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判断组件是否被选中
-   *
-   * @param element
-   * @returns
-   */
-  isElementSelected(element: IElement): boolean {
-    return this._selectedElementsMap.has(element.id);
-  }
-
-  /**
    * 删除选中组件
    */
   deleteSelects(): void {
-    this._selectedElementsMap.keysArray().forEach(id => {
-      this.removeElement(id);
+    this.selectedElements.forEach(element => {
+      this.removeElement(element.id);
     });
   }
 
@@ -1522,7 +1408,7 @@ export default class StageStore implements IStageStore {
    * @param element
    */
   toggleSelectElement(element: IElement): void {
-    if (this.isElementSelected(element)) {
+    if (element.isSelected) {
       this.deSelectElement(element);
     } else {
       this.selectElement(element);
