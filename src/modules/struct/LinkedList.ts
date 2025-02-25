@@ -1,6 +1,8 @@
 import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import { EventEmitter } from "events";
 
+export type LinkedNodeEqFunc<T> = (a: T, b: T) => boolean;
+
 export interface ILinkedList<T> extends EventEmitter {
   nodes: Set<T>;
   get length(): number;
@@ -24,6 +26,7 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
   nodes: Set<ILinkedNode<T>>;
   private _head: ILinkedNode<T>;
   private _tail: ILinkedNode<T>;
+  private _eqFunc: LinkedNodeEqFunc<ILinkedNode<T>> = (a, b) => a === b;
 
   get head(): ILinkedNode<T> {
     return this._head;
@@ -37,11 +40,12 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     return this.nodes.size;
   }
 
-  constructor() {
+  constructor(eqFunc?: LinkedNodeEqFunc<ILinkedNode<T>>) {
     super();
     this.nodes = new Set();
     this._head = null;
     this._tail = null;
+    this._eqFunc = eqFunc;
   }
 
   /**
@@ -96,10 +100,10 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     }
     node.prev = null;
     node.next = null;
-    if (this._tail === node) {
+    if (this._eqFunc(node, this._tail)) {
       this._tail = prev;
     }
-    if (this._head === node) {
+    if (this._eqFunc(node, this._head)) {
       this._head = next;
     }
   }
@@ -223,7 +227,7 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
     let current = this._head;
     while (current) {
       index++;
-      if (current === node) {
+      if (this._eqFunc(current, node)) {
         return index;
       }
       current = current.next;

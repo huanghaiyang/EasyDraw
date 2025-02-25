@@ -31,4 +31,18 @@ export default class ColorUtils {
     // 返回RGBA格式的字符串
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
   }
+
+  /**
+   * 生成一个随机的颜色
+   */
+  static getRandomColor(): string {
+    // 定义十六进制字符集
+    const letters = "0123456789ABCDEF";
+    let color = "#";
+    // 循环 6 次，每次随机选择一个字符添加到颜色字符串中
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  }
 }

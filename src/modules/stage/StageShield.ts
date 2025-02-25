@@ -1383,7 +1383,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const group = this.store.selectToGroup();
     if (group) {
       this.store.selectGroup(group);
-      this.mask.redraw(true);
+      this._redrawAll(true);
     }
   }
 
@@ -1397,7 +1397,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const elements = groups.map(group => group.getAllSubElements()).flat();
       this.store.deSelectGroups(groups);
       this.store.selectElements(elements);
-      this.mask.redraw(true);
+      this._redrawAll(true);
     }
   }
 
@@ -1517,7 +1517,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
     await this.store.setElementsGoDown(elements);
-    await this._redrawAll({ shield: true });
+    await this._redrawAll(true);
   }
 
   /**
@@ -1527,6 +1527,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
     await this.store.setElementsShiftMove(elements);
-    await this._redrawAll({ shield: true });
+    await this._redrawAll(true);
   }
 }

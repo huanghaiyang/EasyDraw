@@ -707,11 +707,16 @@ export default class StageStore implements IStageStore {
    * 添加组件
    *
    * @param element
+   * @param targetElement
    */
-  addElement(element: IElement): IElement {
+  addElement(element: IElement, targetElement?: IElement): IElement {
     const node = new LinkedNode(element);
     element.node = node;
-    this._elementList.insert(node);
+    if (targetElement) {
+      this._elementList.insertAfter(node, targetElement.node);
+    } else {
+      this._elementList.insert(node);
+    }
     this._elementsMap.set(element.id, element);
     return element;
   }
@@ -1569,17 +1574,54 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 对给定的组件列表进行层级排序
+   *
+   * @param elements 组件列表
+   * @returns 排序后的组件列表
+   */
+  private _sortElementsByLevel(elements: IElement[]): IElement[] {
+    return elements.sort((a, b) => {
+      return this.getIndexById(a.id) - this.getIndexById(b.id);
+    });
+  }
+
+  /**
+   * 对给定的组件列表进行层级排序
+   *
+   * @param elements 组件列表
+   * @returns 排序后的组件列表
+   */
+  private _rearrangeForwardElementNodes(elements: IElement[]): IElement[] {
+    let sortedElements = elements;
+    // 如果给定的组件是连续的,则不需要重新排序
+    if (!ElementList.isConsecutive(elements)) {
+      sortedElements = this._sortElementsByLevel(elements);
+      // 因为是不连续的，所以需要将给定的组件的层级进行提高，使用层级最高的组件作为提高的基准
+      const levelHighestElement = sortedElements[sortedElements.length - 1];
+      // 先把组件的节点从链表中删除
+      this._removeNodesByElements(sortedElements.slice(0, sortedElements.length - 1));
+      // 再把节点插入到层级最高的组件之前
+      for (let i = 0; i <= sortedElements.length - 2; i++) {
+        this._elementList.insertBefore(sortedElements[i].node, levelHighestElement.node, false);
+      }
+    }
+    return sortedElements;
+  }
+
+  /**
    * 创建组合
    *
    * @param elements
    */
   createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
+    // 对给定的组件所属的链表节点进行重新排序
+    const sortedElements = this._rearrangeForwardElementNodes(elements);
     // 创建组合组件
-    const group = new ElementGroup(this._createElementGroupObject(elements), this.shield);
+    const group = new ElementGroup(this._createElementGroupObject(sortedElements), this.shield);
     // 绑定组合组件的子组件
     this._bindElementsGroup(group);
     // 添加组合组件
-    this.addElement(group);
+    this.addElement(group, sortedElements[sortedElements.length - 1]);
     // 设置组合组件状态
     this.updateElementById(group.id, {
       status: ElementStatus.finished,
@@ -1628,8 +1670,7 @@ export default class StageStore implements IStageStore {
     if (isSameGroup) {
       return null;
     }
-    const group = this.createElementGroup(elements);
-    return group;
+    return this.createElementGroup(elements);
   }
 
   /**
@@ -1726,8 +1767,6 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       const [node] = this._elementList.removeBy(node => node.value.id === element.id, false);
       removedNodes.push(node);
-      node.prev = null;
-      node.next = null;
     });
     return removedNodes;
   }
