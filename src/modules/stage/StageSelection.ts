@@ -343,7 +343,7 @@ export default class StageSelection implements IStageSelection {
           coords,
           boxCoords: cloneDeep(coords),
           ...CommonUtils.getRect(coords),
-          subIds: new Set(elements.map(element => element.id)),
+          subIds: elements.map(element => element.id),
           ...DefaultAngleModel,
         });
       }

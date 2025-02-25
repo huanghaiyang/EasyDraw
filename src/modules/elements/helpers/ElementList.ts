@@ -115,12 +115,7 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
   removeBy(predicate: (node: ILinkedNode<IElement>) => boolean, autoEmit: boolean = true): ILinkedNode<IElement>[] {
     let result: ILinkedNode<IElement>[] = [];
     runInAction(() => {
-      result = super.removeBy(predicate);
-      if (autoEmit) {
-        result.forEach(node => {
-          this.emit(ElementListEventNames.removed, node);
-        });
-      }
+      result = super.removeBy(predicate, autoEmit);
     });
     return result;
   }

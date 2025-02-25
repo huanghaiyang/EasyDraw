@@ -54,7 +54,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param sub
    */
   addSub(sub: IElement): void {
-    this.model.subIds.add(sub.id);
+    this.model.subIds.push(sub.id);
   }
 
   /**
@@ -63,7 +63,9 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param sub
    */
   removeSub(sub: IElement): void {
-    this.model.subIds.delete(sub.id);
+    const index = this.model.subIds.indexOf(sub.id);
+    if (index === -1) return;
+    this.model.subIds.splice(index, 1);
   }
 
   /**
@@ -72,7 +74,9 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param id
    */
   removeSubById(id: string): void {
-    this.model.subIds.delete(id);
+    const index = this.model.subIds.indexOf(id);
+    if (index === -1) return;
+    this.model.subIds.splice(index, 1);
   }
 
   /**
@@ -81,7 +85,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param sub
    */
   hasSub(sub: IElement): boolean {
-    return this.model.subIds.has(sub.id);
+    return this.model.subIds?.includes(sub.id);
   }
 
   /**
@@ -90,14 +94,14 @@ export default class ElementGroup extends Element implements IElementGroup {
    * @param id
    */
   hasSubById(id: string): boolean {
-    return this.model.subIds.has(id);
+    return this.model.subIds?.includes(id);
   }
 
   /**
    * 获取子组件
    */
   getSubs(): IElement[] {
-    return this.shield.store.getElementsByIds(Array.from(this.model.subIds));
+    return this.shield.store.getElementsByIds(this.model.subIds);
   }
 
   /**
@@ -154,7 +158,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 清除子组件
    */
   clearSubs(): void {
-    this.model.subIds.clear();
+    this.model.subIds = [];
   }
 
   /**
@@ -189,7 +193,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    *
    * @param value
    */
-  protected __setIsSelected(value: boolean): void {
+  __setIsSelected(value: boolean): void {
     super.__setIsSelected(value);
     this.deepSubs.forEach(sub => {
       sub.isSelected = value;

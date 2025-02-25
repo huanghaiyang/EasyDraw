@@ -1538,7 +1538,7 @@ export default class StageStore implements IStageStore {
    */
   private _unbindElementsGroup(group: IElementGroup): void {
     this.updateElementsModel(group.getSubs(), { groupId: undefined });
-    this.updateElementModel(group.id, { subIds: new Set() });
+    this.updateElementModel(group.id, { subIds: [] });
   }
 
   /**
@@ -1550,7 +1550,7 @@ export default class StageStore implements IStageStore {
     // 过滤掉组合组件
     elements = elements.filter(element => !element.isGroupSubject);
     // 获取组合组件的子组件id
-    const subIds = new Set(elements.map(element => element.id));
+    const subIds = elements.map(element => element.id);
     // 获取组合组件的坐标
     const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateBoxCoords).flat());
     // 获取组合组件的宽高
@@ -1716,16 +1716,81 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 移除组件节点
+   *
+   * @param elements
+   * @returns
+   */
+  private _removeNodesByElements(elements: IElement[]): ILinkedNode<IElement>[] {
+    const removedNodes: ILinkedNode<IElement>[] = [];
+    elements.forEach(element => {
+      const [node] = this._elementList.removeBy(node => node.value.id === element.id, false);
+      removedNodes.push(node);
+      node.prev = null;
+      node.next = null;
+    });
+    return removedNodes;
+  }
+
+  /**
+   * 获取组合组件在链表中位置最靠前的子组件
+   *
+   * @param group
+   * @returns
+   */
+  private _getPrevmostElement(group: IElementGroup): IElement {
+    let result = group.subs[0];
+    if (result && result.isGroup) {
+      result = this._getPrevmostElement(result as IElementGroup);
+    }
+    return result;
+  }
+  /**
    * 组件下移
    *
-   * @param elements 要修改的元件集合
+   * @param elements 要修改的组件集合
    */
-  async setElementsGoDown(elements: IElement[]): Promise<void> {}
+  async setElementsGoDown(elements: IElement[]): Promise<void> {
+    if (elements.length === 0) return;
+    const headNode: ILinkedNode<IElement> = elements[0].node;
+    let targetNode: ILinkedNode<IElement> | null = headNode.prev;
+    if (targetNode?.value.isGroup) {
+      targetNode = this._getPrevmostElement(targetNode.value as IElementGroup).node;
+    }
+    const removedNodes = this._removeNodesByElements(elements);
+    if (targetNode) {
+      removedNodes.forEach(node => {
+        this._elementList.insertBefore(node, targetNode, false);
+      });
+    } else {
+      removedNodes.reverse().forEach(node => {
+        this._elementList.prepend(node, false);
+      });
+    }
+  }
 
   /**
    * 组件上移
    *
    * @param elements 要修改的元件集合
    */
-  async setElementsShiftMove(elements: IElement[]): Promise<void> {}
+  async setElementsShiftMove(elements: IElement[]): Promise<void> {
+    if (elements.length === 0) return;
+    const tailNode: ILinkedNode<IElement> = elements[elements.length - 1].node;
+    let targetNode: ILinkedNode<IElement> | null = tailNode.next;
+    if (targetNode?.value.isGroupSubject) {
+      targetNode = targetNode.value.ancestorGroup.node;
+    }
+    const removedNodes = this._removeNodesByElements(elements);
+    if (targetNode) {
+      removedNodes.forEach(node => {
+        this._elementList.insertAfter(node, targetNode, false);
+        targetNode = node;
+      });
+    } else {
+      removedNodes.forEach(node => {
+        this._elementList.insert(node, false);
+      });
+    }
+  }
 }

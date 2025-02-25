@@ -93,6 +93,12 @@ export const useStageStore = defineStore("stage", {
       if (elements.length !== 1) return null;
       return elements[0];
     },
+    headOfSelected(): IElement {
+      return this.selectedElements[0];
+    },
+    tailOfSelected(): IElement {
+      return this.selectedElements[this.selectedElements.length - 1];
+    },
     // 输入框是否禁用
     inputDisabled(): boolean {
       return !this.primarySelectedElement;
@@ -111,11 +117,11 @@ export const useStageStore = defineStore("stage", {
     },
     // 是否可以上移
     layerShiftMoveEnable(): boolean {
-      return this.primarySelectedElement && !this.primarySelectedElement.isTopmost;
+      return this.tailOfSelected && !this.tailOfSelected.isTopmost;
     },
     // 是否可以下移
     layerGoDownEnable(): boolean {
-      return this.primarySelectedElement && !this.primarySelectedElement.isBottommost;
+      return this.headOfSelected && !this.headOfSelected.isBottommost;
     },
   },
   actions: {

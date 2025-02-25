@@ -573,7 +573,7 @@ export default class ElementUtils {
     const id = CommonUtils.getDateId();
     return {
       id: `${id}`,
-      subIds: new Set(),
+      subIds: [],
       coords: [],
       boxCoords: [],
       width: 0,
@@ -616,11 +616,7 @@ export default class ElementUtils {
     const timestamp = CommonUtils.getDateId();
     models.forEach((model, index) => {
       modelsMap.set(model.id, model);
-      if (model.subIds) {
-        model.subIds = new Set(model.subIds);
-      }
-      const id = timestamp + index;
-      ids.push(id);
+      ids.push(timestamp + index);
     });
     models.forEach((model, index) => {
       ElementUtils.reBindGroup(model, modelsMap, `${ids[index]}`);
@@ -652,8 +648,9 @@ export default class ElementUtils {
     if (groupId) {
       const group = modelsMap.get(groupId);
       if (group) {
-        group.subIds.delete(id);
-        group.subIds.add(newId);
+        const index = group.subIds.indexOf(id);
+        if (index === -1) return;
+        group.subIds.splice(index, 1, newId);
       }
     }
   }

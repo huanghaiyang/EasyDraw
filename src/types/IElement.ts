@@ -132,7 +132,7 @@ export type ElementObject = AngleModel &
     // 图片自然高度
     naturalHeight?: number;
     // 子组件id集合
-    subIds?: Set<string>;
+    subIds?: Array<string>;
   };
 
 // 刷新角度选项参数

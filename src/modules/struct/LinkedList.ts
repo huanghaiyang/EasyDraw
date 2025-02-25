@@ -82,8 +82,9 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    * 删除节点
    *
    * @param node
+   * @param options
    */
-  remove(node: ILinkedNode<T>): void {
+  remove(node: ILinkedNode<T>, options?: any): void {
     this.nodes.delete(node);
     const prev = node.prev;
     const next = node.next;
@@ -107,12 +108,14 @@ export default class LinkedList<T extends ILinkedNodeValue> extends EventEmitter
    * 根据条件删除节点
    *
    * @param predicate
+   * @param options
+   * @returns
    */
-  removeBy(predicate: (node: ILinkedNode<T>) => boolean): ILinkedNode<T>[] {
+  removeBy(predicate: (node: ILinkedNode<T>) => boolean, options?: any): ILinkedNode<T>[] {
     let result: ILinkedNode<T>[] = [];
     Array.from(this.nodes).forEach(node => {
       if (predicate(node)) {
-        this.remove(node);
+        this.remove(node, options);
         result.push(node);
       }
     });
