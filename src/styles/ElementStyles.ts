@@ -1,4 +1,5 @@
 import { CreatorTypes } from "@/types/Creator";
+import ColorUtils from "@/utils/ColorUtils";
 import { cloneDeep } from "lodash";
 
 export enum StrokeTypes {
@@ -98,7 +99,7 @@ export const DefaultStrokeColorOpacity = 1;
 // 默认填充颜色
 export const DefaultFillColor = "#999999";
 // 默认填充透明度
-export const DefaultFillColorOpacity = 0.15;
+export const DefaultFillColorOpacity = 1;
 // 默认边框宽度
 export const DefaultStrokeWidth = 1;
 // 默认字体大小
@@ -162,5 +163,8 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
       fill.colorOpacity = 0;
     });
   }
+  style.fills.forEach(fill => {
+    fill.color = ColorUtils.getRandomColor();
+  })
   return style;
 };
