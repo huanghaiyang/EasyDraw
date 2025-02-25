@@ -107,6 +107,7 @@ export default class StageSelection implements IStageSelection {
   private _getElementsMaskModels(elements: IElement[], type: DrawerMaskModelTypes): IMaskModel[] {
     const result: IMaskModel[] = [];
     elements.forEach(element => {
+      if (!element) return;
       if (element.isGroupSubject) return;
       result.push({
         type,
@@ -140,7 +141,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   private _getSelectedElementsMaskModels(): IMaskModel[] {
-    return this._getElementsMaskModels(this.shield.store.selectedElements, DrawerMaskModelTypes.path);
+    return this._getElementsMaskModels([this.shield.store.primarySelectedElement || this.shield.store.creatingElements[0]], DrawerMaskModelTypes.path);
   }
 
   /**
@@ -154,7 +155,7 @@ export default class StageSelection implements IStageSelection {
       result.push(...this._getRangeElementsMaskModels());
     }
     result.push(...this._getTargetElementsMaskModels());
-    // result.push(...this._getSelectedElementsMaskModels());
+    result.push(...this._getSelectedElementsMaskModels());
     if (this.isRange) {
       result.push({
         points: this._rangePoints,

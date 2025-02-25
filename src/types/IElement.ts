@@ -717,7 +717,7 @@ export default interface IElement {
   /**
    * 计算非倾斜盒模型坐标
    */
-  calcUnleanBoxCoords(): IPoint[];
+  calcUnLeanBoxCoords(): IPoint[];
 
   /**
    * 计算非倾斜点-舞台坐标

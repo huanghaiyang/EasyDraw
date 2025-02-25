@@ -807,7 +807,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 绘制完成之后的重绘
    */
   private async _redrawAfterCreated(): Promise<void> {
-    await Promise.all([this.mask.redraw(), this.provisional.redraw(), this.redraw(), this.triggerElementCreated(), this.selection.refresh()]);
+    await Promise.all([this.selection.refresh(), this.mask.redraw(), this.provisional.redraw(), this.redraw(), this.triggerElementCreated()]);
   }
 
   /**

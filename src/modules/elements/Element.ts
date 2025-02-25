@@ -1,6 +1,6 @@
 /**
  * ＴＯＤＯ
- * 
+ *
  * 1. 与描边及填充相关的样式坐标计算非常耗费性能，需要优化
  */
 import { ElementStatus, IPoint, ISize } from "@/types";
@@ -58,6 +58,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   _unLeanPoints: IPoint[] = [];
   // 不倾斜路径点-世界坐标系
   _unLeanCoords: IPoint[] = [];
+  // 不倾斜盒模型-世界坐标系
+  _unLeanBoxCoords: IPoint[] = [];
+  // 不倾斜盒模型-舞台坐标系
+  _unLeanBoxPoints: IPoint[] = [];
   // 最大盒模型-舞台坐标系
   _maxBoxPoints: IPoint[] = [];
   // 旋转坐标-舞台坐标系
@@ -98,6 +102,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   _rotateControllers: IPointController[] = [];
   // 最小倾斜矩阵垂直尺寸
   _minParallelogramVerticalSize: number;
+  // 描边坐标-世界坐标系
+  _strokeCoords: IPoint[][];
+  // 描边坐标-舞台坐标系
+  _strokePoints: IPoint[][];
+  // 不倾斜描边坐标-世界坐标系
+  _unLeanStrokeCoords: IPoint[][];
+  // 不倾斜描边坐标-舞台坐标系
+  _unLeanStrokePoints: IPoint[][];
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
@@ -167,28 +179,20 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 获取边框线段点坐标
   get strokePoints(): IPoint[][] {
-    return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._rotatePoints, stroke);
-    });
+    return this._strokePoints;
   }
 
   // 获取边框线段坐标
   get strokeCoords(): IPoint[][] {
-    return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._rotateCoords, stroke);
-    });
+    return this._strokeCoords;
   }
 
   get unLeanStrokePoints(): IPoint[][] {
-    return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._unLeanPoints, stroke);
-    });
+    return this._unLeanStrokePoints;
   }
 
   get unLeanStrokeCoords(): IPoint[][] {
-    return this.model.styles.strokes.map(stroke => {
-      return this.convertPointsByStrokeType(this._unLeanCoords, stroke);
-    });
+    return this._unLeanStrokeCoords;
   }
 
   /**
@@ -857,8 +861,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcRotatePoints(): IPoint[] {
-    const center = this.calcCenter();
-    return this._points.map(point => MathUtils.rotateWithCenter(point, this.model.angle, center));
+    return ElementUtils.calcStageRelativePoints(this._rotateCoords, this.shield.stageCalcParams);
   }
 
   /**
@@ -867,21 +870,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcRotateOutlinePoints(): IPoint[][] {
-    return this.model.styles.strokes.map(stroke => {
-      return ElementUtils.calcOutlinePoints(this._rotatePoints, stroke.type, stroke.width, this.flip);
-    });
+    return this._rotateOutlineCoords.map(coords => ElementUtils.calcStageRelativePoints(coords, this.shield.stageCalcParams));
   }
 
   /**
    * 计算旋转后的盒模型坐标
    */
   calcRotateBoxPoints(): IPoint[] {
-    if (!this.model.boxCoords?.length) return [];
-    const center = this.calcCenter();
-    return this.model.boxCoords.map(coord => {
-      const point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
-      return MathUtils.rotateWithCenter(point, this.model.angle, center);
-    });
+    return ElementUtils.calcStageRelativePoints(this._rotateBoxCoords, this.shield.stageCalcParams);
   }
 
   /**
@@ -1100,22 +1096,21 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 计算非倾斜盒模型坐标
-   *
-   * @returns
-   */
-  calcUnleanBoxCoords(): IPoint[] {
-    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, 0, this.model.leanYAngle);
-  }
-
-  /**
    * 计算非倾斜点坐标
    *
    * @returns
    */
   calcUnLeanPoints(): IPoint[] {
-    const coords = this.calcUnLeanCoords();
-    return ElementUtils.calcStageRelativePoints(coords, this.shield.stageCalcParams);
+    return ElementUtils.calcStageRelativePoints(this._unLeanCoords, this.shield.stageCalcParams);
+  }
+
+  /**
+   * 计算非倾斜盒模型坐标
+   *
+   * @returns
+   */
+  calcUnLeanBoxCoords(): IPoint[] {
+    return MathUtils.calcUnLeanByPoints(this.model.boxCoords, 0, this.model.leanYAngle);
   }
 
   /**
@@ -1124,8 +1119,51 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcUnLeanBoxPoints(): IPoint[] {
-    const boxCoords = this.calcUnleanBoxCoords();
-    return ElementUtils.calcStageRelativePoints(boxCoords, this.shield.stageCalcParams);
+    return ElementUtils.calcStageRelativePoints(this._unLeanBoxCoords, this.shield.stageCalcParams);
+  }
+
+  /**
+   * 计算边框坐标
+   *
+   * @returns
+   */
+  calcStrokeCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._rotateCoords, stroke);
+    });
+  }
+
+  /**
+   * 计算边框点坐标
+   *
+   * @returns
+   */
+  calcStrokePoints(): IPoint[][] {
+    return this._strokeCoords.map(coords => {
+      return ElementUtils.calcStageRelativePoints(coords, this.shield.stageCalcParams);
+    });
+  }
+
+  /**
+   * 计算非倾斜边框坐标
+   *
+   * @returns
+   */
+  calcUnLeanStrokeCoords(): IPoint[][] {
+    return this.model.styles.strokes.map(stroke => {
+      return this.convertPointsByStrokeType(this._unLeanCoords, stroke);
+    });
+  }
+
+  /**
+   * 计算非倾斜边框点坐标
+   *
+   * @returns
+   */
+  calcUnLeanStrokePoints(): IPoint[][] {
+    return this._unLeanStrokeCoords.map(coords => {
+      return ElementUtils.calcStageRelativePoints(coords, this.shield.stageCalcParams);
+    });
   }
 
   /**
@@ -1202,20 +1240,32 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshPoints() {
     // 计算舞台坐标
     this._points = this.calcPoints();
-    // 计算旋转后的路径点
-    this._rotatePoints = this.calcRotatePoints();
     // 计算旋转后的路径坐标
     this._rotateCoords = this.calcRotateCoords();
-    // 计算旋转后的盒模型点
-    this._rotateBoxPoints = this.calcRotateBoxPoints();
+    // 计算旋转后的路径点
+    this._rotatePoints = this.calcRotatePoints();
     // 计算旋转后的盒模型坐标
     this._rotateBoxCoords = this.calcRotateBoxCoords();
+    // 计算旋转后的盒模型点
+    this._rotateBoxPoints = this.calcRotateBoxPoints();
     // 计算不倾斜路径坐标
     this._unLeanCoords = this.calcUnLeanCoords();
     // 计算不倾斜路径点
     this._unLeanPoints = this.calcUnLeanPoints();
+    // 计算不倾斜盒模型坐标
+    this._unLeanBoxCoords = this.calcUnLeanBoxCoords();
+    // 计算不倾斜盒模型点
+    this._unLeanBoxPoints = this.calcUnLeanBoxPoints();
     // 计算变换器
     this._transformers = this.calcTransformers();
+    // 计算边框坐标
+    this._strokeCoords = this.calcStrokeCoords();
+    // 计算边框点坐标
+    this._strokePoints = this.calcStrokePoints();
+    // 计算非倾斜边框坐标
+    this._unLeanStrokeCoords = this.calcUnLeanStrokeCoords();
+    // 计算非倾斜边框点坐标
+    this._unLeanStrokePoints = this.calcUnLeanStrokePoints();
     // 判断是否启用旋转
     if (this.rotationEnable) {
       // 计算旋转控制器
@@ -1330,8 +1380,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     const { width, height } = ElementUtils.calcSize(this.model);
     this.model.width = MathUtils.precise(width, 1);
     this.model.height = MathUtils.precise(height, 1);
-    const { width: verticalSize, height: horizontalSize } = MathUtils.calcParallelogramVerticalSize(this.rotateBoxCoords);
-    this._minParallelogramVerticalSize = Math.min(verticalSize, horizontalSize);
+    if (this._rotateBoxCoords && this._rotateBoxCoords.length) {
+      const { width: verticalSize, height: horizontalSize } = MathUtils.calcParallelogramVerticalSize(this._rotateBoxCoords);
+      this._minParallelogramVerticalSize = Math.min(verticalSize, horizontalSize);
+    }
   }
 
   /**
@@ -1763,10 +1815,10 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新与边框设置相关的坐标
    */
   _refreshOutlinePoints(): void {
-    // 计算旋转后的边框路径点
-    this._rotateOutlinePoints = this.calcRotateOutlinePoints();
     // 计算旋转后的边框路径坐标
     this._rotateOutlineCoords = this.calcRotateOutlineCoords();
+    // 计算旋转后的边框路径点
+    this._rotateOutlinePoints = this.calcRotateOutlinePoints();
     // 计算最大边框盒模型点
     this._maxOutlineBoxPoints = this.calcMaxOutlineBoxPoints();
   }
@@ -1891,7 +1943,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 重新计算倾斜坐标
     this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(coords, value, centerCoord), 1);
     // 计算非倾斜盒模型坐标
-    const boxCoords = this.calcUnleanBoxCoords();
+    const boxCoords = this.calcUnLeanBoxCoords();
     // 重新计算倾斜盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord), 1);
     // 刷新y倾斜角度

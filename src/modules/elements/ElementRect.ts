@@ -86,7 +86,7 @@ export default class ElementRect extends Element implements IElementRect {
   private _getArcBoxCoords(strokeStyle: StrokeStyle): IPoint[] {
     const { type, width: strokeWidth } = strokeStyle;
     // 计算原始矩形的坐标
-    let coords = this.calcUnleanBoxCoords();
+    let coords = this.calcUnLeanBoxCoords();
     // 计算原始矩形的宽和高
     const { width, height } = CommonUtils.calcRectangleSize(coords);
     let sx: number = 1,
@@ -193,7 +193,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   private _getArcVerticalPoints(strokeStyle: StrokeStyle): ArcPoints[] {
     // 计算原始矩形的坐标
-    let boxCoords = this.calcUnleanBoxCoords();
+    let boxCoords = this.calcUnLeanBoxCoords();
     // 计算描边矩形坐标
     boxCoords = this._getArcBoxCoords(strokeStyle);
     // 计算圆角半径

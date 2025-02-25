@@ -831,6 +831,7 @@ export default class StageStore implements IStageStore {
       status: ElementStatus.creating,
       isOnStage: true,
       isProvisional: true,
+      isSelected: true,
     });
   }
 

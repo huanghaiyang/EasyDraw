@@ -630,6 +630,7 @@ export default class MathUtils {
    * @returns
    */
   static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number): IPoint[] {
+    if (leanXAngle === 0 && leanYAngle === 0) return points;
     const center = MathUtils.calcCenter(points);
     return MathUtils.batchLeanWithCenter(points, -leanXAngle, -leanYAngle, center);
   }
