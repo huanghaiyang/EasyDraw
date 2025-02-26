@@ -17,7 +17,7 @@ import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
 import IStageShield, { StageCalcParams } from "@/types/IStageShield";
 import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
-import { RenderParams } from "@/types/IRender";
+import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
@@ -690,5 +690,34 @@ export default class ElementUtils {
         break;
     }
     return model;
+  }
+
+  /**
+   * 计算arc舞台坐标
+   *
+   * @param arc
+   * @param params
+   * @returns
+   */
+  static calcStageRelativeArcPoint(arc: ArcPoints, params: StageCalcParams): ArcPoints {
+    const { start, end, controller, corner, value } = arc;
+    return {
+      start: ElementUtils.calcStageRelativePoint(start, params),
+      end: ElementUtils.calcStageRelativePoint(end, params),
+      controller: ElementUtils.calcStageRelativePoint(controller, params),
+      corner: ElementUtils.calcStageRelativePoint(corner, params),
+      value,
+    };
+  }
+
+  /**
+   * 批量计算arc舞台坐标
+   *
+   * @param arcCoords
+   * @param params
+   * @returns
+   */
+  static batchCalcStageRelativeArcPoints(arcCoords: ArcPoints[], params: StageCalcParams): ArcPoints[] {
+    return arcCoords.map(arc => ElementUtils.calcStageRelativeArcPoint(arc, params));
   }
 }

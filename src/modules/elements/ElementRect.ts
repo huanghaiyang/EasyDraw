@@ -16,6 +16,10 @@ export default class ElementRect extends Element implements IElementRect {
   _originalCorner: number[] = [];
   _originalCornerPoints: IPoint[] = [];
   _originalAllCornerEqual: boolean = false;
+  _arcCoords: ArcPoints[][] = [];
+  _arcFillCoords: ArcPoints[] = [];
+  _arcPoints: ArcPoints[][] = [];
+  _arcFillPoints: ArcPoints[] = [];
 
   get cornersModifyEnable(): boolean {
     return true;
@@ -49,13 +53,29 @@ export default class ElementRect extends Element implements IElementRect {
     return uniq(this.model.corners).length === 1;
   }
 
+  get arcCoords(): ArcPoints[][] {
+    return this._arcCoords;
+  }
+
+  get arcFillCoords(): ArcPoints[] {
+    return this._arcFillCoords;
+  }
+
   get arcPoints(): ArcPoints[][] {
-    return this.model.styles.strokes.map(strokeStyle => {
-      return this._getArcVerticalPoints(strokeStyle);
-    });
+    return this._arcPoints;
   }
 
   get arcFillPoints(): ArcPoints[] {
+    return this._arcFillPoints;
+  }
+
+  calcArcCoords(): ArcPoints[][] {
+    return this.model.styles.strokes.map(strokeStyle => {
+      return this._getArcVerticalCoords(strokeStyle);
+    });
+  }
+
+  calcArcFillCoords(): ArcPoints[] {
     const index = this.innermostStrokePointsIndex;
     let strokeStyle = this.model.styles.strokes[index];
     let { width, type } = strokeStyle;
@@ -74,7 +94,17 @@ export default class ElementRect extends Element implements IElementRect {
       }
     }
     strokeStyle = { ...strokeStyle, type: StrokeTypes.inside, width };
-    return this._getArcVerticalPoints(strokeStyle);
+    return this._getArcVerticalCoords(strokeStyle);
+  }
+
+  calcArcPoints(): ArcPoints[][] {
+    return this.arcCoords.map(coords => {
+      return ElementUtils.batchCalcStageRelativeArcPoints(coords, this.shield.stageCalcParams);
+    });
+  }
+
+  calcArcFillPoints(): ArcPoints[] {
+    return ElementUtils.batchCalcStageRelativeArcPoints(this._arcFillCoords, this.shield.stageCalcParams);
   }
 
   /**
@@ -191,7 +221,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param strokeStyle
    * @returns
    */
-  private _getArcVerticalPoints(strokeStyle: StrokeStyle): ArcPoints[] {
+  private _getArcVerticalCoords(strokeStyle: StrokeStyle): ArcPoints[] {
     // 计算原始矩形的坐标
     let boxCoords = this.calcUnLeanBoxCoords();
     // 计算描边矩形坐标
@@ -226,15 +256,12 @@ export default class ElementRect extends Element implements IElementRect {
           end = boxCoords[index];
         }
       }
-      start = ElementUtils.calcStageRelativePoint(start, this.shield.stageCalcParams);
-      end = ElementUtils.calcStageRelativePoint(end, this.shield.stageCalcParams);
-      controller = ElementUtils.calcStageRelativePoint(controller, this.shield.stageCalcParams);
       result.push({
         start,
         controller,
         end,
         value,
-        corner: ElementUtils.calcStageRelativePoint(rCoord, this.shield.stageCalcParams),
+        corner: rCoord,
       });
     });
     return result;
@@ -377,6 +404,16 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 刷新边框
+   */
+  refreshStrokes(): void {
+    this._arcCoords = this.calcArcCoords();
+    this._arcPoints = this.calcArcPoints();
+    this._arcFillCoords = this.calcArcFillCoords();
+    this._arcFillPoints = this.calcArcFillPoints();
+  }
+
+  /**
    * 刷新
    * @param options
    * @param subOptions
@@ -384,6 +421,7 @@ export default class ElementRect extends Element implements IElementRect {
   refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void {
     super.refresh(options, subOptions);
     this.refreshCorners();
+    this.refreshStrokes();
   }
 
   /**
@@ -411,6 +449,55 @@ export default class ElementRect extends Element implements IElementRect {
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
     this.refreshOriginalCornerProps();
+  }
+
+  /**
+   * 设置圆角
+   *
+   * @param value
+   * @param index
+   */
+  setCorners(value: number, index?: number): void {
+    super.setCorners(value, index);
+    this.refreshStrokes();
+  }
+
+  /**
+   * 设置边框宽度
+   * @param value
+   * @param index
+   */
+  setStrokeWidth(value: number, index: number): void {
+    super.setStrokeWidth(value, index);
+    this.refreshStrokes();
+  }
+
+  /**
+   * 设置边框类型
+   * @param value
+   * @param index
+   */
+  setStrokeType(value: StrokeTypes, index: number): void {
+    super.setStrokeType(value, index);
+    this.refreshStrokes();
+  }
+
+  /**
+   * 添加描边
+   * @param prevIndex 新描边要插入的索引位置（从0开始）
+   */
+  addStroke(prevIndex: number): void {
+    super.addStroke(prevIndex);
+    this.refreshStrokes();
+  }
+
+  /**
+   * 删除描边
+   * @param index
+   */
+  removeStroke(index: number): void {
+    super.removeStroke(index);
+    this.refreshStrokes();
   }
 
   /**
