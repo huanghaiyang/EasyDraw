@@ -824,8 +824,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isDragging = false;
     }
-    // 刷新组件坐标数据
-    this.store.refreshElementsPosition(this.store.selectedElements);
   }
 
   /**

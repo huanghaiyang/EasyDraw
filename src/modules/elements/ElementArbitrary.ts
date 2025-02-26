@@ -119,21 +119,13 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     this._outerPaths = this.calcOuterPaths();
     this._outerWorldPaths = this.calcOuterWorldPaths();
   }
-
-  /**
-   * 刷新组件的点坐标数据
-   */
-  refreshPoints(): void {
-    super.refreshPoints();
-    this.refreshOuters();
-  }
-
+  
   /**
    * 刷新边框线段点坐标数据
    */
-  _refreshOutlinePoints(): void {
+  refreshOutlinePoints(): void {
     this.refreshOuters();
-    super._refreshOutlinePoints();
+    super.refreshOutlinePoints();
   }
 
   /**

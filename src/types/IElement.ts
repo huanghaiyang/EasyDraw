@@ -159,6 +159,9 @@ export type RefreshOptions = {
   rotation?: boolean;
   angles?: boolean;
   originals?: boolean;
+  outline?: boolean;
+  strokes?: boolean;
+  corners?: boolean;
 };
 
 // 默认刷新选项
@@ -169,6 +172,9 @@ export const DefaultElementRefreshOptions: RefreshOptions = {
   rotation: true,
   angles: true,
   originals: true,
+  outline: true,
+  strokes: true,
+  corners: true,
 };
 
 // 舞台组件（组件）
@@ -610,6 +616,21 @@ export default interface IElement {
   refreshOriginalAngle(): void;
 
   /**
+   * 刷新原始属性
+   */
+  refreshOutlinePoints(): void;
+
+  /**
+   * 刷新边框
+   */
+  refreshStrokePoints(): void;
+
+  /**
+   * 刷新圆角
+   */
+  refreshCorners(): void;
+
+  /**
    * 刷新
    * @param options 刷新选项
    * @param subOptions 子选项
@@ -817,7 +838,7 @@ export default interface IElement {
   /**
    * 刷新原始模型坐标
    */
-  refreshoriginalCoords(): void;
+  refreshOriginalCoords(): void;
 
   /**
    * 刷新原始变换器点坐标

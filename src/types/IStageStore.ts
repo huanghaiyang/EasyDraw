@@ -105,8 +105,6 @@ export default interface IStageStore extends IStageSetter {
   refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void;
   // 刷新组件角度
   refreshElementsOriginalAngles(elements: IElement[], options?: RefreshSubOptions): void;
-  // 刷新组件位置
-  refreshElementsPosition(elements: IElement[]): void;
   // 遍历组件
   forEach(callback: (element: IElement, index: number) => void): void;
   // 刷新舞台组件

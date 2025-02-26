@@ -856,18 +856,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 选中并刷新组件
-   *
-   * @param element
-   */
-  private _selectAndRefreshProvisionalElement(element: IElement): void {
-    if (element) {
-      this.selectElement(element);
-      element.refresh({ points: true, rotation: true });
-    }
-  }
-
-  /**
    * 在当前鼠标位置创建临时组件
    *
    * @param coords
@@ -890,7 +878,8 @@ export default class StageStore implements IStageStore {
       default:
         break;
     }
-    this._selectAndRefreshProvisionalElement(element);
+    this.selectElement(element);
+    element.refresh();
     return element;
   }
 
@@ -939,8 +928,8 @@ export default class StageStore implements IStageStore {
       element = this._createProvisionalElement(model) as ElementArbitrary;
       element.tailCoordIndex = 0;
     }
-    element.refresh({ size: true });
-    this._selectAndRefreshProvisionalElement(element);
+    this.selectElement(element);
+    element.refresh({ size: true, points: true, position: true });
     return element;
   }
 
@@ -1028,7 +1017,7 @@ export default class StageStore implements IStageStore {
       x,
       y,
     });
-    element.refresh({ points: true, rotation: true, position: true });
+    element.refresh({ points: true, rotation: true, position: true, outline: true, strokes: true, corners: true });
   }
 
   /**
@@ -1162,17 +1151,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 舞台位置移动时，实时更新组件坐标
-   *
-   * @param elements
-   */
-  refreshElementsPosition(elements: IElement[]): void {
-    elements.forEach(element => {
-      element.refresh({ points: true, rotation: true, position: true });
-    });
-  }
-
-  /**
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
   refreshStageElements(): void {
@@ -1181,7 +1159,7 @@ export default class StageStore implements IStageStore {
       const element = node.value;
       const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
       this.updateElementById(element.id, { isOnStage });
-      element.refresh({ points: true, rotation: true, originals: true });
+      element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });
     });
   }
 
@@ -1355,7 +1333,7 @@ export default class StageStore implements IStageStore {
       status: ElementStatus.finished,
       isSelected: true,
     });
-    element.refresh({ points: true, rotation: true, originals: true });
+    element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });
     return element;
   }
 

@@ -353,6 +353,8 @@ export default class StageSelection implements IStageSelection {
           size: true,
           rotation: true,
           angles: true,
+          outline: true,
+          strokes: true,
         });
       } else {
         this.rangeElement.refresh();

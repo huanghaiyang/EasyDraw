@@ -309,7 +309,7 @@ export const useStageStore = defineStore("stage", {
      * @param corners
      */
     onCornersChanged(element: IElement, corners: number[]) {
-      this.corners = corners;
+      this.corners = [...corners];
     },
     /**
      * X轴翻转变化
@@ -345,7 +345,7 @@ export const useStageStore = defineStore("stage", {
      * @param stroke
      */
     onStrokesChanged(element: IElement, strokes: StrokeStyle[]) {
-      this.strokes = strokes;
+      this.strokes = cloneDeep(strokes);
     },
     /**
      * 组件填充变化
@@ -354,7 +354,7 @@ export const useStageStore = defineStore("stage", {
      * @param fills
      */
     onFillsChanged(element: IElement, fills: StrokeStyle[]) {
-      this.fills = fills;
+      this.fills = cloneDeep(fills);
     },
     /**
      * 组件字体大小变化

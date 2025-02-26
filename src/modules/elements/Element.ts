@@ -37,11 +37,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 所属节点
   node: ILinkedNode<IElement>;
   // 原始变换器点坐标
-  _originalTransformerPoints: IPoint[];
+  _originalTransformerPoints: IPoint[] = [];
   // 原始模型坐标
-  _originalCoords: IPoint[];
+  _originalCoords: IPoint[] = [];
   // 原始模型盒模型坐标
-  _originalBoxCoords: IPoint[];
+  _originalBoxCoords: IPoint[] = [];
   // 原始变换矩阵
   _originalTransformMatrix: number[][] = [];
   // 变换矩阵
@@ -103,13 +103,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 最小倾斜矩阵垂直尺寸
   _minParallelogramVerticalSize: number;
   // 描边坐标-世界坐标系
-  _strokeCoords: IPoint[][];
+  _strokeCoords: IPoint[][] = [];
   // 描边坐标-舞台坐标系
-  _strokePoints: IPoint[][];
+  _strokePoints: IPoint[][] = [];
   // 不倾斜描边坐标-世界坐标系
-  _unLeanStrokeCoords: IPoint[][];
+  _unLeanStrokeCoords: IPoint[][] = [];
   // 不倾斜描边坐标-舞台坐标系
-  _unLeanStrokePoints: IPoint[][];
+  _unLeanStrokePoints: IPoint[][] = [];
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
@@ -201,7 +201,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   get innermostStrokePointsIndex(): number {
     let result = 0;
     let innerWidth = 0;
-    this.strokePoints.forEach((points, index) => {
+    this._strokePoints.forEach((points, index) => {
       const { width, type } = this.model.styles.strokes[index];
       if (type === StrokeTypes.middle && innerWidth < width / 2) {
         innerWidth = width / 2;
@@ -219,7 +219,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 获取最内边框线段点
    */
   get innermostStrokePoints(): IPoint[] {
-    return this.strokePoints[this.innermostStrokePointsIndex];
+    return this._strokePoints[this.innermostStrokePointsIndex];
   }
 
   // 是否翻转X轴
@@ -1192,7 +1192,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   calcViewAngle(): number {
     if (!this.viewAngleCalcEnable) return this.model.angle;
-    return MathUtils.calcViewAngleByPoints(this.rotateBoxCoords);
+    return MathUtils.calcViewAngleByPoints(this._rotateBoxCoords);
   }
 
   /**
@@ -1258,14 +1258,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._unLeanBoxPoints = this.calcUnLeanBoxPoints();
     // 计算变换器
     this._transformers = this.calcTransformers();
-    // 计算边框坐标
-    this._strokeCoords = this.calcStrokeCoords();
-    // 计算边框点坐标
-    this._strokePoints = this.calcStrokePoints();
-    // 计算非倾斜边框坐标
-    this._unLeanStrokeCoords = this.calcUnLeanStrokeCoords();
-    // 计算非倾斜边框点坐标
-    this._unLeanStrokePoints = this.calcUnLeanStrokePoints();
     // 判断是否启用旋转
     if (this.rotationEnable) {
       // 计算旋转控制器
@@ -1280,8 +1272,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._maxBoxPoints = this.calcMaxBoxPoints();
     // 计算矩形
     this._rect = this.calcRect();
-    // 刷新边框路径点
-    this._refreshOutlinePoints();
   }
 
   /**
@@ -1352,7 +1342,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始坐标
    */
-  refreshoriginalCoords() {
+  refreshOriginalCoords() {
     // 维护原始模型坐标
     this._originalCoords = cloneDeep(this.model.coords);
     // 维护原始模型盒模型坐标
@@ -1366,7 +1356,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalProps(): void {
     // 维护原始模型坐标
-    this.refreshoriginalCoords();
+    this.refreshOriginalCoords();
     // 维护原始变换器坐标
     this.refreshOriginalTransformerPoints();
     // 维护原始组件属性
@@ -1469,6 +1459,9 @@ export default class Element implements IElement, ILinkedNodeValue {
         size: true,
         position: true,
         angles: true,
+        outline: true,
+        strokes: true,
+        corners: true,
       },
       { angles: { view: true, actual: true } },
     );
@@ -1548,6 +1541,9 @@ export default class Element implements IElement, ILinkedNodeValue {
         size: true,
         position: true,
         angles: true,
+        outline: true,
+        strokes: true,
+        corners: true,
       },
       { angles: { view: true, actual: true } },
     );
@@ -1792,6 +1788,9 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 刷新组件必要数据
+   *
+   * 注意：
+   * 1. 不要调整刷新顺序
    * @param options
    * @param subOptions
    */
@@ -1809,12 +1808,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (options?.rotation) this.refreshRotation();
     // 刷新原始属性
     if (options?.originals) this.refreshOriginalProps();
+    // 刷新圆角
+    if (options?.corners) this.refreshCorners();
+    // 刷新边框
+    if (options?.strokes) this.refreshStrokePoints();
+    // 刷新外轮廓
+    if (options?.outline) this.refreshOutlinePoints();
   }
 
   /**
    * 刷新与边框设置相关的坐标
    */
-  _refreshOutlinePoints(): void {
+  refreshOutlinePoints(): void {
     // 计算旋转后的边框路径坐标
     this._rotateOutlineCoords = this.calcRotateOutlineCoords();
     // 计算旋转后的边框路径点
@@ -1872,6 +1877,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       position: true,
       rotation: true,
       originals: true,
+      outline: true,
+      strokes: true,
+      corners: true,
     });
   }
 
@@ -1896,6 +1904,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       position: true,
       rotation: true,
       originals: true,
+      outline: true,
+      strokes: true,
+      corners: true,
     });
   }
 
@@ -1980,6 +1991,20 @@ export default class Element implements IElement, ILinkedNodeValue {
   refreshCorners(): void {}
 
   /**
+   * 刷新边框
+   */
+  refreshStrokePoints(): void {
+    // 计算边框坐标
+    this._strokeCoords = this.calcStrokeCoords();
+    // 计算边框点坐标
+    this._strokePoints = this.calcStrokePoints();
+    // 计算非倾斜边框坐标
+    this._unLeanStrokeCoords = this.calcUnLeanStrokeCoords();
+    // 计算非倾斜边框点坐标
+    this._unLeanStrokePoints = this.calcUnLeanStrokePoints();
+  }
+
+  /**
    * 设置圆角
    *
    * @param value
@@ -1991,7 +2016,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     else values.fill(value);
     values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
     this.model.corners = values;
-    this.refreshCorners();
+    this.refresh({ corners: true, strokes: true });
   }
 
   /**
@@ -2002,7 +2027,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes, index: number): void {
     this.model.styles.strokes[index].type = value;
-    this._refreshOutlinePoints();
+    this.refresh({ outline: true, strokes: true });
   }
 
   /**
@@ -2033,7 +2058,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeWidth(value: number, index: number): void {
     this.model.styles.strokes[index].width = value;
-    this._refreshOutlinePoints();
+    this.refresh({ outline: true, strokes: true });
   }
 
   /**
@@ -2045,7 +2070,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const strokes = cloneDeep(this.model.styles.strokes);
     strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
     this.model.styles.strokes = strokes;
-    this._refreshOutlinePoints();
+    this.refresh({ outline: true, strokes: true });
   }
 
   /**
@@ -2057,7 +2082,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const strokes = cloneDeep(this.model.styles.strokes);
     strokes.splice(index, 1);
     this.model.styles.strokes = strokes;
-    this._refreshOutlinePoints();
+    this.refresh({ outline: true, strokes: true });
   }
 
   /**
@@ -2176,6 +2201,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       rotation: true,
       position: true,
       angles: true,
+      outline: true,
+      strokes: true,
+      corners: true,
     });
   }
 

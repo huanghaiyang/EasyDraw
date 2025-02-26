@@ -63,11 +63,11 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   get startRotatePathPoint(): IPoint {
-    return this.rotatePoints[0];
+    return this._rotatePoints[0];
   }
 
   get endRotatePathPoint(): IPoint {
-    return this.rotatePoints[1];
+    return this._rotatePoints[1];
   }
 
   get startCoord(): IPoint {
@@ -137,8 +137,8 @@ export default class ElementLine extends Element implements IElementLine {
   /**
    * 刷新轮廓坐标
    */
-  _refreshOutlinePoints(): void {
-    super._refreshOutlinePoints();
+  refreshOutlinePoints(): void {
+    super.refreshOutlinePoints();
     this.refreshBentOutline();
   }
 

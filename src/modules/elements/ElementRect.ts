@@ -13,7 +13,6 @@ import CommonUtils from "@/utils/CommonUtils";
 export default class ElementRect extends Element implements IElementRect {
   _cornerControllers: ICornerController[] = [];
   _cornerPoints: IPoint[] = [];
-  _originalCorner: number[] = [];
   _originalCornerPoints: IPoint[] = [];
   _originalAllCornerEqual: boolean = false;
   _arcCoords: ArcPoints[][] = [];
@@ -318,10 +317,10 @@ export default class ElementRect extends Element implements IElementRect {
   calcCornerPoint(index: number, real?: boolean): IPoint {
     const value = this.visualCorners[index];
     const coord = this.calcCornerCoord(index, real);
-    const controller = this.rotateBoxPoints[index];
+    const controller = this._rotateBoxPoints[index];
     let point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
     point = MathUtils.transWithCenter(point, this.angles, this.center);
-    const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(point, this.rotateBoxPoints);
+    const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(point, this._rotateBoxPoints);
     let start = crossPoints[indexes[index][0]];
     let end = crossPoints[indexes[index][1]];
     if (!start || !end) {
@@ -333,7 +332,7 @@ export default class ElementRect extends Element implements IElementRect {
       tAngle = 180 - tAngle;
     }
     const targetAngle = MathUtils.calcAngle(controller, end) + (flipX ? -tAngle / 2 : tAngle / 2);
-    const targetCenter = this._getCornerTargetPoint(index, this.rotateBoxPoints);
+    const targetCenter = this._getCornerTargetPoint(index, this._rotateBoxPoints);
     const ctLen = MathUtils.calcDistance(controller, targetCenter) * 2;
     const ratio = value / this.minParallelogramVerticalSize;
     const len = ctLen * ratio;
@@ -406,22 +405,12 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 刷新边框
    */
-  refreshStrokes(): void {
+  refreshStrokePoints(): void {
+    super.refreshStrokePoints();
     this._arcCoords = this.calcArcCoords();
     this._arcPoints = this.calcArcPoints();
     this._arcFillCoords = this.calcArcFillCoords();
     this._arcFillPoints = this.calcArcFillPoints();
-  }
-
-  /**
-   * 刷新
-   * @param options
-   * @param subOptions
-   */
-  refresh(options?: RefreshOptions, subOptions?: { angles?: RefreshAnglesOptions }): void {
-    super.refresh(options, subOptions);
-    this.refreshCorners();
-    this.refreshStrokes();
   }
 
   /**
@@ -438,7 +427,6 @@ export default class ElementRect extends Element implements IElementRect {
    * 刷新原始圆角属性
    */
   refreshOriginalCornerProps(): void {
-    this._originalCorner = cloneDeep(this.normalizeCorners);
     this._originalCornerPoints = cloneDeep(this._cornerPoints);
     this._originalAllCornerEqual = this.isAllCornerEqual;
   }
@@ -449,55 +437,6 @@ export default class ElementRect extends Element implements IElementRect {
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
     this.refreshOriginalCornerProps();
-  }
-
-  /**
-   * 设置圆角
-   *
-   * @param value
-   * @param index
-   */
-  setCorners(value: number, index?: number): void {
-    super.setCorners(value, index);
-    this.refreshStrokes();
-  }
-
-  /**
-   * 设置边框宽度
-   * @param value
-   * @param index
-   */
-  setStrokeWidth(value: number, index: number): void {
-    super.setStrokeWidth(value, index);
-    this.refreshStrokes();
-  }
-
-  /**
-   * 设置边框类型
-   * @param value
-   * @param index
-   */
-  setStrokeType(value: StrokeTypes, index: number): void {
-    super.setStrokeType(value, index);
-    this.refreshStrokes();
-  }
-
-  /**
-   * 添加描边
-   * @param prevIndex 新描边要插入的索引位置（从0开始）
-   */
-  addStroke(prevIndex: number): void {
-    super.addStroke(prevIndex);
-    this.refreshStrokes();
-  }
-
-  /**
-   * 删除描边
-   * @param index
-   */
-  removeStroke(index: number): void {
-    super.removeStroke(index);
-    this.refreshStrokes();
   }
 
   /**
@@ -534,13 +473,13 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof CornerController) {
       const index = this.cornerControllers.indexOf(controller);
       if (index !== -1) {
-        const segmentStart = this._getCornerTargetPoint(index, this.rotateBoxPoints);
+        const segmentStart = this._getCornerTargetPoint(index, this._rotateBoxPoints);
         const originalPoint = this._originalCornerPoints[index];
         const currentPoint = {
           x: offset.x + originalPoint.x,
           y: offset.y + originalPoint.y,
         };
-        const segmentEnd = this.rotateBoxPoints[index];
+        const segmentEnd = this._rotateBoxPoints[index];
         const crossPoint = MathUtils.calcProjectionOnSegment(currentPoint, segmentStart, segmentEnd);
         let proportion = MathUtils.calcSegmentProportion(crossPoint, segmentStart, segmentEnd);
         proportion = clamp(proportion, 0, 1);
