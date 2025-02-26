@@ -8,6 +8,7 @@ import { cloneDeep, throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import { toRaw } from "vue";
 
 // 舞台实例
 const shield = new StageShield();
@@ -407,7 +408,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsPosition(value: IPoint): void {
-      shield.setElementsPosition(this.selectedElements, value);
+      shield.setElementsPosition(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -416,7 +417,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsLeft(value: number): void {
-      shield.setElementsPosition(this.selectedElements, {
+      shield.setElementsPosition(toRaw(this.selectedElements), {
         x: value,
         y: this.position.y,
       });
@@ -428,7 +429,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsTop(value: number): void {
-      shield.setElementsPosition(this.selectedElements, {
+      shield.setElementsPosition(toRaw(this.selectedElements), {
         x: this.position.x,
         y: value,
       });
@@ -440,7 +441,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsWidth(value: number): void {
-      shield.setElementsWidth(this.selectedElements, value);
+      shield.setElementsWidth(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -449,7 +450,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsHeight(value: number): void {
-      shield.setElementsHeight(this.selectedElements, value);
+      shield.setElementsHeight(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -458,7 +459,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsAngle(value: number): void {
-      shield.setElementsAngle(this.selectedElements, value);
+      shield.setElementsAngle(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -468,7 +469,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsCorners(value: number, index?: number): void {
-      shield.setElementsCorners(this.selectedElements, value, index);
+      shield.setElementsCorners(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -477,7 +478,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsLeanYAngle(value: number): void {
-      shield.setElementsLeanYAngle(this.selectedElements, value);
+      shield.setElementsLeanYAngle(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -487,7 +488,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeType(value: StrokeTypes, index: number): void {
-      shield.setElementsStrokeType(this.selectedElements, value, index);
+      shield.setElementsStrokeType(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -497,7 +498,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeWidth(value: number, index: number): void {
-      shield.setElementsStrokeWidth(this.selectedElements, value, index);
+      shield.setElementsStrokeWidth(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -507,7 +508,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeColor(value: string, index: number): void {
-      shield.setElementsStrokeColor(this.selectedElements, value, index);
+      shield.setElementsStrokeColor(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -517,7 +518,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeColorOpacity(value: number, index: number): void {
-      shield.setElementsStrokeColorOpacity(this.selectedElements, value, index);
+      shield.setElementsStrokeColorOpacity(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -526,7 +527,7 @@ export const useStageStore = defineStore("stage", {
      * @param prevIndex 添加描边的索引位置（从0开始）
      */
     addElementsStroke(prevIndex: number): void {
-      shield.addElementsStroke(this.selectedElements, prevIndex);
+      shield.addElementsStroke(toRaw(this.selectedElements), prevIndex);
     },
 
     /**
@@ -535,7 +536,7 @@ export const useStageStore = defineStore("stage", {
      * @param index 删除描边的索引位置（从0开始）
      */
     removeElementsStroke(index: number): void {
-      shield.removeElementsStroke(this.selectedElements, index);
+      shield.removeElementsStroke(toRaw(this.selectedElements), index);
     },
 
     /**
@@ -545,7 +546,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsFillColor(value: string, index: number): void {
-      shield.setElementsFillColor(this.selectedElements, value, index);
+      shield.setElementsFillColor(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -555,7 +556,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsFillColorOpacity(value: number, index: number): void {
-      shield.setElementsFillColorOpacity(this.selectedElements, value, index);
+      shield.setElementsFillColorOpacity(toRaw(this.selectedElements), value, index);
     },
 
     /**
@@ -564,7 +565,7 @@ export const useStageStore = defineStore("stage", {
      * @param prevIndex
      */
     addElementsFill(prevIndex: number): void {
-      shield.addElementsFill(this.selectedElements, prevIndex);
+      shield.addElementsFill(toRaw(this.selectedElements), prevIndex);
     },
 
     /**
@@ -573,7 +574,7 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     removeElementsFill(index: number): void {
-      shield.removeElementsFill(this.selectedElements, index);
+      shield.removeElementsFill(toRaw(this.selectedElements), index);
     },
 
     /**
@@ -582,7 +583,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsTextAlign(value: CanvasTextAlign): void {
-      shield.setElementsTextAlign(this.selectedElements, value);
+      shield.setElementsTextAlign(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -591,7 +592,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
-      shield.setElementsTextBaseline(this.selectedElements, value);
+      shield.setElementsTextBaseline(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -600,7 +601,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsFontSize(value: number): void {
-      shield.setElementsFontSize(this.selectedElements, value);
+      shield.setElementsFontSize(toRaw(this.selectedElements), value);
     },
 
     /**
@@ -609,7 +610,7 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsFontFamily(value: string): void {
-      shield.setElementsFontFamily(this.selectedElements, value);
+      shield.setElementsFontFamily(toRaw(this.selectedElements), value);
     },
     /**
      * 设置舞台缩放
@@ -643,63 +644,63 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setRatioLocked(value: boolean): void {
-      shield.setElementsRatioLocked(this.selectedElements, value);
+      shield.setElementsRatioLocked(toRaw(this.selectedElements), value);
     },
     /**
      * 左侧对齐
      */
     setElementsAlignLeft(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignLeft(this.selectedElements);
+      shield.setElementsAlignLeft(toRaw(this.selectedElements));
     },
     /**
      * 水平居中对齐
      */
     setElementsAlignCenter(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignCenter(this.selectedElements);
+      shield.setElementsAlignCenter(toRaw(this.selectedElements));
     },
     /**
      * 右侧对齐
      */
     setElementsAlignRight(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignRight(this.selectedElements);
+      shield.setElementsAlignRight(toRaw(this.selectedElements));
     },
     /**
      * 顶部对齐
      */
     setElementsAlignTop(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignTop(this.selectedElements);
+      shield.setElementsAlignTop(toRaw(this.selectedElements));
     },
     /**
      * 垂直居中对齐
      */
     setElementsAlignMiddle(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignMiddle(this.selectedElements);
+      shield.setElementsAlignMiddle(toRaw(this.selectedElements));
     },
     /**
      * 底部对齐
      */
     setElementsAlignBottom(): void {
       if (!this.alignEnable) return;
-      shield.setElementsAlignBottom(this.selectedElements);
+      shield.setElementsAlignBottom(toRaw(this.selectedElements));
     },
     /**
      * 水平均分对齐
      */
     setElementsAverageVertical(): void {
       if (!this.averageEnable) return;
-      shield.setElementsAverageVertical(this.selectedElements);
+      shield.setElementsAverageVertical(toRaw(this.selectedElements));
     },
     /**
      * 垂直平均分对齐
      */
     setElementsAverageHorizontal(): void {
       if (!this.averageEnable) return;
-      shield.setElementsAverageHorizontal(this.selectedElements);
+      shield.setElementsAverageHorizontal(toRaw(this.selectedElements));
     },
     /**
      * 组件下移
@@ -708,7 +709,7 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsGoDown(): void {
       if (!this.layerGoDownEnable) return;
-      shield.setElementsGoDown(this.selectedElements);
+      shield.setElementsGoDown(toRaw(this.selectedElements));
     },
     /**
      * 组件上移
@@ -717,7 +718,7 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsShiftMove(): void {
       if (!this.layerShiftMoveEnable) return;
-      shield.setElementsShiftMove(this.selectedElements);
+      shield.setElementsShiftMove(toRaw(this.selectedElements));
     },
     /**
      * 上传图片
