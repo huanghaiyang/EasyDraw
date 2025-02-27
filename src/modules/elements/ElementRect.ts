@@ -326,6 +326,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param index
    */
   refreshCornersController(index: number): void {
+    if (this._cornerCoords.length === 0) return;
     const { x, y } = this._cornerCoords[index];
     const points = this.getController4BoxCoords(this._cornerCoords[index]);
     if (!this._cornerControllers[index]) {
@@ -347,6 +348,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param index
    */
   refreshCornerCoords(index: number): void {
+    if (!this._rotateBoxCoords || !this._rotateBoxCoords.length) return;
     this._cornerCoords[index] = this.calcCornerCoord(index);
   }
 
@@ -388,7 +390,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshCorners(): void {
     super.refreshCorners();
-    if ( !this.isInMultiSelected) {
+    if (!this.isInMultiSelected) {
       this._refreshCorners();
     }
   }
