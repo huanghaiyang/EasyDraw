@@ -16,9 +16,9 @@ export default interface IController {
 
   /**
    * 是否命中点
-   * @param point 点坐标
+   * @param coord 点坐标
    */
-  isPointHitting(point: IPoint): boolean;
+  isCoordHitting(coord: IPoint): boolean;
 }
 
 // 点控制器
@@ -30,7 +30,7 @@ export interface IPointController extends IController, IPoint {
   // 盒模型坐标
   points: IPoint[];
   // 是否包含点
-  isContainsPoint(point: IPoint): boolean;
+  isContainsCoord(coord: IPoint): boolean;
 }
 
 // 线段控制器
@@ -40,7 +40,7 @@ export interface ISegmentController extends IController {
   // 结束点
   end: IPoint;
   // 是否接近
-  isClosest(point: IPoint): boolean;
+  isClosest(coord: IPoint): boolean;
 }
 
 // 圆角控制器

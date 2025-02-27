@@ -14,7 +14,7 @@ import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import PolygonUtils from "@/utils/PolygonUtils";
 import ElementImage from "@/modules/elements/ElementImage";
 import ElementTaskImage from "@/modules/render/shield/task/ElementTaskImage";
-import IStageShield, { StageCalcParams } from "@/types/IStageShield";
+import IStageShield from "@/types/IStageShield";
 import ElementTaskArbitrary from "@/modules/render/shield/task/ElementTaskArbitrary";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArcPoints, RenderParams } from "@/types/IRender";
@@ -94,26 +94,38 @@ export default class ElementUtils {
   /**
    * 计算世界坐标在画布坐标系下的坐标
    *
-   * @param worldCoords
-   * @param params
+   * @param coords
    * @returns
    */
-  static calcStageRelativePoints(worldCoords: IPoint[], params: StageCalcParams): IPoint[] {
-    return worldCoords.map(p => ElementUtils.calcStageRelativePoint(p, params));
+  static calcStageRelativePoints(coords: IPoint[]): IPoint[] {
+    return coords.map(p => ElementUtils.calcStageRelativePoint(p));
+  }
+
+  /**
+   * 批量计算世界坐标在画布坐标系下的坐标
+   *
+   * @param coords
+   * @returns
+   */
+  static batchCalcStageRelativePoints(coords: IPoint[][]): IPoint[][] {
+    return coords.map(coords => ElementUtils.calcStageRelativePoints(coords));
   }
 
   /**
    * 计算世界坐标在画布坐标系下的坐标
    *
-   * @param worldCoord
-   * @param params
+   * @param coord
    * @returns
    */
-  static calcStageRelativePoint(worldCoord: IPoint, params: StageCalcParams): IPoint {
-    const { scale, rect, worldCoord: center } = params;
+  static calcStageRelativePoint(coord: IPoint): IPoint {
+    const {
+      rect: { width, height },
+      scale,
+      worldCoord: { x, y },
+    } = window.shield.stageCalcParams;
     return {
-      x: worldCoord.x + rect.width / 2 / scale - center.x,
-      y: worldCoord.y + rect.height / 2 / scale - center.y,
+      x: coord.x + width / 2 / scale - x,
+      y: coord.y + height / 2 / scale - y,
     };
   }
 
@@ -121,24 +133,27 @@ export default class ElementUtils {
    * 计算世界坐标
    *
    * @param points
-   * @param params
    * @returns
    */
-  static calcWorldPoints(points: IPoint[], params: StageCalcParams): IPoint[] {
-    return points.map(p => ElementUtils.calcWorldPoint(p, params));
+  static calcWorldCoords(points: IPoint[]): IPoint[] {
+    return points.map(p => ElementUtils.calcWorldCoord(p));
   }
 
   /**
    * 计算世界坐标
    *
    * @param point
-   * @param params
    * @returns
    */
-  static calcWorldPoint(point: IPoint, params: StageCalcParams): IPoint {
+  static calcWorldCoord(point: IPoint): IPoint {
+    const {
+      rect: { width, height },
+      scale,
+      worldCoord: { x, y },
+    } = window.shield.stageCalcParams;
     return {
-      x: point.x - params.rect.width / 2 / params.scale + params.worldCoord.x,
-      y: point.y - params.rect.height / 2 / params.scale + params.worldCoord.y,
+      x: point.x - width / 2 / scale + x,
+      y: point.y - height / 2 / scale + y,
     };
   }
 
@@ -207,10 +222,10 @@ export default class ElementUtils {
    * @param elements
    * @param point
    */
-  static getTopAElementByPoint(elements: IElement[], point: IPoint): IElement {
+  static getTopAElementByCoord(elements: IElement[], point: IPoint): IElement {
     for (let i = elements.length - 1; i >= 0; i--) {
       const element = elements[i];
-      if (element.isContainsPoint(point)) {
+      if (element.isContainsCoord(point)) {
         return element;
       }
     }
@@ -224,11 +239,11 @@ export default class ElementUtils {
    */
   static calcElementRotatePoint(element: IElement): IPoint {
     const {
-      center,
+      centerCoord,
       rotation: { angle, scale },
       model: { height },
     } = element;
-    return MathUtils.calcTargetPoint(center, height / 2 + SelectionRotationMargin * scale, angle);
+    return MathUtils.calcTargetPoint(centerCoord, height / 2 + SelectionRotationMargin * scale, angle);
   }
 
   /**
@@ -249,22 +264,6 @@ export default class ElementUtils {
         return MathUtils.calcCenter(model.coords);
       }
     }
-  }
-
-  /**
-   * 移动坐标
-   *
-   * @param coords
-   * @param offset
-   * @returns
-   */
-  static translateCoords(coords: IPoint[], offset: IPoint): IPoint[] {
-    return coords.map(p => {
-      return {
-        x: p.x + offset.x,
-        y: p.y + offset.y,
-      };
-    });
   }
 
   /**
@@ -310,58 +309,41 @@ export default class ElementUtils {
   /**
    * 计算组件包含外边框宽度的坐标
    *
-   * @param points
+   * @param coords
    * @param strokeType
    * @param strokeWidth
    * @param options
    * @returns
    */
-  static calcOutlinePoints(points: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
+  static calcOutlinePoints(coords: IPoint[], strokeType: StrokeTypes, strokeWidth: number, options: RenderParams): IPoint[] {
     if (strokeWidth && strokeType !== StrokeTypes.inside) {
       let r = strokeWidth / 2;
       if (strokeType === StrokeTypes.outside) {
         r = strokeWidth;
       }
       const { flipX, flipY } = options;
-      return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(points, r, options) : ArbitraryUtils.getArbitraryOuterVertices(points, r, options);
+      return flipX !== flipY ? ArbitraryUtils.getArbitraryInnerVertices(coords, r, options) : ArbitraryUtils.getArbitraryOuterVertices(coords, r, options);
     }
-    return points;
-  }
-
-  /**
-   * 给定一个矩形的宽高，将其完全放入舞台中，计算世界坐标
-   *
-   * @param width
-   * @param height
-   * @param params
-   * @param padding
-   * @returns
-   */
-  static calcRectangleCoordsInStage(width: number, height: number, params: StageCalcParams, padding: number = 0): IPoint[] {
-    let { width: innerWidth, height: innerHeight } = CommonUtils.calcRectangleSizeInRect(width, height, CommonUtils.scaleRect(params.rect, 1 / params.scale), padding / params.scale);
-    innerWidth = MathUtils.precise(innerWidth * params.scale, 1);
-    innerHeight = MathUtils.precise(innerHeight * params.scale, 1);
-    const points = CommonUtils.calcCenterInnerRectPoints({ width: innerWidth, height: innerHeight }, params.rect);
-    return ElementUtils.calcWorldPoints(points, params);
+    return coords;
   }
 
   /**
    * 计算自由绘制非闭合线框区块
    *
-   * @param points
+   * @param coords
    * @param styles
    * @param isFold
    * @returns
    */
-  static calcNoFoldArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
+  static calcNoFoldArbitraryBorderRegions(coords: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
     const { width } = strokeStyle;
     const result: IPoint[][] = [];
-    points.forEach((current, index) => {
-      if (index < points.length - 1) {
-        const next = points[index + 1];
+    coords.forEach((current, index) => {
+      if (index < coords.length - 1) {
+        const next = coords[index + 1];
         result.push(PolygonUtils.calcBentLineOuterVertices([current, next], width / 2));
         if (index !== 0) {
-          const prev = points[index - 1];
+          const prev = coords[index - 1];
           result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, strokeStyle));
         }
       }
@@ -372,16 +354,16 @@ export default class ElementUtils {
   /**
    * 计算自由绘制闭合线框区块
    *
-   * @param points
+   * @param coords
    * @param styles
    * @returns
    */
-  static calcFoldArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
+  static calcFoldArbitraryBorderRegions(coords: IPoint[], strokeStyle: StrokeStyle): IPoint[][] {
     const { width } = strokeStyle;
     const result: IPoint[][] = [];
-    points.forEach((current, index) => {
-      const prev = CommonUtils.getPrevOfArray(points, index);
-      const next = CommonUtils.getNextOfArray(points, index);
+    coords.forEach((current, index) => {
+      const prev = CommonUtils.getPrevOfArray(coords, index);
+      const next = CommonUtils.getNextOfArray(coords, index);
       result.push(PolygonUtils.calcBentLineOuterVertices([current, next], width / 2));
       result.push(ElementUtils.calc3PArbitraryBorderRegions(prev, current, next, strokeStyle));
     });
@@ -391,14 +373,14 @@ export default class ElementUtils {
   /**
    * 计算自由绘制线框区块
    *
-   * @param points
+   * @param coords
    * @param styles
    * @param isFold
    * @returns
    */
-  static calcArbitraryBorderRegions(points: IPoint[], strokeStyle: StrokeStyle, isFold: boolean): IPoint[][] {
-    if (isFold) return ElementUtils.calcFoldArbitraryBorderRegions(points, strokeStyle);
-    return ElementUtils.calcNoFoldArbitraryBorderRegions(points, strokeStyle);
+  static calcArbitraryBorderRegions(coords: IPoint[], strokeStyle: StrokeStyle, isFold: boolean): IPoint[][] {
+    if (isFold) return ElementUtils.calcFoldArbitraryBorderRegions(coords, strokeStyle);
+    return ElementUtils.calcNoFoldArbitraryBorderRegions(coords, strokeStyle);
   }
 
   /**
@@ -436,21 +418,17 @@ export default class ElementUtils {
   /**
    * 通过旋转坐标计算旋转前的坐标
    *
-   * @param rotatePoints
+   * @param rotateCoords
    * @param angles
-   * @param lockPoint
+   * @param lockCoord
    * @param params
    * @returns
    */
-  static calcCoordsByTransPoints(rotatePoints: IPoint[], angles: Partial<AngleModel>, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+  static calcCoordsByTransPoints(rotateCoords: IPoint[], angles: Partial<AngleModel>, lockCoord: IPoint): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.transWithCenter(point, angles, lockPoint, true)));
+    const centerCoord = MathUtils.calcCenter(rotateCoords.map(point => MathUtils.transWithCenter(point, angles, lockCoord, true)));
     // 计算旋转后的中心点
-    center = MathUtils.transWithCenter(center, angles, lockPoint);
-    // 计算中心点世界坐标
-    const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
-    // 计算旋转后的坐标
-    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
+    const newCenterCoord = MathUtils.transWithCenter(centerCoord, angles, lockCoord);
     // 计算旋转后的坐标
     return rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angles.angle, newCenterCoord));
   }
@@ -458,21 +436,17 @@ export default class ElementUtils {
   /**
    * 通过旋转坐标计算旋转前的坐标
    *
-   * @param rotatePoints
+   * @param rotateCoords
    * @param angle
-   * @param lockPoint
+   * @param lockCoord
    * @param params
    * @returns
    */
-  static calcCoordsByRotatePoints(rotatePoints: IPoint[], angle: number, lockPoint: IPoint, params: StageCalcParams): IPoint[] {
+  static calcCoordsByRotatePoints(rotateCoords: IPoint[], angle: number, lockCoord: IPoint): IPoint[] {
     // 计算中心点
-    let center = MathUtils.calcCenter(rotatePoints.map(point => MathUtils.rotateWithCenter(point, -angle, lockPoint)));
+    let centerCoord = MathUtils.calcCenter(rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angle, lockCoord)));
     // 计算旋转后的中心点
-    center = MathUtils.rotateWithCenter(center, angle, lockPoint);
-    // 计算中心点世界坐标
-    const newCenterCoord = ElementUtils.calcWorldPoint(center, params);
-    // 计算旋转后的坐标
-    const rotateCoords = ElementUtils.calcWorldPoints(rotatePoints, params);
+    const newCenterCoord = MathUtils.rotateWithCenter(centerCoord, angle, lockCoord);
     // 计算旋转后的坐标
     return rotateCoords.map(point => MathUtils.rotateWithCenter(point, -angle, newCenterCoord));
   }
@@ -480,48 +454,48 @@ export default class ElementUtils {
   /**
    * 将给定点还原为未变形前的坐标并按照给定的矩阵进行变形
    *
-   * @param point
+   * @param coord
    * @param matrix
-   * @param lockPoint
+   * @param lockCoord
    * @param angles
    * @returns
    */
-  static normalizeMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+  static normalizeMatrixPoint(coord: IPoint, matrix: number[][], lockCoord: IPoint, angles: Partial<AngleModel>): IPoint {
     // 坐标重新按照角度反向偏转
-    point = MathUtils.transWithCenter(point, angles, lockPoint, true);
+    coord = MathUtils.transWithCenter(coord, angles, lockCoord, true);
     // 以不动点为圆心，计算形变
-    const [x, y] = multiply(matrix, [point.x - lockPoint.x, point.y - lockPoint.y, 1]);
+    const [x, y] = multiply(matrix, [coord.x - lockCoord.x, coord.y - lockCoord.y, 1]);
     // 重新计算坐标
-    return { x: x + lockPoint.x, y: y + lockPoint.y };
+    return { x: x + lockCoord.x, y: y + lockCoord.y };
   }
 
   /**
    * 计算矩阵变换后的点
    *
-   * @param point
+   * @param coord
    * @param matrix
-   * @param lockPoint
+   * @param lockCoord
    * @param angles
    * @returns
    */
-  static calcMatrixPoint(point: IPoint, matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint {
+  static calcMatrixPoint(coord: IPoint, matrix: number[][], lockCoord: IPoint, angles: Partial<AngleModel>): IPoint {
     // 还原并计算
-    const normalizedPoint = ElementUtils.normalizeMatrixPoint(point, matrix, lockPoint, angles);
+    const normalizedCoord = ElementUtils.normalizeMatrixPoint(coord, matrix, lockCoord, angles);
     // 坐标重新按照角度偏转
-    return MathUtils.transWithCenter(normalizedPoint, angles, lockPoint);
+    return MathUtils.transWithCenter(normalizedCoord, angles, lockCoord);
   }
 
   /**
    * 计算矩阵变换后的点
    *
-   * @param points
+   * @param coords
    * @param matrix
-   * @param lockPoint
+   * @param lockCoord
    * @param angles
    * @returns
    */
-  static calcMatrixPoints(points: IPoint[], matrix: number[][], lockPoint: IPoint, angles: Partial<AngleModel>): IPoint[] {
-    return points.map(point => ElementUtils.calcMatrixPoint(point, matrix, lockPoint, angles));
+  static calcMatrixPoints(coords: IPoint[], matrix: number[][], lockCoord: IPoint, angles: Partial<AngleModel>): IPoint[] {
+    return coords.map(coord => ElementUtils.calcMatrixPoint(coord, matrix, lockCoord, angles));
   }
 
   /**
@@ -666,10 +640,10 @@ export default class ElementUtils {
     const { coords, boxCoords } = model;
     model.x += dValue;
     model.y += dValue;
-    model.coords = MathUtils.batchTranslate(coords, { dx: dValue, dy: dValue });
+    model.coords = MathUtils.batchTranslate(coords, { x: dValue, y: dValue });
     model.boxCoords = MathUtils.batchTranslate(boxCoords, {
-      dx: dValue,
-      dy: dValue,
+      x: dValue,
+      y: dValue,
     });
     return model;
   }
@@ -696,16 +670,15 @@ export default class ElementUtils {
    * 计算arc舞台坐标
    *
    * @param arc
-   * @param params
    * @returns
    */
-  static calcStageRelativeArcPoint(arc: ArcPoints, params: StageCalcParams): ArcPoints {
+  static calcStageRelativeArcPoint(arc: ArcPoints): ArcPoints {
     const { start, end, controller, corner, value } = arc;
     return {
-      start: ElementUtils.calcStageRelativePoint(start, params),
-      end: ElementUtils.calcStageRelativePoint(end, params),
-      controller: ElementUtils.calcStageRelativePoint(controller, params),
-      corner: ElementUtils.calcStageRelativePoint(corner, params),
+      start: ElementUtils.calcStageRelativePoint(start),
+      end: ElementUtils.calcStageRelativePoint(end),
+      controller: ElementUtils.calcStageRelativePoint(controller),
+      corner: ElementUtils.calcStageRelativePoint(corner),
       value,
     };
   }
@@ -714,10 +687,19 @@ export default class ElementUtils {
    * 批量计算arc舞台坐标
    *
    * @param arcCoords
-   * @param params
    * @returns
    */
-  static batchCalcStageRelativeArcPoints(arcCoords: ArcPoints[], params: StageCalcParams): ArcPoints[] {
-    return arcCoords.map(arc => ElementUtils.calcStageRelativeArcPoint(arc, params));
+  static calcStageRelativeArcPoints(arcCoords: ArcPoints[]): ArcPoints[] {
+    return arcCoords.map(arc => ElementUtils.calcStageRelativeArcPoint(arc));
+  }
+
+  /**
+   * 批量计算arc舞台坐标
+   *
+   * @param arcCoords
+   * @returns
+   */
+  static batchCalcStageRelativeArcPoints(arcCoords: ArcPoints[][]): ArcPoints[][] {
+    return arcCoords.map(coords => ElementUtils.calcStageRelativeArcPoints(coords));
   }
 }

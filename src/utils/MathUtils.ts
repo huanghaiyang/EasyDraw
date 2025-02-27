@@ -1,7 +1,8 @@
 import { multiply, cos, sin, add, isPositive } from "mathjs";
-import { IPoint, ISize, ScaleValue, TranslationValue } from "@/types";
+import { IPoint, ISize, ScaleValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
+import { ArcPoints } from "@/types/IRender";
 
 // 直线类型
 export type DirectionLine = { point: IPoint; direction: IPoint };
@@ -28,14 +29,12 @@ export default class MathUtils {
    * @param value
    * @returns
    */
-  static translate(coord: IPoint, value: TranslationValue): IPoint {
+  static translate(coord: IPoint, value: IPoint): IPoint {
     if (!value) return coord;
-    if (value.dx === 0 && value.dy === 0) return coord;
-    const translationMatrix = MathUtils.calcTranslateMatrix(value.dx, value.dy);
-    const translatedPoint = multiply(translationMatrix, [coord.x, coord.y, 1]);
+    if (value.x === 0 && value.y === 0) return coord;
     return {
-      x: translatedPoint[0],
-      y: translatedPoint[1],
+      x: coord.x + value.x,
+      y: coord.y + value.y,
     };
   }
 
@@ -46,7 +45,7 @@ export default class MathUtils {
    * @param value
    * @returns
    */
-  static batchTranslate(coords: IPoint[], value: TranslationValue): IPoint[] {
+  static batchTranslate(coords: IPoint[], value: IPoint): IPoint[] {
     return coords.map(coord => this.translate(coord, value));
   }
 
@@ -327,8 +326,46 @@ export default class MathUtils {
    * @param value
    * @returns
    */
-  static rotateAndTranslate(coord: IPoint, angle: number, value: TranslationValue): IPoint {
+  static rotateAndTranslate(coord: IPoint, angle: number, value: IPoint): IPoint {
     return MathUtils.translate(MathUtils.rotate(coord, angle), value);
+  }
+
+  /**
+   * 平移弧线点
+   *
+   * @param arcPoints
+   * @param offset
+   * @returns
+   */
+  static translateArcPoint(arcPoints: ArcPoints, offset: IPoint): ArcPoints {
+    let { start, controller, end, corner, value } = arcPoints;
+    start = MathUtils.translate(start, offset);
+    controller = MathUtils.translate(controller, offset);
+    end = MathUtils.translate(end, offset);
+    corner = MathUtils.translate(corner, offset);
+    return { start, controller, end, corner, value };
+  }
+
+  /**
+   * 平移弧线点
+   *
+   * @param arcPoints
+   * @param offset
+   * @returns
+   */
+  static translateArcPoints(arcPoints: ArcPoints[], offset: IPoint): ArcPoints[] {
+    return arcPoints.map(arc => MathUtils.translateArcPoint(arc, offset));
+  }
+
+  /**
+   * 批量平移弧线点
+   *
+   * @param arcPoints
+   * @param offsets
+   * @returns
+   */
+  static batchTranslateArcPoints(arcPoints: ArcPoints[][], offset: IPoint): ArcPoints[][] {
+    return arcPoints.map((arc, index) => MathUtils.translateArcPoints(arc, offset));
   }
 
   /**

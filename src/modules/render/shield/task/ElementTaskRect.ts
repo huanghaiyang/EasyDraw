@@ -2,6 +2,7 @@ import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementRect } from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementTaskRect extends ElementTaskBase {
   get node() {
@@ -13,14 +14,14 @@ export default class ElementTaskRect extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const {
-      arcPoints,
-      arcFillPoints,
+      arcCoords,
+      arcFillCoords,
       model: { styles },
       angle,
       flipX,
       leanY,
       actualAngle,
-      rotateBoxPoints,
+      rotateBoxCoords,
       center,
     } = this.node;
 
@@ -30,6 +31,11 @@ export default class ElementTaskRect extends ElementTaskBase {
       leanY,
       actualAngle,
     };
+    
+    const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
+    const rotateBoxPoints = ElementUtils.calcStageRelativePoints(rotateBoxCoords);
+    const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
+
     let rect = CommonUtils.calcRotateBoxRect(rotateBoxPoints, center);
     rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
 

@@ -1,3 +1,4 @@
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { IElementEllipse } from "@/types/IElement";
 import CanvasUtils from "@/utils/CanvasUtils";
@@ -13,8 +14,8 @@ export default class ElementTaskEllipse extends ElementTaskBase {
    */
   async run(): Promise<void> {
     const {
-      innermostStrokePointsIndex,
-      unLeanStrokePoints,
+      innermostStrokeCoordIndex,
+      unLeanStrokeCoords,
       model: {
         styles,
         styles: { strokes },
@@ -32,8 +33,9 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       leanY,
       actualAngle,
     };
-
-    const innermostStrokePoints = unLeanStrokePoints[innermostStrokePointsIndex];
+    
+    const unLeanStrokePoints = ElementUtils.batchCalcStageRelativePoints(unLeanStrokeCoords);
+    const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
     const rect = CommonUtils.getRect(innermostStrokePoints);
 
     styles.fills.forEach(fillStyle => {

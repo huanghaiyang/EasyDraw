@@ -1,3 +1,4 @@
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import { ControllerStyle } from "@/styles/MaskStyles";
 import CanvasUtils from "@/utils/CanvasUtils";
@@ -12,6 +13,7 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
     const strokeStyle = { ...ControllerStyle.strokes[0] };
     const fillStyle = { ...ControllerStyle.fills[0] };
     radius /= CanvasUtils.scale;
+    point = ElementUtils.calcStageRelativePoint(point);
 
     CanvasUtils.drawEllipseFillWithScale(
       this.canvas,

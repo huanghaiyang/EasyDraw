@@ -8,7 +8,8 @@ export default class MaskTaskCursorPosition extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      await CanvasUtils.drawRotateTextWithScale(this.canvas, this.data.text, this.data.point, CursorPositionStyle, CursorPositionStyle.fills[0]);
+      let { text, point } = this.data;
+      await CanvasUtils.drawRotateTextWithScale(this.canvas, text, point, CursorPositionStyle, CursorPositionStyle.fills[0]);
     }
   }
 }

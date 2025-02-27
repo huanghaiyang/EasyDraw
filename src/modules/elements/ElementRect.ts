@@ -1,6 +1,6 @@
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
-import { IElementRect, RefreshAnglesOptions, RefreshOptions } from "@/types/IElement";
+import { IElementRect } from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CornerController from "@/modules/handler/controller/CornerController";
@@ -12,13 +12,13 @@ import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   _cornerControllers: ICornerController[] = [];
-  _cornerPoints: IPoint[] = [];
-  _originalCornerPoints: IPoint[] = [];
+  _cornerCoords: IPoint[] = [];
+  _originalCornerCoords: IPoint[] = [];
   _originalAllCornerEqual: boolean = false;
   _arcCoords: ArcPoints[][] = [];
   _arcFillCoords: ArcPoints[] = [];
-  _arcPoints: ArcPoints[][] = [];
-  _arcFillPoints: ArcPoints[] = [];
+  _originalArcCoords: ArcPoints[][] = [];
+  _originalArcFillCoords: ArcPoints[] = [];
 
   get cornersModifyEnable(): boolean {
     return true;
@@ -32,8 +32,8 @@ export default class ElementRect extends Element implements IElementRect {
     return this._normalizeCorners();
   }
 
-  get cornerPoints(): IPoint[] {
-    return this._cornerPoints;
+  get cornerCoords(): IPoint[] {
+    return this._cornerCoords;
   }
 
   get visualCorners(): number[] {
@@ -60,14 +60,6 @@ export default class ElementRect extends Element implements IElementRect {
     return this._arcFillCoords;
   }
 
-  get arcPoints(): ArcPoints[][] {
-    return this._arcPoints;
-  }
-
-  get arcFillPoints(): ArcPoints[] {
-    return this._arcFillPoints;
-  }
-
   calcArcCoords(): ArcPoints[][] {
     return this.model.styles.strokes.map(strokeStyle => {
       return this._getArcVerticalCoords(strokeStyle);
@@ -75,7 +67,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   calcArcFillCoords(): ArcPoints[] {
-    const index = this.innermostStrokePointsIndex;
+    const index = this.innermostStrokeCoordIndex;
     let strokeStyle = this.model.styles.strokes[index];
     let { width, type } = strokeStyle;
     switch (type) {
@@ -94,16 +86,6 @@ export default class ElementRect extends Element implements IElementRect {
     }
     strokeStyle = { ...strokeStyle, type: StrokeTypes.inside, width };
     return this._getArcVerticalCoords(strokeStyle);
-  }
-
-  calcArcPoints(): ArcPoints[][] {
-    return this.arcCoords.map(coords => {
-      return ElementUtils.batchCalcStageRelativeArcPoints(coords, this.shield.stageCalcParams);
-    });
-  }
-
-  calcArcFillPoints(): ArcPoints[] {
-    return ElementUtils.batchCalcStageRelativeArcPoints(this._arcFillCoords, this.shield.stageCalcParams);
   }
 
   /**
@@ -235,7 +217,7 @@ export default class ElementRect extends Element implements IElementRect {
       // 当前圆角半径
       const value = corner[index];
       // 计算圆角控制点并转换为旋转过的坐标
-      const rCoord = this.calcCornerCoordBy(coord, index, value);
+      const rCoord = this.calcUnLeanCornerCoordBy(coord, index, value);
       // 当前顶点（旋转过的坐标）
       let controller: IPoint = boxCoords[index];
       let start: IPoint, end: IPoint;
@@ -273,10 +255,10 @@ export default class ElementRect extends Element implements IElementRect {
    * @param real
    * @returns
    */
-  calcCornerCoord(index: number, real?: boolean): IPoint {
+  calcUnLeanCornerCoord(index: number, real?: boolean): IPoint {
     const value = real ? this.normalizeCorners[index] : this.visualCorners[index];
     const coord = MathUtils.leanWithCenter(this.model.boxCoords[index], this.model.leanXAngle, -this.model.leanYAngle, this.centerCoord);
-    return this.calcCornerCoordBy(coord, index, value);
+    return this.calcUnLeanCornerCoordBy(coord, index, value);
   }
 
   /**
@@ -287,22 +269,22 @@ export default class ElementRect extends Element implements IElementRect {
    * @param value
    * @returns
    */
-  calcCornerCoordBy(point: IPoint, index: number, value: number): IPoint {
+  calcUnLeanCornerCoordBy(point: IPoint, index: number, value: number): IPoint {
     if (value === 0) return point;
-    let dx: number, dy: number;
+    let x: number, y: number;
     if ([0, 3].includes(index)) {
-      dx = this.flipX ? -value : value;
+      x = this.flipX ? -value : value;
     } else {
-      dx = this.flipX ? value : -value;
+      x = this.flipX ? value : -value;
     }
     if ([0, 1].includes(index)) {
-      dy = value;
+      y = value;
     } else {
-      dy = -value;
+      y = -value;
     }
     const coord = MathUtils.translate(point, {
-      dx,
-      dy,
+      x,
+      y,
     });
     return coord;
   }
@@ -314,13 +296,12 @@ export default class ElementRect extends Element implements IElementRect {
    * @param real
    * @returns
    */
-  calcCornerPoint(index: number, real?: boolean): IPoint {
+  calcCornerCoord(index: number, real?: boolean): IPoint {
+    const controller = this._rotateBoxCoords[index];
     const value = this.visualCorners[index];
-    const coord = this.calcCornerCoord(index, real);
-    const controller = this._rotateBoxPoints[index];
-    let point = ElementUtils.calcStageRelativePoint(coord, this.shield.stageCalcParams);
-    point = MathUtils.transWithCenter(point, this.angles, this.center);
-    const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(point, this._rotateBoxPoints);
+    let coord = this.calcUnLeanCornerCoord(index, real);
+    coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord);
+    const { coords: crossPoints, indexes } = this._getCrossPointsOfParallelLines(coord, this._rotateBoxCoords);
     let start = crossPoints[indexes[index][0]];
     let end = crossPoints[indexes[index][1]];
     if (!start || !end) {
@@ -332,7 +313,7 @@ export default class ElementRect extends Element implements IElementRect {
       tAngle = 180 - tAngle;
     }
     const targetAngle = MathUtils.calcAngle(controller, end) + (flipX ? -tAngle / 2 : tAngle / 2);
-    const targetCenter = this._getCornerTargetPoint(index, this._rotateBoxPoints);
+    const targetCenter = this._getCornerTargetCoord(index, this._rotateBoxCoords);
     const ctLen = MathUtils.calcDistance(controller, targetCenter) * 2;
     const ratio = value / this.minParallelogramVerticalSize;
     const len = ctLen * ratio;
@@ -345,8 +326,8 @@ export default class ElementRect extends Element implements IElementRect {
    * @param index
    */
   refreshCornersController(index: number): void {
-    const { x, y } = this._cornerPoints[index];
-    const points = this.getControllerPoints(this._cornerPoints[index]);
+    const { x, y } = this._cornerCoords[index];
+    const points = this.getController4BoxCoords(this._cornerCoords[index]);
     if (!this._cornerControllers[index]) {
       this._cornerControllers[index] = new CornerController(this, {
         x,
@@ -365,8 +346,8 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param index
    */
-  refreshCornersPoint(index: number): void {
-    this._cornerPoints[index] = this.calcCornerPoint(index);
+  refreshCornerCoords(index: number): void {
+    this._cornerCoords[index] = this.calcCornerCoord(index);
   }
 
   /**
@@ -374,10 +355,10 @@ export default class ElementRect extends Element implements IElementRect {
    *
    * @param options 刷新圆角选项
    */
-  refreshCornersPoints(indexes?: number[]): void {
+  refreshCornersCoords(indexes?: number[]): void {
     indexes = indexes || [0, 1, 2, 3];
     indexes.forEach(index => {
-      this.refreshCornersPoint(index);
+      this.refreshCornerCoords(index);
     });
   }
 
@@ -398,7 +379,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshCorners(): void {
     super.refreshCorners();
-    this.refreshCornersPoints();
+    this.refreshCornersCoords();
     this.refreshCornersControllers();
   }
 
@@ -408,9 +389,7 @@ export default class ElementRect extends Element implements IElementRect {
   refreshStrokePoints(): void {
     super.refreshStrokePoints();
     this._arcCoords = this.calcArcCoords();
-    this._arcPoints = this.calcArcPoints();
     this._arcFillCoords = this.calcArcFillCoords();
-    this._arcFillPoints = this.calcArcFillPoints();
   }
 
   /**
@@ -424,30 +403,32 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
-   * 刷新原始圆角属性
-   */
-  refreshOriginalCornerProps(): void {
-    this._originalCornerPoints = cloneDeep(this._cornerPoints);
-    this._originalAllCornerEqual = this.isAllCornerEqual;
-  }
-
-  /**
    * 刷新原始组件属性
    */
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
-    this.refreshOriginalCornerProps();
+    this._originalCornerCoords = cloneDeep(this._cornerCoords);
+    this._originalAllCornerEqual = this.isAllCornerEqual;
+  }
+
+  /**
+   * 重新维护原始描边
+   */
+  refreshOriginalStrokes(): void {
+    super.refreshOriginalStrokes();
+    this._originalArcCoords = cloneDeep(this._arcCoords);
+    this._originalArcFillCoords = cloneDeep(this._arcFillCoords);
   }
 
   /**
    * 获取圆角目标点
    * @param index 圆角索引
-   * @param boxPoints 原始点
+   * @param boxCoords 原始点
    */
-  private _getCornerTargetPoint(index: number, boxPoints: IPoint[]): IPoint {
+  private _getCornerTargetCoord(index: number, boxCoords: IPoint[]): IPoint {
     let point: IPoint;
-    let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxPoints);
-    const { width, height } = MathUtils.calcParallelogramVerticalSize(boxPoints);
+    let [c1, c2] = MathUtils.calculateAngleBisectorIntersection(boxCoords);
+    const { width, height } = MathUtils.calcParallelogramVerticalSize(boxCoords);
     if (width <= height) {
       if ([0, 1].includes(index)) {
         point = c1;
@@ -473,13 +454,13 @@ export default class ElementRect extends Element implements IElementRect {
     if (controller instanceof CornerController) {
       const index = this.cornerControllers.indexOf(controller);
       if (index !== -1) {
-        const segmentStart = this._getCornerTargetPoint(index, this._rotateBoxPoints);
-        const originalPoint = this._originalCornerPoints[index];
+        const segmentStart = this._getCornerTargetCoord(index, this._rotateBoxCoords);
+        const originalPoint = this._originalCornerCoords[index];
         const currentPoint = {
           x: offset.x + originalPoint.x,
           y: offset.y + originalPoint.y,
         };
-        const segmentEnd = this._rotateBoxPoints[index];
+        const segmentEnd = this._rotateBoxCoords[index];
         const crossPoint = MathUtils.calcProjectionOnSegment(currentPoint, segmentStart, segmentEnd);
         let proportion = MathUtils.calcSegmentProportion(crossPoint, segmentStart, segmentEnd);
         proportion = clamp(proportion, 0, 1);
@@ -501,5 +482,15 @@ export default class ElementRect extends Element implements IElementRect {
     const values = [...this.model.corners];
     if (every(values, value => value === 0)) return values;
     return ElementUtils.fixCornersBasedOnMinSize(values, this.minParallelogramVerticalSize);
+  }
+
+  /**
+   * 位移元素
+   * @param offset 位移量
+   */
+  translateBy(offset: IPoint): void {
+    this._arcCoords = MathUtils.batchTranslateArcPoints(this._originalArcCoords, offset);
+    this._arcFillCoords = MathUtils.translateArcPoints(this._originalArcFillCoords, offset);
+    super.translateBy(offset);
   }
 }

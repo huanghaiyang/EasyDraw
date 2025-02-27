@@ -22,9 +22,9 @@ export default class BaseController implements IController {
 
   /**
    * 是否命中点
-   * @param point 点坐标
+   * @param coord 点坐标
    */
-  isPointHitting(point: IPoint): boolean {
+  isCoordHitting(coord: IPoint): boolean {
     return false;
   }
 }

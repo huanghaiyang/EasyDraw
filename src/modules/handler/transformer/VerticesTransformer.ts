@@ -4,7 +4,7 @@ import PointController from "@/modules/handler/controller/PointController";
 
 export default class VerticesTransformer extends PointController implements IVerticesTransformer {
   get angle(): number {
-    const angle = MathUtils.calcAngle(this.host.center, {
+    const angle = MathUtils.calcAngle(this.host.centerCoord, {
       x: this.x,
       y: this.y,
     });

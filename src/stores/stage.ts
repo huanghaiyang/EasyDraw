@@ -16,7 +16,6 @@ const shield = new StageShield();
 const container = new StageContainer();
 // 配置
 shield.configure.config({ rotationIconEnable: true });
-window.shield = shield;
 
 // 舞台默认数据
 const DefaultStage = {

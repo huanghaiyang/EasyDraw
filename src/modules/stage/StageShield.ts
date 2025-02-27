@@ -160,6 +160,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
     this.renderer = new ShieldRenderer(this);
+
+    window.shield = this;
   }
 
   /**
@@ -477,7 +479,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
     // 只有在未对组件进行旋转/移动/形变的情况下才会启用组件命中逻辑
     if (this.isMoveableActive && !this.isElementsBusy) {
-      this.selection.hitTargetElements(this.cursor.value);
+      this.selection.hitTargetElements(this.cursor.worldValue);
     }
 
     // 判断鼠标是否按下
@@ -551,7 +553,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   private _tryActiveController(): IController {
-    return this.selection.tryActiveController(this.cursor.value);
+    return this.selection.tryActiveController(this.cursor.worldValue);
   }
 
   /**
@@ -573,8 +575,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(this.store.selectedElements, {
       isDragging: true,
     });
-    // 更新组件位置
-    this.store.updateSelectedElementsMovement(this.movingOffset);
+    this.store.selectedElements.forEach(element => {
+      element.translateBy(this.movingOffset);
+    });
     this.selection.refresh();
   }
 
@@ -625,9 +628,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _createRange(): void {
     // 计算选区
-    const rangePoints = CommonUtils.getBoxPoints([this._pressDownPosition, this._pressMovePosition]);
+    const rangeCoords = CommonUtils.getBoxPoints([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
     // 更新选区，命中组件
-    this.selection.setRange(rangePoints);
+    this.selection.setRange(rangeCoords);
   }
 
   /**
@@ -677,7 +680,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.elementsStatus = StageShieldElementsStatus.CORNER_MOVING;
       } else {
         // 获取鼠标点击的组件
-        const targetElement = this.selection.getElementOnPoint(this.cursor.value);
+        const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
         // 判断当前鼠标位置的组件是否已经被选中
         const isSelectContainsTarget = this.store.isSelectedContainsTarget();
         if (e.ctrlKey) {
@@ -877,7 +880,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
   private _selectTopAElement(elements: IElement[]): void {
-    const topAElement = ElementUtils.getTopAElementByPoint(elements, this.cursor.value);
+    const topAElement = ElementUtils.getTopAElementByCoord(elements, this.cursor.worldValue);
     this.store.deSelectElements(
       this.store.selectedElements.filter(element => {
         if (topAElement && topAElement.isGroup) {
@@ -935,7 +938,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcPressDown(e: MouseEvent): void {
     this._pressDownPosition = this.cursor.transform(e);
-    this._pressDownStageWorldCoord = this.calcWorldCoord(this._pressDownPosition);
+    this._pressDownStageWorldCoord = ElementUtils.calcWorldCoord(this._pressDownPosition);
   }
 
   /**
@@ -945,7 +948,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcPressUp(e: MouseEvent): void {
     this._pressUpPosition = this.cursor.transform(e);
-    this._pressUpStageWorldCoord = this.calcWorldCoord(this._pressUpPosition);
+    this._pressUpStageWorldCoord = ElementUtils.calcWorldCoord(this._pressUpPosition);
   }
 
   /**
@@ -955,7 +958,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcPressMove(e: MouseEvent): void {
     this._pressMovePosition = this.cursor.transform(e);
-    this._pressMoveStageWorldCoord = this.calcWorldCoord(this._pressMovePosition);
+    this._pressMoveStageWorldCoord = ElementUtils.calcWorldCoord(this._pressMovePosition);
   }
 
   /**
@@ -978,15 +981,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   checkCursorPressUpALittle(e: MouseEvent): boolean {
     return Math.abs(this._pressUpStageWorldCoord.x - this._pressDownStageWorldCoord.x) >= MinCursorMXD || Math.abs(this._pressUpStageWorldCoord.y - this._pressDownStageWorldCoord.y) >= MinCursorMYD;
-  }
-
-  /**
-   * 给定坐标计算距离世界坐标中心点的偏移
-   *
-   * @param pos
-   */
-  calcWorldCoord(pos: IPoint): IPoint {
-    return ElementUtils.calcWorldPoint(pos, this.stageCalcParams);
   }
 
   /**
@@ -1126,7 +1120,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _handleWheelScale(deltaScale: number, e: MouseEvent): void {
     const prevCursorPosition = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
-    const cursorCoord = ElementUtils.calcWorldPoint(prevCursorPosition, this.stageCalcParams);
+    const cursorCoord = ElementUtils.calcWorldCoord(prevCursorPosition);
     const value = this._checkScale(deltaScale);
     const cursorCoordOffsetX = (e.clientX - this.stageRect.left) / value;
     const cursorCoordOffsetY = (e.clientY - this.stageRect.top) / value;
@@ -1174,7 +1168,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   calcScaleAutoFitValue(): number {
-    const elementsBox = CommonUtils.getBoxPoints(this.store.visibleElements.map(element => element.maxOutlineBoxPoints).flat());
+    const elementsBox = CommonUtils.getBoxPoints(this.store.visibleElements.map(element => element.maxOutlineBoxCoords).flat());
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
 
@@ -1185,7 +1179,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   calcElementAutoFitValue(element: IElement): number {
-    return this.calcScaleAutoFitValueByBox(element.maxOutlineBoxPoints);
+    return this.calcScaleAutoFitValueByBox(element.maxOutlineBoxCoords);
   }
 
   /**

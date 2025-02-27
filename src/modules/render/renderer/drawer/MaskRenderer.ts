@@ -15,7 +15,6 @@ import { IMaskModel, IRotationModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
 import { DefaultControllerRadius, SelectionIndicatorMargin } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
-import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -127,21 +126,21 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    */
   private createMaskCursorPositionTask(): IRenderTask {
     // 获取当前光标位置（舞台坐标系）
-    const point = this.drawer.shield.cursor.value;
-    if (!point) return;
-
-    // 将舞台坐标转换为世界坐标
-    const coord = ElementUtils.calcWorldPoint(point, this.drawer.shield.stageCalcParams);
+    const {
+      cursor: { value, worldValue },
+      stageScale,
+    } = this.drawer.shield;
+    if (!worldValue) return;
 
     // 构建坐标显示模型
     const model: IMaskModel = {
       point: {
         // 在光标右下方20像素处显示（考虑舞台缩放比例）
-        x: point.x + 20 / this.drawer.shield.stageScale,
-        y: point.y + 20 / this.drawer.shield.stageScale,
+        x: value.x + 20 / stageScale,
+        y: value.y + 20 / stageScale,
       },
       type: DrawerMaskModelTypes.cursorPosition,
-      text: `${coord.x},${coord.y}`, // 格式化坐标值
+      text: `${MathUtils.precise(worldValue.x, 1)},${MathUtils.precise(worldValue.y, 1)}`, // 格式化坐标值
     };
 
     // 创建并返回渲染任务
@@ -264,16 +263,17 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
-        [p1, p2] = element.rotatePoints.sort((a, b) => a.x - b.x);
+        [p1, p2] = element.rotateCoords.sort((a, b) => a.x - b.x);
         break;
       }
       default: {
         if (element.model.angle % 90 === 0 && element.model.leanYAngle === 0) {
-          p1 = element.maxBoxPoints[3];
-          p2 = element.maxBoxPoints[2];
+          const { maxBoxCoords } = element;
+          p1 = maxBoxCoords[3];
+          p2 = maxBoxCoords[2];
         } else {
           // 获取最左侧，最下侧，最右侧三个点
-          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxPoints, true);
+          const [leftPoint, bottomPoint, rightPoint] = CommonUtils.getLBRPoints(element.rotateBoxCoords, true);
           // 计算最下侧点与最左侧点，最下侧点与最右侧点的夹角
           let leftAngle = MathUtils.transformToAcuteAngle(MathUtils.calcAngle(bottomPoint, leftPoint) + 180);
           // 计算最下侧点与最右侧点，最下侧点与最右侧点的夹角

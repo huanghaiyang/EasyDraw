@@ -62,12 +62,12 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get startRotatePathPoint(): IPoint {
-    return this._rotatePoints[0];
+  get startRotateCoord(): IPoint {
+    return this._rotateCoords[0];
   }
 
-  get endRotatePathPoint(): IPoint {
-    return this._rotatePoints[1];
+  get endRotateCoord(): IPoint {
+    return this._rotateCoords[1];
   }
 
   get startCoord(): IPoint {
@@ -78,12 +78,7 @@ export default class ElementLine extends Element implements IElementLine {
     return this.model.coords[1];
   }
 
-  private _outerPoints: IPoint[][] = [];
   private _outerCoords: IPoint[][] = [];
-
-  get outerPoints(): IPoint[][] {
-    return this._outerPoints;
-  }
 
   get outerCoords(): IPoint[][] {
     return this._outerCoords;
@@ -102,8 +97,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   private refreshBentOutline() {
     this._outerCoords = this.calcOuterCoords();
-    this._outerPoints = this.calcOuterPoints();
-    this._maxOutlineBoxPoints = CommonUtils.getBoxPoints(this._outerPoints.flat());
+    this._maxOutlineBoxCoords = CommonUtils.getBoxPoints(this._outerCoords.flat());
   }
 
   /**
@@ -112,15 +106,6 @@ export default class ElementLine extends Element implements IElementLine {
   refreshPoints(): void {
     super.refreshPoints();
     this.refreshBentOutline();
-  }
-
-  /**
-   * 计算外轮廓
-   *
-   * @returns
-   */
-  calcOuterPoints(): IPoint[][] {
-    return this._outerCoords.map(coords => ElementUtils.calcStageRelativePoints(coords, this.shield.stageCalcParams));
   }
 
   /**
@@ -157,20 +142,20 @@ export default class ElementLine extends Element implements IElementLine {
    * @param point
    * @returns
    */
-  isContainsPoint(point: IPoint): boolean {
+  isContainsCoord(coord: IPoint): boolean {
     return some(this.model.styles.strokes, stroke => {
-      return MathUtils.isPointClosestSegment(point, this.startRotatePathPoint, this.endRotatePathPoint, LineClosestMargin + stroke.width / 2 / this.shield.stageScale);
+      return MathUtils.isPointClosestSegment(coord, this.startRotateCoord, this.endRotateCoord, LineClosestMargin + stroke.width / 2 / this.shield.stageScale);
     });
   }
 
   /**
    * 是否与多边形相交
    *
-   * @param points
+   * @param coords
    */
-  isPolygonOverlap(points: IPoint[]): boolean {
-    return some(this._outerPoints, ps => {
-      return MathUtils.isPolygonsOverlap(ps, points);
+  isPolygonOverlap(coords: IPoint[]): boolean {
+    return some(this._outerCoords, ps => {
+      return MathUtils.isPolygonsOverlap(ps, coords);
     });
   }
 
@@ -181,7 +166,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this._outerPoints, ps => {
+    return some(this._outerCoords, ps => {
       return MathUtils.isPolygonsOverlap(ps, coords);
     });
   }
@@ -194,11 +179,11 @@ export default class ElementLine extends Element implements IElementLine {
   doVerticesTransform(offset: IPoint): void {
     const index = this._transformers.findIndex(transformer => transformer.isActive);
     if (index !== -1) {
-      const lockPoint = this._originalTransformerPoints[CommonUtils.getNextIndexOfArray(2, index, 1)];
+      const lockCoord = this._originalTransformerCoords[CommonUtils.getNextIndexOfArray(2, index, 1)];
       // 当前拖动的点的原始位置
-      const currentPointOriginal = this._originalTransformerPoints[index];
+      const currentCoordOriginal = this._originalTransformerCoords[index];
       // 根据不动点进行形变
-      this.transformByLockPoint(lockPoint, currentPointOriginal, offset, index);
+      this.transformByLockPoint(lockCoord, currentCoordOriginal, offset, index);
     }
   }
 
@@ -208,7 +193,7 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   getTransformPointForSizeChange(): IPoint {
-    return this._originalTransformerPoints[1];
+    return this._originalTransformerCoords[1];
   }
 
   /**

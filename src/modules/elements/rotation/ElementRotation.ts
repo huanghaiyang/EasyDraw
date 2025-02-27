@@ -42,14 +42,14 @@ export default class ElementRotation extends PointController implements IElement
   /**
    * 检查点是否在旋转句柄内
    *
-   * @param point
+   * @param coord
    * @returns
    */
-  isContainsPoint(point: IPoint): boolean {
+  isContainsCoord(coord: IPoint): boolean {
     // 如果组件旋转启用，则检查点是否在旋转路径点内
     if (this.host.rotationEnable) {
       // 使用射线法检查点是否在旋转路径点内
-      return MathUtils.isPointInPolygonByRayCasting(point, this.points);
+      return MathUtils.isPointInPolygonByRayCasting(coord, this.points);
     }
     // 如果组件旋转未启用，则返回 false
     return false;

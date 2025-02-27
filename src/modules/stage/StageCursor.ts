@@ -28,7 +28,8 @@ export default class StageCursor implements IStageCursor {
    * @returns
    */
   get worldValue(): IPoint {
-    return ElementUtils.calcWorldPoint(this.value, this.shield.stageCalcParams);
+    if (!this.value) return null;
+    return ElementUtils.calcWorldCoord(this.value);
   }
 
   /**

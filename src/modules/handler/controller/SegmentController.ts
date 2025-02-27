@@ -36,18 +36,18 @@ export default class SegmentController extends BaseController implements ISegmen
   /**
    * 判断点是否在多边形内
    *
-   * @param point
+   * @param coord
    * @returns
    */
-  isClosest(point: IPoint): boolean {
-    return MathUtils.isPointClosestSegment(point, this.start, this.end, BorderTransformerMargin / this.host.shield.stageScale);
+  isClosest(coord: IPoint): boolean {
+    return MathUtils.isPointClosestSegment(coord, this.start, this.end, BorderTransformerMargin / this.host.shield.stageScale);
   }
 
   /**
    * 是否命中点
-   * @param point 点坐标
+   * @param coord 点坐标
    */
-  isPointHitting(point: IPoint): boolean {
-    return this.isClosest(point);
+  isCoordHitting(coord: IPoint): boolean {
+    return this.isClosest(coord);
   }
 }

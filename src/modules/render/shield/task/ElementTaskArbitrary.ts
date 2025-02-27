@@ -2,6 +2,7 @@ import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementRect } from "@/types/IElement";
 import { DefaultLineMeterLimit } from "@/styles/ElementStyles";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementTaskArbitrary extends ElementTaskBase {
   get node() {
@@ -12,15 +13,16 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    const {
-      innermostStrokePointsIndex,
-      strokePoints,
+    let {
+      innermostStrokeCoordIndex,
+      strokeCoords,
       model: { styles, isFold },
     } = this.node;
+    const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
 
     if (isFold) {
       styles.fills.forEach(fillStyle => {
-        CanvasUtils.drawInnerPathFillWithScale(this.canvas, strokePoints[innermostStrokePointsIndex], fillStyle, styles.strokes[innermostStrokePointsIndex]);
+        CanvasUtils.drawInnerPathFillWithScale(this.canvas, strokePoints[innermostStrokeCoordIndex], fillStyle, styles.strokes[innermostStrokeCoordIndex]);
       });
     }
 

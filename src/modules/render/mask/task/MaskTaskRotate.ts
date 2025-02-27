@@ -2,6 +2,7 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import RotateSvg from "@/assets/svg/rotate.svg";
 import { IRotationModel } from "@/types/IModel";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class MaskTaskRotate extends MaskTaskBase {
   get data(): IRotationModel {
@@ -17,18 +18,15 @@ export default class MaskTaskRotate extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (this.canvas) {
-      let {
-        point: { x, y },
-        width,
-        height,
-        scale,
-      } = this.data;
+      let { point, width, height, scale } = this.data;
+      point = ElementUtils.calcStageRelativePoint(point);
+
       await CanvasUtils.drawImgLike(
         this.canvas,
         this.svg,
         {
-          x: (x - (width * scale) / 2) / scale,
-          y: (y - (height * scale) / 2) / scale,
+          x: (point.x - (width * scale) / 2) / scale,
+          y: (point.y - (height * scale) / 2) / scale,
           width,
           height,
         },

@@ -81,8 +81,6 @@ export default interface IStageStore extends IStageSetter {
   creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement;
   // 完成创建组件
   finishCreatingElement(): IElement;
-  // 更新选中组件位置
-  updateSelectedElementsMovement(offset: IPoint): void;
   // 更新选中组件旋转
   updateSelectedElementsRotation(point: IPoint): void;
   // 更新组件旋转

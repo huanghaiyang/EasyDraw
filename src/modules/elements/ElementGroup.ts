@@ -166,17 +166,17 @@ export default class ElementGroup extends Element implements IElementGroup {
    *
    * @param point
    */
-  isContainsPoint(point: IPoint): boolean {
-    return this.deepSubs.some(sub => sub.isContainsPoint(point));
+  isContainsCoord(coord: IPoint): boolean {
+    return this.deepSubs.some(sub => sub.isContainsCoord(coord));
   }
 
   /**
    * 是否多边形重叠
    *
-   * @param points
+   * @param coords
    */
-  isPolygonOverlap(points: IPoint[]): boolean {
-    return this.deepSubs.some(sub => sub.isPolygonOverlap(points));
+  isPolygonOverlap(coords: IPoint[]): boolean {
+    return this.deepSubs.some(sub => sub.isPolygonOverlap(coords));
   }
 
   /**

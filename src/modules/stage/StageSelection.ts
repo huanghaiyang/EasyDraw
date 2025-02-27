@@ -22,7 +22,7 @@ export default class StageSelection implements IStageSelection {
   // 变换控制器模型
   private _transformerModels: IMaskModel[] = [];
   // 选区范围点
-  private _rangePoints: IPoint[] = null;
+  private _rangeCoords: IPoint[] = null;
 
   // 是否为空
   get isEmpty(): boolean {
@@ -32,7 +32,7 @@ export default class StageSelection implements IStageSelection {
 
   // 是否为选区范围
   get isRange(): boolean {
-    return this._rangePoints !== null && this._rangePoints.length > 0;
+    return this._rangeCoords !== null && this._rangeCoords.length > 0;
   }
 
   // 选区模型
@@ -69,11 +69,11 @@ export default class StageSelection implements IStageSelection {
   /**
    * 设置选区
    *
-   * @param points
+   * @param coords
    */
-  setRange(points: IPoint[]): void {
-    this._rangePoints = points;
-    this.refreshRangeElements(this._rangePoints);
+  setRange(coords: IPoint[]): void {
+    this._rangeCoords = coords;
+    this.refreshRangeElements(this._rangeCoords);
   }
 
   /**
@@ -85,12 +85,13 @@ export default class StageSelection implements IStageSelection {
    */
   private _getElementMaskModelProps(element: IElement, boxRender?: boolean): Partial<IMaskModel> {
     const {
-      rotatePoints,
-      rotateBoxPoints,
+      rotateCoords,
+      rotateBoxCoords,
       model: { angle, isFold },
     } = element;
+    const points = boxRender ? rotateBoxCoords : rotateCoords;
     return {
-      points: boxRender ? rotateBoxPoints : rotatePoints,
+      points,
       angle,
       element: {
         isFold,
@@ -158,7 +159,7 @@ export default class StageSelection implements IStageSelection {
     result.push(...this._getSelectedElementsMaskModels());
     if (this.isRange) {
       result.push({
-        points: this._rangePoints,
+        points: this._rangeCoords,
         type: DrawerMaskModelTypes.range,
       });
     }
@@ -175,7 +176,7 @@ export default class StageSelection implements IStageSelection {
     if (element && element.boxVerticesTransformEnable && element.model.coords.length > 0) {
       return {
         type: DrawerMaskModelTypes.selection,
-        points: element.rotateBoxPoints,
+        points: element.rotateBoxCoords,
         angle: element.model.angle,
       };
     }
@@ -241,13 +242,13 @@ export default class StageSelection implements IStageSelection {
   /**
    * 根据坐标获取命中的组件
    *
-   * @param point
+   * @param coord
    */
-  hitTargetElements(point: IPoint): void {
+  hitTargetElements(coord: IPoint): void {
     const stageElements = this.shield.store.stageElements;
     for (let i = stageElements.length - 1; i >= 0; i--) {
       const element = stageElements[i];
-      const isTarget = element.isContainsPoint(point);
+      const isTarget = element.isContainsCoord(coord);
       this.shield.store.updateElementById(element.id, { isTarget });
       if (isTarget) {
         this.shield.store.targetElements.forEach(target => {
@@ -275,13 +276,13 @@ export default class StageSelection implements IStageSelection {
   /**
    * 刷新给定区域的组件，将其设置为命中状态
    *
-   * @param rangePoints
+   * @param rangeCoords
    */
-  refreshRangeElements(rangePoints: IPoint[]): void {
-    if (rangePoints && rangePoints.length) {
+  refreshRangeElements(rangeCoords: IPoint[]): void {
+    if (rangeCoords && rangeCoords.length) {
       this.shield.store.stageElements.forEach(element => {
         this.shield.store.updateElementById(element.id, {
-          isInRange: element.isPolygonOverlap(rangePoints),
+          isInRange: element.isPolygonOverlap(rangeCoords),
         });
       });
     }
@@ -305,11 +306,11 @@ export default class StageSelection implements IStageSelection {
    * @param point
    * @returns
    */
-  getElementOnPoint(point: IPoint): IElement {
+  getElementOnCoord(point: IPoint): IElement {
     const stageElements = this.shield.store.stageElements;
     for (let i = stageElements.length - 1; i >= 0; i--) {
       const element = stageElements[i];
-      if (element.isContainsPoint(point)) {
+      if (element.isContainsCoord(point)) {
         return element;
       }
     }
@@ -374,13 +375,13 @@ export default class StageSelection implements IStageSelection {
   /**
    * 尝试激活控制器
    *
-   * @param point
+   * @param coord
    * @returns
    */
-  tryActiveController(point: IPoint): IController {
+  tryActiveController(coord: IPoint): IController {
     const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
-      const controller = element.getControllerByPoint(point);
+      const controller = element.getControllerByCoord(coord);
       element.setControllersActive(
         element.controllers.filter(c => c.id !== controller?.id),
         false,

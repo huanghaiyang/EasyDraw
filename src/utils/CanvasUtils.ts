@@ -136,10 +136,10 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static calcOffsetByRect(rect: Partial<DOMRect>) {
+  static calcOffsetByRect(rect: Partial<DOMRect>): IPoint {
     return {
-      dx: -(rect.x + rect.width / 2),
-      dy: -(rect.y + rect.height / 2),
+      x: -(rect.x + rect.width / 2),
+      y: -(rect.y + rect.height / 2),
     };
   }
 
@@ -167,15 +167,7 @@ export default class CanvasUtils {
    */
   static translateArcPoints(arcPoints: ArcPoints[], rect: Partial<DOMRect>): ArcPoints[] {
     const offset = CanvasUtils.calcOffsetByRect(rect);
-    return arcPoints.map(arc => {
-      let { start, controller, end, corner, value } = arc;
-      start = MathUtils.translate(start, offset);
-      controller = MathUtils.translate(controller, offset);
-      end = MathUtils.translate(end, offset);
-      corner = MathUtils.translate(corner, offset);
-
-      return { start, controller, end, corner, value };
-    });
+    return MathUtils.translateArcPoints(arcPoints, offset);
   }
 
   /**

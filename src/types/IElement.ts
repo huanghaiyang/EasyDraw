@@ -37,11 +37,11 @@ export type TransformByOptions = {
   // 变换器类型
   transformType: TransformTypes;
   // 不动点
-  lockPoint: IPoint;
+  lockCoord: IPoint;
   // 不动点索引
   lockIndex: number;
   // 当前拖动的点的原始位置
-  originalMovingPoint: IPoint;
+  originalMovingCoord: IPoint;
   // 偏移量
   offset: IPoint;
   // 组合角度
@@ -259,15 +259,13 @@ export default interface IElement {
   // 变换不动点索引
   get transformLockIndex(): number;
   // 变换不动点
-  get transformLockPoint(): IPoint;
+  get transformLockCoord(): IPoint;
   // 变换原始拖动点
-  get originalTransformMovePoint(): IPoint;
+  get originalTransformMoveCoord(): IPoint;
   // 宽度
   get width(): number;
   // 高度
   get height(): number;
-  // 最小宽高
-  get minSize(): number;
   // 最小内边框宽高
   get minParallelogramVerticalSize(): number;
   // 旋转角度
@@ -298,45 +296,28 @@ export default interface IElement {
   get visualStrokeWidth(): number;
   // 视觉字体大小
   get visualFontSize(): number;
-
   // 激活的顶点索引
   get activeCoordIndex(): number;
   // 原始模型坐标
   get originalCoords(): IPoint[];
   // 原始模型盒模型坐标
   get originalBoxCoords(): IPoint[];
-  // 路径点-相对于舞台画布的坐标
-  get points(): IPoint[];
-  // 不倾斜路径点
-  get unLeanPoints(): IPoint[];
   // 最大盒模型顶点
-  get maxBoxPoints(): IPoint[];
-  // 旋转路径点
-  get rotatePoints(): IPoint[];
+  get maxBoxCoords(): IPoint[];
   // 旋转路径坐标
   get rotateCoords(): IPoint[];
-  // 旋转路径外框点
-  get rotateOutlinePoints(): IPoint[][];
-  // 旋转盒模型顶点
-  get rotateBoxPoints(): IPoint[];
   // 旋转盒模型坐标
   get rotateBoxCoords(): IPoint[];
   // 最大外框盒模型顶点
-  get maxOutlineBoxPoints(): IPoint[];
+  get maxOutlineBoxCoords(): IPoint[];
   // 旋转路径外框坐标
   get rotateOutlineCoords(): IPoint[][];
-  // 描边路径点
-  get strokePoints(): IPoint[][];
   // 描边路径坐标
   get strokeCoords(): IPoint[][];
-  // 不倾斜描边路径点
-  get unLeanStrokePoints(): IPoint[][];
   // 不倾斜描边路径坐标
   get unLeanStrokeCoords(): IPoint[][];
-  // 中心内边框线段点
-  get innermostStrokePoints(): IPoint[];
   // 中心内边框线段索引
-  get innermostStrokePointsIndex(): number;
+  get innermostStrokeCoordIndex(): number;
   // 中心点
   get center(): IPoint;
   // 中心点坐标
@@ -349,8 +330,6 @@ export default interface IElement {
   get transformerType(): TransformerTypes;
   // 矩形
   get rect(): Partial<DOMRect>;
-  // 对齐点
-  get alignPoints(): IPoint[];
   // 对齐坐标
   get alignCoords(): IPoint[];
   // 对齐外框坐标
@@ -616,16 +595,6 @@ export default interface IElement {
   refreshOriginalAngle(): void;
 
   /**
-   * 刷新原始属性
-   */
-  refreshOutlinePoints(): void;
-
-  /**
-   * 刷新边框
-   */
-  refreshStrokePoints(): void;
-
-  /**
    * 刷新圆角
    */
   refreshCorners(): void;
@@ -641,7 +610,7 @@ export default interface IElement {
    * 是否包含点
    * @param point 点坐标
    */
-  isContainsPoint(point: IPoint): boolean;
+  isContainsCoord(coord: IPoint): boolean;
 
   /**
    * 是否多边形重叠
@@ -656,39 +625,19 @@ export default interface IElement {
   isModelPolygonOverlap(points: IPoint[]): boolean;
 
   /**
-   * 计算路径点
-   */
-  calcPoints(): IPoint[];
-
-  /**
-   * 计算旋转路径点
-   */
-  calcRotatePoints(): IPoint[];
-
-  /**
-   * 计算旋转外框路径点
-   */
-  calcRotateOutlinePoints(): IPoint[][];
-
-  /**
    * 计算最大盒模型顶点
    */
-  calcMaxBoxPoints(): IPoint[];
+  calcMaxBoxCoords(): IPoint[];
 
   /**
    * 计算最大外框盒模型顶点
    */
-  calcMaxOutlineBoxPoints(): IPoint[];
+  calcMaxOutlineBoxCoords(): IPoint[];
 
   /**
    * 计算旋转外框坐标
    */
   calcRotateOutlineCoords(): IPoint[][];
-
-  /**
-   * 计算旋转盒模型顶点
-   */
-  calcRotateBoxPoints(): IPoint[];
 
   /**
    * 计算中心点
@@ -726,11 +675,6 @@ export default interface IElement {
   calcRotateCoords(): IPoint[];
 
   /**
-   * 计算矩形
-   */
-  calcRect(): Partial<DOMRect>;
-
-  /**
    * 计算非倾斜坐标
    */
   calcUnLeanCoords(): IPoint[];
@@ -739,16 +683,6 @@ export default interface IElement {
    * 计算非倾斜盒模型坐标
    */
   calcUnLeanBoxCoords(): IPoint[];
-
-  /**
-   * 计算非倾斜点-舞台坐标
-   */
-  calcUnLeanPoints(): IPoint[];
-
-  /**
-   * 计算非倾斜盒模型点-舞台坐标
-   */
-  calcUnLeanBoxPoints(): IPoint[];
 
   /**
    * 计算倾斜Y角度
@@ -787,10 +721,10 @@ export default interface IElement {
   /**
    * 根据点获取控制器
    *
-   * @param point 点
+   * @param coord 点
    * @returns 控制器
    */
-  getControllerByPoint(point: IPoint): IController;
+  getControllerByCoord(coord: IPoint): IController;
 
   /**
    * 变换
@@ -826,6 +760,12 @@ export default interface IElement {
   leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void;
 
   /**
+   * 位移
+   * @param offset 偏移量
+   */
+  translateBy(offset: IPoint): void;
+
+  /**
    * 刷新旋转
    */
   refreshRotation(): void;
@@ -836,14 +776,9 @@ export default interface IElement {
   refreshOriginalElementProps(): void;
 
   /**
-   * 刷新原始模型坐标
-   */
-  refreshOriginalCoords(): void;
-
-  /**
    * 刷新原始变换器点坐标
    */
-  refreshOriginalTransformerPoints(): void;
+  refreshOriginalTransformerCoords(): void;
 
   /**
    * 刷新原始属性
@@ -877,13 +812,13 @@ export interface IElementRect extends IElement {
   // 圆角控制器
   get cornerControllers(): IPointController[];
   // 圆角点
-  get cornerPoints(): IPoint[];
+  get cornerCoords(): IPoint[];
   // 是否所有圆角半径相等
   get isAllCornerEqual(): boolean;
   // 曲线点
-  get arcPoints(): ArcPoints[][];
+  get arcCoords(): ArcPoints[][];
   // 曲线填充点
-  get arcFillPoints(): ArcPoints[];
+  get arcFillCoords(): ArcPoints[];
   /**
    * 刷新圆角控制器
    *
@@ -895,11 +830,7 @@ export interface IElementRect extends IElement {
    *
    * @param indexes 刷新圆角选项
    */
-  refreshCornersPoints(indexes?: number[]): void;
-  /**
-   * 刷新原始圆角属性
-   */
-  refreshOriginalCornerProps(): void;
+  refreshCornersCoords(indexes?: number[]): void;
   /**
    * 通过偏移量更新圆角
    * @param offset 偏移量
@@ -922,19 +853,11 @@ export interface IElementText extends IElement {}
 // 舞台组件（组件）-线段
 export interface IElementLine extends IElement {
   // 开始旋转路径点
-  get startRotatePathPoint(): IPoint;
+  get startRotateCoord(): IPoint;
   // 结束旋转路径点
-  get endRotatePathPoint(): IPoint;
-  // 外框点
-  get outerPoints(): IPoint[][];
+  get endRotateCoord(): IPoint;
   // 外框坐标
   get outerCoords(): IPoint[][];
-
-  /**
-   * 计算外框点
-   */
-  calcOuterPoints(): IPoint[][];
-
   /**
    * 计算外框坐标
    */
@@ -948,15 +871,8 @@ export interface IElementArbitrary extends IElement {
   // 编辑点索引
   editingCoordIndex: number;
 
-  // 外框路径
-  get outerPaths(): IPoint[][][];
   // 外框世界路径
   get outerWorldPaths(): IPoint[][][];
-
-  /**
-   * 计算外框路径
-   */
-  calcOuterPaths(): IPoint[][][];
 
   /**
    * 计算外框世界路径

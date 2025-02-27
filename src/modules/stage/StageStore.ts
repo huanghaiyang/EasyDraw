@@ -988,39 +988,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 组件移动
-   *
-   * @param offset
-   */
-  updateSelectedElementsMovement(offset: IPoint): void {
-    this.selectedElements.forEach(element => {
-      this._moveElement(element, offset);
-    });
-  }
-
-  /**
-   * 移动组件
-   *
-   * @param element
-   * @param offset
-   */
-  private _moveElement(element: IElement, offset: IPoint): void {
-    const coords = ElementUtils.translateCoords(element.originalCoords, offset);
-    const boxCoords = ElementUtils.translateCoords(element.originalBoxCoords, offset);
-    const { x, y } = ElementUtils.calcPosition({
-      type: element.model.type,
-      coords,
-    });
-    this.updateElementModel(element.id, {
-      coords,
-      boxCoords,
-      x,
-      y,
-    });
-    element.refresh({ points: true, rotation: true, position: true, outline: true, strokes: true, corners: true });
-  }
-
-  /**
    * 形变
    *
    * @param offset
@@ -1041,16 +1008,16 @@ export default class StageStore implements IStageStore {
       if (element.isGroup && !element.isGroupSubject) {
         (element as IElementGroup).deepSubs.forEach(sub => {
           const {
-            transformLockPoint,
+            transformLockCoord,
             transformLockIndex,
-            originalTransformMovePoint,
+            originalTransformMoveCoord,
             transformType,
             model: { angle, leanYAngle },
           } = element;
           sub.transformBy({
-            lockPoint: transformLockPoint,
+            lockCoord: transformLockCoord,
             lockIndex: transformLockIndex,
-            originalMovingPoint: originalTransformMovePoint,
+            originalMovingCoord: originalTransformMoveCoord,
             offset,
             groupAngle: angle,
             groupLeanYAngle: leanYAngle,
@@ -1220,8 +1187,8 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   calcRotatingStatesByElements(point: IPoint, elements: IElement[]): { center: IPoint; centerCoord: IPoint; angle: number } {
-    const center = MathUtils.calcCenter(elements.map(element => element.points).flat());
-    const centerCoord = ElementUtils.calcWorldPoint(center, this.shield.stageCalcParams);
+    const centerCoord = MathUtils.calcCenter(elements.map(element => element.centerCoord).flat());
+    const center = ElementUtils.calcStageRelativePoint(centerCoord);
     const angle = MathUtils.precise(MathUtils.calcAngle(center, point));
     return { center, centerCoord, angle };
   }
@@ -1486,7 +1453,7 @@ export default class StageStore implements IStageStore {
         });
         if (element.tfRefreshAfterEdChanged) {
           element.refreshTransformers();
-          element.refreshOriginalTransformerPoints();
+          element.refreshOriginalTransformerCoords();
         }
       }
     });

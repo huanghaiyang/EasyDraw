@@ -2,6 +2,7 @@ import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { TransformerSize, ControllerStyle } from "@/styles/MaskStyles";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class MaskTaskTransformer extends MaskTaskBase {
   /**
@@ -9,7 +10,9 @@ export default class MaskTaskTransformer extends MaskTaskBase {
    */
   async run(): Promise<void> {
     const { width } = ControllerStyle.strokes[0];
-    const { scale, point, leanYAngle, actualAngle } = this.data;
+    let { scale, point, leanYAngle, actualAngle } = this.data;
+    point = ElementUtils.calcStageRelativePoint(point);
+
     CanvasUtils.drawPathWithScale(
       this.canvas,
       CommonUtils.get4BoxPoints(

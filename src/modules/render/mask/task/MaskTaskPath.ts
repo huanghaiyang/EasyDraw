@@ -3,6 +3,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { SelectionStyle } from "@/styles/MaskStyles";
 import { DrawerMaskModelTypes } from "@/types";
 import { ElementStyles } from "@/styles/ElementStyles";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class MaskTaskPath extends MaskTaskBase {
   /**
@@ -11,6 +12,9 @@ export default class MaskTaskPath extends MaskTaskBase {
   async run(): Promise<void> {
     const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
+    let { points } = this.data;
+    points = ElementUtils.calcStageRelativePoints(points);
+
     if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.data.type)) {
       specialStyles.fills = [
         {
@@ -20,7 +24,7 @@ export default class MaskTaskPath extends MaskTaskBase {
     }
     CanvasUtils.drawPathWithScale(
       this.canvas,
-      this.data.points,
+      points,
       Object.assign({}, { ...SelectionStyle, ...specialStyles }),
       {},
       {

@@ -26,7 +26,7 @@ export default interface IStageSelection {
   get internalAngle(): number;
 
   // 设置范围
-  setRange(points: IPoint[]): void;
+  setRange(coords: IPoint[]): void;
   // 选区范围
   selectRange(): void;
   // 获取模型
@@ -36,15 +36,15 @@ export default interface IStageSelection {
   // 清除选区
   clearSelects(): void;
   // 命中目标组件
-  hitTargetElements(point: IPoint): void;
+  hitTargetElements(coord: IPoint): void;
   // 尝试激活控制器
-  tryActiveController(point: IPoint): IController;
+  tryActiveController(coord: IPoint): IController;
   // 获取激活控制器
   getActiveController(): IController;
   // 刷新范围组件
-  refreshRangeElements(rangePoints: IPoint[]): void;
+  refreshRangeElements(rangeCoords: IPoint[]): void;
   // 获取点上组件
-  getElementOnPoint(point: IPoint): IElement;
+  getElementOnCoord(coord: IPoint): IElement;
   // 计算选区模型
   calcSelectionModel(): IMaskModel;
   // 计算变换器模型
