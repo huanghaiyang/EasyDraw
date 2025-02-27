@@ -1,5 +1,5 @@
 import Element from "@/modules/elements/Element";
-import { IPoint } from "@/types";
+import { ElementStatus, IPoint } from "@/types";
 import { IElementRect } from "@/types/IElement";
 import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -377,10 +377,20 @@ export default class ElementRect extends Element implements IElementRect {
   /**
    * 刷新圆角
    */
-  refreshCorners(): void {
-    super.refreshCorners();
+  _refreshCorners(): void {
+    if (this.status !== ElementStatus.finished) return;
     this.refreshCornersCoords();
     this.refreshCornersControllers();
+  }
+
+  /**
+   * 刷新圆角
+   */
+  refreshCorners(): void {
+    super.refreshCorners();
+    if ( !this.isInMultiSelected) {
+      this._refreshCorners();
+    }
   }
 
   /**
@@ -492,5 +502,16 @@ export default class ElementRect extends Element implements IElementRect {
     this._arcCoords = MathUtils.batchTranslateArcPoints(this._originalArcCoords, offset);
     this._arcFillCoords = MathUtils.translateArcPoints(this._originalArcFillCoords, offset);
     super.translateBy(offset);
+  }
+
+  /**
+   * 设置选中状态
+   * @param value 选中状态
+   */
+  __setIsSelected(value: boolean): void {
+    super.__setIsSelected(value);
+    if (value) {
+      this._refreshCorners();
+    }
   }
 }

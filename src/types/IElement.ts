@@ -292,6 +292,8 @@ export default interface IElement {
   // 是否最底层
   get isBottommost(): boolean;
 
+  get isInMultiSelected(): boolean;
+
   // 视觉描边宽度
   get visualStrokeWidth(): number;
   // 视觉字体大小

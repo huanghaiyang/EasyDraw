@@ -53,6 +53,8 @@ export default interface IStageStore extends IStageSetter {
   // 是否多选
   get isMultiSelected(): boolean;
 
+  get selectedElementIds(): Set<string>;
+
   // 创建组件数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): Partial<ElementObject>;
   // 添加组件

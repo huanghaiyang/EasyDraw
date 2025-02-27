@@ -889,7 +889,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         return element !== topAElement;
       }),
     );
-    if (topAElement && !topAElement.isSelected) {
+    if (topAElement) {
       this.store.selectElement(topAElement);
     }
   }

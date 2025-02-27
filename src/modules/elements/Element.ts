@@ -768,6 +768,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.node.prev === null;
   }
 
+  get isInMultiSelected(): boolean {
+    const { selectedElementIds } = this.shield.store;
+    return selectedElementIds.has(this.id) && selectedElementIds.size > 1;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     this.model = observable(model);
     this.rotation = new ElementRotation(this);

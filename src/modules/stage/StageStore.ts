@@ -59,6 +59,10 @@ export default class StageStore implements IStageStore {
     this._reactionElementsSelectionChanged();
   }
 
+  get selectedElementIds(): Set<string> {
+    return this._selectedElementIds;
+  }
+
   // 当前创建并更新中的组件
   get creatingElements(): IElement[] {
     const element = this._elementsMap.get(this._currentCreatingElementId);
