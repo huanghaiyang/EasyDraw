@@ -36,6 +36,8 @@ export default interface IStageStore extends IStageSetter {
   get isEditingEmpty(): boolean;
   // 是否舞台组件为空
   get isStageEmpty(): boolean;
+  // 是否临时组件为空
+  get isProvisionalEmpty(): boolean;
   // 是否为空
   get isEmpty(): boolean;
   // 是否可见组件为空

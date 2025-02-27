@@ -673,12 +673,13 @@ export default class ElementUtils {
    * @returns
    */
   static calcStageRelativeArcPoint(arc: ArcPoints): ArcPoints {
-    const { start, end, controller, corner, value } = arc;
+    let { start, end, controller, corner, value } = arc;
+    [start, end, controller, corner] = ElementUtils.calcStageRelativePoints([start, end, controller, corner]);
     return {
-      start: ElementUtils.calcStageRelativePoint(start),
-      end: ElementUtils.calcStageRelativePoint(end),
-      controller: ElementUtils.calcStageRelativePoint(controller),
-      corner: ElementUtils.calcStageRelativePoint(corner),
+      start,
+      end,
+      controller,
+      corner,
       value,
     };
   }

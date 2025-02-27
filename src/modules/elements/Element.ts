@@ -339,7 +339,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get center(): IPoint {
-    return this.calcCenter();
+    return ElementUtils.calcStageRelativePoint(this.centerCoord);
   }
 
   get centerCoord(): IPoint {
@@ -804,8 +804,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcRotateBoxCoords(): IPoint[] {
-    const centerCoord = this.calcCenterCoord();
-    return this.model.boxCoords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, centerCoord));
+    return this.model.boxCoords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, this.centerCoord));
   }
 
   /**
@@ -832,8 +831,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcRotateCoords(): IPoint[] {
-    const centerCoord = this.calcCenterCoord();
-    return this.model.coords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, centerCoord));
+    return this.model.coords.map(coord => MathUtils.rotateWithCenter(coord, this.model.angle, this.centerCoord));
   }
 
   /**
@@ -848,15 +846,6 @@ export default class Element implements IElement, ILinkedNodeValue {
         isFold: this.model.isFold,
       });
     });
-  }
-
-  /**
-   * 计算中心点
-   *
-   * @returns
-   */
-  calcCenter(): IPoint {
-    return ElementUtils.calcStageRelativePoint(this.calcCenterCoord());
   }
 
   /**
@@ -1240,8 +1229,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 更新坐标
    */
   refreshPosition(): void {
-    const centerCoord = this.calcCenterCoord();
-    Object.assign(this.model, centerCoord);
+    Object.assign(this.model, this.calcCenterCoord());
   }
 
   /**
@@ -1830,7 +1818,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算非倾斜坐标
     const coords = this.calcUnLeanCoords();
     // 计算中心坐标
-    const centerCoord = this.calcCenterCoord();
+    const centerCoord = this.centerCoord;
     // 重新计算倾斜坐标
     this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(coords, value, centerCoord), 1);
     // 计算非倾斜盒模型坐标

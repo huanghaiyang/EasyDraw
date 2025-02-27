@@ -14,7 +14,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
    */
   async redraw(force?: boolean): Promise<void> {
     const cargo = new RenderTaskCargo([]);
-    if (this.drawer.store.provisionalElements.length) {
+    if (!this.drawer.store.isProvisionalEmpty) {
       this.drawer.store.provisionalElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {

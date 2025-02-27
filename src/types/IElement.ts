@@ -640,11 +640,6 @@ export default interface IElement {
   calcRotateOutlineCoords(): IPoint[][];
 
   /**
-   * 计算中心点
-   */
-  calcCenter(): IPoint;
-
-  /**
    * 计算中心点坐标
    */
   calcCenterCoord(): IPoint;

@@ -28,6 +28,8 @@ export default class StageStore implements IStageStore {
   private _currentCreatingElementId;
   // 组件对象映射关系，加快查询
   private _elementsMap: Map<string, IElement>;
+  // 组件对象映射关系，加快查询
+  private _provisionalElementIds: Set<string>;
   // 选中的组件
   private _selectedElementIds: Set<string>;
   // 目标组件
@@ -43,6 +45,7 @@ export default class StageStore implements IStageStore {
     this.shield = shield;
     this._elementList = new ElementList();
     this._elementsMap = new Map<string, IElement>();
+    this._provisionalElementIds = new Set<string>();
     this._selectedElementIds = observable.set(new Set<string>());
     this._targetElementIds = observable.set(new Set<string>());
     this._reactionElementAdded();
@@ -58,6 +61,10 @@ export default class StageStore implements IStageStore {
       return [element];
     }
     return [];
+  }
+
+  get isProvisionalEmpty(): boolean {
+    return this._provisionalElementIds.size === 0;
   }
 
   // 已经渲染到舞台的组件
@@ -191,6 +198,7 @@ export default class StageStore implements IStageStore {
       this._elementsMap.delete(id);
       this._selectedElementIds.delete(id);
       this._targetElementIds.delete(id);
+      this._provisionalElementIds.delete(id);
     });
   }
 
@@ -240,6 +248,14 @@ export default class StageStore implements IStageStore {
           this._selectedElementIds.add(element.id);
         } else {
           this._selectedElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isProvisional: {
+        if (value) {
+          this._provisionalElementIds.add(element.id);
+        } else {
+          this._provisionalElementIds.delete(element.id);
         }
         break;
       }
