@@ -339,10 +339,7 @@ export default class MathUtils {
    */
   static translateArcPoint(arcPoints: ArcPoints, offset: IPoint): ArcPoints {
     let { start, controller, end, corner, value } = arcPoints;
-    start = MathUtils.translate(start, offset);
-    controller = MathUtils.translate(controller, offset);
-    end = MathUtils.translate(end, offset);
-    corner = MathUtils.translate(corner, offset);
+    [start, controller, end, corner] = MathUtils.batchTranslate([start, controller, end, corner], offset);
     return { start, controller, end, corner, value };
   }
 

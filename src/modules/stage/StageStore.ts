@@ -23,17 +23,27 @@ export default class StageStore implements IStageStore {
   shield: IStageShield;
 
   // 画板上绘制的组件列表（形状、文字、图片等）
-  private _elementList: ElementList;
+  private _elementList: ElementList = new ElementList();
   // 当前正在创建的组件
   private _currentCreatingElementId;
   // 组件对象映射关系，加快查询
-  private _elementsMap: Map<string, IElement>;
+  private _elementsMap: Map<string, IElement> = new Map<string, IElement>();
   // 组件对象映射关系，加快查询
-  private _provisionalElementIds: Set<string>;
+  private _provisionalElementIds: Set<string> = new Set<string>();
   // 选中的组件
-  private _selectedElementIds: Set<string>;
+  private _selectedElementIds: Set<string> = observable.set(new Set<string>());
   // 目标组件
-  private _targetElementIds: Set<string>;
+  private _targetElementIds: Set<string> = observable.set(new Set<string>());
+  // 可见组件
+  private _visibleElementIds: Set<string> = new Set<string>();
+  // 范围组件
+  private _rangeElementIds: Set<string> = new Set<string>();
+  // 舞台组件
+  private _stageElementIds: Set<string> = new Set<string>();
+  // 编辑组件
+  private _editingElementIds: Set<string> = new Set<string>();
+  // 旋转组件目标组件
+  private _rotatingTargetElementIds: Set<string> = new Set<string>();
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
@@ -43,11 +53,6 @@ export default class StageStore implements IStageStore {
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this._elementList = new ElementList();
-    this._elementsMap = new Map<string, IElement>();
-    this._provisionalElementIds = new Set<string>();
-    this._selectedElementIds = observable.set(new Set<string>());
-    this._targetElementIds = observable.set(new Set<string>());
     this._reactionElementAdded();
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
@@ -69,31 +74,37 @@ export default class StageStore implements IStageStore {
 
   // 已经渲染到舞台的组件
   get provisionalElements(): IElement[] {
+    if (this.isProvisionalEmpty) return [];
     return this._elementList.filter(node => node.value.isProvisional).map(node => node.value);
   }
 
   // 选中的组件
   get selectedElements(): IElement[] {
+    if (this.isSelectedEmpty) return [];
     return this._elementList.filter(node => node.value.isSelected).map(node => node.value);
   }
 
   // 命中的组件
   get targetElements(): IElement[] {
+    if (this.isTargetEmpty) return [];
     return this._elementList.filter(node => node.value.isTarget).map(node => node.value);
   }
 
   // 舞台上的组件
   get stageElements(): IElement[] {
+    if (this.isStageEmpty) return [];
     return this._elementList.filter(node => node.value.isOnStage).map(node => node.value);
   }
 
   // 选区范围内的组件
   get rangeElements(): IElement[] {
+    if (this.isRangeEmpty) return [];
     return this._elementList.filter(node => node.value.isInRange).map(node => node.value);
   }
 
   // 可见的组件
   get visibleElements(): IElement[] {
+    if (this.isVisibleEmpty) return [];
     return this._elementList.filter(node => node.value.isVisible).map(node => node.value);
   }
 
@@ -114,22 +125,24 @@ export default class StageStore implements IStageStore {
 
   // 旋转目标组件
   get rotatingTargetElements(): IElement[] {
+    if (this.isRotatingTargetEmpty) return [];
     return this._elementList.filter(node => node.value.isRotatingTarget).map(node => node.value);
   }
 
   // 编辑中的组件
   get editingElements(): IElement[] {
+    if (this.isEditingEmpty) return [];
     return this._elementList.filter(node => node.value.isEditing).map(node => node.value);
   }
 
   // 是否选中组件为空
   get isSelectedEmpty(): boolean {
-    return this.selectedElements.length === 0;
+    return this._selectedElementIds.size === 0;
   }
 
   // 是否可见组件为空
   get isVisibleEmpty(): boolean {
-    return this.visibleElements.length === 0;
+    return this._visibleElementIds.size === 0;
   }
 
   // 是否组件列表为空
@@ -139,22 +152,26 @@ export default class StageStore implements IStageStore {
 
   // 是否处于编辑状态
   get isEditingEmpty(): boolean {
-    return this.editingElements.length === 0;
+    return this._editingElementIds.size === 0;
   }
 
   // 是否命中组件为空
   get isTargetEmpty(): boolean {
-    return this.targetElements.length === 0;
+    return this._targetElementIds.size === 0;
   }
 
   // 是否选区范围组件为空
   get isRangeEmpty(): boolean {
-    return this.rangeElements.length === 0;
+    return this._rangeElementIds.size === 0;
   }
 
   // 是否舞台组件为空
   get isStageEmpty(): boolean {
-    return this.stageElements.length === 0;
+    return this._stageElementIds.size === 0;
+  }
+
+  get isRotatingTargetEmpty(): boolean {
+    return this._rotatingTargetElementIds.size === 0;
   }
 
   // 选中的组合
@@ -199,6 +216,11 @@ export default class StageStore implements IStageStore {
       this._selectedElementIds.delete(id);
       this._targetElementIds.delete(id);
       this._provisionalElementIds.delete(id);
+      this._rotatingTargetElementIds.delete(id);
+      this._editingElementIds.delete(id);
+      this._rangeElementIds.delete(id);
+      this._visibleElementIds.delete(id);
+      this._stageElementIds.delete(id);
     });
   }
 
@@ -264,6 +286,46 @@ export default class StageStore implements IStageStore {
           this._targetElementIds.add(element.id);
         } else {
           this._targetElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isRotatingTarget: {
+        if (value) {
+          this._rotatingTargetElementIds.add(element.id);
+        } else {
+          this._rotatingTargetElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isEditing: {
+        if (value) {
+          this._editingElementIds.add(element.id);
+        } else {
+          this._editingElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isInRange: {
+        if (value) {
+          this._rangeElementIds.add(element.id);
+        } else {
+          this._rangeElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isVisible: {
+        if (value) {
+          this._visibleElementIds.add(element.id);
+        } else {
+          this._visibleElementIds.delete(element.id);
+        }
+        break;
+      }
+      case ElementReactionPropNames.isOnStage: {
+        if (value) {
+          this._stageElementIds.add(element.id);
+        } else {
+          this._stageElementIds.delete(element.id);
         }
         break;
       }
