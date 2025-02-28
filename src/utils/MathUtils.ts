@@ -7,6 +7,8 @@ import { ArcPoints } from "@/types/IRender";
 // 直线类型
 export type DirectionLine = { point: IPoint; direction: IPoint };
 
+const worker = new Worker(new URL("./worker/MathWorker.ts", import.meta.url), { type: "module" });
+
 export default class MathUtils {
   /**
    * 计算平移矩阵
@@ -47,6 +49,38 @@ export default class MathUtils {
    */
   static batchTranslate(coords: IPoint[], value: IPoint): IPoint[] {
     return coords.map(coord => this.translate(coord, value));
+  }
+
+  /**
+   * 异步平移
+   *
+   * @param coord
+   * @param value
+   * @returns
+   */
+  static asyncTranslate(coord: IPoint, value: IPoint): Promise<IPoint> {
+    return new Promise(resolve => {
+      worker.postMessage({ funcName: "translate", args: [coord, value] });
+      worker.onmessage = e => {
+        resolve(e.data);
+      };
+    });
+  }
+
+  /**
+   * 异步批量平移
+   *
+   * @param coords
+   * @param value
+   * @returns
+   */
+  static asyncBatchTranslate(coords: IPoint[], value: IPoint): Promise<IPoint[]> {
+    return new Promise(resolve => {
+      worker.postMessage({ funcName: "batchTranslate", args: [coords, value] });
+      worker.onmessage = e => {
+        resolve(e.data);
+      };
+    });
   }
 
   /**
