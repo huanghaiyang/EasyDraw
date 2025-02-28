@@ -106,6 +106,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 最小倾斜矩阵垂直尺寸
   _minParallelogramVerticalSize: number;
 
+  // 用于记录翻转状态
+  private _flipX: boolean = false;
+  // 用于记录内边框线段点索引
+  private _innermostStrokeCoordIndex: number = 0;
+
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
@@ -186,20 +191,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 获取最内边框线段点索引
    */
   get innermostStrokeCoordIndex(): number {
-    let result = 0;
-    let innerWidth = 0;
-    this._strokeCoords.forEach((points, index) => {
-      const { width, type } = this.model.styles.strokes[index];
-      if (type === StrokeTypes.middle && innerWidth < width / 2) {
-        innerWidth = width / 2;
-        result = index;
-      }
-      if (type === StrokeTypes.inside && innerWidth < width) {
-        innerWidth = width;
-        result = index;
-      }
-    });
-    return result;
+    return this._innermostStrokeCoordIndex;
   }
 
   /**
@@ -213,7 +205,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   @computed
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
-    return MathUtils.calcFlipXByPoints(this.model.boxCoords);
+    if (!this._isTransforming) return this._flipX;
+    this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords);
+    return this._flipX;
   }
 
   // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
@@ -1014,6 +1008,26 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.strokes.map(stroke => {
       return this.convertPointsByStrokeType(this._rotateCoords, stroke);
     });
+  }
+
+  /**
+   * 计算内边框线段点索引
+   */
+  calcInnermostStrokeCoordIndex(): number {
+    let result = 0;
+    let innerWidth = 0;
+    this._strokeCoords.forEach((points, index) => {
+      const { width, type } = this.model.styles.strokes[index];
+      if (type === StrokeTypes.middle && innerWidth < width / 2) {
+        innerWidth = width / 2;
+        result = index;
+      }
+      if (type === StrokeTypes.inside && innerWidth < width) {
+        innerWidth = width;
+        result = index;
+      }
+    });
+    return result;
   }
 
   /**
@@ -1871,6 +1885,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._strokeCoords = this.calcStrokeCoords();
     // 计算非倾斜边框坐标
     this._unLeanStrokeCoords = this.calcUnLeanStrokeCoords();
+    // 计算内边框线段点索引
+    this._innermostStrokeCoordIndex = this.calcInnermostStrokeCoordIndex();
   }
 
   /**
