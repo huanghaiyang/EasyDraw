@@ -1,6 +1,6 @@
 import LinkedList, { LinkedNodeEqFunc } from "@/modules/struct/LinkedList";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
-import { observable, reaction, runInAction } from "mobx";
+import { reaction, runInAction } from "mobx";
 import { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
 import IElement from "@/types/IElement";
 import IElementList from "@/types/IElementList";
@@ -13,7 +13,6 @@ const ElementListNodeEqFunc: LinkedNodeEqFunc<ILinkedNode<IElement>> = (node1, n
 export default class ElementList extends LinkedList<IElement> implements IElementList {
   constructor() {
     super(ElementListNodeEqFunc);
-    this.nodes = observable.set(this.nodes);
   }
 
   /**

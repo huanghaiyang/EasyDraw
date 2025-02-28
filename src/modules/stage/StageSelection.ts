@@ -63,6 +63,7 @@ export default class StageSelection implements IStageSelection {
         ...ElementUtils.createEmptyGroupObject(),
       } as ElementObject,
       this.shield,
+      true
     );
   }
 

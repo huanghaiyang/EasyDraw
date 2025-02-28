@@ -110,6 +110,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   private _flipX: boolean = false;
   // 用于记录内边框线段点索引
   private _innermostStrokeCoordIndex: number = 0;
+  // 用于是舞台选区组件
+  private _isRangeElement: boolean = false;
 
   // 组件状态
   @observable _status: ElementStatus = ElementStatus.initialed;
@@ -141,6 +143,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   @observable _isInRange: boolean = false;
   // 是否在舞台上
   @observable _isOnStage: boolean = false;
+
+  get isRangeElement(): boolean {
+    return this._isRangeElement;
+  }
 
   // 组件ID
   get id(): string {
@@ -767,10 +773,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return selectedElementIds.has(this.id) && selectedElementIds.size > 1;
   }
 
-  constructor(model: ElementObject, shield: IStageShield) {
+  constructor(model: ElementObject, shield: IStageShield, isRangeElement?: boolean) {
     this.model = observable(model);
     this.rotation = new ElementRotation(this);
     this.shield = shield;
+    this._isRangeElement = isRangeElement ?? false;
     makeObservable(this);
   }
 
@@ -1047,6 +1054,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcInternalAngle(): number {
+    if (this._isRangeElement) return 90;
     return MathUtils.calcInternalAngle(this.model.boxCoords);
   }
 
@@ -1056,7 +1064,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcLeanYAngle(): number {
-    if (!this.leanYAngleCalcEnable) return 0;
+    if (!this.leanYAngleCalcEnable || this._isRangeElement) return 0;
     return MathUtils.calcLeanYAngle(this.model.internalAngle, this.flipX);
   }
 

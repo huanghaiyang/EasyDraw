@@ -188,6 +188,7 @@ export default interface IElement {
   // 所属节点
   node: ILinkedNode<IElement>;
 
+  get isRangeElement(): boolean;
   // 组件ID
   get id(): string;
   // 是否是组件

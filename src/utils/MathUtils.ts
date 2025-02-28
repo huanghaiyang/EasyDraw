@@ -1043,6 +1043,7 @@ export default class MathUtils {
     let angleDegrees = angleRadians * (180 / Math.PI);
     // 如果角度是不合法的值，则返回0，表示三点共线
     if (isNaN(angleDegrees)) {
+      // 是返回0好呢还是返回180呢
       angleDegrees = 0;
     }
     return angleDegrees;
