@@ -1,7 +1,6 @@
 import { IPoint } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { evaluate } from "mathjs";
 
 export default class PolygonUtils {
   /**
@@ -16,7 +15,7 @@ export default class PolygonUtils {
    */
   static calcIOPoint(current: IPoint, next: IPoint, angle: number, r: number, innerOrOuter: boolean): IPoint {
     // 半角度
-    const halfAngle = evaluate("angle / 2", { angle });
+    const halfAngle = angle / 2;
     // 三角形斜边
     const hypotenuse = MathUtils.calcTriangleSide3By2(halfAngle, r);
     // 下一个角度
@@ -26,12 +25,9 @@ export default class PolygonUtils {
       nextAngle += 360;
     }
     // 最终角度
-    let finalAngle = evaluate("halfAngle + nextAngle", {
-      halfAngle,
-      nextAngle,
-    });
+    let finalAngle = halfAngle + nextAngle;
     // 计算目标点
-    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : evaluate("finalAngle + 180", { finalAngle }));
+    const point = MathUtils.calcTargetPoint(current, hypotenuse, innerOrOuter ? finalAngle : finalAngle + 180);
     return point;
   }
 

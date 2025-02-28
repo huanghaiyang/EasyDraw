@@ -76,7 +76,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isEscEvent = isHotkey("esc");
     this._handleMouseMove = throttle((e) => {
       this.emit("cursorMove", e);
-    }, 1000 / 60)
+    }, 1000 / 120)
     this.initEvents();
   }
 

@@ -21,7 +21,6 @@ import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementText from "@/modules/elements/ElementText";
-import { multiply } from "mathjs";
 import { clamp, range } from "lodash";
 import ElementTaskEllipse from "@/modules/render/shield/task/ElementTaskEllipse";
 import ElementEllipse from "@/modules/elements/ElementEllipse";
@@ -464,7 +463,7 @@ export default class ElementUtils {
     // 坐标重新按照角度反向偏转
     coord = MathUtils.transWithCenter(coord, angles, lockCoord, true);
     // 以不动点为圆心，计算形变
-    const [x, y] = multiply(matrix, [coord.x - lockCoord.x, coord.y - lockCoord.y, 1]);
+    const [x, y] = MathUtils.multiply(matrix, [coord.x - lockCoord.x, coord.y - lockCoord.y, 1]);
     // 重新计算坐标
     return { x: x + lockCoord.x, y: y + lockCoord.y };
   }

@@ -1,4 +1,3 @@
-import { multiply, cos, sin, add, isPositive } from "mathjs";
 import { IPoint, ISize, ScaleValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
@@ -10,6 +9,64 @@ export type DirectionLine = { point: IPoint; direction: IPoint };
 const worker = new Worker(new URL("./worker/MathWorker.ts", import.meta.url), { type: "module" });
 
 export default class MathUtils {
+  /**
+   * 矩阵相乘
+   *
+   * @param matrixA
+   * @param matrixB
+   * @returns
+   */
+  static multiply(matrixA: number[][], matrixB: number[] | number[][]) {
+    const rowsA = matrixA.length;
+    const colsA = matrixA[0].length;
+
+    // 判断 matrixB 是向量还是矩阵
+    if (Array.isArray(matrixB[0])) {
+      // matrixB 是矩阵
+      const rowsB = matrixB.length;
+      const colsB = matrixB[0].length;
+
+      // 检查矩阵是否可以相乘
+      if (colsA !== rowsB) {
+        throw new Error("矩阵 A 的列数必须等于矩阵 B 的行数");
+      }
+
+      // 初始化结果矩阵
+      const result = new Array(rowsA);
+      for (let i = 0; i < rowsA; i++) {
+        result[i] = new Array(colsB).fill(0);
+      }
+
+      // 执行矩阵相乘
+      for (let i = 0; i < rowsA; i++) {
+        for (let j = 0; j < colsB; j++) {
+          for (let k = 0; k < colsA; k++) {
+            result[i][j] += matrixA[i][k] * matrixB[k][j];
+          }
+        }
+      }
+
+      return result;
+    } else {
+      // matrixB 是向量
+      if (colsA !== matrixB.length) {
+        throw new Error("矩阵 A 的列数必须等于向量的长度");
+      }
+
+      // 初始化结果向量
+      const result = new Array(rowsA).fill(0);
+
+      // 执行矩阵与向量相乘
+      for (let i = 0; i < rowsA; i++) {
+        for (let j = 0; j < colsA; j++) {
+          result[i] += matrixA[i][j] * (matrixB[j] as number);
+        }
+      }
+
+      return result;
+    }
+  }
+
   /**
    * 计算平移矩阵
    *
@@ -95,7 +152,7 @@ export default class MathUtils {
   static rotate(coord: IPoint, angle: number): IPoint {
     if (angle === 0) return coord;
     const rotationMatrix = MathUtils.calcRotateMatrix(angle);
-    const rotatedPoint = multiply(rotationMatrix, [coord.x, coord.y, 1]);
+    const rotatedPoint = MathUtils.multiply(rotationMatrix, [coord.x, coord.y, 1]);
     return {
       x: rotatedPoint[0],
       y: rotatedPoint[1],
@@ -270,8 +327,8 @@ export default class MathUtils {
     angle = angle || 0;
     const theta = MathUtils.angleToRadian(angle);
     return [
-      [cos(theta), -sin(theta), 0],
-      [sin(theta), cos(theta), 0],
+      [Math.cos(theta), -Math.sin(theta), 0],
+      [Math.sin(theta), Math.cos(theta), 0],
       [0, 0, 1],
     ];
   }
@@ -288,10 +345,10 @@ export default class MathUtils {
   static leanWithCenter(coord: IPoint, leanXAngle: number, leanYAngle: number, center: IPoint): IPoint {
     if (leanXAngle === 0 && leanYAngle === 0) return coord;
     const matrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
-    const result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    const result = MathUtils.multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
-      x: add(result[0], center.x),
-      y: add(result[1], center.y),
+      x: result[0] + center.x,
+      y: result[1] + center.y,
     };
   }
 
@@ -329,14 +386,14 @@ export default class MathUtils {
     const leanMatrix = MathUtils.calcLeanMatrix(leanXAngle, leanYAngle);
     const rotateMatrix = MathUtils.calcRotateMatrix(angle);
     if (isReverse) {
-      matrix = multiply(leanMatrix, rotateMatrix) as unknown as number[][];
+      matrix = MathUtils.multiply(leanMatrix, rotateMatrix) as unknown as number[][];
     } else {
-      matrix = multiply(rotateMatrix, leanMatrix) as unknown as number[][];
+      matrix = MathUtils.multiply(rotateMatrix, leanMatrix) as unknown as number[][];
     }
-    let result = multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
+    let result = MathUtils.multiply(matrix, [coord.x - center.x, coord.y - center.y, 1]);
     return {
-      x: add(result[0], center.x),
-      y: add(result[1], center.y),
+      x: result[0] + center.x,
+      y: result[1] + center.y,
     };
   }
 
@@ -409,7 +466,7 @@ export default class MathUtils {
   static scale(coord: IPoint, value: ScaleValue): IPoint {
     if (value.sx === 1 && value.sy === 1) return coord;
     const scaleMatrix = MathUtils.calcScaleMatrix(value.sx, value.sy);
-    const scaledPoint = multiply(scaleMatrix, [coord.x, coord.y, 1]);
+    const scaledPoint = MathUtils.multiply(scaleMatrix, [coord.x, coord.y, 1]);
     return {
       x: scaledPoint[0],
       y: scaledPoint[1],
@@ -630,8 +687,8 @@ export default class MathUtils {
     // 将角度转换为弧度
     const angleRad = MathUtils.angleToRadian(angleDeg);
     // 计算目标点的坐标
-    const targetX = center.x + distance * cos(angleRad);
-    const targetY = center.y + distance * sin(angleRad);
+    const targetX = center.x + distance * Math.cos(angleRad);
+    const targetY = center.y + distance * Math.sin(angleRad);
     return {
       x: targetX,
       y: targetY,
@@ -1278,8 +1335,7 @@ export default class MathUtils {
    * @returns
    */
   static resignValue(value: number, referValue: number): number {
-    const isPst = isPositive(value);
-    return isPst ? Math.abs(referValue) : -Math.abs(referValue);
+    return value >= 0 ? Math.abs(referValue) : -Math.abs(referValue);
   }
 
   /**
