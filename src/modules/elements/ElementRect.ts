@@ -9,6 +9,7 @@ import { clamp, cloneDeep, every, range, uniq } from "lodash";
 import { ArcPoints } from "@/types/IRender";
 import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
+import { NamedPoints } from "@/types/IWorker";
 
 export default class ElementRect extends Element implements IElementRect {
   _cornerControllers: ICornerController[] = [];
@@ -497,12 +498,40 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   /**
+   * 位移弧线
+   * @param offset 位移量
+   */
+  private _translateArc(offset: IPoint): void {
+    this._arcCoords = MathUtils.batchTranslateArcPoints(this._originalArcCoords, offset);
+    this._arcFillCoords = MathUtils.translateArcPoints(this._originalArcFillCoords, offset);
+  }
+
+  /**
+   * 位移元素
+   * @param offset 位移量
+   */
+  async translateByOffset(offset: IPoint): Promise<void> {
+    this._translateArc(offset);
+    await super.translateByOffset(offset);
+  }
+
+  /**
+   * 通过给定的已经计算过的坐标点和位移进行位移
+   *
+   * @param map
+   * @param offset
+   */
+  translateWith(map: NamedPoints, offset: IPoint): void {
+    this._translateArc(offset);
+    super.translateWith(map, offset);
+  }
+
+  /**
    * 位移元素
    * @param offset 位移量
    */
   translateBy(offset: IPoint): void {
-    this._arcCoords = MathUtils.batchTranslateArcPoints(this._originalArcCoords, offset);
-    this._arcFillCoords = MathUtils.translateArcPoints(this._originalArcFillCoords, offset);
+    this._translateArc(offset);
     super.translateBy(offset);
   }
 

@@ -34,13 +34,16 @@ import StageAlign from "@/modules/stage/StageAlign";
 import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
+import { NamedPoints } from "@/types/IWorker";
+import RenderQueue from "@/modules/render/RenderQueue";
+import { nanoid } from "nanoid";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
   currentCreator: Creator;
   // 鼠标操作
   cursor: IStageCursor;
-  // 遮罩画布用以绘制鼠标样式,工具图标等
+  // 遮罩画板用以绘制鼠标样式,工具图标等
   mask: IDrawerMask;
   // 前景画板
   provisional: IDrawerProvisional;
@@ -67,6 +70,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   renderEl: HTMLDivElement;
   // 组件状态
   elementsStatus: StageShieldElementsStatus = StageShieldElementsStatus.NONE;
+  // 光标移动队列
+  private _cursorMoveQueue: RenderQueue = new RenderQueue();
+
   // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
     return CommonUtils.getRectVertices(this.stageRect);
@@ -422,14 +428,33 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 添加一个任务到鼠标移动队列
+   *
+   * @param task
+   */
+  private _addCursorQueueTask(task: () => Promise<void>): void {
+    this._cursorMoveQueue.add({
+      id: nanoid(4),
+      run: task,
+      destroy: () => Promise.resolve(),
+    });
+  }
+
+  /**
    * 添加事件监听
    */
   private _addEventListeners() {
     this.event.on("resize", this._refreshSize.bind(this));
-    this.event.on("cursorMove", this._handleCursorMove.bind(this));
+    this.event.on("cursorMove", e => {
+      this._addCursorQueueTask(() => this._handleCursorMove(e));
+    });
     this.event.on("cursorLeave", this._handleCursorLeave.bind(this));
-    this.event.on("pressDown", this._handlePressDown.bind(this));
-    this.event.on("pressUp", this._handlePressUp.bind(this));
+    this.event.on("pressDown", e => {
+      this._addCursorQueueTask(() => this._handlePressDown(e));
+    });
+    this.event.on("pressUp", e => {
+      this._addCursorQueueTask(() => this._handlePressUp(e));
+    });
     this.event.on("dblClick", this._handleDblClick.bind(this));
     this.event.on("wheelScale", this._handleWheelScale.bind(this));
     this.event.on("wheelMove", this._handleWheelMove.bind(this));
@@ -506,7 +531,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
               break;
             }
             case StageShieldElementsStatus.MOVING: {
-              this._dragElements();
+              await this._dragElements();
               flag = true;
               break;
             }
@@ -524,7 +549,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           if (![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus)) {
             if (this.store.isSelectedContainsTarget()) {
               this.elementsStatus = StageShieldElementsStatus.MOVING;
-              this._dragElements();
+              await this._dragElements();
               flag = true;
             }
           }
@@ -568,13 +593,37 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 批量移动组件
+   *
+   * @param elements
+   * @param offset
+   */
+  private async _batchTranslateElements(elements: IElement[], offset: IPoint): Promise<void> {
+    let map = new Map<string, NamedPoints>();
+    elements.forEach(element => {
+      map.set(element.id, element.getTranslateNamedPoints());
+    });
+    const result = await MathUtils.asyncMapNamedBatchTranslate(map, offset);
+    for (const [id, points] of result) {
+      const element = elements.find(element => element.id === id);
+      if (element) {
+        element.translateWith(points, offset);
+      }
+    }
+    map.clear();
+    result.clear();
+  }
+
+  /**
    * 拖动组件移动
    */
-  private _dragElements(): void {
+  private async _dragElements(): Promise<void> {
+    const elements = this.store.selectedElements;
     // 标记组件正在拖动
-    this.store.updateElements(this.store.selectedElements, {
+    this.store.updateElements(elements, {
       isDragging: true,
     });
+    // await this._batchTranslateElements(elements, this.movingOffset);
     this.store.selectedElements.forEach(element => {
       element.translateBy(this.movingOffset);
     });
@@ -817,11 +866,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件拖拽操作
    */
   private _endElementsDrag() {
-    this._refreshElementsOriginals(this.store.selectedElements, {
+    const elements = this.store.selectedElements;
+    this._refreshElementsOriginals(elements, {
       deepSubs: true,
     });
     // 取消组件拖动状态
-    this.store.updateElements(this.store.selectedElements, {
+    this.store.updateElements(elements, {
       isDragging: false,
     });
     if (this.store.isMultiSelected) {
@@ -851,11 +901,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件变换操作
    */
   private _endElementsTransform() {
-    this._refreshElementsOriginals(this.store.selectedElements, {
+    const elements = this.store.selectedElements;
+    this._refreshElementsOriginals(elements, {
       deepSubs: true,
     });
     // 更新组件状态
-    this.store.updateElements(this.store.selectedElements, {
+    this.store.updateElements(elements, {
       isTransforming: false,
     });
     if (this.store.isMultiSelected) {
@@ -867,13 +918,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件圆角半径操作
    */
   private _endElementsCorner() {
-    this.store.updateElements(this.store.selectedElements, {
+    const elements = this.store.selectedElements;
+    this.store.updateElements(elements, {
       isCornerMoving: false,
     });
-    this.store.selectedElements.forEach(element => {
+    elements.forEach(element => {
       (element as IElementRect).refreshCorners();
     });
-    this._refreshElementsOriginals(this.store.selectedElements);
+    this._refreshElementsOriginals(elements);
   }
 
   /**

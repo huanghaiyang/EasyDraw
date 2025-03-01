@@ -16,6 +16,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
+import { NamedPoints } from "@/types/IWorker";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -762,6 +763,25 @@ export default interface IElement {
    * @param offset 偏移量
    */
   translateBy(offset: IPoint): void;
+
+  /**
+   * 获取位移命名点
+   */
+  getTranslateNamedPoints(): NamedPoints;
+
+  /**
+   * 位移
+   * @param offset 偏移量
+   */
+  translateByOffset(offset: IPoint): Promise<void>;
+
+  /**
+   * 通过给定的已经计算过的坐标点进行位移
+   *
+   * @param map
+   * @param offset
+   */
+  translateWith(map: NamedPoints, offset: IPoint): void;
 
   /**
    * 刷新旋转

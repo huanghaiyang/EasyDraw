@@ -2,11 +2,21 @@ import { IPoint, ISize, ScaleValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
 import { ArcPoints } from "@/types/IRender";
+import { nanoid } from "nanoid";
+import { MapNamedPoints, NamedPoints } from "@/types/IWorker";
 
 // 直线类型
 export type DirectionLine = { point: IPoint; direction: IPoint };
 
 const worker = new Worker(new URL("./worker/MathWorker.ts", import.meta.url), { type: "module" });
+const workerCallback = new Map<string, Function>();
+worker.onmessage = (e: any) => {
+  const { id, result } = e.data;
+  let callback = workerCallback.get(id);
+  callback && callback(result);
+  workerCallback.delete(id);
+  callback = null;
+};
 
 export default class MathUtils {
   /**
@@ -85,15 +95,15 @@ export default class MathUtils {
    * 平移
    *
    * @param coord
-   * @param value
+   * @param offset
    * @returns
    */
-  static translate(coord: IPoint, value: IPoint): IPoint {
-    if (!value) return coord;
-    if (value.x === 0 && value.y === 0) return coord;
+  static translate(coord: IPoint, offset: IPoint): IPoint {
+    if (!offset) return coord;
+    if (offset.x === 0 && offset.y === 0) return coord;
     return {
-      x: coord.x + value.x,
-      y: coord.y + value.y,
+      x: coord.x + offset.x,
+      y: coord.y + offset.y,
     };
   }
 
@@ -101,26 +111,27 @@ export default class MathUtils {
    * 批量平移
    *
    * @param coords
-   * @param value
+   * @param offset
    * @returns
    */
-  static batchTranslate(coords: IPoint[], value: IPoint): IPoint[] {
-    return coords.map(coord => this.translate(coord, value));
+  static batchTranslate(coords: IPoint[], offset: IPoint): IPoint[] {
+    return coords.map(coord => this.translate(coord, offset));
   }
 
   /**
    * 异步平移
    *
    * @param coord
-   * @param value
+   * @param offset
    * @returns
    */
-  static asyncTranslate(coord: IPoint, value: IPoint): Promise<IPoint> {
+  static asyncTranslate(coord: IPoint, offset: IPoint): Promise<IPoint> {
     return new Promise(resolve => {
-      worker.postMessage({ funcName: "translate", args: [coord, value] });
-      worker.onmessage = e => {
-        resolve(e.data);
-      };
+      const id = `${Date.now()}_${nanoid(4)}`;
+      worker.postMessage({ funcName: "translate", args: [coord, offset], id });
+      workerCallback.set(id, (data: any) => {
+        resolve(data);
+      });
     });
   }
 
@@ -128,15 +139,50 @@ export default class MathUtils {
    * 异步批量平移
    *
    * @param coords
-   * @param value
+   * @param offset
    * @returns
    */
-  static asyncBatchTranslate(coords: IPoint[], value: IPoint): Promise<IPoint[]> {
+  static asyncBatchTranslate(coords: IPoint[], offset: IPoint): Promise<IPoint[]> {
     return new Promise(resolve => {
-      worker.postMessage({ funcName: "batchTranslate", args: [coords, value] });
-      worker.onmessage = e => {
-        resolve(e.data);
-      };
+      const id = `${Date.now()}_${nanoid(4)}`;
+      worker.postMessage({ funcName: "batchTranslate", args: [coords, offset], id });
+      workerCallback.set(id, (data: any) => {
+        resolve(data);
+      });
+    });
+  }
+
+  /**
+   * 批量平移
+   *
+   * @param coords
+   * @param offset
+   * @returns
+   */
+  static asyncNamedBatchTranslate(coords: NamedPoints, offset: IPoint): Promise<NamedPoints> {
+    return new Promise(resolve => {
+      const id = `${Date.now()}_${nanoid(4)}`;
+      worker.postMessage({ funcName: "namedBatchTranslate", args: [coords, offset], id });
+      workerCallback.set(id, (data: any) => {
+        resolve(data);
+      });
+    });
+  }
+
+  /**
+   * 批量组件坐标平移
+   *
+   * @param coords
+   * @param offset
+   * @returns
+   */
+  static asyncMapNamedBatchTranslate(coords: MapNamedPoints, offset: IPoint): Promise<MapNamedPoints> {
+    return new Promise(resolve => {
+      const id = `${Date.now()}_${nanoid(4)}`;
+      worker.postMessage({ funcName: "mapNamedBatchTranslate", args: [coords, offset], id });
+      workerCallback.set(id, (data: any) => {
+        resolve(data);
+      });
     });
   }
 
