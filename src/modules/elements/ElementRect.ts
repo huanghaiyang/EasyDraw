@@ -539,8 +539,8 @@ export default class ElementRect extends Element implements IElementRect {
    * 设置选中状态
    * @param value 选中状态
    */
-  __setIsSelected(value: boolean): void {
-    super.__setIsSelected(value);
+  _setIsSelected(value: boolean): void {
+    super._setIsSelected(value);
     if (value) {
       this._refreshCorners();
     }

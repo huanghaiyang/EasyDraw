@@ -108,42 +108,42 @@ export default class Element implements IElement, ILinkedNodeValue {
   _minParallelogramVerticalSize: number;
 
   // 用于记录翻转状态
-  private _flipX: boolean = false;
+  _flipX: boolean = false;
   // 用于记录内边框线段点索引
-  private _innermostStrokeCoordIndex: number = 0;
+  _innermostStrokeCoordIndex: number = 0;
   // 用于是舞台选区组件
-  private _isRangeElement: boolean = false;
+  _isRangeElement: boolean = false;
 
   // 组件状态
-  @observable _status: ElementStatus = ElementStatus.initialed;
+  _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
-  @observable _isSelected: boolean = false;
+  _isSelected: boolean = false;
   // 是否可见
-  @observable _isVisible: boolean = true;
+  _isVisible: boolean = true;
   // 是否正在编辑
-  @observable _isEditing: boolean = false;
+  _isEditing: boolean = false;
   // 是否锁定
-  @observable _isLocked: boolean = false;
+  _isLocked: boolean = false;
   // 是否正在移动
-  @observable _isMoving: boolean = false;
+  _isMoving: boolean = false;
   // 是否正在变换
-  @observable _isTransforming: boolean = false;
+  _isTransforming: boolean = false;
   // 是否正在旋转
-  @observable _isRotating: boolean = false;
+  _isRotating: boolean = false;
   // 是否正在旋转目标
-  @observable _isRotatingTarget: boolean = false;
+  _isRotatingTarget: boolean = false;
   // 是否正在拖动
-  @observable _isDragging: boolean = false;
+  _isDragging: boolean = false;
   // 是否正在修改圆角
-  @observable _isCornerMoving: boolean = false;
+  _isCornerMoving: boolean = false;
   // 是否处于临时状态
-  @observable _isProvisional: boolean = false;
+  _isProvisional: boolean = false;
   // 是否命中
-  @observable _isTarget: boolean = false;
+  _isTarget: boolean = false;
   // 是否在选区范围内
-  @observable _isInRange: boolean = false;
+  _isInRange: boolean = false;
   // 是否在舞台上
-  @observable _isOnStage: boolean = false;
+  _isOnStage: boolean = false;
 
   get isRangeElement(): boolean {
     return this._isRangeElement;
@@ -209,7 +209,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 是否翻转X轴
-  @computed
+
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
     if (!this._isTransforming) return this._flipX;
@@ -315,12 +315,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._originalBoxCoords;
   }
 
-  @computed
   get width(): number {
     return this.model.width;
   }
 
-  @computed
   get height(): number {
     return this.model.height;
   }
@@ -329,12 +327,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._minParallelogramVerticalSize;
   }
 
-  @computed
   get angle(): number {
     return this.getAngle();
   }
 
-  @computed
   get corners(): number[] {
     return this.model.corners;
   }
@@ -347,7 +343,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.calcCenterCoord();
   }
 
-  @computed
   get position(): IPoint {
     return {
       x: this.model.x,
@@ -355,37 +350,30 @@ export default class Element implements IElement, ILinkedNodeValue {
     };
   }
 
-  @computed
   get strokes(): StrokeStyle[] {
     return this.model.styles.strokes;
   }
 
-  @computed
   get fills(): FillStyle[] {
     return this.model.styles.fills;
   }
 
-  @computed
   get textAlign(): CanvasTextAlign {
     return this.model.styles.textAlign;
   }
 
-  @computed
   get textBaseline(): CanvasTextBaseline {
     return this.model.styles.textBaseline;
   }
 
-  @computed
   get fontSize(): number {
     return this.model.styles.fontSize;
   }
 
-  @computed
   get fontFamily(): string {
     return this.model.styles.fontFamily;
   }
 
-  @computed
   get status(): ElementStatus {
     return this._status;
   }
@@ -394,7 +382,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setStatus(value);
   }
 
-  @computed
   get isSelected(): boolean {
     return this._isSelected;
   }
@@ -403,7 +390,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsSelected(value);
   }
 
-  @computed
   get isVisible(): boolean {
     return this._isVisible;
   }
@@ -412,7 +398,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsVisible(value);
   }
 
-  @computed
   get isEditing(): boolean {
     return this._isEditing;
   }
@@ -421,7 +406,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsEditing(value);
   }
 
-  @computed
   get isLocked(): boolean {
     return this._isLocked;
   }
@@ -430,7 +414,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsLocked(value);
   }
 
-  @computed
   get isMoving(): boolean {
     return this._isMoving;
   }
@@ -439,7 +422,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsMoving(value);
   }
 
-  @computed
   get isTransforming(): boolean {
     return this._isTransforming;
   }
@@ -448,7 +430,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsTransforming(value);
   }
 
-  @computed
   get isRotating(): boolean {
     return this._isRotating;
   }
@@ -457,7 +438,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsRotating(value);
   }
 
-  @computed
   get isRotatingTarget(): boolean {
     return this._isRotatingTarget;
   }
@@ -466,7 +446,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsRotatingTarget(value);
   }
 
-  @computed
   get isDragging(): boolean {
     return this._isDragging;
   }
@@ -475,7 +454,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsDragging(value);
   }
 
-  @computed
   get isCornerMoving(): boolean {
     return this._isCornerMoving;
   }
@@ -484,7 +462,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsCornerMoving(value);
   }
 
-  @computed
   get isProvisional(): boolean {
     return this._isProvisional;
   }
@@ -493,7 +470,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsRendered(value);
   }
 
-  @computed
   get isTarget(): boolean {
     return this._isTarget;
   }
@@ -502,7 +478,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsTarget(value);
   }
 
-  @computed
   get isInRange(): boolean {
     return this._isInRange;
   }
@@ -511,7 +486,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsInRange(value);
   }
 
-  @computed
   get isOnStage(): boolean {
     return this._isOnStage;
   }
@@ -520,90 +494,66 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsOnStage(value);
   }
 
-  @computed
   get isRatioLocked(): boolean {
     return this.model.isRatioLocked;
   }
 
-  @action
   _setStatus(status: ElementStatus): void {
-    this.__setStatus(status);
-  }
-
-  __setStatus(status: ElementStatus): void {
     this._status = status;
   }
 
-  @action
   _setIsSelected(value: boolean): void {
-    this.__setIsSelected(value);
-  }
-
-  __setIsSelected(value: boolean): void {
     this._isSelected = value;
   }
 
-  @action
   _setIsVisible(value: boolean): void {
     this._isVisible = value;
   }
 
-  @action
   _setIsEditing(value: boolean): void {
     this._isEditing = value;
   }
 
-  @action
   _setIsLocked(value: boolean): void {
     this._isLocked = value;
   }
 
-  @action
   _setIsMoving(value: boolean): void {
     this._isMoving = value;
   }
 
-  @action
   _setIsTransforming(value: boolean): void {
     this._isTransforming = value;
   }
 
-  @action
   _setIsRotating(value: boolean): void {
     this._isRotating = value;
   }
 
-  @action
   _setIsRotatingTarget(value: boolean): void {
     this._isRotatingTarget = value;
   }
 
-  @action
   _setIsDragging(value: boolean): void {
     this._isDragging = value;
   }
 
-  @action
   _setIsRendered(value: boolean): void {
     this._isProvisional = value;
   }
 
-  @action
   _setIsTarget(value: boolean): void {
     this._isTarget = value;
   }
 
-  @action
   _setIsOnStage(value: boolean): void {
     this._isOnStage = value;
   }
 
-  @action
   _setIsInRange(value: boolean): void {
     this._isInRange = value;
   }
 
-  @action
   _setIsCornerMoving(value: boolean): void {
     this._isCornerMoving = value;
   }
@@ -700,7 +650,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.internalAngle;
   }
 
-  @computed
   get leanYAngle(): number {
     return this.model.leanYAngle;
   }
@@ -771,16 +720,32 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get isInMultiSelected(): boolean {
     const { selectedElementIds } = this.shield.store;
-    return selectedElementIds.has(this.id) && selectedElementIds.size > 1;
+    return selectedElementIds.has(this.model.id) && selectedElementIds.size > 1;
   }
 
   constructor(model: ElementObject, shield: IStageShield, isRangeElement?: boolean) {
-    this.model = observable(model);
+    this.model = model;
     this.rotation = new ElementRotation(this);
     this.shield = shield;
     this._isRangeElement = isRangeElement ?? false;
     this.model.boxCoords.length && (this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords));
-    makeObservable(this);
+    makeObservable(this, {
+      _status: observable,
+      _isDragging: observable,
+      _isRotating: observable,
+      _isTransforming: observable,
+      _isRotatingTarget: observable,
+      _isProvisional: observable,
+      _isOnStage: observable,
+      _isEditing: observable,
+      _isMoving: observable,
+      _isSelected: observable,
+      _isVisible: observable,
+      _isLocked: observable,
+      _isTarget: observable,
+      _isInRange: observable,
+      _isCornerMoving: observable,
+    });
   }
 
   /**

@@ -76,8 +76,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    *
    * @param status
    */
-  __setStatus(status: ElementStatus): void {
-    super.__setStatus(status);
+  _setStatus(status: ElementStatus): void {
+    super._setStatus(status);
     if (status === ElementStatus.finished) {
       this.tailCoordIndex = -1;
     }

@@ -445,16 +445,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _addEventListeners() {
     this.event.on("resize", this._refreshSize.bind(this));
-    this.event.on("cursorMove", e => {
-      this._addCursorQueueTask(() => this._handleCursorMove(e));
-    });
+    this.event.on("cursorMove", e => this._addCursorQueueTask(() => this._handleCursorMove(e)));
+    this.event.on("pressDown", e => this._addCursorQueueTask(() => this._handlePressDown(e)));
+    this.event.on("pressUp", e => this._addCursorQueueTask(() => this._handlePressUp(e)));
     this.event.on("cursorLeave", this._handleCursorLeave.bind(this));
-    this.event.on("pressDown", e => {
-      this._addCursorQueueTask(() => this._handlePressDown(e));
-    });
-    this.event.on("pressUp", e => {
-      this._addCursorQueueTask(() => this._handlePressUp(e));
-    });
     this.event.on("dblClick", this._handleDblClick.bind(this));
     this.event.on("wheelScale", this._handleWheelScale.bind(this));
     this.event.on("wheelMove", this._handleWheelMove.bind(this));

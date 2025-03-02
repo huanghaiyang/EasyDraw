@@ -193,8 +193,8 @@ export default class ElementGroup extends Element implements IElementGroup {
    *
    * @param value
    */
-  __setIsSelected(value: boolean): void {
-    super.__setIsSelected(value);
+  _setIsSelected(value: boolean): void {
+    super._setIsSelected(value);
     this.deepSubs.forEach(sub => {
       sub.isSelected = value;
     });
