@@ -243,6 +243,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
     await this.store.setElementsCorners(elements, value, index);
+    this._refreshElementsOriginals(elements);
     await this._redrawAll({ shield: true });
   }
 
@@ -255,6 +256,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
     await this.store.setElementsStrokeType(elements, value, index);
+    this._refreshElementsOriginals(elements);
     await this._redrawAll({ shield: true });
   }
 
@@ -267,6 +269,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value, index);
+    this._refreshElementsOriginals(elements);
     await this._redrawAll({ shield: true });
   }
 
@@ -302,6 +305,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsStroke(elements, prevIndex);
+    this._refreshElementsOriginals(elements);
     await this._redrawAll({ shield: true });
   }
 
@@ -313,6 +317,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async removeElementsStroke(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsStroke(elements, index);
+    this._refreshElementsOriginals(elements);
     await this._redrawAll({ shield: true });
   }
 

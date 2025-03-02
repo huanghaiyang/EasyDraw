@@ -10,6 +10,7 @@ import { TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
 import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import { NamedPoints } from "@/types/IWorker";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -19,6 +20,8 @@ export default class ElementArbitrary extends Element implements IElementArbitra
 
   // 外轮廓区域（世界坐标）
   private _outerWorldPaths: IPoint[][][] = [];
+  // 原始外轮廓区域（世界坐标）
+  private _originalOuterWorldPaths: IPoint[][][] = [];
 
   // 变换器类型
   get transformerType(): TransformerTypes {
@@ -84,17 +87,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   }
 
   /**
-   * 刷新由边框线段计算出边框区域
-   *
-   * @returns
-   */
-  calcOuterPaths(): IPoint[][][] {
-    return this._strokeCoords.map((points: IPoint[], index: number) => {
-      return ElementUtils.calcArbitraryBorderRegions(points, this.model.styles.strokes[index], this.model.isFold);
-    });
-  }
-
-  /**
    * 刷新由边框线段计算出世界坐标的边框区域
    *
    * @returns
@@ -106,18 +98,19 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   }
 
   /**
-   * 刷新边框区域,包含舞台坐标与世界坐标区域
-   */
-  private refreshOuters(): void {
-    this._outerWorldPaths = this.calcOuterWorldPaths();
-  }
-
-  /**
    * 刷新边框线段点坐标数据
    */
   refreshOutlinePoints(): void {
-    this.refreshOuters();
+    this._outerWorldPaths = this.calcOuterWorldPaths();
     super.refreshOutlinePoints();
+  }
+
+  /**
+   * 刷新原始外轮廓坐标
+   */
+  refreshOriginalStrokes(): void {
+    super.refreshOriginalStrokes();
+    this._originalOuterWorldPaths = cloneDeep(this._outerWorldPaths);
   }
 
   /**
@@ -163,7 +156,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @returns
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
-    return some(this.outerWorldPaths, groupPaths => {
+    return some(this._outerWorldPaths, groupPaths => {
       return some(groupPaths, paths => {
         return MathUtils.isPolygonsOverlap(paths, coords);
       });
@@ -249,5 +242,49 @@ export default class ElementArbitrary extends Element implements IElementArbitra
         1,
       );
     }
+  }
+
+  /**
+   * 位移外轮廓区域
+   *
+   * @param offset
+   */
+  private _translateOuterCoords(offset: IPoint): void {
+    this._outerWorldPaths = this._originalOuterWorldPaths.map((paths, index) => {
+      return paths.map(groupCoords => {
+        return groupCoords.map(coords => MathUtils.translate(coords, offset));
+      });
+    });
+  }
+
+  /**
+   * 位移
+   *
+   * @param offset 位移量
+   */
+  translateBy(offset: IPoint): void {
+    this._translateOuterCoords(offset);
+    super.translateBy(offset);
+  }
+
+  /**
+   * 位移外轮廓区域
+   *
+   * @param offset
+   */
+  async translateByOffset(offset: IPoint): Promise<void> {
+    this._translateOuterCoords(offset);
+    await super.translateByOffset(offset);
+  }
+
+  /**
+   * 通过给定的已经计算过的坐标点和位移进行位移
+   *
+   * @param map
+   * @param offset
+   */
+  translateWith(map: NamedPoints, offset: IPoint): void {
+    this._translateOuterCoords(offset);
+    super.translateWith(map, offset);
   }
 }

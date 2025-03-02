@@ -270,6 +270,8 @@ export default interface IElement {
   get height(): number;
   // 最小内边框宽高
   get minParallelogramVerticalSize(): number;
+  // 最小倾斜宽高
+  get minLeanSize(): number;
   // 旋转角度
   get angle(): number;
   // 位置
@@ -294,7 +296,10 @@ export default interface IElement {
   // 是否最底层
   get isBottommost(): boolean;
 
+  // 是否在多选中（舞台多选，如果当前组件是组合或者子组件，那么当选中组合时，子组件也是选中状态，此属性也会放回true）
   get isInMultiSelected(): boolean;
+  // 当属性变化时，书否应该触发emit通知外部
+  get shouldPropChangedEmit(): boolean;
 
   // 视觉描边宽度
   get visualStrokeWidth(): number;
@@ -766,12 +771,14 @@ export default interface IElement {
 
   /**
    * 获取位移命名点
+   * @unused
    */
   getTranslateNamedPoints(): NamedPoints;
 
   /**
    * 位移
    * @param offset 偏移量
+   * @unused
    */
   translateByOffset(offset: IPoint): Promise<void>;
 
@@ -780,6 +787,7 @@ export default interface IElement {
    *
    * @param map
    * @param offset
+   * @unused
    */
   translateWith(map: NamedPoints, offset: IPoint): void;
 

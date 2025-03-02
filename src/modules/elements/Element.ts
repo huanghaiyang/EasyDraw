@@ -1,10 +1,10 @@
-import { ElementStatus, IPoint, ISize } from "@/types";
+import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { clamp, cloneDeep, isNumber, some } from "lodash";
-import { action, makeObservable, observable, computed } from "mobx";
+import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
@@ -106,6 +106,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   _rotateControllers: IPointController[] = [];
   // 最小倾斜矩阵垂直尺寸
   _minParallelogramVerticalSize: number;
+  // 最小倾斜尺寸
+  _minLeanSize: number;
 
   // 用于记录翻转状态
   _flipX: boolean = false;
@@ -325,6 +327,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get minParallelogramVerticalSize(): number {
     return this._minParallelogramVerticalSize;
+  }
+
+  get minLeanSize(): number {
+    return this._minLeanSize;
   }
 
   get angle(): number {
@@ -723,6 +729,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     return selectedElementIds.has(this.model.id) && selectedElementIds.size > 1;
   }
 
+  get shouldPropChangedEmit(): boolean {
+    const isInMultiSelected = this.isInMultiSelected;
+    return !isInMultiSelected || (isInMultiSelected && !this.isGroupSubject);
+  }
+
   constructor(model: ElementObject, shield: IStageShield, isRangeElement?: boolean) {
     this.model = model;
     this.rotation = new ElementRotation(this);
@@ -755,6 +766,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   getAngle(): number {
     return this.model.angle;
+  }
+
+  /**
+   * 发送属性变化事件
+   *
+   * @param name
+   * @param values
+   */
+  protected emitPropChanged(name: ShieldDispatcherNames, values: any[]) {
+    if (this.shouldPropChangedEmit) {
+      this.shield.store.filterEmit(name, this, ...values);
+    }
   }
 
   /**
@@ -1143,7 +1166,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 重新维护原始变形器坐标
    */
   refreshOriginalElementProps() {
+    // 维护原始坐标
     this.refreshOriginalCoords();
+    // 维护原始描边
     this.refreshOriginalStrokes();
     // 维护原始矩形
     this._originalSize = { width: this.model.width, height: this.model.height };
@@ -1163,6 +1188,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._originalRotateCoords = cloneDeep(this._rotateCoords);
     // 维护原始旋转盒模型坐标
     this._originalRotateBoxCoords = cloneDeep(this._rotateBoxCoords);
+    // 维护原始不倾斜坐标
+    this._originalUnLeanCoords = cloneDeep(this._unLeanCoords);
+    // 维护原始不倾斜盒模型坐标
+    this._originalUnLeanBoxCoords = cloneDeep(this._unLeanBoxCoords);
     // 维护原始中心点坐标
     this._originalCenterCoord = cloneDeep(this.centerCoord);
     // 维护原始路径坐标
@@ -1216,6 +1245,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (this._rotateBoxCoords && this._rotateBoxCoords.length) {
       const { width: verticalSize, height: horizontalSize } = MathUtils.calcParallelogramVerticalSize(this._rotateBoxCoords);
       this._minParallelogramVerticalSize = Math.min(verticalSize, horizontalSize);
+      this._minLeanSize = Math.min(this.model.width, horizontalSize);
     }
   }
 
@@ -1309,6 +1339,10 @@ export default class Element implements IElement, ILinkedNodeValue {
       },
       { angles: { view: true, actual: true } },
     );
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
+    this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
+    this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
   /**
@@ -1647,6 +1681,11 @@ export default class Element implements IElement, ILinkedNodeValue {
     ]);
   }
 
+  /**
+   * 位移
+   *
+   * @param offset
+   */
   translateBy(offset: IPoint): void {
     this.model.coords = MathUtils.batchTranslate(this._originalCoords, offset);
     this.model.boxCoords = MathUtils.batchTranslate(this._originalBoxCoords, offset);
@@ -1660,6 +1699,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._maxOutlineBoxCoords = MathUtils.batchTranslate(this._originalMaxOutlineBoxCoords, offset);
     this._rotateOutlineCoords = this._originalRotateOutlineCoords.map(coords => MathUtils.batchTranslate(coords, offset));
     this._translateRefresh();
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
   /**
@@ -1671,6 +1711,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const result: NamedPoints = await MathUtils.asyncNamedBatchTranslate(this.getTranslateNamedPoints(), offset);
     this.translateWithCoords(result);
     this._translateRefresh();
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
   /**
@@ -1701,6 +1742,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   translateWith(map: NamedPoints, offset: IPoint): void {
     this.translateWithCoords(map);
     this._translateRefresh();
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
   /**
@@ -1864,6 +1906,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   setAngle(value: number): void {
     this.model.angle = value;
     this.refresh(null, { angles: { view: true, actual: true } });
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
   /**
@@ -1890,6 +1933,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refresh(null, {
       angles: { view: true, actual: true, internal: true },
     });
+    this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
   }
 
   /**
@@ -1915,7 +1959,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 刷新圆角
    */
-  refreshCorners(): void {}
+  refreshCorners(): void {
+    // 子组件实现
+  }
 
   /**
    * 刷新边框
@@ -1942,6 +1988,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
     this.model.corners = values;
     this.refresh({ corners: true, strokes: true });
+    this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
   /**
@@ -1953,7 +2000,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   setStrokeType(value: StrokeTypes, index: number): void {
     this.model.styles.strokes[index].type = value;
     this.refresh({ outline: true, strokes: true });
-    this.refreshOriginalStrokes();
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1964,6 +2011,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeColor(value: string, index: number): void {
     this.model.styles.strokes[index].color = value;
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1973,7 +2021,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setStrokeColorOpacity(value: number, index: number): void {
-    this.model.styles.strokes[index].colorOpacity = value;
+    this.model.styles.strokes[index].colorOpacity = clamp(value, 0, 1);
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1983,9 +2032,21 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setStrokeWidth(value: number, index: number): void {
+    switch (this.model.styles.strokes[index].type) {
+      case StrokeTypes.middle:
+        value = clamp(value, 0, this._minLeanSize);
+        break;
+      case StrokeTypes.inside:
+        value = clamp(value, 0, this._minLeanSize / 2);
+        break;
+      case StrokeTypes.outside:
+        value = clamp(value, 0, this._minLeanSize * 2);
+        break;
+    }
+    value = MathUtils.precise(value, 1);
     this.model.styles.strokes[index].width = value;
     this.refresh({ outline: true, strokes: true });
-    this.refreshOriginalStrokes();
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1994,11 +2055,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param prevIndex
    */
   addStroke(prevIndex: number): void {
-    const strokes = cloneDeep(this.model.styles.strokes);
-    strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
-    this.model.styles.strokes = strokes;
+    this.model.styles.strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
     this.refresh({ outline: true, strokes: true });
-    this.refreshOriginalStrokes();
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -2007,11 +2066,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   removeStroke(index: number): void {
-    const strokes = cloneDeep(this.model.styles.strokes);
-    strokes.splice(index, 1);
-    this.model.styles.strokes = strokes;
+    this.model.styles.strokes.splice(index, 1);
     this.refresh({ outline: true, strokes: true });
-    this.refreshOriginalStrokes();
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -2021,6 +2078,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFillColor(value: string, index: number): void {
     this.model.styles.fills[index].color = value;
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2029,7 +2087,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setFillColorOpacity(value: number, index: number): void {
-    this.model.styles.fills[index].colorOpacity = value;
+    this.model.styles.fills[index].colorOpacity = clamp(value, 0, 1);
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2038,9 +2097,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param prevIndex
    */
   addFill(prevIndex: number): void {
-    const fills = cloneDeep(this.model.styles.fills);
-    fills.splice(prevIndex + 1, 0, { ...DefaultFillStyle });
-    this.model.styles.fills = fills;
+    this.model.styles.fills.splice(prevIndex + 1, 0, { ...DefaultFillStyle });
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2049,9 +2107,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   removeFill(index: number): void {
-    const fills = cloneDeep(this.model.styles.fills);
-    fills.splice(index, 1);
-    this.model.styles.fills = fills;
+    this.model.styles.fills.splice(index, 1);
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2060,6 +2117,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontSize(value: number): void {
     this.model.styles.fontSize = value;
+    this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [this.fontSize]);
   }
 
   /**
@@ -2068,6 +2126,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontFamily(value: string): void {
     this.model.styles.fontFamily = value;
+    this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [this.fontFamily]);
   }
 
   /**
@@ -2076,6 +2135,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextAlign(value: CanvasTextAlign): void {
     this.model.styles.textAlign = value;
+    this.emitPropChanged(ShieldDispatcherNames.textAlignChanged, [this.textAlign]);
   }
 
   /**
@@ -2084,6 +2144,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextBaseline(value: CanvasTextBaseline): void {
     this.model.styles.textBaseline = value;
+    this.emitPropChanged(ShieldDispatcherNames.textBaselineChanged, [this.textBaseline]);
   }
 
   /**
@@ -2098,6 +2159,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else {
       this.model.ratio = null;
     }
+    this.emitPropChanged(ShieldDispatcherNames.ratioLockedChanged, [this.isRatioLocked]);
   }
 
   /**

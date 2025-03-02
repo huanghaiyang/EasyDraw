@@ -1,5 +1,5 @@
 import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
-import { IPoint } from "@/types/index";
+import { IPoint, ShieldDispatcherNames } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
 import { IElementGroup } from "@/types/IElementGroup";
@@ -149,7 +149,8 @@ export default interface IStageStore extends IStageSetter {
   getSelectedElements(isExcludeGroupSubs: boolean): IElement[];
   // 判断选中的组件是否等于正在绘制的组件
   isSelectedEqCreating(): boolean;
-
+  // 过滤事件并发送
+  filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void;
   // 是否存在组合
   hasElementGroup(id: string): boolean;
   // 创建组合
