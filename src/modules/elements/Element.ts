@@ -1934,16 +1934,16 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param groupAngle
    * @param center
    */
-  leanYBy(value: number, prevValue: number, groupAngle: number, center: IPoint): void {
+  leanYBy(value: number, prevValue: number, groupAngle: number, centerCoord: IPoint): void {
     // 计算旋转偏移前的坐标
-    let points = MathUtils.batchTransWithCenter(this._rotateCoords, { angle: groupAngle, leanYAngle: prevValue }, center, true);
+    let coords = MathUtils.batchTransWithCenter(this._rotateCoords, { angle: groupAngle, leanYAngle: prevValue }, centerCoord, true);
     // 计算旋转偏移前的盒模型坐标
-    let boxPoints = MathUtils.batchTransWithCenter(this._rotateBoxCoords, { angle: groupAngle, leanYAngle: prevValue }, center, true);
+    let boxCoords = MathUtils.batchTransWithCenter(this._rotateBoxCoords, { angle: groupAngle, leanYAngle: prevValue }, centerCoord, true);
     // 计算偏移后的坐标
-    points = MathUtils.batchTransWithCenter(points, { angle: groupAngle, leanYAngle: value }, center);
+    coords = MathUtils.batchTransWithCenter(coords, { angle: groupAngle, leanYAngle: value }, centerCoord);
     // 计算偏移后的盒模型坐标
-    boxPoints = MathUtils.batchTransWithCenter(boxPoints, { angle: groupAngle, leanYAngle: value }, center);
-    this._doTransformByPoints(points, boxPoints, center);
+    boxCoords = MathUtils.batchTransWithCenter(boxCoords, { angle: groupAngle, leanYAngle: value }, centerCoord);
+    this._doTransformByPoints(coords, boxCoords, centerCoord);
   }
 
   /**

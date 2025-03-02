@@ -496,9 +496,9 @@ export default class StageStore implements IStageStore {
         value = MathUtils.precise(value, 1);
         element.setLeanYAngle(value);
         if (element.isGroup) {
-          const center = element.center;
+          const centerCoord = element.centerCoord;
           (element as IElementGroup).deepSubs.forEach(sub => {
-            sub.leanYBy(value, prevValue, element.angle, center);
+            sub.leanYBy(value, prevValue, element.angle, centerCoord);
           });
         }
       }
