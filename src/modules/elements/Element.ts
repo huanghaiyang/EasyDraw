@@ -779,6 +779,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.rotation = new ElementRotation(this);
     this.shield = shield;
     this._isRangeElement = isRangeElement ?? false;
+    this.model.boxCoords.length && (this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords));
     makeObservable(this);
   }
 
