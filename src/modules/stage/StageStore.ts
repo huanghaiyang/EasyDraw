@@ -371,6 +371,21 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 添加或删除元素
+   *
+   * @param set
+   * @param id
+   * @param value
+   */
+  private _setAddDelete(set: Set<string>, id: string, value: boolean): void {
+    if (value) {
+      set.add(id);
+    } else {
+      set.delete(id);
+    }
+  }
+
+  /**
    * 组件属性发生变化时，更新组件映射关系
    *
    * @param propName
@@ -380,67 +395,35 @@ export default class StageStore implements IStageStore {
   private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
     switch (propName) {
       case ElementReactionPropNames.isSelected: {
-        if (value) {
-          this._selectedElementIds.add(element.id);
-        } else {
-          this._selectedElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._selectedElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isProvisional: {
-        if (value) {
-          this._provisionalElementIds.add(element.id);
-        } else {
-          this._provisionalElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._provisionalElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isTarget: {
-        if (value) {
-          this._targetElementIds.add(element.id);
-        } else {
-          this._targetElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._targetElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isRotatingTarget: {
-        if (value) {
-          this._rotatingTargetElementIds.add(element.id);
-        } else {
-          this._rotatingTargetElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._rotatingTargetElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isEditing: {
-        if (value) {
-          this._editingElementIds.add(element.id);
-        } else {
-          this._editingElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._editingElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isInRange: {
-        if (value) {
-          this._rangeElementIds.add(element.id);
-        } else {
-          this._rangeElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._rangeElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isVisible: {
-        if (value) {
-          this._visibleElementIds.add(element.id);
-        } else {
-          this._visibleElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._visibleElementIds, element.id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isOnStage: {
-        if (value) {
-          this._stageElementIds.add(element.id);
-        } else {
-          this._stageElementIds.delete(element.id);
-        }
+        this._setAddDelete(this._stageElementIds, element.id, value as boolean);
         break;
       }
       default: {
