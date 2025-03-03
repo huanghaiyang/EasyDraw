@@ -42,17 +42,13 @@ export default interface IStageStore extends IStageSetter {
   get isEmpty(): boolean;
   // 是否可见组件为空
   get isVisibleEmpty(): boolean;
-  // 选中的组合
-  get selectedElementGroups(): IElementGroup[];
-  // 选中的根组合
-  get selectedAncestorElementGroups(): IElementGroup[];
   // 选中的根组件
   get selectedAncestorElement(): IElement;
   // 不属于任何组合的组件
   get noParentElements(): IElement[];
   // 是否多选
   get isMultiSelected(): boolean;
-
+  // 选中的组件ID
   get selectedElementIds(): Set<string>;
 
   // 创建组件数据模型

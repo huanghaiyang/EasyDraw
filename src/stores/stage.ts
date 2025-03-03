@@ -77,22 +77,15 @@ export const useStageStore = defineStore("stage", {
       selectedElements: [],
       // 目标组件
       targetElements: [],
+      // 是否多选
+      isMultiSelected: false,
+      // 舞台主选中组件
+      primarySelectedElement: null,
       // 舞台默认数据
       ...cloneDeep(DefaultStage),
     };
   },
   getters: {
-    // 是否多选
-    isMultipleSelected(): boolean {
-      return ElementUtils.getNoParentElements(this.selectedElements).length > 1;
-    },
-    // 选中的唯一组件
-    primarySelectedElement(): IElement {
-      // 选中的非组合组件
-      const elements = ElementUtils.getNoParentElements(this.selectedElements);
-      if (elements.length !== 1) return null;
-      return elements[0];
-    },
     headOfSelected(): IElement {
       return this.selectedElements[0];
     },
@@ -174,6 +167,10 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
       // 监听绘制工具
       shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
+      // 监听多选状态
+      shield.on(ShieldDispatcherNames.multiSelectedChanged, throttle(this.onMultiSelectedChanged.bind(this), 100));
+      // 监听主选中状态
+      shield.on(ShieldDispatcherNames.primarySelectedChanged, throttle(this.onPrimarySelectedChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -199,6 +196,22 @@ export const useStageStore = defineStore("stage", {
       if (creator.category === CreatorCategories.freedom) {
         this.currentArbitraryCreator = creator;
       }
+    },
+    /**
+     * 舞台组件选中状态改变
+     *
+     * @param selectedElements
+     */
+    onMultiSelectedChanged(isMultiSelected: boolean) {
+      this.isMultiSelected = isMultiSelected;
+    },
+    /**
+     * 舞台主选中状态改变
+     *
+     * @param primarySelectedElement
+     */
+    onPrimarySelectedChanged(primarySelectedElement: IElement | null) {
+      this.primarySelectedElement = primarySelectedElement;
     },
     /**
      * 舞台组件创建完毕

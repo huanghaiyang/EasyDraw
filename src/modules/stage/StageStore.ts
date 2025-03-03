@@ -28,28 +28,55 @@ export default class StageStore implements IStageStore {
   private _currentCreatingElementId;
   // 组件对象映射关系，加快查询
   private _elementsMap: Map<string, IElement> = new Map<string, IElement>();
+
+  // 临时组件
+  private _provisionalElements: IElement[] = [];
+  // 选中的组件
+  private _selectedElements: IElement[] = [];
+  // 目标组件
+  private _targetElements: IElement[] = [];
+  // 范围组件
+  private _rangeElements: IElement[] = [];
+  // 可见组件
+  private _visibleElements: IElement[] = [];
+  // 舞台组件
+  private _stageElements: IElement[] = [];
+  // 编辑组件
+  private _editingElements: IElement[] = [];
+  // 旋转组件目标组件
+  private _rotatingTargetElements: IElement[] = [];
+
   // 组件对象映射关系，加快查询
-  private _provisionalElementIds: Set<string> = new Set<string>();
+  private _provisionalElementIds: Set<string> = observable.set(new Set<string>());
   // 选中的组件
   private _selectedElementIds: Set<string> = observable.set(new Set<string>());
   // 目标组件
   private _targetElementIds: Set<string> = observable.set(new Set<string>());
   // 可见组件
-  private _visibleElementIds: Set<string> = new Set<string>();
+  private _visibleElementIds: Set<string> = observable.set(new Set<string>());
   // 范围组件
-  private _rangeElementIds: Set<string> = new Set<string>();
+  private _rangeElementIds: Set<string> = observable.set(new Set<string>());
   // 舞台组件
-  private _stageElementIds: Set<string> = new Set<string>();
+  private _stageElementIds: Set<string> = observable.set(new Set<string>());
   // 编辑组件
-  private _editingElementIds: Set<string> = new Set<string>();
+  private _editingElementIds: Set<string> = observable.set(new Set<string>());
   // 旋转组件目标组件
-  private _rotatingTargetElementIds: Set<string> = new Set<string>();
+  private _rotatingTargetElementIds: Set<string> = observable.set(new Set<string>());
+
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
   private _rotatingCenterCoord: IPoint;
   // 旋转组件原始角度
   private _rotatingOriginalAngle: number;
+  // 是否多选
+  private _isMultiSelected: boolean = false;
+  // 未定位父组件的选中组件
+  private _noParentElements: IElement[] = [];
+  // 选中的祖先组件
+  private _selectedAncestorElement: IElement;
+  // 主选中的组件
+  private _primarySelectedElement: IElement;
 
   constructor(shield: IStageShield) {
     this.shield = shield;
@@ -78,65 +105,54 @@ export default class StageStore implements IStageStore {
 
   // 已经渲染到舞台的组件
   get provisionalElements(): IElement[] {
-    if (this.isProvisionalEmpty) return [];
-    return this._elementList.filter(node => node.value.isProvisional).map(node => node.value);
+    return this._provisionalElements;
   }
 
   // 选中的组件
   get selectedElements(): IElement[] {
-    if (this.isSelectedEmpty) return [];
-    return this._elementList.filter(node => node.value.isSelected).map(node => node.value);
+    return this._selectedElements;
   }
 
   // 命中的组件
   get targetElements(): IElement[] {
-    if (this.isTargetEmpty) return [];
-    return this._elementList.filter(node => node.value.isTarget).map(node => node.value);
+    return this._targetElements;
   }
 
   // 舞台上的组件
   get stageElements(): IElement[] {
-    if (this.isStageEmpty) return [];
-    return this._elementList.filter(node => node.value.isOnStage).map(node => node.value);
+    return this._stageElements;
   }
 
   // 选区范围内的组件
   get rangeElements(): IElement[] {
-    if (this.isRangeEmpty) return [];
-    return this._elementList.filter(node => node.value.isInRange).map(node => node.value);
+    return this._rangeElements;
   }
 
   // 可见的组件
   get visibleElements(): IElement[] {
-    if (this.isVisibleEmpty) return [];
-    return this._elementList.filter(node => node.value.isVisible).map(node => node.value);
+    return this._visibleElements;
   }
 
   // 选中的根组件
   get selectedAncestorElement(): IElement {
-    return ElementUtils.getAncestorGroup(this.selectedElements);
+    return this._selectedAncestorElement;
   }
 
   /**
    * 获取选中的主要组件
    */
   get primarySelectedElement(): IElement {
-    // 选中的根节点，根组件不可以是子组件
-    const ancestorElement = this.selectedAncestorElement;
-    // 选中的组件不能是创建中的临时组件
-    if (ancestorElement && !ancestorElement.isProvisional) return ancestorElement;
+    return this._primarySelectedElement;
   }
 
   // 旋转目标组件
   get rotatingTargetElements(): IElement[] {
-    if (this.isRotatingTargetEmpty) return [];
-    return this._elementList.filter(node => node.value.isRotatingTarget).map(node => node.value);
+    return this._rotatingTargetElements;
   }
 
   // 编辑中的组件
   get editingElements(): IElement[] {
-    if (this.isEditingEmpty) return [];
-    return this._elementList.filter(node => node.value.isEditing).map(node => node.value);
+    return this._editingElements;
   }
 
   // 是否选中组件为空
@@ -178,24 +194,14 @@ export default class StageStore implements IStageStore {
     return this._rotatingTargetElementIds.size === 0;
   }
 
-  // 选中的组合
-  get selectedElementGroups(): IElementGroup[] {
-    return this.getSelectedElementGroups();
-  }
-
-  // 选中的根组合
-  get selectedAncestorElementGroups(): IElementGroup[] {
-    return this.getSelectedAncestorElementGroups();
-  }
-
   // 不属于任何组合的组件
   get noParentElements(): IElement[] {
-    return ElementUtils.getNoParentElements(this.selectedElements) as IElement[];
+    return this._noParentElements;
   }
 
   // 是否多选
   get isMultiSelected(): boolean {
-    return this.noParentElements.length > 1;
+    return this._isMultiSelected;
   }
 
   /**
@@ -243,21 +249,82 @@ export default class StageStore implements IStageStore {
    * 组件选中状态发生变化时，更新选中状态映射关系
    */
   private _reactionElementsSelectionChanged(): void {
-    // 监听选中组件变更事件通知外部监听者
     reaction(
       () => Array.from(this._selectedElementIds),
       () => {
-        this.shield.emit(ShieldDispatcherNames.selectedChanged, this.selectedElements);
+        this._selectedElements = this._filterList(this._selectedElementIds);
+        this._noParentElements = ElementUtils.getNoParentElements(this._selectedElements);
+        this._isMultiSelected = this._noParentElements.length > 1;
+        this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
+        this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
+
+        this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
+        this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
+        this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
+
         this.shield.selection.refresh();
       },
     );
-    // 监听目标组件变更事件通知外部监听者
     reaction(
       () => Array.from(this._targetElementIds),
       () => {
-        this.shield.emit(ShieldDispatcherNames.targetChanged, this.targetElements);
+        this._targetElements = this._filterList(this._targetElementIds);
+        this.shield.emit(ShieldDispatcherNames.targetChanged, this._targetElements);
       },
     );
+
+    reaction(
+      () => Array.from(this._provisionalElementIds),
+      () => {
+        this._provisionalElements = this._filterList(this._provisionalElementIds);
+      },
+    );
+
+    reaction(
+      () => Array.from(this._rotatingTargetElementIds),
+      () => {
+        this._rotatingTargetElements = this._filterList(this._rotatingTargetElementIds);
+      },
+    );
+
+    reaction(
+      () => Array.from(this._editingElementIds),
+      () => {
+        this._editingElements = this._filterList(this._editingElementIds);
+      },
+    );
+
+    reaction(
+      () => Array.from(this._rangeElementIds),
+      () => {
+        this._rangeElements = this._filterList(this._rangeElementIds);
+      },
+    );
+
+    reaction(
+      () => Array.from(this._visibleElementIds),
+      () => {
+        this._visibleElements = this._filterList(this._visibleElementIds);
+      },
+    );
+
+    reaction(
+      () => Array.from(this._stageElementIds),
+      () => {
+        this._stageElements = this._filterList(this._stageElementIds);
+      },
+    );
+  }
+
+  /**
+   * 匹配列表
+   *
+   * @param set
+   * @param list
+   * @returns
+   */
+  private _filterList(set: Set<string>): Array<IElement> {
+    return this._elementList.filter(node => set.has(node.value.id)).map(node => node.value);
   }
 
   /**

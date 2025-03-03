@@ -4,7 +4,7 @@ import { useStageStore } from "@/stores/stage";
 const stageStore = useStageStore();
 </script>
 <template>
-  <div :class="['layer-props right-props']" v-if="!stageStore.isMultipleSelected">
+  <div :class="['layer-props right-props']" v-if="!stageStore.isMultiSelected">
     <div class="layer-props__title">
       <span class="layer-props__title-text">层级</span>
     </div>

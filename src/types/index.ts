@@ -117,4 +117,8 @@ export enum ShieldDispatcherNames {
   creatorChanged = "creatorChanged",
   // 锁定比例改变
   ratioLockedChanged = "ratioLockedChanged",
+  // 多选状态改变
+  multiSelectedChanged = "multiSelectedChanged",
+  // 主选中状态改变
+  primarySelectedChanged = "primarySelectedChanged",
 }
