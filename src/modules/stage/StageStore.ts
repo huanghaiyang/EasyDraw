@@ -426,30 +426,6 @@ export default class StageStore implements IStageStore {
         this._setAddDelete(this._stageElementIds, element.id, value as boolean);
         break;
       }
-      default: {
-        const names: ShieldDispatcherNames[] = [
-          ShieldDispatcherNames.positionChanged,
-          ShieldDispatcherNames.angleChanged,
-          ShieldDispatcherNames.cornersChanged,
-          ShieldDispatcherNames.flipXChanged,
-          ShieldDispatcherNames.leanYAngleChanged,
-          ShieldDispatcherNames.widthChanged,
-          ShieldDispatcherNames.heightChanged,
-          ShieldDispatcherNames.scaleChanged,
-          ShieldDispatcherNames.strokesChanged,
-          ShieldDispatcherNames.fillsChanged,
-          ShieldDispatcherNames.textAlignChanged,
-          ShieldDispatcherNames.textBaselineChanged,
-          ShieldDispatcherNames.ratioLockedChanged,
-        ];
-        for (const name of names) {
-          if (name.toString() === `${propName}Changed`) {
-            this.filterEmit(name, element, value);
-            break;
-          }
-        }
-        break;
-      }
     }
   }
 

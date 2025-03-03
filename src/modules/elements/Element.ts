@@ -1343,6 +1343,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
+    this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
   }
 
   /**
