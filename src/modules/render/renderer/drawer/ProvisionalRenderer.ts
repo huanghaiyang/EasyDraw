@@ -14,9 +14,9 @@ export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional
    */
   async redraw(): Promise<void> {
     let cargo = new RenderTaskCargo([]);
-    const elements = this.drawer.shield.store.creatingElements;
-    if (elements.length > 0) {
-      elements.forEach(element => {
+    const { creatingElements } = this.drawer.shield.store;
+    if (creatingElements.length > 0) {
+      creatingElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

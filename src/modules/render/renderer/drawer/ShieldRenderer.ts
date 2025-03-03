@@ -14,8 +14,9 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
    */
   async redraw(force?: boolean): Promise<void> {
     const cargo = new RenderTaskCargo([]);
-    if (!this.drawer.store.isProvisionalEmpty) {
-      this.drawer.store.provisionalElements.forEach(element => {
+    const { isProvisionalEmpty, provisionalElements, stageElements } = this.drawer.store;
+    if (!isProvisionalEmpty) {
+      provisionalElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);
@@ -28,7 +29,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
     }
     if (force || this.drawer.shouldRedraw) {
       cargo.add(new ElementTaskClear(null, this.renderParams));
-      this.drawer.store.stageElements.forEach(element => {
+      stageElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);
         if (task) {
           cargo.add(task);

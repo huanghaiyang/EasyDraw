@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, includes, isEqual } from "lodash";
+import { every, isEqual } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -1298,11 +1298,11 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   isSelectedContainsTarget(): boolean {
-    const targetElements = this.shield.store.targetElements;
-    if (targetElements.length === 0) return false;
-    const targetIds = targetElements.map(item => item.id);
-    const selectedIds = this.shield.store.selectedElements.map(item => item.id);
-    return every(targetIds, item => includes(selectedIds, item));
+    if (this.isTargetEmpty) return false;
+    // 由于mobx对set进行了代理，所以every遍历时值并不是组件id而是代理实例名称，例如‘ObservableSet@2’
+    return every(Array.from(this._targetElementIds), id => {
+      return this._selectedElementIds.has(id as string);
+    });
   }
 
   /**

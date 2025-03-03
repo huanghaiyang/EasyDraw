@@ -71,23 +71,30 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       cargo.addAll(controllerTasks);
     }
 
+    const {
+      store: { noParentElements },
+      configure: { rotationIconEnable },
+      selection: { rangeElement },
+      cursor,
+      isDrawerActive,
+    } = this.drawer.shield;
+
     // 特殊组件处理（单个无父组件）===
-    const noParentElements = this.drawer.shield.store.noParentElements;
     if (noParentElements.length === 1) {
       const element = noParentElements[0];
       // 添加旋转图标（当组件允许旋转且处于完成状态）
-      if (this.drawer.shield.configure.rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
+      if (rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
         cargo.add(this.createMaskRotateTask(element.rotation));
       }
       // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
     } else if (noParentElements.length > 1) {
       // 多选时添加范围组件的旋转任务
-      cargo.add(this.createMaskRotateTask(this.drawer.shield.selection.rangeElement.rotation));
+      cargo.add(this.createMaskRotateTask(rangeElement.rotation));
     }
 
     // 光标绘制阶段 ================
-    const task = this.drawer.shield.cursor.getTask();
+    const task = cursor.getTask();
     if (task) {
       cargo.add(task);
       this._lastCursorRendered = true;
@@ -95,7 +102,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
 
     // 激活状态下的附加绘制任务 ====
-    if (this.drawer.shield.isDrawerActive) {
+    if (isDrawerActive) {
       cargo.add(this.createMaskCursorPositionTask()); // 坐标显示
       cargo.add(this.createMaskArbitraryCursorTask()); // 自定义光标
     }
@@ -156,7 +163,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns {IRenderTask[]} 选区路径渲染任务数组
    */
   private createMaskSelectionTasks(): IRenderTask[] {
-    const selection = this.drawer.shield.selection;
+    const { selection, stageScale } = this.drawer.shield;
     const tasks: IRenderTask[] = [];
     // 合并主选区和子选区模型
     const models: IMaskModel[] = [...selection.getModels(), selection.selectionModel];
@@ -167,7 +174,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         const task = new MaskTaskPath(
           {
             ...model,
-            scale: 1 / this.drawer.shield.stageScale, // 根据舞台缩放调整路径尺寸
+            scale: 1 / stageScale, // 根据舞台缩放调整路径尺寸
           },
           this.renderParams,
         );
@@ -195,8 +202,10 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns {IRenderTask[]} 形变控制器任务数组
    */
   private createMaskTransformerTasks(): IRenderTask[] {
-    const models: IMaskModel[] = this.drawer.shield.selection.transformerModels;
-    return models.map(model => {
+    const {
+      selection: { transformerModels },
+    } = this.drawer.shield;
+    return transformerModels.map(model => {
       switch (model.element.transformerType) {
         case TransformerTypes.circle:
           return new MaskTaskCircleTransformer(model, this.renderParams);
@@ -212,7 +221,11 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createControllerTasks(): IRenderTask[] {
-    const element = this.drawer.shield.store.primarySelectedElement || this.drawer.shield.selection.rangeElement;
+    const {
+      store: { primarySelectedElement },
+      selection: { rangeElement },
+    } = this.drawer.shield;
+    const element = primarySelectedElement || rangeElement;
     if (element) {
       const { controllers = [] } = element;
       return controllers
@@ -260,6 +273,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param element
    */
   private createMaskIndicatorTask(element: IElement): IRenderTask {
+    const { stageScale } = this.drawer.shield;
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
@@ -290,7 +304,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const angle = MathUtils.calcAngle(p1, p2);
     // 生成指示器数据对象
     const model: IMaskModel = {
-      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / this.drawer.shield.stageScale),
+      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / stageScale),
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
@@ -304,9 +318,10 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    if (this.drawer.shield.currentCreator.category === CreatorCategories.freedom) {
+    const { currentCreator, cursor } = this.drawer.shield;
+    if (currentCreator.category === CreatorCategories.freedom) {
       const model: IMaskModel = {
-        point: this.drawer.shield.cursor.value,
+        point: cursor.value,
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultControllerRadius,
       };
