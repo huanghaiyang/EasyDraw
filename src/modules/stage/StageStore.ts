@@ -252,72 +252,115 @@ export default class StageStore implements IStageStore {
     reaction(
       () => Array.from(this._selectedElementIds),
       () => {
-        this._selectedElements = this._filterList(this._selectedElementIds);
-        this._noParentElements = ElementUtils.getNoParentElements(this._selectedElements);
-        this._isMultiSelected = this._noParentElements.length > 1;
-        this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
-        this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
-
-        this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
-        this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
-        this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
-
+        this._reactionSelectedElementsChanged();
         this.shield.selection.refresh();
       },
     );
     reaction(
       () => Array.from(this._targetElementIds),
-      () => {
-        this._targetElements = this._filterList(this._targetElementIds);
-        this.shield.emit(ShieldDispatcherNames.targetChanged, this._targetElements);
-      },
+      () => this._reactionTargetElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._provisionalElementIds),
-      () => {
-        this._provisionalElements = this._filterList(this._provisionalElementIds);
-      },
+      () => this._reactionProvisionalElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._rotatingTargetElementIds),
-      () => {
-        this._rotatingTargetElements = this._filterList(this._rotatingTargetElementIds);
-      },
+      () => this._reactionRotatingTargetElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._editingElementIds),
-      () => {
-        this._editingElements = this._filterList(this._editingElementIds);
-      },
+      () => this._reactionEditingElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._rangeElementIds),
-      () => {
-        this._rangeElements = this._filterList(this._rangeElementIds);
-      },
+      () => this._reactRangeElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._visibleElementIds),
-      () => {
-        this._visibleElements = this._filterList(this._visibleElementIds);
-      },
+      () => this._reactionVisibleElementsChanged(),
     );
 
     reaction(
       () => Array.from(this._stageElementIds),
-      () => {
-        this._stageElements = this._filterList(this._stageElementIds);
-      },
+      () => this._reactionStageElementsChanged(),
     );
   }
 
   /**
+   * 舞台选中元素发生变化
+   */
+  private _reactionSelectedElementsChanged(): void {
+    this._selectedElements = this._filterList(this._selectedElementIds);
+    this._noParentElements = ElementUtils.getNoParentElements(this._selectedElements);
+    this._isMultiSelected = this._noParentElements.length > 1;
+    this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
+    this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
+
+    this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
+    this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
+    this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
+  }
+
+  /**
+   * 舞台元素发生变化
+   */
+  private _reactionTargetElementsChanged(): void {
+    this._targetElements = this._filterList(this._targetElementIds);
+    this.shield.emit(ShieldDispatcherNames.targetChanged, this._targetElements);
+  }
+
+  /**
+   * 舞台元素发生变化
+   */
+  private _reactionStageElementsChanged(): void {
+    this._stageElements = this._filterList(this._stageElementIds);
+  }
+
+  /**
+   * 舞台可见元素发生变化
+   */
+  private _reactionVisibleElementsChanged(): void {
+    this._visibleElements = this._filterList(this._visibleElementIds);
+  }
+
+  /**
+   * 舞台范围元素发生变化
+   */
+  private _reactRangeElementsChanged(): void {
+    this._rangeElements = this._filterList(this._rangeElementIds);
+  }
+
+  /**
+   * 舞台编辑元素发生变化
+   */
+  private _reactionEditingElementsChanged(): void {
+    this._editingElements = this._filterList(this._editingElementIds);
+  }
+
+  /**
+   * 舞台旋转元素发生变化
+   */
+  private _reactionRotatingTargetElementsChanged(): void {
+    this._rotatingTargetElements = this._filterList(this._rotatingTargetElementIds);
+  }
+
+  /**
+   * 舞台 Provisional 元素发生变化
+   */
+  private _reactionProvisionalElementsChanged(): void {
+    this._provisionalElements = this._filterList(this._provisionalElementIds);
+  }
+
+  /**
    * 匹配列表
+   *
+   * @param set
    *
    * @param set
    * @param list
@@ -1900,6 +1943,7 @@ export default class StageStore implements IStageStore {
         this._elementList.prepend(node, false);
       });
     }
+    this._reactionStageElementsChanged();
   }
 
   /**
@@ -1925,5 +1969,6 @@ export default class StageStore implements IStageStore {
         this._elementList.insert(node, false);
       });
     }
+    this._reactionStageElementsChanged();
   }
 }
