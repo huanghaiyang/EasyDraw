@@ -143,7 +143,8 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   private _getSelectedElementsMaskModels(): IMaskModel[] {
-    return this._getElementsMaskModels([this.shield.store.primarySelectedElement || this.shield.store.creatingElements[0]], DrawerMaskModelTypes.path);
+    const { store } = this.shield;
+    return this._getElementsMaskModels([store.primarySelectedElement || store.creatingElements[0]], DrawerMaskModelTypes.path);
   }
 
   /**
@@ -237,7 +238,8 @@ export default class StageSelection implements IStageSelection {
    * 清空选区
    */
   clearSelects(): void {
-    this.shield.store.deSelectElements(this.shield.store.selectedElements);
+    const { store } = this.shield;
+    store.deSelectElements(store.selectedElements);
   }
 
   /**
@@ -246,15 +248,16 @@ export default class StageSelection implements IStageSelection {
    * @param coord
    */
   hitTargetElements(coord: IPoint): void {
-    const stageElements = this.shield.store.stageElements;
+    const { store } = this.shield;
+    const stageElements = store.stageElements;
     for (let i = stageElements.length - 1; i >= 0; i--) {
       const element = stageElements[i];
       const isTarget = element.isContainsCoord(coord);
-      this.shield.store.updateElementById(element.id, { isTarget });
+      store.updateElementById(element.id, { isTarget });
       if (isTarget) {
-        this.shield.store.targetElements.forEach(target => {
+        store.targetElements.forEach(target => {
           if (target.id !== element.id) {
-            this.shield.store.updateElementById(target.id, { isTarget: false });
+            store.updateElementById(target.id, { isTarget: false });
           }
         });
         break;
@@ -281,8 +284,9 @@ export default class StageSelection implements IStageSelection {
    */
   refreshRangeElements(rangeCoords: IPoint[]): void {
     if (rangeCoords && rangeCoords.length) {
-      this.shield.store.stageElements.forEach(element => {
-        this.shield.store.updateElementById(element.id, {
+      const { store } = this.shield;
+      store.stageElements.forEach(element => {
+        store.updateElementById(element.id, {
           isInRange: element.isPolygonOverlap(rangeCoords),
         });
       });
@@ -294,7 +298,8 @@ export default class StageSelection implements IStageSelection {
    */
   selectRange(): void {
     if (this.isRange) {
-      this.shield.store.updateElements(this.shield.store.rangeElements, {
+      const { store } = this.shield;
+      store.updateElements(store.rangeElements, {
         isSelected: true,
         isInRange: false,
       });
