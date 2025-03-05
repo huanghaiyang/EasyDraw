@@ -121,4 +121,8 @@ export enum ShieldDispatcherNames {
   multiSelectedChanged = "multiSelectedChanged",
   // 主选中状态改变
   primarySelectedChanged = "primarySelectedChanged",
+  // 层移动状态改变
+  layerShiftMoveEnableChanged = "layerShiftMoveEnableChanged",
+  // 层移动状态改变
+  layerGoDownEnableChanged = "layerGoDownEnableChanged",
 }

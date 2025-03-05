@@ -127,23 +127,26 @@ export default class ElementList extends LinkedList<IElement> implements IElemen
   /**
    * 判断给定的组件在链表中是否是连续的
    *
-   * @param elements 组件列表
+   * @param nodes 组件列表
    * @returns 是否连续
    */
-  static isConsecutive(elements: IElement[]): boolean {
-    let current: IElement = elements[0];
+  static isConsecutive(nodes: ILinkedNode<IElement>[]): boolean {
+    if (nodes.length < 2) {
+      return true;
+    }
+    let current: ILinkedNode<IElement> = nodes[0];
     let index = 1;
-    while (current.node.next) {
-      if (!ElementListNodeEqFunc(current.node.next, elements[index].node)) {
+    while (current.next) {
+      if (!ElementListNodeEqFunc(current.next, nodes[index])) {
         break;
       } else {
-        current = elements[index];
+        current = current.next;
         index++;
-        if (index === elements.length) {
+        if (index === nodes.length) {
           break;
         }
       }
     }
-    return index === elements.length;
+    return index === nodes.length;
   }
 }

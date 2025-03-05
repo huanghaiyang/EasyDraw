@@ -305,6 +305,23 @@ export default class StageStore implements IStageStore {
     this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
     this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
     this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
+
+    this._emitElementsLayerChanged();
+  }
+
+  /**
+   * 舞台元素层级发生变化时，发送事件
+   */
+  private _emitElementsLayerChanged(): void {
+    if (this._selectedElements.length) {
+      if (ElementList.isConsecutive(this._selectedElements.map(element => element.node))) {
+        this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, !this._selectedElements[this._selectedElements.length - 1].isTopmost);
+        this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, !this._selectedElements[0].isBottommost);
+      } else {
+        this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, true);
+        this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, true);
+      }
+    }
   }
 
   /**
@@ -1690,7 +1707,7 @@ export default class StageStore implements IStageStore {
   private _rearrangeForwardElementNodes(elements: IElement[]): IElement[] {
     let sortedElements = elements;
     // 如果给定的组件是连续的,则不需要重新排序
-    if (!ElementList.isConsecutive(elements)) {
+    if (!ElementList.isConsecutive(elements.map(element => element.node))) {
       sortedElements = this._sortElementsByLevel(elements);
       // 因为是不连续的，所以需要将给定的组件的层级进行提高，使用层级最高的组件作为提高的基准
       const levelHighestElement = sortedElements[sortedElements.length - 1];
@@ -1903,6 +1920,7 @@ export default class StageStore implements IStageStore {
       });
     }
     this._reactionStageElementsChanged();
+    this._emitElementsLayerChanged();
   }
 
   /**
@@ -1929,5 +1947,6 @@ export default class StageStore implements IStageStore {
       });
     }
     this._reactionStageElementsChanged();
+    this._emitElementsLayerChanged();
   }
 }

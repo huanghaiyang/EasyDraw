@@ -81,17 +81,15 @@ export const useStageStore = defineStore("stage", {
       isMultiSelected: false,
       // 舞台主选中组件
       primarySelectedElement: null,
+      // 层上移是否可用
+      layerShiftMoveEnable: false,
+      // 层下移动是否可用
+      layerGoDownEnable: false,
       // 舞台默认数据
       ...cloneDeep(DefaultStage),
     };
   },
   getters: {
-    headOfSelected(): IElement {
-      return this.selectedElements[0];
-    },
-    tailOfSelected(): IElement {
-      return this.selectedElements[this.selectedElements.length - 1];
-    },
     // 输入框是否禁用
     inputDisabled(): boolean {
       return !this.primarySelectedElement;
@@ -107,14 +105,6 @@ export const useStageStore = defineStore("stage", {
     // 自由线条绘制是否可见
     arbitraryVisible(): boolean {
       return this.currentCreator?.type === CreatorTypes.arbitrary;
-    },
-    // 是否可以上移
-    layerShiftMoveEnable(): boolean {
-      return this.tailOfSelected && !this.tailOfSelected.isTopmost;
-    },
-    // 是否可以下移
-    layerGoDownEnable(): boolean {
-      return this.headOfSelected && !this.headOfSelected.isBottommost;
     },
   },
   actions: {
@@ -171,6 +161,10 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.multiSelectedChanged, throttle(this.onMultiSelectedChanged.bind(this), 100));
       // 监听主选中状态
       shield.on(ShieldDispatcherNames.primarySelectedChanged, throttle(this.onPrimarySelectedChanged.bind(this), 100));
+      // 监听层上移状态
+      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), 100));
+      // 监听层下移状态
+      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), 100));
     },
     /**
      * 设置绘制工具
@@ -412,6 +406,18 @@ export const useStageStore = defineStore("stage", {
      */
     onRatioLockedChanged(element: IElement, isRatioLocked: boolean) {
       this.isRatioLocked = isRatioLocked;
+    },
+    /**
+     * 层上移是否可用
+     */
+    onLayerShiftMoveEnableChanged(value: boolean) {
+      this.layerShiftMoveEnable = value;
+    },
+    /**
+     * 层下移是否可用
+     */
+    onLayerGoDownEnableChanged(value: boolean) {
+      this.layerGoDownEnable = value;
     },
     //-----------------------------------属性设置---------------------------------------//
     /**
