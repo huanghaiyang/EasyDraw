@@ -7,27 +7,21 @@ import { IShieldRenderer } from "@/types/IStageRenderer";
 
 export default class ShieldRenderer extends BaseRenderer<IStageShield> implements IShieldRenderer {
   /**
+   * 最后一次绘制的舞台元素数量
+   */
+  private _lastestStageElementsSize: number = 0;
+
+  /**
    * 绘制舞台内容
    *
    * @param force
    * @returns
    */
   async redraw(force?: boolean): Promise<void> {
-    const cargo = new RenderTaskCargo([]);
-    const { isProvisionalEmpty, provisionalElements, stageElements } = this.drawer.store;
-    if (!isProvisionalEmpty) {
-      provisionalElements.forEach(element => {
-        const task = ElementUtils.createElementTask(element, this.renderParams);
-        if (task) {
-          cargo.add(task);
-        }
-      });
-      if (!cargo.isEmpty()) {
-        await this.renderCargo(cargo);
-        return;
-      }
-    }
-    if (force || this.drawer.shouldRedraw) {
+    const { stageElements } = this.drawer.store;
+    if (force || this.drawer.shouldRedraw || stageElements.length !== this._lastestStageElementsSize) {
+      this._lastestStageElementsSize = stageElements.length;
+      const cargo = new RenderTaskCargo([]);
       cargo.add(new ElementTaskClear(null, this.renderParams));
       stageElements.forEach(element => {
         const task = ElementUtils.createElementTask(element, this.renderParams);

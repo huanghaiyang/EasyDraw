@@ -10,7 +10,6 @@ import { TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
 import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
-import { NamedPoints } from "@/types/IWorker";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -265,26 +264,5 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   translateBy(offset: IPoint): void {
     this._translateOuterCoords(offset);
     super.translateBy(offset);
-  }
-
-  /**
-   * 位移外轮廓区域
-   *
-   * @param offset
-   */
-  async translateByOffset(offset: IPoint): Promise<void> {
-    this._translateOuterCoords(offset);
-    await super.translateByOffset(offset);
-  }
-
-  /**
-   * 通过给定的已经计算过的坐标点和位移进行位移
-   *
-   * @param map
-   * @param offset
-   */
-  translateWith(map: NamedPoints, offset: IPoint): void {
-    this._translateOuterCoords(offset);
-    super.translateWith(map, offset);
   }
 }

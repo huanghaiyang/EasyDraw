@@ -210,10 +210,13 @@ export const useStageStore = defineStore("stage", {
     /**
      * 舞台组件创建完毕
      *
-     * @param elementIds
+     * @param elements
      */
-    onElementCreated(elementIds: string[]) {
+    onElementCreated(elements: IElement[]) {
       this.setCreator(MoveableCreator);
+      if (elements.length) {
+        this.onElementChanged(elements[0]);
+      }
     },
     /**
      * 舞台组件选中状态改变
@@ -229,7 +232,17 @@ export const useStageStore = defineStore("stage", {
           Object.assign(this, cloneDeep(DefaultStage));
           return;
         }
-        const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, textAlign, textBaseline, isRatioLocked } = element;
+        this.onElementChanged(element);
+      }
+    },
+    /**
+     * 舞台组件变更
+     *
+     * @param element
+     */
+    onElementChanged(element: IElement) {
+      if (!element) return;
+      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, textAlign, textBaseline, isRatioLocked } = element;
         // 组件位置
         this.onPositionChanged(element, position);
         // 组件宽度
@@ -258,7 +271,6 @@ export const useStageStore = defineStore("stage", {
         this.onTextBaselineChanged(element, textBaseline);
         // 宽高比锁定
         this.onRatioLockedChanged(element, isRatioLocked);
-      }
     },
     /**
      * 舞台组件命中状态改变

@@ -21,7 +21,6 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
-import { MathPoints, NamedPoints } from "@/types/IWorker";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
@@ -1662,27 +1661,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 获取需要位移的点
-   *
-   * @returns
-   */
-  getTranslateNamedPoints(): NamedPoints {
-    return new Map<string, MathPoints>([
-      ["coords", this._originalCoords],
-      ["boxCoords", this._originalBoxCoords],
-      ["rotateCoords", this._originalRotateCoords],
-      ["rotateBoxCoords", this._originalRotateBoxCoords],
-      ["unLeanCoords", this._originalUnLeanCoords],
-      ["unLeanBoxCoords", this._originalUnLeanBoxCoords],
-      ["strokeCoords", this._originalStrokeCoords],
-      ["unLeanStrokeCoords", this._originalUnLeanStrokeCoords],
-      ["maxBoxCoords", this._originalMaxBoxCoords],
-      ["maxOutlineBoxCoords", this._originalMaxOutlineBoxCoords],
-      ["rotateOutlineCoords", this._originalRotateOutlineCoords],
-    ]);
-  }
-
-  /**
    * 位移
    *
    * @param offset
@@ -1699,49 +1677,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._maxBoxCoords = MathUtils.batchTranslate(this._originalMaxBoxCoords, offset);
     this._maxOutlineBoxCoords = MathUtils.batchTranslate(this._originalMaxOutlineBoxCoords, offset);
     this._rotateOutlineCoords = this._originalRotateOutlineCoords.map(coords => MathUtils.batchTranslate(coords, offset));
-    this._translateRefresh();
-    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
-  }
-
-  /**
-   * 位移
-   *
-   * @param offset
-   */
-  async translateByOffset(offset: IPoint): Promise<void> {
-    const result: NamedPoints = await MathUtils.asyncNamedBatchTranslate(this.getTranslateNamedPoints(), offset);
-    this.translateWithCoords(result);
-    this._translateRefresh();
-    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
-  }
-
-  /**
-   * 通过给定的已经计算过的坐标点进行位移
-   *
-   * @param map
-   */
-  translateWithCoords(map: NamedPoints): void {
-    this.model.coords = map.get("coords") as IPoint[];
-    this.model.boxCoords = map.get("boxCoords") as IPoint[];
-    this._rotateCoords = map.get("rotateCoords") as IPoint[];
-    this._rotateBoxCoords = map.get("rotateBoxCoords") as IPoint[];
-    this._unLeanCoords = map.get("unLeanCoords") as IPoint[];
-    this._unLeanBoxCoords = map.get("unLeanBoxCoords") as IPoint[];
-    this._unLeanStrokeCoords = map.get("unLeanStrokeCoords") as IPoint[][];
-    this._strokeCoords = map.get("strokeCoords") as IPoint[][];
-    this._maxBoxCoords = map.get("maxBoxCoords") as IPoint[];
-    this._maxOutlineBoxCoords = map.get("maxOutlineBoxCoords") as IPoint[];
-    this._rotateOutlineCoords = map.get("rotateOutlineCoords") as IPoint[][];
-  }
-
-  /**
-   * 通过给定的已经计算过的坐标点和位移进行位移
-   *
-   * @param map
-   * @param offset
-   */
-  translateWith(map: NamedPoints, offset: IPoint): void {
-    this.translateWithCoords(map);
     this._translateRefresh();
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }

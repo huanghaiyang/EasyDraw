@@ -1002,7 +1002,7 @@ export default class StageStore implements IStageStore {
   private _setElementProvisionalCreating(element: IElement): void {
     this.updateElementById(element.id, {
       status: ElementStatus.creating,
-      isOnStage: true,
+      isOnStage: false,
       isProvisional: true,
       isSelected: true,
     });

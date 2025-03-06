@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, cloneDeep, isBoolean } from "lodash";
+import { clamp, cloneDeep } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { ElementObject, IElementRect, RefreshSubOptions } from "@/types/IElement";
@@ -34,7 +34,6 @@ import StageAlign from "@/modules/stage/StageAlign";
 import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
-import { NamedPoints } from "@/types/IWorker";
 import RenderQueue from "@/modules/render/RenderQueue";
 import { nanoid } from "nanoid";
 
@@ -72,6 +71,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   elementsStatus: StageShieldElementsStatus = StageShieldElementsStatus.NONE;
   // 光标移动队列
   private _cursorMoveQueue: RenderQueue = new RenderQueue();
+  // 重绘队列
+  private _redrawQueue: RenderQueue = new RenderQueue();
+  // 重绘标志
+  private _redrawFlag: boolean = false;
 
   // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
@@ -166,8 +169,34 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
     this.renderer = new ShieldRenderer(this);
-
+    this._requestAnimationRedraw();
     window.shield = this;
+  }
+
+  /**
+   * 添加重绘任务
+   *
+   * @param callback
+   * @param force
+   */
+  private _addRedrawTask(callback?: () => Promise<void>, force?: boolean) {
+    this._redrawQueue.add({
+      id: CommonUtils.getRandomId(),
+      run: async () => {
+        await Promise.all([this.redraw(force), this.mask.redraw(), this.provisional.redraw()]);
+      },
+      destroy: () => callback?.(),
+    });
+  }
+
+  /**
+   * 重绘所有组件
+   */
+  private async _requestAnimationRedraw(): Promise<void> {
+    requestAnimationFrame(async () => {
+      this._addRedrawTask(() => this._requestAnimationRedraw(), this._redrawFlag);
+      this._redrawFlag = false;
+    });
   }
 
   /**
@@ -179,7 +208,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     await this.store.setElementsPosition(elements, value);
     this.selection.refresh();
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -191,7 +220,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsWidth(elements, value);
     this.selection.refresh();
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -203,7 +232,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsHeight(elements, value);
     this.selection.refresh();
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -216,8 +245,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
     this.selection.refresh();
-    await this._redrawAll({ shield: true, mask: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -230,8 +259,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsAngle(elements, value);
     this.selection.refresh();
-    await this._redrawAll({ shield: true });
     this._refreshElementsOriginals(elements, { deepSubs: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -244,7 +273,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
     await this.store.setElementsCorners(elements, value, index);
     this._refreshElementsOriginals(elements);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -257,7 +286,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
     await this.store.setElementsStrokeType(elements, value, index);
     this._refreshElementsOriginals(elements);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -270,7 +299,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value, index);
     this._refreshElementsOriginals(elements);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -282,7 +311,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsStrokeColor(elements, value, index);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -294,7 +323,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeColorOpacity(elements, value, index);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -306,7 +335,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsStroke(elements, prevIndex);
     this._refreshElementsOriginals(elements);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -318,7 +347,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async removeElementsStroke(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsStroke(elements, index);
     this._refreshElementsOriginals(elements);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -330,7 +359,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsFillColor(elements, value, index);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -342,7 +371,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsFillColorOpacity(elements, value, index);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -353,7 +382,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async addElementsFill(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsFill(elements, prevIndex);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -364,7 +393,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async removeElementsFill(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsFill(elements, index);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -375,7 +404,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -386,7 +415,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -397,7 +426,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -408,7 +437,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
-    await this._redrawAll({ shield: true });
+    this._redrawFlag = true;
   }
 
   /**
@@ -497,7 +526,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e
    */
   async _handleCursorMove(e: MouseEvent): Promise<void> {
-    let flag = false;
     this.cursor.transform(e);
     this.cursor.updateStyle(e);
 
@@ -526,22 +554,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           switch (this.elementsStatus) {
             case StageShieldElementsStatus.ROTATING: {
               this._rotateElements();
-              flag = true;
               break;
             }
             case StageShieldElementsStatus.MOVING: {
               await this._dragElements();
-              flag = true;
               break;
             }
             case StageShieldElementsStatus.TRANSFORMING: {
               this._transformElements();
-              flag = true;
               break;
             }
             case StageShieldElementsStatus.CORNER_MOVING: {
               this._cornerElements();
-              flag = true;
               break;
             }
           }
@@ -549,14 +573,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
             if (this.store.isSelectedContainsTarget()) {
               this.elementsStatus = StageShieldElementsStatus.MOVING;
               await this._dragElements();
-              flag = true;
             }
           }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
         this._dragStage(e);
-        flag = true;
       }
     } else if (this.isMoveableActive) {
       this._tryActiveController();
@@ -564,11 +586,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isElementsBusy) {
       this.store.cancelTargetElements();
     }
-    await this._redrawAllIfy({
-      shield: flag,
-      provisional: this._isPressDown,
-      mask: true,
-    });
   }
 
   /**
@@ -592,28 +609,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 批量移动组件
-   *
-   * @param elements
-   * @param offset
-   */
-  private async _batchTranslateElements(elements: IElement[], offset: IPoint): Promise<void> {
-    let map = new Map<string, NamedPoints>();
-    elements.forEach(element => {
-      map.set(element.id, element.getTranslateNamedPoints());
-    });
-    const result = await MathUtils.asyncMapNamedBatchTranslate(map, offset);
-    for (const [id, points] of result) {
-      const element = elements.find(element => element.id === id);
-      if (element) {
-        element.translateWith(points, offset);
-      }
-    }
-    map.clear();
-    result.clear();
-  }
-
-  /**
    * 拖动组件移动
    */
   private async _dragElements(): Promise<void> {
@@ -622,7 +617,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(elements, {
       isDragging: true,
     });
-    // await this._batchTranslateElements(elements, this.movingOffset);
     this.store.selectedElements.forEach(element => {
       element.translateBy(this.movingOffset);
     });
@@ -687,7 +681,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleCursorLeave(): Promise<void> {
     this.cursor.clear();
     this.cursor.setStyle("default");
-    await this.mask.redraw();
   }
 
   /**
@@ -746,7 +739,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
     }
-    await this.mask.redraw();
   }
 
   /**
@@ -829,7 +821,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     // 非自由绘制模式，绘制完成之后重绘
     if (!this.isArbitraryDrawing) {
-      this._redrawAfterCreated();
+      await this._tryCreatedRedraw();
     }
   }
 
@@ -846,19 +838,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       if (!this.store.isEditingEmpty) {
         this.elementsStatus = StageShieldElementsStatus.EDITING;
       }
-      this._redrawAllIfy({
-        mask: true,
-        provisional: false,
-        shield: true,
-      });
     }
   }
 
-  /**
+   /**
    * 绘制完成之后的重绘
    */
-  private async _redrawAfterCreated(): Promise<void> {
-    await Promise.all([this.selection.refresh(), this.mask.redraw(), this.provisional.redraw(), this.redraw(), this.triggerElementCreated()]);
+   private async _tryCreatedRedraw(): Promise<void> {
+    await Promise.all([this.selection.refresh(), this._addRedrawTask(null, true), this.tryEmitElementCreated()]);
   }
 
   /**
@@ -968,7 +955,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 提交绘制
    */
-  async triggerElementCreated(): Promise<void> {
+  async tryEmitElementCreated(): Promise<void> {
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
       this.store.updateElements(provisionalElements, {
@@ -977,7 +964,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       });
       this.emit(
         ShieldDispatcherNames.elementCreated,
-        provisionalElements.map(item => item.id),
+        provisionalElements,
       );
     }
   }
@@ -1043,7 +1030,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._updateCanvasSize(rect);
     this.store.refreshStageElements();
     this.selection.refresh();
-    await this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1055,36 +1042,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.mask.updateCanvasSize(size);
     this.provisional.updateCanvasSize(size);
     this.updateCanvasSize(size);
-  }
-
-  /**
-   * 重新绘制所有内容
-   */
-  private async _redrawAll(force?: boolean | { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
-    if (isBoolean(force)) {
-      await Promise.all([this.mask.redraw(force), this.provisional.redraw(force), this.redraw(force)]);
-    } else {
-      await Promise.all([this.mask.redraw(force.mask), this.provisional.redraw(force.provisional), this.redraw(force.shield)]);
-    }
-  }
-
-  /**
-   * 可选渲染
-   *
-   * @param options
-   */
-  private async _redrawAllIfy(options: { mask?: boolean; provisional?: boolean; shield?: boolean }): Promise<void> {
-    const funcs: Function[] = [];
-    if (options.shield) {
-      funcs.push(() => this.redraw());
-    }
-    if (options.provisional) {
-      funcs.push(() => this.provisional.redraw());
-    }
-    if (options.mask) {
-      funcs.push(() => this.mask.redraw());
-    }
-    await Promise.all(funcs.map(func => func()));
   }
 
   /**
@@ -1160,7 +1117,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
     this.selection.refresh();
-    await this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1197,7 +1154,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1311,8 +1268,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const nextScale = this.calcElementAutoFitValue(element);
     if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
-    } else {
-      await this._redrawAll(true);
     }
     callback && callback();
   }
@@ -1336,7 +1291,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       return;
     }
     this.store.deleteSelects();
-    this._redrawAll(true);
   }
 
   /**
@@ -1351,7 +1305,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   selectAll(): void {
     this.store.selectAll();
-    this._redrawAll(true);
   }
 
   /**
@@ -1383,7 +1336,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this.store.pasteElements(elementsJson);
     if (!isEmpty) {
       this.selection.refresh();
-      await this._redrawAll({ shield: true });
     }
   }
 
@@ -1426,7 +1378,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const group = this.store.selectToGroup();
     if (group) {
       this.store.selectGroup(group);
-      this._redrawAll(true);
     }
   }
 
@@ -1440,7 +1391,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const elements = groups.map(group => group.getAllSubElements()).flat();
       this.store.deSelectGroups(groups);
       this.store.selectElements(elements);
-      this._redrawAll(true);
     }
   }
 
@@ -1452,7 +1402,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignLeft(elements: IElement[]): void {
     this.align.setElementsAlignLeft(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1463,7 +1413,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignRight(elements: IElement[]): void {
     this.align.setElementsAlignRight(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1474,7 +1424,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignTop(elements: IElement[]): void {
     this.align.setElementsAlignTop(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1485,7 +1435,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignBottom(elements: IElement[]): void {
     this.align.setElementsAlignBottom(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1496,7 +1446,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignCenter(elements: IElement[]): void {
     this.align.setElementsAlignCenter(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1507,7 +1457,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   setElementsAlignMiddle(elements: IElement[]): void {
     this.align.setElementsAlignMiddle(elements);
     this.selection.refresh();
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1517,7 +1467,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAverageVertical(elements: IElement[]): void {
     this.align.setElementsAverageVertical(elements);
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1527,7 +1477,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAverageHorizontal(elements: IElement[]): void {
     this.align.setElementsAverageHorizontal(elements);
-    this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1537,7 +1487,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isArbitraryDrawing) {
       this._isPressDown = false;
       this.store.finishCreatingElement();
-      await this._redrawAfterCreated();
+      await this._tryCreatedRedraw();
     }
   }
 
@@ -1549,7 +1499,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.endEditingElements(this.store.editingElements);
       this.selection.refresh();
       this.elementsStatus = StageShieldElementsStatus.NONE;
-      await this._redrawAll(true);
     }
   }
 
@@ -1560,7 +1509,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
     await this.store.setElementsGoDown(elements);
-    await this._redrawAll(true);
+    this._redrawFlag = true;
   }
 
   /**
@@ -1570,6 +1519,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
     await this.store.setElementsShiftMove(elements);
-    await this._redrawAll(true);
+    this._redrawFlag = true;
   }
 }
