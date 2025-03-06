@@ -13,6 +13,8 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
+    if (!this.canvas || !this.node) return;
+    
     let {
       innermostStrokeCoordIndex,
       strokeCoords,

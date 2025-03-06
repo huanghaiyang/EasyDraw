@@ -8,6 +8,8 @@ export default class MaskTaskIndicator extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
+    if (!this.canvas || !this.data) return;
+    
     let { text, point } = this.data;
     point = ElementUtils.calcStageRelativePoint(point);
 

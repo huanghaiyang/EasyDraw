@@ -10,6 +10,8 @@ export default class MaskTaskPath extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
+    if (!this.canvas || !this.data) return;
+    
     const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
     let { points } = this.data;

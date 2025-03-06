@@ -9,6 +9,7 @@ export default class MaskTaskTransformer extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
+    if (!this.canvas || !this.data) return;
     const { width } = ControllerStyle.strokes[0];
     let { scale, point, leanYAngle, actualAngle } = this.data;
     point = ElementUtils.calcStageRelativePoint(point);

@@ -36,6 +36,8 @@ import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import { nanoid } from "nanoid";
+import IStageUndo from "@/types/IStageUndo";
+import StageUndo from "@/modules/stage/StageUndo";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -56,6 +58,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   event: IStageEvent;
   // 对齐
   align: IStageAlign;
+  // 撤销
+  undo: IStageUndo;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -168,6 +172,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection = new StageSelection(this);
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
+    this.undo = new StageUndo(this);
     this.renderer = new ShieldRenderer(this);
     this._requestAnimationRedraw();
     window.shield = this;

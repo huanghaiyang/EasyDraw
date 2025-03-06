@@ -9,6 +9,7 @@ import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
 import IStageAlign from "@/types/IStageAlign";
+import IStageUndo from "@/types/IStageUndo";
 
 // 组件状态
 export enum StageShieldElementsStatus {
@@ -38,6 +39,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   event: IStageEvent;
   // 对齐
   align: IStageAlign;
+  // 撤销
+  undo: IStageUndo;
   // 当前创建者
   currentCreator: Creator;
   // 渲染组件

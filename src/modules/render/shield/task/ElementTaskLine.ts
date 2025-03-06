@@ -12,6 +12,8 @@ export default class ElementTaskLine extends ElementTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
+    if (!this.canvas || !this.node) return;
+    
     const {
       strokeCoords,
       model: { styles },
