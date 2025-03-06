@@ -25,6 +25,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isCtrlHEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlGEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlCEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlZEvent: (e: KeyboardEvent) => boolean;
+  private _isCtrlYEvent: (e: KeyboardEvent) => boolean;
   private _isCtrlShiftGEvent: (e: KeyboardEvent) => boolean;
   private _isShiftEvent: (e: KeyboardEvent) => boolean;
   private _isShift1Event: (e: KeyboardEvent) => boolean;
@@ -72,6 +74,8 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isCtrlHEvent = isHotkey("ctrl+h");
     this._isCtrlGEvent = isHotkey("ctrl+g");
     this._isCtrlCEvent = isHotkey("ctrl+c");
+    this._isCtrlZEvent = isHotkey("ctrl+z");
+    this._isCtrlYEvent = isHotkey("ctrl+y");
     this._isCtrlShiftGEvent = isHotkey("ctrl+shift+g");
     this._isEscEvent = isHotkey("esc");
     this._handleMouseMove = throttle((e) => {
@@ -255,6 +259,16 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         if (this._isCtrlCEvent(e)) {
           EventUtils.stopPP(e);
           this.emit("selectCopy", e);
+        }
+        // 监听撤销操作
+        if (this._isCtrlZEvent(e)) {
+          EventUtils.stopPP(e);
+          this.emit("undo");
+        }
+        // 监听重做操作
+        if (this._isCtrlYEvent(e)) {
+          EventUtils.stopPP(e);
+          this.emit("redo");
         }
         // 监听组件组合取消操作
         if (this._isCtrlShiftGEvent(e)) {

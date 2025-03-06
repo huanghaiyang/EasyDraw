@@ -38,6 +38,8 @@ import RenderQueue from "@/modules/render/RenderQueue";
 import { nanoid } from "nanoid";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
+import { CommandTypes } from "@/types/ICommand";
+import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -505,6 +507,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectHand", this._handleSelectHand.bind(this));
     this.event.on("selectGroup", this._handleSelectGroup.bind(this));
     this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
+    this.event.on("undo", this._handleUndo.bind(this));
+    this.event.on("redo", this._handleRedo.bind(this));
   }
 
   /**
@@ -846,10 +850,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
   }
 
-   /**
+  /**
    * 绘制完成之后的重绘
    */
-   private async _tryCreatedRedraw(): Promise<void> {
+  private async _tryCreatedRedraw(): Promise<void> {
     await Promise.all([this.selection.refresh(), this._addRedrawTask(null, true), this.tryEmitElementCreated()]);
   }
 
@@ -967,10 +971,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         isProvisional: false,
         isOnStage: true,
       });
-      this.emit(
-        ShieldDispatcherNames.elementCreated,
-        provisionalElements,
+      this.emit(ShieldDispatcherNames.elementCreated, provisionalElements);
+      const command = new ElementsAddedCommand(
+        {
+          type: CommandTypes.ElementsAdded,
+          data: await Promise.all(provisionalElements.map(element => element.toJson())),
+        },
+        this.store,
       );
+      this.undo.undoStack.push(command);
     }
   }
 
@@ -1397,6 +1406,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.deSelectGroups(groups);
       this.store.selectElements(elements);
     }
+  }
+
+  /**
+   * 处理撤销操作
+   */
+  _handleUndo(): void {
+    this.undo.undo();
+  }
+
+  /**
+   * 处理重做操作
+   */
+  _handleRedo(): void {
+    this.undo.redo();
   }
 
   /**

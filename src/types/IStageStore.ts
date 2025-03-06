@@ -55,6 +55,8 @@ export default interface IStageStore extends IStageSetter {
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): Partial<ElementObject>;
   // 添加组件
   addElement(element: IElement): IElement;
+  // 根据组件数据模型添加组件
+  addElementByModel(model: ElementObject): IElement;
   // 移除组件
   removeElement(id: string): IElement;
   // 更新组件
@@ -110,7 +112,7 @@ export default interface IStageStore extends IStageSetter {
   // 刷新组件
   refreshElements(elements: IElement[]): void;
   // 创建图片组件
-  createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement>;
+  createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject>;
   // 插入图片组件
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
   // 删除选中组件

@@ -890,6 +890,20 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 根据组件数据模型添加组件
+   *
+   * @param model
+   * @returns
+   */
+  addElementByModel(model: ElementObject): IElement {
+    const element = ElementUtils.createElement(model, this.shield);
+    Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
+    this.addElement(element);
+    element.refresh();
+    return element;
+  }
+
+  /**
    * 删除组件
    *
    * @param id
@@ -1419,7 +1433,7 @@ export default class StageStore implements IStageStore {
    * @param image
    * @param options
    */
-  async createImageElement(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<IElement> {
+  async createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject> {
     const { colorSpace } = options;
     const { width, height } = image;
     const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, {
@@ -1445,8 +1459,7 @@ export default class StageStore implements IStageStore {
       ...center,
       ...DefaultCornerModel,
     } as ElementObject;
-    const element = ElementUtils.createElement(object, this.shield);
-    return element;
+    return object;
   }
 
   /**
@@ -1461,15 +1474,8 @@ export default class StageStore implements IStageStore {
       image = ImageUtils.createImageFromImageData(image);
       await ImageUtils.waitForImageLoad(image);
     }
-    const element = await this.createImageElement(image, { colorSpace });
-    this.addElement(element);
-    this.updateElementById(element.id, {
-      isOnStage: true,
-      status: ElementStatus.finished,
-      isSelected: true,
-    });
-    element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });
-    return element;
+    const object = await this.createImageElementModel(image, { colorSpace });
+    return this.addElementByModel(object);
   }
 
   /**
@@ -1860,10 +1866,7 @@ export default class StageStore implements IStageStore {
     const models = ElementUtils.convertElementsJson(elementsJson);
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
-      const element = ElementUtils.createElement(model, this.shield);
-      Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
-      this.addElement(element);
-      element.refresh();
+      const element = this.addElementByModel(model);
       result.push(element);
     }
     return result;
