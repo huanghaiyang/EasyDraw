@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp, cloneDeep } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { ElementObject, IElementRect, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -214,6 +214,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     await this.store.setElementsPosition(elements, value);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -226,6 +227,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsWidth(elements, value);
+    elements.forEach(element => element.onWidthChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -238,6 +240,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsHeight(elements, value);
+    elements.forEach(element => element.onHeightChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -249,10 +252,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
-    this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsLeanYAngle(elements, value);
+    elements.forEach(element => element.onLeanyAngleChanged());
     this.selection.refresh();
-    this._refreshElementsOriginals(elements, { deepSubs: true });
     this._redrawFlag = true;
   }
 
@@ -263,10 +265,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
-    this._refreshElementsOriginals(elements, { deepSubs: true });
     await this.store.setElementsAngle(elements, value);
+    elements.forEach(element => element.onAngleChanged());
     this.selection.refresh();
-    this._refreshElementsOriginals(elements, { deepSubs: true });
     this._redrawFlag = true;
   }
 
@@ -279,7 +280,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
     await this.store.setElementsCorners(elements, value, index);
-    this._refreshElementsOriginals(elements);
+    elements.forEach(element => element.onCornerChanged());
     this._redrawFlag = true;
   }
 
@@ -292,7 +293,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
     await this.store.setElementsStrokeType(elements, value, index);
-    this._refreshElementsOriginals(elements);
+    elements.forEach(element => element.onStrokeTypeChanged());
     this._redrawFlag = true;
   }
 
@@ -305,7 +306,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeWidth(elements, value, index);
-    this._refreshElementsOriginals(elements);
+    elements.forEach(element => element.onStrokeWidthChanged());
     this._redrawFlag = true;
   }
 
@@ -318,6 +319,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsStrokeColor(elements, value, index);
+    elements.forEach(element => element.onStrokeColorChanged());
     this._redrawFlag = true;
   }
 
@@ -330,6 +332,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsStrokeColorOpacity(elements, value, index);
+    elements.forEach(element => element.onStrokeColorOpacityChanged());
     this._redrawFlag = true;
   }
 
@@ -341,7 +344,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsStroke(elements, prevIndex);
-    this._refreshElementsOriginals(elements);
+    elements.forEach(element => element.onStrokeAdded());
     this._redrawFlag = true;
   }
 
@@ -353,7 +356,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async removeElementsStroke(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsStroke(elements, index);
-    this._refreshElementsOriginals(elements);
+    elements.forEach(element => element.onStrokeRemoved());
     this._redrawFlag = true;
   }
 
@@ -366,6 +369,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this.store.setElementsFillColor(elements, value, index);
+    elements.forEach(element => element.onFillColorChanged());
     this._redrawFlag = true;
   }
 
@@ -378,6 +382,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this.store.setElementsFillColorOpacity(elements, value, index);
+    elements.forEach(element => element.onFillColorOpacityChanged());
     this._redrawFlag = true;
   }
 
@@ -389,6 +394,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async addElementsFill(elements: IElement[], prevIndex: number): Promise<void> {
     await this.store.addElementsFill(elements, prevIndex);
+    elements.forEach(element => element.onFillAdded());
     this._redrawFlag = true;
   }
 
@@ -400,6 +406,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async removeElementsFill(elements: IElement[], index: number): Promise<void> {
     await this.store.removeElementsFill(elements, index);
+    elements.forEach(element => element.onFillRemoved());
     this._redrawFlag = true;
   }
 
@@ -411,6 +418,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
+    elements.forEach(element => element.onTextAlignChanged());
     this._redrawFlag = true;
   }
 
@@ -422,6 +430,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
+    elements.forEach(element => element.onTextBaselineChanged());
     this._redrawFlag = true;
   }
 
@@ -433,6 +442,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
+    elements.forEach(element => element.onFontSizeChanged());
     this._redrawFlag = true;
   }
 
@@ -444,6 +454,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
+    elements.forEach(element => element.onFontFamilyChanged());
     this._redrawFlag = true;
   }
 
@@ -455,6 +466,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
     await this.store.setElementsRatioLocked(elements, value);
+    elements.forEach(element => element.onRatioLockedChanged());
   }
 
   /**
@@ -574,7 +586,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
               break;
             }
             case StageShieldElementsStatus.CORNER_MOVING: {
-              this._cornerElements();
+              this._movingElementsCorner();
               break;
             }
           }
@@ -621,13 +633,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 拖动组件移动
    */
   private async _dragElements(): Promise<void> {
-    const elements = this.store.selectedElements;
+    const { selectedElements } = this.store;
     // 标记组件正在拖动
-    this.store.updateElements(elements, {
+    this.store.updateElements(selectedElements, {
       isDragging: true,
     });
-    this.store.selectedElements.forEach(element => {
+    selectedElements.forEach(element => {
       element.translateBy(this.movingOffset);
+      element.onTranslating();
     });
     this.selection.refresh();
   }
@@ -635,26 +648,30 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 组件半径
    */
-  private _cornerElements(): void {
-    this.store.updateElements(this.store.selectedElements, {
+  private _movingElementsCorner(): void {
+    const { selectedElements } = this.store;
+    this.store.updateElements(selectedElements, {
       isCornerMoving: true,
     });
-    this.store.updateSelectedElementsCorner(this.movingOffset);
+    this.store.updateElementsCorner(selectedElements, this.movingOffset);
+    selectedElements.forEach(element => element.onCornerChanging());
   }
 
   /**
    * 组件形变
    */
   private _transformElements(): void {
-    this.store.updateElements(this.store.selectedElements, {
+    const { selectedElements } = this.store;
+    this.store.updateElements(selectedElements, {
       isTransforming: true,
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isTransforming = true;
       this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
     } else {
-      this.store.updateSelectedElementsTransform(this.movingOffset);
+      this.store.updateElementsTransform(selectedElements, this.movingOffset);
     }
+    selectedElements.forEach(element => element.onTransforming());
     this.selection.refresh();
   }
 
@@ -662,15 +679,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 旋转组件
    */
   private _rotateElements(): void {
-    this.store.updateElements(this.store.selectedElements, {
+    const { selectedElements } = this.store;
+    this.store.updateElements(selectedElements, {
       isRotating: true,
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = true;
       this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
     } else {
-      this.store.updateSelectedElementsRotation(this._pressMovePosition);
+      this.store.updateElementsRotation(selectedElements, this._pressMovePosition);
     }
+    selectedElements.forEach(element => element.onRotating());
     this.selection.refresh();
   }
 
@@ -799,7 +818,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       // 如果是选择模式
       // 判断是否是拖动组件操作，并且判断拖动位移是否有效
       if (this.store.isSelectedEmpty) {
-        this._makeRangeEmpty();
+        this.selection.selectRange();
+        this.selection.setRange(null);
       } else if (this.checkCursorPressUpALittle(e)) {
         switch (this.elementsStatus) {
           case StageShieldElementsStatus.MOVING: {
@@ -815,7 +835,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
             break;
           }
           case StageShieldElementsStatus.CORNER_MOVING: {
-            this._endElementsCorner();
+            this._endMoveingElementsCorner();
             break;
           }
         }
@@ -861,13 +881,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件拖拽操作
    */
   private _endElementsDrag() {
-    const elements = this.store.selectedElements;
-    this._refreshElementsOriginals(elements, {
-      deepSubs: true,
-    });
+    const { selectedElements } = this.store;
     // 取消组件拖动状态
-    this.store.updateElements(elements, {
+    this.store.updateElements(selectedElements, {
       isDragging: false,
+    });
+    selectedElements.forEach(element => {
+      element.onTranslateAfter();
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isDragging = false;
@@ -878,13 +898,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件旋转操作
    */
   private _endElementsRotate() {
-    this._refreshElementsOriginals(this.store.selectedElements, {
-      deepSubs: true,
-    });
+    const { selectedElements } = this.store;
     // 更新组件状态
-    this.store.updateElements(this.store.rotatingTargetElements, {
+    this.store.updateElements(selectedElements, {
       isRotatingTarget: false,
       isRotating: false,
+    });
+    selectedElements.forEach(element => {
+      element.onRotateAfter();
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = false;
@@ -896,13 +917,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 结束组件变换操作
    */
   private _endElementsTransform() {
-    const elements = this.store.selectedElements;
-    this._refreshElementsOriginals(elements, {
-      deepSubs: true,
-    });
+    const { selectedElements } = this.store;
     // 更新组件状态
-    this.store.updateElements(elements, {
+    this.store.updateElements(selectedElements, {
       isTransforming: false,
+    });
+    selectedElements.forEach(element => {
+      element.onTransformAfter();
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isTransforming = false;
@@ -912,15 +933,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 结束组件圆角半径操作
    */
-  private _endElementsCorner() {
-    const elements = this.store.selectedElements;
-    this.store.updateElements(elements, {
+  private _endMoveingElementsCorner() {
+    const { selectedElements } = this.store;
+    this.store.updateElements(selectedElements, {
       isCornerMoving: false,
     });
-    elements.forEach(element => {
-      (element as IElementRect).refreshCorners();
+    selectedElements.forEach(element => {
+      element.onCornerChanged();
     });
-    this._refreshElementsOriginals(elements);
   }
 
   /**
@@ -939,14 +959,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (topAElement) {
       this.store.selectElement(topAElement);
     }
-  }
-
-  /**
-   * 处理选区为空的情况
-   */
-  private _makeRangeEmpty() {
-    this.selection.selectRange();
-    this.selection.setRange(null);
   }
 
   /**
@@ -1429,6 +1441,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignLeft(elements: IElement[]): void {
     this.align.setElementsAlignLeft(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1440,6 +1453,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignRight(elements: IElement[]): void {
     this.align.setElementsAlignRight(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1451,6 +1465,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignTop(elements: IElement[]): void {
     this.align.setElementsAlignTop(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1462,6 +1477,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignBottom(elements: IElement[]): void {
     this.align.setElementsAlignBottom(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1473,6 +1489,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignCenter(elements: IElement[]): void {
     this.align.setElementsAlignCenter(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1484,6 +1501,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAlignMiddle(elements: IElement[]): void {
     this.align.setElementsAlignMiddle(elements);
+    elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._redrawFlag = true;
   }
@@ -1495,6 +1513,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAverageVertical(elements: IElement[]): void {
     this.align.setElementsAverageVertical(elements);
+    elements.forEach(element => element.onPositionChanged());
     this._redrawFlag = true;
   }
 
@@ -1505,6 +1524,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsAverageHorizontal(elements: IElement[]): void {
     this.align.setElementsAverageHorizontal(elements);
+    elements.forEach(element => element.onPositionChanged());
     this._redrawFlag = true;
   }
 
@@ -1537,6 +1557,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
     await this.store.setElementsGoDown(elements);
+    elements.forEach(element => element.onLayerChanged());
     this._redrawFlag = true;
   }
 
@@ -1547,6 +1568,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
     await this.store.setElementsShiftMove(elements);
+    elements.forEach(element => element.onLayerChanged());
     this._redrawFlag = true;
   }
 }

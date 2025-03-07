@@ -799,6 +799,171 @@ export default interface IElement {
   refreshCorners(): void;
 
   /**
+   * 位置变化
+   */
+  onPositionChanged(): void;
+
+  /**
+   * 宽度变化
+   */
+  onWidthChanged(): void;
+
+  /**
+   * 高度变化
+   */
+  onHeightChanged(): void;
+
+  /**
+   * 层级变化
+   */
+  onLayerChanged(): void;
+
+  /**
+   * 位移前
+   */
+  onTranslateBefore(): void;
+
+  /**
+   * 位移后
+   */
+  onTranslateAfter(): void;
+
+  /**
+   * 位移中
+   */
+  onTranslating(): void;
+
+  /**
+   * 旋转前
+   */
+  onRotateBefore(): void;
+
+  /**
+   * 旋转后
+   */
+  onRotateAfter(): void;
+
+  /**
+   * 旋转中
+   */
+  onRotating(): void;
+
+  /**
+   * 变换前
+   */
+  onTransformBefore(): void;
+
+  /**
+   * 变换后
+   */
+  onTransformAfter(): void;
+
+  /**
+   * 变换中
+   */
+  onTransforming(): void;
+
+  /**
+   * 角度变化
+   */
+  onAngleChanged(): void;
+
+  /**
+   * 倾斜角度变化
+   */
+  onLeanyAngleChanged(): void;
+
+  
+  /**
+   * 圆角变化中
+   */
+  onCornerChanging(): void;
+
+  /**
+   * 圆角变化
+   */
+  onCornerChanged(): void;
+
+  /**
+   * 边框类型变化
+   */
+  onStrokeTypeChanged(): void;
+
+  /**
+   * 边框宽度变化
+   */
+  onStrokeWidthChanged(): void;
+
+  /**
+   * 边框颜色变化
+   */
+  onStrokeColorChanged(): void;
+
+  /**
+   * 边框颜色透明度变化
+   */
+  onStrokeColorOpacityChanged(): void;
+
+  /**
+   * 添加描边
+   */
+  onStrokeAdded(): void;
+
+  /**
+   * 删除描边
+   */
+  onStrokeRemoved(): void;
+
+  /**
+   * 设置填充颜色
+   */
+  onFillColorChanged(): void;
+
+  /**
+   * 设置填充颜色透明度
+   */
+  onFillColorOpacityChanged(): void;
+
+  /**
+   * 添加填充
+   */
+  onFillAdded(): void;
+
+  /**
+   * 删除填充
+   */
+  onFillRemoved(): void;
+
+  /**
+   * 设置文本对齐方式
+   */
+  onTextAlignChanged(): void;
+
+  /**
+   * 设置文本基线
+   */
+  onTextBaselineChanged(): void;
+
+  /**
+   * 设置文本字体大小
+   */
+  onFontSizeChanged(): void;
+
+  /**
+   * 设置文本字体
+   */
+  onFontFamilyChanged(): void;
+
+  /**
+   * 锁定比例
+   */
+  onRatioLockedChanged(): void;
+
+  /**
+   * 转换为JSON
+   */
+  toJson(): Promise<ElementObject>;
+  /**
    * 转换为JSON
    */
   toJson(): Promise<ElementObject>;

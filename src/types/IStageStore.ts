@@ -83,16 +83,10 @@ export default interface IStageStore extends IStageSetter {
   creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement;
   // 完成创建组件
   finishCreatingElement(): IElement;
-  // 更新选中组件旋转
-  updateSelectedElementsRotation(point: IPoint): void;
   // 更新组件旋转
   updateElementsRotation(elements: IElement[], point: IPoint): void;
-  // 更新选中组件形变
-  updateSelectedElementsTransform(offset: IPoint): void;
   // 更新组件形变
   updateElementsTransform(elements: IElement[], offset: IPoint): void;
-  // 更新选中组件圆角半径
-  updateSelectedElementsCorner(offset: IPoint): void;
   // 更新组件圆角半径
   updateElementsCorner(elements: IElement[], offset: IPoint): void;
   // 计算旋转组件中心

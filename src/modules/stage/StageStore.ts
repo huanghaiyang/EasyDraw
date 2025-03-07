@@ -1172,15 +1172,6 @@ export default class StageStore implements IStageStore {
   /**
    * 形变
    *
-   * @param offset
-   */
-  updateSelectedElementsTransform(offset: IPoint): void {
-    this.updateElementsTransform(this.selectedElements, offset);
-  }
-
-  /**
-   * 形变
-   *
    * @param elements
    * @param offset
    */
@@ -1213,15 +1204,6 @@ export default class StageStore implements IStageStore {
   /**
    * 组件圆角半径
    *
-   * @param offset
-   */
-  updateSelectedElementsCorner(offset: IPoint): void {
-    this.updateElementsCorner(this.selectedElements, offset);
-  }
-
-  /**
-   * 组件圆角半径
-   *
    * @param elements
    * @param offset
    */
@@ -1249,7 +1231,7 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-    this._refreshElementsByFunc(elements, element => element.refresh({ originals: true }), options);
+    this._refreshElementsByFunc(elements, element => element.refreshOriginalProps(), options);
   }
 
   /**
@@ -1385,15 +1367,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 根据当前鼠标位置，计算旋转角度
-   *
-   * @param point
-   */
-  updateSelectedElementsRotation(point: IPoint): void {
-    this.updateElementsRotation(this.rotatingTargetElements, point);
-  }
-
-  /**
    * 组件旋转操作
    *
    * @param elements
@@ -1413,6 +1386,7 @@ export default class StageStore implements IStageStore {
    * @param angle
    * @param originalAngle
    * @param centerCoord
+   * @param isRotating
    */
   rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint): void {
     elements.forEach(element => {

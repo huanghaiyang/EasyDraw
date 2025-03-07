@@ -759,6 +759,278 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 位置发生变化
+   */
+  onPositionChanged(): void {
+    this.refresh();
+    this.refreshOriginalProps();
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
+  }
+
+  /**
+   * 宽度发生变化
+   */
+  onWidthChanged(): void {
+    this.refresh();
+    this.refreshOriginalProps();
+    this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
+  }
+
+  /**
+   * 高度发生变化
+   */
+  onHeightChanged(): void {
+    this.refresh();
+    this.refreshOriginalProps();
+    this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
+  }
+
+  /**
+   * 层级发生变化
+   */
+  onLayerChanged(): void {}
+
+  /**
+   * 平移前
+   */
+  onTranslateBefore(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 平移后
+   */
+  onTranslateAfter(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 平移中
+   */
+  onTranslating(): void {
+    const { x, y } = ElementUtils.calcPosition({ type: this.model.type, coords: this.model.coords });
+    this.model.x = x;
+    this.model.y = y;
+    this.refreshCorners();
+    this.refreshRotation();
+    this.refreshTransformers();
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
+  }
+
+  /**
+   * 旋转前
+   */
+  onRotateBefore(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 旋转后
+   */
+  onRotateAfter(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 旋转中
+   */
+  onRotating(): void {
+    // 刷新
+    this.refresh({
+      points: true,
+      rotation: true,
+      position: true,
+      angles: true,
+      outline: true,
+      strokes: true,
+      corners: true,
+    });
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
+  }
+
+  /**
+   * 变换前
+   */
+  onTransformBefore(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 变换后
+   */
+  onTransformAfter(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
+   * 变换中
+   */
+  onTransforming(): void {
+    this.refresh(
+      {
+        points: true,
+        rotation: true,
+        size: true,
+        position: true,
+        angles: true,
+        outline: true,
+        strokes: true,
+        corners: true,
+      },
+      { angles: { view: true, actual: true } },
+    );
+    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
+    this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
+    this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
+    this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
+  }
+
+  /**
+   * 角度发生变化
+   */
+  onAngleChanged(): void {
+    this.refresh(null, { angles: { view: true, actual: true } });
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
+  }
+
+  /**
+   * 倾斜角度发生变化
+   */
+  onLeanyAngleChanged(): void {
+    // 刷新角度选项
+    this.refresh(null, {
+      angles: { view: true, actual: true, internal: true },
+    });
+    this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
+  }
+
+  /**
+   * 圆角变化中
+   */
+  onCornerChanging(): void {
+    this.refresh({ corners: true, strokes: true });
+    this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
+  }
+
+  /**
+   * 圆角发生变化
+   */
+  onCornerChanged(): void {
+    this.refresh({ corners: true, strokes: true, originals: true });
+    this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
+  }
+
+  /**
+   * 描边类型发生变化
+   */
+  onStrokeTypeChanged(): void {
+    this.refresh({ strokes: true, outline: true, originals: true });
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 描边宽度发生变化
+   */
+  onStrokeWidthChanged(): void {
+    this.refresh({ strokes: true, outline: true, originals: true });
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 描边颜色发生变化
+   */
+  onStrokeColorChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 描边透明度发生变化
+   */
+  onStrokeColorOpacityChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 描边添加
+   */
+  onStrokeAdded(): void {
+    this.refresh({ strokes: true, outline: true, originals: true });
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 描边删除
+   */
+  onStrokeRemoved(): void {
+    this.refresh({ strokes: true, outline: true, originals: true });
+    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
+  }
+
+  /**
+   * 填充颜色发生变化
+   */
+  onFillColorChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
+  }
+
+  /**
+   * 填充透明度发生变化
+   */
+  onFillColorOpacityChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
+  }
+
+  /**
+   * 填充添加
+   */
+  onFillAdded(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
+  }
+
+  /**
+   * 填充删除
+   */
+  onFillRemoved(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
+  }
+
+  /**
+   * 文字对齐方式发生变化
+   */
+  onTextAlignChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textAlignChanged, [this.textAlign]);
+  }
+
+  /**
+   * 文字基线发生变化
+   */
+  onTextBaselineChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textBaselineChanged, [this.textBaseline]);
+  }
+
+  /**
+   * 字体大小发生变化
+   */
+  onFontSizeChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [this.fontSize]);
+  }
+
+  /**
+   * 字体发生变化
+   */
+  onFontFamilyChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [this.fontFamily]);
+  }
+
+  /**
+   * 锁定比例发生变化
+   */
+  onRatioLockedChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.ratioLockedChanged, [this.isRatioLocked]);
+  }
+
+  /**
    * 获取显示角度
    *
    * @returns
@@ -1325,24 +1597,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
     }
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        size: true,
-        position: true,
-        angles: true,
-        outline: true,
-        strokes: true,
-        corners: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
-    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
-    this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
-    this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
-    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
-    this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
   }
 
   /**
@@ -1408,19 +1662,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (originalMovingCoord && matrix) {
       this._tryFlipAngle(lockCoord, originalMovingCoord, matrix);
     }
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        size: true,
-        position: true,
-        angles: true,
-        outline: true,
-        strokes: true,
-        corners: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
   }
 
   /**
@@ -1677,20 +1918,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._maxBoxCoords = MathUtils.batchTranslate(this._originalMaxBoxCoords, offset);
     this._maxOutlineBoxCoords = MathUtils.batchTranslate(this._originalMaxOutlineBoxCoords, offset);
     this._rotateOutlineCoords = this._originalRotateOutlineCoords.map(coords => MathUtils.batchTranslate(coords, offset));
-    this._translateRefresh();
-    this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
-  }
-
-  /**
-   * 位移后重计算
-   */
-  private _translateRefresh(): void {
-    const { x, y } = ElementUtils.calcPosition({ type: this.model.type, coords: this.model.coords });
-    this.model.x = x;
-    this.model.y = y;
-    this.refreshCorners();
-    this.refreshRotation();
-    this.refreshTransformers();
   }
 
   /**
@@ -1802,17 +2029,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = MathUtils.batchPrecisePoint(this.batchCalcTransformPointsByCenter(this._originalRotateCoords, matrix, this._originalCenterCoord, this._originalCenterCoord), 1);
     // 设置变换盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoint(this.batchCalcTransformPointsByCenter(this._originalRotateBoxCoords, matrix, this._originalCenterCoord, this._originalCenterCoord), 1);
-    // 刷新组件
-    this.refresh({
-      points: true,
-      size: true,
-      position: true,
-      rotation: true,
-      originals: true,
-      outline: true,
-      strokes: true,
-      corners: true,
-    });
   }
 
   /**
@@ -1830,8 +2046,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchTranslate(this.model.coords, offset), 1);
     // 设置变换盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchTranslate(this.model.boxCoords, offset), 1);
-    // 刷新组件
-    this.refresh();
   }
 
   /**
@@ -1841,8 +2055,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setAngle(value: number): void {
     this.model.angle = value;
-    this.refresh(null, { angles: { view: true, actual: true } });
-    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
   /**
@@ -1865,11 +2077,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord), 1);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
-    // 刷新角度选项
-    this.refresh(null, {
-      angles: { view: true, actual: true, internal: true },
-    });
-    this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
   }
 
   /**
@@ -1923,8 +2130,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     else values.fill(value);
     values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
     this.model.corners = values;
-    this.refresh({ corners: true, strokes: true });
-    this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
   /**
@@ -1935,8 +2140,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes, index: number): void {
     this.model.styles.strokes[index].type = value;
-    this.refresh({ outline: true, strokes: true });
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1947,7 +2150,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeColor(value: string, index: number): void {
     this.model.styles.strokes[index].color = value;
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1958,7 +2160,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeColorOpacity(value: number, index: number): void {
     this.model.styles.strokes[index].colorOpacity = clamp(value, 0, 1);
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1981,8 +2182,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
     value = MathUtils.precise(value, 1);
     this.model.styles.strokes[index].width = value;
-    this.refresh({ outline: true, strokes: true });
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -1992,8 +2191,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   addStroke(prevIndex: number): void {
     this.model.styles.strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
-    this.refresh({ outline: true, strokes: true });
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -2003,8 +2200,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   removeStroke(index: number): void {
     this.model.styles.strokes.splice(index, 1);
-    this.refresh({ outline: true, strokes: true });
-    this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
   /**
@@ -2014,7 +2209,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFillColor(value: string, index: number): void {
     this.model.styles.fills[index].color = value;
-    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2024,7 +2218,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFillColorOpacity(value: number, index: number): void {
     this.model.styles.fills[index].colorOpacity = clamp(value, 0, 1);
-    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2034,7 +2227,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   addFill(prevIndex: number): void {
     this.model.styles.fills.splice(prevIndex + 1, 0, { ...DefaultFillStyle });
-    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2044,7 +2236,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   removeFill(index: number): void {
     this.model.styles.fills.splice(index, 1);
-    this.emitPropChanged(ShieldDispatcherNames.fillsChanged, [this.fills]);
   }
 
   /**
@@ -2053,7 +2244,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontSize(value: number): void {
     this.model.styles.fontSize = value;
-    this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [this.fontSize]);
   }
 
   /**
@@ -2062,7 +2252,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontFamily(value: string): void {
     this.model.styles.fontFamily = value;
-    this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [this.fontFamily]);
   }
 
   /**
@@ -2071,7 +2260,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextAlign(value: CanvasTextAlign): void {
     this.model.styles.textAlign = value;
-    this.emitPropChanged(ShieldDispatcherNames.textAlignChanged, [this.textAlign]);
   }
 
   /**
@@ -2080,7 +2268,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextBaseline(value: CanvasTextBaseline): void {
     this.model.styles.textBaseline = value;
-    this.emitPropChanged(ShieldDispatcherNames.textBaselineChanged, [this.textBaseline]);
   }
 
   /**
@@ -2095,7 +2282,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else {
       this.model.ratio = null;
     }
-    this.emitPropChanged(ShieldDispatcherNames.ratioLockedChanged, [this.isRatioLocked]);
   }
 
   /**
@@ -2122,16 +2308,6 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchPrecisePoint(boxCoords, 1);
     // 设置变换角度
     this.model.angle = MathUtils.mirrorAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
-    // 刷新
-    this.refresh({
-      points: true,
-      rotation: true,
-      position: true,
-      angles: true,
-      outline: true,
-      strokes: true,
-      corners: true,
-    });
   }
 
   /**
