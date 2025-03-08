@@ -5,7 +5,7 @@ import { IIconModel, IMaskModel } from "@/types/IModel";
 import { CursorTypes } from "@/types/Stage";
 import SplitV from "@/assets/svg/split-v.svg";
 import Hand from "@/assets/svg/hand.svg";
-import Cross from "@/assets/svg/cross.svg";
+import Cross from "@/assets/svg/cross_.svg";
 import Move from "@/assets/svg/move.svg";
 import RotateNE from "@/assets/svg/rotate-ne.svg";
 
