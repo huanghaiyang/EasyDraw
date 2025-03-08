@@ -54,8 +54,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 组件状态
   elementsStatus: StageShieldElementsStatus;
 
-  // 是否需要重绘
-  get shouldRedraw(): boolean;
   // 是否组件繁忙
   get isElementsBusy(): boolean;
   // 舞台矩形点

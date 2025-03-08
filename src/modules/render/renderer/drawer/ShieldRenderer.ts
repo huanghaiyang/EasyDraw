@@ -19,7 +19,7 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
    */
   async redraw(force?: boolean): Promise<void> {
     const { stageElements } = this.drawer.store;
-    if (force || this.drawer.shouldRedraw || stageElements.length !== this._lastestStageElementsSize) {
+    if (force || stageElements.length !== this._lastestStageElementsSize) {
       this._lastestStageElementsSize = stageElements.length;
       const cargo = new RenderTaskCargo([]);
       cargo.add(new ElementTaskClear(null, this.renderParams));

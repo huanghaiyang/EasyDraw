@@ -111,10 +111,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _isStageMoving: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
-  // 是否需要重绘
-  get shouldRedraw(): boolean {
-    return this.isElementsBusy || this._isStageMoving;
-  }
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
@@ -576,7 +572,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
               break;
             }
             case StageShieldElementsStatus.MOVING: {
-              await this._dragElements();
+              this._dragElements();
               break;
             }
             case StageShieldElementsStatus.TRANSFORMING: {
@@ -630,7 +626,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 拖动组件移动
    */
-  private async _dragElements(): Promise<void> {
+  private _dragElements(): void {
     const { selectedElements } = this.store;
     // 标记组件正在拖动
     this.store.updateElements(selectedElements, {
@@ -639,6 +635,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElementsTranslate(selectedElements, this.movingOffset);
     selectedElements.forEach(element => element.onTranslating());
     this.selection.refresh();
+    this._redrawFlag = true;
   }
 
   /**
@@ -651,6 +648,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     });
     this.store.updateElementsCorner(selectedElements, this.movingOffset);
     selectedElements.forEach(element => element.onCornerChanging());
+    this._redrawFlag = true;
   }
 
   /**
@@ -669,6 +667,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     selectedElements.forEach(element => element.onTransforming());
     this.selection.refresh();
+    this._redrawFlag = true;
   }
 
   /**
@@ -687,6 +686,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     selectedElements.forEach(element => element.onRotating());
     this.selection.refresh();
+    this._redrawFlag = true;
   }
 
   /**
