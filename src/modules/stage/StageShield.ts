@@ -638,10 +638,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store.updateElements(selectedElements, {
       isDragging: true,
     });
-    selectedElements.forEach(element => {
-      element.translateBy(this.movingOffset);
-      element.onTranslating();
-    });
+    this.store.updateElementsTranslate(selectedElements, this.movingOffset);
+    selectedElements.forEach(element => element.onTranslating());
     this.selection.refresh();
   }
 

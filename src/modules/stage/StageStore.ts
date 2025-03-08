@@ -1214,6 +1214,19 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 组件移动
+   *
+   * @param elements
+   * @param offset
+   */
+  updateElementsTranslate(elements: IElement[], offset: IPoint): void {
+    elements.forEach(element => {
+      element.translateBy(offset);
+      this._updateElementStageStatusIfy(element);
+    });
+  }
+
+  /**
    * 遍历所有节点
    *
    * @param callback
@@ -1282,14 +1295,21 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 更新组件舞台状态
+   *
+   * @param element
+   */
+  private _updateElementStageStatusIfy(element: IElement): void {
+    const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectCoords);
+    this.updateElementById(element.id, { isOnStage });
+  }
+
+  /**
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
   refreshStageElements(): void {
-    const stageWordRectCoords = this.shield.stageWordRectCoords;
-    this._elementList.forEach(node => {
-      const element = node.value;
-      const isOnStage = element.isModelPolygonOverlap(stageWordRectCoords);
-      this.updateElementById(element.id, { isOnStage });
+    this._elementList.forEach(({ value: element }) => {
+      this._updateElementStageStatusIfy(element);
       element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });
     });
   }
@@ -1393,9 +1413,11 @@ export default class StageStore implements IStageStore {
       angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
       angle = MathUtils.precise(angle, 1);
       element.setAngle(angle);
+      this._updateElementStageStatusIfy(element);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
           sub.rotateBy(angle - element.originalAngle, centerCoord);
+          this._updateElementStageStatusIfy(sub);
         });
       }
     });
