@@ -33,7 +33,6 @@ export default defineConfig({
           vue: ["vue", "vuex", "pinia", "vue-i18n"],
           element: ["element-plus"],
           lodash: ["lodash"],
-          mathjs: ["mathjs"],
           mobx: ["mobx"],
         },
       },
