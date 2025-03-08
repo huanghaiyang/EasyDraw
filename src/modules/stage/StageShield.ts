@@ -35,7 +35,6 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import { nanoid } from "nanoid";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
 import { CommandTypes } from "@/types/ICommand";
@@ -188,11 +187,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _addRedrawTask(callback?: () => Promise<void>, force?: boolean) {
     this._redrawQueue.add({
-      id: CommonUtils.getRandomId(),
       run: async () => {
         await Promise.all([this.redraw(force), this.mask.redraw(), this.provisional.redraw()]);
+        if (callback) {
+          await callback();
+        }
       },
-      destroy: () => callback?.(),
     });
   }
 
@@ -487,9 +487,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _addCursorQueueTask(task: () => Promise<void>): void {
     this._cursorMoveQueue.add({
-      id: nanoid(4),
       run: task,
-      destroy: () => Promise.resolve(),
     });
   }
 

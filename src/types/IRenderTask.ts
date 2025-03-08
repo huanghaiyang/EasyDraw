@@ -4,11 +4,11 @@ import { IMaskModel } from "@/types/IModel";
 // 渲染任务
 export interface IRenderTask {
   // 任务id
-  id: string;
+  id?: string;
   // 运行
   run(): Promise<void>;
   // 销毁
-  destroy(): Promise<void>;
+  destroy?(): Promise<void>;
 }
 
 // 辅助画布绘制任务

@@ -39,7 +39,9 @@ export default class RenderQueue implements IRenderQueue {
       } catch (error) {
         console.error("RenderQueue: error running task", task.id, error);
       } finally {
-        task.destroy();
+        if (task.destroy) {
+          await task.destroy();
+        }
         task = null;
       }
     }
@@ -56,7 +58,9 @@ export default class RenderQueue implements IRenderQueue {
     while (this.queue.length > 0) {
       let task = this.queue.shift();
       if (task) {
-        await task.destroy();
+        if (task.destroy) {
+          await task.destroy();
+        }
         task = null;
         this.queue = null;
         this.running = false;

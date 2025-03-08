@@ -11,8 +11,4 @@ export default abstract class RenderTaskBase implements IRenderTask {
   run(): Promise<void> {
     return Promise.resolve();
   }
-
-  destroy(): Promise<void> {
-    return Promise.resolve();
-  }
 }

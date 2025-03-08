@@ -70,7 +70,9 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
         } catch (e) {
           console.error(e);
         } finally {
-          task.destroy();
+          if (task.destroy) {
+            await task.destroy();
+          }
           task = null;
         }
       }
