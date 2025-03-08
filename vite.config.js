@@ -29,6 +29,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        dir: "docs",
         manualChunks: {
           vue: ["vue", "vuex", "pinia", "vue-i18n"],
           element: ["element-plus"],
