@@ -8,12 +8,12 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.data) return;
+    if (!this.canvas || !this.model) return;
 
-    let { point } = this.data;
+    let { point } = this.model;
 
     if (!point) return;
-    let { radius } = this.data;
+    let { radius } = this.model;
     const strokeStyle = { ...ControllerStyle.strokes[0] };
     const fillStyle = { ...ControllerStyle.fills[0] };
     radius /= CanvasUtils.scale;

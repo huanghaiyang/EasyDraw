@@ -13,8 +13,6 @@ export interface IRenderTask {
 
 // 辅助画布绘制任务
 export interface IMaskTask extends IRenderTask {
-  // 数据
-  get data(): IMaskModel;
   // 模型
   model: IMaskModel;
 }

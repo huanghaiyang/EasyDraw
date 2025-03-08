@@ -1,23 +1,18 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IElementLine } from "@/types/IElement";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementTaskLine extends ElementTaskBase {
-  get node() {
-    return this.element as IElementLine;
-  }
-
   /**
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.node) return;
+    if (!this.canvas || !this.element) return;
     
     const {
       strokeCoords,
       model: { styles },
-    } = this.node;
+    } = this.element;
 
     const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
 

@@ -13,15 +13,6 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
   type: CursorTypes = CursorTypes.vertices;
 
   /**
-   * 获取模型
-   *
-   * @returns
-   */
-  get data(): IIconModel {
-    return this.model as IIconModel;
-  }
-
-  /**
    * 获取图标
    *
    * @returns
@@ -58,14 +49,14 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
    * 运行绘制任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.data) return;
+    if (!this.canvas || !this.model) return;
 
     let {
       point: { x, y },
       width,
       height,
       scale,
-    } = this.data;
+    } = this.model as IIconModel;
     await CanvasUtils.drawImgLike(
       this.canvas,
       this.img,
@@ -76,7 +67,7 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
         height,
       },
       {
-        angle: this.data.angle,
+        angle: this.model.angle,
       },
     );
   }

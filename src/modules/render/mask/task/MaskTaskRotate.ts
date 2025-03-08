@@ -1,14 +1,10 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import RotateSvg from "@/assets/svg/rotate.svg";
-import { IRotationModel } from "@/types/IModel";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import { IRotationModel } from "@/types/IModel";
 
 export default class MaskTaskRotate extends MaskTaskBase {
-  get data(): IRotationModel {
-    return this.model as IRotationModel;
-  }
-
   get svg() {
     return RotateSvg;
   }
@@ -17,8 +13,8 @@ export default class MaskTaskRotate extends MaskTaskBase {
    * 运行绘制任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.data) return;
-    let { point, width, height, scale } = this.data;
+    if (!this.canvas || !this.model) return;
+    let { point, width, height, scale } = this.model as IRotationModel;
     point = ElementUtils.calcStageRelativePoint(point);
 
     await CanvasUtils.drawImgLike(
@@ -31,7 +27,7 @@ export default class MaskTaskRotate extends MaskTaskBase {
         height,
       },
       {
-        angle: this.data.angle,
+        angle: this.model.angle,
       },
     );
   }

@@ -4,21 +4,19 @@ import { IElementTask } from "@/types/IRenderTask";
 
 export default abstract class ElementTaskBase extends RenderTaskBase implements IElementTask {
   element: IElement;
-  protected _canvas: HTMLCanvasElement;
-
-  get node() {
-    return this.element;
-  }
-
-  get canvas() {
-    return this._canvas;
-  }
+  canvas: HTMLCanvasElement;
 
   constructor(element: IElement, params?: any) {
     super();
     this.element = element;
     if (params) {
-      this._canvas = params.canvas as HTMLCanvasElement;
+      this.canvas = params.canvas as HTMLCanvasElement;
     }
+  }
+
+  destroy(): Promise<void> {
+    this.element = null;
+    this.canvas = null;
+    return Promise.resolve();
   }
 }

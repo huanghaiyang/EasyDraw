@@ -1,25 +1,20 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { IElementRect } from "@/types/IElement";
 import { DefaultLineMeterLimit } from "@/styles/ElementStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementTaskArbitrary extends ElementTaskBase {
-  get node() {
-    return this.element as IElementRect;
-  }
-
   /**
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.node) return;
-    
+    if (!this.canvas || !this.element) return;
+
     let {
       innermostStrokeCoordIndex,
       strokeCoords,
       model: { styles, isFold },
-    } = this.node;
+    } = this.element;
     const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
 
     if (isFold) {

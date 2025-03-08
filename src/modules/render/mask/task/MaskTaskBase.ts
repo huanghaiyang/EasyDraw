@@ -6,21 +6,20 @@ export default abstract class MaskTaskBase extends RenderTaskBase implements IMa
   // 模型
   model: IMaskModel;
   // 画布
-  protected _canvas: HTMLCanvasElement;
-
-  get data(): IMaskModel {
-    return this.model;
-  }
-
-  get canvas(): HTMLCanvasElement {
-    return this._canvas;
-  }
+  canvas: HTMLCanvasElement;
 
   constructor(model: IMaskModel, params?: any) {
     super();
     this.model = model;
     if (params) {
-      this._canvas = params.canvas as HTMLCanvasElement;
+      this.canvas = params.canvas as HTMLCanvasElement;
     }
+  }
+
+  destroy(): Promise<void> {
+    this.model = null;
+    this.id = null;
+    this.canvas = null;
+    return Promise.resolve();
   }
 }

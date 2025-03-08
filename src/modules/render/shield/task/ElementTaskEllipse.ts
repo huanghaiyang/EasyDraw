@@ -1,20 +1,15 @@
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
-import { IElementEllipse } from "@/types/IElement";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementTaskEllipse extends ElementTaskBase {
-  get node() {
-    return this.element as IElementEllipse;
-  }
-
   /**
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.node) return;
-    
+    if (!this.canvas || !this.element) return;
+
     const {
       innermostStrokeCoordIndex,
       unLeanStrokeCoords,
@@ -27,7 +22,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       flipX,
       leanY,
       actualAngle,
-    } = this.node;
+    } = this.element;
 
     const options = {
       angle,
@@ -35,7 +30,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       leanY,
       actualAngle,
     };
-    
+
     const unLeanStrokePoints = ElementUtils.batchCalcStageRelativePoints(unLeanStrokeCoords);
     const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
     const rect = CommonUtils.getRect(innermostStrokePoints);

@@ -62,11 +62,10 @@ export default class RenderQueue implements IRenderQueue {
           await task.destroy();
         }
         task = null;
-        this.queue = null;
-        this.running = false;
-        return;
       }
     }
+    this.queue = null;
+    this.running = false;
   }
 }
 

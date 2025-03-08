@@ -5,15 +5,11 @@ import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementTaskImage extends ElementTaskBase {
-  get node() {
-    return this.element as IElementImage;
-  }
-
   /**
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.node) return;
+    if (!this.canvas || !this.element) return;
 
     const {
       arcCoords,
@@ -25,7 +21,7 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
       rotateBoxCoords,
       center,
-    } = this.node;
+    } = this.element as IElementImage;
 
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
     const rotateBoxPoints = ElementUtils.calcStageRelativePoints(rotateBoxCoords);
@@ -39,10 +35,10 @@ export default class ElementTaskImage extends ElementTaskBase {
     };
 
     let rect = CommonUtils.calcRotateBoxRect(rotateBoxPoints, center);
-    rect = CommonUtils.scaleRect(rect, this.node.shield.stageScale);
+    rect = CommonUtils.scaleRect(rect, this.element.shield.stageScale);
 
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, this.node.model.data, rect, {
+    CanvasUtils.drawImgLike(this.canvas, this.element.model.data, rect, {
       ...options,
       clipArcPoints: arcFillPoints,
     });

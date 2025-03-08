@@ -10,14 +10,14 @@ export default class MaskTaskPath extends MaskTaskBase {
    * 运行任务
    */
   async run(): Promise<void> {
-    if (!this.canvas || !this.data) return;
+    if (!this.canvas || !this.model) return;
     
     const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
-    let { points } = this.data;
+    let { points } = this.model;
     points = ElementUtils.calcStageRelativePoints(points);
 
-    if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.data.type)) {
+    if ([DrawerMaskModelTypes.selection, DrawerMaskModelTypes.path].includes(this.model.type)) {
       specialStyles.fills = [
         {
           colorOpacity: 0,
@@ -31,10 +31,10 @@ export default class MaskTaskPath extends MaskTaskBase {
       {},
       {
         ...SelectionStyle.strokes[0],
-        width: width * this.data.scale,
+        width: width * this.model.scale,
       },
       {
-        isFold: typeof this.data.element?.isFold === "undefined" ? true : this.data.element?.isFold,
+        isFold: typeof this.model.element?.isFold === "undefined" ? true : this.model.element?.isFold,
       },
     );
   }
