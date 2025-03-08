@@ -25,7 +25,7 @@ watch(
 );
 </script>
 <template>
-  <div class="corners-props right-props" v-if="stageStore.primarySelectedElement?.cornersModifyEnable">
+  <div class="corners-props right-props" v-show="stageStore.primarySelectedElement?.cornersModifyEnable">
     <div class="corners-props__title">
       <span class="corners-props__title-text">圆角</span>
     </div>

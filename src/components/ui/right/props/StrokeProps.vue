@@ -29,7 +29,7 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="stroke-props right-props" v-if="stageStore.primarySelectedElement?.strokeEnable">
+  <div class="stroke-props right-props" v-show="stageStore.primarySelectedElement?.strokeEnable">
     <div class="stroke-props__title">
       <span class="stroke-props__title-text">描边</span>
       <el-icon><Plus @click="stageStore.addElementsStroke(strokes.length - 1)" /></el-icon>

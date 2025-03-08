@@ -5,7 +5,7 @@ import { useStageStore } from "@/stores/stage";
 const stageStore = useStageStore();
 </script>
 <template>
-  <div class="arbitrary-bar" v-if="stageStore.arbitraryVisible">
+  <div class="arbitrary-bar" v-show="stageStore.arbitraryVisible">
     <div class="tool-item">
       <el-icon @click="stageStore.commitArbitraryDrawing">
         <Close />
