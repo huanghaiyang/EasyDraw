@@ -271,6 +271,7 @@ export default class CanvasUtils {
    * @returns
    */
   static transParamsWithScale(points: IPoint[], strokeStyle?: StrokeStyle): [IPoint[], StrokeStyle] {
+    if (CanvasUtils.scale === 1) return [points, strokeStyle];
     points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     if (strokeStyle) {
       strokeStyle = {
@@ -289,6 +290,7 @@ export default class CanvasUtils {
    * @returns
    */
   static transArcParamsWithScale(arcPoints: ArcPoints[], strokeStyle?: StrokeStyle): [ArcPoints[], StrokeStyle] {
+    if (CanvasUtils.scale === 1) return [arcPoints, strokeStyle];
     arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     if (strokeStyle) {
       strokeStyle = {
@@ -306,12 +308,12 @@ export default class CanvasUtils {
    * @returns
    */
   static transEllipseModelWithScale(ellipseModel: EllipseModel) {
-    ellipseModel = {
+    if (CanvasUtils.scale === 1) return ellipseModel;
+    return {
       ...ellipseModel,
       rx: ellipseModel.rx * CanvasUtils.scale,
       ry: ellipseModel.ry * CanvasUtils.scale,
     };
-    return ellipseModel;
   }
 
   /**
@@ -377,6 +379,7 @@ export default class CanvasUtils {
    * @returns
    */
   static scaleArcPoints(arcPoints: ArcPoints[]) {
+    if (CanvasUtils.scale === 1) return arcPoints;
     arcPoints = arcPoints.map(arc => {
       const { start, controller, end, value, corner } = arc;
       const [p1, p2, p3, p4] = CommonUtils.scalePoints([start, controller, end, corner], CanvasUtils.scale);
