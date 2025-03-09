@@ -277,7 +277,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
-        [p1, p2] = element.rotateCoords.sort((a, b) => a.x - b.x);
+        [p1, p2] = [...element.rotateCoords].sort((a, b) => a.x - b.x);
         break;
       }
       default: {

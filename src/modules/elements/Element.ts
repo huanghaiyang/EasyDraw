@@ -1893,15 +1893,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 获取设置尺寸变换的变换点（设置宽度的时候使用）
-   *
-   * @returns
-   */
-  getTransformPointForSizeChange(): IPoint {
-    return this._originalTransformerCoords[2];
-  }
-
-  /**
    * 位移
    *
    * @param offset

@@ -1406,12 +1406,13 @@ export default class StageStore implements IStageStore {
    * @param angle
    * @param originalAngle
    * @param centerCoord
-   * @param isRotating
    */
   rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint): void {
     elements.forEach(element => {
-      angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
-      angle = MathUtils.precise(angle, 1);
+      if (element.model.type !== CreatorTypes.line) {
+        angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
+        angle = MathUtils.precise(angle, 1);
+      }
       element.setAngle(angle);
       this._updateElementStageStatusIfy(element);
       if (element.isGroup) {
@@ -1672,7 +1673,7 @@ export default class StageStore implements IStageStore {
     // 获取组合组件的子组件id
     const subIds = elements.map(element => element.id);
     // 获取组合组件的坐标
-    const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateBoxCoords).flat());
+    const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateCoords).flat());
     // 获取组合组件的宽高
     const { width, height, x, y } = CommonUtils.getRect(coords);
     // 返回组合组件的数据对象

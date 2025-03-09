@@ -7,7 +7,7 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
 import { TransformerTypes } from "@/types/ITransformer";
-import { some } from "lodash";
+import { cloneDeep, some } from "lodash";
 
 export default class ElementLine extends Element implements IElementLine {
   get editingEnable(): boolean {
@@ -70,15 +70,8 @@ export default class ElementLine extends Element implements IElementLine {
     return this._rotateCoords[1];
   }
 
-  get startCoord(): IPoint {
-    return this.model.coords[0];
-  }
-
-  get endCoord(): IPoint {
-    return this.model.coords[1];
-  }
-
   private _outerCoords: IPoint[][] = [];
+  private _originalOuterCoords: IPoint[][] = [];
 
   get outerCoords(): IPoint[][] {
     return this._outerCoords;
@@ -133,7 +126,10 @@ export default class ElementLine extends Element implements IElementLine {
    * @returns
    */
   getAngle(): number {
-    return ElementUtils.fixAngle(MathUtils.calcAngle(this.startCoord, this.endCoord) + 90);
+    if (this.startRotateCoord && this.endRotateCoord) {
+      return ElementUtils.fixAngle(MathUtils.calcAngle(this.startRotateCoord, this.endRotateCoord) + 90);
+    }
+    return 0;
   }
 
   /**
@@ -188,23 +184,16 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   /**
-   * 获取设置尺寸变换的变换点（设置宽度的时候使用）
-   *
-   * @returns
-   */
-  getTransformPointForSizeChange(): IPoint {
-    return this._originalTransformerCoords[1];
-  }
-
-  /**
    * 设置宽度
    *
    * @param value
    */
   setWidth(value: number): number[][] {
-    const newCoord = MathUtils.calcTargetPoint(this.startCoord, value, this.angle - 90);
-    this.model.coords[1] = newCoord;
+    const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, value, this.angle - 90);
+    this.model.coords = [this.startRotateCoord, endRotateCoord];
+    this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
     this.model.width = value;
+    this.model.angle = 0;
     return [[]];
   }
 
@@ -214,9 +203,28 @@ export default class ElementLine extends Element implements IElementLine {
    * @param value
    */
   setAngle(value: number): void {
-    const center = MathUtils.calcCenter(this.model.coords);
-    const startCoord = MathUtils.calcTargetPoint(center, this.width / 2, value + 90);
-    const endCoord = MathUtils.calcTargetPoint(center, this.width / 2, value - 90);
-    this.model.coords = [startCoord, endCoord];
+    const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, this.model.width, value - 90);
+    this.model.coords = [this.startRotateCoord, endRotateCoord];
+    this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
+    this.model.angle = 0;
+  }
+
+  /**
+   * 按比例缩放
+   *
+   * @param scale
+   * @param center
+   */
+  translateBy(offset: IPoint): void {
+    this._outerCoords = this._originalOuterCoords.map(coords => MathUtils.batchTranslate(coords, offset));
+    super.translateBy(offset);
+  }
+
+  /**
+   * 刷新原始外轮廓坐标
+   */
+  refreshOriginalStrokes(): void {
+    super.refreshOriginalStrokes();
+    this._originalOuterCoords = cloneDeep(this._outerCoords);
   }
 }
