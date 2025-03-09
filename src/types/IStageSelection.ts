@@ -20,10 +20,6 @@ export default interface IStageSelection {
   get selectionModel(): IMaskModel;
   // 变换器模型
   get transformerModels(): IMaskModel[];
-  // 中心点
-  get center(): IPoint;
-  // 获取内部角度
-  get internalAngle(): number;
 
   // 设置范围
   setRange(coords: IPoint[]): void;
