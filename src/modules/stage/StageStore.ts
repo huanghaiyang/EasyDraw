@@ -1222,7 +1222,7 @@ export default class StageStore implements IStageStore {
   updateElementsTranslate(elements: IElement[], offset: IPoint): void {
     elements.forEach(element => {
       element.translateBy(offset);
-      this._updateElementStageStatusIfy(element);
+      !element.isOnStage && this._updateElementStageStatusIfy(element);
     });
   }
 
@@ -1414,11 +1414,11 @@ export default class StageStore implements IStageStore {
         angle = MathUtils.precise(angle, 1);
       }
       element.setAngle(angle);
-      this._updateElementStageStatusIfy(element);
+      !element.isOnStage && this._updateElementStageStatusIfy(element);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
           sub.rotateBy(angle - element.originalAngle, centerCoord);
-          this._updateElementStageStatusIfy(sub);
+          !sub.isOnStage && this._updateElementStageStatusIfy(sub);
         });
       }
     });
@@ -1964,7 +1964,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
     if (elements.length === 0) return;
-    this._doElementsShiftMove(elements); 
+    this._doElementsShiftMove(elements);
     this._reactionStageElementsChanged();
     this._emitElementsLayerChanged();
   }
