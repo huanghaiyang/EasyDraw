@@ -89,8 +89,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   setScaleReduce(): void;
   // 设置放大
   setScaleIncrease(): void;
-  // 删除选区组件
-  deleteSelectElements(): void;
   // 全选
   selectAll(): void;
   // 上传图片

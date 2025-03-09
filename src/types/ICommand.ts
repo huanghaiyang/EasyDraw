@@ -1,5 +1,16 @@
 import { ElementObject } from "@/types/IElement";
 
+// 通用组件命令对象
+export type ICommandElementObject = {
+  model: Partial<ElementObject>;
+};
+
+// 组件删除命令对象
+export type IRemovedCommandElementObject = ICommandElementObject & {
+  prevId?: string;
+  nextId?: string;
+};
+
 export default interface ICommand {
   payload: ICommandPayload;
   undo(): void;
@@ -8,8 +19,8 @@ export default interface ICommand {
 
 export interface ICommandPayload {
   type: CommandTypes;
-  dataList: Array<Partial<ElementObject>>;
-  rDataList?: Array<Partial<ElementObject>>;
+  dataList: Array<ICommandElementObject>;
+  rDataList?: Array<ICommandElementObject>;
 }
 
 export enum CommandTypes {

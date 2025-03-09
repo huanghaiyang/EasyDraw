@@ -1,5 +1,5 @@
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
-import { ElementObject } from "@/types/IElement";
+import { ICommandElementObject } from "@/types/ICommand";
 
 export default class ElementsUpdatedCommand extends ElementsBaseCommand {
   /**
@@ -7,10 +7,10 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand {
    *
    * @param dataList
    */
-  private _restoreElementsFromData(dataList: Array<Partial<ElementObject>>) {
+  private _restoreElementsFromData(dataList: Array<ICommandElementObject>) {
     dataList.forEach(data => {
-      const { id } = data;
-      const element = this.store.updateElementModel(id, data);
+      const { model } = data;
+      const element = this.store.updateElementModel(model.id, model);
       element && element.refresh();
     });
   }

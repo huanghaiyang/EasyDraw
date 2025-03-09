@@ -37,9 +37,10 @@ import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
-import { CommandTypes } from "@/types/ICommand";
+import { CommandTypes, ICommandElementObject, IRemovedCommandElementObject } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
-import ElementsUpdatedCommand from "../command/ElementsUpdatedCommand";
+import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
+import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -882,8 +883,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsUpdatedCommand(
       {
         type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(element => element.toOriginalTranslateJson())),
-        rDataList: await Promise.all(selectedElements.map(element => element.toTranslateJson())),
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTranslateJson() }) as ICommandElementObject)),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject)),
       },
       this.store,
     );
@@ -993,7 +994,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const command = new ElementsAddedCommand(
         {
           type: CommandTypes.ElementsAdded,
-          dataList: await Promise.all(provisionalElements.map(element => element.toJson())),
+          dataList: await Promise.all(provisionalElements.map(async element => ({ model: await element.toJson() }) as ICommandElementObject)),
         },
         this.store,
       );
@@ -1316,20 +1317,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 删除选中组件
+   * 处理选中组件删除
    */
-  deleteSelectElements(): void {
+  async _handleSelectsDelete(): Promise<void> {
     if (this.store.isSelectedEmpty) {
       return;
     }
+    const command = new ElementsRemovedCommand(
+      {
+        type: CommandTypes.ElementsRemoved,
+        dataList: await Promise.all(this.store.selectedElements.map(async element => ({ model: await element.toJson() }) as IRemovedCommandElementObject)),
+      },
+      this.store,
+    );
+    this.undo.undoStack.push(command);
     this.store.deleteSelects();
-  }
-
-  /**
-   * 处理选中组件删除
-   */
-  _handleSelectsDelete(): void {
-    this.deleteSelectElements();
   }
 
   /**
