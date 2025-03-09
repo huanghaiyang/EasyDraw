@@ -8,7 +8,8 @@ export default interface ICommand {
 
 export interface ICommandPayload {
   type: CommandTypes;
-  data: Array<Partial<ElementObject>>;
+  dataList: Array<Partial<ElementObject>>;
+  rDataList?: Array<Partial<ElementObject>>;
 }
 
 export enum CommandTypes {

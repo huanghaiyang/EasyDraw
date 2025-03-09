@@ -873,7 +873,7 @@ export default interface IElement {
    */
   onLeanyAngleChanged(): void;
 
-  
+
   /**
    * 圆角变化中
    */
@@ -973,6 +973,16 @@ export default interface IElement {
    * @param json JSON数据
    */
   fromJson(json: ElementObject): void;
+
+  /**
+   * 将组件移动之前的数据转换为json
+   */
+  toOriginalTranslateJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件移动后的数据转换为json
+   */
+  toTranslateJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React
@@ -1007,16 +1017,16 @@ export interface IElementRect extends IElement {
 }
 
 // 舞台组件（组件）-圆形
-export interface IElementEllipse extends IElement {}
+export interface IElementEllipse extends IElement { }
 
 // 舞台组件（组件）-图片
-export interface IElementImage extends IElementRect {}
+export interface IElementImage extends IElementRect { }
 
 // 舞台组件（组件）-任意多边形&线条
-export interface IElementPolygon extends IElement {}
+export interface IElementPolygon extends IElement { }
 
 // 舞台组件（组件）-文本
-export interface IElementText extends IElement {}
+export interface IElementText extends IElement { }
 
 // 舞台组件（组件）-线段
 export interface IElementLine extends IElement {

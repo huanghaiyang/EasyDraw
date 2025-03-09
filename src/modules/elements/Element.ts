@@ -788,7 +788,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 层级发生变化
    */
-  onLayerChanged(): void {}
+  onLayerChanged(): void { }
 
   /**
    * 平移前
@@ -2352,5 +2352,39 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   fromJson(json: ElementObject): void {
     this.model = JSON.parse(JSON.stringify(json));
+  }
+
+  /**
+   * 将组件位移之前的数据转换为json
+   *
+   * @returns
+   */
+  async toOriginalTranslateJson(): Promise<ElementObject> {
+    const { _originalCoords, _originalBoxCoords, id, _originalCenterCoord } = this;
+    const obj = {
+      id,
+      coords: _originalCoords,
+      boxCoords: _originalBoxCoords,
+      x: _originalCenterCoord.x,
+      y: _originalCenterCoord.y,
+    }
+    return JSON.parse(JSON.stringify(obj)) as ElementObject;
+  }
+
+  /**
+   * 将组件位移之后的数据转换为json
+   *
+   * @returns 
+   */
+  async toTranslateJson(): Promise<ElementObject> {
+    const { id, coords, boxCoords, x, y } = this.model;
+    const obj = {
+      id,
+      coords,
+      boxCoords,
+      x,
+      y,
+    }
+    return JSON.parse(JSON.stringify(obj)) as ElementObject;
   }
 }
