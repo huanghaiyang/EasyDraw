@@ -4,10 +4,12 @@ import { IRenderTask } from "@/types/IRenderTask";
 export default class RenderQueue implements IRenderQueue {
   running: boolean;
   queue: IRenderTask[];
+  stopped: boolean;
 
   constructor() {
     this.running = false;
     this.queue = [];
+    this.stopped = false;
   }
 
   /**
@@ -16,6 +18,7 @@ export default class RenderQueue implements IRenderQueue {
    * @param task
    */
   async add(task: IRenderTask): Promise<void> {
+    if (this.stopped) return;
     this.queue.push(task);
     if (!this.running) {
       this.running = true;
@@ -27,15 +30,15 @@ export default class RenderQueue implements IRenderQueue {
    * 执行所有任务
    */
   async run(): Promise<void> {
+    if (this.stopped) return;
     if (this.queue.length === 0) {
       this.running = false;
       return;
     }
     let task = this.queue.shift()!;
     if (task) {
-      await task.run();
       try {
-        await this.run();
+        await task.run();
       } catch (error) {
         console.error("RenderQueue: error running task", task.id, error);
       } finally {
@@ -45,16 +48,20 @@ export default class RenderQueue implements IRenderQueue {
         task = null;
       }
     }
-
-    requestAnimationFrame(() => {
-      this.run();
-    });
+    if (this.queue.length > 0) {
+      requestAnimationFrame(() => {
+        this.run();
+      });
+    } else {
+      this.running = false;
+    }
   }
 
   /**
    * 销毁队列
    */
   async destroy(): Promise<void> {
+    this.stopped = true;
     while (this.queue.length > 0) {
       let task = this.queue.shift();
       if (task) {
