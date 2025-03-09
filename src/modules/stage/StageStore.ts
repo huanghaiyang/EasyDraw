@@ -1897,13 +1897,13 @@ export default class StageStore implements IStageStore {
     }
     return result;
   }
+
   /**
-   * 组件下移
+   * 执行组件下移擦做
    *
    * @param elements 要修改的组件集合
    */
-  async setElementsGoDown(elements: IElement[]): Promise<void> {
-    if (elements.length === 0) return;
+  private _doElementsGoDown(elements: IElement[]): void {
     const headNode: ILinkedNode<IElement> = elements[0].node;
     let targetNode: ILinkedNode<IElement> | null = headNode.prev;
     if (targetNode?.value.isGroup) {
@@ -1919,17 +1919,26 @@ export default class StageStore implements IStageStore {
         this._elementList.prepend(node, false);
       });
     }
+  }
+
+  /**
+   * 组件下移
+   *
+   * @param elements 要修改的组件集合
+   */
+  async setElementsGoDown(elements: IElement[]): Promise<void> {
+    if (elements.length === 0) return;
+    this._doElementsGoDown(elements);
     this._reactionStageElementsChanged();
     this._emitElementsLayerChanged();
   }
 
   /**
-   * 组件上移
+   * 执行元件的Shift移动操作
    *
-   * @param elements 要修改的元件集合
+   * @param elements 要移动的元件集合
    */
-  async setElementsShiftMove(elements: IElement[]): Promise<void> {
-    if (elements.length === 0) return;
+  private _doElementsShiftMove(elements: IElement[]): void {
     const tailNode: ILinkedNode<IElement> = elements[elements.length - 1].node;
     let targetNode: ILinkedNode<IElement> | null = tailNode.next;
     if (targetNode?.value.isGroupSubject) {
@@ -1946,6 +1955,16 @@ export default class StageStore implements IStageStore {
         this._elementList.insert(node, false);
       });
     }
+  }
+
+  /**
+   * 组件上移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsShiftMove(elements: IElement[]): Promise<void> {
+    if (elements.length === 0) return;
+    this._doElementsShiftMove(elements); 
     this._reactionStageElementsChanged();
     this._emitElementsLayerChanged();
   }
