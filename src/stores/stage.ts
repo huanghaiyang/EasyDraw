@@ -16,6 +16,8 @@ const shield = new StageShield();
 const container = new StageContainer();
 // 配置
 shield.configure.config({ rotationIconEnable: true });
+// 节流时间
+const ThrottleTime = 200;
 
 // 舞台默认数据
 const DefaultStage = {
@@ -125,46 +127,46 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
       // 监听目标
       shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
-      // 监听位置
-      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), 100));
-      // 监听宽度
-      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), 100));
-      // 监听高度
-      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), 100));
-      // 监听角度
-      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), 100));
-      // 监听圆角
-      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), 100));
-      // 监听X轴翻转
-      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), 100));
-      // 监听Y偏移角度
-      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), 100));
-      // 监听缩放
-      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), 100));
-      // 监听描边
-      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), 100));
-      // 监听填充
-      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), 100));
-      // 监听字体大小
-      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), 100));
-      // 监听字体
-      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), 100));
-      // 监听文本对齐方式
-      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), 100));
-      // 监听文本基线
-      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), 100));
-      // 监听宽高比锁定
-      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), 100));
-      // 监听绘制工具
-      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), 100));
       // 监听多选状态
-      shield.on(ShieldDispatcherNames.multiSelectedChanged, throttle(this.onMultiSelectedChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged.bind(this));
       // 监听主选中状态
-      shield.on(ShieldDispatcherNames.primarySelectedChanged, throttle(this.onPrimarySelectedChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged.bind(this));
+      // 监听位置
+      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听宽度
+      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听高度
+      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听角度
+      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听圆角
+      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听X轴翻转
+      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听Y偏移角度
+      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听缩放
+      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听描边
+      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听填充
+      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听字体大小
+      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听字体
+      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听文本对齐方式
+      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听文本基线
+      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听宽高比锁定
+      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听绘制工具
+      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听层上移状态
-      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听层下移状态
-      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), 100));
+      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
     },
     /**
      * 设置绘制工具
@@ -243,34 +245,34 @@ export const useStageStore = defineStore("stage", {
     onElementChanged(element: IElement) {
       if (!element) return;
       const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, textAlign, textBaseline, isRatioLocked } = element;
-        // 组件位置
-        this.onPositionChanged(element, position);
-        // 组件宽度
-        this.onWidthChanged(element, width);
-        // 组件高度
-        this.onHeightChanged(element, height);
-        // 组件旋转角度
-        this.onAngleChanged(element, angle);
-        // 组件圆角
-        this.onCornersChanged(element, corners);
-        // X轴翻转
-        this.onFlipXChanged(element, flipX);
-        // Y轴偏移角度
-        this.onLeanYAngleChanged(element, leanYAngle);
-        // 描边
-        this.onStrokesChanged(element, strokes);
-        // 填充颜色
-        this.onFillsChanged(element, fills);
-        // 字体大小
-        this.onFontSizeChanged(element, fontSize);
-        // 字体
-        this.onFontFamilyChanged(element, fontFamily);
-        // 文本对齐方式
-        this.onTextAlignChanged(element, textAlign);
-        // 文本基线
-        this.onTextBaselineChanged(element, textBaseline);
-        // 宽高比锁定
-        this.onRatioLockedChanged(element, isRatioLocked);
+      // 组件位置
+      this.onPositionChanged(element, position);
+      // 组件宽度
+      this.onWidthChanged(element, width);
+      // 组件高度
+      this.onHeightChanged(element, height);
+      // 组件旋转角度
+      this.onAngleChanged(element, angle);
+      // 组件圆角
+      this.onCornersChanged(element, corners);
+      // X轴翻转
+      this.onFlipXChanged(element, flipX);
+      // Y轴偏移角度
+      this.onLeanYAngleChanged(element, leanYAngle);
+      // 描边
+      this.onStrokesChanged(element, strokes);
+      // 填充颜色
+      this.onFillsChanged(element, fills);
+      // 字体大小
+      this.onFontSizeChanged(element, fontSize);
+      // 字体
+      this.onFontFamilyChanged(element, fontFamily);
+      // 文本对齐方式
+      this.onTextAlignChanged(element, textAlign);
+      // 文本基线
+      this.onTextBaselineChanged(element, textBaseline);
+      // 宽高比锁定
+      this.onRatioLockedChanged(element, isRatioLocked);
     },
     /**
      * 舞台组件命中状态改变

@@ -8,7 +8,6 @@ import { TaskQueue } from "@/modules/render/RenderQueue";
 import { QueueTask } from "@/modules/render/RenderTask";
 import FileUtils from "@/utils/FileUtils";
 import TimeUtils from "@/utils/TimerUtils";
-import { throttle } from "lodash";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
@@ -32,7 +31,6 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   private _isShift1Event: (e: KeyboardEvent) => boolean;
   private _isDeleteEvent: (e: KeyboardEvent) => boolean;
   private _isEscEvent: (e: KeyboardEvent) => boolean;
-  private _handleMouseMove: (e: MouseEvent) => void;
 
   get isCtrl(): boolean {
     return this._isCtrl;
@@ -78,9 +76,6 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     this._isCtrlYEvent = isHotkey("ctrl+y");
     this._isCtrlShiftGEvent = isHotkey("ctrl+shift+g");
     this._isEscEvent = isHotkey("esc");
-    this._handleMouseMove = throttle((e) => {
-      this.emit("cursorMove", e);
-    }, 1000 / 120)
     this.initEvents();
   }
 
@@ -142,7 +137,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    */
   async initMouseEvents(): Promise<void> {
     this.shield.canvas.addEventListener("mousemove", e => {
-      this._handleMouseMove(e);
+      this.emit("cursorMove", e);
     });
     this.shield.canvas.addEventListener("mouseleave", e => {
       this.emit("cursorLeave", e);
