@@ -365,7 +365,7 @@ export const useStageStore = defineStore("stage", {
      * @param element
      * @param stroke
      */
-    onStrokesChanged(element: IElement, strokes: StrokeStyle[]) {
+    onStrokesChanged(element: IElement, strokes: StrokeStyle[] = []) {
       this.strokes = LodashUtils.jsonClone(strokes);
     },
     /**
@@ -374,7 +374,7 @@ export const useStageStore = defineStore("stage", {
      * @param element
      * @param fills
      */
-    onFillsChanged(element: IElement, fills: StrokeStyle[]) {
+    onFillsChanged(element: IElement, fills: StrokeStyle[] = []) {
       this.fills = LodashUtils.jsonClone(fills);
     },
     /**

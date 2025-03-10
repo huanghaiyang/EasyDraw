@@ -199,4 +199,11 @@ export default class ElementGroup extends Element implements IElementGroup {
       sub.isSelected = value;
     });
   }
+
+  /**
+   * 计算旋转外框坐标
+   */
+  calcRotateOutlineCoords(): IPoint[][] {
+    return [this._rotateCoords];
+  }
 }

@@ -90,10 +90,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
   // 舞台矩形顶点坐标
   get stageWordRectCoords(): IPoint[] {
-    let { width, height } = this.stageRect;
-    width /= this.stageScale;
-    height /= this.stageScale;
-    return CommonUtils.getBoxVertices(this.stageWorldCoord, { width, height });
+    return CommonUtils.getBoxVertices(this.stageWorldCoord, { width: this.stageRect.width / this.stageScale, height: this.stageRect.height / this.stageScale });
   }
 
   // 鼠标按下位置
@@ -1449,6 +1446,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.undo.undo();
     this.selection.refresh();
     this._shouldRedraw = true;
+    this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
   }
 
   /**
@@ -1458,6 +1456,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.undo.redo();
     this.selection.refresh();
     this._shouldRedraw = true;
+    this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
   }
 
   /**
