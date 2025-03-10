@@ -1010,6 +1010,16 @@ export default interface IElement {
    * 将组件变换数据转换为json
    */
   toTransformJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件原始圆角数据转换为json
+   */
+  toOriginalCornerJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件圆角数据转换为json
+   */
+  toCornerJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React

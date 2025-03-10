@@ -209,10 +209,42 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject));
     await this.store.setElementsPosition(elements, value);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject));
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList,
+        rDataList,
+      },
+      this.store,
+    );
+    this.undo.add(command);
     elements.forEach(element => element.onPositionChanged());
     this.selection.refresh();
     this._shouldRedraw = true;
+  }
+
+  /**
+   * 创建组件更新命令
+   *
+   * @param elements
+   * @param elementsUpdateFunction
+   */
+  private async _createTransformCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject));
+    await elementsUpdateFunction();
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject));
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList,
+        rDataList,
+      },
+      this.store,
+    );
+    this.undo.add(command);
   }
 
   /**
@@ -222,7 +254,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
-    await this.store.setElementsWidth(elements, value);
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsWidth(elements, value);
+    });
     elements.forEach(element => element.onWidthChanged());
     this.selection.refresh();
     this._shouldRedraw = true;
@@ -235,7 +269,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
-    await this.store.setElementsHeight(elements, value);
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsHeight(elements, value);
+    });
     elements.forEach(element => element.onHeightChanged());
     this.selection.refresh();
     this._shouldRedraw = true;
@@ -248,7 +284,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
-    await this.store.setElementsLeanYAngle(elements, value);
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsLeanYAngle(elements, value);
+    });
     elements.forEach(element => element.onLeanyAngleChanged());
     this.selection.refresh();
     this._shouldRedraw = true;
@@ -261,7 +299,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
-    await this.store.setElementsAngle(elements, value);
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsAngle(elements, value);
+    });
     elements.forEach(element => element.onAngleChanged());
     this.selection.refresh();
     this._shouldRedraw = true;
@@ -275,7 +315,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject));
     await this.store.setElementsCorners(elements, value, index);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject));
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList,
+        rDataList,
+      },
+      this.store,
+    );
+    this.undo.add(command);
     elements.forEach(element => element.onCornerChanged());
     this._shouldRedraw = true;
   }
@@ -818,19 +869,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       } else if (this.checkCursorPressUpALittle(e)) {
         switch (this.elementsStatus) {
           case StageShieldElementsStatus.MOVING: {
-            this._endElementsDrag();
+            await this._endElementsDrag();
             break;
           }
           case StageShieldElementsStatus.ROTATING: {
-            this._endElementsRotate();
+            await this._endElementsRotate();
             break;
           }
           case StageShieldElementsStatus.TRANSFORMING: {
-            this._endElementsTransform();
+            await this._endElementsTransform();
             break;
           }
           case StageShieldElementsStatus.CORNER_MOVING: {
-            this._endMoveingElementsCorner();
+            await this._endMoveingElementsCorner();
             break;
           }
         }
@@ -949,8 +1000,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 结束组件圆角半径操作
    */
-  private _endMoveingElementsCorner() {
+  private async _endMoveingElementsCorner() {
     const { selectedElements } = this.store;
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalCornerJson() }) as ICommandElementObject)),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject)),
+      },
+      this.store,
+    );
+    this.undo.add(command);
+    // 更新组件状态
     selectedElements.forEach(element => {
       element.isCornerMoving = false;
       element.onCornerChanged();

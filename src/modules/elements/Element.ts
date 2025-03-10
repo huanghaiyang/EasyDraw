@@ -69,6 +69,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   _originalAngle: number = 0;
   // 原始盒模型-舞台坐标系
   _originalSize: Partial<DOMRect> = {};
+  // 原始圆角
+  _originalCorners: number[] = [];
 
   // 变换矩阵
   _transformMatrix: number[][] = [];
@@ -1443,6 +1445,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshOriginalStrokes();
     // 维护原始矩形
     this._originalSize = { width: this.model.width, height: this.model.height };
+    // 维护原始圆角
+    this._originalCorners = LodashUtils.jsonClone(this.model.corners);
     // 维护原始变换矩阵
     this._originalTransformMatrix = [];
   }
@@ -2437,5 +2441,28 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   async toTransformJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys, "width", "height", "angle"]))) as ElementObject;
+  }
+
+  /**
+   * 将组件角点之前的数据转换为json
+   *
+   * @returns
+   */
+  async toOriginalCornerJson(): Promise<ElementObject> {
+    const { id, _originalCorners } = this;
+    const obj = {
+      id,
+      corners: _originalCorners,
+    };
+    return JSON.parse(JSON.stringify(obj)) as ElementObject;
+  }
+
+  /**
+   * 将组件角点之后的数据转换为json
+   *
+   * @returns
+   */
+  async toCornerJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "corners"]))) as ElementObject;
   }
 }
