@@ -2465,4 +2465,22 @@ export default class Element implements IElement, ILinkedNodeValue {
   async toCornerJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify(pick(this.model, ["id", "corners"]))) as ElementObject;
   }
+
+  /**
+   * 将组件描边数据转换为json
+   *
+   * @returns
+   */
+  async toStrokesJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "styles.strokes"]))) as ElementObject;
+  }
+
+  /**
+   * 将组件填充数据转换为json
+   *
+   * @returns
+   */
+  async toFillsJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "styles.fills"]))) as ElementObject;
+  }
 }

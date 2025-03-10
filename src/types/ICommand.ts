@@ -11,6 +11,13 @@ export type IRemovedCommandElementObject = ICommandElementObject & {
   nextId?: string;
 };
 
+// 组件样式命令对象
+export type IStyleCommandElementObject = ICommandElementObject & {
+  isStyle?: boolean;
+  isStroke?: boolean;
+  isFill?: boolean;
+};
+
 export default interface ICommand {
   payload: ICommandPayload;
   undo(): void;

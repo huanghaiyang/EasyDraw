@@ -4,7 +4,7 @@ import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
-import { every, isEqual, throttle } from "lodash";
+import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
@@ -441,7 +441,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsPosition(value: IPoint): void {
-      if (isEqual(this.position, value)) return;
       shield.setElementsPosition(toRaw(this.selectedElements), value);
     },
 
@@ -451,7 +450,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsWidth(value: number): void {
-      if (isEqual(this.width, value)) return;
       shield.setElementsWidth(toRaw(this.selectedElements), value);
     },
 
@@ -461,7 +459,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsHeight(value: number): void {
-      if (isEqual(this.height, value)) return;
       shield.setElementsHeight(toRaw(this.selectedElements), value);
     },
 
@@ -471,7 +468,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsAngle(value: number): void {
-      if (isEqual(this.angle, value)) return;
       shield.setElementsAngle(toRaw(this.selectedElements), value);
     },
 
@@ -482,7 +478,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsCorners(value: number, index?: number): void {
-      if ((index !== undefined && isEqual(this.corners[index], value)) || every(this.corners, item => isEqual(item, value))) return;
       shield.setElementsCorners(toRaw(this.selectedElements), value, index);
     },
 
@@ -492,7 +487,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsLeanYAngle(value: number): void {
-      if (isEqual(this.leanYAngle, value)) return;
       shield.setElementsLeanYAngle(toRaw(this.selectedElements), value);
     },
 
@@ -503,7 +497,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeType(value: StrokeTypes, index: number): void {
-      if (isEqual(this.strokes[index].type, value)) return;
       shield.setElementsStrokeType(toRaw(this.selectedElements), value, index);
     },
 
@@ -514,7 +507,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeWidth(value: number, index: number): void {
-      if (isEqual(this.strokes[index].width, value)) return;
       shield.setElementsStrokeWidth(toRaw(this.selectedElements), value, index);
     },
 
@@ -525,7 +517,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeColor(value: string, index: number): void {
-      if (isEqual(this.strokes[index].color, value)) return;
       shield.setElementsStrokeColor(toRaw(this.selectedElements), value, index);
     },
 
@@ -536,7 +527,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsStrokeColorOpacity(value: number, index: number): void {
-      if (isEqual(this.strokes[index].opacity, value)) return;
       shield.setElementsStrokeColorOpacity(toRaw(this.selectedElements), value, index);
     },
 
@@ -546,7 +536,6 @@ export const useStageStore = defineStore("stage", {
      * @param prevIndex 添加描边的索引位置（从0开始）
      */
     addElementsStroke(prevIndex: number): void {
-      if (prevIndex < 0 || prevIndex > this.strokes.length) return;
       shield.addElementsStroke(toRaw(this.selectedElements), prevIndex);
     },
 
@@ -556,7 +545,6 @@ export const useStageStore = defineStore("stage", {
      * @param index 删除描边的索引位置（从0开始）
      */
     removeElementsStroke(index: number): void {
-      if (index < 0 || index >= this.strokes.length) return;
       shield.removeElementsStroke(toRaw(this.selectedElements), index);
     },
 
@@ -567,7 +555,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsFillColor(value: string, index: number): void {
-      if (isEqual(this.fills[index].color, value)) return;
       shield.setElementsFillColor(toRaw(this.selectedElements), value, index);
     },
 
@@ -578,7 +565,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     setElementsFillColorOpacity(value: number, index: number): void {
-      if (isEqual(this.fills[index].opacity, value)) return;
       shield.setElementsFillColorOpacity(toRaw(this.selectedElements), value, index);
     },
 
@@ -588,7 +574,6 @@ export const useStageStore = defineStore("stage", {
      * @param prevIndex
      */
     addElementsFill(prevIndex: number): void {
-      if (prevIndex < 0 || prevIndex > this.fills.length) return;
       shield.addElementsFill(toRaw(this.selectedElements), prevIndex);
     },
 
@@ -598,7 +583,6 @@ export const useStageStore = defineStore("stage", {
      * @param index
      */
     removeElementsFill(index: number): void {
-      if (index < 0 || index >= this.fills.length) return;
       shield.removeElementsFill(toRaw(this.selectedElements), index);
     },
 
@@ -608,7 +592,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsTextAlign(value: CanvasTextAlign): void {
-      if (isEqual(this.textAlign, value)) return;
       shield.setElementsTextAlign(toRaw(this.selectedElements), value);
     },
 
@@ -618,7 +601,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
-      if (isEqual(this.textBaseline, value)) return;
       shield.setElementsTextBaseline(toRaw(this.selectedElements), value);
     },
 
@@ -628,7 +610,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsFontSize(value: number): void {
-      if (isEqual(this.fontSize, value)) return;
       shield.setElementsFontSize(toRaw(this.selectedElements), value);
     },
 
@@ -638,7 +619,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setElementsFontFamily(value: string): void {
-      if (isEqual(this.fontFamily, value)) return;
       shield.setElementsFontFamily(toRaw(this.selectedElements), value);
     },
     /**
@@ -673,7 +653,6 @@ export const useStageStore = defineStore("stage", {
      * @param value
      */
     setRatioLocked(value: boolean): void {
-      if (isEqual(this.isRatioLocked, value)) return;
       shield.setElementsRatioLocked(toRaw(this.selectedElements), value);
     },
     /**
