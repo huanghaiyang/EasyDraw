@@ -983,6 +983,16 @@ export default interface IElement {
    * 将组件移动后的数据转换为json
    */
   toTranslateJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件旋转之前的数据转换为json
+   */
+  toOriginalRotateJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件旋转后的数据转换为json
+   */
+  toRotateJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React

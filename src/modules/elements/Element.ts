@@ -3,7 +3,7 @@ import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, isNumber, some } from "lodash";
+import { clamp, isNumber, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
@@ -789,7 +789,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 层级发生变化
    */
-  onLayerChanged(): void { }
+  onLayerChanged(): void {}
 
   /**
    * 平移前
@@ -2361,31 +2361,50 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toOriginalTranslateJson(): Promise<ElementObject> {
-    const { _originalCoords, _originalBoxCoords, id, _originalCenterCoord } = this;
+    const { id, _originalCoords, _originalBoxCoords, _originalCenterCoord } = this;
     const obj = {
       id,
       coords: _originalCoords,
       boxCoords: _originalBoxCoords,
       x: _originalCenterCoord.x,
       y: _originalCenterCoord.y,
-    }
+    };
     return JSON.parse(JSON.stringify(obj)) as ElementObject;
   }
 
   /**
    * 将组件位移之后的数据转换为json
    *
-   * @returns 
+   * @returns
    */
   async toTranslateJson(): Promise<ElementObject> {
-    const { id, coords, boxCoords, x, y } = this.model;
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "coords", "boxCoords", "x", "y"]))) as ElementObject;
+  }
+
+  /**
+   * 将组件旋转之前的数据转换为json
+   *
+   * @returns
+   */
+  async toOriginalRotateJson(): Promise<ElementObject> {
+    const { id, _originalCoords, _originalBoxCoords, _originalCenterCoord } = this;
     const obj = {
       id,
-      coords,
-      boxCoords,
-      x,
-      y,
-    }
+      coords: _originalCoords,
+      boxCoords: _originalBoxCoords,
+      x: _originalCenterCoord.x,
+      y: _originalCenterCoord.y,
+      angle: this._originalAngle,
+    };
     return JSON.parse(JSON.stringify(obj)) as ElementObject;
+  }
+
+  /**
+   * 将组件旋转之后的数据转换为json
+   *
+   * @returns
+   */
+  async toRotateJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "coords", "boxCoords", "x", "y", "angle"]))) as ElementObject;
   }
 }

@@ -905,8 +905,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 结束组件旋转操作
    */
-  private _endElementsRotate() {
+  private async _endElementsRotate() {
     const { selectedElements } = this.store;
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalRotateJson() }) as ICommandElementObject)),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toRotateJson() }) as ICommandElementObject)),
+      },
+      this.store,
+    );
+    this.undo.add(command);
     // 更新组件状态
     this.store.updateElements(selectedElements, {
       isRotatingTarget: false,
