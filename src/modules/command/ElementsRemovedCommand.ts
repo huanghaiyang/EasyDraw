@@ -1,7 +1,7 @@
 import IElement, { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import { IRemovedCommandElementObject } from "@/types/ICommand";
-import { cloneDeep } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementsRemovedCommand extends ElementsBaseCommand {
   undo(): void {
@@ -12,7 +12,7 @@ export default class ElementsRemovedCommand extends ElementsBaseCommand {
       if (prevId) {
         prevElement = this.store.getElementById(prevId);
       }
-      this.store.addElementByModel(cloneDeep(model) as ElementObject, prevElement, !prevId);
+      this.store.addElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
     });
   }
 

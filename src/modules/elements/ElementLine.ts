@@ -7,7 +7,8 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import PolygonUtils from "@/utils/PolygonUtils";
 import { TransformerTypes } from "@/types/ITransformer";
-import { cloneDeep, some } from "lodash";
+import { some } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementLine extends Element implements IElementLine {
   get editingEnable(): boolean {
@@ -225,6 +226,6 @@ export default class ElementLine extends Element implements IElementLine {
    */
   refreshOriginalStrokes(): void {
     super.refreshOriginalStrokes();
-    this._originalOuterCoords = cloneDeep(this._outerCoords);
+    this._originalOuterCoords = LodashUtils.jsonClone(this._outerCoords);
   }
 }

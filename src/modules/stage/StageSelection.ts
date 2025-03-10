@@ -6,11 +6,11 @@ import IStageSelection from "@/types/IStageSelection";
 import IStageShield from "@/types/IStageShield";
 import { DefaultControllerRadius } from "@/styles/MaskStyles";
 import CommonUtils from "@/utils/CommonUtils";
-import { cloneDeep } from "lodash";
 import IController from "@/types/IController";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class StageSelection implements IStageSelection {
   // 舞台
@@ -348,7 +348,7 @@ export default class StageSelection implements IStageSelection {
         const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateCoords).flat());
         Object.assign(this.rangeElement.model, {
           coords,
-          boxCoords: cloneDeep(coords),
+          boxCoords: LodashUtils.jsonClone(coords),
           ...CommonUtils.getRect(coords),
           subIds: elements.map(element => element.id),
           ...DefaultAngleModel,

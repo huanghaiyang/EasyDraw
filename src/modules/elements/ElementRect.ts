@@ -5,10 +5,11 @@ import MathUtils from "@/utils/MathUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CornerController from "@/modules/handler/controller/CornerController";
 import IController, { ICornerController } from "@/types/IController";
-import { clamp, cloneDeep, every, range, uniq } from "lodash";
+import { clamp, every, range, uniq } from "lodash";
 import { ArcPoints } from "@/types/IRender";
 import { StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import CommonUtils from "@/utils/CommonUtils";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementRect extends Element implements IElementRect {
   _cornerControllers: ICornerController[] = [];
@@ -419,7 +420,7 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
-    this._originalCornerCoords = cloneDeep(this._cornerCoords);
+    this._originalCornerCoords = LodashUtils.jsonClone(this._cornerCoords);
     this._originalAllCornerEqual = this.isAllCornerEqual;
   }
 
@@ -428,8 +429,8 @@ export default class ElementRect extends Element implements IElementRect {
    */
   refreshOriginalStrokes(): void {
     super.refreshOriginalStrokes();
-    this._originalArcCoords = cloneDeep(this._arcCoords);
-    this._originalArcFillCoords = cloneDeep(this._arcFillCoords);
+    this._originalArcCoords = LodashUtils.jsonClone(this._arcCoords);
+    this._originalArcFillCoords = LodashUtils.jsonClone(this._arcFillCoords);
   }
 
   /**

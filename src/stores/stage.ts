@@ -4,11 +4,12 @@ import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
-import { cloneDeep, throttle } from "lodash";
+import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { toRaw } from "vue";
+import LodashUtils from "@/utils/LodashUtils";
 
 // 舞台实例
 const shield = new StageShield();
@@ -88,7 +89,7 @@ export const useStageStore = defineStore("stage", {
       // 层下移动是否可用
       layerGoDownEnable: false,
       // 舞台默认数据
-      ...cloneDeep(DefaultStage),
+      ...LodashUtils.jsonClone(DefaultStage),
     };
   },
   getters: {
@@ -231,7 +232,7 @@ export const useStageStore = defineStore("stage", {
         // 获取组合或者组件
         const element: IElement = ElementUtils.getAncestorGroup(this.selectedElements);
         if (!element) {
-          Object.assign(this, cloneDeep(DefaultStage));
+          Object.assign(this, LodashUtils.jsonClone(DefaultStage));
           return;
         }
         this.onElementChanged(element);
@@ -365,7 +366,7 @@ export const useStageStore = defineStore("stage", {
      * @param stroke
      */
     onStrokesChanged(element: IElement, strokes: StrokeStyle[]) {
-      this.strokes = cloneDeep(strokes);
+      this.strokes = LodashUtils.jsonClone(strokes);
     },
     /**
      * 组件填充变化
@@ -374,7 +375,7 @@ export const useStageStore = defineStore("stage", {
      * @param fills
      */
     onFillsChanged(element: IElement, fills: StrokeStyle[]) {
-      this.fills = cloneDeep(fills);
+      this.fills = LodashUtils.jsonClone(fills);
     },
     /**
      * 组件字体大小变化

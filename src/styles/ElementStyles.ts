@@ -1,5 +1,5 @@
 import { CreatorTypes } from "@/types/Creator";
-import { cloneDeep } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 
 export enum StrokeTypes {
   inside = 0,
@@ -151,7 +151,7 @@ export const DefaultElementStyle: ElementStyles = {
  * @returns 组件样式
  */
 export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
-  const style = cloneDeep(DefaultElementStyle);
+  const style = LodashUtils.jsonClone(DefaultElementStyle);
   if ([CreatorTypes.line, CreatorTypes.arbitrary].includes(type)) {
     style.strokes.forEach(stroke => {
       stroke.width = DefaultLineStrokeWidth;

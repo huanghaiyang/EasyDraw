@@ -3,7 +3,7 @@ import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, cloneDeep, isNumber, some } from "lodash";
+import { clamp, isNumber, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
@@ -21,6 +21,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
@@ -1452,25 +1453,25 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalCoords(): void {
     // 维护原始模型坐标
-    this._originalCoords = cloneDeep(this.model.coords);
+    this._originalCoords = LodashUtils.jsonClone(this.model.coords);
     // 维护原始模型盒模型坐标
-    this._originalBoxCoords = cloneDeep(this.model.boxCoords);
+    this._originalBoxCoords = LodashUtils.jsonClone(this.model.boxCoords);
     // 维护原始旋转坐标
-    this._originalRotateCoords = cloneDeep(this._rotateCoords);
+    this._originalRotateCoords = LodashUtils.jsonClone(this._rotateCoords);
     // 维护原始旋转盒模型坐标
-    this._originalRotateBoxCoords = cloneDeep(this._rotateBoxCoords);
+    this._originalRotateBoxCoords = LodashUtils.jsonClone(this._rotateBoxCoords);
     // 维护原始不倾斜坐标
-    this._originalUnLeanCoords = cloneDeep(this._unLeanCoords);
+    this._originalUnLeanCoords = LodashUtils.jsonClone(this._unLeanCoords);
     // 维护原始不倾斜盒模型坐标
-    this._originalUnLeanBoxCoords = cloneDeep(this._unLeanBoxCoords);
+    this._originalUnLeanBoxCoords = LodashUtils.jsonClone(this._unLeanBoxCoords);
     // 维护原始中心点坐标
-    this._originalCenterCoord = cloneDeep(this.centerCoord);
+    this._originalCenterCoord = LodashUtils.jsonClone(this.centerCoord);
     // 维护原始路径坐标
-    this._originalRotateOutlineCoords = cloneDeep(this._rotateOutlineCoords);
+    this._originalRotateOutlineCoords = LodashUtils.jsonClone(this._rotateOutlineCoords);
     // 维护原始最大外轮廓坐标
-    this._originalMaxOutlineBoxCoords = cloneDeep(this._maxOutlineBoxCoords);
+    this._originalMaxOutlineBoxCoords = LodashUtils.jsonClone(this._maxOutlineBoxCoords);
     // 维护原始最大轮廓盒模型坐标
-    this._originalMaxBoxCoords = cloneDeep(this._maxBoxCoords);
+    this._originalMaxBoxCoords = LodashUtils.jsonClone(this._maxBoxCoords);
   }
 
   /**
@@ -1478,9 +1479,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   refreshOriginalStrokes(): void {
     // 维护原始描边坐标
-    this._originalStrokeCoords = cloneDeep(this._strokeCoords);
+    this._originalStrokeCoords = LodashUtils.jsonClone(this._strokeCoords);
     // 维护原始不倾斜描边坐标
-    this._originalUnLeanStrokeCoords = cloneDeep(this._unLeanStrokeCoords);
+    this._originalUnLeanStrokeCoords = LodashUtils.jsonClone(this._unLeanStrokeCoords);
   }
 
   /**
@@ -1769,7 +1770,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 如果需要翻转角度，则更新原始矩阵
     if (isFlip) {
       // 更新原始矩阵以便下次判断是否需要翻转角度
-      this._originalTransformMatrix = cloneDeep(matrix);
+      this._originalTransformMatrix = LodashUtils.jsonClone(matrix);
     }
     return isFlip;
   }
@@ -2116,7 +2117,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setCorners(value: number, index?: number): void {
-    let values = cloneDeep(this.model.corners);
+    let values = LodashUtils.jsonClone(this.model.corners);
     if (isNumber(index)) values[index] = value;
     else values.fill(value);
     values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);

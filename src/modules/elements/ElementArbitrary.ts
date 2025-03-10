@@ -3,13 +3,14 @@ import Element from "@/modules/elements/Element";
 import IStageShield from "@/types/IStageShield";
 import { ElementStatus, IPoint } from "@/types";
 import MathUtils from "@/utils/MathUtils";
-import { cloneDeep, some } from "lodash";
+import { some } from "lodash";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { LineClosestMinWidth } from "@/types/constants";
 import { TransformerTypes } from "@/types/ITransformer";
 import CommonUtils from "@/utils/CommonUtils";
 import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -109,7 +110,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   refreshOriginalStrokes(): void {
     super.refreshOriginalStrokes();
-    this._originalOuterWorldPaths = cloneDeep(this._outerWorldPaths);
+    this._originalOuterWorldPaths = LodashUtils.jsonClone(this._outerWorldPaths);
   }
 
   /**
@@ -229,7 +230,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      const points = cloneDeep(this._originalRotateCoords);
+      const points = LodashUtils.jsonClone(this._originalRotateCoords);
       points[this.editingCoordIndex] = {
         x: points[this.editingCoordIndex].x + offset.x,
         y: points[this.editingCoordIndex].y + offset.y,

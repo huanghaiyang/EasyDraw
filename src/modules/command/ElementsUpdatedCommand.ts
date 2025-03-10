@@ -1,6 +1,6 @@
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import { ICommandElementObject } from "@/types/ICommand";
-import { cloneDeep } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 export default class ElementsUpdatedCommand extends ElementsBaseCommand {
   /**
    * 恢复数据
@@ -10,7 +10,7 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand {
   private _restoreElementsFromData(dataList: Array<ICommandElementObject>) {
     dataList.forEach(data => {
       const { model } = data;
-      const element = this.store.updateElementModel(model.id, cloneDeep(model));
+      const element = this.store.updateElementModel(model.id, LodashUtils.jsonClone(model));
       element && element.refresh();
     });
   }

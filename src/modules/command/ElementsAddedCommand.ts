@@ -1,6 +1,6 @@
 import { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
-import { cloneDeep } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementsAddedCommand extends ElementsBaseCommand {
   undo(): void {
@@ -16,7 +16,7 @@ export default class ElementsAddedCommand extends ElementsBaseCommand {
   redo(): void {
     this.store.deSelectAll();
     this.payload.dataList.forEach(data => {
-      this.store.addElementByModel(cloneDeep(data.model) as ElementObject);
+      this.store.addElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
     });
   }
 }

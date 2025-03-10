@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, cloneDeep } from "lodash";
+import { clamp } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
@@ -41,6 +41,7 @@ import { CommandTypes, ICommandElementObject, IRemovedCommandElementObject } fro
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -763,7 +764,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         }
       }
     } else if (this.isHandActive) {
-      this._originalStageWorldCoord = cloneDeep(this.stageWorldCoord);
+      this._originalStageWorldCoord = LodashUtils.jsonClone(this.stageWorldCoord);
     }
   }
 
