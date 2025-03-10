@@ -628,12 +628,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _dragElements(): void {
     const { selectedElements } = this.store;
-    // 标记组件正在拖动
-    this.store.updateElements(selectedElements, {
-      isDragging: true,
-    });
     this.store.updateElementsTranslate(selectedElements, this.movingOffset);
-    selectedElements.forEach(element => element.onTranslating());
+    selectedElements.forEach(element => {
+      element.isDragging = true;
+      element.onTranslating();
+    });
     this.selection.refresh();
     this._shouldRedraw = true;
   }
@@ -643,11 +642,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _movingElementsCorner(): void {
     const { selectedElements } = this.store;
-    this.store.updateElements(selectedElements, {
-      isCornerMoving: true,
-    });
     this.store.updateElementsCorner(selectedElements, this.movingOffset);
-    selectedElements.forEach(element => element.onCornerChanging());
+    selectedElements.forEach(element => {
+      element.isCornerMoving = true;
+      element.onCornerChanging();
+    });
     this._shouldRedraw = true;
   }
 
@@ -656,16 +655,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _transformElements(): void {
     const { selectedElements } = this.store;
-    this.store.updateElements(selectedElements, {
-      isTransforming: true,
-    });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isTransforming = true;
       this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
     } else {
       this.store.updateElementsTransform(selectedElements, this.movingOffset);
     }
-    selectedElements.forEach(element => element.onTransforming());
+    selectedElements.forEach(element => {
+      element.isTransforming = true;
+      element.onTransforming();
+    });
     this.selection.refresh();
     this._shouldRedraw = true;
   }
@@ -675,16 +674,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _rotateElements(): void {
     const { selectedElements, noParentElements } = this.store;
-    this.store.updateElements(selectedElements, {
-      isRotating: true,
-    });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = true;
       this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
     } else {
       this.store.updateElementsRotation(noParentElements, this._pressMovePosition);
     }
-    selectedElements.forEach(element => element.onRotating());
+    selectedElements.forEach(element => {
+      element.isRotating = true;
+      element.onRotating();
+    });
     this.selection.refresh();
     this._shouldRedraw = true;
   }
@@ -888,10 +887,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     this.undo.add(command);
     // 取消组件拖动状态
-    this.store.updateElements(selectedElements, {
-      isDragging: false,
-    });
     selectedElements.forEach(element => {
+      element.isDragging = false;
       element.onTranslateAfter();
     });
     if (this.store.isMultiSelected) {
@@ -914,11 +911,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     this.undo.add(command);
     // 更新组件状态
-    this.store.updateElements(selectedElements, {
-      isRotatingTarget: false,
-      isRotating: false,
-    });
     selectedElements.forEach(element => {
+      element.isRotatingTarget = false;
+      element.isRotating = false;
       element.onRotateAfter();
     });
     if (this.store.isMultiSelected) {
@@ -930,13 +925,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 结束组件变换操作
    */
-  private _endElementsTransform() {
+  private async _endElementsTransform() {
     const { selectedElements } = this.store;
+    const command = new ElementsUpdatedCommand(
+      {
+        type: CommandTypes.ElementsUpdated,
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() }) as ICommandElementObject)),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject)),
+      },
+      this.store,
+    );
+    this.undo.add(command);
     // 更新组件状态
-    this.store.updateElements(selectedElements, {
-      isTransforming: false,
-    });
     selectedElements.forEach(element => {
+      element.isTransforming = false;
       element.onTransformAfter();
     });
     if (this.store.isMultiSelected) {
@@ -949,10 +951,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _endMoveingElementsCorner() {
     const { selectedElements } = this.store;
-    this.store.updateElements(selectedElements, {
-      isCornerMoving: false,
-    });
     selectedElements.forEach(element => {
+      element.isCornerMoving = false;
       element.onCornerChanged();
     });
   }

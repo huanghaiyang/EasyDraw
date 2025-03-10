@@ -23,6 +23,8 @@ import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
 import LodashUtils from "@/utils/LodashUtils";
 
+const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y"];
+
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
   model: ElementObject;
@@ -215,7 +217,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   get flipX(): boolean {
     if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
     if (!this._isTransforming) return this._flipX;
-    this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords);
+    this.refreshFlipX();
     return this._flipX;
   }
 
@@ -739,7 +741,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.rotation = new ElementRotation(this);
     this.shield = shield;
     this._isRangeElement = isRangeElement ?? false;
-    this.model.boxCoords.length && (this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords));
+    this.refreshFlipX();
     makeObservable(this, {
       _status: observable,
       _isDragging: observable,
@@ -764,7 +766,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onPositionChanged(): void {
     this.refresh();
-    this.refreshOriginalProps();
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
@@ -773,7 +774,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onWidthChanged(): void {
     this.refresh();
-    this.refreshOriginalProps();
     this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
   }
 
@@ -782,7 +782,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onHeightChanged(): void {
     this.refresh();
-    this.refreshOriginalProps();
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
   }
 
@@ -1953,6 +1952,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新组件的旋转
+   */
+  refreshFlipX(): void {
+    this.model.boxCoords?.length && (this._flipX = MathUtils.calcFlipXByPoints(this.model.boxCoords));
+  }
+
+  /**
    * 设置组件宽度
    *
    * @param value
@@ -2356,11 +2362,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 将组件位移之前的数据转换为json
+   * 转换为原始JSON
    *
    * @returns
    */
-  async toOriginalTranslateJson(): Promise<ElementObject> {
+  private _toOriginalCommonJson(): ElementObject {
     const { id, _originalCoords, _originalBoxCoords, _originalCenterCoord } = this;
     const obj = {
       id,
@@ -2369,6 +2375,16 @@ export default class Element implements IElement, ILinkedNodeValue {
       x: _originalCenterCoord.x,
       y: _originalCenterCoord.y,
     };
+    return obj;
+  }
+
+  /**
+   * 将组件位移之前的数据转换为json
+   *
+   * @returns
+   */
+  async toOriginalTranslateJson(): Promise<ElementObject> {
+    const obj = this._toOriginalCommonJson();
     return JSON.parse(JSON.stringify(obj)) as ElementObject;
   }
 
@@ -2378,7 +2394,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toTranslateJson(): Promise<ElementObject> {
-    return JSON.parse(JSON.stringify(pick(this.model, ["id", "coords", "boxCoords", "x", "y"]))) as ElementObject;
+    return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys]))) as ElementObject;
   }
 
   /**
@@ -2387,15 +2403,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toOriginalRotateJson(): Promise<ElementObject> {
-    const { id, _originalCoords, _originalBoxCoords, _originalCenterCoord } = this;
-    const obj = {
-      id,
-      coords: _originalCoords,
-      boxCoords: _originalBoxCoords,
-      x: _originalCenterCoord.x,
-      y: _originalCenterCoord.y,
-      angle: this._originalAngle,
-    };
+    const obj = this._toOriginalCommonJson();
+    obj.angle = this._originalAngle;
     return JSON.parse(JSON.stringify(obj)) as ElementObject;
   }
 
@@ -2405,6 +2414,28 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toRotateJson(): Promise<ElementObject> {
-    return JSON.parse(JSON.stringify(pick(this.model, ["id", "coords", "boxCoords", "x", "y", "angle"]))) as ElementObject;
+    return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys, "angle"]))) as ElementObject;
+  }
+
+  /**
+   * 将组件形变之前的数据转换为json
+   *
+   * @returns
+   */
+  async toOriginalTransformJson(): Promise<ElementObject> {
+    const obj = this._toOriginalCommonJson();
+    obj.width = this._originalSize.width;
+    obj.height = this._originalSize.height;
+    obj.angle = this._originalAngle;
+    return JSON.parse(JSON.stringify(obj)) as ElementObject;
+  }
+
+  /**
+   * 将组件形变之后的数据转换为json
+   *
+   * @returns
+   */
+  async toTransformJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys, "width", "height", "angle"]))) as ElementObject;
   }
 }

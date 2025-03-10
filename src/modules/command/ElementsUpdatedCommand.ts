@@ -11,7 +11,10 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand {
     dataList.forEach(data => {
       const { model } = data;
       const element = this.store.updateElementModel(model.id, LodashUtils.jsonClone(model));
-      element && element.refresh();
+      if (element) {
+        element.refreshFlipX();
+        element.refresh();
+      }
     });
   }
 

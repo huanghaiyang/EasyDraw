@@ -394,6 +394,8 @@ export default interface IElement {
   set isTransforming(value: boolean);
   // 设置是否旋转
   set isRotating(value: boolean);
+  // 设置是否旋转目标
+  set isRotatingTarget(value: boolean);
   // 设置是否拖动
   set isDragging(value: boolean);
   // 设置是否修改圆角
@@ -606,6 +608,11 @@ export default interface IElement {
    * 刷新圆角
    */
   refreshCorners(): void;
+
+  /**
+   * 刷新翻转状态
+   */
+  refreshFlipX(): void;
 
   /**
    * 刷新
@@ -993,6 +1000,16 @@ export default interface IElement {
    * 将组件旋转后的数据转换为json
    */
   toRotateJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件原始变换数据转换为json
+   */
+  toOriginalTransformJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件变换数据转换为json
+   */
+  toTransformJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React

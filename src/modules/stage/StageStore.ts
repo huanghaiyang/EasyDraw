@@ -527,10 +527,10 @@ export default class StageStore implements IStageStore {
    * @param matrix
    */
   private scaleSubs(element: IElement, matrix: number[][]): void {
-    const { center, angle, leanYAngle } = element;
+    const { centerCoord, angle, leanYAngle } = element;
     const { scaleX, scaleY } = MathUtils.getScaleFromMatrix(matrix);
     (element as IElementGroup).deepSubs.forEach(sub => {
-      sub.scaleBy(center, scaleX, scaleY, {
+      sub.scaleBy(centerCoord, scaleX, scaleY, {
         angle,
         leanYAngle,
       });
