@@ -888,7 +888,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.undoStack.push(command);
+    this.undo.add(command);
     // 取消组件拖动状态
     this.store.updateElements(selectedElements, {
       isDragging: false,
@@ -998,7 +998,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         },
         this.store,
       );
-      this.undo.undoStack.push(command);
+      this.undo.add(command);
     }
   }
 
@@ -1326,11 +1326,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsRemovedCommand(
       {
         type: CommandTypes.ElementsRemoved,
-        dataList: await Promise.all(this.store.selectedElements.map(async element => ({ model: await element.toJson() }) as IRemovedCommandElementObject)),
+        dataList: await Promise.all(
+          this.store.selectedElements.map(async element => {
+            return { model: await element.toJson(), prevId: element.node.prev?.value?.id, nextId: element.node.next?.value?.id } as IRemovedCommandElementObject;
+          }),
+        ),
       },
       this.store,
     );
-    this.undo.undoStack.push(command);
+    this.undo.add(command);
     this.store.deleteSelects();
   }
 

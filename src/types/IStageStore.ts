@@ -54,9 +54,9 @@ export default interface IStageStore extends IStageSetter {
   // 创建组件数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): Partial<ElementObject>;
   // 添加组件
-  addElement(element: IElement): IElement;
+  addElement(element: IElement, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 根据组件数据模型添加组件
-  addElementByModel(model: ElementObject): IElement;
+  addElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 移除组件
   removeElement(id: string): IElement;
   // 更新组件

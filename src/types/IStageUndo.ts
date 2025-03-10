@@ -8,4 +8,6 @@ export default interface IStageUndo {
 
   undo(): void;
   redo(): void;
+
+  add(command: ICommand): void;
 }

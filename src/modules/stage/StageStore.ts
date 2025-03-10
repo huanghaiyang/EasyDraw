@@ -876,14 +876,19 @@ export default class StageStore implements IStageStore {
    *
    * @param element
    * @param targetElement
+   * @param isPrepend
    */
-  addElement(element: IElement, targetElement?: IElement): IElement {
+  addElement(element: IElement, targetElement?: IElement, isPrepend?: boolean): IElement {
     const node = new LinkedNode(element);
     element.node = node;
     if (targetElement) {
       this._elementList.insertAfter(node, targetElement.node);
     } else {
-      this._elementList.insert(node);
+      if (isPrepend) {
+        this._elementList.prepend(node);
+      } else {
+        this._elementList.insert(node);
+      }
     }
     this._elementsMap.set(element.id, element);
     return element;
@@ -893,12 +898,14 @@ export default class StageStore implements IStageStore {
    * 根据组件数据模型添加组件
    *
    * @param model
+   * @param targetElement
+   * @param isPrepend
    * @returns
    */
-  addElementByModel(model: ElementObject): IElement {
+  addElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
     const element = ElementUtils.createElement(model, this.shield);
     Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
-    this.addElement(element);
+    this.addElement(element, targetElement, isPrepend);
     element.refresh();
     return element;
   }
@@ -1899,7 +1906,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 执行组件下移擦做
+   * 执行组件下移操作
    *
    * @param elements 要修改的组件集合
    */

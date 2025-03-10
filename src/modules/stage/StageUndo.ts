@@ -4,24 +4,20 @@ import ICommand from "@/types/ICommand";
 
 export default class StageUndo implements IStageUndo {
   shield: IStageShield;
-  undoStack: ICommand[];
-  redoStack: ICommand[];
+  undoStack: ICommand[] = [];
+  redoStack: ICommand[] = [];
 
   constructor(shield: IStageShield) {
     this.shield = shield;
-    this.undoStack = [];
-    this.redoStack = [];
   }
 
   /**
-   * 重做
+   * 添加撤销命令
+   * @param command
    */
-  redo(): void {
-    if (this.redoStack.length > 0) {
-      const command = this.redoStack.pop();
-      this.undoStack.push(command);
-      command.redo();
-    }
+  add(command: ICommand): void {
+    this.undoStack.push(command);
+    this.redoStack = [];
   }
 
   /**
@@ -32,6 +28,17 @@ export default class StageUndo implements IStageUndo {
       const command = this.undoStack.pop();
       this.redoStack.push(command);
       command.undo();
+    }
+  }
+
+  /**
+   * 重做
+   */
+  redo(): void {
+    if (this.redoStack.length > 0) {
+      const command = this.redoStack.pop();
+      this.undoStack.push(command);
+      command.redo();
     }
   }
 }
