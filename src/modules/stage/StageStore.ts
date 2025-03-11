@@ -306,13 +306,13 @@ export default class StageStore implements IStageStore {
     this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
     this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
 
-    this._emitElementsLayerChanged();
+    this.emitElementsLayerChanged();
   }
 
   /**
    * 舞台元素层级发生变化时，发送事件
    */
-  private _emitElementsLayerChanged(): void {
+  emitElementsLayerChanged(): void {
     if (this._selectedElements.length) {
       if (ElementList.isConsecutive(this._selectedElements.map(element => element.node))) {
         this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, !this._selectedElements[this._selectedElements.length - 1].isTopmost);
@@ -372,6 +372,15 @@ export default class StageStore implements IStageStore {
    */
   private _reactionProvisionalElementsChanged(): void {
     this._provisionalElements = this._filterList(this._provisionalElementIds);
+  }
+
+  /**
+   * 重新整理组件的顺序
+   */
+  resortElementsArray(): void {
+    this._reactionStageElementsChanged();
+    this._reactionVisibleElementsChanged();
+    this._reactionSelectedElementsChanged();
   }
 
   /**
@@ -1872,6 +1881,27 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 移动组件
+   *
+   * @param element
+   * @param targetElement
+   * @param isPrepend
+   */
+  rearrangeElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void {
+    const { node } = element;
+    this._elementList.remove(node, false);
+    if (targetElement) {
+      this._elementList.insertAfter(node, targetElement.node, false);
+    } else {
+      if (isPrepend) {
+        this._elementList.prepend(node, false);
+      } else {
+        this._elementList.insert(node, false);
+      }
+    }
+  }
+
+  /**
    * 移除组件节点
    *
    * @param elements
@@ -1931,8 +1961,8 @@ export default class StageStore implements IStageStore {
   async setElementsGoDown(elements: IElement[]): Promise<void> {
     if (elements.length === 0) return;
     this._doElementsGoDown(elements);
-    this._reactionStageElementsChanged();
-    this._emitElementsLayerChanged();
+    this.resortElementsArray();
+    this.emitElementsLayerChanged();
   }
 
   /**
@@ -1967,7 +1997,7 @@ export default class StageStore implements IStageStore {
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
     if (elements.length === 0) return;
     this._doElementsShiftMove(elements);
-    this._reactionStageElementsChanged();
-    this._emitElementsLayerChanged();
+    this.resortElementsArray();
+    this.emitElementsLayerChanged();
   }
 }

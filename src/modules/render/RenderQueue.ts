@@ -1,5 +1,6 @@
 import { IRenderQueue } from "@/types/IRender";
 import { IRenderTask } from "@/types/IRenderTask";
+import TimeUtils from "@/utils/TimerUtils";
 
 export default class RenderQueue implements IRenderQueue {
   running: boolean;
@@ -58,19 +59,20 @@ export default class RenderQueue implements IRenderQueue {
   }
 
   /**
+   * 等待结束运行
+   */
+  async wait(): Promise<void> {
+    while (this.running) {
+      await TimeUtils.wait(10);
+    }
+  }
+
+  /**
    * 销毁队列
    */
   async destroy(): Promise<void> {
+    await this.wait();
     this.stopped = true;
-    while (this.queue.length > 0) {
-      let task = this.queue.shift();
-      if (task) {
-        if (task.destroy) {
-          await task.destroy();
-        }
-        task = null;
-      }
-    }
     this.queue = null;
     this.running = false;
   }

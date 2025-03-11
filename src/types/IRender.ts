@@ -43,6 +43,8 @@ export interface IRenderQueue {
   run(): Promise<void>;
   // 销毁
   destroy(): Promise<void>;
+  // 等待结束运行
+  wait(): Promise<void>;
 }
 
 // 渲染参数

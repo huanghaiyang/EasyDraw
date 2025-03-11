@@ -37,7 +37,7 @@ import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
-import { CommandTypes, ICommandElementObject, IGroupRemovedCommandElementObject } from "@/types/ICommand";
+import { CommandTypes, ICommandElementObject, IGroupRemovedCommandElementObject, IRemovedRelation } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
@@ -45,6 +45,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
 import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
+import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -1434,6 +1435,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件顺序调整数据模型
+   *
+   * @param element
+   */
+  private _createRearrangeModel(element: IElement): IRemovedRelation {
+    return {
+      prevId: element.node.prev?.value?.id,
+      nextId: element.node.next?.value?.id,
+    };
+  }
+
+  /**
    * 处理选中组件删除
    */
   async _handleSelectsDelete(): Promise<void> {
@@ -1445,7 +1458,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         type: CommandTypes.ElementsRemoved,
         dataList: await Promise.all(
           this.store.selectedElements.map(async element => {
-            return { model: await element.toJson(), prevId: element.node.prev?.value?.id, nextId: element.node.next?.value?.id };
+            return { model: await element.toJson(), ...this._createRearrangeModel(element) };
           }),
         ),
       },
@@ -1579,8 +1592,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         dataList.push({
           model: await group.toJson(),
           isGroup: true,
-          prevId: group.node.prev?.value?.id,
-          nextId: group.node.next?.value?.id,
+          ...this._createRearrangeModel(group),
         });
         subs.forEach(async sub => {
           dataList.push({
@@ -1780,12 +1792,37 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件顺序调整的命令
+   *
+   * @param elements 要修改的元件集合
+   * @param callback 回调
+   */
+  private async _createRearrangeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
+    await elementsUpdateFunction();
+    const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
+    const command = new ElementsRearrangeCommand(
+      {
+        type: CommandTypes.ElementsRearranged,
+        dataList,
+        rDataList,
+      },
+      this.store,
+    );
+    this.undo.add(command);
+  }
+
+  /**
+   * 组件下移
+  /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
-    await this.store.setElementsGoDown(elements);
+    await this._createRearrangeCommand(elements, async () => {
+      await this.store.setElementsGoDown(elements);
+    });
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
   }
@@ -1796,7 +1833,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements 要修改的元件集合
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
-    await this.store.setElementsShiftMove(elements);
+    await this._createRearrangeCommand(elements, async () => {
+      await this.store.setElementsShiftMove(elements);
+    });
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
   }
