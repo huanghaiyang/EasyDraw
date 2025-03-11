@@ -790,7 +790,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 层级发生变化
    */
-  onLayerChanged(): void {}
+  onLayerChanged(): void { }
 
   /**
    * 平移前
@@ -2482,5 +2482,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   async toFillsJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify(pick(this.model, ["id", "styles.fills"]))) as ElementObject;
+  }
+
+  /**
+   * 将组件组合数据转换为json
+   *
+   * @returns
+   */
+  async toGroupJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "groupId"]))) as ElementObject;
   }
 }

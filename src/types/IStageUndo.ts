@@ -6,6 +6,9 @@ export default interface IStageUndo {
   undoStack: ICommand[];
   redoStack: ICommand[];
 
+  get nearestUndoCommand(): ICommand | undefined;
+  get nearestRedoCommand(): ICommand | undefined;
+
   undo(): void;
   redo(): void;
 

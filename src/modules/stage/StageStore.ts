@@ -1799,15 +1799,10 @@ export default class StageStore implements IStageStore {
   /**
    * 取消组合
    */
-  cancelSelectedGroups(): IElementGroup[] {
-    let groups = this.getSelectedAncestorElementGroups();
-    if (groups.length === 0) {
-      return null;
-    }
+  cancelGroups(groups: IElementGroup[]): void {
     groups.forEach(group => {
       this.removeElementGroup(group);
     });
-    return groups;
   }
 
   /**

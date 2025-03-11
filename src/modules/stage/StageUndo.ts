@@ -7,6 +7,14 @@ export default class StageUndo implements IStageUndo {
   undoStack: ICommand[] = [];
   redoStack: ICommand[] = [];
 
+  get nearestUndoCommand(): ICommand | undefined {
+    return this.undoStack[this.undoStack.length - 1];
+  }
+
+  get nearestRedoCommand(): ICommand | undefined {
+    return this.redoStack[this.redoStack.length - 1];
+  }
+
   constructor(shield: IStageShield) {
     this.shield = shield;
   }

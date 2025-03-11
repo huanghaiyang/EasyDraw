@@ -37,11 +37,14 @@ import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
-import { CommandTypes, ICommandElementObject, IRemovedCommandElementObject, IStyleCommandElementObject } from "@/types/ICommand";
+import { CommandTypes, ICommandElementObject, IGroupRemovedCommandElementObject } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
 import LodashUtils from "@/utils/LodashUtils";
+import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
+import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
+import { IElementGroup } from "@/types/IElementGroup";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -221,9 +224,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   private async _createTranslateCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject));
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
   }
 
@@ -249,9 +252,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createTransformCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject));
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
   }
 
@@ -323,9 +326,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject));
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
     await this.store.setElementsCorners(elements, value, index);
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
     elements.forEach(element => element.onCornerChanged());
     this._shouldRedraw = true;
@@ -338,9 +341,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createStrokeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), isStroke: true, isStyle: true }) as IStyleCommandElementObject));
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), isStroke: true, isStyle: true })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), isStroke: true, isStyle: true }) as IStyleCommandElementObject));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), isStroke: true, isStyle: true })));
     this._createUpdateCommandBy(dataList, rDataList);
   }
 
@@ -439,9 +442,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createFillCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), isFill: true, isStyle: true }) as IStyleCommandElementObject));
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), isFill: true, isStyle: true })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), isFill: true, isStyle: true }) as IStyleCommandElementObject));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), isFill: true, isStyle: true })));
     this._createUpdateCommandBy(dataList, rDataList);
   }
 
@@ -977,8 +980,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsUpdatedCommand(
       {
         type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTranslateJson() }) as ICommandElementObject)),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTranslateJson() }) as ICommandElementObject)),
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTranslateJson() }))),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTranslateJson() }))),
       },
       this.store,
     );
@@ -1001,8 +1004,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsUpdatedCommand(
       {
         type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalRotateJson() }) as ICommandElementObject)),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toRotateJson() }) as ICommandElementObject)),
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalRotateJson() }))),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toRotateJson() }))),
       },
       this.store,
     );
@@ -1027,8 +1030,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsUpdatedCommand(
       {
         type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() }) as ICommandElementObject)),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTransformJson() }) as ICommandElementObject)),
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() }))),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTransformJson() }))),
       },
       this.store,
     );
@@ -1051,8 +1054,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsUpdatedCommand(
       {
         type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalCornerJson() }) as ICommandElementObject)),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toCornerJson() }) as ICommandElementObject)),
+        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalCornerJson() }))),
+        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toCornerJson() }))),
       },
       this.store,
     );
@@ -1108,7 +1111,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const command = new ElementsAddedCommand(
         {
           type: CommandTypes.ElementsAdded,
-          dataList: await Promise.all(provisionalElements.map(async element => ({ model: await element.toJson() }) as ICommandElementObject)),
+          dataList: await Promise.all(provisionalElements.map(async element => ({ model: await element.toJson() }))),
         },
         this.store,
       );
@@ -1442,7 +1445,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         type: CommandTypes.ElementsRemoved,
         dataList: await Promise.all(
           this.store.selectedElements.map(async element => {
-            return { model: await element.toJson(), prevId: element.node.prev?.value?.id, nextId: element.node.next?.value?.id } as IRemovedCommandElementObject;
+            return { model: await element.toJson(), prevId: element.node.prev?.value?.id, nextId: element.node.next?.value?.id };
           }),
         ),
       },
@@ -1523,33 +1526,105 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件组合添加命令
+   *
+   * @param group 组合
+   */
+  private async _createGroupAddedCommand(group: IElementGroup): Promise<void> {
+    const command = new GroupAddedCommand(
+      {
+        type: CommandTypes.GroupAdded,
+        dataList: await Promise.all(
+          this.store.selectedElements
+            .filter(element => !(element.isGroupSubject && element.model.groupId !== group.id))
+            .map(async element => {
+              let isGroup: boolean = element.id === group.id;
+              let model: Partial<ElementObject>;
+              if (isGroup) {
+                model = await element.toJson();
+              } else {
+                model = await element.toGroupJson();
+              }
+              return { model, isGroup };
+            }),
+        ),
+      },
+      this.store,
+    );
+    this.undo.add(command);
+  }
+
+  /**
    * 处理组件组合操作
    */
-  _handleSelectGroup(): void {
+  async _handleSelectGroup(): Promise<void> {
     if (this.isElementsBusy) return;
     const group = this.store.selectToGroup();
     if (group) {
       this.store.selectGroup(group);
+      await this._createGroupAddedCommand(group);
     }
+  }
+
+  /**
+   * 创建组件组合取消命令
+   *
+   * @param groups 组合列表
+   */
+  private async _createGroupRemovedCommand(groups: IElementGroup[]): Promise<void> {
+    const dataList: Array<IGroupRemovedCommandElementObject> = [];
+    await Promise.all(
+      groups.map(async group => {
+        const { subs } = group;
+        dataList.push({
+          model: await group.toJson(),
+          isGroup: true,
+          prevId: group.node.prev?.value?.id,
+          nextId: group.node.next?.value?.id,
+        });
+        subs.forEach(async sub => {
+          dataList.push({
+            model: await sub.toGroupJson(),
+            isGroup: false,
+          });
+        });
+      }),
+    );
+    const command = new GroupRemovedCommand(
+      {
+        type: CommandTypes.GroupRemoved,
+        dataList,
+      },
+      this.store,
+    );
+    this.undo.add(command);
   }
 
   /**
    * 处理组件组合取消操作
    */
-  _handleSelectGroupCancel(): void {
+  async _handleSelectGroupCancel(): Promise<void> {
     if (this.isElementsBusy) return;
-    const groups = this.store.cancelSelectedGroups();
-    if (groups) {
-      const elements = groups.map(group => group.getAllSubElements()).flat();
-      this.store.deSelectGroups(groups);
-      this.store.selectElements(elements);
-    }
+    const groups = this.store.getSelectedAncestorElementGroups();
+    if (groups.length === 0) return;
+    await this._createGroupRemovedCommand(groups);
+    this.store.cancelGroups(groups);
+    groups.forEach(group => {
+      group.subs.forEach(sub => {
+        sub.isSelected = true;
+      });
+    });
   }
 
   /**
    * 处理撤销操作
    */
   _handleUndo(): void {
+    const nearestUndoCommand = this.undo.nearestUndoCommand;
+    if (!nearestUndoCommand) return;
+    if (!(nearestUndoCommand instanceof ElementsUpdatedCommand)) {
+      this.store.deSelectAll();
+    }
     this.undo.undo();
     this.selection.refresh();
     this._shouldRedraw = true;
@@ -1560,7 +1635,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理重做操作
    */
   _handleRedo(): void {
+    const nearestRedoCommand = this.undo.nearestRedoCommand;
+    if (!nearestRedoCommand) return;
+    if (!(nearestRedoCommand instanceof ElementsUpdatedCommand)) {
+      this.store.deSelectAll();
+    }
     this.undo.redo();
+    this.selection.refresh();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);

@@ -5,7 +5,6 @@ import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementsRemovedCommand extends ElementsBaseCommand {
   undo(): void {
-    this.store.deSelectAll();
     this.payload.dataList.forEach(data => {
       const { prevId, model } = data as IRemovedCommandElementObject;
       let prevElement: IElement | undefined;
@@ -17,7 +16,6 @@ export default class ElementsRemovedCommand extends ElementsBaseCommand {
   }
 
   redo(): void {
-    this.store.deSelectAll();
     this.payload.dataList.forEach(data => {
       const {
         model: { id },

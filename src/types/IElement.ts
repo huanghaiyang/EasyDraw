@@ -87,6 +87,13 @@ export type CornerModel = {
   corners?: number[];
 };
 
+export type GroupModel = {
+  // 组合id
+  groupId?: string;
+  // 子组件id集合
+  subIds?: Array<string>;
+}
+
 // 默认圆角模型
 export const DefaultCornerModel: CornerModel = {
   corners: [0, 0, 0, 0],
@@ -96,6 +103,7 @@ export const DefaultCornerModel: CornerModel = {
 export type ElementObject = AngleModel &
   FlipModel &
   CornerModel &
+  GroupModel &
   IPoint & {
     // 组件id
     id: string;
@@ -123,16 +131,12 @@ export type ElementObject = AngleModel &
     ratio?: number;
     // 是否闭合
     isFold?: boolean;
-    // 组合id
-    groupId?: string;
     // 图片颜色空间
     colorSpace?: string;
     // 图片自然宽度
     naturalWidth?: number;
     // 图片自然高度
     naturalHeight?: number;
-    // 子组件id集合
-    subIds?: Array<string>;
   };
 
 // 刷新角度选项参数
@@ -1030,6 +1034,11 @@ export default interface IElement {
    * 将组件填充数据转换为json
    */
   toFillsJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件组合数据转换为json
+   */
+  toGroupJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React
