@@ -18,7 +18,6 @@ export enum StageShieldElementsStatus {
   ROTATING,
   TRANSFORMING,
   CORNER_MOVING,
-  EDITING,
 }
 
 // 舞台主画板

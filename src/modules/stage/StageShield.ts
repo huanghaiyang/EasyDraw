@@ -115,6 +115,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _isStageMoving: boolean = false;
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
+  // 编辑前的原始数据
+  private _originalEditingDataList: Array<ICommandElementObject>;
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
@@ -931,11 +933,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
             break;
           }
           case StageShieldElementsStatus.CORNER_MOVING: {
-            await this._endMoveingElementsCorner();
+            await this._endMovingElementsCorner();
             break;
           }
         }
-        if ([StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus)) {
+        if (
+          [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus) &&
+          this.store.isEditingEmpty
+        ) {
           this.elementsStatus = StageShieldElementsStatus.NONE;
         }
       } else if (!e.ctrlKey && !e.shiftKey) {
@@ -960,9 +965,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._selectTopAElement(this.store.stageElements);
       this.store.beginEditingElements(this.store.selectedElements);
       this.selection.refresh();
-      if (!this.store.isEditingEmpty) {
-        this.elementsStatus = StageShieldElementsStatus.EDITING;
-      }
+      this._originalEditingDataList = await Promise.all(this.store.selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() })));
     }
   }
 
@@ -974,19 +977,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件原始平移命令
+   *
+   * @param elements
+   */
+  private async _createOriginalTranslateCommand(elements: IElement[]): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTranslateJson() })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
+    this._createUpdateCommandBy(dataList, rDataList);
+  }
+
+  /**
    * 结束组件拖拽操作
    */
   private async _endElementsDrag(): Promise<void> {
     const { selectedElements } = this.store;
-    const command = new ElementsUpdatedCommand(
-      {
-        type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTranslateJson() }))),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTranslateJson() }))),
-      },
-      this.store,
-    );
-    this.undo.add(command);
+    await this._createOriginalTranslateCommand(selectedElements);
     // 取消组件拖动状态
     selectedElements.forEach(element => {
       element.isDragging = false;
@@ -998,19 +1004,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件原始旋转命令
+   *
+   * @param elements
+   */
+  private async _createOrignalRotateCommand(elements: IElement[]): Promise<void> {
+    const datalist = await Promise.all(elements.map(async element => ({ model: await element.toOriginalRotateJson() })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toRotateJson() })));
+    this._createUpdateCommandBy(datalist, rDataList);
+  }
+
+  /**
    * 结束组件旋转操作
    */
   private async _endElementsRotate() {
     const { selectedElements } = this.store;
-    const command = new ElementsUpdatedCommand(
-      {
-        type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalRotateJson() }))),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toRotateJson() }))),
-      },
-      this.store,
-    );
-    this.undo.add(command);
+    await this._createOrignalRotateCommand(selectedElements);
     // 更新组件状态
     selectedElements.forEach(element => {
       element.isRotatingTarget = false;
@@ -1024,19 +1033,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件原始变换命令
+   *
+   * @param elements
+   */
+  private async _createOriginalTransformCommand(elements: IElement[]): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTransformJson() })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
+    this._createUpdateCommandBy(dataList, rDataList);
+  }
+
+  /**
    * 结束组件变换操作
    */
   private async _endElementsTransform() {
-    const { selectedElements } = this.store;
-    const command = new ElementsUpdatedCommand(
-      {
-        type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() }))),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toTransformJson() }))),
-      },
-      this.store,
-    );
-    this.undo.add(command);
+    const { selectedElements, isEditingEmpty } = this.store;
+    if (!isEditingEmpty) return;
+    await this._createOriginalTransformCommand(selectedElements);
     // 更新组件状态
     selectedElements.forEach(element => {
       element.isTransforming = false;
@@ -1048,19 +1061,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建组件原始圆角半径命令
+   *
+   * @param elements
+   */
+  private async _createOriginalCornerCommand(elements: IElement[]): Promise<void> {
+    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson() })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
+    this._createUpdateCommandBy(dataList, rDataList);
+  }
+
+  /**
    * 结束组件圆角半径操作
    */
-  private async _endMoveingElementsCorner() {
+  private async _endMovingElementsCorner(): Promise<void> {
     const { selectedElements } = this.store;
-    const command = new ElementsUpdatedCommand(
-      {
-        type: CommandTypes.ElementsUpdated,
-        dataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalCornerJson() }))),
-        rDataList: await Promise.all(selectedElements.map(async element => ({ model: await element.toCornerJson() }))),
-      },
-      this.store,
-    );
-    this.undo.add(command);
+    await this._createOriginalCornerCommand(selectedElements);
     // 更新组件状态
     selectedElements.forEach(element => {
       element.isCornerMoving = false;
@@ -1099,6 +1115,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建添加组件命令
+   *
+   * @param elements
+   */
+  private async _createAddedCommand(elements: IElement[]): Promise<void> {
+    const command = new ElementsAddedCommand(
+      {
+        type: CommandTypes.ElementsAdded,
+        dataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
+      },
+      this.store,
+    );
+    this.undo.add(command);
+  }
+
+  /**
    * 提交绘制
    */
   async tryEmitElementCreated(): Promise<void> {
@@ -1109,14 +1141,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         isOnStage: true,
       });
       this.emit(ShieldDispatcherNames.elementCreated, provisionalElements);
-      const command = new ElementsAddedCommand(
-        {
-          type: CommandTypes.ElementsAdded,
-          dataList: await Promise.all(provisionalElements.map(async element => ({ model: await element.toJson() }))),
-        },
-        this.store,
-      );
-      this.undo.add(command);
+      await this._createAddedCommand(provisionalElements);
     }
   }
 
@@ -1420,6 +1445,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
     }
+    await this._createAddedCommand([element]);
     callback && callback();
   }
 
@@ -1501,10 +1527,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (!isEmpty) {
       this._clearStageSelects();
     }
-    await this.store.pasteElements(elementsJson);
+    const elements = await this.store.pasteElements(elementsJson);
     if (!isEmpty) {
       this.selection.refresh();
     }
+    await this._createAddedCommand(elements);
   }
 
   /**
@@ -1784,10 +1811,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 提交编辑绘制
    */
   async commitEditingDrawing(): Promise<void> {
-    if (!this.store.isEditingEmpty) {
-      this.store.endEditingElements(this.store.editingElements);
+    const { isEditingEmpty, editingElements } = this.store;
+    if (!isEditingEmpty) {
+      const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
+      this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
+      this.store.endEditingElements(editingElements);
       this.selection.refresh();
       this.elementsStatus = StageShieldElementsStatus.NONE;
+      this._originalEditingDataList = null;
     }
   }
 
@@ -1812,8 +1843,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.undo.add(command);
   }
 
-  /**
-   * 组件下移
   /**
    * 组件下移
    *

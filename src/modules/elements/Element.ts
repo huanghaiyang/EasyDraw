@@ -790,7 +790,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 层级发生变化
    */
-  onLayerChanged(): void { }
+  onLayerChanged(): void {}
 
   /**
    * 平移前
@@ -2371,13 +2371,18 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   private _toOriginalCommonJson(): ElementObject {
-    const { id, _originalCoords, _originalBoxCoords, _originalCenterCoord } = this;
+    const {
+      id,
+      _originalCoords,
+      _originalBoxCoords,
+      _originalCenterCoord: { x, y },
+    } = this;
     const obj = {
       id,
       coords: _originalCoords,
       boxCoords: _originalBoxCoords,
-      x: _originalCenterCoord.x,
-      y: _originalCenterCoord.y,
+      x,
+      y,
     };
     return obj;
   }
