@@ -1692,8 +1692,7 @@ export default class StageStore implements IStageStore {
           status: value ? ElementStatus.editing : ElementStatus.finished,
         });
         if (element.tfRefreshAfterEdChanged) {
-          element.refreshTransformers();
-          element.refreshOriginalTransformerCoords();
+          element.refresh();
         }
       }
     });

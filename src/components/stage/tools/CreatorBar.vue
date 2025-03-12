@@ -9,6 +9,7 @@ const currentCreator = computed(() => stageStore.currentCreator);
 const currentCursorCreator = computed(() => stageStore.currentCursorCreator);
 const currentShapeCreator = computed(() => stageStore.currentShapeCreator);
 const currentArbitraryCreator = computed(() => stageStore.currentArbitraryCreator);
+const currentTextCreator = computed(() => stageStore.currentTextCreator);
 
 const select = item => {
   emits("select", item);
@@ -41,6 +42,10 @@ const select = item => {
     </div>
 
     <creator-dropdown :creators="FreedomCreators" :current-creator="currentCreator" :select="select" />
+
+    <div :class="['tool-item', { selected: currentTextCreator.category === currentCreator.category }]" @click="select(currentTextCreator)">
+      <el-icon :class="['iconfont', currentTextCreator.icon]"></el-icon>
+    </div>
   </div>
 </template>
 <style lang="less">

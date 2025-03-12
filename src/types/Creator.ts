@@ -33,6 +33,8 @@ export enum CreatorCategories {
   shapes = "shapes",
   // 自由绘制
   freedom = "freedom",
+  // 文本
+  text = "text",
 }
 
 // 创作工具

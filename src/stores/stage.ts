@@ -6,7 +6,7 @@ import IElement, { DefaultCornerModel } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
-import { MoveableCreator, PenCreator, RectangleCreator } from "@/types/CreatorDicts";
+import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { toRaw } from "vue";
 import LodashUtils from "@/utils/LodashUtils";
@@ -74,6 +74,8 @@ export const useStageStore = defineStore("stage", {
       currentCursorCreator: MoveableCreator,
       // 当前形状工具
       currentShapeCreator: RectangleCreator,
+      // 当前文本工具
+      currentTextCreator: TextCreator,
       // 当前自由工具
       currentArbitraryCreator: PenCreator,
       // 选中组件

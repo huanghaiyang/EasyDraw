@@ -74,6 +74,14 @@ export const EllipseCreator: Creator = {
   icon: "icon-verbise-eclipse",
 };
 
+// 文本
+export const TextCreator: Creator = {
+  type: CreatorTypes.text,
+  name: "文本",
+  category: CreatorCategories.text,
+  icon: "icon-verbise-text",
+}
+
 // 光标工具
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 
