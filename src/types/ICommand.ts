@@ -6,16 +6,16 @@ export type ICommandElementObject = {
 };
 
 // 组件移出前的前后组件ID关系
-export type IRemovedRelation = {
+export type INodeRelation = {
   prevId?: string;
   nextId?: string;
 };
 
 // 组件删除命令
-export type IRemovedCommandElementObject = ICommandElementObject & IRemovedRelation;
+export type IRemovedCommandElementObject = ICommandElementObject & INodeRelation;
 
 // 组件顺序调整命令
-export type IRearrangeCommandElementObject = ICommandElementObject & IRemovedRelation;
+export type IRearrangeCommandElementObject = ICommandElementObject & INodeRelation;
 
 // 组件样式命令
 export type IStyleCommandElementObject = ICommandElementObject & {
@@ -25,12 +25,11 @@ export type IStyleCommandElementObject = ICommandElementObject & {
 };
 
 // 组合命令
-export type IGroupCommandElementObject = ICommandElementObject & {
-  isGroup?: boolean;
-};
-
-// 组合删除命令
-export type IGroupRemovedCommandElementObject = IGroupCommandElementObject & IRemovedRelation;
+export type IGroupCommandElementObject = ICommandElementObject &
+  INodeRelation & {
+    isGroup?: boolean;
+    isGroupSubject?: boolean;
+  };
 
 export default interface ICommand {
   payload: ICommandPayload;

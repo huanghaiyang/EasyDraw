@@ -321,6 +321,9 @@ export default class StageStore implements IStageStore {
         this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, true);
         this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, true);
       }
+    } else {
+      this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, false);
+      this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, false);
     }
   }
 
@@ -904,6 +907,42 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 在某组件之前添加组件
+   *
+   * @param element
+   * @param targetElement
+   * @param isAppend
+   * @returns
+   */
+  beforeAddElement(element: IElement, targetElement?: any, isAppend?: boolean): IElement {
+    const node = new LinkedNode(element);
+    element.node = node;
+    if (targetElement) {
+      this._elementList.insertBefore(node, targetElement.node);
+    } else {
+      if (isAppend) {
+        this._elementList.insert(node);
+      } else {
+        this._elementList.prepend(node);
+      }
+    }
+    this._elementsMap.set(element.id, element);
+    return element;
+  }
+
+  /**
+   * 根据组件数据模型创建组件
+   *
+   * @param model
+   * @returns
+   */
+  private _createElementByModel(model: ElementObject): IElement {
+    const element = ElementUtils.createElement(model, this.shield);
+    Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
+    return element;
+  }
+
+  /**
    * 根据组件数据模型添加组件
    *
    * @param model
@@ -911,10 +950,24 @@ export default class StageStore implements IStageStore {
    * @param isPrepend
    * @returns
    */
-  addElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
-    const element = ElementUtils.createElement(model, this.shield);
-    Object.assign(element, { status: ElementStatus.finished, isOnStage: true, isSelected: true });
+  afterAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
+    const element = this._createElementByModel(model);
     this.addElement(element, targetElement, isPrepend);
+    element.refresh();
+    return element;
+  }
+
+  /**
+   * 根据组件数据模型在某组件之前添加组件
+   *
+   * @param model
+   * @param targetElement
+   * @param isPrepend
+   * @returns
+   */
+  beforeAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
+    const element = this._createElementByModel(model);
+    this.beforeAddElement(element, targetElement, isPrepend);
     element.refresh();
     return element;
   }
@@ -1488,7 +1541,7 @@ export default class StageStore implements IStageStore {
       await ImageUtils.waitForImageLoad(image);
     }
     const object = await this.createImageElementModel(image, { colorSpace });
-    return this.addElementByModel(object);
+    return this.afterAddElementByModel(object);
   }
 
   /**
@@ -1874,7 +1927,7 @@ export default class StageStore implements IStageStore {
     const models = ElementUtils.convertElementsJson(elementsJson);
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
-      const element = this.addElementByModel(model);
+      const element = this.afterAddElementByModel(model);
       result.push(element);
     }
     return result;
@@ -1897,6 +1950,27 @@ export default class StageStore implements IStageStore {
         this._elementList.prepend(node, false);
       } else {
         this._elementList.insert(node, false);
+      }
+    }
+  }
+
+  /**
+   * 移动组件
+   *
+   * @param element
+   * @param targetElement
+   * @param isAppend
+   */
+  rearrangeElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void {
+    const { node } = element;
+    this._elementList.remove(node, false);
+    if (targetElement) {
+      this._elementList.insertBefore(node, targetElement.node, false);
+    } else {
+      if (isAppend) {
+        this._elementList.insert(node, false);
+      } else {
+        this._elementList.prepend(node, false);
       }
     }
   }

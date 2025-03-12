@@ -16,10 +16,10 @@ export default class ElementsRearrangeCommand extends ElementsBaseCommand {
       const element = this.store.getElementById(id);
       if (element) {
         this.store.rearrangeElementAfter(element, prevId ? this.store.getElementById(prevId) : null, true);
-        this.store.resortElementsArray();
-        this.store.emitElementsLayerChanged();
       }
     });
+    this.store.resortElementsArray();
+    this.store.emitElementsLayerChanged();
   }
   undo(): void {
     if (!this.payload.dataList) {

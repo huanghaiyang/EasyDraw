@@ -1,7 +1,7 @@
-import IElement, { ElementObject } from "@/types/IElement";
+import { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import LodashUtils from "@/utils/LodashUtils";
-import { IGroupRemovedCommandElementObject } from "@/types/ICommand";
+import { IGroupCommandElementObject } from "@/types/ICommand";
 
 export default class GroupRemovedCommand extends ElementsBaseCommand {
   undo(): void {
@@ -10,13 +10,9 @@ export default class GroupRemovedCommand extends ElementsBaseCommand {
         model: { id, groupId },
         isGroup,
         prevId,
-      } = data as IGroupRemovedCommandElementObject;
+      } = data as IGroupCommandElementObject;
       if (isGroup) {
-        let prevElement: IElement | undefined;
-        if (prevId) {
-          prevElement = this.store.getElementById(prevId);
-        }
-        this.store.addElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, prevElement, !prevId);
+        this.store.afterAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, prevId ? this.store.getElementById(prevId) : null, true);
       } else {
         this.store.updateElementModel(id, {
           groupId,
@@ -30,7 +26,7 @@ export default class GroupRemovedCommand extends ElementsBaseCommand {
       const {
         model: { id },
         isGroup,
-      } = data as IGroupRemovedCommandElementObject;
+      } = data as IGroupCommandElementObject;
       if (isGroup) {
         this.store.removeElement(id);
       } else {

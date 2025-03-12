@@ -11,7 +11,7 @@ export default class ElementsRemovedCommand extends ElementsBaseCommand {
       if (prevId) {
         prevElement = this.store.getElementById(prevId);
       }
-      this.store.addElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
+      this.store.afterAddElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
     });
   }
 

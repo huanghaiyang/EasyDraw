@@ -14,7 +14,7 @@ export default class ElementsAddedCommand extends ElementsBaseCommand {
 
   redo(): void {
     this.payload.dataList.forEach(data => {
-      this.store.addElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
+      this.store.afterAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
     });
   }
 }

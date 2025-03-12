@@ -4,7 +4,7 @@ import { CreatorTypes } from "@/types/Creator";
 export interface IElementGroup extends IElement {
   // 子组件
   get subs(): IElement[];
-  // 深度子组件
+  // 深度子组件(注意返回的组件不是按照链表前后顺序返回的)
   get deepSubs(): IElement[];
   // 添加子组件
   addSub(sub: IElement): void;

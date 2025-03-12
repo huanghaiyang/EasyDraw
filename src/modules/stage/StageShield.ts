@@ -37,7 +37,7 @@ import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import IStageUndo from "@/types/IStageUndo";
 import StageUndo from "@/modules/stage/StageUndo";
-import { CommandTypes, ICommandElementObject, IGroupRemovedCommandElementObject, IRemovedRelation } from "@/types/ICommand";
+import { CommandTypes, ICommandElementObject, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
@@ -1465,7 +1465,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param element
    */
-  private _createRearrangeModel(element: IElement): IRemovedRelation {
+  private _createRearrangeModel(element: IElement): INodeRelation {
     return {
       prevId: element.node.prev?.value?.id,
       nextId: element.node.next?.value?.id,
@@ -1566,32 +1566,39 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件组合添加命令
+   * 创建组件组合添加数据模型
    *
    * @param group 组合
+   * @param elements 组件
+   * @returns
    */
-  private async _createGroupAddedCommand(group: IElementGroup): Promise<void> {
-    const command = new GroupAddedCommand(
-      {
-        type: CommandTypes.GroupAdded,
-        dataList: await Promise.all(
-          this.store.selectedElements
-            .filter(element => !(element.isGroupSubject && element.model.groupId !== group.id))
-            .map(async element => {
-              let isGroup: boolean = element.id === group.id;
-              let model: Partial<ElementObject>;
-              if (isGroup) {
-                model = await element.toJson();
-              } else {
-                model = await element.toGroupJson();
-              }
-              return { model, isGroup };
-            }),
-        ),
-      },
-      this.store,
+  private async _createGroupAddedDataList(group: IElementGroup, elements: IElement[]): Promise<Array<IGroupCommandElementObject>> {
+    const { id: groupId } = group;
+    return await Promise.all(
+      elements.map(async element => {
+        const {
+          id,
+          model: { groupId: eGroupId },
+        } = element;
+        let model: Partial<ElementObject>;
+        const isGroup = groupId === id;
+        // 是当前组合
+        if (isGroup) {
+          model = await element.toJson();
+        } else if (eGroupId === groupId) {
+          // 是当前组合的子组件
+          model = await element.toGroupJson();
+        } else {
+          // 当前组合的孙子组件
+          model = { id };
+        }
+        const result: IGroupCommandElementObject = { model, isGroup, ...this._createRearrangeModel(element) };
+        if (eGroupId === groupId) {
+          result.isGroupSubject = true;
+        }
+        return result;
+      }),
     );
-    this.undo.add(command);
   }
 
   /**
@@ -1599,10 +1606,27 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async _handleSelectGroup(): Promise<void> {
     if (this.isElementsBusy) return;
+    if (this.store.isSelectedEmpty) return;
+    const dataList: Array<IGroupCommandElementObject> = await Promise.all(
+      this.store.selectedElements.map(async element => ({ model: { id: element.id }, isGroupSubject: !element.isGroupSubject, ...this._createRearrangeModel(element) })),
+    );
     const group = this.store.selectToGroup();
     if (group) {
+      dataList.push({
+        model: { id: group.id },
+        isGroup: true,
+      } as IGroupCommandElementObject);
       this.store.selectGroup(group);
-      await this._createGroupAddedCommand(group);
+      const rDataList = await this._createGroupAddedDataList(group, this.store.selectedElements);
+      const command = new GroupAddedCommand(
+        {
+          type: CommandTypes.GroupAdded,
+          dataList,
+          rDataList,
+        },
+        this.store,
+      );
+      this.undo.add(command);
     }
   }
 
@@ -1612,16 +1636,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param groups 组合列表
    */
   private async _createGroupRemovedCommand(groups: IElementGroup[]): Promise<void> {
-    const dataList: Array<IGroupRemovedCommandElementObject> = [];
+    const dataList: Array<IGroupCommandElementObject> = [];
     await Promise.all(
       groups.map(async group => {
-        const { subs } = group;
         dataList.push({
           model: await group.toJson(),
           isGroup: true,
           ...this._createRearrangeModel(group),
         });
-        subs.forEach(async sub => {
+        group.subs.forEach(async sub => {
           dataList.push({
             model: await sub.toGroupJson(),
             isGroup: false,
