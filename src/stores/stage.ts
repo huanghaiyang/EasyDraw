@@ -218,7 +218,6 @@ export const useStageStore = defineStore("stage", {
      * @param elements
      */
     onElementCreated(elements: IElement[]) {
-      this.setCreator(MoveableCreator);
       if (elements.length) {
         this.onElementChanged(elements[0]);
       }

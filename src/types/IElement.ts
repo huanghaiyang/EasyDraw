@@ -16,6 +16,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
+import ITextData from "@/types/IText";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -92,7 +93,9 @@ export type GroupModel = {
   groupId?: string;
   // 子组件id集合
   subIds?: Array<string>;
-}
+};
+
+export type ElementModelData = ITextData | string | HTMLImageElement | ImageData;
 
 // 默认圆角模型
 export const DefaultCornerModel: CornerModel = {
@@ -114,7 +117,7 @@ export type ElementObject = AngleModel &
     // 组件类型
     type?: CreatorTypes;
     // 组件数据
-    data?: any;
+    data?: ElementModelData;
     // 组件名称
     name?: string;
     // 宽度
@@ -884,7 +887,6 @@ export default interface IElement {
    */
   onLeanyAngleChanged(): void;
 
-
   /**
    * 圆角变化中
    */
@@ -1073,16 +1075,16 @@ export interface IElementRect extends IElement {
 }
 
 // 舞台组件（组件）-圆形
-export interface IElementEllipse extends IElement { }
+export interface IElementEllipse extends IElement {}
 
 // 舞台组件（组件）-图片
-export interface IElementImage extends IElementRect { }
+export interface IElementImage extends IElementRect {}
 
 // 舞台组件（组件）-任意多边形&线条
-export interface IElementPolygon extends IElement { }
+export interface IElementPolygon extends IElement {}
 
 // 舞台组件（组件）-文本
-export interface IElementText extends IElement { }
+export interface IElementText extends IElement {}
 
 // 舞台组件（组件）-线段
 export interface IElementLine extends IElement {

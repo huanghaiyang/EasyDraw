@@ -73,12 +73,15 @@ export type StrokeStyle = FillStyle & {
   width: number;
 };
 
-// 字体样式定义
-export type FontStyle = {
+export type TextFontStyle = {
   // 字体大小
-  fontSize?: number;
+  fontSize?: number; 
   // 字体
   fontFamily?: string;
+}
+
+// 字体样式定义
+export type FontStyle = TextFontStyle & {
   // 文本对齐方式
   textAlign?: CanvasTextAlign;
   // 文本基线

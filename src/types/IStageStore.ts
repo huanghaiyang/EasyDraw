@@ -1,8 +1,9 @@
-import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementModelData, ElementObject, RefreshSubOptions } from "@/types/IElement";
 import { IPoint, ShieldDispatcherNames } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
 import { IElementGroup } from "@/types/IElementGroup";
+import { FontStyle } from "@/styles/ElementStyles";
 
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
@@ -52,7 +53,7 @@ export default interface IStageStore extends IStageSetter {
   get selectedElementIds(): Set<string>;
 
   // 创建组件数据模型
-  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): Partial<ElementObject>;
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData): Partial<ElementObject>;
   // 添加组件
   addElement(element: IElement, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 根据组件数据模型添加组件
@@ -111,10 +112,12 @@ export default interface IStageStore extends IStageSetter {
   refreshStageElements(): void;
   // 刷新组件
   refreshElements(elements: IElement[]): void;
-  // 创建图片组件
+  // 创建图片组件的数据模型
   createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject>;
   // 插入图片组件
   insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement>;
+  // 插入文本组件
+  insertTextElement(text: string, fontStyle: FontStyle, coords?: IPoint[]): IElement;
   // 删除选中组件
   deleteSelects(): void;
   // 检查选区是否包含目标

@@ -1,5 +1,5 @@
 import { MinCursorMXD, MinCursorMYD } from "@/types/constants";
-import { IPoint, ShieldDispatcherNames } from "@/types";
+import { IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
 import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { StrokeTypes } from "@/styles/ElementStyles";
+import { FontStyle, StrokeTypes } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -90,6 +90,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _redrawQueue: RenderQueue = new RenderQueue();
   // 重绘标志
   private _shouldRedraw: boolean = false;
+  // 最近一次鼠标按下时间戳
+  private _latestMousedownTimestamp: number = 0;
+  // 是否在鼠标抬起时选中顶层组件
+  private _shouldSelectTopAWhilePressUp: boolean = true;
 
   // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
@@ -138,7 +142,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 是否是文本工具
   get isTextActive(): boolean {
-    return [CreatorCategories.text, CreatorCategories.freedom].includes(this.currentCreator?.category);
+    return [CreatorCategories.text].includes(this.currentCreator?.category);
   }
 
   // 是否是手绘工具
@@ -827,6 +831,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e
    */
   async _handlePressDown(e: MouseEvent): Promise<void> {
+    this._latestMousedownTimestamp = window.performance.now();
     this._isPressDown = true;
     this.calcPressDown(e);
 
@@ -927,12 +932,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isDrawerActive) {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) {
-      // 如果是选择模式
-      // 判断是否是拖动组件操作，并且判断拖动位移是否有效
+      // 先判断是否选中组件
       if (this.store.isSelectedEmpty) {
         this.selection.selectRange();
         this.selection.setRange(null);
       } else if (this.checkCursorPressUpALittle(e)) {
+        // 判断是否是拖动组件操作，并且判断拖动位移是否有效
         switch (this.elementsStatus) {
           case StageShieldElementsStatus.MOVING: {
             await this._endElementsDrag();
@@ -958,7 +963,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           this.elementsStatus = StageShieldElementsStatus.NONE;
         }
       } else if (!e.ctrlKey && !e.shiftKey) {
-        this._selectTopAElement(this.store.selectedElements);
+        if (this._shouldSelectTopAWhilePressUp) {
+          this._selectTopAElement(this.store.selectedElements);
+        }
+        this._shouldSelectTopAWhilePressUp = true;
       }
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e);
@@ -1145,6 +1153,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 发送组件创建事件
+   */
+  private _emitElementsCreated(elements: IElement[]): void {
+    this.setCreator(MoveableCreator);
+    this.emit(ShieldDispatcherNames.elementCreated, elements);
+  }
+
+  /**
    * 提交绘制
    */
   async tryEmitElementCreated(): Promise<void> {
@@ -1154,7 +1170,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         isProvisional: false,
         isOnStage: true,
       });
-      this.emit(ShieldDispatcherNames.elementCreated, provisionalElements);
+      this._emitElementsCreated(provisionalElements);
       await this._createAddedCommand(provisionalElements);
     }
   }
@@ -1452,9 +1468,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理图片粘贴
    *
    * @param imageData
-   * @param callback
    */
-  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
+  async _handleImagePasted(imageData: ImageData): Promise<void> {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
@@ -1462,7 +1477,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       await this.setScale(nextScale);
     }
     await this._createAddedCommand([element]);
-    callback && callback();
   }
 
   /**
@@ -1698,9 +1712,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理撤销操作
    */
   _handleUndo(): void {
-    const nearestUndoCommand = this.undo.nearestUndoCommand;
-    if (!nearestUndoCommand) return;
-    if (!(nearestUndoCommand instanceof ElementsUpdatedCommand)) {
+    const tailUndoCommand = this.undo.tailUndoCommand;
+    if (!tailUndoCommand) return;
+    if (!(tailUndoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
     this.undo.undo();
@@ -1713,13 +1727,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理重做操作
    */
   _handleRedo(): void {
-    const nearestRedoCommand = this.undo.nearestRedoCommand;
-    if (!nearestRedoCommand) return;
-    if (!(nearestRedoCommand instanceof ElementsUpdatedCommand)) {
+    const tailRedoCommand = this.undo.tailRedoCommand;
+    if (!tailRedoCommand) return;
+    if (!(tailRedoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
     this.undo.redo();
-    this.selection.refresh();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
@@ -1729,9 +1742,32 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理输入
    *
    * @param value
+   * @param fontStyle
+   * @param size
+   * @param position
    */
-  _handleInput(value: string): void {
-    console.log(value);
+  async _handleInput(value: string, fontStyle: FontStyle, size: ISize, position: IPoint): Promise<void> {
+    this._clearStageSelects();
+    const { x, y } = ElementUtils.calcWorldCoord(position);
+    const { width, height } = size;
+    const element = await this.store.insertTextElement(
+      value,
+      fontStyle,
+      CommonUtils.get4BoxPoints(
+        {
+          x: x + width / 2,
+          y: y + height / 2,
+        },
+        size,
+      ),
+    );
+    await this._createAddedCommand([element]);
+    this.selection.refresh();
+    this._emitElementsCreated([element]);
+    // 如果差值小于50ms，则可以判定是鼠标点击舞台时触发的blur事件
+    if (window.performance.now() - this._latestMousedownTimestamp <= 50) {
+      this._shouldSelectTopAWhilePressUp = false;
+    }
   }
 
   /**

@@ -7,11 +7,11 @@ export default class StageUndo implements IStageUndo {
   undoStack: ICommand[] = [];
   redoStack: ICommand[] = [];
 
-  get nearestUndoCommand(): ICommand | undefined {
+  get tailUndoCommand(): ICommand | undefined {
     return this.undoStack[this.undoStack.length - 1];
   }
 
-  get nearestRedoCommand(): ICommand | undefined {
+  get tailRedoCommand(): ICommand | undefined {
     return this.redoStack[this.redoStack.length - 1];
   }
 

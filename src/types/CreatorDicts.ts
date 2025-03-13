@@ -80,7 +80,7 @@ export const TextCreator: Creator = {
   name: "文本",
   category: CreatorCategories.text,
   icon: "icon-verbise-text",
-}
+};
 
 // 光标工具
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
@@ -92,4 +92,4 @@ export const ShapeCreators: Creator[] = [RectangleCreator, LineRectangleCreator,
 export const FreedomCreators: Creator[] = [PenCreator, PencilCreator];
 
 // 所有工具
-export const Creators: Creator[] = [MoveableCreator, ...CursorCreators, RectangleCreator, ...ShapeCreators, PenCreator, ...FreedomCreators];
+export const Creators: Creator[] = [MoveableCreator, ...CursorCreators, RectangleCreator, ...ShapeCreators, PenCreator, ...FreedomCreators, TextCreator];

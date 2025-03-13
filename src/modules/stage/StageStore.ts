@@ -8,9 +8,9 @@ import MathUtils from "@/utils/MathUtils";
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect } from "@/types/IElement";
+import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { FontStyle, getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
@@ -18,6 +18,7 @@ import { ArbitraryPointClosestMargin } from "@/types/constants";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import { observable, reaction } from "mobx";
+import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -1048,11 +1049,11 @@ export default class StageStore implements IStageStore {
    * 创建组件的数据对象
    *
    * @param type
-   * @param points
+   * @param coords
    * @param data
    * @returns
    */
-  createElementModel(type: CreatorTypes, coords: IPoint[], data?: any): ElementObject {
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData): ElementObject {
     const size: ISize = ElementUtils.calcSize({
       coords,
       boxCoords: CommonUtils.getBoxPoints(coords),
@@ -1540,8 +1541,21 @@ export default class StageStore implements IStageStore {
       image = ImageUtils.createImageFromImageData(image);
       await ImageUtils.waitForImageLoad(image);
     }
-    const object = await this.createImageElementModel(image, { colorSpace });
-    return this.afterAddElementByModel(object);
+    const model = await this.createImageElementModel(image, { colorSpace });
+    return this.afterAddElementByModel(model);
+  }
+
+  /**
+   * 创建并插入文本组件
+   *
+   * @param text
+   * @param fontStyle
+   * @param coords
+   */
+  insertTextElement(text: string, fontStyle: FontStyle, coords?: IPoint[]): IElement {
+    const textData = TextElementUtils.createTextData(text, fontStyle);
+    const model = this.createElementModel(CreatorTypes.text, coords, textData);
+    return this.afterAddElementByModel(model);
   }
 
   /**

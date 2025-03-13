@@ -9,7 +9,10 @@ const minWidth = 200;
 const minHeight = 20;
 
 export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
+  // 输入框
   input: HTMLTextAreaElement;
+  // 输入框位置
+  private _inputPosition: IPoint;
 
   /**
    * 初始化画布
@@ -118,9 +121,18 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * @param input
    */
   private _addInputEvents(input: HTMLTextAreaElement): void {
-    input.addEventListener("blur", () => {
+    input.addEventListener("blur", (e) => {
       if (this.input.value) {
-        this.emit("input", this.input.value);
+        this.emit(
+          "input",
+          this.input.value,
+          DefaultFontStyle,
+          {
+            width: input.offsetWidth,
+            height: input.offsetHeight,
+          },
+          this._inputPosition,
+        );
       }
       this.input.remove();
       this.input = null;
@@ -139,6 +151,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * 创建文本输入框
    */
   private _createInputElement(position: IPoint): HTMLTextAreaElement {
+    this._inputPosition = position;
     const strokeWidth = 1 / this.shield.stageScale;
     const input = document.createElement("textarea");
 
