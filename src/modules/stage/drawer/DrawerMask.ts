@@ -1,18 +1,18 @@
 import MaskRenderer from "@/modules/render/renderer/drawer/MaskRenderer";
-import HelperDrawer from "@/modules/stage/drawer/HelperDrawer";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import IStageShield from "@/types/IStageShield";
+import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 
-export default class DrawerMask extends HelperDrawer implements IDrawerMask {
+export default class DrawerMask extends DrawerBase implements IDrawerMask {
   constructor(shield: IStageShield) {
     super(shield);
     this.renderer = new MaskRenderer(this);
   }
 
-  initCanvas(): HTMLCanvasElement {
-    super.initCanvas();
-    this.canvas.id = "mask";
-    this.canvas.style.pointerEvents = "none";
-    return this.canvas;
+  initNode(): HTMLCanvasElement | HTMLDivElement {
+    super.initNode();
+    this.node.id = "mask";
+    this.node.style.pointerEvents = "none";
+    return this.node;
   }
 }

@@ -136,24 +136,24 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * 初始化鼠标事件
    */
   async initMouseEvents(): Promise<void> {
-    this.shield.canvas.addEventListener("mousemove", e => {
+    this.shield.node.addEventListener("mousemove", (e: MouseEvent) => {
       this.emit("cursorMove", e);
     });
-    this.shield.canvas.addEventListener("mouseleave", e => {
+    this.shield.node.addEventListener("mouseleave", (e: MouseEvent) => {
       this.emit("cursorLeave", e);
     });
-    this.shield.canvas.addEventListener("mousedown", e => {
+    this.shield.node.addEventListener("mousedown", (e: MouseEvent) => {
       this.emit("pressDown", e);
     });
-    this.shield.canvas.addEventListener("mouseup", e => {
+    this.shield.node.addEventListener("mouseup", (e: MouseEvent) => {
       this.emit("pressUp", e);
     });
-    this.shield.canvas.addEventListener("dblclick", e => {
+    this.shield.node.addEventListener("dblclick", (e: MouseEvent) => {
       this.emit("dblClick", e);
     });
 
     // 滚轮事件
-    this.shield.canvas.addEventListener("wheel", e => {
+    this.shield.node.addEventListener("wheel", (e: WheelEvent) => {
       EventUtils.stopPP(e);
 
       // 如果为ctrl+滚轮事件，则缩放，否则移动舞台
@@ -173,12 +173,12 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     });
 
     // 拖拽over事件需要阻止默认事件，否则无法触发drop事件
-    this.shield.canvas.addEventListener("dragover", e => {
+    this.shield.node.addEventListener("dragover", (e: DragEvent) => {
       EventUtils.stopPP(e);
     });
 
     // 拖拽解析数据
-    this.shield.canvas.addEventListener("drop", e => {
+    this.shield.node.addEventListener("drop", (e: DragEvent) => {
       EventUtils.stopPP(e);
 
       // 解析图片
@@ -192,7 +192,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     });
 
     // 键盘事件
-    document.addEventListener("keydown", e => {
+    document.addEventListener("keydown", (e: KeyboardEvent) => {
       this._isCtrl = this._isCtrlEvent(e);
 
       // 放大操作
@@ -279,13 +279,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     });
 
     // 键盘弹起事件监听
-    document.addEventListener("keyup", e => {
+    document.addEventListener("keyup", (e: KeyboardEvent) => {
       this._isCtrl = e.ctrlKey;
       this._isShift = e.shiftKey;
     });
 
     // 粘贴操作
-    document.addEventListener("paste", evt => {
+    document.addEventListener("paste", (evt: ClipboardEvent) => {
       // 解析图片
       FileUtils.getImageDataFromClipboard(evt)
         .then(imageDataList => {

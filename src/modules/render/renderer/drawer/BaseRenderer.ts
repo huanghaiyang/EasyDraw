@@ -18,7 +18,7 @@ export default class BaseRenderer<T extends IStageDrawer> implements IStageRende
 
   get renderParams() {
     return {
-      canvas: this.drawer.canvas,
+      canvas: this.drawer.node,
     };
   }
 

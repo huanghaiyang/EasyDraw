@@ -3,11 +3,13 @@ import { ISize } from "@/types/index";
 // 画板画布
 export default interface IStageCanvas {
   // 画布
-  canvas: HTMLCanvasElement;
+  node: HTMLCanvasElement | HTMLDivElement;
   // 初始化画布
-  initCanvas(): HTMLCanvasElement;
+  initNode(): HTMLCanvasElement | HTMLDivElement;
   // 更新画布大小
-  updateCanvasSize(size: ISize): void;
+  updateSize(size: ISize): void;
   // 清除画布
-  clearCanvas(): void;
+  clear(): void;
+  // 初始化样式
+  initStyle(): void;
 }

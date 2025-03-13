@@ -38,7 +38,7 @@ export default class StageCursor implements IStageCursor {
    * @returns
    */
   get renderParams(): any {
-    return { canvas: this.shield.mask.canvas };
+    return { canvas: this.shield.mask.node };
   }
 
   constructor(shield: IStageShield) {
@@ -73,7 +73,7 @@ export default class StageCursor implements IStageCursor {
    * @param cursor
    */
   setStyle(cursor: string): void {
-    this.shield.canvas.style.cursor = cursor;
+    this.shield.node.style.cursor = cursor;
   }
 
   /**

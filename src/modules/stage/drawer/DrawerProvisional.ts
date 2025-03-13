@@ -1,18 +1,18 @@
 import ProvisionalRenderer from "@/modules/render/renderer/drawer/ProvisionalRenderer";
-import HelperDrawer from "@/modules/stage/drawer/HelperDrawer";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import IStageShield from "@/types/IStageShield";
+import DrawerBase from "./DrawerBase";
 
-export default class DrawerProvisional extends HelperDrawer implements IDrawerMask {
+export default class DrawerProvisional extends DrawerBase implements IDrawerMask {
   constructor(shield: IStageShield) {
     super(shield);
     this.renderer = new ProvisionalRenderer(this);
   }
 
-  initCanvas(): HTMLCanvasElement {
-    super.initCanvas();
-    this.canvas.id = "provisional";
-    this.canvas.style.pointerEvents = "none";
-    return this.canvas;
+  initNode(): HTMLCanvasElement | HTMLDivElement {
+    super.initNode();
+    this.node.id = "provisional";
+    this.node.style.pointerEvents = "none";
+    return this.node;
   }
 }

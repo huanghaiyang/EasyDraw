@@ -16,7 +16,7 @@ import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
-import { IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
+import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
 import IStageShield, { StageCalcParams, StageShieldElementsStatus } from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
@@ -46,6 +46,7 @@ import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
 import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
+import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -56,6 +57,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   mask: IDrawerMask;
   // 前景画板
   provisional: IDrawerProvisional;
+  // html画板
+  html: IDrawerHtml;
   // 配置
   configure: IStageConfigure;
   // 数据存储
@@ -172,6 +175,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.store = new StageStore(this);
     this.cursor = new StageCursor(this);
     this.provisional = new DrawerProvisional(this);
+    this.html = new DrawerHtml(this);
     this.selection = new StageSelection(this);
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
@@ -575,7 +579,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async init(renderEl: HTMLDivElement): Promise<void> {
     this.renderEl = renderEl;
-    await Promise.all([this.initCanvas(), this.event.init()]);
+    await Promise.all([this.initNode(), this.event.init()]);
     this._addEventListeners();
   }
 
@@ -623,19 +627,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 初始化画布
    */
-  initCanvas(): HTMLCanvasElement {
-    super.initCanvas();
+  initNode(): HTMLCanvasElement | HTMLDivElement {
+    super.initNode();
 
-    const maskCanvas = this.mask.initCanvas();
-    const provisionalCanvas = this.provisional.initCanvas();
+    const maskCanvas = this.mask.initNode();
+    const provisionalCanvas = this.provisional.initNode();
+    const htmlDrawer = this.html.initNode();
 
     this.renderEl.insertBefore(maskCanvas, this.renderEl.firstChild);
-    this.renderEl.insertBefore(provisionalCanvas, this.mask.canvas);
+    this.renderEl.insertBefore(htmlDrawer, this.mask.node);
+    this.renderEl.insertBefore(provisionalCanvas, this.html.node);
 
-    this.canvas.id = "shield";
-    this.renderEl.insertBefore(this.canvas, this.provisional.canvas);
+    this.node.id = "shield";
+    this.renderEl.insertBefore(this.node, this.provisional.node);
 
-    return this.canvas;
+    return this.node;
   }
 
   /**
@@ -1215,9 +1221,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param size
    */
   private _updateCanvasSize(size: DOMRect): void {
-    this.mask.updateCanvasSize(size);
-    this.provisional.updateCanvasSize(size);
-    this.updateCanvasSize(size);
+    this.mask.updateSize(size);
+    this.provisional.updateSize(size);
+    this.html.updateSize(size);
+    this.updateSize(size);
   }
 
   /**
@@ -1290,6 +1297,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setScale(value: number): Promise<void> {
     this.stageScale = value;
     CanvasUtils.scale = value;
+    this.html.updateSize(this.renderEl.getBoundingClientRect());
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
     this.selection.refresh();

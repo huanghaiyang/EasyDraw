@@ -2,19 +2,36 @@ import { ISize } from "@/types";
 import { IStageDrawer } from "@/types/IStageDrawer";
 import { IStageRenderer } from "@/types/IStageRenderer";
 import { EventEmitter } from "events";
+import IStageShield from "@/types/IStageShield";
 
 export default class DrawerBase extends EventEmitter implements IStageDrawer {
-  canvas: HTMLCanvasElement;
+  node: HTMLCanvasElement | HTMLDivElement;
   renderer: IStageRenderer;
+  shield: IStageShield;
+
+  constructor(shield?: IStageShield) {
+    super();
+    this.shield = shield;
+  }
 
   /**
    * 初始化画布
    *
    * @returns
    */
-  initCanvas(): HTMLCanvasElement {
-    this.canvas = document.createElement("canvas");
-    return this.canvas;
+  initNode(): HTMLCanvasElement | HTMLDivElement {
+    this.node = document.createElement("canvas");
+    this.initStyle();
+    return this.node;
+  }
+
+  /**
+   * 初始化样式
+   */
+  initStyle(): void {
+    this.node.style.position = "absolute";
+    this.node.style.top = "0";
+    this.node.style.left = "0";
   }
 
   /**
@@ -22,16 +39,25 @@ export default class DrawerBase extends EventEmitter implements IStageDrawer {
    *
    * @param size
    */
-  updateCanvasSize(size: ISize): void {
-    this.canvas.width = size.width;
-    this.canvas.height = size.height;
+  updateSize(size: ISize): void {
+    if (this.node instanceof HTMLCanvasElement) {
+      this.node.width = size.width;
+      this.node.height = size.height;
+    } else {
+      this.node.style.width = `${size.width}px`;
+      this.node.style.height = `${size.height}px`;
+    }
   }
 
   /**
    * 画布清空
    */
-  clearCanvas(): void {
-    this.canvas.getContext("2d")?.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  clear(): void {
+    if (this.node instanceof HTMLCanvasElement) {
+      this.node.getContext("2d")?.clearRect(0, 0, this.node.width, this.node.height);
+    } else {
+      this.node.innerHTML = "";
+    }
   }
 
   /**

@@ -1,6 +1,6 @@
 import { IPoint } from "@/types/index";
 import IStageConfigure from "@/types/IStageConfigure";
-import { IDrawerMask, IDrawerProvisional, IStageDrawer } from "@/types/IStageDrawer";
+import { IDrawerHtml, IDrawerMask, IDrawerProvisional, IStageDrawer } from "@/types/IStageDrawer";
 import IStageSelection from "@/types/IStageSelection";
 import IStageStore from "@/types/IStageStore";
 import IStageCursor from "@/types/IStageCursor";
@@ -32,6 +32,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   mask: IDrawerMask;
   // 临时
   provisional: IDrawerProvisional;
+  // html
+  html: IDrawerHtml;
   // 配置
   configure: IStageConfigure;
   // 事件

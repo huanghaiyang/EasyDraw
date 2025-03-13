@@ -19,13 +19,6 @@ defineExpose({
 .stage-shield {
   width: 100%;
   height: 100%;
-}
-
-#shield,
-#mask,
-#provisional {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
 }
 </style>
