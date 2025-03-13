@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import IStageCanvas from "@/types/IStageCanvas";
 import IStageShield from "@/types/IStageShield";
 import { IStageRenderer } from "@/types/IStageRenderer";
+import { IPoint } from "@/types";
 
 // 舞台画布
 export interface IStageDrawer extends IStageCanvas, EventEmitter {
@@ -20,4 +21,9 @@ export interface IDrawerMask extends IStageDrawer {}
 export interface IDrawerProvisional extends IStageDrawer {}
 
 // HTML绘制画布
-export interface IDrawerHtml extends IStageDrawer {}
+export interface IDrawerHtml extends IStageDrawer {
+  // 输入框
+  input: HTMLTextAreaElement;
+  // 创建文本输入框
+  createTextInput(position: IPoint): HTMLTextAreaElement;
+}

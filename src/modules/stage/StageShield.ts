@@ -136,6 +136,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     return [CreatorCategories.shapes, CreatorCategories.freedom].includes(this.currentCreator?.category);
   }
 
+  // 是否是文本工具
+  get isTextActive(): boolean {
+    return [CreatorCategories.text, CreatorCategories.freedom].includes(this.currentCreator?.category);
+  }
+
   // 是否是手绘工具
   get isHandActive(): boolean {
     return this.currentCreator?.type === CreatorTypes.hand;
@@ -622,6 +627,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
     this.event.on("undo", this._handleUndo.bind(this));
     this.event.on("redo", this._handleRedo.bind(this));
+    this.html.on("input", this._handleInput.bind(this));
   }
 
   /**
@@ -824,8 +830,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._isPressDown = true;
     this.calcPressDown(e);
 
-    // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
-    if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
+    if (this.isTextActive) {
+      this.html.createTextInput(this.cursor.value);
+    } else if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
+      // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
       this._clearStageSelects();
     } else if (this.isMoveableActive) {
       // 尝试激活控制器
@@ -1715,6 +1723,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
+  }
+
+  /**
+   * 处理输入
+   *
+   * @param value
+   */
+  _handleInput(value: string): void {
+    console.log(value);
   }
 
   /**

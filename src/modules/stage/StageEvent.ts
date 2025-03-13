@@ -286,6 +286,9 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
 
     // 粘贴操作
     document.addEventListener("paste", (evt: ClipboardEvent) => {
+      if (this._isInputEvent(evt)) {
+        return;
+      }
       // 解析图片
       FileUtils.getImageDataFromClipboard(evt)
         .then(imageDataList => {

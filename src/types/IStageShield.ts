@@ -65,6 +65,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   get isStageMoving(): boolean;
   // 是否画板激活
   get isDrawerActive(): boolean;
+  // 是否正在输入文本
+  get isTextActive(): boolean;
   // 是否可移动激活
   get isMoveableActive(): boolean;
   // 是否手激活

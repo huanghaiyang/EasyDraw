@@ -73,12 +73,8 @@ export type StrokeStyle = FillStyle & {
   width: number;
 };
 
-// 画板组件样式定义
-export type ElementStyles = {
-  // 描边
-  strokes?: StrokeStyle[];
-  // 填充
-  fills?: FillStyle[];
+// 字体样式定义
+export type FontStyle = {
   // 字体大小
   fontSize?: number;
   // 字体
@@ -87,6 +83,14 @@ export type ElementStyles = {
   textAlign?: CanvasTextAlign;
   // 文本基线
   textBaseline?: CanvasTextBaseline;
+};
+
+// 画板组件样式定义
+export type ElementStyles = FontStyle & {
+  // 描边
+  strokes?: StrokeStyle[];
+  // 填充
+  fills?: FillStyle[];
 };
 
 // 默认描边类型，分为内描边，平分线宽，外描边
@@ -106,7 +110,7 @@ export const DefaultFontSize = 12;
 // 默认字体家族
 export const DefaultFontFamily = "sans-serif";
 // 默认文本对齐方式
-export const DefaultTextAlign = "center";
+export const DefaultTextAlign = "left";
 // 默认文本基线
 export const DefaultTextBaseline = "middle";
 // 默认直线描边宽度
@@ -134,14 +138,19 @@ export const DefaultFillStyle: FillStyle = {
   colorOpacity: DefaultFillColorOpacity,
 };
 
-// 默认组件样式
-export const DefaultElementStyle: ElementStyles = {
-  strokes: [{ ...DefaultStrokeStyle }],
-  fills: [{ ...DefaultFillStyle }],
+// 默认字体样式
+export const DefaultFontStyle: FontStyle = {
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
+};
+
+// 默认组件样式
+export const DefaultElementStyle: ElementStyles = {
+  strokes: [{ ...DefaultStrokeStyle }],
+  fills: [{ ...DefaultFillStyle }],
+  ...DefaultFontStyle,
 };
 
 /**

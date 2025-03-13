@@ -1,0 +1,81 @@
+import { FontStyle } from "@/styles/ElementStyles";
+import { ISize } from "@/types";
+
+export default class FontUtils {
+  /**
+   * 计算文字宽度
+   *
+   * @param text
+   * @param fontStyle
+   * @returns
+   */
+  static measureText(text: string, fontStyle: FontStyle): ISize {
+    const { fontSize, fontFamily, textBaseline, textAlign } = fontStyle;
+    const lines = text.split("\n");
+    let maxWidth = 0;
+    let height = 0;
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    if (textBaseline) {
+      ctx.textBaseline = textBaseline;
+    }
+    if (textAlign) {
+      ctx.textAlign = textAlign;
+    }
+    lines.forEach(line => {
+      const metrics = ctx.measureText(line || "\u00a0");
+      const { width, fontBoundingBoxAscent, fontBoundingBoxDescent } = metrics;
+      if (width > maxWidth) {
+        maxWidth = width;
+      }
+      height += fontBoundingBoxAscent + fontBoundingBoxDescent;
+    });
+    const result = {
+      width: maxWidth,
+      height,
+    };
+    ctx = null;
+    canvas = null;
+    return result;
+  }
+
+  /**
+   * 计算文字宽度
+   *
+   * @param text
+   * @param fontStyle
+   * @returns
+   */
+  static measureTextWithSpan(text: string, fontStyle: FontStyle): ISize {
+    const { fontSize, fontFamily, textBaseline, textAlign } = fontStyle;
+    const lines = text.split("\n");
+    let maxWidth = 0;
+    let height = 0;
+    const span = document.createElement("span");
+    document.body.appendChild(span);
+    span.style.visibility = "hidden";
+    span.style.fontSize = `${fontSize}px`;
+    span.style.fontFamily = fontFamily;
+    if (textBaseline) {
+      span.style.verticalAlign = textBaseline;
+    }
+    if (textAlign) {
+      span.style.textAlign = textAlign;
+    }
+    lines.forEach(line => {
+      span.textContent = line || "\u00a0";
+      const width = span.offsetWidth;
+      if (width > maxWidth) {
+        maxWidth = width;
+      }
+      height += span.offsetHeight;
+    });
+    const result = {
+      width: maxWidth,
+      height,
+    };
+    document.body.removeChild(span);
+    return result;
+  }
+}

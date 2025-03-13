@@ -80,7 +80,7 @@ export default class StageCursor implements IStageCursor {
    * 更新鼠标样式
    */
   updateStyle(e: MouseEvent): void {
-    if (this.shield.selection.getActiveController() || this.shield.isDrawerActive) {
+    if (this.shield.selection.getActiveController() || this.shield.isDrawerActive || this.shield.isTextActive) {
       this.setStyle("none");
     } else if (this.shield.isHandActive) {
       this.setStyle("grab");
@@ -95,7 +95,7 @@ export default class StageCursor implements IStageCursor {
    * @returns
    */
   getTask(): IMaskTask {
-    if (this.shield.isDrawerActive) {
+    if (this.shield.isDrawerActive || this.shield.isTextActive) {
       return this.createMaskDrawingCursorTask();
     } else if (this.shield.isMoveableActive) {
       const controller = this.shield.selection.getActiveController();
