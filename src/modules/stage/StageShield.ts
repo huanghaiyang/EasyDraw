@@ -1492,8 +1492,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理图片粘贴
    *
    * @param imageData
+   * @param callback
    */
-  async _handleImagePasted(imageData: ImageData): Promise<void> {
+  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
@@ -1501,6 +1502,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       await this.setScale(nextScale);
     }
     await this._createAddedCommand([element]);
+    callback && callback();
   }
 
   /**
