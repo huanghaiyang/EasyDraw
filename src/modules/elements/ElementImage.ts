@@ -15,7 +15,7 @@ export default class ElementImage extends ElementRect implements IElementImage {
   async toJson(): Promise<ElementObject> {
     const result = await super.toJson();
     const img = this.model.data;
-    const dataUrl = await CanvasUtils.getDataUrlFromImage(img);
+    const dataUrl = await CanvasUtils.getDataUrlFromImage(img as HTMLImageElement);
     result.data = dataUrl;
     return result;
   }

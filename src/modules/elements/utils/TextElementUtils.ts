@@ -14,7 +14,7 @@ export default class TextElementUtils {
    * @returns 文本数据
    */
   static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
-    fontStyle = pick(fontStyle, ["fontFamily", "fontSize"]);
+    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity"]);
     const lines: ITextLine[] = [];
 
     content.split("\n").forEach(line => {

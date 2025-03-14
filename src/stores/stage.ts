@@ -57,6 +57,10 @@ const DefaultStage = {
   fontSize: DefaultElementStyle.fontSize,
   // 字体
   fontFamily: DefaultElementStyle.fontFamily,
+  // 字体颜色
+  fontColor: DefaultElementStyle.fontColor,
+  // 字体颜色透明度
+  fontColorOpacity: DefaultElementStyle.fontColorOpacity,
   // 文字对齐方式
   textAlign: DefaultElementStyle.textAlign,
   // 文字基线
@@ -158,6 +162,10 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听字体
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听字体颜色
+      shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听字体颜色透明度
+      shield.on(ShieldDispatcherNames.fontColorOpacityChanged, throttle(this.onFontColorOpacityChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听文本基线
@@ -246,7 +254,7 @@ export const useStageStore = defineStore("stage", {
      */
     onElementChanged(element: IElement) {
       if (!element) return;
-      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, textAlign, textBaseline, isRatioLocked } = element;
+      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, fontColor, fontColorOpacity, textAlign, textBaseline, isRatioLocked } = element;
       // 组件位置
       this.onPositionChanged(element, position);
       // 组件宽度
@@ -269,6 +277,10 @@ export const useStageStore = defineStore("stage", {
       this.onFontSizeChanged(element, fontSize);
       // 字体
       this.onFontFamilyChanged(element, fontFamily);
+      // 字体颜色
+      this.onFontColorChanged(element, fontColor);
+      // 字体颜色透明度
+      this.onFontColorOpacityChanged(element, fontColorOpacity);
       // 文本对齐方式
       this.onTextAlignChanged(element, textAlign);
       // 文本基线
@@ -395,6 +407,24 @@ export const useStageStore = defineStore("stage", {
      */
     onFontFamilyChanged(element: IElement, fontFamily: string) {
       this.fontFamily = fontFamily;
+    },
+    /**
+     * 组件字体颜色变化
+     *
+     * @param element
+     * @param fontColor
+     */
+    onFontColorChanged(element: IElement, fontColor: string) {
+      this.fontColor = fontColor;
+    },
+    /**
+     * 组件字体颜色透明度变化
+     *
+     * @param element
+     * @param fontColorOpacity
+     */
+    onFontColorOpacityChanged(element: IElement, fontColorOpacity: number) {
+      this.fontColorOpacity = fontColorOpacity;
     },
     /**
      * 组件字体对齐方式变化
@@ -621,6 +651,22 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFontFamily(value: string): void {
       shield.setElementsFontFamily(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字体颜色
+     *
+     * @param value
+     */
+    setElementsFontColor(value: string): void {
+      shield.setElementsFontColor(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字体颜色透明度
+     *
+     * @param value
+     */
+    setElementsFontColorOpacity(value: number): void {
+      shield.setElementsFontColorOpacity(toRaw(this.selectedElements), value);
     },
     /**
      * 设置舞台缩放

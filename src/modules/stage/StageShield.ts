@@ -571,6 +571,30 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字体颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontColor(elements: IElement[], value: string): Promise<void> {
+    await this.store.setElementsFontColor(elements, value);
+    elements.forEach(element => element.onFontColorChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体颜色透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsFontColorOpacity(elements, value);
+    elements.forEach(element => element.onFontColorOpacityChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 锁定比例
    *
    * @param elements

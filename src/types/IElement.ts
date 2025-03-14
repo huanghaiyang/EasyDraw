@@ -294,6 +294,10 @@ export default interface IElement {
   get fontSize(): number;
   // 字体
   get fontFamily(): string;
+  // 字体颜色
+  get fontColor(): string;
+  // 字体颜色透明度
+  get fontColorOpacity(): number;
   // 圆角
   get corners(): number[];
 
@@ -323,6 +327,10 @@ export default interface IElement {
   get rotateCoords(): IPoint[];
   // 旋转盒模型坐标
   get rotateBoxCoords(): IPoint[];
+  // 非倾斜坐标
+  get unLeanCoords(): IPoint[];
+  // 非倾斜盒模型坐标
+  get unLeanBoxCoords(): IPoint[];
   // 最大外框盒模型顶点
   get maxOutlineBoxCoords(): IPoint[];
   // 旋转路径外框坐标
@@ -545,6 +553,18 @@ export default interface IElement {
    * @param value 字体名称（如'Microsoft YaHei'）
    */
   setFontFamily(value: string): void;
+
+  /**
+   * 设置字体颜色
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   */
+  setFontColor(value: string): void;
+
+  /**
+   * 设置字体颜色透明度
+   * @param value 透明度值（0-1）
+   */
+  setFontColorOpacity(value: number): void;
 
   /**
    * 设置文本对齐
@@ -966,6 +986,16 @@ export default interface IElement {
    * 设置文本字体
    */
   onFontFamilyChanged(): void;
+
+  /**
+   * 设置文本颜色
+   */
+  onFontColorChanged(): void;
+
+  /**
+   * 设置文本颜色透明度
+   */
+  onFontColorOpacityChanged(): void;
 
   /**
    * 锁定比例

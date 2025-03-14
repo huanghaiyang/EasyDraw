@@ -170,6 +170,23 @@ export default interface IStageSetter {
   setElementsFontFamily(elements: IElement[], value: string): Promise<void>;
 
   /**
+   * 设置组件字体颜色
+   *
+   * @param elements 要修改的元件集合
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   */
+  setElementsFontColor(elements: IElement[], value: string): Promise<void>;
+
+
+  /**
+   * 设置组件字体颜色透明度
+   *
+   * @param elements 要修改的元件集合
+   * @param value 透明度值（0-1）
+   */
+  setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void>;
+
+  /**
    * 设置组件比例锁定
    *
    * @param elements 要修改的元件集合

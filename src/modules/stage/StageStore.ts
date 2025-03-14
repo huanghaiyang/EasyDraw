@@ -816,6 +816,36 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件字体颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontColor(elements: IElement[], value: string): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontColor === value) return;
+        element.setFontColor(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件字体颜色透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontColorOpacity === value) return;
+        element.setFontColorOpacity(value);
+      }
+    });
+  }
+
+  /**
    * 锁定比例
    *
    * @param elements

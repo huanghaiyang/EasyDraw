@@ -4,6 +4,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import { DefaultFontStyle } from "@/styles/ElementStyles";
 import { SelectionStrokeColor } from "@/styles/MaskStyles";
 import FontUtils from "@/utils/FontUtils";
+import ColorUtils from "@/utils/ColorUtils";
 
 const minWidth = 200;
 const minHeight = 20;
@@ -121,7 +122,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * @param input
    */
   private _addInputEvents(input: HTMLTextAreaElement): void {
-    input.addEventListener("blur", (e) => {
+    input.addEventListener("blur", () => {
       if (this.input.value) {
         this.emit(
           "input",
@@ -163,6 +164,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       boxShadow: `0 -${strokeWidth}px 0 0 ${SelectionStrokeColor}, -${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, ${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, 0 ${strokeWidth}px 0 0 ${SelectionStrokeColor}`,
       fontSize: `${DefaultFontStyle.fontSize}px`,
       fontFamily: DefaultFontStyle.fontFamily,
+      color: ColorUtils.hashToRgba(DefaultFontStyle.fontColor, DefaultFontStyle.fontColorOpacity),
       verticalAlign: DefaultFontStyle.textBaseline,
       textAlign: DefaultFontStyle.textAlign,
     });

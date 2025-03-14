@@ -1,8 +1,8 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementImage } from "@/types/IElement";
-import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 
 export default class ElementTaskImage extends ElementTaskBase {
   /**
@@ -19,12 +19,9 @@ export default class ElementTaskImage extends ElementTaskBase {
       flipX,
       leanY,
       actualAngle,
-      rotateBoxCoords,
-      center,
     } = this.element as IElementImage;
 
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
-    const rotateBoxPoints = ElementUtils.calcStageRelativePoints(rotateBoxCoords);
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
 
     const options = {
@@ -34,11 +31,10 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
     };
 
-    let rect = CommonUtils.calcRotateBoxRect(rotateBoxPoints, center);
-    rect = CommonUtils.scaleRect(rect, this.element.shield.stageScale);
+    const rect = ElementTaskHelper.getRotateBoxRect(this.element);
 
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, this.element.model.data, rect, {
+    CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, rect, {
       ...options,
       clipArcPoints: arcFillPoints,
     });

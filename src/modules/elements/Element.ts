@@ -384,6 +384,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.fontFamily;
   }
 
+  get fontColor(): string {
+    return this.model.styles.fontColor;
+  }
+
+  get fontColorOpacity(): number {
+    return this.model.styles.fontColorOpacity;
+  }
+
   get status(): ElementStatus {
     return this._status;
   }
@@ -586,6 +594,14 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get rotateOutlineCoords(): IPoint[][] {
     return this._rotateOutlineCoords;
+  }
+
+  get unLeanCoords(): IPoint[] {
+    return this._unLeanCoords;
+  }
+
+  get unLeanBoxCoords(): IPoint[] {
+    return this._unLeanBoxCoords;
   }
 
   get transformers(): IVerticesTransformer[] {
@@ -1023,6 +1039,20 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFontFamilyChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [this.fontFamily]);
+  }
+
+  /**
+   * 字体颜色发生变化
+   */
+  onFontColorChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [this.fontColor]);
+  }
+
+  /**
+   * 字体颜色透明度发生变化
+   */
+  onFontColorOpacityChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [this.fontColorOpacity]);
   }
 
   /**
@@ -2254,6 +2284,22 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontFamily(value: string): void {
     this.model.styles.fontFamily = value;
+  }
+
+  /**
+   * 设置字体颜色
+   * @param value
+   */
+  setFontColor(value: string): void {
+    this.model.styles.fontColor = value;
+  }
+
+  /**
+   * 设置字体颜色透明度
+   * @param value
+   */
+  setFontColorOpacity(value: number): void {
+    this.model.styles.fontColorOpacity = clamp(value, 0, 1);
   }
 
   /**

@@ -21,6 +21,7 @@ export default class ArbitraryUtils {
    *
    * @param vertices
    * @param r
+   * @param options
    * @returns
    */
   static getArbitraryOuterVertices(vertices: IPoint[], r: number, options: RenderParams): IPoint[] {

@@ -10,6 +10,6 @@ export default class MaskTaskCursorPosition extends MaskTaskBase {
     if (!this.canvas || !this.model) return;
     
     let { text, point } = this.model;
-    await CanvasUtils.drawRotateTextWithScale(this.canvas, text, point, CursorPositionStyle, CursorPositionStyle.fills[0]);
+    await CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, point, CursorPositionStyle, CursorPositionStyle.fills[0]);
   }
 }

@@ -25,6 +25,7 @@ import { clamp, range } from "lodash";
 import ElementTaskEllipse from "@/modules/render/shield/task/ElementTaskEllipse";
 import ElementEllipse from "@/modules/elements/ElementEllipse";
 import ImageUtils from "@/utils/ImageUtils";
+import ElementTaskText from "@/modules/render/shield/task/ElementTaskText";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -70,6 +71,10 @@ export default class ElementUtils {
       }
       case CreatorTypes.arbitrary: {
         task = new ElementTaskArbitrary(element, params);
+      }
+      case CreatorTypes.text: {
+        task = new ElementTaskText(element, params);
+        break;
       }
       default:
         break;
@@ -644,7 +649,7 @@ export default class ElementUtils {
     const { type, data } = model;
     switch (type) {
       case CreatorTypes.image: {
-        model.data = await ImageUtils.createImageFromUrl(data);
+        model.data = await ImageUtils.createImageFromUrl(data as string);
       }
       default:
         break;

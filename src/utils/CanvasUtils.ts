@@ -1,13 +1,14 @@
 import { IPoint } from "@/types";
-import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import { EllipseModel } from "@/types/IElement";
+import ITextData from "@/types/IText";
 
-//
+// 画布变换参数
 type CtxTransformOptions = {
   radian: number;
   scaleX: number;
@@ -225,12 +226,72 @@ export default class CanvasUtils {
    * 绘制一个旋转的文字
    *
    * @param target
+   * @param textData
+   * @param points
+   * @param rect
+   * @param fontStyle
+   * @param options
+   */
+  static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: Partial<DOMRect>, fontStyle: FontStyle, options: RenderParams = {}): void {
+    const { flipX } = options;
+    const ctx = target.getContext("2d");
+    ctx.save();
+    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
+    points = CanvasUtils.translatePoints(points, rect);
+    ctx.font = `${fontStyle.fontSize}px ${fontStyle.fontFamily}`;
+    ctx.textAlign = fontStyle.textAlign;
+    ctx.textBaseline = fontStyle.textBaseline;
+    ctx.fillStyle = StyleUtils.joinFillColor({ color: fontStyle.fontColor, colorOpacity: fontStyle.fontColorOpacity });
+    let prevY = points[0].y;
+
+    textData.lines.forEach(line => {
+      let prevX = flipX ? -points[0].x : points[0].x;
+      let maxHeight = 0;
+      const { nodes } = line;
+      nodes.forEach(node => {
+        ctx.save();
+        let { content, fontStyle } = node;
+        fontStyle = CanvasUtils.transFontWithScale(fontStyle);
+        const { fontColor, fontColorOpacity, fontSize, fontFamily } = fontStyle;
+        ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
+        ctx.font = `${fontSize}px ${fontFamily}`;
+        ctx.fillText(content, prevX, prevY);
+        const metric = ctx.measureText(content);
+        prevX += metric.width;
+        maxHeight = Math.max(maxHeight, metric.fontBoundingBoxAscent + metric.fontBoundingBoxDescent);
+        ctx.restore();
+      });
+      prevY += maxHeight;
+    });
+    ctx.restore();
+  }
+
+  /**
+   * 绘制中心点需要缩放的文本
+   *
+   * @param target
+   * @param textData
+   * @param points
+   * @param rect
+   * @param fontStyle
+   * @param options
+   */
+  static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: Partial<DOMRect>, fontStyle: FontStyle, options: RenderParams = {}) {
+    points = CanvasUtils.transPointsWidthScale(points);
+    fontStyle = CanvasUtils.transFontWithScale(fontStyle);
+    CanvasUtils.drawRotateText(target, textData, points, rect, fontStyle, options);
+  }
+
+  /**
+   * 绘制一个旋转的文字
+   *
+   * @param target
    * @param text
    * @param center
    * @param styles
    * @param options
    */
-  static drawRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}): void {
+  static drawCommonRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}): void {
     const { angle = 0 } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -253,33 +314,53 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}) {
+  static drawCommonRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}) {
     if (CanvasUtils.scale !== 1) {
       center = {
         x: center.x * CanvasUtils.scale,
         y: center.y * CanvasUtils.scale,
       };
     }
-    CanvasUtils.drawRotateText(target, text, center, styles, fillStyle, options);
+    CanvasUtils.drawCommonRotateText(target, text, center, styles, fillStyle, options);
   }
 
   /**
-   * 参数缩放
+   * 点缩放
    *
    * @param points
-   * @param styles
    * @returns
    */
-  static transParamsWithScale(points: IPoint[], strokeStyle?: StrokeStyle): [IPoint[], StrokeStyle] {
-    if (CanvasUtils.scale === 1) return [points, strokeStyle];
-    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
-    if (strokeStyle) {
-      strokeStyle = {
-        ...strokeStyle,
-        width: strokeStyle.width * CanvasUtils.scale,
-      };
-    }
-    return [points, strokeStyle];
+  static transPointsWidthScale(points: IPoint[]): IPoint[] {
+    if (CanvasUtils.scale === 1) return points;
+    return CommonUtils.scalePoints(points, CanvasUtils.scale);
+  }
+
+  /**
+   * 线宽缩放
+   *
+   * @param strokeStyle
+   * @returns
+   */
+  static transStrokeWithScale(strokeStyle: StrokeStyle): StrokeStyle {
+    if (CanvasUtils.scale === 1) return strokeStyle;
+    return {
+      ...strokeStyle,
+      width: strokeStyle.width * CanvasUtils.scale,
+    };
+  }
+
+  /**
+   * 字体缩放
+   *
+   * @param fontStyle
+   * @returns
+   */
+  static transFontWithScale(fontStyle: FontStyle): FontStyle {
+    if (CanvasUtils.scale === 1) return fontStyle;
+    return {
+      ...fontStyle,
+      fontSize: fontStyle.fontSize * CanvasUtils.scale,
+    };
   }
 
   /**
@@ -325,7 +406,8 @@ export default class CanvasUtils {
    * @param options
    */
   static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
-    [points, strokeStyle] = CanvasUtils.transParamsWithScale(points, strokeStyle);
+    points = CanvasUtils.transPointsWidthScale(points);
+    strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(target, points, fillStyle, strokeStyle, options);
     }
@@ -365,7 +447,8 @@ export default class CanvasUtils {
    * @param options
    */
   static drawInnerPathFillWithScale(target: HTMLCanvasElement, points: IPoint[], fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
-    [points, strokeStyle] = CanvasUtils.transParamsWithScale(points, strokeStyle);
+    points = CanvasUtils.transPointsWidthScale(points);
+    strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(target, points, fillStyle, strokeStyle, options);
     }
@@ -417,11 +500,13 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawPathStrokeWidthScale(target: HTMLCanvasElement, points: IPoint[], strokeStyle: StrokeStyle, options: RenderParams = {}) {
-    [points, strokeStyle] = CanvasUtils.transParamsWithScale(points, strokeStyle);
+    points = CanvasUtils.transPointsWidthScale(points);
+    strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
   }
 
   /**
+   * 绘制曲线描边
    * 绘制曲线描边
    *
    * @param target
@@ -696,8 +781,9 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawEllipseStrokeWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
-    const [points, scaleStyles] = CanvasUtils.transParamsWithScale([point], strokeStyle);
-    CanvasUtils.drawEllipseStroke(target, points[0], model, scaleStyles, rect, options);
+    const points = CanvasUtils.transPointsWidthScale([point]);
+    strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
+    CanvasUtils.drawEllipseStroke(target, points[0], model, strokeStyle, rect, options);
   }
 
   /**
@@ -709,7 +795,7 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawEllipseFillWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
-    const [points] = CanvasUtils.transParamsWithScale([point]);
+    const points = CanvasUtils.transPointsWidthScale([point]);
     CanvasUtils.drawEllipseFill(target, points[0], model, fillStyle, rect, options);
   }
 
@@ -746,7 +832,8 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawLineWidthScale(target: HTMLCanvasElement, points: IPoint[], strokeStyle: StrokeStyle) {
-    [points, strokeStyle] = CanvasUtils.transParamsWithScale(points, strokeStyle);
+    points = CanvasUtils.transPointsWidthScale(points);
+    strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawLine(target, points, strokeStyle);
   }
 

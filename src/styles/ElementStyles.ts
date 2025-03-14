@@ -75,10 +75,14 @@ export type StrokeStyle = FillStyle & {
 
 export type TextFontStyle = {
   // 字体大小
-  fontSize?: number; 
+  fontSize?: number;
   // 字体
   fontFamily?: string;
-}
+  // 字体颜色
+  fontColor?: string;
+  // 字体颜色透明度
+  fontColorOpacity?: number;
+};
 
 // 字体样式定义
 export type FontStyle = TextFontStyle & {
@@ -112,10 +116,14 @@ export const DefaultStrokeWidth = 1;
 export const DefaultFontSize = 12;
 // 默认字体家族
 export const DefaultFontFamily = "sans-serif";
+// 默认字体颜色
+export const DefaultFontColor = "#000000";
+// 默认字体颜色透明度
+export const DefaultFontColorOpacity = 1;
 // 默认文本对齐方式
 export const DefaultTextAlign = "left";
 // 默认文本基线
-export const DefaultTextBaseline = "middle";
+export const DefaultTextBaseline = "top";
 // 默认直线描边宽度
 export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
@@ -145,6 +153,8 @@ export const DefaultFillStyle: FillStyle = {
 export const DefaultFontStyle: FontStyle = {
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
+  fontColor: DefaultFontColor,
+  fontColorOpacity: DefaultFontColorOpacity,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
 };
@@ -169,9 +179,14 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
       stroke.width = DefaultLineStrokeWidth;
     });
   }
-  if ([CreatorTypes.image, CreatorTypes.arbitrary].includes(type)) {
+  if ([CreatorTypes.image, CreatorTypes.arbitrary, CreatorTypes.text].includes(type)) {
     style.fills.forEach(fill => {
       fill.colorOpacity = 0;
+    });
+  }
+  if ([CreatorTypes.text].includes(type)) {
+    style.strokes.forEach(stroke => {
+      stroke.width = 0;
     });
   }
   return style;
