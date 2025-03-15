@@ -23,7 +23,7 @@ export interface IDrawerProvisional extends IStageDrawer {}
 // HTML绘制画布
 export interface IDrawerHtml extends IStageDrawer {
   // 输入框
-  input: HTMLTextAreaElement;
+  textEditor: HTMLTextAreaElement;
   // 创建文本输入框
   createTextInput(position: IPoint): HTMLTextAreaElement;
 }

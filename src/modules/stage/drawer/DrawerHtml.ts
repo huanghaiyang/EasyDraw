@@ -11,9 +11,9 @@ const minHeight = 20;
 
 export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   // 输入框
-  input: HTMLTextAreaElement;
+  textEditor: HTMLTextAreaElement;
   // 输入框位置
-  private _inputPosition: IPoint;
+  private _textEditorPosition: IPoint;
 
   /**
    * 初始化画布
@@ -47,18 +47,18 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * 创建文本输入框
    */
   createTextInput(position: IPoint): HTMLTextAreaElement {
-    if (this.input) {
-      return this.input;
+    if (this.textEditor) {
+      return this.textEditor;
     }
-    const input = this._createInputElement(position);
-    this._addInputEvents(input);
-    this.node.appendChild(input);
+    const textEditor = this._createInputElement(position);
+    this._addInputEvents(textEditor);
+    this.node.appendChild(textEditor);
     setTimeout(() => {
-      input.setSelectionRange(0, 0);
-      input.focus();
+      textEditor.setSelectionRange(0, 0);
+      textEditor.focus();
     }, 0);
-    this.input = input;
-    return input;
+    this.textEditor = textEditor;
+    return textEditor;
   }
 
   /**
@@ -109,10 +109,10 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * 更新输入框样式
    */
   private _updateInputStyleWhileInputing(): void {
-    let { width, height } = FontUtils.measureTextWithSpan(this.input.value, DefaultFontStyle);
+    let { width, height } = FontUtils.measureTextWithSpan(this.textEditor.value, DefaultFontStyle);
     width = Math.max(width, minWidth);
     height = Math.max(height, minHeight);
-    Object.assign(this.input.style, {
+    Object.assign(this.textEditor.style, {
       minWidth: `${width}px`,
       minHeight: `${height}px`,
     });
@@ -121,31 +121,31 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   /**
    * 添加输入框事件
    *
-   * @param input
+   * @param textEditor
    */
-  private _addInputEvents(input: HTMLTextAreaElement): void {
-    input.addEventListener("blur", () => {
-      if (this.input.value) {
+  private _addInputEvents(textEditor: HTMLTextAreaElement): void {
+    textEditor.addEventListener("blur", () => {
+      if (this.textEditor.value) {
         this.emit(
           "input",
-          this.input.value,
+          this.textEditor.value,
           DefaultFontStyle,
           {
-            width: input.offsetWidth,
-            height: input.offsetHeight,
+            width: textEditor.offsetWidth,
+            height: textEditor.offsetHeight,
           },
-          this._inputPosition,
+          this._textEditorPosition,
         );
       }
-      this.input.remove();
-      this.input = null;
+      this.textEditor.remove();
+      this.textEditor = null;
     });
-    input.addEventListener("keydown", e => {
+    textEditor.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         this._updateInputStyleWhileInputing();
       }
     });
-    input.addEventListener("input", () => {
+    textEditor.addEventListener("textEditor", () => {
       this._updateInputStyleWhileInputing();
     });
   }
@@ -154,11 +154,11 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * 创建文本输入框
    */
   private _createInputElement(position: IPoint): HTMLTextAreaElement {
-    this._inputPosition = position;
+    this._textEditorPosition = position;
     const strokeWidth = 1 / this.shield.stageScale;
-    const input = document.createElement("textarea");
+    const textEditor = document.createElement("textarea");
 
-    Object.assign(input.style, {
+    Object.assign(textEditor.style, {
       top: `${position.y}px`,
       left: `${position.x}px`,
       minWidth: `${minWidth}px`,
@@ -171,6 +171,6 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       verticalAlign: DefaultFontStyle.textBaseline,
       textAlign: DefaultFontStyle.textAlign,
     });
-    return input;
+    return textEditor;
   }
 }
