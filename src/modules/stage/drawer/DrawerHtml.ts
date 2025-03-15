@@ -145,7 +145,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
         this._updateInputStyleWhileInputing();
       }
     });
-    textEditor.addEventListener("textEditor", () => {
+    textEditor.addEventListener("input", () => {
       this._updateInputStyleWhileInputing();
     });
   }

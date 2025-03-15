@@ -1020,10 +1020,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async _handleDblClick(e: MouseEvent): Promise<void> {
     if (this.isMoveableActive) {
-      this._selectTopAElement(this.store.stageElements);
-      this.store.beginEditingElements(this.store.selectedElements);
+      const { stageElements, selectedElements } = this.store;
+      this._selectTopAElement(stageElements);
+      this.store.beginEditingElements(selectedElements);
       this.selection.refresh();
-      this._originalEditingDataList = await Promise.all(this.store.selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() })));
+      this._originalEditingDataList = await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() })));
     }
   }
 

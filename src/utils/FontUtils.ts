@@ -3,6 +3,7 @@ import { ISize } from "@/types";
 
 export default class FontUtils {
   static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘";
+
   /**
    * 计算文字宽度
    *
