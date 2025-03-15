@@ -57,6 +57,8 @@ const DefaultStage = {
   fontSize: DefaultElementStyle.fontSize,
   // 字体
   fontFamily: DefaultElementStyle.fontFamily,
+  // 字体行高
+  fontLineHeight: DefaultElementStyle.fontLineHeight,
   // 字体颜色
   fontColor: DefaultElementStyle.fontColor,
   // 字体颜色透明度
@@ -162,6 +164,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听字体
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      // 监听字体行高
+      shield.on(ShieldDispatcherNames.fontLineHeightChanged, throttle(this.onFontLineHeightChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听字体颜色
       shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
       // 监听字体颜色透明度
@@ -254,7 +258,8 @@ export const useStageStore = defineStore("stage", {
      */
     onElementChanged(element: IElement) {
       if (!element) return;
-      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, fontColor, fontColorOpacity, textAlign, textBaseline, isRatioLocked } = element;
+      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, fontColor, fontColorOpacity, fontLineHeight, textAlign, textBaseline, isRatioLocked } =
+        element;
       // 组件位置
       this.onPositionChanged(element, position);
       // 组件宽度
@@ -277,6 +282,8 @@ export const useStageStore = defineStore("stage", {
       this.onFontSizeChanged(element, fontSize);
       // 字体
       this.onFontFamilyChanged(element, fontFamily);
+      // 字体行高
+      this.onFontLineHeightChanged(element, fontLineHeight);
       // 字体颜色
       this.onFontColorChanged(element, fontColor);
       // 字体颜色透明度
@@ -407,6 +414,15 @@ export const useStageStore = defineStore("stage", {
      */
     onFontFamilyChanged(element: IElement, fontFamily: string) {
       this.fontFamily = fontFamily;
+    },
+    /**
+     * 组件字体行高变化
+     *
+     * @param element
+     * @param fontLineHeight
+     */
+    onFontLineHeightChanged(element: IElement, fontLineHeight: number) {
+      this.fontLineHeight = fontLineHeight;
     },
     /**
      * 组件字体颜色变化
@@ -651,6 +667,14 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFontFamily(value: string): void {
       shield.setElementsFontFamily(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字体行高
+     *
+     * @param value
+     */
+    setElementsFontLineHeight(value: number): void {
+      shield.setElementsFontLineHeight(toRaw(this.selectedElements), value);
     },
     /**
      * 设置组件字体颜色

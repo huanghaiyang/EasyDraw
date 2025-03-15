@@ -82,6 +82,8 @@ export type TextFontStyle = {
   fontColor?: string;
   // 字体颜色透明度
   fontColorOpacity?: number;
+  // 字体行高
+  fontLineHeight?: number;
 };
 
 // 字体样式定义
@@ -128,6 +130,8 @@ export const DefaultTextBaseline = "top";
 export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
+// 默认字体行高
+export const DefaultFontLineHeight = 1.4;
 
 // 默认描边样式
 export const DefaultStrokeStyle: StrokeStyle = {
@@ -155,6 +159,7 @@ export const DefaultFontStyle: FontStyle = {
   fontFamily: DefaultFontFamily,
   fontColor: DefaultFontColor,
   fontColorOpacity: DefaultFontColorOpacity,
+  fontLineHeight: DefaultFontLineHeight,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
 };

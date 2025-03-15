@@ -294,6 +294,8 @@ export default interface IElement {
   get fontSize(): number;
   // 字体
   get fontFamily(): string;
+  // 字体行高
+  get fontLineHeight(): number;
   // 字体颜色
   get fontColor(): string;
   // 字体颜色透明度
@@ -553,6 +555,12 @@ export default interface IElement {
    * @param value 字体名称（如'Microsoft YaHei'）
    */
   setFontFamily(value: string): void;
+
+  /**
+   * 设置字体行高
+   * @param value 字体行高值
+   */
+  setFontLineHeight(value: number): void;
 
   /**
    * 设置字体颜色
@@ -986,6 +994,11 @@ export default interface IElement {
    * 设置文本字体
    */
   onFontFamilyChanged(): void;
+
+  /**
+   * 设置文本字体行高
+   */
+  onFontLineHeightChanged(): void;
 
   /**
    * 设置文本颜色

@@ -7,6 +7,7 @@ import { ArcPoints, RenderParams } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import { EllipseModel } from "@/types/IElement";
 import ITextData from "@/types/IText";
+import FontUtils from "@/utils/FontUtils";
 
 // 画布变换参数
 type CtxTransformOptions = {
@@ -233,15 +234,16 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: Partial<DOMRect>, fontStyle: FontStyle, options: RenderParams = {}): void {
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
     points = CanvasUtils.translatePoints(points, rect);
-    ctx.font = `${fontStyle.fontSize}px ${fontStyle.fontFamily}`;
-    ctx.textAlign = fontStyle.textAlign;
-    ctx.textBaseline = fontStyle.textBaseline;
-    ctx.fillStyle = StyleUtils.joinFillColor({ color: fontStyle.fontColor, colorOpacity: fontStyle.fontColorOpacity });
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.textAlign = textAlign;
+    ctx.textBaseline = textBaseline;
+    ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
     let prevY = points[0].y;
 
     textData.lines.forEach(line => {
@@ -250,15 +252,22 @@ export default class CanvasUtils {
       const { nodes } = line;
       nodes.forEach(node => {
         ctx.save();
-        let { content, fontStyle } = node;
-        fontStyle = CanvasUtils.transFontWithScale(fontStyle);
-        const { fontColor, fontColorOpacity, fontSize, fontFamily } = fontStyle;
-        ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
-        ctx.font = `${fontSize}px ${fontFamily}`;
-        ctx.fillText(content, prevX, prevY);
-        const metric = ctx.measureText(content);
-        prevX += metric.width;
-        maxHeight = Math.max(maxHeight, metric.fontBoundingBoxAscent + metric.fontBoundingBoxDescent);
+        let { content, fontStyle: nodeFontStyle } = node;
+        nodeFontStyle = CanvasUtils.transFontWithScale(nodeFontStyle);
+        let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
+        ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
+        ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
+        const { width } = ctx.measureText(content);
+        const metrics = ctx.measureText(FontUtils.DUMMY_TEXT);
+        const { actualBoundingBoxDescent, fontBoundingBoxDescent } = metrics;
+        const rowHeight = fontLineHeight * nodeFontSize;
+        let height: number = 0;
+        if (textBaseline === "top") {
+          height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
+        }
+        ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
+        prevX += width;
+        maxHeight = Math.max(maxHeight, rowHeight);
         ctx.restore();
       });
       prevY += maxHeight;

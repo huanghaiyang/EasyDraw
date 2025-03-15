@@ -816,6 +816,21 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件字体行高
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontLineHeight === value) return;
+        element.setFontLineHeight(value);
+      }
+    });
+  }
+
+  /**
    * 设置组件字体颜色
    *
    * @param elements

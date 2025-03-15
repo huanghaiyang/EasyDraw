@@ -170,6 +170,14 @@ export default interface IStageSetter {
   setElementsFontFamily(elements: IElement[], value: string): Promise<void>;
 
   /**
+   * 设置组件字体行高
+   *
+   * @param elements 要修改的元件集合
+   * @param value 字体行高
+   */
+  setElementsFontLineHeight(elements: IElement[], value: number): Promise<void>;
+
+  /**
    * 设置组件字体颜色
    *
    * @param elements 要修改的元件集合

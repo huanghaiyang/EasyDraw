@@ -571,6 +571,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字体行高
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
+    await this.store.setElementsFontLineHeight(elements, value);
+    elements.forEach(element => element.onFontLineHeightChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 设置组件字体颜色
    *
    * @param elements

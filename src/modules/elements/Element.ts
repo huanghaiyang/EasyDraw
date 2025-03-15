@@ -384,6 +384,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.fontFamily;
   }
 
+  get fontLineHeight(): number {
+    return this.model.styles.fontLineHeight;
+  }
+
   get fontColor(): string {
     return this.model.styles.fontColor;
   }
@@ -1039,6 +1043,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFontFamilyChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [this.fontFamily]);
+  }
+
+  /**
+   * 字体行高发生变化
+   */
+  onFontLineHeightChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontLineHeightChanged, [this.fontLineHeight]);
   }
 
   /**
@@ -2284,6 +2295,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontFamily(value: string): void {
     this.model.styles.fontFamily = value;
+  }
+
+  /**
+   * 设置字体行高
+   * @param value
+   */
+  setFontLineHeight(value: number): void {
+    this.model.styles.fontLineHeight = value;
   }
 
   /**

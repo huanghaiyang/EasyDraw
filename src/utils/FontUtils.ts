@@ -2,8 +2,11 @@ import { FontStyle } from "@/styles/ElementStyles";
 import { ISize } from "@/types";
 
 export default class FontUtils {
+  static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘";
   /**
    * 计算文字宽度
+   *
+   * 如果未指定行高，则可以使用此方法计算文本尺寸，否则请使用 measureTextWithSpan
    *
    * @param text
    * @param fontStyle
@@ -48,7 +51,7 @@ export default class FontUtils {
    * @returns
    */
   static measureTextWithSpan(text: string, fontStyle: FontStyle): ISize {
-    const { fontSize, fontFamily, textBaseline, textAlign } = fontStyle;
+    const { fontSize, fontFamily, textBaseline, textAlign, fontLineHeight } = fontStyle;
     const lines = text.split("\n");
     let maxWidth = 0;
     let height = 0;
@@ -57,6 +60,10 @@ export default class FontUtils {
     span.style.visibility = "hidden";
     span.style.fontSize = `${fontSize}px`;
     span.style.fontFamily = fontFamily;
+    span.style.display = "inline-block";
+    if (fontLineHeight) {
+      span.style.lineHeight = `${fontLineHeight}`;
+    }
     if (textBaseline) {
       span.style.verticalAlign = textBaseline;
     }

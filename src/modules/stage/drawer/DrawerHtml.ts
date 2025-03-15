@@ -86,11 +86,13 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
             border: none;
             outline: none;
             resize: none;
+            word-break: break-word;
             white-space: nowrap;
             pointer-events: auto;
             background: transparent;
             caret-color: #000;
             color: #000;
+            box-sizing: border-box;
         }
         #html-drawer textarea::-webkit-scrollbar {
             display: none;
@@ -107,12 +109,12 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * 更新输入框样式
    */
   private _updateInputStyleWhileInputing(): void {
-    let { width, height } = FontUtils.measureText(this.input.value, DefaultFontStyle);
+    let { width, height } = FontUtils.measureTextWithSpan(this.input.value, DefaultFontStyle);
     width = Math.max(width, minWidth);
     height = Math.max(height, minHeight);
     Object.assign(this.input.style, {
-      minWidth: `${width / this.shield.stageScale}px`,
-      minHeight: `${height / this.shield.stageScale}px`,
+      minWidth: `${width}px`,
+      minHeight: `${height}px`,
     });
   }
 
@@ -159,11 +161,12 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     Object.assign(input.style, {
       top: `${position.y}px`,
       left: `${position.x}px`,
-      minWidth: `${minWidth / this.shield.stageScale}px`,
-      minHeight: `${minHeight / this.shield.stageScale}px`,
+      minWidth: `${minWidth}px`,
+      minHeight: `${minHeight}px`,
       boxShadow: `0 -${strokeWidth}px 0 0 ${SelectionStrokeColor}, -${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, ${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, 0 ${strokeWidth}px 0 0 ${SelectionStrokeColor}`,
       fontSize: `${DefaultFontStyle.fontSize}px`,
       fontFamily: DefaultFontStyle.fontFamily,
+      lineHeight: `${DefaultFontStyle.fontLineHeight}`,
       color: ColorUtils.hashToRgba(DefaultFontStyle.fontColor, DefaultFontStyle.fontColorOpacity),
       verticalAlign: DefaultFontStyle.textBaseline,
       textAlign: DefaultFontStyle.textAlign,
