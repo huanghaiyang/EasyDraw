@@ -71,6 +71,7 @@ export default class ElementUtils {
       }
       case CreatorTypes.arbitrary: {
         task = new ElementTaskArbitrary(element, params);
+        break;
       }
       case CreatorTypes.text: {
         task = new ElementTaskText(element, params);

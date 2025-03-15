@@ -204,11 +204,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   private createMaskTransformerTasks(): IRenderTask[] {
     const {
       selection: { transformerModels },
+      stageScale,
     } = this.drawer.shield;
     return transformerModels.map(model => {
       switch (model.element.transformerType) {
         case TransformerTypes.circle:
-          return new MaskTaskCircleTransformer(model, this.renderParams);
+          return new MaskTaskCircleTransformer({ ...model, scale: 1 / stageScale }, this.renderParams);
         case TransformerTypes.rect:
           return new MaskTaskTransformer(model, this.renderParams);
       }
@@ -224,6 +225,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const {
       store: { primarySelectedElement },
       selection: { rangeElement },
+      stageScale,
     } = this.drawer.shield;
     const element = primarySelectedElement || rangeElement;
     if (element) {
@@ -239,7 +241,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
               type: DrawerMaskModelTypes.transformer,
               radius: DefaultControllerRadius,
             };
-            return new MaskTaskCircleTransformer(model, this.renderParams);
+            return new MaskTaskCircleTransformer({ ...model, scale: 1 / stageScale }, this.renderParams);
           }
         })
         .filter(model => !!model);
@@ -318,12 +320,13 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    const { currentCreator, cursor } = this.drawer.shield;
+    const { currentCreator, cursor, stageScale } = this.drawer.shield;
     if (currentCreator.category === CreatorCategories.freedom) {
       const model: IMaskModel = {
         point: cursor.value,
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultControllerRadius,
+        scale: 1 / stageScale,
       };
       return new MaskTaskCircleTransformer(model, this.renderParams);
     }

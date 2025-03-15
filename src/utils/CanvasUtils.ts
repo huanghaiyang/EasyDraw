@@ -248,8 +248,11 @@ export default class CanvasUtils {
 
     textData.lines.forEach(line => {
       let prevX = flipX ? -points[0].x : points[0].x;
-      let maxHeight = 0;
       const { nodes } = line;
+      let rowHeight = 0;
+      nodes.forEach(node => {
+        rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
+      });
       nodes.forEach(node => {
         ctx.save();
         let { content, fontStyle: nodeFontStyle } = node;
@@ -257,20 +260,20 @@ export default class CanvasUtils {
         let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
         ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
         ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
-        const { width } = ctx.measureText(content);
         const metrics = ctx.measureText(FontUtils.DUMMY_TEXT);
         const { actualBoundingBoxDescent, fontBoundingBoxDescent } = metrics;
-        const rowHeight = fontLineHeight * nodeFontSize;
         let height: number = 0;
         if (textBaseline === "top") {
           height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
         }
-        ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
-        prevX += width;
-        maxHeight = Math.max(maxHeight, rowHeight);
+        content.split("").forEach(char => {
+          const { width } = ctx.measureText(char);
+          ctx.fillText(char, prevX, prevY + (rowHeight - height) / 2);
+          prevX += width;
+        });
         ctx.restore();
       });
-      prevY += maxHeight;
+      prevY += rowHeight;
     });
     ctx.restore();
   }

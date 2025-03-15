@@ -13,10 +13,11 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
     let { point } = this.model;
 
     if (!point) return;
-    let { radius } = this.model;
+    let { radius, scale } = this.model;
     const strokeStyle = { ...ControllerStyle.strokes[0] };
+    strokeStyle.width *= scale;
     const fillStyle = { ...ControllerStyle.fills[0] };
-    radius /= CanvasUtils.scale;
+    radius *= scale;
     point = ElementUtils.calcStageRelativePoint(point);
 
     CanvasUtils.drawEllipseFillWithScale(
