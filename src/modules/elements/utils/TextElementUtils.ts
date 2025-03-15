@@ -18,14 +18,13 @@ export default class TextElementUtils {
     const lines: ITextLine[] = [];
 
     content.split("\n").forEach(line => {
-      lines.push({
-        nodes: [
-          {
-            content: line,
-            fontStyle,
-          },
-        ],
+      const nodes = line.split("").map(char => {
+        return {
+          content: char,
+          fontStyle,
+        };
       });
+      lines.push({ nodes });
     });
     return {
       lines,
