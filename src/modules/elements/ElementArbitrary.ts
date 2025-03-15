@@ -28,19 +28,9 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return TransformerTypes.circle;
   }
 
-  // 是否启用顶点变换
-  get verticesTransformEnable(): boolean {
+  // 是否启用坐标变换
+  get coordTransformEnable(): boolean {
     return this.status !== ElementStatus.finished;
-  }
-
-  // 是否启用盒模型顶点变换
-  get boxVerticesTransformEnable(): boolean {
-    return this.status === ElementStatus.finished;
-  }
-
-  // 是否启用边框变换
-  get borderTransformEnable(): boolean {
-    return this.status === ElementStatus.finished;
   }
 
   /**

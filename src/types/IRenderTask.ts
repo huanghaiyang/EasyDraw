@@ -1,5 +1,6 @@
 import IElement from "@/types/IElement";
 import { IMaskModel } from "@/types/IModel";
+import { IPoint } from "@/types";
 
 // 渲染任务
 export interface IRenderTask {
@@ -21,4 +22,10 @@ export interface IMaskTask extends IRenderTask {
 export interface IElementTask extends IRenderTask {
   // 组件
   element: IElement;
+}
+
+// 带光标位置的舞台组件绘制任务
+export interface IElementTaskCursor extends IElementTask {
+  // 光标位置
+  cursor: IPoint;
 }

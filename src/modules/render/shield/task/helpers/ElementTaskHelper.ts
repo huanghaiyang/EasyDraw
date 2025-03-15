@@ -1,5 +1,7 @@
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import IElement, { IElementRect } from "@/types/IElement";
+import { IPoint } from "@/types";
+import IElement, { IElementRect, IElementText } from "@/types/IElement";
+import ITextData, { ITextCursor, ITextNode } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -52,5 +54,39 @@ export default class ElementTaskHelper {
     let rect = CommonUtils.calcRotateBoxRect(rotateBoxCoords, center);
     rect = CommonUtils.scaleRect(rect, element.shield.stageScale);
     return rect;
+  }
+
+  /**
+   * 获取光标位置
+   *
+   * @param element 文本元素
+   * @param cursor 光标位置
+   * @returns 光标位置
+   */
+  static getCursorPositionOfTextElement(element: IElementText, cursor: IPoint, rect: Partial<DOMRect>): ITextCursor {
+    const [curPoint] = CanvasUtils.translatePoints([cursor], rect);
+    const { x: cursorX, y: cursorY } = curPoint;
+    const { lines } = element.model.data as ITextData;
+    let nearestNode: ITextNode | undefined;
+
+    lines.forEach(line => {
+      line.nodes.forEach(node => {
+        const { x, y, width, height } = node;
+        if (cursorX >= x && cursorX <= x + width && cursorY >= y && cursorY <= y + height) {
+          nearestNode = node;
+        }
+      });
+    });
+
+    if (nearestNode) {
+      const { x, y, width, height } = nearestNode;
+      return {
+        x: x + width,
+        y: y,
+        height: height,
+        width: 0,
+        nearestNodeId: nearestNode.id,
+      };
+    }
   }
 }

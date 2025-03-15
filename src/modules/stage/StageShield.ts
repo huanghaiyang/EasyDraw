@@ -47,6 +47,8 @@ import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
+import { ITextCursor } from "@/types/IText";
+import ElementText from "@/modules/elements/ElementText";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -141,8 +143,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   // 是否是文本工具
-  get isTextActive(): boolean {
+  get isTextCreating(): boolean {
     return [CreatorCategories.text].includes(this.currentCreator?.category);
+  }
+
+  get isTextEditing(): boolean {
+    return !this.store.isEditingEmpty && this.store.editingElements[0].model.type === CreatorTypes.text;
   }
 
   // 是否是手绘工具
@@ -158,6 +164,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 是否是任意绘制工具
   get isArbitraryDrawing(): boolean {
     return this.currentCreator?.type === CreatorTypes.arbitrary;
+  }
+
+  get isArbitraryEditing(): boolean {
+    return !this.store.isEditingEmpty && this.store.editingElements[0].model.type === CreatorTypes.arbitrary;
   }
 
   // 舞台计算参数
@@ -739,11 +749,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
               break;
             }
           }
-          if (![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus)) {
-            if (this.store.isSelectedContainsTarget()) {
-              this.elementsStatus = StageShieldElementsStatus.MOVING;
-              await this._dragElements();
-            }
+          if (
+            ![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
+            this.store.isSelectedContainsTarget() &&
+            this.store.isEditingEmpty
+          ) {
+            this.elementsStatus = StageShieldElementsStatus.MOVING;
+            await this._dragElements();
           }
         }
       } else if (this.isHandActive) {
@@ -776,6 +788,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
     this.selection.refresh();
+    this._shouldRedraw = true;
   }
 
   /**
@@ -871,7 +884,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._isPressDown = true;
     this.calcPressDown(e);
 
-    if (this.isTextActive) {
+    if (this.isTextEditing) {
+      const textCursor = this._tryHitTextCursor();
+      if (textCursor) {
+        console.log(textCursor);
+      }
+    } else if (this.isTextCreating) {
       this.html.createTextInput(this.cursor.value);
     } else if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
       // 如果当前是绘制模式或则是开始绘制自由多边形，则清空选区
@@ -920,6 +938,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._originalStageWorldCoord = LodashUtils.jsonClone(this.stageWorldCoord);
     }
+  }
+
+  /**
+   * 尝试命中文本组件的光标
+   *
+   * @returns 文本光标
+   */
+  private _tryHitTextCursor(): ITextCursor | null {
+    const { selectedElements } = this.store;
+    const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
+    if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
+      return (targetElement as ElementText).hitCursor(this.cursor.worldValue);
+    }
+    return null;
   }
 
   /**
@@ -1609,7 +1641,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   _handleCancel(): void {
     if (this.isArbitraryDrawing) {
       this.commitArbitraryDrawing();
-    } else if (!this.store.isEditingEmpty) {
+    } else if (this.isArbitraryEditing) {
       this.commitEditingDrawing();
     }
   }
@@ -1934,8 +1966,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 提交编辑绘制
    */
   async commitEditingDrawing(): Promise<void> {
-    const { isEditingEmpty, editingElements } = this.store;
-    if (!isEditingEmpty) {
+    const { editingElements } = this.store;
+    if (this.isArbitraryEditing) {
       const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
       this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
       this.store.endEditingElements(editingElements);

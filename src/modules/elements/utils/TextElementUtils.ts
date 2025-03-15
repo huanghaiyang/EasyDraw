@@ -1,6 +1,7 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
 import ITextData, { ITextLine } from "@/types/IText";
 import { pick } from "lodash";
+import { nanoid } from "nanoid";
 
 /**
  * 文本工具类
@@ -21,6 +22,7 @@ export default class TextElementUtils {
       const nodes = line.split("").map(char => {
         return {
           content: char,
+          id: nanoid(),
           fontStyle,
         };
       });

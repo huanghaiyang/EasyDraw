@@ -1,4 +1,4 @@
-import { IPoint, DrawerMaskModelTypes } from "@/types";
+import { IPoint, DrawerMaskModelTypes, ElementStatus } from "@/types";
 import IElement, { DefaultAngleModel, ElementObject } from "@/types/IElement";
 import { TransformerTypes } from "@/types/ITransformer";
 import { IMaskModel } from "@/types/IModel";
@@ -63,8 +63,9 @@ export default class StageSelection implements IStageSelection {
         ...ElementUtils.createEmptyGroupObject(),
       } as ElementObject,
       this.shield,
-      true
+      true,
     );
+    this.rangeElement.status = ElementStatus.finished;
   }
 
   /**
@@ -174,6 +175,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   calcSelectionModel(): IMaskModel {
+    if (this.shield.store.isSelectedEmpty) return;
     const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element && element.boxVerticesTransformEnable && element.model.coords.length > 0) {
       return {
@@ -190,22 +192,25 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   calcTransformerModels(): IMaskModel[] {
+    if (this.shield.store.isSelectedEmpty) return [];
     const { primarySelectedElement, creatingElements } = this.shield.store;
     const element = primarySelectedElement || creatingElements[0] || this.rangeElement;
 
-    if (element && element.model.coords.length > 0) {
-      const { transformerType, angle, leanYAngle, actualAngle, transformers, verticesTransformEnable, flipX, flipY } = element;
-      return this.calcTransformerModelsByPoints(
-        transformers,
-        {
-          angle,
-          leanYAngle,
-          actualAngle,
-          flipX,
-          flipY,
-        },
-        verticesTransformEnable ? transformerType : TransformerTypes.rect,
-      );
+    if (element && element.transformersEnable && element.model.coords.length > 0) {
+      const { transformerType, angle, leanYAngle, actualAngle, transformers, coordTransformEnable, boxVerticesTransformEnable, flipX, flipY } = element;
+      if (coordTransformEnable || boxVerticesTransformEnable) {
+        return this.calcTransformerModelsByPoints(
+          transformers,
+          {
+            angle,
+            leanYAngle,
+            actualAngle,
+            flipX,
+            flipY,
+          },
+          coordTransformEnable ? transformerType : TransformerTypes.rect,
+        );
+      }
     }
     return [];
   }
@@ -249,9 +254,8 @@ export default class StageSelection implements IStageSelection {
    */
   hitTargetElements(coord: IPoint): void {
     const { store } = this.shield;
-    const stageElements = store.stageElements;
-    for (let i = stageElements.length - 1; i >= 0; i--) {
-      const element = stageElements[i];
+    for (let i = store.stageElements.length - 1; i >= 0; i--) {
+      const element = store.stageElements[i];
       const isTarget = element.isContainsCoord(coord);
       store.updateElementById(element.id, { isTarget });
       if (isTarget) {
@@ -385,6 +389,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   tryActiveController(coord: IPoint): IController {
+    if (this.shield.store.isSelectedEmpty) return;
     const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       const controller = element.getControllerByCoord(coord);
@@ -405,6 +410,7 @@ export default class StageSelection implements IStageSelection {
    * @returns
    */
   getActiveController(): IController {
+    if (this.shield.store.isSelectedEmpty) return;
     const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
       return element.getActiveController();

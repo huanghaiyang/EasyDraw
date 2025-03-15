@@ -267,17 +267,21 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 是否可以通过顶点变形
-  get verticesTransformEnable(): boolean {
+  get coordTransformEnable(): boolean {
     return false;
   }
 
   // 是否可以通过盒模型顶点变形
   get boxVerticesTransformEnable(): boolean {
-    return true;
+    return this.status === ElementStatus.finished;
   }
 
   // 是否可以通过边框变形
   get borderTransformEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
+  get transformersEnable(): boolean {
     return true;
   }
 
@@ -731,7 +735,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       }
       result.push(...this._rotateControllers);
     }
-    if (this.verticesTransformEnable || this.boxVerticesTransformEnable) {
+    if (this.coordTransformEnable || this.boxVerticesTransformEnable) {
       result.push(...this._transformers);
     }
     if (this.borderTransformEnable) {
@@ -1227,22 +1231,23 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  calcVerticesTransformers(): IVerticesTransformer[] {
+  calcCoordTransformers(): IVerticesTransformer[] {
     return this.calcTransformersByCoords(this._rotateCoords);
   }
 
   /**
-   * 直线允许顶点变换，但是其他组件仅允许根据盒模型顶点变换
+   * 计算变换器
    *
    * @returns
    */
   calcTransformers(): IVerticesTransformer[] {
-    if (this.verticesTransformEnable) {
-      return this.calcVerticesTransformers();
+    if (this.coordTransformEnable) {
+      return this.calcCoordTransformers();
     }
     if (this.boxVerticesTransformEnable) {
       return this.calcBoxVerticesTransformers();
     }
+    return [];
   }
 
   /**
@@ -1532,7 +1537,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 刷新原始顶点坐标
    */
   refreshOriginalTransformerCoords(): void {
-    this._originalTransformerCoords = this.transformers.map(transformer => {
+    this._originalTransformerCoords = this._transformers.map(transformer => {
       const { x, y } = transformer;
       return {
         x,
@@ -1716,7 +1721,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   transformByVertices(offset: IPoint): void {
-    if (!this.verticesTransformEnable && !this.boxVerticesTransformEnable) return;
+    if (!this.coordTransformEnable && !this.boxVerticesTransformEnable) return;
     this.doVerticesTransform(offset);
   }
 

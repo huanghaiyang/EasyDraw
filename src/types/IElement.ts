@@ -16,7 +16,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
-import ITextData from "@/types/IText";
+import ITextData, { ITextCursor } from "@/types/IText";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -214,14 +214,16 @@ export default interface IElement {
   get heightModifyEnable(): boolean;
   // 旋转是否可修改
   get rotationEnable(): boolean;
-  // 顶点旋转是否可修改
+  // 是否可以进行顶点旋转
   get verticesRotationEnable(): boolean;
-  // 顶点变换是否可修改
-  get verticesTransformEnable(): boolean;
-  // 盒模型顶点变换是否可修改
+  // 是否可以进行坐标变换
+  get coordTransformEnable(): boolean;
+  // 是否可以进行盒模型顶点变换
   get boxVerticesTransformEnable(): boolean;
-  // 边框变换是否可修改
+  // 是否可以进行边框变换
   get borderTransformEnable(): boolean;
+  // 控制器是否可见
+  get transformersEnable(): boolean;
   // 填充是否可修改
   get fillEnabled(): boolean;
   // 描边是否可修改
@@ -244,7 +246,7 @@ export default interface IElement {
   get leanYAngleModifyEnable(): boolean;
   // 圆角是否可修改
   get cornersModifyEnable(): boolean;
-  // 是否在编辑后刷新
+  // 是否在编辑状态改变后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
   get originalAngle(): number;
@@ -702,7 +704,7 @@ export default interface IElement {
   /**
    * 计算顶点变换器
    */
-  calcVerticesTransformers(): IPoint[];
+  calcCoordTransformers(): IPoint[];
 
   /**
    * 计算盒模型顶点变换器
@@ -1127,7 +1129,12 @@ export interface IElementImage extends IElementRect {}
 export interface IElementPolygon extends IElement {}
 
 // 舞台组件（组件）-文本
-export interface IElementText extends IElement {}
+export interface IElementText extends IElement {
+  // 文本光标
+  get textCursor(): ITextCursor;
+  // 给定坐标获取文本光标
+  hitCursor(point: IPoint): ITextCursor;
+}
 
 // 舞台组件（组件）-线段
 export interface IElementLine extends IElement {

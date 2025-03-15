@@ -1423,6 +1423,7 @@ export default class StageStore implements IStageStore {
    * 刷新舞台上的所有组件，超出舞台范围的组件不予展示
    */
   refreshStageElements(): void {
+    // 此处有性能问题
     this._elementList.forEach(({ value: element }) => {
       this._updateElementStageStatusIfy(element);
       element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });

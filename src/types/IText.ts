@@ -1,9 +1,12 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
+import { IPoint, ISize } from "@/types";
 
-export type ITextNode = {
-  content: string;
-  fontStyle: TextFontStyle;
-};
+export type ITextNode = Partial<IPoint> &
+  Partial<ISize> & {
+    id: string;
+    content: string;
+    fontStyle: TextFontStyle;
+  };
 
 export type ITextLine = {
   nodes: ITextNode[];
@@ -12,3 +15,8 @@ export type ITextLine = {
 export default interface ITextData {
   lines: ITextLine[];
 }
+
+export type ITextCursor = Partial<IPoint> &
+  Partial<ISize> & {
+    nearestNodeId?: string;
+  };

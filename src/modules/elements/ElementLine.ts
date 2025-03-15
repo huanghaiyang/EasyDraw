@@ -23,7 +23,7 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get verticesTransformEnable(): boolean {
+  get coordTransformEnable(): boolean {
     return true;
   }
 

@@ -266,11 +266,11 @@ export default class CanvasUtils {
         if (textBaseline === "top") {
           height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
         }
-        content.split("").forEach(char => {
-          const { width } = ctx.measureText(char);
-          ctx.fillText(char, prevX, prevY + (rowHeight - height) / 2);
-          prevX += width;
-        });
+        const { width } = ctx.measureText(content);
+        // TODO 此处直接修改node，需要重新设计
+        Object.assign(node, { x: prevX, y: prevY, width, height });
+        ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
+        prevX += width;
         ctx.restore();
       });
       prevY += rowHeight;
