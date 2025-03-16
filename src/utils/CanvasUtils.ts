@@ -268,7 +268,7 @@ export default class CanvasUtils {
         }
         const { width } = ctx.measureText(content);
         // TODO 此处直接修改node，需要重新设计
-        Object.assign(node, { x: prevX, y: prevY, width, height });
+        Object.assign(node, { x: prevX, y: prevY, width, height: rowHeight });
         ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
         prevX += width;
         ctx.restore();

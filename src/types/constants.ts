@@ -10,3 +10,5 @@ export const LineClosestMargin = 4;
 export const ArbitraryPointClosestMargin = 4;
 // 鼠标移动到线段最近距离
 export const LineClosestMinWidth = 8;
+// 文本光标宽度
+export const TextCursorWidth = 16;

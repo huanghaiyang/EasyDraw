@@ -23,6 +23,8 @@ import VerticesTransformer from "@/modules/handler/transformer/VerticesTransform
 import BorderTransformer from "@/modules/handler/transformer/BorderTransformer";
 import { IPointController } from "@/types/IController";
 import IElementRotation from "@/types/IElementRotation";
+import ElementText from "@/modules/elements/ElementText";
+import ElementTaskTextCursor from "@/modules/render/shield/task/ElementTaskTextCursor";
 
 /**
  * 蒙版渲染器
@@ -77,6 +79,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       selection: { rangeElement },
       cursor,
       isDrawerActive,
+      isTextEditing,
     } = this.drawer.shield;
 
     // 特殊组件处理（单个无父组件）===
@@ -105,6 +108,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     if (isDrawerActive) {
       cargo.add(this.createMaskCursorPositionTask()); // 坐标显示
       cargo.add(this.createMaskArbitraryCursorTask()); // 自定义光标
+    }
+
+    // 文本编辑状态下的绘制任务
+    if (isTextEditing) {
+      // 文本编辑时，绘制光标位置的指示器
+      cargo.add(this.createTextElementCursorTask());
     }
 
     // 任务执行与状态清理 ==========
@@ -329,6 +338,20 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         scale: 1 / stageScale,
       };
       return new MaskTaskCircleTransformer(model, this.renderParams);
+    }
+  }
+
+  /**
+   * 创建一个文本元素的光标任务
+   *
+   * @returns
+   */
+  private createTextElementCursorTask(): IRenderTask {
+    const { isEditingEmpty, editingElements } = this.drawer.shield.store;
+    if (isEditingEmpty) return;
+    const element = editingElements[0];
+    if (element instanceof ElementText) {
+      return new ElementTaskTextCursor(element, this.renderParams);
     }
   }
 }

@@ -19,4 +19,5 @@ export default interface ITextData {
 export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
     nearestNodeId?: string;
+    rotateBoxRect?: Partial<DOMRect>;
   };

@@ -115,7 +115,7 @@ export const DefaultFillColorOpacity = 0.15;
 // 默认边框宽度
 export const DefaultStrokeWidth = 1;
 // 默认字体大小
-export const DefaultFontSize = 12;
+export const DefaultFontSize = 16;
 // 默认字体家族
 export const DefaultFontFamily = "sans-serif";
 // 默认字体颜色

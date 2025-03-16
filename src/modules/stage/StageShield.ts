@@ -951,8 +951,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.calcPressDown(e);
 
     if (this.isTextEditing) {
-      const textCursor = this._tryHitTextCursor();
-      this._toggleIntervalRedraw(!!textCursor);
+      if (this._isCursorOnEditingElement()) {
+        this._tryHitTextCursor();
+      } else {
+        await this._commitEidting();
+        this._shouldSelectTopAWhilePressUp = false;
+      }
     } else if (this.isTextCreating) {
       this.html.createTextInput(this.cursor.value);
     } else if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
@@ -979,6 +983,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._originalStageWorldCoord = LodashUtils.jsonClone(this.stageWorldCoord);
     }
+  }
+
+  /**
+   * 判断光标是否在选中的组件上
+   */
+  private _isCursorOnEditingElement(): boolean {
+    const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
+    return this.store.editingElements.includes(targetElement);
   }
 
   /**
@@ -2025,17 +2037,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 提交编辑
+   */
+  private async _commitEidting(): Promise<void> {
+    const { editingElements } = this.store;
+    const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
+    this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
+    this.store.endEditingElements(editingElements);
+    this.selection.refresh();
+    this.elementsStatus = StageShieldElementsStatus.NONE;
+    this._originalEditingDataList = null;
+  }
+
+  /**
    * 提交编辑绘制
    */
   async commitEditingDrawing(): Promise<void> {
-    const { editingElements } = this.store;
     if (this.isArbitraryEditing) {
-      const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
-      this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
-      this.store.endEditingElements(editingElements);
-      this.selection.refresh();
-      this.elementsStatus = StageShieldElementsStatus.NONE;
-      this._originalEditingDataList = null;
+      await this._commitEidting();
     }
   }
 
