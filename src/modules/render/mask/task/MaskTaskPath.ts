@@ -11,7 +11,7 @@ export default class MaskTaskPath extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
-    
+
     const { width } = SelectionStyle.strokes[0];
     const specialStyles: ElementStyles = {};
     let { points } = this.model;
@@ -31,7 +31,7 @@ export default class MaskTaskPath extends MaskTaskBase {
       {},
       {
         ...SelectionStyle.strokes[0],
-        width: width * this.model.scale,
+        width: width / CanvasUtils.scale,
       },
       {
         isFold: typeof this.model.element?.isFold === "undefined" ? true : this.model.element?.isFold,

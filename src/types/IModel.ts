@@ -6,8 +6,6 @@ import { AngleModel, FlipModel } from "@/types/IElement";
 export interface IMaskModel extends AngleModel, FlipModel {
   // 类型
   type: DrawerMaskModelTypes;
-  // 比例
-  scale?: number;
   // 点
   point?: IPoint;
   // 点

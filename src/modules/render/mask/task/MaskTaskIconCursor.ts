@@ -55,14 +55,13 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
       point: { x, y },
       width,
       height,
-      scale,
     } = this.model as IIconModel;
     await CanvasUtils.drawImgLike(
       this.canvas,
       this.img,
       {
-        x: (x - (width * scale) / 2) / scale,
-        y: (y - (height * scale) / 2) / scale,
+        x: (x - width / CanvasUtils.scale / 2) * CanvasUtils.scale,
+        y: (y - height / CanvasUtils.scale / 2) * CanvasUtils.scale,
         width,
         height,
       },

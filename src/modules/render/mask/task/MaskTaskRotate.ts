@@ -14,15 +14,15 @@ export default class MaskTaskRotate extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
-    let { point, width, height, scale } = this.model as IRotationModel;
+    let { point, width, height } = this.model as IRotationModel;
     point = ElementUtils.calcStageRelativePoint(point);
 
     await CanvasUtils.drawImgLike(
       this.canvas,
       this.svg,
       {
-        x: (point.x - (width * scale) / 2) / scale,
-        y: (point.y - (height * scale) / 2) / scale,
+        x: (point.x - width / CanvasUtils.scale / 2) * CanvasUtils.scale,
+        y: (point.y - height / CanvasUtils.scale / 2) * CanvasUtils.scale,
         width,
         height,
       },

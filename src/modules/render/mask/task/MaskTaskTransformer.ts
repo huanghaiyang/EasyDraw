@@ -11,7 +11,7 @@ export default class MaskTaskTransformer extends MaskTaskBase {
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
     const { width } = ControllerStyle.strokes[0];
-    let { scale, point, leanYAngle, actualAngle } = this.model;
+    let { point, leanYAngle, actualAngle } = this.model;
     point = ElementUtils.calcStageRelativePoint(point);
 
     CanvasUtils.drawPathWithScale(
@@ -19,8 +19,8 @@ export default class MaskTaskTransformer extends MaskTaskBase {
       CommonUtils.get4BoxPoints(
         point,
         {
-          width: TransformerSize * scale,
-          height: TransformerSize * scale,
+          width: TransformerSize / CanvasUtils.scale,
+          height: TransformerSize / CanvasUtils.scale,
         },
         {
           angle: actualAngle,
@@ -31,7 +31,7 @@ export default class MaskTaskTransformer extends MaskTaskBase {
       ControllerStyle.fills[0],
       {
         ...ControllerStyle.strokes[0],
-        width: width * scale,
+        width: width / CanvasUtils.scale,
       },
       {
         calcVertices: false,

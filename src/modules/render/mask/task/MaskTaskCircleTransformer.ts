@@ -13,13 +13,19 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
     let { point } = this.model;
 
     if (!point) return;
-    let { radius, scale } = this.model;
+    let { radius } = this.model;
+    // 描边样式
     const strokeStyle = { ...ControllerStyle.strokes[0] };
-    strokeStyle.width *= scale;
+    // 保证描边宽度在不同缩放下保持一致
+    strokeStyle.width /= CanvasUtils.scale;
+    // 填充样式
     const fillStyle = { ...ControllerStyle.fills[0] };
-    radius *= scale;
+    // 保证半径在不同缩放下保持一致
+    radius /= CanvasUtils.scale;
+    // 转换为舞台坐标
     point = ElementUtils.calcStageRelativePoint(point);
 
+    // 绘制填充
     CanvasUtils.drawEllipseFillWithScale(
       this.canvas,
       point,
@@ -30,6 +36,7 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
       fillStyle,
     );
 
+    // 绘制描边
     CanvasUtils.drawEllipseStrokeWithScale(
       this.canvas,
       point,

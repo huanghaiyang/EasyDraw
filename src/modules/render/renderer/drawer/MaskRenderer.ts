@@ -25,6 +25,7 @@ import { IPointController } from "@/types/IController";
 import IElementRotation from "@/types/IElementRotation";
 import ElementText from "@/modules/elements/ElementText";
 import ElementTaskTextCursor from "@/modules/render/shield/task/ElementTaskTextCursor";
+import { pick } from "lodash";
 
 /**
  * 蒙版渲染器
@@ -143,7 +144,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   private createMaskCursorPositionTask(): IRenderTask {
     // 获取当前光标位置（舞台坐标系）
     const {
-      cursor: { value, worldValue },
+      cursor: { worldValue },
       stageScale,
     } = this.drawer.shield;
     if (!worldValue) return;
@@ -152,8 +153,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const model: IMaskModel = {
       point: {
         // 在光标右下方20像素处显示（考虑舞台缩放比例）
-        x: value.x + 20 / stageScale,
-        y: value.y + 20 / stageScale,
+        x: worldValue.x + 20 / stageScale,
+        y: worldValue.y + 20 / stageScale,
       },
       type: DrawerMaskModelTypes.cursorPosition,
       text: `${MathUtils.precise(worldValue.x, 1)},${MathUtils.precise(worldValue.y, 1)}`, // 格式化坐标值
@@ -172,7 +173,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns {IRenderTask[]} 选区路径渲染任务数组
    */
   private createMaskSelectionTasks(): IRenderTask[] {
-    const { selection, stageScale } = this.drawer.shield;
+    const { selection } = this.drawer.shield;
     const tasks: IRenderTask[] = [];
     // 合并主选区和子选区模型
     const models: IMaskModel[] = [...selection.getModels(), selection.selectionModel];
@@ -180,13 +181,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     models.forEach(model => {
       if (model && model.points.length > 0) {
         // 创建缩放适配的路径任务
-        const task = new MaskTaskPath(
-          {
-            ...model,
-            scale: 1 / stageScale, // 根据舞台缩放调整路径尺寸
-          },
-          this.renderParams,
-        );
+        const task = new MaskTaskPath(model, this.renderParams);
         tasks.push(task);
       }
     });
@@ -213,16 +208,19 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   private createMaskTransformerTasks(): IRenderTask[] {
     const {
       selection: { transformerModels },
-      stageScale,
     } = this.drawer.shield;
-    return transformerModels.map(model => {
-      switch (model.element.transformerType) {
-        case TransformerTypes.circle:
-          return new MaskTaskCircleTransformer({ ...model, scale: 1 / stageScale }, this.renderParams);
-        case TransformerTypes.rect:
-          return new MaskTaskTransformer(model, this.renderParams);
-      }
-    });
+    return transformerModels
+      .map(model => {
+        switch (model.element.transformerType) {
+          case TransformerTypes.circle:
+            return new MaskTaskCircleTransformer(model, this.renderParams);
+          case TransformerTypes.rect:
+            return new MaskTaskTransformer(model, this.renderParams);
+          default:
+            return null;
+        }
+      })
+      .filter(task => !!task);
   }
 
   /**
@@ -234,7 +232,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const {
       store: { primarySelectedElement },
       selection: { rangeElement },
-      stageScale,
     } = this.drawer.shield;
     const element = primarySelectedElement || rangeElement;
     if (element) {
@@ -250,8 +247,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
               type: DrawerMaskModelTypes.transformer,
               radius: DefaultControllerRadius,
             };
-            return new MaskTaskCircleTransformer({ ...model, scale: 1 / stageScale }, this.renderParams);
+            return new MaskTaskCircleTransformer(model, this.renderParams);
           }
+          return null;
         })
         .filter(model => !!model);
     }
@@ -261,19 +259,14 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   /**
    * 创建一个绘制旋转图标的任务
    *
-   * @param element
+   * @param rotation
    * @returns
    */
   private createMaskRotateTask(rotation: IElementRotation): IRenderTask {
-    const { x, y, points, angle, width, height, scale } = rotation;
     const model: IRotationModel = {
-      point: { x, y },
-      points,
-      angle,
+      point: { x: rotation.x, y: rotation.y },
       type: DrawerMaskModelTypes.rotate,
-      width,
-      height,
-      scale,
+      ...pick(rotation, ["points", "angle", "width", "height"]),
     };
     return new MaskTaskRotate(model, this.renderParams);
   }
@@ -329,13 +322,12 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskArbitraryCursorTask(): IRenderTask {
-    const { currentCreator, cursor, stageScale } = this.drawer.shield;
+    const { currentCreator, cursor } = this.drawer.shield;
     if (currentCreator.category === CreatorCategories.freedom) {
       const model: IMaskModel = {
         point: cursor.value,
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultControllerRadius,
-        scale: 1 / stageScale,
       };
       return new MaskTaskCircleTransformer(model, this.renderParams);
     }
