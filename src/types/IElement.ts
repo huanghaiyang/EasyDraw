@@ -246,6 +246,8 @@ export default interface IElement {
   get leanYAngleModifyEnable(): boolean;
   // 圆角是否可修改
   get cornersModifyEnable(): boolean;
+  // 圆角是否展示
+  get cornerEnable(): boolean;
   // 是否在编辑状态改变后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度

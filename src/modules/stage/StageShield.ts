@@ -701,6 +701,44 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 执行组件操作
+   */
+  private async _doElementsOperating(): Promise<void> {
+    switch (this.elementsStatus) {
+      case StageShieldElementsStatus.ROTATING: {
+        this._rotateElements();
+        break;
+      }
+      case StageShieldElementsStatus.MOVING: {
+        this._dragElements();
+        break;
+      }
+      case StageShieldElementsStatus.TRANSFORMING: {
+        this._transformElements();
+        break;
+      }
+      case StageShieldElementsStatus.CORNER_MOVING: {
+        this._movingElementsCorner();
+        break;
+      }
+    }
+  }
+
+  /**
+   * 当组件操作时更新状态
+   */
+  private async _updateStatusWhileElementsOperating(): Promise<void> {
+    if (
+      ![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
+      this.store.isSelectedContainsTarget() &&
+      this.store.isEditingEmpty
+    ) {
+      this.elementsStatus = StageShieldElementsStatus.MOVING;
+      await this._dragElements();
+    }
+  }
+
+  /**
    * 鼠标移动事件
    *
    * @param e
@@ -731,32 +769,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (this.store.isSelectedEmpty) {
           this._createRange();
         } else if (this.checkCursorPressMovedALittle(e)) {
-          switch (this.elementsStatus) {
-            case StageShieldElementsStatus.ROTATING: {
-              this._rotateElements();
-              break;
-            }
-            case StageShieldElementsStatus.MOVING: {
-              this._dragElements();
-              break;
-            }
-            case StageShieldElementsStatus.TRANSFORMING: {
-              this._transformElements();
-              break;
-            }
-            case StageShieldElementsStatus.CORNER_MOVING: {
-              this._movingElementsCorner();
-              break;
-            }
-          }
-          if (
-            ![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
-            this.store.isSelectedContainsTarget() &&
-            this.store.isEditingEmpty
-          ) {
-            this.elementsStatus = StageShieldElementsStatus.MOVING;
-            await this._dragElements();
-          }
+          await this._doElementsOperating();
+          await this._updateStatusWhileElementsOperating();
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
@@ -875,6 +889,58 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 开启或者关闭定时重绘功能
+   *
+   * @param value
+   */
+  private _toggleIntervalRedraw(value: boolean): void {
+    setTimeout(() => {
+      this._shouldRedraw = value;
+    }, 0);
+  }
+
+  /**
+   * 预处理旋转状态
+   *
+   * @param controller
+   */
+  private _preProcessRotationStates(controller: IController): void {
+    this.store.updateElementById(controller.host.id, {
+      isRotatingTarget: true,
+    });
+    // 如果是选区旋转，则只处理选区组件
+    if (this.store.isMultiSelected) {
+      // 计算选区旋转的中心点等数据信息
+      this.store.refreshElementsRotationStates([this.selection.rangeElement], this._pressDownPosition);
+    } else {
+      this.store.refreshRotatingStates(this._pressDownPosition);
+    }
+  }
+
+  /**
+   * 处理当鼠标按下时的组件是否应该选中
+   *
+   * @param e
+   */
+  private _processSelectWhilePressDown(e: MouseEvent): void {
+    // 获取鼠标点击的组件
+    const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
+    // 判断当前鼠标位置的组件是否已经被选中
+    const isSelectContainsTarget = this.store.isSelectedContainsTarget();
+    if (e.ctrlKey) {
+      targetElement && this.store.toggleSelectElement(targetElement);
+    } else {
+      // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
+      if (!isSelectContainsTarget) {
+        this._clearStageSelects();
+        if (targetElement) {
+          this.store.selectElement(targetElement);
+        }
+      }
+    }
+  }
+
+  /**
    * 鼠标按下事件
    *
    * @param e
@@ -886,9 +952,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
     if (this.isTextEditing) {
       const textCursor = this._tryHitTextCursor();
-      if (textCursor) {
-        console.log(textCursor);
-      }
+      this._toggleIntervalRedraw(!!textCursor);
     } else if (this.isTextCreating) {
       this.html.createTextInput(this.cursor.value);
     } else if (this.isDrawerActive && !this.store.isSelectedEqCreating()) {
@@ -903,37 +967,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         });
       }
       if (controller instanceof ElementRotation) {
-        this.store.updateElementById(controller.host.id, {
-          isRotatingTarget: true,
-        });
-        // 如果是选区旋转，则只处理选区组件
-        if (this.store.isMultiSelected) {
-          // 计算选区旋转的中心点等数据信息
-          this.store.refreshElementsRotationStates([this.selection.rangeElement], this._pressDownPosition);
-        } else {
-          this.store.refreshRotatingStates(this._pressDownPosition);
-        }
+        this._preProcessRotationStates(controller);
         this.elementsStatus = StageShieldElementsStatus.ROTATING;
       } else if (controller instanceof VerticesTransformer || controller instanceof BorderTransformer) {
         this.elementsStatus = StageShieldElementsStatus.TRANSFORMING;
       } else if (controller instanceof CornerController) {
         this.elementsStatus = StageShieldElementsStatus.CORNER_MOVING;
       } else {
-        // 获取鼠标点击的组件
-        const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
-        // 判断当前鼠标位置的组件是否已经被选中
-        const isSelectContainsTarget = this.store.isSelectedContainsTarget();
-        if (e.ctrlKey) {
-          targetElement && this.store.toggleSelectElement(targetElement);
-        } else {
-          // 如果当前鼠标位置的组件没有被选中，则将当前组件设置为选中状态，其他组件取消选中状态
-          if (!isSelectContainsTarget) {
-            this._clearStageSelects();
-            if (targetElement) {
-              this.store.selectElement(targetElement);
-            }
-          }
-        }
+        this._processSelectWhilePressDown(e);
       }
     } else if (this.isHandActive) {
       this._originalStageWorldCoord = LodashUtils.jsonClone(this.stageWorldCoord);
@@ -986,6 +1027,53 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 结束组件操作
+   */
+  private async _endElementsOperation(): Promise<void> {
+    // 判断是否是拖动组件操作，并且判断拖动位移是否有效
+    switch (this.elementsStatus) {
+      case StageShieldElementsStatus.MOVING: {
+        await this._endElementsDrag();
+        break;
+      }
+      case StageShieldElementsStatus.ROTATING: {
+        await this._endElementsRotate();
+        break;
+      }
+      case StageShieldElementsStatus.TRANSFORMING: {
+        await this._endElementsTransform();
+        break;
+      }
+      case StageShieldElementsStatus.CORNER_MOVING: {
+        await this._endMovingElementsCorner();
+        break;
+      }
+    }
+  }
+
+  /**
+   * 当结束组件操作时更新组件状态
+   */
+  private _updateStatusWhileEndElementsOperation(): void {
+    if (
+      [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus) &&
+      this.store.isEditingEmpty
+    ) {
+      this.elementsStatus = StageShieldElementsStatus.NONE;
+    }
+  }
+
+  /**
+   * 判断鼠标抬起时是否需要选中顶层组件
+   */
+  private _selectTopAElementIfy(): void {
+    if (this._shouldSelectTopAWhilePressUp) {
+      this._selectTopAElement(this.store.selectedElements);
+    }
+    this._shouldSelectTopAWhilePressUp = true;
+  }
+
+  /**
    * 鼠标抬起事件
    *
    * @param e
@@ -1005,36 +1093,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.selection.selectRange();
         this.selection.setRange(null);
       } else if (this.checkCursorPressUpALittle(e)) {
-        // 判断是否是拖动组件操作，并且判断拖动位移是否有效
-        switch (this.elementsStatus) {
-          case StageShieldElementsStatus.MOVING: {
-            await this._endElementsDrag();
-            break;
-          }
-          case StageShieldElementsStatus.ROTATING: {
-            await this._endElementsRotate();
-            break;
-          }
-          case StageShieldElementsStatus.TRANSFORMING: {
-            await this._endElementsTransform();
-            break;
-          }
-          case StageShieldElementsStatus.CORNER_MOVING: {
-            await this._endMovingElementsCorner();
-            break;
-          }
-        }
-        if (
-          [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus) &&
-          this.store.isEditingEmpty
-        ) {
-          this.elementsStatus = StageShieldElementsStatus.NONE;
-        }
+        await this._endElementsOperation();
+        this._updateStatusWhileEndElementsOperation();
       } else if (!e.ctrlKey && !e.shiftKey) {
-        if (this._shouldSelectTopAWhilePressUp) {
-          this._selectTopAElement(this.store.selectedElements);
-        }
-        this._shouldSelectTopAWhilePressUp = true;
+        this._selectTopAElementIfy();
       }
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e);

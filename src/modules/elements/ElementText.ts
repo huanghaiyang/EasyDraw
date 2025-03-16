@@ -6,11 +6,13 @@ import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskH
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
+
+  // 文本光标
+  private _textCursor: ITextCursor;
+
   get editingEnable(): boolean {
     return true;
   }
-  // 文本光标
-  private _textCursor: ITextCursor;
 
   get textCursor(): ITextCursor {
     return this._textCursor;
@@ -18,6 +20,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   // 是否启用控制器
   get transformersEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
+  get cornerEnable(): boolean {
     return this.status === ElementStatus.finished;
   }
 

@@ -722,6 +722,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get cornerEnable(): boolean {
+    return false;
+  }
+
   get rotateControllers(): IPointController[] {
     return this._rotateControllers;
   }

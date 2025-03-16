@@ -25,6 +25,10 @@ export default class ElementRect extends Element implements IElementRect {
     return true;
   }
 
+  get cornerEnable(): boolean {
+    return true;
+  }
+
   get cornerControllers(): ICornerController[] {
     return this._cornerControllers;
   }
@@ -46,7 +50,11 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get controllers(): IController[] {
-    return [...super.controllers, ...this.cornerControllers];
+    const result = super.controllers;
+    if (this.cornerEnable) {
+      result.push(...this.cornerControllers);
+    }
+    return result;
   }
 
   get isAllCornerEqual(): boolean {
