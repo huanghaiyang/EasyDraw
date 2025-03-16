@@ -487,4 +487,15 @@ export default class CommonUtils {
     };
     return rect;
   }
+
+  /**
+   * 判断点是否在矩形内
+   *
+   * @param rect
+   * @param point
+   * @returns
+   */
+  static isPointInRect(rect: Partial<DOMRect>, point: IPoint): boolean {
+    return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
+  }
 }

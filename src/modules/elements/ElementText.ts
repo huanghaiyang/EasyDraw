@@ -28,6 +28,18 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 舞台状态变化
+   */
+  onStageChanged(): void {
+    super.onStageChanged();
+    if (this._textCursor) {
+      const updatedProps = ElementTaskHelper.getTextCursorUpdatedProps(this.model.data as ITextData, this._textCursor);
+      Object.assign(this._textCursor, updatedProps);
+      this._textCursor.rotateBoxRect = ElementTaskHelper.getRotateBoxRect(this);
+    }
+  }
+
+  /**
    * 给定坐标获取文本光标
    *
    * @param coord 坐标

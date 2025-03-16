@@ -1020,6 +1020,11 @@ export default interface IElement {
   onRatioLockedChanged(): void;
 
   /**
+   * 舞台缩放、滚动、大小变化
+   */
+  onStageChanged(): void;
+
+  /**
    * 转换为JSON
    */
   toJson(): Promise<ElementObject>;

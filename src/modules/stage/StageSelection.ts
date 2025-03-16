@@ -228,7 +228,6 @@ export default class StageSelection implements IStageSelection {
       const model: IMaskModel = {
         point,
         type: DrawerMaskModelTypes.transformer,
-        scale: 1 / this.shield.stageScale,
         element: {
           transformerType,
         },

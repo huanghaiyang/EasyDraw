@@ -1082,6 +1082,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 舞台缩放、滚动、大小变化
+   */
+  onStageChanged(): void {
+    // TODO
+  }
+
+  /**
    * 获取显示角度
    *
    * @returns

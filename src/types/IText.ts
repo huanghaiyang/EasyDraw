@@ -18,6 +18,7 @@ export default interface ITextData {
 
 export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
-    nearestNodeId?: string;
+    nodeId?: string;
+    pos: number; // 0 表示左侧，1 表示右侧
     rotateBoxRect?: Partial<DOMRect>;
   };

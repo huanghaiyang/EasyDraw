@@ -802,6 +802,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
     this.selection.refresh();
+    this.store.editingElements.forEach(element => element.onStageChanged());
     this._shouldRedraw = true;
   }
 
@@ -1379,6 +1380,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._updateCanvasSize(rect);
     this.store.refreshStageElements();
     this.selection.refresh();
+    this.store.editingElements.forEach(element => element.onStageChanged());
     this._shouldRedraw = true;
   }
 
@@ -1431,6 +1433,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 刷新当前舞台世界坐标
    */
   private _refreshStageWorldCoord(e: MouseEvent): void {
+    if (!this._originalStageWorldCoord) return;
     const point = CommonUtils.getEventPosition(e, this.stageRect, this.stageScale);
     this.stageWorldCoord = {
       x: this._originalStageWorldCoord.x - (point.x - this._pressDownPosition.x),
@@ -1468,6 +1471,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
     this.selection.refresh();
+    this.store.editingElements.forEach(element => element.onStageChanged());
     this._shouldRedraw = true;
   }
 
@@ -1491,8 +1495,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       x: stageWorldCoordX,
       y: stageWorldCoordY,
     };
-
     this.setScale(value);
+    this.store.editingElements.forEach(element => element.onStageChanged());
   }
 
   /**
@@ -1505,6 +1509,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
     this.selection.refresh();
+    this.store.editingElements.forEach(element => element.onStageChanged());
     this._shouldRedraw = true;
   }
 
@@ -1554,6 +1559,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.stageWorldCoord = { x: 0, y: 0 };
       this.setScale(1);
     }
+    this.store.editingElements.forEach(element => element.onStageChanged());
   }
 
   /**
