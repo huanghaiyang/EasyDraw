@@ -794,6 +794,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 触发编辑组件的舞台变化事件
+   */
+  private triggetEditingElementsStageChanged(): void {
+    requestAnimationFrame(() => {
+      this.store.editingElements.forEach(element => element.onStageChanged());
+    });
+  }
+
+  /**
    * 舞台拖动
    *
    * @param e
@@ -802,7 +811,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
     this.selection.refresh();
-    this.store.editingElements.forEach(element => element.onStageChanged());
+    this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
 
@@ -1380,7 +1389,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._updateCanvasSize(rect);
     this.store.refreshStageElements();
     this.selection.refresh();
-    this.store.editingElements.forEach(element => element.onStageChanged());
+    this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
 
@@ -1471,7 +1480,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
     this.selection.refresh();
-    this.store.editingElements.forEach(element => element.onStageChanged());
+    this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
 
@@ -1496,7 +1505,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       y: stageWorldCoordY,
     };
     this.setScale(value);
-    this.store.editingElements.forEach(element => element.onStageChanged());
   }
 
   /**
@@ -1559,7 +1567,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.stageWorldCoord = { x: 0, y: 0 };
       this.setScale(1);
     }
-    this.store.editingElements.forEach(element => element.onStageChanged());
   }
 
   /**

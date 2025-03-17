@@ -20,7 +20,7 @@ function getTextCursorNodeAbout(node: ITextNode, pos: number): Partial<ITextCurs
     pos,
     x: x + (pos === 1 ? width : 0),
     y,
-    width: TextCursorWidth * CanvasUtils.scale,
+    width: TextCursorWidth,
     height,
   };
 }
@@ -42,7 +42,7 @@ function getTextCursorLineAbout(line: ITextLine): Partial<ITextCursor> {
     return {
       x,
       y,
-      width: TextCursorWidth * CanvasUtils.scale,
+      width: TextCursorWidth,
       height,
     };
   }
