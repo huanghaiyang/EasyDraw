@@ -250,29 +250,33 @@ export default class CanvasUtils {
       let prevX = flipX ? -points[0].x : points[0].x;
       const { nodes } = line;
       let rowHeight = 0;
-      nodes.forEach(node => {
-        rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
-      });
-      nodes.forEach(node => {
-        ctx.save();
-        let { content, fontStyle: nodeFontStyle } = node;
-        nodeFontStyle = CanvasUtils.transFontWithScale(nodeFontStyle);
-        let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
-        ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
-        ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
-        const metrics = ctx.measureText(FontUtils.DUMMY_TEXT);
-        const { actualBoundingBoxDescent, fontBoundingBoxDescent } = metrics;
-        let height: number = 0;
-        if (textBaseline === "top") {
-          height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
-        }
-        const { width } = ctx.measureText(content);
-        // TODO 此处直接修改node，需要重新设计
-        Object.assign(node, { x: prevX, y: prevY, width, height: rowHeight });
-        ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
-        prevX += width;
-        ctx.restore();
-      });
+      if (nodes.length === 0) {
+        rowHeight = fontLineHeight * fontSize * CanvasUtils.scale;
+      } else {
+        nodes.forEach(node => {
+          rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
+        });
+        nodes.forEach(node => {
+          ctx.save();
+          let { content, fontStyle: nodeFontStyle } = node;
+          nodeFontStyle = CanvasUtils.transFontWithScale(nodeFontStyle);
+          let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
+          ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
+          ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
+          const metrics = ctx.measureText(FontUtils.DUMMY_TEXT);
+          const { actualBoundingBoxDescent, fontBoundingBoxDescent } = metrics;
+          let height: number = 0;
+          if (textBaseline === "top") {
+            height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
+          }
+          const { width } = ctx.measureText(content);
+          // TODO 此处直接修改node，需要重新设计
+          Object.assign(node, { x: prevX, y: prevY, width, height: rowHeight });
+          ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
+          prevX += width;
+          ctx.restore();
+        });
+      }
       prevY += rowHeight;
     });
     ctx.restore();

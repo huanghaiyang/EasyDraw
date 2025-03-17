@@ -1747,12 +1747,14 @@ export default class StageStore implements IStageStore {
   private _setElementsEditing(elements: IElement[], value: boolean): void {
     elements.forEach(element => {
       if (element.editingEnable) {
-        this.updateElementById(element.id, {
-          isEditing: value,
-          status: value ? ElementStatus.editing : ElementStatus.finished,
-        });
-        if (element.tfRefreshAfterEdChanged) {
-          element.refresh();
+        if (value !== element.isEditing) {
+          this.updateElementById(element.id, {
+            isEditing: value,
+            status: value ? ElementStatus.editing : ElementStatus.finished,
+          });
+          if (element.tfRefreshAfterEdChanged) {
+            element.refresh();
+          }
         }
       }
     });

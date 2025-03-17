@@ -27,6 +27,11 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  _setIsEditing(value: boolean): void {
+    super._setIsEditing(value);
+    this._textCursor = null;
+  }
+
   /**
    * 舞台状态变化
    */
