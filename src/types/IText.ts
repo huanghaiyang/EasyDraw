@@ -8,9 +8,10 @@ export type ITextNode = Partial<IPoint> &
     fontStyle: TextFontStyle;
   };
 
-export type ITextLine = {
-  nodes: ITextNode[];
-};
+export type ITextLine = Partial<IPoint> &
+  Partial<ISize> & {
+    nodes: ITextNode[];
+  };
 
 export default interface ITextData {
   lines: ITextLine[];
@@ -19,6 +20,7 @@ export default interface ITextData {
 export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
     nodeId?: string;
-    pos: number; // 0 表示左侧，1 表示右侧
+    lineNumber?: number;
+    pos?: number; // 0 表示左侧，1 表示右侧
     rotateBoxRect?: Partial<DOMRect>;
   };

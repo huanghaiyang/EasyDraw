@@ -152,7 +152,7 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static translatePoints(points: IPoint[], rect: Partial<DOMRect>) {
+  static transPointsOfBox(points: IPoint[], rect: Partial<DOMRect>) {
     const offset = CanvasUtils.calcOffsetByRect(rect);
     return points.map(point => {
       return MathUtils.translate(point, offset);
@@ -239,7 +239,7 @@ export default class CanvasUtils {
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
-    points = CanvasUtils.translatePoints(points, rect);
+    points = CanvasUtils.transPointsOfBox(points, rect);
     ctx.font = `${fontSize}px ${fontFamily}`;
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
@@ -248,12 +248,14 @@ export default class CanvasUtils {
 
     textData.lines.forEach(line => {
       let prevX = flipX ? -points[0].x : points[0].x;
+      Object.assign(line, { x: prevX, y: prevY, width: rect.width });
       const { nodes } = line;
       let rowHeight = 0;
       if (nodes.length === 0) {
-        rowHeight = fontLineHeight * fontSize * CanvasUtils.scale;
+        rowHeight = fontLineHeight * fontSize;
       } else {
         nodes.forEach(node => {
+          // 注意node节点的fontSize是没有缩放的，所以这里需要再次缩放
           rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
         });
         nodes.forEach(node => {
@@ -277,6 +279,7 @@ export default class CanvasUtils {
           ctx.restore();
         });
       }
+      line.height = rowHeight;
       prevY += rowHeight;
     });
     ctx.restore();
@@ -735,7 +738,7 @@ export default class CanvasUtils {
   static transformEllipse(ctx: CanvasRenderingContext2D, point: IPoint, model: EllipseModel, rect?: Partial<DOMRect>, options?: RenderParams): { point: IPoint; model: EllipseModel } {
     if (rect && options) {
       CanvasUtils.transformCtx(ctx, rect, CanvasUtils.getTransformValues(options));
-      point = CanvasUtils.translatePoints([point], rect)[0];
+      point = CanvasUtils.transPointsOfBox([point], rect)[0];
     }
     model = CanvasUtils.transEllipseModelWithScale(model);
     return { point, model };
