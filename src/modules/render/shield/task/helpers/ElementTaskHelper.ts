@@ -2,6 +2,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import IElement, { IElementRect } from "@/types/IElement";
+import { RenderRect } from "@/types/IRender";
 import ITextData, { ITextCursor, ITextLine, ITextNode } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -75,7 +76,7 @@ export default class ElementTaskHelper {
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
 
-    const rect = ElementTaskHelper.calculateRotatedBoxRect(element);
+    const rect = ElementTaskHelper.calcElementRenderRect(element) as RenderRect;
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawInnerArcPathFillWithScale(canvas, rect, arcFillPoints, fillStyle, options);
     });
@@ -97,9 +98,9 @@ export default class ElementTaskHelper {
    * @param element
    * @returns
    */
-  static calculateRotatedBoxRect(element: IElement): Partial<DOMRect> {
+  static calcElementRenderRect(element: IElement): Partial<DOMRect> {
     const { rotateBoxCoords, center } = element;
-    let rect = CommonUtils.calcRotateBoxRect(rotateBoxCoords, center);
+    let rect = CommonUtils.calcRenderRect(rotateBoxCoords, center);
     rect = CommonUtils.scaleRect(rect, element.shield.stageScale);
     return rect;
   }
@@ -115,7 +116,7 @@ export default class ElementTaskHelper {
   static retrieveTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>): ITextCursor {
     const textCursor: ITextCursor = {};
     // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
-    const [curPoint] = CanvasUtils.transPointsOfBox([position], rect);
+    const [curPoint] = CanvasUtils.transPointsOfBox([position], rect as RenderRect);
     const { lines } = textData;
     let line: ITextLine;
     let lineNumber = -1;
@@ -152,7 +153,7 @@ export default class ElementTaskHelper {
       textCursor.lineNumber = lines.length - 1;
       Object.assign(textCursor, getTextCursorLineAbout(lines[lines.length - 1]));
     }
-    textCursor.rotateBoxRect = rect;
+    textCursor.renderRect = rect;
     return textCursor;
   }
 

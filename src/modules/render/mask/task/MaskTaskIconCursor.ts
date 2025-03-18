@@ -8,6 +8,7 @@ import Hand from "@/assets/svg/hand.svg";
 import Cross from "@/assets/svg/cross_.svg";
 import Move from "@/assets/svg/move.svg";
 import RotateNE from "@/assets/svg/rotate-ne.svg";
+import { RenderRect } from "@/types/IRender";
 
 export default class MaskTaskIconCursor extends MaskTaskBase {
   type: CursorTypes = CursorTypes.vertices;
@@ -64,7 +65,7 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
         y: (y - height / CanvasUtils.scale / 2) * CanvasUtils.scale,
         width,
         height,
-      },
+      } as RenderRect,
       {
         angle: this.model.angle,
       },

@@ -22,5 +22,5 @@ export type ITextCursor = Partial<IPoint> &
     nodeId?: string;
     lineNumber?: number;
     pos?: number; // 0 表示左侧，1 表示右侧
-    rotateBoxRect?: Partial<DOMRect>;
+    renderRect?: Partial<DOMRect>;
   };

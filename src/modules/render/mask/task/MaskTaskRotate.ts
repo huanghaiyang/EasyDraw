@@ -3,6 +3,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import RotateSvg from "@/assets/svg/rotate.svg";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IRotationModel } from "@/types/IModel";
+import { RenderRect } from "@/types/IRender";
 
 export default class MaskTaskRotate extends MaskTaskBase {
   get svg() {
@@ -25,7 +26,7 @@ export default class MaskTaskRotate extends MaskTaskBase {
         y: (point.y - height / CanvasUtils.scale / 2) * CanvasUtils.scale,
         width,
         height,
-      },
+      } as RenderRect,
       {
         angle: this.model.angle,
       },

@@ -75,3 +75,19 @@ export type ArcPoints = {
   value: number;
   corner?: IPoint;
 };
+
+/**
+ * 用于渲染的父盒模型
+ *
+ * 通常用于以下场景：
+ *
+ * 1. 将一个较小的图片渲染到一个较大的盒子的指定位置，例如渲染文本的光标到文本内部，由于文本存在旋转、翻转或者倾斜，则需要将光标相对于文本组件中心点进行渲染
+ */
+export type DestinationRect = {
+  desX: number;
+  desY: number;
+  desWidth: number;
+  desHeight: number;
+};
+
+export type RenderRect = Partial<DOMRect> & DestinationRect;

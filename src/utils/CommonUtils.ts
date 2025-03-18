@@ -473,7 +473,7 @@ export default class CommonUtils {
    * @param rotateBoxPoints
    * @param center
    */
-  static calcRotateBoxRect(rotateBoxPoints: IPoint[], center: IPoint): Partial<DOMRect> {
+  static calcRenderRect(rotateBoxPoints: IPoint[], center: IPoint): Partial<DOMRect> {
     // 计算倾斜后的图片的宽度
     const width = MathUtils.calcDistance(rotateBoxPoints[0], rotateBoxPoints[1]);
     // 计算倾斜后的图片的高度

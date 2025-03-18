@@ -3,6 +3,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementImage } from "@/types/IElement";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
+import { RenderRect } from "@/types/IRender";
 
 export default class ElementTaskImage extends ElementTaskBase {
   /**
@@ -31,7 +32,7 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
     };
 
-    const rect = ElementTaskHelper.calculateRotatedBoxRect(this.element);
+    const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制图片
     CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, rect, {

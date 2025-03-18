@@ -1,5 +1,6 @@
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
+import { RenderRect } from "@/types/IRender";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -33,7 +34,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
 
     const unLeanStrokePoints = ElementUtils.batchCalcStageRelativePoints(unLeanStrokeCoords);
     const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
-    const rect = CommonUtils.getRect(innermostStrokePoints);
+    const rect = CommonUtils.getRect(innermostStrokePoints) as RenderRect;
 
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawEllipseFillWithScale(
@@ -50,7 +51,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
     });
 
     unLeanStrokePoints.forEach((points, index) => {
-      const rect = CommonUtils.getRect(points);
+      const rect = CommonUtils.getRect(points) as RenderRect;
       CanvasUtils.drawEllipseStrokeWithScale(
         this.canvas,
         center,

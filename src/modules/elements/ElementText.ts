@@ -41,7 +41,7 @@ export default class ElementText extends ElementRect implements IElementText {
     if (this._textCursor) {
       const updatedProps = ElementTaskHelper.getUpdatedTextCursorProps(this.model.data as ITextData, this._textCursor);
       Object.assign(this._textCursor, updatedProps);
-      this._textCursor.rotateBoxRect = ElementTaskHelper.calculateRotatedBoxRect(this);
+      this._textCursor.renderRect = ElementTaskHelper.calcElementRenderRect(this);
     }
   }
 
@@ -60,7 +60,7 @@ export default class ElementText extends ElementRect implements IElementText {
       // 转换为舞台坐标
       const point = ElementUtils.calcStageRelativePoint(coord);
       // 计算旋转盒模型的rect
-      const rect = ElementTaskHelper.calculateRotatedBoxRect(this);
+      const rect = ElementTaskHelper.calcElementRenderRect(this);
       // 获取文本光标
       this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
     }

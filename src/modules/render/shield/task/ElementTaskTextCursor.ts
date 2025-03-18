@@ -20,20 +20,7 @@ export default class ElementTaskText extends ElementTaskBase implements IElement
     if (!this.canvas || !this.element) return;
     const { textCursor, angle, flipX, leanY, actualAngle } = this.element as IElementText;
     if (!textCursor) return;
-    const {
-      x,
-      y,
-      rotateBoxRect: { x: rx, y: ry, width: rWidth, height: rHeight },
-      width,
-      height,
-    } = textCursor;
-
-    const rect = {
-      x: x + rx + rWidth / 2 - width / 2,
-      y: y + ry + rHeight / 2,
-      width,
-      height,
-    };
+    const { x: desX, y: desY, width: desWidth, height: desHeight, renderRect } = textCursor;
 
     const options = {
       angle,
@@ -42,8 +29,19 @@ export default class ElementTaskText extends ElementTaskBase implements IElement
       actualAngle,
     };
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, CursorTextSvg, rect, {
-      ...options,
-    });
+    CanvasUtils.drawImgLike(
+      this.canvas,
+      CursorTextSvg,
+      {
+        ...renderRect,
+        desX,
+        desY,
+        desWidth,
+        desHeight,
+      },
+      {
+        ...options,
+      },
+    );
   }
 }

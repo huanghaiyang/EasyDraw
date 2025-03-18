@@ -3,11 +3,12 @@ import { ElementStyles, FillStyle, FontStyle, StrokeStyle, StrokeTypes } from "@
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { ArcPoints, RenderParams } from "@/types/IRender";
+import { ArcPoints, RenderParams, RenderRect } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import { EllipseModel } from "@/types/IElement";
 import ITextData from "@/types/IText";
 import FontUtils from "@/utils/FontUtils";
+import { every, isNumber } from "lodash";
 
 // 画布变换参数
 type CtxTransformOptions = {
@@ -53,7 +54,7 @@ export default class CanvasUtils {
    * @param options
    * @returns
    */
-  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: Partial<DOMRect>, options: RenderParams = {}): Promise<void> {
+  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: RenderRect, options: RenderParams = {}): Promise<void> {
     return new Promise((resolve, reject) => {
       if (data instanceof ImageData) {
         data = CanvasUtils.getCanvasByImageData(data).toDataURL();
@@ -119,7 +120,7 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static transformCtx(ctx: CanvasRenderingContext2D, rect: Partial<DOMRect>, options: CtxTransformOptions) {
+  static transformCtx(ctx: CanvasRenderingContext2D, rect: RenderRect, options: CtxTransformOptions) {
     const { x, y, width, height } = rect;
     const { radian, scaleX, scaleY, leanY } = options;
 
@@ -138,7 +139,7 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static calcOffsetByRect(rect: Partial<DOMRect>): IPoint {
+  static calcOffsetByRect(rect: RenderRect): IPoint {
     return {
       x: -(rect.x + rect.width / 2),
       y: -(rect.y + rect.height / 2),
@@ -152,7 +153,7 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static transPointsOfBox(points: IPoint[], rect: Partial<DOMRect>) {
+  static transPointsOfBox(points: IPoint[], rect: RenderRect) {
     const offset = CanvasUtils.calcOffsetByRect(rect);
     return points.map(point => {
       return MathUtils.translate(point, offset);
@@ -167,7 +168,7 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static translateArcPoints(arcPoints: ArcPoints[], rect: Partial<DOMRect>): ArcPoints[] {
+  static translateArcPoints(arcPoints: ArcPoints[], rect: RenderRect): ArcPoints[] {
     const offset = CanvasUtils.calcOffsetByRect(rect);
     return MathUtils.translateArcPoints(arcPoints, offset);
   }
@@ -179,7 +180,7 @@ export default class CanvasUtils {
    * @param arcPoints
    * @param rect
    */
-  static drawClipArcPoints(ctx: CanvasRenderingContext2D, arcPoints: ArcPoints[], rect: Partial<DOMRect>) {
+  static drawClipArcPoints(ctx: CanvasRenderingContext2D, arcPoints: ArcPoints[], rect: RenderRect) {
     arcPoints = CanvasUtils.transArcParamsWithScale(arcPoints)[0];
     arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
     ctx.beginPath();
@@ -198,15 +199,19 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: Partial<DOMRect>, options: RenderParams = {}): void {
-    const { width, height } = rect;
+  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: RenderRect, options: RenderParams = {}): void {
+    const { width, height, desX, desY, desWidth, desHeight } = rect;
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
     if (options.clipArcPoints) {
       CanvasUtils.drawClipArcPoints(ctx, options.clipArcPoints, rect);
     }
-    ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    if (every([desX, desY, desWidth, desHeight], isNumber)) {
+      ctx.drawImage(img, desX - desWidth / 2, desY, desWidth, desHeight);
+    } else {
+      ctx.drawImage(img, -width / 2, -height / 2, width, height);
+    }
     ctx.restore();
   }
 
@@ -218,7 +223,7 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: Partial<DOMRect>, options: RenderParams = {}) {
+  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: RenderRect, options: RenderParams = {}) {
     const img = CanvasUtils.getCanvasByImageData(imageData); // 频繁调用有性能问题
     CanvasUtils.drawRotateImage(target, img, rect, options);
   }
@@ -233,7 +238,7 @@ export default class CanvasUtils {
    * @param fontStyle
    * @param options
    */
-  static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: Partial<DOMRect>, fontStyle: FontStyle, options: RenderParams = {}): void {
+  static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
     const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
@@ -295,7 +300,7 @@ export default class CanvasUtils {
    * @param fontStyle
    * @param options
    */
-  static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: Partial<DOMRect>, fontStyle: FontStyle, options: RenderParams = {}) {
+  static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}) {
     points = CanvasUtils.transPointsWidthScale(points);
     fontStyle = CanvasUtils.transFontWithScale(fontStyle);
     CanvasUtils.drawRotateText(target, textData, points, rect, fontStyle, options);
@@ -504,7 +509,7 @@ export default class CanvasUtils {
    * @param fillStyle
    * @param options
    */
-  static drawInnerArcPathFillWithScale(target: HTMLCanvasElement, rect: Partial<DOMRect>, arcPoints: ArcPoints[], fillStyle: FillStyle, options: RenderParams = {}): void {
+  static drawInnerArcPathFillWithScale(target: HTMLCanvasElement, rect: RenderRect, arcPoints: ArcPoints[], fillStyle: FillStyle, options: RenderParams = {}): void {
     arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawArcPathFill(target, arcPoints, rect, fillStyle, options);
@@ -533,7 +538,7 @@ export default class CanvasUtils {
    * @param strokeStyle
    * @param options
    */
-  static drawArcPathStrokeWidthScale(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: Partial<DOMRect>, strokeStyle: StrokeStyle, options: RenderParams = {}) {
+  static drawArcPathStrokeWidthScale(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
     [arcPoints, strokeStyle] = CanvasUtils.transArcParamsWithScale(arcPoints, strokeStyle);
     CanvasUtils.drawArcPathStroke(target, arcPoints, rect, strokeStyle, options);
   }
@@ -662,7 +667,7 @@ export default class CanvasUtils {
    * @param strokeStyle
    * @param options
    */
-  static drawArcPathStroke(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: Partial<DOMRect>, strokeStyle: StrokeStyle, options: RenderParams = {}) {
+  static drawArcPathStroke(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
     const { isFold = true } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -713,7 +718,7 @@ export default class CanvasUtils {
    * @param arcPoints
    * @param fillStyle
    */
-  static drawArcPathFill(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: Partial<DOMRect>, fillStyle: FillStyle, options: RenderParams = {}) {
+  static drawArcPathFill(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}) {
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, rect, CanvasUtils.getTransformValues(options));
@@ -735,7 +740,7 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static transformEllipse(ctx: CanvasRenderingContext2D, point: IPoint, model: EllipseModel, rect?: Partial<DOMRect>, options?: RenderParams): { point: IPoint; model: EllipseModel } {
+  static transformEllipse(ctx: CanvasRenderingContext2D, point: IPoint, model: EllipseModel, rect?: RenderRect, options?: RenderParams): { point: IPoint; model: EllipseModel } {
     if (rect && options) {
       CanvasUtils.transformCtx(ctx, rect, CanvasUtils.getTransformValues(options));
       point = CanvasUtils.transPointsOfBox([point], rect)[0];
@@ -752,7 +757,7 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawEllipseFill(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
+  static drawEllipseFill(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: RenderRect, options?: RenderParams) {
     const ctx = target.getContext("2d");
     ctx.save();
     const {
@@ -775,7 +780,7 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawEllipseStroke(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
+  static drawEllipseStroke(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: RenderRect, options?: RenderParams) {
     const ctx = target.getContext("2d");
     ctx.save();
     const {
@@ -799,7 +804,7 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawEllipseStrokeWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
+  static drawEllipseStrokeWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: RenderRect, options?: RenderParams) {
     const points = CanvasUtils.transPointsWidthScale([point]);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawEllipseStroke(target, points[0], model, strokeStyle, rect, options);
@@ -813,7 +818,7 @@ export default class CanvasUtils {
    * @param corner
    * @param styles
    */
-  static drawEllipseFillWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: Partial<DOMRect>, options?: RenderParams) {
+  static drawEllipseFillWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: RenderRect, options?: RenderParams) {
     const points = CanvasUtils.transPointsWidthScale([point]);
     CanvasUtils.drawEllipseFill(target, points[0], model, fillStyle, rect, options);
   }

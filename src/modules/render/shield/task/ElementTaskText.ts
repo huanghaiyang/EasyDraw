@@ -4,6 +4,7 @@ import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskH
 import CanvasUtils from "@/utils/CanvasUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ITextData from "@/types/IText";
+import { RenderRect } from "@/types/IRender";
 
 export default class ElementTaskText extends ElementTaskBase {
   /**
@@ -34,7 +35,7 @@ export default class ElementTaskText extends ElementTaskBase {
     };
 
     const unLeanBoxPoints = ElementUtils.calcStageRelativePoints(unLeanBoxCoords);
-    const rect = ElementTaskHelper.calculateRotatedBoxRect(this.element);
+    const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
 
     CanvasUtils.drawRotateTextWithScale(
       this.canvas,
