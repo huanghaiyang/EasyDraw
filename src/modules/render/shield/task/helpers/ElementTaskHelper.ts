@@ -28,8 +28,7 @@ function getTextCursorNodeAbout(node: ITextNode, pos: number): Partial<ITextCurs
 /**
  * 尝试将光光标绑定到行末尾的节点上，如果当前行没有节点，则将光标移动到行首位置
  *
- * @param textCursor
- * @param line
+ * @param line 文本行
  * @returns 光标信息
  */
 function getTextCursorLineAbout(line: ITextLine): Partial<ITextCursor> {
@@ -88,6 +87,12 @@ export default class ElementTaskHelper {
 
   /**
    * 获取旋转盒模型的rect
+   *
+   * 注意：
+   *
+   * 1. 此盒模型是相对于舞台的且根据画布进行了缩放
+   * 2. 此盒模型不存在旋转或者倾斜，翻转的情况
+   * 3. 此盒模型的宽度等于组件的宽度，但是高度不等于组件的高度，而是等于组件boxCoords的第一个坐标，垂直与boxCoords的第3、4个坐标的垂线段距离
    *
    * @param element
    * @returns

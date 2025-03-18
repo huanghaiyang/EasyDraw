@@ -49,7 +49,7 @@ export default class CanvasUtils {
    *
    * @param target
    * @param data
-   * @param options
+   * @param rect
    * @param options
    * @returns
    */

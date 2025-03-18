@@ -5,6 +5,7 @@ import ITextData, { ITextCursor } from "@/types/IText";
 import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -54,8 +55,13 @@ export default class ElementText extends ElementRect implements IElementText {
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
     } else {
+      // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
+      coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord, true);
+      // 转换为舞台坐标
       const point = ElementUtils.calcStageRelativePoint(coord);
+      // 计算旋转盒模型的rect
       const rect = ElementTaskHelper.calculateRotatedBoxRect(this);
+      // 获取文本光标
       this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
     }
     return this._textCursor;
