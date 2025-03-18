@@ -31,7 +31,7 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
     };
 
-    const rect = ElementTaskHelper.getRotateBoxRect(this.element);
+    const rect = ElementTaskHelper.calculateRotatedBoxRect(this.element);
 
     // 绘制图片
     CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, rect, {

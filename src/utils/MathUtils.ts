@@ -503,6 +503,58 @@ export default class MathUtils {
   }
 
   /**
+   * 给出点和直线，返回点相对于直线的对称点
+   *
+   * @param coord
+   * @param lineStart
+   * @param lineEnd
+   * @returns
+   */
+  static calcSymmetryPoint(coord: IPoint, lineStart: IPoint, lineEnd: IPoint): IPoint {
+    // 计算直线的向量
+    const dx = lineEnd.x - lineStart.x;
+    const dy = lineEnd.y - lineStart.y;
+
+    // 计算直线的长度平方
+    const lineLengthSquared = dx * dx + dy * dy;
+
+    // 如果直线长度为 0，直接返回原坐标
+    if (lineLengthSquared === 0) {
+      return { ...coord };
+    }
+
+    // 计算从直线起点到待翻转点的向量
+    const px = coord.x - lineStart.x;
+    const py = coord.y - lineStart.y;
+
+    // 计算点在直线上的投影比例
+    const dotProduct = px * dx + py * dy;
+    const projectionRatio = dotProduct / lineLengthSquared;
+
+    // 计算投影点的坐标
+    const projectionX = lineStart.x + projectionRatio * dx;
+    const projectionY = lineStart.y + projectionRatio * dy;
+
+    // 计算对称点的坐标
+    const flippedX = 2 * projectionX - coord.x;
+    const flippedY = 2 * projectionY - coord.y;
+
+    return { x: flippedX, y: flippedY };
+  }
+
+  /**
+   * 给出点数组和直线，返回点数组相对于直线的对称点数组
+   *
+   * @param coords
+   * @param lineStart
+   * @param lineEnd
+   * @returns
+   */
+  static batchCalcSymmetryPoints(coords: IPoint[], lineStart: IPoint, lineEnd: IPoint): IPoint[] {
+    return coords.map(coord => MathUtils.calcSymmetryPoint(coord, lineStart, lineEnd));
+  }
+
+  /**
    * 缩放
    *
    * @param coord

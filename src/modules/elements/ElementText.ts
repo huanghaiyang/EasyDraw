@@ -38,9 +38,9 @@ export default class ElementText extends ElementRect implements IElementText {
   onStageChanged(): void {
     super.onStageChanged();
     if (this._textCursor) {
-      const updatedProps = ElementTaskHelper.getTextCursorUpdatedProps(this.model.data as ITextData, this._textCursor);
+      const updatedProps = ElementTaskHelper.getUpdatedTextCursorProps(this.model.data as ITextData, this._textCursor);
       Object.assign(this._textCursor, updatedProps);
-      this._textCursor.rotateBoxRect = ElementTaskHelper.getRotateBoxRect(this);
+      this._textCursor.rotateBoxRect = ElementTaskHelper.calculateRotatedBoxRect(this);
     }
   }
 
@@ -55,8 +55,8 @@ export default class ElementText extends ElementRect implements IElementText {
       this._textCursor = null;
     } else {
       const point = ElementUtils.calcStageRelativePoint(coord);
-      const rect = ElementTaskHelper.getRotateBoxRect(this);
-      this._textCursor = ElementTaskHelper.getTextCursorByPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
+      const rect = ElementTaskHelper.calculateRotatedBoxRect(this);
+      this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
     }
     return this._textCursor;
   }

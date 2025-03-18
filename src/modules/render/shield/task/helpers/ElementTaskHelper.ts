@@ -76,7 +76,7 @@ export default class ElementTaskHelper {
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
 
-    const rect = ElementTaskHelper.getRotateBoxRect(element);
+    const rect = ElementTaskHelper.calculateRotatedBoxRect(element);
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawInnerArcPathFillWithScale(canvas, rect, arcFillPoints, fillStyle, options);
     });
@@ -92,7 +92,7 @@ export default class ElementTaskHelper {
    * @param element
    * @returns
    */
-  static getRotateBoxRect(element: IElement): Partial<DOMRect> {
+  static calculateRotatedBoxRect(element: IElement): Partial<DOMRect> {
     const { rotateBoxCoords, center } = element;
     let rect = CommonUtils.calcRotateBoxRect(rotateBoxCoords, center);
     rect = CommonUtils.scaleRect(rect, element.shield.stageScale);
@@ -107,7 +107,7 @@ export default class ElementTaskHelper {
    * @param rect 旋转盒模型的rect
    * @returns 光标位置
    */
-  static getTextCursorByPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>): ITextCursor {
+  static retrieveTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>): ITextCursor {
     const textCursor: ITextCursor = {};
     // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
     const [curPoint] = CanvasUtils.transPointsOfBox([position], rect);
@@ -158,7 +158,7 @@ export default class ElementTaskHelper {
    * @param textCursor 文本光标
    * @returns 光标信息
    */
-  static getTextCursorUpdatedProps(textData: ITextData, textCursor: ITextCursor): Partial<ITextCursor> {
+  static getUpdatedTextCursorProps(textData: ITextData, textCursor: ITextCursor): Partial<ITextCursor> {
     const { lines } = textData;
     const { nodeId, pos, lineNumber } = textCursor;
     const line = lines[lineNumber];

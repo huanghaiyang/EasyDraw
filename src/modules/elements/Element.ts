@@ -214,16 +214,15 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this._strokeCoords[this.innermostStrokeCoordIndex];
   }
 
-  // 是否翻转X轴
-
+  // x轴是否翻转
   get flipX(): boolean {
-    if (!this.flipXEnable || !this.boxVerticesTransformEnable) return false;
-    if (!this._isTransforming) return this._flipX;
+    if (!this.flipXEnable) return false;
+    if (!this._isTransforming || this._isEditing) return this._flipX;
     this.refreshFlipX();
     return this._flipX;
   }
 
-  // 是否翻转Y轴(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
+  // y轴是否翻转(由于组件按y轴翻转实际上是角度翻转，因此这里始终返回false)
   get flipY(): boolean {
     return false;
   }

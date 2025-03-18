@@ -1103,8 +1103,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePressUp(e: MouseEvent): Promise<void> {
     this._isPressDown = false;
     this.calcPressUp(e);
-    // 如果是绘制模式，则完成组件的绘制
-    if (this.isArbitraryDrawing) {
+    if (this.isTextEditing) {
+    } else if (this.isArbitraryDrawing) {
+      // 如果是绘制模式，则完成组件的绘制
       this._isPressDown = true;
       this._handleArbitraryPressUp();
     } else if (this.isDrawerActive) {

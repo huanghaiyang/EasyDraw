@@ -220,17 +220,21 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    */
   private doEditingTransform(offset: IPoint): void {
     if (this.editingCoordIndex !== -1) {
-      const points = LodashUtils.jsonClone(this._originalRotateCoords);
-      points[this.editingCoordIndex] = {
-        x: points[this.editingCoordIndex].x + offset.x,
-        y: points[this.editingCoordIndex].y + offset.y,
+      const coords = LodashUtils.jsonClone(this._originalRotateCoords);
+      coords[this.editingCoordIndex] = {
+        x: coords[this.editingCoordIndex].x + offset.x,
+        y: coords[this.editingCoordIndex].y + offset.y,
       };
       const lockPoint = this._originalRotateBoxCoords[0];
-      this.model.coords = MathUtils.batchPrecisePoint(ElementUtils.calcCoordsByTransPoints(points, this.angles, lockPoint), 1);
-      this.model.boxCoords = MathUtils.batchPrecisePoint(
+      this.model.coords = MathUtils.batchPrecisePoint(ElementUtils.calcCoordsByTransPoints(coords, this.angles, lockPoint), 1);
+      let boxCoords = MathUtils.batchPrecisePoint(
         MathUtils.batchLeanWithCenter(CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)), 0, this.model.leanYAngle, this.calcCenterCoord()),
         1,
       );
+      if (this._flipX) {
+        boxCoords = MathUtils.batchCalcSymmetryPoints(boxCoords, MathUtils.calcPolygonCentroid([boxCoords[0], boxCoords[1]]), MathUtils.calcPolygonCentroid([boxCoords[2], boxCoords[3]]));
+      }
+      this.model.boxCoords = boxCoords;
     }
   }
 

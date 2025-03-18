@@ -34,7 +34,7 @@ export default class ElementTaskText extends ElementTaskBase {
     };
 
     const unLeanBoxPoints = ElementUtils.calcStageRelativePoints(unLeanBoxCoords);
-    const rect = ElementTaskHelper.getRotateBoxRect(this.element);
+    const rect = ElementTaskHelper.calculateRotatedBoxRect(this.element);
 
     CanvasUtils.drawRotateTextWithScale(
       this.canvas,
