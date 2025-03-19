@@ -21,12 +21,18 @@ export default interface ITextData {
   lines: ITextLine[];
 }
 
+// 文本光标位置
+export enum TextCursorPosition {
+  LEFT,
+  RIGHT,
+}
+
 // 文本光标
 export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
     nodeId?: string;
     lineNumber?: number;
-    pos?: number; // 0 表示左侧，1 表示右侧
+    pos?: TextCursorPosition;
     renderRect?: Partial<DOMRect>;
   };
 

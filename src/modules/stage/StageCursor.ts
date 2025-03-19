@@ -177,7 +177,6 @@ export default class StageCursor implements IStageCursor {
       width: CursorSize,
       height: CursorSize,
       angle: options?.angle || 0,
-      scale: 1 / this.shield.stageScale,
     };
   }
 }

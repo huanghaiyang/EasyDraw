@@ -24,18 +24,21 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       leanY,
       actualAngle,
     } = this.element;
-
+    // 渲染选项
     const options = {
       angle,
       flipX,
       leanY,
       actualAngle,
     };
-
+    // 计算未倾斜的描边舞台坐标
     const unLeanStrokePoints = ElementUtils.batchCalcStageRelativePoints(unLeanStrokeCoords);
+    // 内描边的舞台坐标
     const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
+    // 内描边的渲染盒模型
     const rect = CommonUtils.getRect(innermostStrokePoints) as RenderRect;
 
+    // 绘制填充
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawEllipseFillWithScale(
         this.canvas,
@@ -50,6 +53,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       );
     });
 
+    // 绘制边框
     unLeanStrokePoints.forEach((points, index) => {
       const rect = CommonUtils.getRect(points) as RenderRect;
       CanvasUtils.drawEllipseStrokeWithScale(

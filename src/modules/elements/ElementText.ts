@@ -55,8 +55,9 @@ export default class ElementText extends ElementRect implements IElementText {
    * 给定坐标获取文本光标
    *
    * @param coord 坐标
+   * @param isSelectionMove 是否是选区移动
    */
-  retrieveTextCursor(coord: IPoint): void {
+  retrieveTextCursor(coord: IPoint, isSelectionMove?: boolean): void {
     // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
@@ -70,10 +71,16 @@ export default class ElementText extends ElementRect implements IElementText {
     // 计算旋转盒模型的rect
     const rect = ElementTaskHelper.calcElementRenderRect(this);
     // 获取文本光标
-    this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
-    // 更新选区，注意此处仅更新选区的startNode，endNode需要在鼠标移动时才更新
-    this._textSelection = {
-      startNode: this._textCursor,
-    };
+    const textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
+    // 更新选区
+    if (isSelectionMove) {
+      this._textSelection.endNode = textCursor;
+    } else {
+      this._textCursor = textCursor;
+      this._textSelection = {
+        startNode: textCursor,
+        endNode: null,
+      };
+    }
   }
 }

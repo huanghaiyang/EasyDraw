@@ -27,6 +27,7 @@ export default class ElementTaskText extends ElementTaskBase {
       unLeanBoxCoords,
     } = this.element;
 
+    // 渲染选项
     const options = {
       angle,
       flipX,
@@ -34,9 +35,12 @@ export default class ElementTaskText extends ElementTaskBase {
       actualAngle,
     };
 
+    // 计算未倾斜的描边舞台坐标
     const unLeanBoxPoints = ElementUtils.calcStageRelativePoints(unLeanBoxCoords);
+    // 计算渲染盒模型的画布坐标
     const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
 
+    // 绘制文本
     CanvasUtils.drawRotateTextWithScale(
       this.canvas,
       data as ITextData,

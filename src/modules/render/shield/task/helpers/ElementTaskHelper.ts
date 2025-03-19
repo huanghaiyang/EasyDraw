@@ -3,7 +3,7 @@ import { IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import IElement, { IElementRect } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { ITextCursor, ITextLine, ITextNode } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, TextCursorPosition } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -14,12 +14,12 @@ import CommonUtils from "@/utils/CommonUtils";
  * @param pos 光标位置
  * @returns 光标信息
  */
-function getTextCursorNodeAbout(node: ITextNode, pos: number): Partial<ITextCursor> {
+function getTextCursorNodeAbout(node: ITextNode, pos: TextCursorPosition): Partial<ITextCursor> {
   const { id, x, y, height, width } = node;
   return {
     nodeId: id,
     pos,
-    x: x + (pos === 1 ? width : 0),
+    x: x + (pos === TextCursorPosition.RIGHT ? width : 0),
     y,
     width: TextCursorWidth,
     height,
@@ -65,22 +65,24 @@ export default class ElementTaskHelper {
       leanY,
       actualAngle,
     } = element;
-
+    // 渲染选项
     const options = {
       angle,
       flipX,
       leanY,
       actualAngle,
     };
-
+    // 计算弧线的舞台坐标
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
+    // 计算弧线填充的舞台坐标
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
-
+    // 计算渲染盒子的画布坐标
     const rect = ElementTaskHelper.calcElementRenderRect(element) as RenderRect;
+    // 绘制填充
     styles.fills.forEach(fillStyle => {
       CanvasUtils.drawInnerArcPathFillWithScale(canvas, rect, arcFillPoints, fillStyle, options);
     });
-
+    // 绘制边框
     arcPoints.forEach((points, index) => {
       CanvasUtils.drawArcPathStrokeWidthScale(canvas, points, rect, styles.strokes[index], options);
     });
@@ -100,7 +102,9 @@ export default class ElementTaskHelper {
    */
   static calcElementRenderRect(element: IElement): Partial<DOMRect> {
     const { rotateBoxCoords, center } = element;
+    // 计算渲染盒子的画布坐标
     let rect = CommonUtils.calcRenderRect(rotateBoxCoords, center);
+    // 根据画布的缩放比例进行缩放
     rect = CommonUtils.scaleRect(rect, element.shield.stageScale);
     return rect;
   }
@@ -136,10 +140,10 @@ export default class ElementTaskHelper {
         const node = line.nodes[j];
         // 判断当前光标是否在当前节点内
         if (CommonUtils.isPointInRect(node, curPoint)) {
-          let pos = 0;
+          let pos = TextCursorPosition.LEFT;
           // 判断当前光标是否在当前节点的右侧位置
           if (curPoint.x >= node.x + node.width / 2) {
-            pos = 1;
+            pos = TextCursorPosition.RIGHT;
           }
           Object.assign(textCursor, getTextCursorNodeAbout(node, pos));
           break;

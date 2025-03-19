@@ -13,9 +13,10 @@ export default class ElementTaskLine extends ElementTaskBase {
       strokeCoords,
       model: { styles },
     } = this.element;
-
+    // 计算描边的舞台坐标
     const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
 
+    // 绘制边框
     strokePoints.forEach((points, index) => {
       CanvasUtils.drawPathWithScale(this.canvas, points, styles, styles.fills[0], styles.strokes[index]);
     });

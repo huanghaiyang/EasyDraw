@@ -15,14 +15,17 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
       strokeCoords,
       model: { styles, isFold },
     } = this.element;
+    // 计算秒表的舞台坐标
     const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
-
+    // 判断路径是否闭合
     if (isFold) {
+      // 绘制填充
       styles.fills.forEach(fillStyle => {
         CanvasUtils.drawInnerPathFillWithScale(this.canvas, strokePoints[innermostStrokeCoordIndex], fillStyle, styles.strokes[innermostStrokeCoordIndex]);
       });
     }
 
+    // 绘制边框
     strokePoints.forEach((points, index) => {
       CanvasUtils.drawPathStrokeWidthScale(this.canvas, points, styles.strokes[index], {
         isFold,

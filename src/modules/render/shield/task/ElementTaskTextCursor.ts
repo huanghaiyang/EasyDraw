@@ -22,13 +22,14 @@ export default class ElementTaskText extends ElementTaskBase implements IElement
     if (!textCursor) return;
     const { x: desX, y: desY, width: desWidth, height: desHeight, renderRect } = textCursor;
 
+    // 渲染选项
     const options = {
       angle,
       flipX,
       leanY,
       actualAngle,
     };
-    // 绘制图片
+    // 绘制光标
     CanvasUtils.drawImgLike(
       this.canvas,
       CursorTextSvg,

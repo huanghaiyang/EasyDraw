@@ -1140,7 +1140,7 @@ export interface IElementText extends IElement {
   // 文本光标
   get textCursor(): ITextCursor;
   // 给定坐标获取文本光标
-  retrieveTextCursor(point: IPoint): void;
+  retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 文本选区
   get textSelection(): ITextSelection;
 }

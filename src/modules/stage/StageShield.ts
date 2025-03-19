@@ -754,7 +754,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 判断鼠标是否按下
     if (this._isPressDown) {
       this.calcPressMove(e);
-      if (this.isArbitraryDrawing) {
+      if (this.isTextEditing) {
+        this._tryRetrieveTextCursor(true);
+      } else if (this.isArbitraryDrawing) {
         // 移动过程中创建组件
         this._updatingArbitraryElementOnMovement(e);
         this.selection.refreshTransformerModels();
@@ -1005,11 +1007,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 尝试命中文本组件的光标
    */
-  private _tryRetrieveTextCursor(): void {
+  private _tryRetrieveTextCursor(isSelectionMove?: boolean): void {
     const { selectedElements } = this.store;
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
-      (targetElement as ElementText).retrieveTextCursor(this.cursor.worldValue);
+      (targetElement as ElementText).retrieveTextCursor(this.cursor.worldValue, isSelectionMove);
     }
   }
 

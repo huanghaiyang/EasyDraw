@@ -22,7 +22,9 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
     } = this.element as IElementImage;
 
+    // 计算弧线的舞台坐标
     const arcPoints = ElementUtils.batchCalcStageRelativeArcPoints(arcCoords);
+    // 计算弧线填充的舞台坐标
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
 
     const options = {
@@ -32,6 +34,7 @@ export default class ElementTaskImage extends ElementTaskBase {
       actualAngle,
     };
 
+    // 计算渲染盒模型的画布坐标
     const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制图片
