@@ -35,7 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import { CommandTypes, ICommandElementObject, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
+import { ElementCommandTypes, ICommandElementObject, IElementCommandPayload, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
@@ -71,7 +71,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 对齐
   align: IStageAlign;
   // 撤销
-  undoRedo: IUndoRedo;
+  undoRedo: IUndoRedo<IElementCommandPayload>;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -197,7 +197,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection = new StageSelection(this);
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
-    this.undoRedo = new UndoRedo();
+    this.undoRedo = new UndoRedo<IElementCommandPayload>();
     this.renderer = new ShieldRenderer(this);
     this._requestAnimationRedraw();
     window.shield = this;
@@ -239,7 +239,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _createUpdateCommandBy(dataList: ICommandElementObject[], rDataList: ICommandElementObject[]): void {
     const command = new ElementsUpdatedCommand(
       {
-        type: CommandTypes.ElementsUpdated,
+        type: ElementCommandTypes.ElementsUpdated,
         dataList,
         rDataList,
       },
@@ -1296,7 +1296,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _createAddedCommand(elements: IElement[]): Promise<void> {
     const command = new ElementsAddedCommand(
       {
-        type: CommandTypes.ElementsAdded,
+        type: ElementCommandTypes.ElementsAdded,
         dataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
       },
       this.store,
@@ -1668,7 +1668,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     const command = new ElementsRemovedCommand(
       {
-        type: CommandTypes.ElementsRemoved,
+        type: ElementCommandTypes.ElementsRemoved,
         dataList: await Promise.all(
           this.store.selectedElements.map(async element => {
             return { model: await element.toJson(), ...this._createRearrangeModel(element) };
@@ -1807,7 +1807,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const rDataList = await this._createGroupAddedDataList(group, this.store.selectedElements);
       const command = new GroupAddedCommand(
         {
-          type: CommandTypes.GroupAdded,
+          type: ElementCommandTypes.GroupAdded,
           dataList,
           rDataList,
         },
@@ -1841,7 +1841,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     const command = new GroupRemovedCommand(
       {
-        type: CommandTypes.GroupRemoved,
+        type: ElementCommandTypes.GroupRemoved,
         dataList,
       },
       this.store,
@@ -2082,7 +2082,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
     const command = new ElementsRearrangeCommand(
       {
-        type: CommandTypes.ElementsRearranged,
+        type: ElementCommandTypes.ElementsRearranged,
         dataList,
         rDataList,
       },

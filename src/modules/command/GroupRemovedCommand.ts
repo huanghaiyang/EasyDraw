@@ -1,9 +1,9 @@
 import { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import LodashUtils from "@/utils/LodashUtils";
-import { IGroupCommandElementObject } from "@/types/ICommand";
+import { IGroupCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 
-export default class GroupRemovedCommand extends ElementsBaseCommand {
+export default class GroupRemovedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   undo(): void {
     this.payload.dataList.forEach(data => {
       const {

@@ -1,9 +1,9 @@
 import IElement, { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
-import { IRemovedCommandElementObject } from "@/types/ICommand";
+import { IElementCommandPayload, IRemovedCommandElementObject } from "@/types/ICommand";
 import LodashUtils from "@/utils/LodashUtils";
 
-export default class ElementsRemovedCommand extends ElementsBaseCommand {
+export default class ElementsRemovedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   undo(): void {
     this.payload.dataList.forEach(data => {
       const { prevId, model } = data as IRemovedCommandElementObject;

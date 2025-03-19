@@ -1,7 +1,7 @@
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
-import { ICommandElementObject } from "@/types/ICommand";
+import { ICommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 import LodashUtils from "@/utils/LodashUtils";
-export default class ElementsUpdatedCommand extends ElementsBaseCommand {
+export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   /**
    * 恢复数据
    *

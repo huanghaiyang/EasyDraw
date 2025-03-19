@@ -1,15 +1,15 @@
-import ICommand from "@/types/ICommand";
 import IUndoRedo from "@/types/IUndoRedo";
+import ICommand from "@/types/ICommand";
 
-export default class UndoRedo implements IUndoRedo {
-  undoStack: ICommand[] = [];
-  redoStack: ICommand[] = [];
+export default class UndoRedo<T> implements IUndoRedo<T> {
+  undoStack: ICommand<T>[] = [];
+  redoStack: ICommand<T>[] = [];
 
-  get tailUndoCommand(): ICommand | undefined {
+  get tailUndoCommand(): ICommand<T> | undefined {
     return this.undoStack[this.undoStack.length - 1];
   }
 
-  get tailRedoCommand(): ICommand | undefined {
+  get tailRedoCommand(): ICommand<T> | undefined {
     return this.redoStack[this.redoStack.length - 1];
   }
 
@@ -17,7 +17,7 @@ export default class UndoRedo implements IUndoRedo {
    * 添加撤销命令
    * @param command
    */
-  add(command: ICommand): void {
+  add(command: ICommand<T>): void {
     this.undoStack.push(command);
     this.redoStack = [];
   }

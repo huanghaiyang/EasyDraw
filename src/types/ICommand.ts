@@ -31,19 +31,19 @@ export type IGroupCommandElementObject = ICommandElementObject &
     isGroupSubject?: boolean;
   };
 
-export default interface ICommand {
-  payload: ICommandPayload;
+export default interface ICommand<T> {
+  payload: T;
   undo(): void;
   redo(): void;
 }
 
-export interface ICommandPayload {
-  type: CommandTypes;
+export interface IElementCommandPayload {
+  type: ElementCommandTypes;
   dataList: Array<ICommandElementObject>;
   rDataList?: Array<ICommandElementObject>;
 }
 
-export enum CommandTypes {
+export enum ElementCommandTypes {
   ElementsAdded = "elements_added",
   ElementsRemoved = "elements_removed",
   ElementsUpdated = "elements_updated",

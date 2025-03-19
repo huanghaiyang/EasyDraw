@@ -1,7 +1,7 @@
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
-import { ICommandElementObject, IRearrangeCommandElementObject } from "@/types/ICommand";
+import { ICommandElementObject, IElementCommandPayload, IRearrangeCommandElementObject } from "@/types/ICommand";
 
-export default class ElementsRearrangeCommand extends ElementsBaseCommand {
+export default class ElementsRearrangeCommand extends ElementsBaseCommand<IElementCommandPayload> {
   /**
    * 重新调整组件位置
    *

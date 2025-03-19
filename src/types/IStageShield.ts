@@ -10,6 +10,7 @@ import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
 import IStageAlign from "@/types/IStageAlign";
 import IUndoRedo from "@/types/IUndoRedo";
+import { IElementCommandPayload } from "@/types/ICommand";
 
 // 组件状态
 export enum StageShieldElementsStatus {
@@ -41,7 +42,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 对齐
   align: IStageAlign;
   // 撤销
-  undoRedo: IUndoRedo;
+  undoRedo: IUndoRedo<IElementCommandPayload>;
   // 当前创建者
   currentCreator: Creator;
   // 渲染组件

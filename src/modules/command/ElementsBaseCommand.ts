@@ -1,11 +1,11 @@
-import ICommand, { ICommandPayload } from "@/types/ICommand";
+import ICommand from "@/types/ICommand";
 import IStageStore from "@/types/IStageStore";
 
-export default class ElementsBaseCommand implements ICommand {
-  payload: ICommandPayload;
+export default class ElementsBaseCommand<T> implements ICommand<T> {
+  payload: T;
   store: IStageStore;
 
-  constructor(payload: ICommandPayload, store: IStageStore) {
+  constructor(payload: T, store: IStageStore) {
     this.payload = payload;
     this.store = store;
   }
