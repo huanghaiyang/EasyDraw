@@ -22,7 +22,7 @@ export default interface ITextData {
 }
 
 // 文本光标位置
-export enum TextCursorPosition {
+export enum TextRenderDirection {
   LEFT,
   RIGHT,
 }
@@ -32,7 +32,7 @@ export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
     nodeId?: string;
     lineNumber?: number;
-    pos?: TextCursorPosition;
+    pos?: TextRenderDirection;
     renderRect?: Partial<DOMRect>;
   };
 

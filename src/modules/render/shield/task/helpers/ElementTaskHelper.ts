@@ -3,7 +3,7 @@ import { IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import IElement, { IElementRect } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { ITextCursor, ITextLine, ITextNode, TextCursorPosition } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, TextRenderDirection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -14,12 +14,12 @@ import CommonUtils from "@/utils/CommonUtils";
  * @param pos 光标位置
  * @returns 光标信息
  */
-function getTextCursorNodeAbout(node: ITextNode, pos: TextCursorPosition): Partial<ITextCursor> {
+function getTextCursorNodeAbout(node: ITextNode, pos: TextRenderDirection): Partial<ITextCursor> {
   const { id, x, y, height, width } = node;
   return {
     nodeId: id,
     pos,
-    x: x + (pos === TextCursorPosition.RIGHT ? width : 0),
+    x: x + (pos === TextRenderDirection.RIGHT ? width : 0),
     y,
     width: TextCursorWidth,
     height,
@@ -140,10 +140,10 @@ export default class ElementTaskHelper {
         const node = line.nodes[j];
         // 判断当前光标是否在当前节点内
         if (CommonUtils.isPointInRect(node, curPoint)) {
-          let pos = TextCursorPosition.LEFT;
+          let pos = TextRenderDirection.LEFT;
           // 判断当前光标是否在当前节点的右侧位置
           if (curPoint.x >= node.x + node.width / 2) {
-            pos = TextCursorPosition.RIGHT;
+            pos = TextRenderDirection.RIGHT;
           }
           Object.assign(textCursor, getTextCursorNodeAbout(node, pos));
           break;

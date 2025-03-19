@@ -1143,6 +1143,8 @@ export interface IElementText extends IElement {
   retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 文本选区
   get textSelection(): ITextSelection;
+  // 文本选区是否可用
+  get isSelectionAvailable(): boolean;
 }
 
 // 舞台组件（组件）-线段

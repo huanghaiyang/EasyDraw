@@ -41,7 +41,7 @@ export default class RenderQueue implements IRenderQueue {
       try {
         await task.run();
       } catch (error) {
-        console.error("RenderQueue: error running task", task.id, error);
+        // console.error("RenderQueue: error running task", task.id, error);
       } finally {
         if (task.destroy) {
           await task.destroy();

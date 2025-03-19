@@ -229,6 +229,28 @@ export default class CanvasUtils {
   }
 
   /**
+   * 根据给定的rect范围绘制填充
+   *
+   * @param target
+   * @param rect
+   * @param fillStyle
+   * @param options
+   */
+  static drawRectFill(target: HTMLCanvasElement, rect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}): void {
+    const { width, height, desX, desY, desWidth, desHeight } = rect;
+    const ctx = target.getContext("2d");
+    ctx.save();
+    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
+    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
+    if (every([desX, desY, desWidth, desHeight], isNumber)) {
+      ctx.fillRect(desX, desY, desWidth, desHeight);
+    } else {
+      ctx.fillRect(-width / 2, -height / 2, width, height);
+    }
+    ctx.restore();
+  }
+
+  /**
    * 绘制一个旋转的文字
    *
    * @param target

@@ -20,7 +20,6 @@ export const TransformerSize = 6;
 export const RotationSize = 12;
 export const SelectionRotationMargin = 12;
 export const SelectionIndicatorMargin = 12;
-// 尺寸指示文本
 export const SelectionIndicatorFillColor = "#0c8ce9";
 export const SelectionIndicatorFillColorOpacity = 1;
 export const SelectionIndicatorTextColor = "#000000";
@@ -28,6 +27,11 @@ export const SelectionIndicatorFontSize = 12;
 export const SelectionIndicatorFontFamily = "Arial";
 export const SelectionIndicatorTextAlign = "center";
 export const SelectionIndicatorTextBaseline = "middle";
+
+// 文本选区填充色
+export const TextSelectionFillColor = "#0c8ce9";
+// 文本选区填充色透明度
+export const TextSelectionFillColorOpacity = 0.25;
 
 // 旋转控制器边距
 export const RotateControllerMargin = TransformerSize + Math.sqrt(Math.pow(RotationSize / 2, 2));

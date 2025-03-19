@@ -26,7 +26,7 @@ export default class StageStore implements IStageStore {
   // 画板上绘制的组件列表（形状、文字、图片等）
   private _elementList: ElementList = new ElementList();
   // 当前正在创建的组件
-  private _currentCreatingElementId;
+  private _currentCreatingElementId: string;
   // 组件对象映射关系，加快查询
   private _elementsMap: Map<string, IElement> = new Map<string, IElement>();
 

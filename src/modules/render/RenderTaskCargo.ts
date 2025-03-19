@@ -68,7 +68,7 @@ export default class RenderTaskCargo extends RenderTaskBase implements IRenderTa
         try {
           await task.run();
         } catch (e) {
-          console.error("RenderTaskCargo: error running task", task.id, e);
+          // console.error("RenderTaskCargo: error running task", task.id, e);
         } finally {
           if (task.destroy) {
             await task.destroy();

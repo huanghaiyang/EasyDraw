@@ -8,7 +8,7 @@ import MaskTaskRotate from "@/modules/render/mask/task/MaskTaskRotate";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import MaskTaskIndicator from "@/modules/render/mask/task/MaskTaskIndicator";
-import IElement from "@/types/IElement";
+import IElement, { IElementText } from "@/types/IElement";
 import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel, IRotationModel } from "@/types/IModel";
@@ -26,6 +26,7 @@ import IElementRotation from "@/types/IElementRotation";
 import ElementText from "@/modules/elements/ElementText";
 import ElementTaskTextCursor from "@/modules/render/shield/task/ElementTaskTextCursor";
 import { pick } from "lodash";
+import ElementTaskTextSelection from "@/modules/render/shield/task/ElementTaskTextSelection";
 
 /**
  * 蒙版渲染器
@@ -115,6 +116,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     if (isTextEditing) {
       // 文本编辑时，绘制光标位置的指示器
       cargo.add(this.createTextElementCursorTask());
+      // 文本编辑时，绘制选区
+      cargo.add(this.createTextElementSelectionTask());
     }
 
     // 任务执行与状态清理 ==========
@@ -334,16 +337,43 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   }
 
   /**
+   * 获取当前正在编辑的文本元素
+   *
+   * @returns
+   */
+  private _getEditingTextElement(): IElementText | null {
+    const { isEditingEmpty, editingElements } = this.drawer.shield.store;
+    if (isEditingEmpty) return null;
+    const element = editingElements[0];
+    if (element instanceof ElementText) {
+      return element;
+    }
+    return null;
+  }
+
+  /**
    * 创建一个文本元素的光标任务
    *
    * @returns
    */
-  private createTextElementCursorTask(): IRenderTask {
-    const { isEditingEmpty, editingElements } = this.drawer.shield.store;
-    if (isEditingEmpty) return;
-    const element = editingElements[0];
-    if (element instanceof ElementText) {
-      return new ElementTaskTextCursor(element, this.renderParams);
+  private createTextElementCursorTask(): IRenderTask | null {
+    const element = this._getEditingTextElement();
+    if (!element) return null;
+    if (element.isSelectionAvailable) return null;
+    return new ElementTaskTextCursor(element, this.renderParams);
+  }
+
+  /**
+   * 创建一个文本元素的选区任务
+   *
+   * @returns
+   */
+  private createTextElementSelectionTask(): IRenderTask | null {
+    const element = this._getEditingTextElement();
+    if (!element) return null;
+    if (element.isSelectionAvailable) {
+      return new ElementTaskTextSelection(element, this.renderParams);
     }
+    return null;
   }
 }

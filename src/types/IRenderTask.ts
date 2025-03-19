@@ -29,3 +29,6 @@ export interface IElementTaskCursor extends IElementTask {
   // 光标位置
   cursor: IPoint;
 }
+
+// 文本选区绘制任务
+export interface IElementTaskTextSelection extends IElementTask {}

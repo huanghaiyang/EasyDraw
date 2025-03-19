@@ -6,6 +6,7 @@ import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskH
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
+import { every } from "lodash";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -25,6 +26,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return this._textSelection;
   }
 
+  get isSelectionAvailable(): boolean {
+    return !!this._textSelection && every(this._textSelection, node => !!node);
+  }
+
   // 是否启用控制器
   get transformersEnable(): boolean {
     return this.status === ElementStatus.finished;
@@ -37,6 +42,7 @@ export default class ElementText extends ElementRect implements IElementText {
   _setIsEditing(value: boolean): void {
     super._setIsEditing(value);
     this._textCursor = null;
+    this._textSelection = null;
   }
 
   /**
