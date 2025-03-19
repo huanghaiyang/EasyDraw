@@ -1,7 +1,7 @@
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { ElementStatus, IPoint } from "@/types";
-import ITextData, { ITextCursor } from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
 import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -10,6 +10,8 @@ import MathUtils from "@/utils/MathUtils";
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
   private _textCursor: ITextCursor;
+  // 文本选区
+  private _textSelection: ITextSelection;
 
   get editingEnable(): boolean {
     return true;
@@ -17,6 +19,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get textCursor(): ITextCursor {
     return this._textCursor;
+  }
+
+  get textSelection(): ITextSelection {
+    return this._textSelection;
   }
 
   // 是否启用控制器
@@ -49,21 +55,25 @@ export default class ElementText extends ElementRect implements IElementText {
    * 给定坐标获取文本光标
    *
    * @param coord 坐标
-   * @returns 文本光标
    */
-  hitCursor(coord: IPoint): ITextCursor {
+  retrieveTextCursor(coord: IPoint): void {
+    // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
-    } else {
-      // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
-      coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord, true);
-      // 转换为舞台坐标
-      const point = ElementUtils.calcStageRelativePoint(coord);
-      // 计算旋转盒模型的rect
-      const rect = ElementTaskHelper.calcElementRenderRect(this);
-      // 获取文本光标
-      this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
+      this._textSelection = null;
+      return;
     }
-    return this._textCursor;
+    // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
+    coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord, true);
+    // 转换为舞台坐标
+    const point = ElementUtils.calcStageRelativePoint(coord);
+    // 计算旋转盒模型的rect
+    const rect = ElementTaskHelper.calcElementRenderRect(this);
+    // 获取文本光标
+    this._textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
+    // 更新选区，注意此处仅更新选区的startNode，endNode需要在鼠标移动时才更新
+    this._textSelection = {
+      startNode: this._textCursor,
+    };
   }
 }

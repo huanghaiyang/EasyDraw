@@ -47,7 +47,6 @@ import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
 import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
-import { ITextCursor } from "@/types/IText";
 import ElementText from "@/modules/elements/ElementText";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
@@ -962,7 +961,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
     if (this.isTextEditing) {
       if (this._isCursorOnEditingElement()) {
-        this._tryHitTextCursor();
+        this._tryRetrieveTextCursor();
       } else {
         await this._commitEidting();
         this._shouldSelectTopAWhilePressUp = false;
@@ -1005,16 +1004,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 尝试命中文本组件的光标
-   *
-   * @returns 文本光标
    */
-  private _tryHitTextCursor(): ITextCursor | null {
+  private _tryRetrieveTextCursor(): void {
     const { selectedElements } = this.store;
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
-      return (targetElement as ElementText).hitCursor(this.cursor.worldValue);
+      (targetElement as ElementText).retrieveTextCursor(this.cursor.worldValue);
     }
-    return null;
   }
 
   /**

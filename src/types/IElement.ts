@@ -16,7 +16,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
-import ITextData, { ITextCursor } from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -1140,7 +1140,9 @@ export interface IElementText extends IElement {
   // 文本光标
   get textCursor(): ITextCursor;
   // 给定坐标获取文本光标
-  hitCursor(point: IPoint): ITextCursor;
+  retrieveTextCursor(point: IPoint): void;
+  // 文本选区
+  get textSelection(): ITextSelection;
 }
 
 // 舞台组件（组件）-线段
