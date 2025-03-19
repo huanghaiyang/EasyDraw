@@ -35,8 +35,6 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import IStageUndo from "@/types/IStageUndo";
-import StageUndo from "@/modules/stage/StageUndo";
 import { CommandTypes, ICommandElementObject, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
@@ -48,6 +46,8 @@ import { IElementGroup } from "@/types/IElementGroup";
 import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
+import IUndoRedo from "@/types/IUndoRedo";
+import UndoRedo from "@/modules/base/UndoRedo";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -71,7 +71,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 对齐
   align: IStageAlign;
   // 撤销
-  undo: IStageUndo;
+  undoRedo: IUndoRedo;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -197,7 +197,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection = new StageSelection(this);
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
-    this.undo = new StageUndo(this);
+    this.undoRedo = new UndoRedo();
     this.renderer = new ShieldRenderer(this);
     this._requestAnimationRedraw();
     window.shield = this;
@@ -245,7 +245,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.add(command);
+    this.undoRedo.add(command);
   }
 
   private async _createTranslateCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
@@ -1301,7 +1301,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.add(command);
+    this.undoRedo.add(command);
   }
 
   /**
@@ -1677,7 +1677,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.add(command);
+    this.undoRedo.add(command);
     this.store.deleteSelects();
   }
 
@@ -1813,7 +1813,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         },
         this.store,
       );
-      this.undo.add(command);
+      this.undoRedo.add(command);
     }
   }
 
@@ -1846,7 +1846,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.add(command);
+    this.undoRedo.add(command);
   }
 
   /**
@@ -1869,12 +1869,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理撤销操作
    */
   _handleUndo(): void {
-    const tailUndoCommand = this.undo.tailUndoCommand;
+    const tailUndoCommand = this.undoRedo.tailUndoCommand;
     if (!tailUndoCommand) return;
     if (!(tailUndoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
-    this.undo.undo();
+    this.undoRedo.undo();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
@@ -1884,12 +1884,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理重做操作
    */
   _handleRedo(): void {
-    const tailRedoCommand = this.undo.tailRedoCommand;
+    const tailRedoCommand = this.undoRedo.tailRedoCommand;
     if (!tailRedoCommand) return;
     if (!(tailRedoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
-    this.undo.redo();
+    this.undoRedo.redo();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
@@ -2088,7 +2088,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
       this.store,
     );
-    this.undo.add(command);
+    this.undoRedo.add(command);
   }
 
   /**

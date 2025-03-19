@@ -1,9 +1,7 @@
-import IStageShield from "@/types/IStageShield";
-import IStageUndo from "@/types/IStageUndo";
 import ICommand from "@/types/ICommand";
+import IUndoRedo from "@/types/IUndoRedo";
 
-export default class StageUndo implements IStageUndo {
-  shield: IStageShield;
+export default class UndoRedo implements IUndoRedo {
   undoStack: ICommand[] = [];
   redoStack: ICommand[] = [];
 
@@ -13,10 +11,6 @@ export default class StageUndo implements IStageUndo {
 
   get tailRedoCommand(): ICommand | undefined {
     return this.redoStack[this.redoStack.length - 1];
-  }
-
-  constructor(shield: IStageShield) {
-    this.shield = shield;
   }
 
   /**

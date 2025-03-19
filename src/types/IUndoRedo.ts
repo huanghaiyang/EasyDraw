@@ -1,8 +1,6 @@
-import IStageShield from "@/types/IStageShield";
 import ICommand from "@/types/ICommand";
 
-export default interface IStageUndo {
-  shield: IStageShield;
+export default interface IUndoRedo {
   undoStack: ICommand[];
   redoStack: ICommand[];
 
