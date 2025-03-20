@@ -359,8 +359,10 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
   private createTextElementCursorTask(): IRenderTask | null {
     const element = this._getEditingTextElement();
     if (!element) return null;
-    if (element.isSelectionAvailable) return null;
-    return new ElementTaskTextCursor(element, this.renderParams);
+    if (element.isCursorVisible) {
+      return new ElementTaskTextCursor(element, this.renderParams);
+    }
+    return null;
   }
 
   /**

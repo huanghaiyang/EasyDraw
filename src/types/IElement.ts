@@ -1145,6 +1145,8 @@ export interface IElementText extends IElement {
   get textSelection(): ITextSelection;
   // 文本选区是否可用
   get isSelectionAvailable(): boolean;
+  // 文本光标是否可见
+  get isCursorVisible(): boolean;
 }
 
 // 舞台组件（组件）-线段

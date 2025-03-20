@@ -13,6 +13,10 @@ export default class ElementText extends ElementRect implements IElementText {
   private _textCursor: ITextCursor;
   // 文本选区
   private _textSelection: ITextSelection;
+  // 光标可见状态
+  private _cursorVisibleStatus: boolean;
+  // 光标可见计时器
+  private _cursorVisibleTimer: number;
 
   get editingEnable(): boolean {
     return true;
@@ -30,6 +34,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return !!this._textSelection && every(this._textSelection, node => !!node);
   }
 
+  get isCursorVisible(): boolean {
+    return !!this._textCursor && !this.isSelectionAvailable && this._cursorVisibleStatus;
+  }
+
   // 是否启用控制器
   get transformersEnable(): boolean {
     return this.status === ElementStatus.finished;
@@ -39,10 +47,48 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  /**
+   * 设置编辑状态
+   *
+   * @param value 编辑状态
+   */
   _setIsEditing(value: boolean): void {
     super._setIsEditing(value);
     this._textCursor = null;
     this._textSelection = null;
+    this._toggleCursorVisibleTimer(value);
+  }
+
+  /**
+   * 切换光标可见状态计时
+   */
+  private _toggleCursorVisibleTimer(value: boolean): void {
+    if (value) {
+      this._startCursorVisibleTimer();
+    } else {
+      this._clearCursorVisibleTimer();
+      this._cursorVisibleStatus = false;
+    }
+  }
+
+  /**
+   * 开始光标可见状态计时
+   */
+  private _startCursorVisibleTimer(): void {
+    if (this._cursorVisibleTimer) return;
+    this._cursorVisibleTimer = setInterval(() => {
+      this._cursorVisibleStatus = !this._cursorVisibleStatus;
+    }, 400);
+  }
+
+  /**
+   * 清除光标可见状态计时
+   */
+  private _clearCursorVisibleTimer(): void {
+    if (this._cursorVisibleTimer) {
+      clearInterval(this._cursorVisibleTimer);
+      this._cursorVisibleTimer = null;
+    }
   }
 
   /**
@@ -78,15 +124,21 @@ export default class ElementText extends ElementRect implements IElementText {
     const rect = ElementTaskHelper.calcElementRenderRect(this);
     // 获取文本光标
     const textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
-    // 更新选区
-    if (isSelectionMove) {
-      this._textSelection.endNode = textCursor;
-    } else {
-      this._textCursor = textCursor;
-      this._textSelection = {
-        startNode: textCursor,
-        endNode: null,
-      };
+    // 如果文本光标存在，那么就更新选区和光标状态
+    if (textCursor) {
+      if (isSelectionMove) {
+        this._textSelection.endNode = textCursor;
+        this._cursorVisibleStatus = false;
+      } else {
+        this._textCursor = textCursor;
+        this._textSelection = {
+          startNode: textCursor,
+          endNode: null,
+        };
+      }
+      this._cursorVisibleStatus = true;
+      this._clearCursorVisibleTimer();
+      this._startCursorVisibleTimer();
     }
   }
 }
