@@ -56,6 +56,7 @@ export default class ElementText extends ElementRect implements IElementText {
     super._setIsEditing(value);
     this._textCursor = null;
     this._textSelection = null;
+    this._cursorVisibleStatus = false;
     this._toggleCursorVisibleTimer(value);
   }
 
@@ -67,7 +68,6 @@ export default class ElementText extends ElementRect implements IElementText {
       this._startCursorVisibleTimer();
     } else {
       this._clearCursorVisibleTimer();
-      this._cursorVisibleStatus = false;
     }
   }
 
