@@ -498,4 +498,20 @@ export default class CommonUtils {
   static isPointInRect(rect: Partial<DOMRect>, point: IPoint): boolean {
     return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
   }
+
+  /**
+   * 将给定的rect转换为以rect中心点为原点的rect
+   *
+   * @param rect
+   * @returns
+   */
+  static centerRectConversion(rect: Partial<DOMRect>): Partial<DOMRect> {
+    const { width, height } = rect;
+    return {
+      x: -width / 2,
+      y: -height / 2,
+      width,
+      height,
+    };
+  }
 }

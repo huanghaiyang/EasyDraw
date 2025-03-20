@@ -6,6 +6,8 @@ import { RenderRect } from "@/types/IRender";
 import ITextData, { ITextCursor, ITextLine, ITextNode, TextRenderDirection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
+import { isBoolean } from "lodash";
 
 /**
  * 获取文本光标与文本节点的对应关系，并更新光标位置和宽高
@@ -115,12 +117,17 @@ export default class ElementTaskHelper {
    * @param textData 文本数据
    * @param position 光标位置
    * @param rect 旋转盒模型的rect
+   * @param flipX 是否翻转
    * @returns 光标位置
    */
-  static retrieveTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>): ITextCursor {
+  static retrieveTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
+    if (!isBoolean(flipX)) flipX = false;
     const textCursor: ITextCursor = {};
     // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
-    const [curPoint] = CanvasUtils.transPointsOfBox([position], rect as RenderRect);
+    let [curPoint] = CanvasUtils.transPointsOfBox([position], rect as RenderRect);
+    if (flipX) {
+      curPoint = MathUtils.calcHorizontalSymmetryPointInRect(curPoint, CommonUtils.centerRectConversion(rect));
+    }
     const { lines } = textData;
     let line: ITextLine;
     let lineNumber = -1;

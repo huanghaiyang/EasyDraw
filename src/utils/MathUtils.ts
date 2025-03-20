@@ -543,6 +543,34 @@ export default class MathUtils {
   }
 
   /**
+   * 计算点在矩形中的水平对称点
+   *
+   * @param point
+   * @param rect
+   * @returns
+   */
+  static calcHorizontalSymmetryPointInRect(point: IPoint, rect: Partial<DOMRect>): IPoint {
+    const { x, y, width, height } = rect;
+    const centerX = (x + x + width) / 2;
+    const centerY = (y + y + height) / 2;
+    return MathUtils.calcSymmetryPoint(point, { x: centerX, y: centerY }, { x: centerX, y });
+  }
+
+  /**
+   * 计算点在矩形中的垂直对称点
+   *
+   * @param point
+   * @param rect
+   * @returns
+   */
+  static calcVerticalSymmetryPointInRect(point: IPoint, rect: Partial<DOMRect>): IPoint {
+    const { x, y, width, height } = rect;
+    const centerX = (x + x + width) / 2;
+    const centerY = (y + y + height) / 2;
+    return MathUtils.calcSymmetryPoint(point, { x: centerX, y: centerY }, { x, y: centerY });
+  }
+
+  /**
    * 给出点数组和直线，返回点数组相对于直线的对称点数组
    *
    * @param coords

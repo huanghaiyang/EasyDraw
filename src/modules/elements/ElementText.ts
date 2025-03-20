@@ -77,7 +77,7 @@ export default class ElementText extends ElementRect implements IElementText {
     // 计算旋转盒模型的rect
     const rect = ElementTaskHelper.calcElementRenderRect(this);
     // 获取文本光标
-    const textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect);
+    const textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
     // 更新选区
     if (isSelectionMove) {
       this._textSelection.endNode = textCursor;
