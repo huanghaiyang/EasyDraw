@@ -5,6 +5,7 @@ import { DefaultFontStyle } from "@/styles/ElementStyles";
 import { SelectionStrokeColor } from "@/styles/MaskStyles";
 import FontUtils from "@/utils/FontUtils";
 import ColorUtils from "@/utils/ColorUtils";
+import { isNumber } from "lodash";
 
 const minWidth = 200;
 const minHeight = 20;
@@ -12,6 +13,8 @@ const minHeight = 20;
 export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   // 输入框
   textEditor: HTMLTextAreaElement;
+  // 文本光标
+  textCursorEditor: HTMLTextAreaElement;
   // 输入框位置
   private _textEditorPosition: IPoint;
 
@@ -59,6 +62,52 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     }, 0);
     this.textEditor = textEditor;
     return textEditor;
+  }
+
+  /**
+   * 创建文本光标
+   * @param value - 文本内容
+   * @param selectionStart - 光标起始位置
+   * @param selectionEnd - 光标结束位置
+   */
+  createTextCursorInput(value: string, selectionStart: number, selectionEnd: number): HTMLTextAreaElement {
+    if (!this.textCursorEditor) {
+      const textCursorEditor = document.createElement("textarea");
+      Object.assign(textCursorEditor.style, {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: `300px`,
+        height: `300px`,
+      });
+      this._addCursorInputEvents(textCursorEditor);
+      this.node.appendChild(textCursorEditor);
+      this.textCursorEditor = textCursorEditor;
+    }
+    this.textCursorEditor.value = value;
+    this.focusTextCursorInput(selectionStart, selectionEnd);
+    return this.textCursorEditor;
+  }
+
+  /**
+   * 聚焦文本光标
+   * @param selectionStart - 光标起始位置
+   * @param selectionEnd - 光标结束位置
+   */
+  focusTextCursorInput(selectionStart?: number, selectionEnd?: number): void {
+    if (!this.textCursorEditor) return;
+    if (!isNumber(selectionStart)) {
+      selectionStart = 0;
+    }
+    if (!isNumber(selectionEnd)) {
+      selectionEnd = 0;
+    }
+    const start = Math.min(selectionStart, selectionEnd);
+    const end = Math.max(selectionStart, selectionEnd);
+    console.log(this.textCursorEditor.value, start, end);
+    this.textCursorEditor.selectionStart = start;
+    this.textCursorEditor.selectionEnd = end;
+    this.textCursorEditor.focus();
   }
 
   /**
@@ -127,7 +176,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     textEditor.addEventListener("blur", () => {
       if (this.textEditor.value) {
         this.emit(
-          "input",
+          "textInput",
           this.textEditor.value,
           DefaultFontStyle,
           {
@@ -147,6 +196,20 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     });
     textEditor.addEventListener("input", () => {
       this._updateInputStyleWhileInputing();
+    });
+  }
+
+  /**
+   * 添加文本光标事件
+   *
+   * @param textCursorEditor
+   */
+  private _addCursorInputEvents(textCursorEditor: HTMLTextAreaElement): void {
+    textCursorEditor.addEventListener("blur", () => {
+      console.log("blur");
+    });
+    textCursorEditor.addEventListener("input", () => {
+      this.emit("textUpdate", textCursorEditor.value, textCursorEditor.selectionStart, textCursorEditor.selectionEnd);
     });
   }
 

@@ -1,5 +1,5 @@
 import { ElementObject } from "@/types/IElement";
-import ITextData from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
 
 // 通用组件命令
 export type ICommandElementObject = {
@@ -64,6 +64,8 @@ export enum TextEditingCommandTypes {
 // 文本组件编辑命令对象
 export type ICommandTextEditingObject = {
   model: ITextData;
+  textCursor?: ITextCursor;
+  textSelection?: ITextSelection;
 };
 
 // 文本组件编辑命令的保存数据

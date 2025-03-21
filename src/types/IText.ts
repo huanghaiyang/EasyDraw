@@ -36,11 +36,8 @@ export type ITextCursor = Partial<IPoint> &
     renderRect?: Partial<DOMRect>;
   };
 
-// 文本选区节点
-export type ITextSelectionNode = ITextCursor;
-
 // 文本选区
 export type ITextSelection = {
-  startNode?: ITextSelectionNode;
-  endNode?: ITextSelectionNode;
+  startCursor?: ITextCursor;
+  endCursor?: ITextCursor;
 };

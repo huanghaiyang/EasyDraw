@@ -6,7 +6,8 @@ import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskH
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every } from "lodash";
+import { every, isEmpty, isString } from "lodash";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -17,6 +18,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _cursorVisibleStatus: boolean;
   // 光标可见计时器
   private _cursorVisibleTimer: number;
+  // 原始文本数据
+  private _originalTextData: ITextData;
 
   get editingEnable(): boolean {
     return true;
@@ -45,6 +48,18 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get cornerEnable(): boolean {
     return this.status === ElementStatus.finished;
+  }
+
+  get text(): string {
+    return ElementTaskHelper.getTextFromTextData(this.model.data as ITextData);
+  }
+
+  get selectionStart(): number {
+    return ElementTaskHelper.getTextNodeNumberAtCursor(this._textCursor, this.model.data as ITextData);
+  }
+
+  get selectionEnd(): number {
+    return ElementTaskHelper.getTextNodeNumberAtCursor(this._textSelection?.endCursor || this._textCursor, this.model.data as ITextData);
   }
 
   /**
@@ -127,18 +142,45 @@ export default class ElementText extends ElementRect implements IElementText {
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
-        this._textSelection.endNode = textCursor;
+        this._textSelection.endCursor = textCursor;
         this._cursorVisibleStatus = false;
       } else {
         this._textCursor = textCursor;
         this._textSelection = {
-          startNode: textCursor,
-          endNode: null,
+          startCursor: textCursor,
+          endCursor: null,
         };
       }
       this._cursorVisibleStatus = true;
       this._clearCursorVisibleTimer();
       this._startCursorVisibleTimer();
     }
+  }
+
+  /**
+   * 更新文本
+   *
+   * @param value 文本
+   * @param selectionStart 选区起始位置
+   * @param selectionEnd 选区结束位置
+   */
+  updateText(value: string, selectionStart?: number, selectionEnd?: number): void {
+    if (isString(value) && isEmpty(value)) {
+      this.model.data = {
+        lines: [
+          {
+            nodes: [],
+          },
+        ],
+      } as ITextData;
+    }
+    const startCursor = ElementTaskHelper.getCursorByTextNodeNumber(this.model.data as ITextData, selectionStart);
+    const endCursor = ElementTaskHelper.getCursorByTextNodeNumber(this.model.data as ITextData, selectionEnd);
+    this._textCursor = startCursor;
+    this._textSelection = {
+      startCursor,
+      endCursor,
+    };
+    this._originalTextData = LodashUtils.jsonClone(this.model.data as ITextData);
   }
 }

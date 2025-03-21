@@ -1139,14 +1139,22 @@ export interface IElementPolygon extends IElement {}
 export interface IElementText extends IElement {
   // 文本光标
   get textCursor(): ITextCursor;
-  // 给定坐标获取文本光标
-  retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 文本选区
   get textSelection(): ITextSelection;
   // 文本选区是否可用
   get isSelectionAvailable(): boolean;
   // 文本光标是否可见
   get isCursorVisible(): boolean;
+  // 文本
+  get text(): string;
+  // 文本选区起始位置
+  get selectionStart(): number;
+  // 文本选区结束位置
+  get selectionEnd(): number;
+  // 给定坐标获取文本光标
+  retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
+  // 更新文本
+  updateText(value: string, selectionStart?: number, selectionEnd?: number): void;
 }
 
 // 舞台组件（组件）-线段

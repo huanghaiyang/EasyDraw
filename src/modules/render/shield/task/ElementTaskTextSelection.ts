@@ -3,7 +3,7 @@ import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { IElementText } from "@/types/IElement";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { TextSelectionFillColor, TextSelectionFillColorOpacity } from "@/styles/MaskStyles";
-import ITextData, { ITextCursor, ITextLine, ITextSelectionNode, TextRenderDirection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, TextRenderDirection } from "@/types/IText";
 import { pick } from "lodash";
 import { RenderParams } from "@/types/IRender";
 
@@ -25,13 +25,13 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
       actualAngle,
     };
 
-    const { startNode, endNode } = textSelection;
-    const { lineNumber: startLineNumber, renderRect } = startNode;
-    const { lineNumber: endLineNumber } = endNode;
+    const { startCursor, endCursor } = textSelection;
+    const { lineNumber: startLineNumber, renderRect } = startCursor;
+    const { lineNumber: endLineNumber } = endCursor;
 
     // 如果是同一行，则仅绘制当前行的选区效果
     if (startLineNumber === endLineNumber) {
-      this._drawLineSelection(startNode, endNode, options);
+      this._drawLineSelection(startCursor, endCursor, options);
     } else {
       const { lines } = this.element.model.data as ITextData;
       if (startLineNumber < endLineNumber) {
@@ -42,9 +42,9 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
             this._draweEmptyLine(line, renderRect, options);
           } else {
             if (i === startLineNumber) {
-              this._drawPartialLine(line, startNode, TextRenderDirection.RIGHT, renderRect, options);
+              this._drawPartialLine(line, startCursor, TextRenderDirection.RIGHT, renderRect, options);
             } else if (i === endLineNumber) {
-              this._drawPartialLine(line, endNode, TextRenderDirection.LEFT, renderRect, options);
+              this._drawPartialLine(line, endCursor, TextRenderDirection.LEFT, renderRect, options);
             } else {
               this._drawFullLine(line, renderRect, options);
             }
@@ -58,9 +58,9 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
             this._draweEmptyLine(line, renderRect, options);
           } else {
             if (i === startLineNumber) {
-              this._drawPartialLine(line, startNode, TextRenderDirection.LEFT, renderRect, options);
+              this._drawPartialLine(line, startCursor, TextRenderDirection.LEFT, renderRect, options);
             } else if (i === endLineNumber) {
-              this._drawPartialLine(line, endNode, TextRenderDirection.RIGHT, renderRect, options);
+              this._drawPartialLine(line, endCursor, TextRenderDirection.RIGHT, renderRect, options);
             } else {
               this._drawFullLine(line, renderRect, options);
             }
@@ -79,19 +79,19 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
    */
   private _draweEmptyLine(line: ITextLine, renderRect: Partial<DOMRect>, options: RenderParams): void {
     const { x, y, height } = line;
-    const startSelectionNode = {
+    const startCursor = {
       x,
       y,
       height,
       renderRect,
-    } as ITextSelectionNode;
-    const endSelectionNode = {
+    } as ITextCursor;
+    const endCursor = {
       x: x + 4 * CanvasUtils.scale,
       y,
       height,
       renderRect,
-    } as ITextSelectionNode;
-    this._drawLineSelection(startSelectionNode, endSelectionNode, options);
+    } as ITextCursor;
+    this._drawLineSelection(startCursor, endCursor, options);
   }
 
   /**
@@ -151,20 +151,20 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
 
   /**
    * 绘制选区
-   * @param startSelectionNode 开始选区节点
-   * @param endSelectionNode 结束选区节点
+   * @param startCursor 开始选区光标
+   * @param endCursor 结束选区光标
    * @param options 渲染选项
    */
-  private _drawLineSelection(startSelectionNode: ITextSelectionNode, endSelectionNode: ITextSelectionNode, options: RenderParams): void {
-    const desX = Math.min(startSelectionNode.x, endSelectionNode.x);
-    const desY = startSelectionNode.y;
-    const desWidth = Math.abs(startSelectionNode.x - endSelectionNode.x);
-    const desHeight = startSelectionNode.height;
+  private _drawLineSelection(startCursor: ITextCursor, endCursor: ITextCursor, options: RenderParams): void {
+    const desX = Math.min(startCursor.x, endCursor.x);
+    const desY = startCursor.y;
+    const desWidth = Math.abs(startCursor.x - endCursor.x);
+    const desHeight = startCursor.height;
 
     CanvasUtils.drawRectFill(
       this.canvas,
       {
-        ...startSelectionNode.renderRect,
+        ...startCursor.renderRect,
         desX,
         desY,
         desWidth,

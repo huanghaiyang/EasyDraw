@@ -201,9 +201,75 @@ export default class ElementTaskHelper {
    */
   static isTextSelectionAvailable(selection: ITextSelection): boolean {
     const {
-      startNode: { lineNumber: startLineNumber, nodeId: startNodeId },
-      endNode: { lineNumber: endLineNumber, nodeId: endNodeId },
+      startCursor: { lineNumber: startLineNumber, nodeId: startNodeId },
+      endCursor: { lineNumber: endLineNumber, nodeId: endNodeId },
     } = selection;
     return startLineNumber !== endLineNumber || startNodeId !== endNodeId;
+  }
+
+  /**
+   * 获取文本数据中的文本内容
+   *
+   * @param textData 文本数据
+   * @returns 文本内容
+   */
+  static getTextFromTextData(textData: ITextData): string {
+    return textData.lines.map(line => line.nodes.map(node => node.content).join("")).join("\n");
+  }
+
+  /**
+   * 获取给定光标位置的文本节点编号
+   *
+   * @param textData 文本数据
+   * @param cursor 文本光标
+   * @returns 文本节点编号
+   */
+  static getTextNodeNumberAtCursor(cursor: ITextCursor, textData: ITextData): number {
+    let result = 0;
+    if (!cursor) return result;
+    const { lineNumber, nodeId, pos } = cursor;
+    const lines = textData.lines;
+    for (let i = 0; i <= lineNumber; i++) {
+      const line = lines[i];
+      if (i < lineNumber) {
+        result += line.nodes.length + 1;
+      } else if (i === lineNumber) {
+        const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+        if (nodeIndex !== -1) {
+          result += pos === TextRenderDirection.RIGHT ? nodeIndex + 1 : nodeIndex;
+        }
+        break;
+      } else {
+        break;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * 根据文本节点编号获取文本光标
+   *
+   * @param textData 文本数据
+   * @param nodeNumber 文本节点编号
+   * @returns 文本光标
+   */
+  static getCursorByTextNodeNumber(textData: ITextData, nodeNumber: number): ITextCursor {
+    let result: ITextCursor = null;
+    const lines = textData.lines;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const lineNodeNumber = line.nodes.length + 1;
+      if (nodeNumber <= lineNodeNumber) {
+        const nodeIndex = nodeNumber - 1;
+        const node = line.nodes[nodeIndex];
+        result = getTextCursorNodeAbout(node, TextRenderDirection.LEFT);
+        break;
+      }
+      nodeNumber -= lineNodeNumber;
+    }
+    if (!result) {
+      result = getTextCursorLineAbout(lines[lines.length - 1]);
+    }
+    return result;
   }
 }

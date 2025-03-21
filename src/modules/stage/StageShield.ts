@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { ElementObject, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementObject, IElementText, RefreshSubOptions } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -676,7 +676,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
     this.event.on("undo", this._handleUndo.bind(this));
     this.event.on("redo", this._handleRedo.bind(this));
-    this.html.on("input", this._handleInput.bind(this));
+    this.html.on("textInput", this._handleTextInput.bind(this));
+    this.html.on("textUpdate", this._handleTextUpdate.bind(this));
   }
 
   /**
@@ -1012,6 +1013,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
       (targetElement as ElementText).retrieveTextCursor(this.cursor.worldValue, isSelectionMove);
+      this._retreiveTextCursorInput(targetElement as unknown as IElementText);
     }
   }
 
@@ -1129,6 +1131,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 创建文本光标输入框并聚焦
+   * @param textElement - 文本组件
+   */
+  private _retreiveTextCursorInput(textElement: IElementText): void {
+    if (!textElement || !(textElement instanceof ElementText)) {
+      return;
+    }
+    this.html.createTextCursorInput(textElement.text);
+    requestAnimationFrame(() => {
+      this.html.focusTextCursorInput(textElement.selectionStart, textElement.selectionEnd);
+    });
+  }
+
+  /**
    * 处理鼠标双击事件
    *
    * @param e
@@ -1140,6 +1156,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.beginEditingElements(selectedElements);
       this.selection.refresh();
       this._originalEditingDataList = await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() })));
+      // 如果是文本编辑模式，则创建文本光标输入框并聚焦
+      if (this.isTextEditing) {
+        this._retreiveTextCursorInput(selectedElements[0] as IElementText);
+      }
     }
   }
 
@@ -1903,7 +1923,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param size
    * @param position
    */
-  async _handleInput(value: string, fontStyle: FontStyle, size: ISize, position: IPoint): Promise<void> {
+  async _handleTextInput(value: string, fontStyle: FontStyle, size: ISize, position: IPoint): Promise<void> {
     this._clearStageSelects();
     const { x, y } = ElementUtils.calcWorldCoord(position);
     const { width, height } = size;
@@ -1924,6 +1944,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 如果差值小于50ms，则可以判定是鼠标点击舞台时触发的blur事件
     if (window.performance.now() - this._latestMousedownTimestamp <= 50) {
       this._shouldSelectTopAWhilePressUp = false;
+    }
+  }
+
+  /**
+   * 处理文本更新
+   *
+   * @param value
+   * @param selectionStart
+   * @param selectionEnd
+   */
+  async _handleTextUpdate(value: string, selectionStart?: number, selectionEnd?: number): Promise<void> {
+    if (this.isTextEditing) {
+      const textElement = this.store.selectedElements[0] as ElementText;
+      textElement.updateText(value, selectionStart, selectionEnd);
+      this._shouldRedraw = true;
     }
   }
 
