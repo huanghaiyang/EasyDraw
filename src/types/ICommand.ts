@@ -1,4 +1,5 @@
 import { ElementObject } from "@/types/IElement";
+import ITextData from "@/types/IText";
 
 // 通用组件命令
 export type ICommandElementObject = {
@@ -31,18 +32,21 @@ export type IGroupCommandElementObject = ICommandElementObject &
     isGroupSubject?: boolean;
   };
 
+// 命令
 export default interface ICommand<T> {
   payload: T;
   undo(): void;
   redo(): void;
 }
 
+// 组件操作数据
 export interface IElementCommandPayload {
   type: ElementCommandTypes;
   dataList: Array<ICommandElementObject>;
   rDataList?: Array<ICommandElementObject>;
 }
 
+// 组件命令类型
 export enum ElementCommandTypes {
   ElementsAdded = "elements_added",
   ElementsRemoved = "elements_removed",
@@ -50,4 +54,21 @@ export enum ElementCommandTypes {
   ElementsRearranged = "elements_rearranged",
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
+}
+
+// 文本组件编辑命令
+export enum TextEditingCommandTypes {
+  TextUpdated = "text_updated",
+}
+
+// 文本组件编辑命令对象
+export type ICommandTextEditingObject = {
+  model: ITextData;
+};
+
+// 文本组件编辑命令的保存数据
+export interface ITextEditingCommandPayload {
+  type: TextEditingCommandTypes;
+  dataList: Array<ICommandTextEditingObject>;
+  rDataList?: Array<ICommandTextEditingObject>;
 }

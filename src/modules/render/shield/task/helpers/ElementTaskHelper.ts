@@ -3,7 +3,7 @@ import { IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import IElement, { IElementRect } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { ITextCursor, ITextLine, ITextNode, TextRenderDirection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextRenderDirection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -191,5 +191,19 @@ export default class ElementTaskHelper {
         return getTextCursorLineAbout(line);
       }
     }
+  }
+
+  /**
+   * 判断文本选区是否可用
+   *
+   * @param selection 文本选区
+   * @returns 是否可用
+   */
+  static isTextSelectionAvailable(selection: ITextSelection): boolean {
+    const {
+      startNode: { lineNumber: startLineNumber, nodeId: startNodeId },
+      endNode: { lineNumber: endLineNumber, nodeId: endNodeId },
+    } = selection;
+    return startLineNumber !== endLineNumber || startNodeId !== endNodeId;
   }
 }
