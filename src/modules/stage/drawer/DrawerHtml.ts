@@ -73,13 +73,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   createTextCursorInput(): HTMLTextAreaElement {
     if (!this.textCursorEditor) {
       const textCursorEditor = document.createElement("textarea");
-      Object.assign(textCursorEditor.style, {
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: `300px`,
-        height: `300px`,
-      });
+      textCursorEditor.id = "text-cursor-editor";
       this._addCursorInputEvents(textCursorEditor);
       this.node.appendChild(textCursorEditor);
       this.textCursorEditor = textCursorEditor;
@@ -136,6 +130,14 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+        #text-cursor-editor {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 0;
+          height: 0;
+          caret-color: transparent;
+        }
     `;
     document.head.appendChild(style);
   }
@@ -186,6 +188,16 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   }
 
   /**
+   * 文本更新
+   */
+  private _emitTextCursorUpdate(): void {
+    this.emit("textUpdate", this.textCursorEditor.value, {
+      keyCode: this._prevTextCursorKeycode,
+      ctrlKey: this._prevTextCursorCtrlKey,
+    });
+  }
+
+  /**
    * 添加文本光标事件
    *
    * @param textCursorEditor
@@ -199,13 +211,11 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     textCursorEditor.addEventListener("keydown", e => {
       this._prevTextCursorKeycode = e.keyCode;
       this._prevTextCursorCtrlKey = e.ctrlKey;
+      this._emitTextCursorUpdate();
     });
     // 输入框内容变化
     textCursorEditor.addEventListener("input", () => {
-      this.emit("textUpdate", textCursorEditor.value, {
-        keyCode: this._prevTextCursorKeycode,
-        ctrlKey: this._prevTextCursorCtrlKey,
-      });
+      this._emitTextCursorUpdate();
     });
   }
 
