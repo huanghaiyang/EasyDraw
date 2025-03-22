@@ -678,6 +678,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("redo", this._handleRedo.bind(this));
     this.html.on("textInput", this._handleTextInput.bind(this));
     this.html.on("textUpdate", this._handleTextUpdate.bind(this));
+    this.html.on("textSelectionUpdate", this._handleTextSelectionUpdate.bind(this));
   }
 
   /**
@@ -1957,6 +1958,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as ElementText;
       textElement.updateText(value, states);
+      this._shouldRedraw = true;
+    }
+  }
+
+  /**
+   * 处理文本光标值和选择变化
+   *
+   * @param states
+   */
+  async _handleTextSelectionUpdate(states: TextEditingStates): Promise<void> {
+    if (this.isTextEditing) {
+      const textElement = this.store.selectedElements[0] as ElementText;
+      textElement.updateTextSelection(states);
       this._shouldRedraw = true;
     }
   }

@@ -29,6 +29,22 @@ function getTextCursorNodeAbout(node: ITextNode, pos: TextRenderDirection): Part
 }
 
 /**
+ * 获取文本行的头光标信息
+ *
+ * @param line 文本行
+ * @returns 光标信息
+ */
+function getHeadCursorOfLine(line: ITextLine): Partial<ITextCursor> {
+  const { x, y, height } = line;
+  return {
+    x,
+    y,
+    width: TextCursorWidth,
+    height,
+  };
+}
+
+/**
  * 尝试将光光标绑定到行末尾的节点上，如果当前行没有节点，则将光标移动到行首位置
  *
  * @param line 文本行
@@ -40,13 +56,7 @@ function getTextCursorLineAbout(line: ITextLine): Partial<ITextCursor> {
   if (node) {
     return getTextCursorNodeAbout(node, TextRenderDirection.RIGHT);
   } else {
-    const { x, y, height } = line;
-    return {
-      x,
-      y,
-      width: TextCursorWidth,
-      height,
-    };
+    return getHeadCursorOfLine(line);
   }
 }
 
@@ -226,7 +236,7 @@ export default class TextElementUtils {
     let result: ITextCursor = null;
     const lines = textData.lines;
     if (nodeNumber === 0) {
-      return getTextCursorLineAbout(lines[0]);
+      return getHeadCursorOfLine(lines[0]);
     }
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];

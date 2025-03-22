@@ -1155,6 +1155,8 @@ export interface IElementText extends IElement {
   retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 更新文本
   updateText(value: string, keys: TextEditingStates): void;
+  // 更新文本选区
+  updateTextSelection(keys: TextEditingStates): void;
 }
 
 // 舞台组件（组件）-线段

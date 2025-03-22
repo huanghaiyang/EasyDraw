@@ -164,9 +164,10 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param states 文本编辑状态
    */
   updateText(value: string, states: TextEditingStates): void {
+    console.log("updateText", value, states);
     if (isString(value)) {
       const textData = LodashUtils.jsonClone(this.model.data as ITextData);
-      const { selectionStart, selectionEnd, prevSelectionStart, prevSelectionEnd, keyCode } = states;
+      const { prevSelectionStart, prevSelectionEnd, keyCode } = states;
       if (isEmpty(value)) {
         const [{ x, y, height }] = textData.lines;
         this.model.data = {
@@ -190,21 +191,40 @@ export default class ElementText extends ElementRect implements IElementText {
         });
         this.model.data = textData;
       }
-      const rect = ElementRenderHelper.calcElementRenderRect(this);
-      const startCursor = TextElementUtils.getCursorByTextNodeNumber(this.model.data as ITextData, selectionStart);
-      startCursor.renderRect = rect;
-
-      let endCursor: ITextCursor;
-      if (!isEmpty(value)) {
-        endCursor = TextElementUtils.getCursorByTextNodeNumber(this.model.data as ITextData, selectionEnd);
-        endCursor.renderRect = rect;
-      }
-
-      this._textCursor = startCursor;
-      this._textSelection = {
-        startCursor,
-        endCursor: isEmpty(value) ? null : endCursor,
-      };
+      this._doUpdateTextSelection(states);
     }
+  }
+
+  /**
+   * 更新文本选区
+   *
+   * @param states 文本编辑状态
+   */
+  updateTextSelection(states: TextEditingStates): void {
+    console.log("updateTextSelection", states);
+    this._doUpdateTextSelection(states);
+  }
+
+  /**
+   * 更新文本选区
+   *
+   * @param states 文本编辑状态
+   */
+  private _doUpdateTextSelection(states: TextEditingStates): void {
+    const { selectionStart, selectionEnd } = states;
+    const textData = this.model.data as ITextData;
+    const rect = ElementRenderHelper.calcElementRenderRect(this);
+    const startCursor = TextElementUtils.getCursorByTextNodeNumber(textData, selectionStart);
+    startCursor.renderRect = rect;
+    let endCursor: ITextCursor | null = null;
+    if (selectionEnd !== selectionStart) {
+      endCursor = TextElementUtils.getCursorByTextNodeNumber(textData, selectionEnd);
+      endCursor.renderRect = rect;
+    }
+    this._textCursor = startCursor;
+    this._textSelection = {
+      startCursor,
+      endCursor,
+    };
   }
 }

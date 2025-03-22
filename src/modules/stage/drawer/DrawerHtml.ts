@@ -1,4 +1,4 @@
-import { IPoint, ISize } from "@/types";
+import { IPoint, ISize, TextEditingStates } from "@/types";
 import { IDrawerHtml } from "@/types/IStageDrawer";
 import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import { DefaultFontStyle } from "@/styles/ElementStyles";
@@ -25,6 +25,8 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   private _prevSelectionStart: number = -1;
   // 最后一次文本光标编辑的selectionEnd
   private _prevSelectionEnd: number = -1;
+  // 是否应该触发selectionChanged事件
+  private _shouldEmitSelectionChanged = true;
 
   /**
    * 初始化画布
@@ -112,7 +114,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     }
     const start = Math.min(selectionStart, selectionEnd);
     const end = Math.max(selectionStart, selectionEnd);
-    console.log(this.textCursorEditor.value, start, end);
+    this._shouldEmitSelectionChanged = false;
     this.textCursorEditor.selectionStart = start;
     this.textCursorEditor.selectionEnd = end;
     this.textCursorEditor.focus();
@@ -208,29 +210,69 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   }
 
   /**
+   * 获取文本光标属性
+   *
+   * @param textCursorEditor
+   */
+  private _getSelectionStates(textCursorEditor: HTMLTextAreaElement): Partial<TextEditingStates> {
+    return {
+      selectionStart: textCursorEditor.selectionStart,
+      selectionEnd: textCursorEditor.selectionEnd,
+    };
+  }
+
+  /**
+   * 发送文本光标值变化事件
+   *
+   * @param textCursorEditor
+   */
+  private _emitValueChange(textCursorEditor: HTMLTextAreaElement): void {
+    this.emit("textUpdate", textCursorEditor.value, {
+      keyCode: this._prevTextCursorKeycode,
+      ctrlKey: this._prevTextCursorCtrlKey,
+      prevSelectionStart: this._prevSelectionStart,
+      prevSelectionEnd: this._prevSelectionEnd,
+      ...this._getSelectionStates(textCursorEditor),
+    });
+  }
+
+  /**
+   * 发送文本光标值和选择变化事件
+   *
+   * @param textCursorEditor
+   */
+  private _emitSelectionChange(textCursorEditor: HTMLTextAreaElement): void {
+    this.emit("textSelectionUpdate", this._getSelectionStates(textCursorEditor));
+  }
+
+  /**
    * 添加文本光标事件
    *
    * @param textCursorEditor
    */
   private _addCursorInputEvents(textCursorEditor: HTMLTextAreaElement): void {
+    // 失去焦点
     textCursorEditor.addEventListener("blur", () => {
       console.log("blur");
     });
+    // 监听文本光标选区变化
+    textCursorEditor.addEventListener("selectionchange", () => {
+      if (this._shouldEmitSelectionChanged) {
+        this._emitSelectionChange(textCursorEditor);
+      }
+      this._shouldEmitSelectionChanged = true;
+    });
+    // 监听键盘按键
     textCursorEditor.addEventListener("keydown", e => {
       this._prevTextCursorKeycode = e.keyCode;
       this._prevTextCursorCtrlKey = e.ctrlKey;
       this._prevSelectionStart = textCursorEditor.selectionStart;
       this._prevSelectionEnd = textCursorEditor.selectionEnd;
     });
+    // 输入框内容变化
     textCursorEditor.addEventListener("input", () => {
-      this.emit("textUpdate", textCursorEditor.value, {
-        keyCode: this._prevTextCursorKeycode,
-        ctrlKey: this._prevTextCursorCtrlKey,
-        selectionStart: textCursorEditor.selectionStart,
-        selectionEnd: textCursorEditor.selectionEnd,
-        prevSelectionStart: this._prevSelectionStart,
-        prevSelectionEnd: this._prevSelectionEnd,
-      });
+      this._shouldEmitSelectionChanged = false;
+      this._emitValueChange(textCursorEditor);
     });
   }
 
