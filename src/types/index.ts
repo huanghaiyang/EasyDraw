@@ -140,8 +140,4 @@ export type TextEditingStates = {
   shiftKey?: boolean;
   altKey?: boolean;
   metaKey?: boolean;
-  selectionStart?: number;
-  selectionEnd?: number;
-  prevSelectionStart?: number;
-  prevSelectionEnd?: number;
 };

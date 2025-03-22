@@ -83,7 +83,7 @@ export default class TextElementUtils {
           fontStyle,
         };
       });
-      lines.push({ nodes });
+      lines.push({ nodes, isTailBreak: true });
     });
     return {
       lines,
@@ -194,98 +194,5 @@ export default class TextElementUtils {
    */
   static getTextFromTextData(textData: ITextData): string {
     return textData.lines.map(line => line.nodes.map(node => node.content).join("")).join("\n");
-  }
-
-  /**
-   * 获取给定光标位置的文本节点编号
-   *
-   * @param textData 文本数据
-   * @param cursor 文本光标
-   * @returns 文本节点编号
-   */
-  static getTextNodeNumberAtCursor(cursor: ITextCursor, textData: ITextData): number {
-    let result = 0;
-    if (!cursor) return result;
-    const { lineNumber, nodeId, pos } = cursor;
-    const lines = textData.lines;
-    for (let i = 0; i <= lineNumber; i++) {
-      const line = lines[i];
-      if (i < lineNumber) {
-        result += line.nodes.length + 1;
-      } else if (i === lineNumber) {
-        const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
-        if (nodeIndex !== -1) {
-          result += pos === TextRenderDirection.RIGHT ? nodeIndex + 1 : nodeIndex;
-        }
-        break;
-      } else {
-        break;
-      }
-    }
-    return result;
-  }
-
-  /**
-   * 根据文本节点编号获取文本光标
-   *
-   * @param textData 文本数据
-   * @param nodeNumber 文本节点编号
-   * @returns 文本光标
-   */
-  static getCursorByTextNodeNumber(textData: ITextData, nodeNumber: number): ITextCursor {
-    let result: ITextCursor = null;
-    const lines = textData.lines;
-    if (nodeNumber === 0) {
-      return getHeadCursorOfLine(lines[0]);
-    }
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const lineNodeNumber = line.nodes.length + 1;
-      if (nodeNumber <= lineNodeNumber) {
-        const nodeIndex = nodeNumber - 1;
-        const node = line.nodes[nodeIndex];
-        result = getTextCursorNodeAbout(node, nodeNumber === 0 ? TextRenderDirection.LEFT : TextRenderDirection.RIGHT);
-        break;
-      }
-      nodeNumber -= lineNodeNumber;
-    }
-    if (!result) {
-      result = getTextCursorLineAbout(lines[lines.length - 1]);
-    }
-    return result;
-  }
-
-  /**
-   * 标记文本数据中的文本选区
-   *
-   * @param textData 文本数据
-   * @param selectionStart 文本选区起始位置
-   * @param selectionEnd 文本选区结束位置
-   * @returns 文本数据
-   */
-  static markTextDataWithSelection(textData: ITextData, selectionStart: number, selectionEnd: number): ITextData {
-    const { lines } = textData;
-    let currentNodeNumber = selectionStart === selectionEnd ? 1 : 0;
-    for (let i = 0; i < lines.length; i++) {
-      let allSelected = true;
-      const { nodes } = lines[i];
-      for (let j = 0; j < nodes.length; j++) {
-        const node = nodes[j];
-        node.selected = selectionStart <= currentNodeNumber && currentNodeNumber <= selectionEnd;
-        if (allSelected && !node.selected) {
-          allSelected = false;
-        }
-        currentNodeNumber++;
-        if (currentNodeNumber > selectionEnd) {
-          break;
-        }
-      }
-      lines[i].selected = allSelected;
-      currentNodeNumber++;
-      if (currentNodeNumber > selectionEnd) {
-        break;
-      }
-    }
-    return textData;
   }
 }

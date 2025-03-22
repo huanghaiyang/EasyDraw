@@ -5,7 +5,7 @@ import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every, isEmpty, isString } from "lodash";
+import { every, isString } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
@@ -52,14 +52,6 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get text(): string {
     return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
-  }
-
-  get selectionStart(): number {
-    return TextElementUtils.getTextNodeNumberAtCursor(this._textCursor, this.model.data as ITextData);
-  }
-
-  get selectionEnd(): number {
-    return TextElementUtils.getTextNodeNumberAtCursor(this._textSelection?.endCursor || this._textCursor, this.model.data as ITextData);
   }
 
   /**
@@ -167,64 +159,14 @@ export default class ElementText extends ElementRect implements IElementText {
     console.log("updateText", value, states);
     if (isString(value)) {
       const textData = LodashUtils.jsonClone(this.model.data as ITextData);
-      const { prevSelectionStart, prevSelectionEnd, keyCode } = states;
-      if (isEmpty(value)) {
-        const [{ x, y, height }] = textData.lines;
-        this.model.data = {
-          lines: [
-            {
-              nodes: [],
-              x,
-              y,
-              width: 0,
-              height,
-            },
-          ],
-        } as ITextData;
-      } else {
-        if (CoderUtils.isDeleterKey(keyCode)) {
-          TextElementUtils.markTextDataWithSelection(textData, prevSelectionStart, prevSelectionEnd);
-        }
+      const { keyCode } = states;
+      if (CoderUtils.isDeleterKey(keyCode)) {
         textData.lines = textData.lines.filter(line => !line.selected);
         textData.lines.forEach(line => {
           line.nodes = line.nodes.filter(node => !node.selected);
         });
-        this.model.data = textData;
       }
-      this._doUpdateTextSelection(states);
+      this.model.data = textData;
     }
-  }
-
-  /**
-   * 更新文本选区
-   *
-   * @param states 文本编辑状态
-   */
-  updateTextSelection(states: TextEditingStates): void {
-    console.log("updateTextSelection", states);
-    this._doUpdateTextSelection(states);
-  }
-
-  /**
-   * 更新文本选区
-   *
-   * @param states 文本编辑状态
-   */
-  private _doUpdateTextSelection(states: TextEditingStates): void {
-    const { selectionStart, selectionEnd } = states;
-    const textData = this.model.data as ITextData;
-    const rect = ElementRenderHelper.calcElementRenderRect(this);
-    const startCursor = TextElementUtils.getCursorByTextNodeNumber(textData, selectionStart);
-    startCursor.renderRect = rect;
-    let endCursor: ITextCursor | null = null;
-    if (selectionEnd !== selectionStart) {
-      endCursor = TextElementUtils.getCursorByTextNodeNumber(textData, selectionEnd);
-      endCursor.renderRect = rect;
-    }
-    this._textCursor = startCursor;
-    this._textSelection = {
-      startCursor,
-      endCursor,
-    };
   }
 }

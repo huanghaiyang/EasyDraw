@@ -1147,16 +1147,10 @@ export interface IElementText extends IElement {
   get isCursorVisible(): boolean;
   // 文本
   get text(): string;
-  // 文本选区起始位置
-  get selectionStart(): number;
-  // 文本选区结束位置
-  get selectionEnd(): number;
   // 给定坐标获取文本光标
   retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 更新文本
   updateText(value: string, keys: TextEditingStates): void;
-  // 更新文本选区
-  updateTextSelection(keys: TextEditingStates): void;
 }
 
 // 舞台组件（组件）-线段

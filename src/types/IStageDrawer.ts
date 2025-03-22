@@ -29,7 +29,7 @@ export interface IDrawerHtml extends IStageDrawer {
   // 文本光标
   textCursorEditor: HTMLTextAreaElement;
   // 创建文本光标输入框
-  createTextCursorInput(value: string, selectionStart?: number, selectionEnd?: number): HTMLTextAreaElement;
+  createTextCursorInput(): HTMLTextAreaElement;
   // 聚焦文本光标输入框
-  focusTextCursorInput(selectionStart?: number, selectionEnd?: number): void;
+  focusTextCursorInput(): void;
 }

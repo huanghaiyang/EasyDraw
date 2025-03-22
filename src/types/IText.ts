@@ -14,8 +14,9 @@ export type ITextNode = Partial<IPoint> &
 // 文本行
 export type ITextLine = Partial<IPoint> &
   Partial<ISize> & {
-    nodes: ITextNode[];
-    selected?: boolean;
+    nodes: ITextNode[]; // 文本节点
+    selected?: boolean; // 是否在选区中
+    isTailBreak?: boolean; // 行尾是否是换行
   };
 
 // 文本数据
