@@ -6,7 +6,7 @@ import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextRende
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { isBoolean, pick } from "lodash";
+import { every, isBoolean, pick } from "lodash";
 import { nanoid } from "nanoid";
 
 /**
@@ -194,5 +194,103 @@ export default class TextElementUtils {
    */
   static getTextFromTextData(textData: ITextData): string {
     return textData.lines.map(line => line.nodes.map(node => node.content).join("")).join("\n");
+  }
+
+  /**
+   * 标记文本未选中
+   *
+   * @param textData 文本数据
+   */
+  static markTextUnselected(textData: ITextData): void {
+    textData.lines.forEach(line => {
+      line.nodes.forEach(node => {
+        node.selected = false;
+      });
+      line.selected = false;
+    });
+  }
+
+  /**
+   * 标记文本行是否选中
+   *
+   * @param line 文本行
+   */
+  static setLineSelectedIfy(line: ITextLine): void {
+    if (every(line.nodes, node => node.selected)) {
+      line.selected = true;
+    }
+  }
+
+  /**
+   * 标记文本节点是否选中
+   *
+   * @param line 文本行
+   * @param startIndex 开始节点索引
+   * @param endIndex 结束节点索引
+   */
+  static setNodeSelected(line: ITextLine, startIndex: number, endIndex: number): void {
+    for (let i = startIndex; i <= endIndex; i++) {
+      line.nodes[i].selected = true;
+    }
+  }
+
+  /**
+   * 标记文本选区
+   *
+   * @param textData 文本数据
+   * @param selection 文本选区
+   */
+  static markTextSelected(textData: ITextData, selection: ITextSelection): void {
+    const { lines } = textData;
+    const { startCursor, endCursor } = selection;
+    const { lineNumber: startLineNumber, nodeId: startNodeId } = startCursor;
+    const { lineNumber: endLineNumber, nodeId: endNodeId } = endCursor;
+
+    if (startLineNumber === endLineNumber) {
+      const line = lines[startLineNumber];
+      const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+      const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+      TextElementUtils.setNodeSelected(line, startNodeIndex, endNodeIndex);
+    } else {
+      if (startLineNumber < endLineNumber) {
+        for (let i = startLineNumber; i <= endLineNumber; i++) {
+          const line = lines[i];
+          const isEmptyLine = line.nodes.length === 0;
+          if (isEmptyLine) {
+            line.selected = true;
+          } else {
+            if (i === startLineNumber) {
+              const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              TextElementUtils.setNodeSelected(line, startNodeIndex, line.nodes.length - 1);
+            } else if (i === endLineNumber) {
+              const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              TextElementUtils.setNodeSelected(line, 0, endNodeIndex);
+            } else {
+              TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
+            }
+            TextElementUtils.setLineSelectedIfy(line);
+          }
+        }
+      } else {
+        for (let i = startLineNumber; i >= endLineNumber; i--) {
+          const line = lines[i];
+          const isEmptyLine = line.nodes.length === 0;
+          if (isEmptyLine) {
+            line.selected = true;
+          } else {
+            if (i === startLineNumber) {
+              const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              TextElementUtils.setNodeSelected(line, 0, startNodeIndex);
+            } else if (i === endLineNumber) {
+              const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              TextElementUtils.setNodeSelected(line, endNodeIndex, line.nodes.length - 1);
+            } else {
+              TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
+            }
+            TextElementUtils.setLineSelectedIfy(line);
+          }
+        }
+      }
+    }
   }
 }

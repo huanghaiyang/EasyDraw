@@ -117,6 +117,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param isSelectionMove 是否是选区移动
    */
   retrieveTextCursor(coord: IPoint, isSelectionMove?: boolean): void {
+    TextElementUtils.markTextUnselected(this.model.data as ITextData);
     // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
@@ -136,6 +137,7 @@ export default class ElementText extends ElementRect implements IElementText {
       if (isSelectionMove) {
         this._textSelection.endCursor = textCursor;
         this._cursorVisibleStatus = false;
+        TextElementUtils.markTextSelected(this.model.data as ITextData, this._textSelection);
       } else {
         this._textCursor = textCursor;
         this._textSelection = {
