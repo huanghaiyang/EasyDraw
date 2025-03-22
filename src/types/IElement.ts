@@ -3,7 +3,7 @@
  * points表示舞台坐标
  * coords表示相对于世界中心的坐标
  */
-import { ElementStatus, IPoint, ISize } from "@/types/index";
+import { ElementStatus, IPoint, ISize, TextEditingStates } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -1154,7 +1154,7 @@ export interface IElementText extends IElement {
   // 给定坐标获取文本光标
   retrieveTextCursor(point: IPoint, isSelectionMove?: boolean): void;
   // 更新文本
-  updateText(value: string, selectionStart?: number, selectionEnd?: number): void;
+  updateText(value: string, keys: TextEditingStates): void;
 }
 
 // 舞台组件（组件）-线段

@@ -17,6 +17,14 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   textCursorEditor: HTMLTextAreaElement;
   // 输入框位置
   private _textEditorPosition: IPoint;
+  // 最后一次文本光标编辑的按键码
+  private _prevTextCursorKeycode: number = -1;
+  // 最后一次文本光标编辑的ctrl键状态
+  private _prevTextCursorCtrlKey = false;
+  // 最后一次文本光标编辑的selectionStart
+  private _prevSelectionStart: number = -1;
+  // 最后一次文本光标编辑的selectionEnd
+  private _prevSelectionEnd: number = -1;
 
   /**
    * 初始化画布
@@ -208,8 +216,21 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     textCursorEditor.addEventListener("blur", () => {
       console.log("blur");
     });
+    textCursorEditor.addEventListener("keydown", e => {
+      this._prevTextCursorKeycode = e.keyCode;
+      this._prevTextCursorCtrlKey = e.ctrlKey;
+      this._prevSelectionStart = textCursorEditor.selectionStart;
+      this._prevSelectionEnd = textCursorEditor.selectionEnd;
+    });
     textCursorEditor.addEventListener("input", () => {
-      this.emit("textUpdate", textCursorEditor.value, textCursorEditor.selectionStart, textCursorEditor.selectionEnd);
+      this.emit("textUpdate", textCursorEditor.value, {
+        keyCode: this._prevTextCursorKeycode,
+        ctrlKey: this._prevTextCursorCtrlKey,
+        selectionStart: textCursorEditor.selectionStart,
+        selectionEnd: textCursorEditor.selectionEnd,
+        prevSelectionStart: this._prevSelectionStart,
+        prevSelectionEnd: this._prevSelectionEnd,
+      });
     });
   }
 

@@ -1,5 +1,5 @@
 import { MinCursorMXD, MinCursorMYD } from "@/types/constants";
-import { IPoint, ISize, ShieldDispatcherNames } from "@/types";
+import { IPoint, ISize, TextEditingStates, ShieldDispatcherNames } from "@/types";
 import StageStore from "@/modules/stage/StageStore";
 import DrawerMask from "@/modules/stage/drawer/DrawerMask";
 import DrawerProvisional from "@/modules/stage/drawer/DrawerProvisional";
@@ -1951,13 +1951,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理文本更新
    *
    * @param value
-   * @param selectionStart
-   * @param selectionEnd
+   * @param states
    */
-  async _handleTextUpdate(value: string, selectionStart?: number, selectionEnd?: number): Promise<void> {
+  async _handleTextUpdate(value: string, states: TextEditingStates): Promise<void> {
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as ElementText;
-      textElement.updateText(value, selectionStart, selectionEnd);
+      textElement.updateText(value, states);
       this._shouldRedraw = true;
     }
   }

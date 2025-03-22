@@ -132,3 +132,16 @@ export enum ShieldDispatcherNames {
   // 层移动状态改变
   layerGoDownEnableChanged = "layerGoDownEnableChanged",
 }
+
+// 键盘事件
+export type TextEditingStates = {
+  keyCode: number;
+  ctrlKey?: boolean;
+  shiftKey?: boolean;
+  altKey?: boolean;
+  metaKey?: boolean;
+  selectionStart?: number;
+  selectionEnd?: number;
+  prevSelectionStart?: number;
+  prevSelectionEnd?: number;
+};

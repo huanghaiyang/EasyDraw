@@ -8,12 +8,14 @@ export type ITextNode = Partial<IPoint> &
     content: string;
     fontStyle: TextFontStyle;
     inSelection?: boolean;
+    selected?: boolean;
   };
 
 // 文本行
 export type ITextLine = Partial<IPoint> &
   Partial<ISize> & {
     nodes: ITextNode[];
+    selected?: boolean;
   };
 
 // 文本数据

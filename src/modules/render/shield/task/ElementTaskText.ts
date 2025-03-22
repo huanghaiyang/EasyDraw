@@ -5,6 +5,7 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ITextData from "@/types/IText";
 import { RenderRect } from "@/types/IRender";
+import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 
 export default class ElementTaskText extends ElementTaskBase {
   /**
@@ -38,7 +39,7 @@ export default class ElementTaskText extends ElementTaskBase {
     // 计算未倾斜的描边舞台坐标
     const unLeanBoxPoints = ElementUtils.calcStageRelativePoints(unLeanBoxCoords);
     // 计算渲染盒模型的画布坐标
-    const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
+    const rect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制文本
     CanvasUtils.drawRotateTextWithScale(

@@ -1,13 +1,15 @@
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
-import { ElementStatus, IPoint } from "@/types";
+import { ElementStatus, IPoint, TextEditingStates } from "@/types";
 import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
-import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { every, isEmpty, isString } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
+import CoderUtils from "@/utils/CoderUtils";
+import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
+import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -18,8 +20,6 @@ export default class ElementText extends ElementRect implements IElementText {
   private _cursorVisibleStatus: boolean;
   // 光标可见计时器
   private _cursorVisibleTimer: number;
-  // 原始文本数据
-  private _originalTextData: ITextData;
 
   get editingEnable(): boolean {
     return true;
@@ -34,7 +34,7 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   get isSelectionAvailable(): boolean {
-    return !!this._textSelection && every(this._textSelection, node => !!node) && ElementTaskHelper.isTextSelectionAvailable(this._textSelection);
+    return !!this._textSelection && every(this._textSelection, node => !!node) && TextElementUtils.isTextSelectionAvailable(this._textSelection);
   }
 
   get isCursorVisible(): boolean {
@@ -51,15 +51,15 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   get text(): string {
-    return ElementTaskHelper.getTextFromTextData(this.model.data as ITextData);
+    return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
   }
 
   get selectionStart(): number {
-    return ElementTaskHelper.getTextNodeNumberAtCursor(this._textCursor, this.model.data as ITextData);
+    return TextElementUtils.getTextNodeNumberAtCursor(this._textCursor, this.model.data as ITextData);
   }
 
   get selectionEnd(): number {
-    return ElementTaskHelper.getTextNodeNumberAtCursor(this._textSelection?.endCursor || this._textCursor, this.model.data as ITextData);
+    return TextElementUtils.getTextNodeNumberAtCursor(this._textSelection?.endCursor || this._textCursor, this.model.data as ITextData);
   }
 
   /**
@@ -112,9 +112,9 @@ export default class ElementText extends ElementRect implements IElementText {
   onStageChanged(): void {
     super.onStageChanged();
     if (this._textCursor) {
-      const updatedProps = ElementTaskHelper.getUpdatedTextCursorProps(this.model.data as ITextData, this._textCursor);
+      const updatedProps = TextElementUtils.getUpdatedTextCursorProps(this.model.data as ITextData, this._textCursor);
       Object.assign(this._textCursor, updatedProps);
-      this._textCursor.renderRect = ElementTaskHelper.calcElementRenderRect(this);
+      this._textCursor.renderRect = ElementRenderHelper.calcElementRenderRect(this);
     }
   }
 
@@ -136,9 +136,9 @@ export default class ElementText extends ElementRect implements IElementText {
     // 转换为舞台坐标
     const point = ElementUtils.calcStageRelativePoint(coord);
     // 计算旋转盒模型的rect
-    const rect = ElementTaskHelper.calcElementRenderRect(this);
+    const rect = ElementRenderHelper.calcElementRenderRect(this);
     // 获取文本光标
-    const textCursor = ElementTaskHelper.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
+    const textCursor = TextElementUtils.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
@@ -161,26 +161,50 @@ export default class ElementText extends ElementRect implements IElementText {
    * 更新文本
    *
    * @param value 文本
-   * @param selectionStart 选区起始位置
-   * @param selectionEnd 选区结束位置
+   * @param states 文本编辑状态
    */
-  updateText(value: string, selectionStart?: number, selectionEnd?: number): void {
-    if (isString(value) && isEmpty(value)) {
-      this.model.data = {
-        lines: [
-          {
-            nodes: [],
-          },
-        ],
-      } as ITextData;
+  updateText(value: string, states: TextEditingStates): void {
+    if (isString(value)) {
+      const textData = LodashUtils.jsonClone(this.model.data as ITextData);
+      const { selectionStart, selectionEnd, prevSelectionStart, prevSelectionEnd, keyCode } = states;
+      if (isEmpty(value)) {
+        const [{ x, y, height }] = textData.lines;
+        this.model.data = {
+          lines: [
+            {
+              nodes: [],
+              x,
+              y,
+              width: 0,
+              height,
+            },
+          ],
+        } as ITextData;
+      } else {
+        if (CoderUtils.isDeleterKey(keyCode)) {
+          TextElementUtils.markTextDataWithSelection(textData, prevSelectionStart, prevSelectionEnd);
+        }
+        textData.lines = textData.lines.filter(line => !line.selected);
+        textData.lines.forEach(line => {
+          line.nodes = line.nodes.filter(node => !node.selected);
+        });
+        this.model.data = textData;
+      }
+      const rect = ElementRenderHelper.calcElementRenderRect(this);
+      const startCursor = TextElementUtils.getCursorByTextNodeNumber(this.model.data as ITextData, selectionStart);
+      startCursor.renderRect = rect;
+
+      let endCursor: ITextCursor;
+      if (!isEmpty(value)) {
+        endCursor = TextElementUtils.getCursorByTextNodeNumber(this.model.data as ITextData, selectionEnd);
+        endCursor.renderRect = rect;
+      }
+
+      this._textCursor = startCursor;
+      this._textSelection = {
+        startCursor,
+        endCursor: isEmpty(value) ? null : endCursor,
+      };
     }
-    const startCursor = ElementTaskHelper.getCursorByTextNodeNumber(this.model.data as ITextData, selectionStart);
-    const endCursor = ElementTaskHelper.getCursorByTextNodeNumber(this.model.data as ITextData, selectionEnd);
-    this._textCursor = startCursor;
-    this._textSelection = {
-      startCursor,
-      endCursor,
-    };
-    this._originalTextData = LodashUtils.jsonClone(this.model.data as ITextData);
   }
 }
