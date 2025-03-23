@@ -16,7 +16,7 @@ import { nanoid } from "nanoid";
  * @param pos 光标位置
  * @returns 光标信息
  */
-function getTextCursorNodeAbout(node: ITextNode, pos: TextRenderDirection): Partial<ITextCursor> {
+function getCursorPropsOfNode(node: ITextNode, pos: TextRenderDirection): Partial<ITextCursor> {
   const { id, x, y, height, width } = node;
   return {
     nodeId: id,
@@ -34,7 +34,7 @@ function getTextCursorNodeAbout(node: ITextNode, pos: TextRenderDirection): Part
  * @param line 文本行
  * @returns 光标信息
  */
-function getHeadCursorOfLine(line: ITextLine): Partial<ITextCursor> {
+function getCursorPropsOfLineStart(line: ITextLine): Partial<ITextCursor> {
   const { x, y, height } = line;
   return {
     x,
@@ -50,13 +50,13 @@ function getHeadCursorOfLine(line: ITextLine): Partial<ITextCursor> {
  * @param line 文本行
  * @returns 光标信息
  */
-function getTextCursorLineAbout(line: ITextLine): Partial<ITextCursor> {
+function getCursorPropsOfLineEnd(line: ITextLine): Partial<ITextCursor> {
   const { nodes } = line;
   const node = nodes[nodes.length - 1];
   if (node) {
-    return getTextCursorNodeAbout(node, TextRenderDirection.RIGHT);
+    return getCursorPropsOfNode(node, TextRenderDirection.RIGHT);
   } else {
-    return getHeadCursorOfLine(line);
+    return getCursorPropsOfLineStart(line);
   }
 }
 
@@ -99,7 +99,7 @@ export default class TextElementUtils {
    * @param flipX 是否翻转
    * @returns 光标位置
    */
-  static retrieveTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
+  static refreshTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
     if (!isBoolean(flipX)) flipX = false;
     const textCursor: ITextCursor = {};
     // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
@@ -131,20 +131,72 @@ export default class TextElementUtils {
           if (curPoint.x >= node.x + node.width / 2) {
             pos = TextRenderDirection.RIGHT;
           }
-          Object.assign(textCursor, getTextCursorNodeAbout(node, pos));
+          Object.assign(textCursor, getCursorPropsOfNode(node, pos));
           break;
         }
       }
       if (!textCursor.nodeId) {
-        Object.assign(textCursor, getTextCursorLineAbout(line));
+        Object.assign(textCursor, getCursorPropsOfLineEnd(line));
       }
     } else {
       // 如果没有找到，则将光标移动到文本的最后一行
       textCursor.lineNumber = lines.length - 1;
-      Object.assign(textCursor, getTextCursorLineAbout(lines[lines.length - 1]));
+      Object.assign(textCursor, getCursorPropsOfLineEnd(lines[lines.length - 1]));
     }
     textCursor.renderRect = rect;
     return textCursor;
+  }
+
+  /**
+   * 获取文本行尾光标信息
+   *
+   * @param line 文本行
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  static getCursorOfLineEnd(line: ITextLine, lineNumber: number): ITextCursor {
+    const { nodes } = line;
+    let cursor: ITextCursor;
+    if (nodes.length > 0) {
+      const node = nodes[nodes.length - 1];
+      cursor = getCursorPropsOfNode(node, TextRenderDirection.RIGHT);
+    } else {
+      cursor = getCursorPropsOfLineStart(line);
+    }
+    cursor.lineNumber = lineNumber;
+    return cursor;
+  }
+
+  /**
+   * 获取文本行首光标信息
+   *
+   * @param line 文本行
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  static getCursorOfLineStart(line: ITextLine, lineNumber: number): ITextCursor {
+    let cursor: ITextCursor;
+    if (line.nodes.length === 0) {
+      cursor = getCursorPropsOfLineStart(line);
+    } else {
+      cursor = getCursorPropsOfNode(line.nodes[0], TextRenderDirection.LEFT);
+    }
+    cursor.lineNumber = lineNumber;
+    return cursor;
+  }
+
+  /**
+   * 获取文本节点的光标信息
+   *
+   * @param node 文本节点
+   * @param pos 光标位置
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  static getCursorOfNode(node: ITextNode, pos: TextRenderDirection, lineNumber: number): ITextCursor {
+    const cursor = getCursorPropsOfNode(node, pos);
+    cursor.lineNumber = lineNumber;
+    return cursor;
   }
 
   /**
@@ -154,7 +206,7 @@ export default class TextElementUtils {
    * @param textCursor 文本光标
    * @returns 光标信息
    */
-  static getUpdatedTextCursorProps(textData: ITextData, textCursor: ITextCursor): Partial<ITextCursor> {
+  static getUpdatedCursorProps(textData: ITextData, textCursor: ITextCursor): Partial<ITextCursor> {
     const { lines } = textData;
     const { nodeId, pos, lineNumber } = textCursor;
     const line = lines[lineNumber];
@@ -162,12 +214,12 @@ export default class TextElementUtils {
       if (nodeId) {
         const node = line.nodes.find(node => node.id === nodeId);
         if (node) {
-          return getTextCursorNodeAbout(node, pos);
+          return getCursorPropsOfNode(node, pos);
         } else {
-          return getTextCursorLineAbout(line);
+          return getCursorPropsOfLineEnd(line);
         }
       } else {
-        return getTextCursorLineAbout(line);
+        return getCursorPropsOfLineEnd(line);
       }
     }
   }

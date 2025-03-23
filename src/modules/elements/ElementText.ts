@@ -1,11 +1,11 @@
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { ElementStatus, IPoint, TextEditingStates } from "@/types";
-import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection, TextRenderDirection } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every, isString } from "lodash";
+import { every } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
@@ -99,14 +99,26 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 更新光标
+   *
+   * @param cursor 文本光标
+   */
+  private _updateCursor(cursor: ITextCursor): void {
+    if (!cursor) return;
+    const updatedProps = TextElementUtils.getUpdatedCursorProps(this.model.data as ITextData, cursor);
+    if (updatedProps) {
+      Object.assign(cursor, updatedProps);
+    }
+  }
+
+  /**
    * 舞台状态变化
    */
   onStageChanged(): void {
     super.onStageChanged();
     if (this._textCursor) {
-      const updatedProps = TextElementUtils.getUpdatedTextCursorProps(this.model.data as ITextData, this._textCursor);
-      Object.assign(this._textCursor, updatedProps);
-      this._textCursor.renderRect = ElementRenderHelper.calcElementRenderRect(this);
+      this._updateCursor(this._textCursor);
+      this._rerefreshCursorRenderRect();
     }
   }
 
@@ -116,7 +128,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param coord 坐标
    * @param isSelectionMove 是否是选区移动
    */
-  retrieveTextCursor(coord: IPoint, isSelectionMove?: boolean): void {
+  refreshTextCursorAtPosition(coord: IPoint, isSelectionMove?: boolean): void {
     TextElementUtils.markTextUnselected(this.model.data as ITextData);
     // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
     if (!this.isContainsCoord(coord)) {
@@ -131,7 +143,7 @@ export default class ElementText extends ElementRect implements IElementText {
     // 计算旋转盒模型的rect
     const rect = ElementRenderHelper.calcElementRenderRect(this);
     // 获取文本光标
-    const textCursor = TextElementUtils.retrieveTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
+    const textCursor = TextElementUtils.refreshTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
@@ -152,6 +164,15 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 刷新文本光标
+   */
+  refreshTextCursors(): void {
+    this._updateCursor(this._textCursor);
+    this._updateCursor(this._textSelection?.endCursor);
+    this._rerefreshCursorRenderRect();
+  }
+
+  /**
    * 更新文本
    *
    * @param value 文本
@@ -159,16 +180,107 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   updateText(value: string, states: TextEditingStates): void {
     console.log("updateText", value, states);
-    if (isString(value)) {
-      const textData = LodashUtils.jsonClone(this.model.data as ITextData);
-      const { keyCode } = states;
-      if (CoderUtils.isDeleterKey(keyCode)) {
-        textData.lines = textData.lines.filter(line => !line.selected);
-        textData.lines.forEach(line => {
-          line.nodes = line.nodes.filter(node => !node.selected);
-        });
+    const textData = LodashUtils.jsonClone(this.model.data as ITextData);
+    const { keyCode } = states;
+    // 如果是删除键，则删除光标所在的文本节点
+    if (CoderUtils.isDeleterKey(keyCode)) {
+      this._deleteAtCursor(textData);
+    }
+    this.model.data = textData;
+    this._rerefreshCursorRenderRect();
+  }
+
+  /**
+   * 刷新光标渲染矩形
+   */
+  private _rerefreshCursorRenderRect(): void {
+    const rect = ElementRenderHelper.calcElementRenderRect(this);
+    if (this._textCursor) {
+      this._textCursor.renderRect = rect;
+    }
+    if (this._textSelection && this._textSelection.endCursor) {
+      this._textSelection.endCursor.renderRect = rect;
+    }
+  }
+
+  /**
+   * 获取文本节点的光标信息
+   *
+   * @param textData 文本数据
+   * @param nodeIndex 节点索引
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  private _getCursorOfNode(textData: ITextData, nodeIndex: number, lineNumber: number): ITextCursor {
+    if (nodeIndex === 0) {
+      return TextElementUtils.getCursorOfLineStart(textData.lines[lineNumber], lineNumber);
+    } else {
+      return TextElementUtils.getCursorOfNode(textData.lines[lineNumber].nodes[nodeIndex - 1], TextRenderDirection.RIGHT, lineNumber);
+    }
+  }
+
+  /**
+   * 删除光标所在的文本节点
+   *
+   * 注意：
+   * 1. 非选区时，尽量将光标绑定到节点的右侧
+   * 2. 如果是选区，则起始光标需要绑定到节点的左侧，结束光标需要绑定到节点的右侧
+   *
+   * @param textData 文本数据
+   */
+  private _deleteAtCursor(textData: ITextData) {
+    // 如果选区可用，则删除选区中的文本节点
+    if (this.isSelectionAvailable) {
+      textData.lines = textData.lines.filter(line => !line.selected);
+      textData.lines.forEach(line => {
+        line.nodes = line.nodes.filter(node => !node.selected);
+      });
+    } else {
+      const { nodeId, lineNumber, pos } = this._textCursor;
+      // 如果光标是在节点后面，则删除光标前面的文本节点
+      if (nodeId) {
+        const nodeIndex = textData.lines[lineNumber].nodes.findIndex(node => node.id === nodeId);
+        // 光标在节点的左侧
+        if (pos === TextRenderDirection.LEFT) {
+          // 表示光标在第一个节点上
+          if (nodeIndex === 0) {
+            // 表示光标在行开头,且不是第一行,则将当前行的内容与前一行合并
+            if (lineNumber !== 0) {
+              const prevLine = textData.lines[lineNumber - 1];
+              prevLine.nodes.push(...textData.lines[lineNumber].nodes);
+              textData.lines.splice(lineNumber, 1);
+              // 将光标移动到前一行的末尾
+              this._textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, lineNumber - 1);
+            }
+          } else {
+            const prevNodeIndex = nodeIndex - 1;
+            // 删除光标前面的文本节点
+            textData.lines[lineNumber].nodes.splice(prevNodeIndex, 1);
+            this._textCursor = this._getCursorOfNode(textData, prevNodeIndex, lineNumber);
+          }
+        } else {
+          // 删除光标绑定的文本节点
+          textData.lines[lineNumber].nodes.splice(nodeIndex, 1);
+          this._textCursor = this._getCursorOfNode(textData, nodeIndex, lineNumber);
+        }
+      } else {
+        if (textData.lines.length === 1) {
+          // 如果只有一行，则清空文本数据
+          textData.lines[0].nodes = [];
+          this._textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[0], 0);
+        } else {
+          // 光标所在的是空行，则删除空行
+          textData.lines.splice(this._textCursor.lineNumber, 1);
+          // 如果不是第一行，则将光标移动到前一行的末尾
+          if (lineNumber !== 0) {
+            this._textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[lineNumber - 1], lineNumber - 1);
+          }
+        }
       }
-      this.model.data = textData;
+      this._textSelection = {
+        startCursor: this._textCursor,
+        endCursor: null,
+      };
     }
   }
 }

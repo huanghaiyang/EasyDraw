@@ -1,3 +1,6 @@
+/**
+ * TODO renderRect逻辑需要异到CanvasUtils中
+ */
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { IElementRect } from "@/types/IElement";

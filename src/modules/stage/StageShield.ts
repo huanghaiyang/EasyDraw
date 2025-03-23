@@ -1012,7 +1012,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const { selectedElements } = this.store;
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
-      (targetElement as ElementText).retrieveTextCursor(this.cursor.worldValue, isSelectionMove);
+      (targetElement as ElementText).refreshTextCursorAtPosition(this.cursor.worldValue, isSelectionMove);
       this._retreiveTextCursorInput(targetElement as unknown as IElementText);
     }
   }
@@ -1957,7 +1957,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as ElementText;
       textElement.updateText(value, states);
-      this._shouldRedraw = true;
+      // 这里需要等待文本更新渲染完成后再更新光标位置
+      this._addRedrawTask(async () => {
+        // 更新光标位置
+        await textElement.refreshTextCursors();
+        // 光标重新渲染
+        this._shouldRedraw = true;
+      }, true);
     }
   }
 
