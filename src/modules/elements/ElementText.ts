@@ -237,25 +237,43 @@ export default class ElementText extends ElementRect implements IElementText {
       });
     } else {
       const { nodeId, lineNumber, pos } = this._textCursor;
+      // 获取前一行行号
+      const prevLineNumber = lineNumber - 1;
       // 如果光标是在节点后面，则删除光标前面的文本节点
       if (nodeId) {
         const nodeIndex = textData.lines[lineNumber].nodes.findIndex(node => node.id === nodeId);
+
         // 光标在节点的左侧
         if (pos === TextRenderDirection.LEFT) {
           // 表示光标在第一个节点上
           if (nodeIndex === 0) {
             // 表示光标在行开头,且不是第一行,则将当前行的内容与前一行合并
             if (lineNumber !== 0) {
-              const prevLine = textData.lines[lineNumber - 1];
+              // 获取前一行
+              const prevLine = textData.lines[prevLineNumber];
+              // 获取前一行的节点数量
+              const prevLineNodeSize = prevLine.nodes.length;
+              // 将当前行的内容与前一行合并
               prevLine.nodes.push(...textData.lines[lineNumber].nodes);
+              // 删除当前行
               textData.lines.splice(lineNumber, 1);
-              // 将光标移动到前一行的末尾
-              this._textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, lineNumber - 1);
+              // 如果前一行有节点,则将光标移动到前一行的末尾,否则将光标移动到前一行的开头
+              if (prevLineNodeSize > 0) {
+                // 获取前一行的最后一个节点
+                const node = prevLine.nodes[prevLineNodeSize - 1];
+                // 将光标移动到前一行的末尾
+                this._textCursor = TextElementUtils.getCursorOfNode(node, TextRenderDirection.RIGHT, prevLineNumber);
+              } else {
+                // 将光标移动到前一行的开头
+                this._textCursor = TextElementUtils.getCursorOfLineStart(prevLine, prevLineNumber);
+              }
             }
           } else {
+            // 获取前一个节点的索引
             const prevNodeIndex = nodeIndex - 1;
             // 删除光标前面的文本节点
             textData.lines[lineNumber].nodes.splice(prevNodeIndex, 1);
+            // 更新光标位置
             this._textCursor = this._getCursorOfNode(textData, prevNodeIndex, lineNumber);
           }
         } else {
@@ -267,13 +285,14 @@ export default class ElementText extends ElementRect implements IElementText {
         if (textData.lines.length === 1) {
           // 如果只有一行，则清空文本数据
           textData.lines[0].nodes = [];
+          // 将光标移动到第一行的开头
           this._textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[0], 0);
         } else {
           // 光标所在的是空行，则删除空行
           textData.lines.splice(this._textCursor.lineNumber, 1);
           // 如果不是第一行，则将光标移动到前一行的末尾
           if (lineNumber !== 0) {
-            this._textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[lineNumber - 1], lineNumber - 1);
+            this._textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[prevLineNumber], prevLineNumber);
           }
         }
       }
