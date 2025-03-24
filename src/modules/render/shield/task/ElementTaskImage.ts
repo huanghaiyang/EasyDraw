@@ -2,8 +2,8 @@ import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { IElementImage } from "@/types/IElement";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 import { RenderRect } from "@/types/IRender";
+import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 
 export default class ElementTaskImage extends ElementTaskBase {
   /**
@@ -35,7 +35,7 @@ export default class ElementTaskImage extends ElementTaskBase {
     };
 
     // 计算渲染盒模型的画布坐标
-    const rect = ElementTaskHelper.calcElementRenderRect(this.element) as RenderRect;
+    const rect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制图片
     CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, rect, {

@@ -3,9 +3,10 @@ import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { IElementText } from "@/types/IElement";
 import CanvasUtils from "@/utils/CanvasUtils";
 import { TextSelectionFillColor, TextSelectionFillColorOpacity } from "@/styles/MaskStyles";
-import ITextData, { ITextCursor, ITextLine, TextRenderDirection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine } from "@/types/IText";
 import { pick } from "lodash";
 import { RenderParams } from "@/types/IRender";
+import { Direction } from "@/types";
 
 export default class ElementTaskTextSelection extends ElementTaskBase implements IElementTaskTextSelection {
   /**
@@ -42,9 +43,9 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
             this._draweEmptyLine(line, renderRect, options);
           } else {
             if (i === startLineNumber) {
-              this._drawPartialLine(line, startCursor, TextRenderDirection.RIGHT, renderRect, options);
+              this._drawPartialLine(line, startCursor, Direction.RIGHT, renderRect, options);
             } else if (i === endLineNumber) {
-              this._drawPartialLine(line, endCursor, TextRenderDirection.LEFT, renderRect, options);
+              this._drawPartialLine(line, endCursor, Direction.LEFT, renderRect, options);
             } else {
               this._drawFullLine(line, renderRect, options);
             }
@@ -58,9 +59,9 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
             this._draweEmptyLine(line, renderRect, options);
           } else {
             if (i === startLineNumber) {
-              this._drawPartialLine(line, startCursor, TextRenderDirection.LEFT, renderRect, options);
+              this._drawPartialLine(line, startCursor, Direction.LEFT, renderRect, options);
             } else if (i === endLineNumber) {
-              this._drawPartialLine(line, endCursor, TextRenderDirection.RIGHT, renderRect, options);
+              this._drawPartialLine(line, endCursor, Direction.RIGHT, renderRect, options);
             } else {
               this._drawFullLine(line, renderRect, options);
             }
@@ -109,7 +110,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
         ...pick(headCursor, ["x", "y", "height"]),
         renderRect,
       } as ITextCursor,
-      TextRenderDirection.RIGHT,
+      Direction.RIGHT,
       renderRect,
       options,
     );
@@ -124,8 +125,8 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
    * @param renderRect 渲染矩形
    * @param options 渲染选项
    */
-  private _drawPartialLine(line: ITextLine, cursor: ITextCursor, direction: TextRenderDirection, renderRect: Partial<DOMRect>, options: RenderParams): void {
-    if (direction === TextRenderDirection.LEFT) {
+  private _drawPartialLine(line: ITextLine, cursor: ITextCursor, direction: Direction, renderRect: Partial<DOMRect>, options: RenderParams): void {
+    if (direction === Direction.LEFT) {
       const headNode = line.nodes[0];
       this._drawLineSelection(
         {
@@ -135,7 +136,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
         cursor,
         options,
       );
-    } else if (direction === TextRenderDirection.RIGHT) {
+    } else if (direction === Direction.RIGHT) {
       const tailNode = line.nodes[line.nodes.length - 1];
       this._drawLineSelection(
         cursor,

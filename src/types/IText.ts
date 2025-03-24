@@ -1,5 +1,5 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
-import { IPoint, ISize } from "@/types";
+import { Direction, IPoint, ISize } from "@/types";
 
 // 文本节点
 export type ITextNode = Partial<IPoint> &
@@ -24,18 +24,12 @@ export default interface ITextData {
   lines: ITextLine[];
 }
 
-// 文本光标位置
-export enum TextRenderDirection {
-  LEFT,
-  RIGHT,
-}
-
 // 文本光标
 export type ITextCursor = Partial<IPoint> &
   Partial<ISize> & {
     nodeId?: string;
     lineNumber?: number;
-    pos?: TextRenderDirection;
+    pos?: Direction;
     renderRect?: Partial<DOMRect>;
   };
 

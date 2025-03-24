@@ -20,6 +20,8 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   private _prevTextCursorKeycode: number = -1;
   // 最后一次文本光标编辑的ctrl键状态
   private _prevTextCursorCtrlKey = false;
+  // 最后一次文本光标编辑的shift键状态
+  private _prevTextCursorShiftKey = false;
 
   /**
    * 初始化画布
@@ -194,6 +196,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     this.emit("textUpdate", this.textCursorEditor.value, {
       keyCode: this._prevTextCursorKeycode,
       ctrlKey: this._prevTextCursorCtrlKey,
+      shiftKey: this._prevTextCursorShiftKey,
     });
   }
 
@@ -211,6 +214,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     textCursorEditor.addEventListener("keydown", e => {
       this._prevTextCursorKeycode = e.keyCode;
       this._prevTextCursorCtrlKey = e.ctrlKey;
+      this._prevTextCursorShiftKey = e.shiftKey;
       this._emitTextCursorUpdate();
     });
     // 输入框内容变化

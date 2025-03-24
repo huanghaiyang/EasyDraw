@@ -141,3 +141,11 @@ export type TextEditingStates = {
   altKey?: boolean;
   metaKey?: boolean;
 };
+
+// 方位
+export enum Direction {
+  LEFT,
+  RIGHT,
+  TOP,
+  BOTTOM,
+}

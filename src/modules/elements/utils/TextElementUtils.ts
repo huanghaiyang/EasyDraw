@@ -1,8 +1,8 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
-import { IPoint } from "@/types";
+import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextRenderDirection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -16,12 +16,12 @@ import { nanoid } from "nanoid";
  * @param pos 光标位置
  * @returns 光标信息
  */
-function getCursorPropsOfNode(node: ITextNode, pos: TextRenderDirection): Partial<ITextCursor> {
+function getCursorPropsOfNode(node: ITextNode, pos: Direction): Partial<ITextCursor> {
   const { id, x, y, height, width } = node;
   return {
     nodeId: id,
     pos,
-    x: x + (pos === TextRenderDirection.RIGHT ? width : 0),
+    x: x + (pos === Direction.RIGHT ? width : 0),
     y,
     width: TextCursorWidth,
     height,
@@ -54,7 +54,7 @@ function getCursorPropsOfLineEnd(line: ITextLine): Partial<ITextCursor> {
   const { nodes } = line;
   const node = nodes[nodes.length - 1];
   if (node) {
-    return getCursorPropsOfNode(node, TextRenderDirection.RIGHT);
+    return getCursorPropsOfNode(node, Direction.RIGHT);
   } else {
     return getCursorPropsOfLineStart(line);
   }
@@ -99,7 +99,7 @@ export default class TextElementUtils {
    * @param flipX 是否翻转
    * @returns 光标位置
    */
-  static refreshTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
+  static getTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
     if (!isBoolean(flipX)) flipX = false;
     const textCursor: ITextCursor = {};
     // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
@@ -126,10 +126,10 @@ export default class TextElementUtils {
         const node = line.nodes[j];
         // 判断当前光标是否在当前节点内
         if (CommonUtils.isPointInRect(node, curPoint)) {
-          let pos = TextRenderDirection.LEFT;
+          let pos = Direction.LEFT;
           // 判断当前光标是否在当前节点的右侧位置
           if (curPoint.x >= node.x + node.width / 2) {
-            pos = TextRenderDirection.RIGHT;
+            pos = Direction.RIGHT;
           }
           Object.assign(textCursor, getCursorPropsOfNode(node, pos));
           break;
@@ -159,7 +159,7 @@ export default class TextElementUtils {
     let cursor: ITextCursor;
     if (nodes.length > 0) {
       const node = nodes[nodes.length - 1];
-      cursor = getCursorPropsOfNode(node, TextRenderDirection.RIGHT);
+      cursor = getCursorPropsOfNode(node, Direction.RIGHT);
     } else {
       cursor = getCursorPropsOfLineStart(line);
     }
@@ -179,7 +179,7 @@ export default class TextElementUtils {
     if (line.nodes.length === 0) {
       cursor = getCursorPropsOfLineStart(line);
     } else {
-      cursor = getCursorPropsOfNode(line.nodes[0], TextRenderDirection.LEFT);
+      cursor = getCursorPropsOfNode(line.nodes[0], Direction.LEFT);
     }
     cursor.lineNumber = lineNumber;
     return cursor;
@@ -193,7 +193,7 @@ export default class TextElementUtils {
    * @param lineNumber 行号
    * @returns 光标信息
    */
-  static getCursorOfNode(node: ITextNode, pos: TextRenderDirection, lineNumber: number): ITextCursor {
+  static getCursorOfNode(node: ITextNode, pos: Direction, lineNumber: number): ITextCursor {
     const cursor = getCursorPropsOfNode(node, pos);
     cursor.lineNumber = lineNumber;
     return cursor;
@@ -232,10 +232,43 @@ export default class TextElementUtils {
    */
   static isTextSelectionAvailable(selection: ITextSelection): boolean {
     const {
-      startCursor: { lineNumber: startLineNumber, nodeId: startNodeId },
-      endCursor: { lineNumber: endLineNumber, nodeId: endNodeId },
+      startCursor: { lineNumber: startLineNumber, nodeId: startNodeId, pos: startPos },
+      endCursor: { lineNumber: endLineNumber, nodeId: endNodeId, pos: endPos },
     } = selection;
-    return startLineNumber !== endLineNumber || startNodeId !== endNodeId;
+    return startLineNumber !== endLineNumber || startNodeId !== endNodeId || startPos !== endPos;
+  }
+
+  /**
+   * 获取文本节点的索引
+   *
+   * @param textData 文本数据
+   * @param nodeId 节点id
+   * @returns 节点索引
+   */
+  static getTextNodeIndex(textData: ITextData, nodeId: string): number {
+    const { lines } = textData;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      if (nodeIndex !== -1) {
+        return nodeIndex;
+      }
+    }
+    return -1;
+  }
+
+  static sortCursors(textData: ITextData, cursors: ITextCursor[]): ITextCursor[] {
+    const result = [...cursors];
+    // 先按行号，再按节点索引，最后按照位置排序
+    return result.sort((a, b) => {
+      if (a.lineNumber !== b.lineNumber) {
+        return a.lineNumber - b.lineNumber;
+      }
+      if (a.nodeId !== b.nodeId) {
+        return TextElementUtils.getTextNodeIndex(textData, a.nodeId) - TextElementUtils.getTextNodeIndex(textData, b.nodeId);
+      }
+      return a.pos - b.pos;
+    });
   }
 
   /**

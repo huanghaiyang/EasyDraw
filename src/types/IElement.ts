@@ -1152,7 +1152,7 @@ export interface IElementText extends IElement {
   // 刷新文本光标
   refreshTextCursors(): void;
   // 更新文本
-  updateText(value: string, keys: TextEditingStates): void;
+  updateText(value: string, states: TextEditingStates): void;
 }
 
 // 舞台组件（组件）-线段
