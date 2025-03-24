@@ -1,3 +1,4 @@
+import { IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
 
@@ -16,10 +17,22 @@ export default class ElementRenderHelper {
    */
   static calcElementRenderRect(element: IElement): Partial<DOMRect> {
     const { rotateBoxCoords, center } = element;
+    return ElementRenderHelper.calcRenderRect(rotateBoxCoords, center, element.shield.stageScale);
+  }
+
+  /**
+   * 计算渲染盒模型的rect
+   *
+   * @param rotateBoxCoords
+   * @param center
+   * @param scale
+   * @returns
+   */
+  static calcRenderRect(rotateBoxCoords: IPoint[], center: IPoint, scale: number): Partial<DOMRect> {
     // 计算渲染盒子的画布坐标
     let rect = CommonUtils.calcRenderRect(rotateBoxCoords, center);
     // 根据画布的缩放比例进行缩放
-    rect = CommonUtils.scaleRect(rect, element.shield.stageScale);
+    rect = CommonUtils.scaleRect(rect, scale);
     return rect;
   }
 }

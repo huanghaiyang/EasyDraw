@@ -1,8 +1,8 @@
+import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { RenderRect } from "@/types/IRender";
 import CanvasUtils from "@/utils/CanvasUtils";
-import CommonUtils from "@/utils/CommonUtils";
 
 export default class ElementTaskEllipse extends ElementTaskBase {
   /**
@@ -23,6 +23,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
       flipX,
       leanY,
       actualAngle,
+      shield,
     } = this.element;
     // 渲染选项
     const options = {
@@ -36,7 +37,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
     // 内描边的舞台坐标
     const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
     // 内描边的渲染盒模型
-    const rect = CommonUtils.getRect(innermostStrokePoints) as RenderRect;
+    const rect = ElementRenderHelper.calcRenderRect(innermostStrokePoints, center, shield.stageScale) as RenderRect;
 
     // 绘制填充
     styles.fills.forEach(fillStyle => {
@@ -44,8 +45,8 @@ export default class ElementTaskEllipse extends ElementTaskBase {
         this.canvas,
         center,
         {
-          rx: rect.width / 2,
-          ry: rect.height / 2,
+          rx: rect.width / 2 / shield.stageScale,
+          ry: rect.height / 2 / shield.stageScale,
         },
         fillStyle,
         rect,
@@ -55,13 +56,13 @@ export default class ElementTaskEllipse extends ElementTaskBase {
 
     // 绘制边框
     unLeanStrokePoints.forEach((points, index) => {
-      const rect = CommonUtils.getRect(points) as RenderRect;
+      const rect = ElementRenderHelper.calcRenderRect(points, center, shield.stageScale) as RenderRect;
       CanvasUtils.drawEllipseStrokeWithScale(
         this.canvas,
         center,
         {
-          rx: rect.width / 2,
-          ry: rect.height / 2,
+          rx: rect.width / 2 / shield.stageScale,
+          ry: rect.height / 2 / shield.stageScale,
         },
         strokes[index],
         rect,
