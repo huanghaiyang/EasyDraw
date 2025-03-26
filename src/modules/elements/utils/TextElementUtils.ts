@@ -378,4 +378,54 @@ export default class TextElementUtils {
       }
     }
   }
+
+  /**
+   * 获取文本行中最接近文本光标位置的节点的光标信息
+   *
+   * @param line 文本行
+   * @param textCursor 文本光标
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  static getClosestNodeCursorOfLine(line: ITextLine, textCursor: ITextCursor, lineNumber: number): ITextCursor {
+    if (textCursor.lineNumber === lineNumber) {
+      return textCursor;
+    }
+    if (line.nodes.length > 0) {
+      let xMinNode: ITextNode;
+      for (let j = 0; j < line.nodes.length; j++) {
+        const node = line.nodes[j];
+        if (node.x + node.width <= textCursor.x) {
+          xMinNode = node;
+        }
+      }
+      if (xMinNode) {
+        return TextElementUtils.getCursorOfNode(xMinNode, Direction.RIGHT, lineNumber);
+      }
+    }
+    return TextElementUtils.getCursorOfLineStart(line, lineNumber);
+  }
+
+  /**
+   * 获取文本数据中最接近文本光标位置的节点的光标信息
+   *
+   * @param textData 文本数据
+   * @param textCursor 文本光标
+   * @param direction 方向
+   * @returns 光标信息
+   */
+  static getClosestNodeCursor(textData: ITextData, textCursor: ITextCursor, direction: Direction): ITextCursor {
+    const { lines } = textData;
+    const { lineNumber } = textCursor;
+    if (direction === Direction.TOP) {
+      if (lineNumber > 0) {
+        return TextElementUtils.getClosestNodeCursorOfLine(lines[lineNumber - 1], textCursor, lineNumber - 1);
+      }
+    } else {
+      if (lineNumber < lines.length - 1) {
+        return TextElementUtils.getClosestNodeCursorOfLine(lines[lineNumber + 1], textCursor, lineNumber + 1);
+      }
+    }
+    return textCursor;
+  }
 }

@@ -20,6 +20,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _cursorVisibleStatus: boolean;
   // 光标可见计时器
   private _cursorVisibleTimer: number;
+  // 上一次标记的光标
+  private _prevMarkCursor: ITextCursor;
 
   get editingEnable(): boolean {
     return true;
@@ -160,6 +162,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._cursorVisibleStatus = true;
       this._clearCursorVisibleTimer();
       this._startCursorVisibleTimer();
+      this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
     }
   }
 
@@ -230,6 +233,8 @@ export default class ElementText extends ElementRect implements IElementText {
     const { nodeId, lineNumber, pos } = prevTextCursor;
     let textCursor: ITextCursor;
     const line = textData.lines[lineNumber];
+    const prevLineNumber = lineNumber - 1;
+    const nextLineNumber = lineNumber + 1;
     // 如果光标在节点后面，则将光标移动到节点后面
     if (nodeId) {
       const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
@@ -239,8 +244,8 @@ export default class ElementText extends ElementRect implements IElementText {
             textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.LEFT, lineNumber);
           } else if (nodeIndex > 0) {
             textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
-          } else if (lineNumber > 0) {
-            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[lineNumber - 1], lineNumber - 1);
+          } else if (prevLineNumber >= 0) {
+            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[prevLineNumber], prevLineNumber);
           }
           break;
         case Direction.RIGHT:
@@ -253,25 +258,37 @@ export default class ElementText extends ElementRect implements IElementText {
           }
           break;
         case Direction.TOP:
+          if (prevLineNumber >= 0) {
+            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[prevLineNumber], this._prevMarkCursor, prevLineNumber);
+          }
           break;
         case Direction.BOTTOM:
+          if (nextLineNumber < textData.lines.length) {
+            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[nextLineNumber], this._prevMarkCursor, nextLineNumber);
+          }
           break;
       }
     } else {
       switch (direction) {
         case Direction.LEFT:
-          if (lineNumber > 0) {
-            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[lineNumber - 1], lineNumber - 1);
+          if (prevLineNumber >= 0) {
+            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[prevLineNumber], prevLineNumber);
           }
           break;
         case Direction.RIGHT:
-          if (lineNumber < textData.lines.length - 1) {
-            textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[lineNumber + 1], lineNumber + 1);
+          if (nextLineNumber < textData.lines.length) {
+            textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[nextLineNumber], nextLineNumber);
           }
           break;
         case Direction.TOP:
+          if (prevLineNumber >= 0) {
+            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[prevLineNumber], this._prevMarkCursor, prevLineNumber);
+          }
           break;
         case Direction.BOTTOM:
+          if (nextLineNumber < textData.lines.length) {
+            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[nextLineNumber], this._prevMarkCursor, nextLineNumber);
+          }
           break;
       }
     }
@@ -285,6 +302,9 @@ export default class ElementText extends ElementRect implements IElementText {
       } else {
         this._textCursor = textCursor;
         this._textSelection = null;
+      }
+      if (![Direction.TOP, Direction.BOTTOM].includes(direction)) {
+        this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
       }
     }
   }
@@ -385,5 +405,6 @@ export default class ElementText extends ElementRect implements IElementText {
         endCursor: null,
       };
     }
+    this._prevMarkCursor = this._textCursor;
   }
 }
