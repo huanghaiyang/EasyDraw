@@ -67,6 +67,7 @@ export default class ElementText extends ElementRect implements IElementText {
     this._textSelection = null;
     this._cursorVisibleStatus = false;
     this._toggleCursorVisibleTimer(value);
+    this._markSelection();
   }
 
   /**
@@ -131,7 +132,6 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param isSelectionMove 是否是选区移动
    */
   refreshTextCursorAtPosition(coord: IPoint, isSelectionMove?: boolean): void {
-    TextElementUtils.markTextUnselected(this.model.data as ITextData);
     // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
@@ -219,10 +219,10 @@ export default class ElementText extends ElementRect implements IElementText {
    * 标记文本选区
    */
   private _markSelection(): void {
+    TextElementUtils.markTextUnselected(this.model.data as ITextData);
+
     if (this.isSelectionAvailable) {
       TextElementUtils.markTextSelected(this.model.data as ITextData, this._textSelection);
-    } else {
-      TextElementUtils.markTextUnselected(this.model.data as ITextData);
     }
   }
 
@@ -259,7 +259,7 @@ export default class ElementText extends ElementRect implements IElementText {
       prevTextCursor = this._textSelection.endCursor;
     }
 
-    const { nodeId, lineNumber, pos } = prevTextCursor;
+    let { nodeId, lineNumber, pos } = prevTextCursor;
     const line = textData.lines[lineNumber];
     const prevLineNumber = lineNumber - 1;
     const nextLineNumber = lineNumber + 1;
@@ -277,24 +277,41 @@ export default class ElementText extends ElementRect implements IElementText {
       }
     } else {
       // 如果光标在节点后面，则将光标移动到节点后面
-      if (nodeId) {
-        const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      if (line.nodes.length) {
+        let nodeIndex: number = -1;
+        // 如果有节点id，则获取节点索引
+        if (nodeId) {
+          nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+        } else {
+          // 表示当前光标在行首，所以将当前节点索引设置为0
+          nodeIndex = 0;
+          // 将pos设置为LEFT
+          pos = Direction.LEFT;
+        }
+        // 根据方向和位置，计算光标位置
         switch (direction) {
           case Direction.LEFT:
+            // 如果pos是RIGHT，则表示光标在当前节点的右侧
             if (pos === Direction.RIGHT) {
+              // 将光标从节点的右侧移动到左侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.LEFT, lineNumber);
             } else if (nodeIndex > 0) {
+              // 将光标移动到前一个节点的左侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
             } else if (prevLineNumber >= 0) {
+              // 将光标移动到前一行的末尾
               textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
             }
             break;
           case Direction.RIGHT:
             if (pos === Direction.LEFT) {
+              // 将光标从节点的左侧移动到右侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.RIGHT, lineNumber);
             } else if (nodeIndex < line.nodes.length - 1) {
+              // 将光标移动到后一个节点的右侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex + 1], Direction.RIGHT, lineNumber);
             } else if (nextLineNumber < textData.lines.length - 1) {
+              // 将光标移动到后一行的开头
               textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
             }
             break;
@@ -303,11 +320,13 @@ export default class ElementText extends ElementRect implements IElementText {
         switch (direction) {
           case Direction.LEFT:
             if (prevLineNumber >= 0) {
+              // 将光标移动到前一行的末尾
               textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
             }
             break;
           case Direction.RIGHT:
-            if (nextLineNumber < textData.lines.length) {
+            if (nextLineNumber < textData.lines.length - 1) {
+              // 将光标移动到后一行的开头
               textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
             }
             break;
