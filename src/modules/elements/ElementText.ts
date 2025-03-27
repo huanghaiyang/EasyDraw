@@ -196,10 +196,23 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.TOP, states);
     } else if (CoderUtils.isArrowDown(keyCode)) {
       this._moveCursorTo(Direction.BOTTOM, states);
+    } else if (CoderUtils.isA(keyCode) && states.ctrlKey) {
+      this._selectAll();
     }
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+  }
+
+  /**
+   * 选中所有文本
+   */
+  private _selectAll(): void {
+    const textData = this.model.data as ITextData;
+    const startCursor = TextElementUtils.getCursorOfLineHead(textData.lines[0], 0);
+    const endCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[textData.lines.length - 1], textData.lines.length - 1);
+    this._textSelection = { startCursor, endCursor };
+    this._textCursor = startCursor;
   }
 
   /**

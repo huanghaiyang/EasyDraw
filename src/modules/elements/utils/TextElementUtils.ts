@@ -34,7 +34,7 @@ function getCursorPropsOfNode(node: ITextNode, pos: Direction): Partial<ITextCur
  * @param line 文本行
  * @returns 光标信息
  */
-function getCursorPropsOfLineStart(line: ITextLine): Partial<ITextCursor> {
+function getCursorPropsOfLineHead(line: ITextLine): Partial<ITextCursor> {
   const { x, y, height } = line;
   return {
     x,
@@ -56,7 +56,7 @@ function getCursorPropsOfLineEnd(line: ITextLine): Partial<ITextCursor> {
   if (node) {
     return getCursorPropsOfNode(node, Direction.RIGHT);
   } else {
-    return getCursorPropsOfLineStart(line);
+    return getCursorPropsOfLineHead(line);
   }
 }
 
@@ -161,7 +161,7 @@ export default class TextElementUtils {
       const node = nodes[nodes.length - 1];
       cursor = getCursorPropsOfNode(node, Direction.RIGHT);
     } else {
-      cursor = getCursorPropsOfLineStart(line);
+      cursor = getCursorPropsOfLineHead(line);
     }
     cursor.lineNumber = lineNumber;
     return cursor;
@@ -177,7 +177,7 @@ export default class TextElementUtils {
   static getCursorOfLineStart(line: ITextLine, lineNumber: number): ITextCursor {
     let cursor: ITextCursor;
     if (line.nodes.length === 0) {
-      cursor = getCursorPropsOfLineStart(line);
+      cursor = getCursorPropsOfLineHead(line);
     } else {
       cursor = getCursorPropsOfNode(line.nodes[0], Direction.LEFT);
     }
@@ -193,7 +193,7 @@ export default class TextElementUtils {
    * @returns 光标信息
    */
   static getCursorOfLineHead(line: ITextLine, lineNumber: number): ITextCursor {
-    const cursor = getCursorPropsOfLineStart(line);
+    const cursor = getCursorPropsOfLineHead(line);
     cursor.lineNumber = lineNumber;
     return cursor;
   }
@@ -232,7 +232,7 @@ export default class TextElementUtils {
           return getCursorPropsOfLineEnd(line);
         }
       } else {
-        return getCursorPropsOfLineEnd(line);
+        return getCursorPropsOfLineHead(line);
       }
     }
   }
@@ -357,9 +357,111 @@ export default class TextElementUtils {
    * @param endIndex 结束节点索引
    */
   static setNodeSelected(line: ITextLine, startIndex: number, endIndex: number): void {
-    for (let i = startIndex; i <= endIndex; i++) {
-      line.nodes[i].selected = true;
+    if (startIndex <= endIndex) {
+      for (let i = startIndex; i <= endIndex; i++) {
+        line.nodes[i].selected = true;
+      }
+    } else {
+      for (let i = startIndex; i >= endIndex; i--) {
+        line.nodes[i].selected = true;
+      }
     }
+  }
+
+  /**
+   * 行右选
+   *
+   * @param line 文本行
+   * @param nodeId 节点id
+   * @param pos 光标位置
+   */
+  static lineRightSelect(line: ITextLine, nodeId: string, pos: Direction): void {
+    let nodeIndex: number = -1;
+    if (nodeId) {
+      nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      // 光标在当前节点的右侧，表示不包含当前节点
+      if (pos === Direction.RIGHT) {
+        // 表示光标定位到了行尾，没有包含任何文本节点
+        if (nodeIndex === line.nodes.length - 1) {
+          return;
+        }
+        // 表示选区不包含当前节点，但是包含当前节点的右侧节点
+        nodeIndex++;
+      }
+    } else {
+      nodeIndex = 0;
+    }
+    // 根据给定范围，设置选中状态
+    TextElementUtils.setNodeSelected(line, nodeIndex, line.nodes.length - 1);
+  }
+
+  /**
+   * 行左选
+   *
+   * @param line 文本行
+   * @param nodeId 节点id
+   * @param pos 光标位置
+   */
+  static lineLeftSelect(line: ITextLine, nodeId: string, pos: Direction): void {
+    let nodeIndex: number = -1;
+    if (nodeId) {
+      nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      // 光标在当前节点的左侧，表示不包含当前节点
+      if (pos === Direction.LEFT) {
+        // 表示光标定位到了行首，没有包含任何文本节点
+        if (nodeIndex === 0) {
+          return;
+        }
+        // 表示选区不包含当前节点，但是包含当前节点的左侧节点
+        nodeIndex--;
+      }
+    } else {
+      nodeIndex = 0;
+    }
+    // 根据给定范围，设置选中状态
+    TextElementUtils.setNodeSelected(line, 0, nodeIndex);
+  }
+
+  /**
+   * 行部分选
+   *
+   * @param line 文本行
+   * @param startNodeId 起始节点id
+   * @param startPos 起始位置
+   * @param endNodeId 结束节点id
+   * @param endPos 结束位置
+   */
+  static linePartialSelect(line: ITextLine, startNodeId: string, startPos: Direction, endNodeId: string, endPos: Direction): void {
+    let startNodeIndex = -1;
+    if (startNodeId) {
+      startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+    } else {
+      startNodeIndex = 0;
+    }
+    // 结束节点索引
+    let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+    // 如果起始节点索引小于结束节点索引，表示选区是从左到右
+    if (startNodeIndex < endNodeIndex) {
+      // 如果起始位置在节点的右侧，则当前节点不选中
+      if (startPos === Direction.RIGHT) {
+        startNodeIndex++;
+      }
+      // 如果结束位置在节点的左侧，则当前节点不选中
+      if (endPos === Direction.LEFT) {
+        endNodeIndex--;
+      }
+    } else {
+      // 起始节点索引大于结束节点索引，表示选区是从右到左
+      // 如果起始位置在节点的左侧，则当前节点不选中
+      if (startPos === Direction.LEFT) {
+        startNodeIndex--;
+      }
+      // 如果结束位置在节点的右侧，则当前节点不选中
+      if (endPos === Direction.RIGHT) {
+        endNodeIndex++;
+      }
+    }
+    TextElementUtils.setNodeSelected(line, startNodeIndex, endNodeIndex);
   }
 
   /**
@@ -371,39 +473,13 @@ export default class TextElementUtils {
   static markTextSelected(textData: ITextData, selection: ITextSelection): void {
     const { lines } = textData;
     let { startCursor, endCursor } = selection;
-    [startCursor, endCursor] = TextElementUtils.sortCursors(textData, [startCursor, endCursor]);
     const { lineNumber: startLineNumber, nodeId: startNodeId, pos: startPos } = startCursor;
     const { lineNumber: endLineNumber, nodeId: endNodeId, pos: endPos } = endCursor;
 
     // 如果起始行号等于结束行号，表示选区在同一行
     if (startLineNumber === endLineNumber) {
-      const line = lines[startLineNumber];
-      // 起始节点索引
-      let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
-      // 结束节点索引
-      let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
-      // 如果起始节点索引小于结束节点索引，表示选区是从左到右
-      if (startNodeIndex < endNodeIndex) {
-        // 如果起始位置在节点的右侧，则当前节点不选中
-        if (startPos === Direction.RIGHT) {
-          startNodeIndex++;
-        }
-        // 如果结束位置在节点的左侧，则当前节点不选中
-        if (endPos === Direction.LEFT) {
-          endNodeIndex--;
-        }
-      } else {
-        // 起始节点索引大于结束节点索引，表示选区是从右到左
-        // 如果起始位置在节点的左侧，则当前节点不选中
-        if (startPos === Direction.LEFT) {
-          startNodeIndex--;
-        }
-        // 如果结束位置在节点的右侧，则当前节点不选中
-        if (endPos === Direction.RIGHT) {
-          endNodeIndex++;
-        }
-      }
-      TextElementUtils.setNodeSelected(line, startNodeIndex, endNodeIndex);
+      TextElementUtils.linePartialSelect(lines[startLineNumber], startNodeId, startPos, endNodeId, endPos);
+      TextElementUtils.setLineSelectedIfy(lines[startLineNumber]);
     } else {
       // 起始行号小于结束行号，表示选区是从上到下，从左到右
       if (startLineNumber < endLineNumber) {
@@ -414,17 +490,9 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
-              if (startPos === Direction.RIGHT) {
-                startNodeIndex++;
-              }
-              TextElementUtils.setNodeSelected(line, startNodeIndex, line.nodes.length - 1);
+              TextElementUtils.lineRightSelect(line, startNodeId, startPos);
             } else if (i === endLineNumber) {
-              let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
-              if (endPos === Direction.LEFT) {
-                endNodeIndex--;
-              }
-              TextElementUtils.setNodeSelected(line, 0, endNodeIndex);
+              TextElementUtils.lineLeftSelect(line, endNodeId, endPos);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
             }
@@ -440,17 +508,9 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
-              if (startPos === Direction.LEFT) {
-                startNodeIndex--;
-              }
-              TextElementUtils.setNodeSelected(line, 0, startNodeIndex);
+              TextElementUtils.lineLeftSelect(line, startNodeId, startPos);
             } else if (i === endLineNumber) {
-              let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
-              if (endPos === Direction.RIGHT) {
-                endNodeIndex++;
-              }
-              TextElementUtils.setNodeSelected(line, endNodeIndex, line.nodes.length - 1);
+              TextElementUtils.lineRightSelect(line, endNodeId, endPos);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
             }

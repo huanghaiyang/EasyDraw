@@ -48,4 +48,84 @@ export default class CoderUtils {
   static isArrowDown(keyCode: number): boolean {
     return keyCode === 40;
   }
+
+  /**
+   * 判断是否为 Ctrl 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 Ctrl 键
+   */
+  static isCtrl(keyCode: number): boolean {
+    return keyCode === 17;
+  }
+
+  /**
+   * 判断是否为 A 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 A 键
+   */
+  static isA(keyCode: number): boolean {
+    return keyCode === 65;
+  }
+
+  /**
+   * 判断是否为 C 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 C 键
+   */
+  static isC(keyCode: number): boolean {
+    return keyCode === 67;
+  }
+
+  /**
+   * 判断是否为 V 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 V 键
+   */
+  static isV(keyCode: number): boolean {
+    return keyCode === 86;
+  }
+
+  /**
+   * 判断是否为 Z 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 Z 键
+   */
+  static isZ(keyCode: number): boolean {
+    return keyCode === 90;
+  }
+
+  /**
+   * 判断是否为 Y 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 Y 键
+   */
+  static isY(keyCode: number): boolean {
+    return keyCode === 89;
+  }
+
+  /**
+   * 判断是否为 X 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 X 键
+   */
+  static isX(keyCode: number): boolean {
+    return keyCode === 88;
+  }
+
+  /**
+   * 判断是否为 Enter 键
+   *
+   * @param keyCode 键码
+   * @returns 是否为 Enter 键
+   */
+  static isEnter(keyCode: number): boolean {
+    return keyCode === 13;
+  }
 }

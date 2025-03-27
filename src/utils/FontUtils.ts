@@ -3,7 +3,7 @@ import { ISize } from "@/types";
 
 export default class FontUtils {
   // 用于计算文本尺寸的假文本
-  static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘";
+  static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘{}[]|~!@#$%^&*()_+{}:";
 
   /**
    * 替换空格
