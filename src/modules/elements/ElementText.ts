@@ -151,7 +151,6 @@ export default class ElementText extends ElementRect implements IElementText {
       if (isSelectionMove) {
         this._textSelection.endCursor = textCursor;
         this._cursorVisibleStatus = false;
-        TextElementUtils.markTextSelected(this.model.data as ITextData, this._textSelection);
       } else {
         this._textCursor = textCursor;
         this._textSelection = {
@@ -164,6 +163,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._startCursorVisibleTimer();
       this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
     }
+    this._markSelection();
   }
 
   /**
@@ -199,6 +199,18 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
+    this._markSelection();
+  }
+
+  /**
+   * 标记文本选区
+   */
+  private _markSelection(): void {
+    if (this.isSelectionAvailable) {
+      TextElementUtils.markTextSelected(this.model.data as ITextData, this._textSelection);
+    } else {
+      TextElementUtils.markTextUnselected(this.model.data as ITextData);
+    }
   }
 
   /**
@@ -211,8 +223,11 @@ export default class ElementText extends ElementRect implements IElementText {
     const textData = this.model.data as ITextData;
     const { shiftKey } = states;
     let prevTextCursor = this._textCursor;
+
+    // 如果选区可用，则根据shiftKey来确定移动方向
     if (this.isSelectionAvailable) {
       if (!shiftKey) {
+        // 如果没有shiftKey，则将光标移动到选区的最左侧位置
         const [minCursor, maxCursor] = TextElementUtils.sortCursors(textData, [this._textSelection.startCursor, this._textSelection.endCursor]);
         switch (direction) {
           case Direction.LEFT:
@@ -230,66 +245,60 @@ export default class ElementText extends ElementRect implements IElementText {
       }
       prevTextCursor = this._textSelection.endCursor;
     }
+
     const { nodeId, lineNumber, pos } = prevTextCursor;
-    let textCursor: ITextCursor;
     const line = textData.lines[lineNumber];
     const prevLineNumber = lineNumber - 1;
     const nextLineNumber = lineNumber + 1;
-    // 如果光标在节点后面，则将光标移动到节点后面
-    if (nodeId) {
-      const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
-      switch (direction) {
-        case Direction.LEFT:
-          if (pos === Direction.RIGHT) {
-            textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.LEFT, lineNumber);
-          } else if (nodeIndex > 0) {
-            textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
-          } else if (prevLineNumber >= 0) {
-            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[prevLineNumber], prevLineNumber);
-          }
-          break;
-        case Direction.RIGHT:
-          if (pos === Direction.LEFT) {
-            textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.RIGHT, lineNumber);
-          } else if (nodeIndex < line.nodes.length - 1) {
-            textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex + 1], Direction.RIGHT, lineNumber);
-          } else if (lineNumber < textData.lines.length - 1) {
-            textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[lineNumber + 1], lineNumber + 1);
-          }
-          break;
-        case Direction.TOP:
-          if (prevLineNumber >= 0) {
-            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[prevLineNumber], this._prevMarkCursor, prevLineNumber);
-          }
-          break;
-        case Direction.BOTTOM:
-          if (nextLineNumber < textData.lines.length) {
-            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[nextLineNumber], this._prevMarkCursor, nextLineNumber);
-          }
-          break;
+    const prevLine = textData.lines[prevLineNumber];
+    const nextLine = textData.lines[nextLineNumber];
+    let textCursor: ITextCursor;
+
+    if (direction === Direction.TOP) {
+      if (prevLineNumber >= 0) {
+        textCursor = TextElementUtils.getClosestNodeCursorOfLine(prevLine, this._prevMarkCursor, prevLineNumber);
+      }
+    } else if (direction === Direction.BOTTOM) {
+      if (nextLineNumber < textData.lines.length) {
+        textCursor = TextElementUtils.getClosestNodeCursorOfLine(nextLine, this._prevMarkCursor, nextLineNumber);
       }
     } else {
-      switch (direction) {
-        case Direction.LEFT:
-          if (prevLineNumber >= 0) {
-            textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[prevLineNumber], prevLineNumber);
-          }
-          break;
-        case Direction.RIGHT:
-          if (nextLineNumber < textData.lines.length) {
-            textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[nextLineNumber], nextLineNumber);
-          }
-          break;
-        case Direction.TOP:
-          if (prevLineNumber >= 0) {
-            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[prevLineNumber], this._prevMarkCursor, prevLineNumber);
-          }
-          break;
-        case Direction.BOTTOM:
-          if (nextLineNumber < textData.lines.length) {
-            textCursor = TextElementUtils.getClosestNodeCursorOfLine(textData.lines[nextLineNumber], this._prevMarkCursor, nextLineNumber);
-          }
-          break;
+      // 如果光标在节点后面，则将光标移动到节点后面
+      if (nodeId) {
+        const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+        switch (direction) {
+          case Direction.LEFT:
+            if (pos === Direction.RIGHT) {
+              textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.LEFT, lineNumber);
+            } else if (nodeIndex > 0) {
+              textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
+            } else if (prevLineNumber >= 0) {
+              textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
+            }
+            break;
+          case Direction.RIGHT:
+            if (pos === Direction.LEFT) {
+              textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.RIGHT, lineNumber);
+            } else if (nodeIndex < line.nodes.length - 1) {
+              textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex + 1], Direction.RIGHT, lineNumber);
+            } else if (nextLineNumber < textData.lines.length - 1) {
+              textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
+            }
+            break;
+        }
+      } else {
+        switch (direction) {
+          case Direction.LEFT:
+            if (prevLineNumber >= 0) {
+              textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
+            }
+            break;
+          case Direction.RIGHT:
+            if (nextLineNumber < textData.lines.length) {
+              textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
+            }
+            break;
+        }
       }
     }
     if (textCursor) {
@@ -298,7 +307,6 @@ export default class ElementText extends ElementRect implements IElementText {
           startCursor: this._textCursor,
           endCursor: textCursor,
         };
-        TextElementUtils.markTextSelected(textData, this._textSelection);
       } else {
         this._textCursor = textCursor;
         this._textSelection = null;
@@ -333,6 +341,19 @@ export default class ElementText extends ElementRect implements IElementText {
   private _deleteAtCursor(textData: ITextData) {
     // 如果选区可用，则删除选区中的文本节点
     if (this.isSelectionAvailable) {
+      const [minCursor] = TextElementUtils.sortCursors(textData, [this._textSelection.startCursor, this._textSelection.endCursor]);
+      const { nodeId, lineNumber, pos } = minCursor;
+      let textCursor = minCursor;
+      const line = textData.lines[lineNumber];
+      const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      if (pos === Direction.LEFT) {
+        if (nodeIndex === 0) {
+          textCursor = TextElementUtils.getCursorOfLineStart(line, lineNumber);
+        } else {
+          textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.RIGHT, lineNumber);
+        }
+      }
+      this._textCursor = textCursor;
       textData.lines = textData.lines.filter(line => !line.selected);
       textData.lines.forEach(line => {
         line.nodes = line.nodes.filter(node => !node.selected);
@@ -343,7 +364,9 @@ export default class ElementText extends ElementRect implements IElementText {
       const prevLineNumber = lineNumber - 1;
       // 如果光标是在节点后面，则删除光标前面的文本节点
       if (nodeId) {
-        const nodeIndex = textData.lines[lineNumber].nodes.findIndex(node => node.id === nodeId);
+        const line = textData.lines[lineNumber];
+        // 获取节点在当前行的索引
+        const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
 
         // 光标在节点的左侧
         if (pos === Direction.LEFT) {
@@ -355,7 +378,7 @@ export default class ElementText extends ElementRect implements IElementText {
               // 获取前一行的节点数量
               const prevLineNodeSize = prevLine.nodes.length;
               // 将当前行的内容与前一行合并
-              prevLine.nodes.push(...textData.lines[lineNumber].nodes);
+              prevLine.nodes.push(...line.nodes);
               // 删除当前行
               textData.lines.splice(lineNumber, 1);
               // 如果前一行有节点,则将光标移动到前一行的末尾,否则将光标移动到前一行的开头
@@ -371,18 +394,18 @@ export default class ElementText extends ElementRect implements IElementText {
             }
           } else {
             // 删除光标前面的文本节点
-            textData.lines[lineNumber].nodes.splice(nodeIndex - 1, 1);
+            line.nodes.splice(nodeIndex - 1, 1);
             // 更新光标位置
-            this._textCursor = TextElementUtils.getCursorOfNode(textData.lines[lineNumber].nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
+            this._textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
           }
         } else {
           // 删除光标绑定的文本节点
-          textData.lines[lineNumber].nodes.splice(nodeIndex, 1);
+          line.nodes.splice(nodeIndex, 1);
           // 更新光标位置
           if (nodeIndex === 0) {
-            this._textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[lineNumber], lineNumber);
+            this._textCursor = TextElementUtils.getCursorOfLineStart(line, lineNumber);
           } else {
-            this._textCursor = TextElementUtils.getCursorOfNode(textData.lines[lineNumber].nodes[nodeIndex - 1], Direction.RIGHT, lineNumber);
+            this._textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.RIGHT, lineNumber);
           }
         }
       } else {
@@ -400,11 +423,11 @@ export default class ElementText extends ElementRect implements IElementText {
           }
         }
       }
-      this._textSelection = {
-        startCursor: this._textCursor,
-        endCursor: null,
-      };
     }
+    this._textSelection = {
+      startCursor: this._textCursor,
+      endCursor: null,
+    };
     this._prevMarkCursor = this._textCursor;
   }
 }

@@ -239,6 +239,25 @@ export default class TextElementUtils {
   }
 
   /**
+   * 获取文本节点
+   *
+   * @param textData 文本数据
+   * @param nodeId 节点id
+   * @returns 文本节点
+   */
+  static getTextNodeById(textData: ITextData, nodeId: string): ITextNode | undefined {
+    const { lines } = textData;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const node = line.nodes.find(node => node.id === nodeId);
+      if (node) {
+        return node;
+      }
+    }
+    return undefined;
+  }
+
+  /**
    * 获取文本节点的索引
    *
    * @param textData 文本数据
@@ -327,7 +346,8 @@ export default class TextElementUtils {
    */
   static markTextSelected(textData: ITextData, selection: ITextSelection): void {
     const { lines } = textData;
-    const { startCursor, endCursor } = selection;
+    let { startCursor, endCursor } = selection;
+    [startCursor, endCursor] = TextElementUtils.sortCursors(textData, [startCursor, endCursor]);
     const { lineNumber: startLineNumber, nodeId: startNodeId } = startCursor;
     const { lineNumber: endLineNumber, nodeId: endNodeId } = endCursor;
 
