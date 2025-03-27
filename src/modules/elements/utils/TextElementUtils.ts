@@ -186,6 +186,19 @@ export default class TextElementUtils {
   }
 
   /**
+   * 获取文本行首光标信息
+   *
+   * @param line 文本行
+   * @param lineNumber 行号
+   * @returns 光标信息
+   */
+  static getCursorOfLineHead(line: ITextLine, lineNumber: number): ITextCursor {
+    const cursor = getCursorPropsOfLineStart(line);
+    cursor.lineNumber = lineNumber;
+    return cursor;
+  }
+
+  /**
    * 获取文本节点的光标信息
    *
    * @param node 文本节点
@@ -291,6 +304,17 @@ export default class TextElementUtils {
   }
 
   /**
+   * 判断两个光标是否相等(是否在同一个位置)
+   *
+   * @param cursorA 光标A
+   * @param cursorB 光标B
+   * @returns 是否相等
+   */
+  static isCursorEqual(cursorA: ITextCursor, cursorB: ITextCursor): boolean {
+    return cursorA.lineNumber === cursorB.lineNumber && cursorA.nodeId === cursorB.nodeId && cursorA.pos === cursorB.pos;
+  }
+
+  /**
    * 获取文本数据中的文本内容
    *
    * @param textData 文本数据
@@ -348,15 +372,40 @@ export default class TextElementUtils {
     const { lines } = textData;
     let { startCursor, endCursor } = selection;
     [startCursor, endCursor] = TextElementUtils.sortCursors(textData, [startCursor, endCursor]);
-    const { lineNumber: startLineNumber, nodeId: startNodeId } = startCursor;
-    const { lineNumber: endLineNumber, nodeId: endNodeId } = endCursor;
+    const { lineNumber: startLineNumber, nodeId: startNodeId, pos: startPos } = startCursor;
+    const { lineNumber: endLineNumber, nodeId: endNodeId, pos: endPos } = endCursor;
 
+    // 如果起始行号等于结束行号，表示选区在同一行
     if (startLineNumber === endLineNumber) {
       const line = lines[startLineNumber];
-      const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
-      const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+      // 起始节点索引
+      let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+      // 结束节点索引
+      let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+      // 如果起始节点索引小于结束节点索引，表示选区是从左到右
+      if (startNodeIndex < endNodeIndex) {
+        // 如果起始位置在节点的右侧，则当前节点不选中
+        if (startPos === Direction.RIGHT) {
+          startNodeIndex++;
+        }
+        // 如果结束位置在节点的左侧，则当前节点不选中
+        if (endPos === Direction.LEFT) {
+          endNodeIndex--;
+        }
+      } else {
+        // 起始节点索引大于结束节点索引，表示选区是从右到左
+        // 如果起始位置在节点的左侧，则当前节点不选中
+        if (startPos === Direction.LEFT) {
+          startNodeIndex--;
+        }
+        // 如果结束位置在节点的右侧，则当前节点不选中
+        if (endPos === Direction.RIGHT) {
+          endNodeIndex++;
+        }
+      }
       TextElementUtils.setNodeSelected(line, startNodeIndex, endNodeIndex);
     } else {
+      // 起始行号小于结束行号，表示选区是从上到下，从左到右
       if (startLineNumber < endLineNumber) {
         for (let i = startLineNumber; i <= endLineNumber; i++) {
           const line = lines[i];
@@ -365,10 +414,16 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              if (startPos === Direction.RIGHT) {
+                startNodeIndex++;
+              }
               TextElementUtils.setNodeSelected(line, startNodeIndex, line.nodes.length - 1);
             } else if (i === endLineNumber) {
-              const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              if (endPos === Direction.LEFT) {
+                endNodeIndex--;
+              }
               TextElementUtils.setNodeSelected(line, 0, endNodeIndex);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
@@ -377,6 +432,7 @@ export default class TextElementUtils {
           }
         }
       } else {
+        // 起始行号大于结束行号，表示选区是从上到下，从右到左
         for (let i = startLineNumber; i >= endLineNumber; i--) {
           const line = lines[i];
           const isEmptyLine = line.nodes.length === 0;
@@ -384,10 +440,16 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              const startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              let startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
+              if (startPos === Direction.LEFT) {
+                startNodeIndex--;
+              }
               TextElementUtils.setNodeSelected(line, 0, startNodeIndex);
             } else if (i === endLineNumber) {
-              const endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              let endNodeIndex = line.nodes.findIndex(node => node.id === endNodeId);
+              if (endPos === Direction.RIGHT) {
+                endNodeIndex++;
+              }
               TextElementUtils.setNodeSelected(line, endNodeIndex, line.nodes.length - 1);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
@@ -397,6 +459,35 @@ export default class TextElementUtils {
         }
       }
     }
+  }
+
+  /**
+   * 合并文本行的节点
+   *
+   * @param textData 文本数据
+   * @param minLineNumber 最小行号
+   * @param maxLineNumber 最大行号
+   */
+  static mergeLineNodes(textData: ITextData, minLineNumber: number, maxLineNumber: number): void {
+    // 将maxLineNumber行的节点合并到minLineNumber行
+    const maxLine = textData.lines[maxLineNumber];
+    const minLine = textData.lines[minLineNumber];
+    // 删除选中的节点
+    maxLine.nodes = maxLine.nodes.filter(node => !node.selected);
+    minLine.nodes = minLine.nodes.filter(node => !node.selected);
+    // 合并节点
+    minLine.nodes.push(...maxLine.nodes);
+    // 删除maxLineNumber行
+    textData.lines.splice(maxLineNumber, 1);
+  }
+
+  /**
+   * 删除文本行的选中节点
+   *
+   * @param line 文本行
+   */
+  static deleteSelectedNodesOfLine(line: ITextLine): void {
+    line.nodes = line.nodes.filter(node => !node.selected);
   }
 
   /**

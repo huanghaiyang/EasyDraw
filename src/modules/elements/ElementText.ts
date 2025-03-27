@@ -341,23 +341,38 @@ export default class ElementText extends ElementRect implements IElementText {
   private _deleteAtCursor(textData: ITextData) {
     // 如果选区可用，则删除选区中的文本节点
     if (this.isSelectionAvailable) {
-      const [minCursor] = TextElementUtils.sortCursors(textData, [this._textSelection.startCursor, this._textSelection.endCursor]);
-      const { nodeId, lineNumber, pos } = minCursor;
+      const [minCursor, maxCursor] = TextElementUtils.sortCursors(textData, [this._textSelection.startCursor, this._textSelection.endCursor]);
+      const { nodeId, lineNumber: minLineNumber, pos } = minCursor;
       let textCursor = minCursor;
-      const line = textData.lines[lineNumber];
+      const line = textData.lines[minLineNumber];
       const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      // 如果光标在节点的左侧，表示当前节点不属于被删除的,则将光标移动到前一个节点的右侧
       if (pos === Direction.LEFT) {
         if (nodeIndex === 0) {
-          textCursor = TextElementUtils.getCursorOfLineStart(line, lineNumber);
+          textCursor = TextElementUtils.getCursorOfLineHead(line, minLineNumber);
         } else {
-          textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.RIGHT, lineNumber);
+          textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.RIGHT, minLineNumber);
         }
       }
       this._textCursor = textCursor;
-      textData.lines = textData.lines.filter(line => !line.selected);
-      textData.lines.forEach(line => {
-        line.nodes = line.nodes.filter(node => !node.selected);
-      });
+      let { lineNumber: maxLineNumber } = maxCursor;
+      // 被删除的总行数
+      const deleteTotaldLineNumber = maxLineNumber - minLineNumber - 1;
+      // 如果选区跨越多行
+      if (deleteTotaldLineNumber > 0) {
+        // 将中间行删除
+        textData.lines.splice(minLineNumber + 1, deleteTotaldLineNumber);
+        // 更新maxLineNumber
+        maxLineNumber -= deleteTotaldLineNumber;
+        // 合并行
+        TextElementUtils.mergeLineNodes(textData, minLineNumber, maxLineNumber);
+      } else {
+        if (minLineNumber === maxLineNumber) {
+          TextElementUtils.deleteSelectedNodesOfLine(textData.lines[minLineNumber]);
+        } else {
+          TextElementUtils.mergeLineNodes(textData, minLineNumber, maxLineNumber);
+        }
+      }
     } else {
       const { nodeId, lineNumber, pos } = this._textCursor;
       // 获取前一行行号
