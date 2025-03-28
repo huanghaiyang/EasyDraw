@@ -190,7 +190,7 @@ export default class ElementText extends ElementRect implements IElementText {
   updateText(value: string, states: TextEditingStates): void {
     console.log("updateText", value, states);
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
-    const { keyCode } = states;
+    const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = states;
 
     // 如果是删除键，则删除光标所在的文本节点
     if (CoderUtils.isDeleterKey(keyCode)) {
@@ -203,14 +203,35 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.TOP, states);
     } else if (CoderUtils.isArrowDown(keyCode)) {
       this._moveCursorTo(Direction.BOTTOM, states);
-    } else if (CoderUtils.isA(keyCode) && states.ctrlKey) {
+    } else if (CoderUtils.isA(keyCode) && ctrlKey) {
       this._selectAll();
-    } else {
-      this._updateTextInput(textData, value, states);
+    } else if (CoderUtils.isX(keyCode) && ctrlKey) {
+      this._cutSelection(textData);
+    } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
+      this._updateInput(textData, value, states);
     }
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+  }
+
+  /**
+   * 剪切选区
+   *
+   * @param textData 文本数据
+   */
+  private _cutSelection(textData: ITextData): void {
+    if (this.isSelectionAvailable) {
+      const selectedNodes = TextElementUtils.pickSelectedContent(textData);
+      const content = JSON.stringify(selectedNodes);
+      const input = document.createElement("input");
+      document.body.appendChild(input);
+      input.value = content;
+      input.select();
+      document.execCommand("copy");
+      input.remove();
+      this._deleteAtCursor(textData);
+    }
   }
 
   /**
@@ -220,7 +241,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param value 文本
    * @param states 文本编辑状态
    */
-  private _updateTextInput(textData: ITextData, value: string, states: TextEditingStates): void {
+  private _updateInput(textData: ITextData, value: string, states: TextEditingStates): void {
     // 如果选区有效，那么就先删除选区中的文本节点
     if (this.isSelectionAvailable) {
       this._deleteAtCursor(textData);

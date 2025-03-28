@@ -3,7 +3,7 @@ import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { ElementObject } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
+import ITextData, { IMixinText, ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
@@ -704,5 +704,28 @@ export default class TextElementUtils {
       fontColorOpacity,
       fontLineHeight,
     };
+  }
+
+  /**
+   * 获取选中的文本节点
+   *
+   * @param textData 文本数据
+   * @returns 选中的文本节点
+   */
+  static pickSelectedContent(textData: ITextData): IMixinText[] {
+    const { lines } = textData;
+    const result: IMixinText[] = [];
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.selected) {
+        result.push(line);
+      } else {
+        const nodes = line.nodes.filter(node => node.selected);
+        if (nodes.length > 0) {
+          result.push(...nodes);
+        }
+      }
+    }
+    return result;
   }
 }

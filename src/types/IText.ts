@@ -45,3 +45,6 @@ export enum TextSelectionCursorType {
   START,
   END,
 }
+
+// 混合文本
+export type IMixinText = ITextLine | ITextNode;
