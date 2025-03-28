@@ -189,7 +189,6 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   updateText(value: string, states: TextEditingStates): void {
     console.log("updateText", value, states);
-    const { updateId, compositionType } = states;
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode } = states;
 
@@ -207,26 +206,42 @@ export default class ElementText extends ElementRect implements IElementText {
     } else if (CoderUtils.isA(keyCode) && states.ctrlKey) {
       this._selectAll();
     } else {
-      // 上一次输入时的光标位置，如果是连续输入，则光标位置不变化
-      // 如果是compositionend，那么就重置光标位置
-      if (!this._prevInputCursor || compositionType === InputCompositionType.END || this._prevTextUpdateId !== updateId) {
-        this._prevInputCursor = this._textCursor;
-      }
-      // 如果相同，表示连续输入，需要将上一次插入的节点删除，重新插入新的文本节点
-      if (this._prevTextUpdateId === updateId) {
-        // 光标位置还原
-        this._textCursor = this._prevInputCursor;
-        // 删除更新ID相同的节点
-        this._deleteNodesByUpdateId(textData, updateId);
-      }
-      // 插入文本，批量生成文本节点
-      this._insertText(textData, value, states);
-      // 更新标记id
-      this._prevTextUpdateId = updateId;
+      this._updateTextInput(textData, value, states);
     }
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+  }
+
+  /**
+   * 更新文本输入
+   *
+   * @param textData 文本数据
+   * @param value 文本
+   * @param states 文本编辑状态
+   */
+  private _updateTextInput(textData: ITextData, value: string, states: TextEditingStates): void {
+    // 如果选区有效，那么就先删除选区中的文本节点
+    if (this.isSelectionAvailable) {
+      this._deleteAtCursor(textData);
+    }
+    const { updateId, compositionType } = states;
+    // 上一次输入时的光标位置，如果是连续输入，则光标位置不变化
+    // 如果是compositionend，那么就重置光标位置
+    if (!this._prevInputCursor || compositionType === InputCompositionType.END || this._prevTextUpdateId !== updateId) {
+      this._prevInputCursor = this._textCursor;
+    }
+    // 如果相同，表示连续输入，需要将上一次插入的节点删除，重新插入新的文本节点
+    if (this._prevTextUpdateId === updateId) {
+      // 光标位置还原
+      this._textCursor = this._prevInputCursor;
+      // 删除更新ID相同的节点
+      this._deleteNodesByUpdateId(textData, updateId);
+    }
+    // 插入文本，批量生成文本节点
+    this._insertText(textData, value, states);
+    // 更新标记id
+    this._prevTextUpdateId = updateId;
   }
 
   /**
