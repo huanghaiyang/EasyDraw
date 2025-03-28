@@ -39,3 +39,9 @@ export type ITextSelection = {
   startCursor?: ITextCursor;
   endCursor?: ITextCursor;
 };
+
+// 文本选区光标类型
+export enum TextSelectionCursorType {
+  START,
+  END,
+}

@@ -27,6 +27,8 @@ import ElementText from "@/modules/elements/ElementText";
 import ElementTaskTextCursor from "@/modules/render/shield/task/ElementTaskTextCursor";
 import { pick } from "lodash";
 import ElementTaskTextSelection from "@/modules/render/shield/task/ElementTaskTextSelection";
+import ElementTaskTextSelectionCursor from "@/modules/render/shield/task/ElementTaskTextSelectionCursor";
+import { TextSelectionCursorType } from "@/types/IText";
 
 /**
  * 蒙版渲染器
@@ -118,6 +120,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       cargo.add(this.createTextElementCursorTask());
       // 文本编辑时，绘制选区
       cargo.add(this.createTextElementSelectionTask());
+      // 文本编辑时，绘制选区的光标
+      cargo.addAll(this.createTextElementSelectionCursorTasks());
     }
 
     // 任务执行与状态清理 ==========
@@ -363,6 +367,23 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       return new ElementTaskTextCursor(element, this.renderParams);
     }
     return null;
+  }
+
+  /**
+   * 创建一组文本元素选区的光标任务
+   *
+   * @returns
+   */
+  private createTextElementSelectionCursorTasks(): IRenderTask[] {
+    const element = this._getEditingTextElement();
+    if (!element) return [];
+    if (element.isSelectionAvailable) {
+      return [
+        new ElementTaskTextSelectionCursor(element, TextSelectionCursorType.START, this.renderParams),
+        new ElementTaskTextSelectionCursor(element, TextSelectionCursorType.END, this.renderParams),
+      ];
+    }
+    return [];
   }
 
   /**

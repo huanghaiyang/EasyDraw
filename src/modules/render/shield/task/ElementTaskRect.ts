@@ -9,6 +9,6 @@ export default class ElementTaskRect extends ElementTaskBase {
   async run(): Promise<void> {
     if (!this.canvas || !this.element) return;
 
-    ElementTaskHelper.draw(this.element as IElementRect, this.canvas);
+    ElementTaskHelper.drawArcRect(this.element as IElementRect, this.canvas);
   }
 }
