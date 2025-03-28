@@ -388,7 +388,7 @@ export default class TextElementUtils {
    * @param nodeId 节点id
    * @param pos 光标位置
    */
-  static lineRightSelect(line: ITextLine, nodeId: string, pos: Direction): void {
+  static rightSelectOfLine(line: ITextLine, nodeId: string, pos: Direction): void {
     let nodeIndex: number = -1;
     if (nodeId) {
       nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
@@ -415,7 +415,7 @@ export default class TextElementUtils {
    * @param nodeId 节点id
    * @param pos 光标位置
    */
-  static lineLeftSelect(line: ITextLine, nodeId: string, pos: Direction): void {
+  static leftSelectOfLine(line: ITextLine, nodeId: string, pos: Direction): void {
     let nodeIndex: number = -1;
     if (nodeId) {
       nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
@@ -444,7 +444,7 @@ export default class TextElementUtils {
    * @param endNodeId 结束节点id
    * @param endPos 结束位置
    */
-  static linePartialSelect(line: ITextLine, startNodeId: string, startPos: Direction, endNodeId: string, endPos: Direction): void {
+  static partialSelectOfLine(line: ITextLine, startNodeId: string, startPos: Direction, endNodeId: string, endPos: Direction): void {
     let startNodeIndex = -1;
     if (startNodeId) {
       startNodeIndex = line.nodes.findIndex(node => node.id === startNodeId);
@@ -491,7 +491,7 @@ export default class TextElementUtils {
 
     // 如果起始行号等于结束行号，表示选区在同一行
     if (startLineNumber === endLineNumber) {
-      TextElementUtils.linePartialSelect(lines[startLineNumber], startNodeId, startPos, endNodeId, endPos);
+      TextElementUtils.partialSelectOfLine(lines[startLineNumber], startNodeId, startPos, endNodeId, endPos);
       TextElementUtils.setLineSelectedIfy(lines[startLineNumber]);
     } else {
       // 起始行号小于结束行号，表示选区是从上到下，从左到右
@@ -503,9 +503,9 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              TextElementUtils.lineRightSelect(line, startNodeId, startPos);
+              TextElementUtils.rightSelectOfLine(line, startNodeId, startPos);
             } else if (i === endLineNumber) {
-              TextElementUtils.lineLeftSelect(line, endNodeId, endPos);
+              TextElementUtils.leftSelectOfLine(line, endNodeId, endPos);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
             }
@@ -521,9 +521,9 @@ export default class TextElementUtils {
             line.selected = true;
           } else {
             if (i === startLineNumber) {
-              TextElementUtils.lineLeftSelect(line, startNodeId, startPos);
+              TextElementUtils.leftSelectOfLine(line, startNodeId, startPos);
             } else if (i === endLineNumber) {
-              TextElementUtils.lineRightSelect(line, endNodeId, endPos);
+              TextElementUtils.rightSelectOfLine(line, endNodeId, endPos);
             } else {
               TextElementUtils.setNodeSelected(line, 0, line.nodes.length - 1);
             }
@@ -541,7 +541,7 @@ export default class TextElementUtils {
    * @param minLineNumber 最小行号
    * @param maxLineNumber 最大行号
    */
-  static mergeLineNodes(textData: ITextData, minLineNumber: number, maxLineNumber: number): void {
+  static margeNodesOfLine(textData: ITextData, minLineNumber: number, maxLineNumber: number): void {
     // 将maxLineNumber行的节点合并到minLineNumber行
     const maxLine = textData.lines[maxLineNumber];
     const minLine = textData.lines[minLineNumber];
@@ -570,7 +570,7 @@ export default class TextElementUtils {
    * @param lineNumber 行号
    * @returns 节点
    */
-  static getNodeOfLineTail(textData: ITextData, lineNumber: number): ITextNode {
+  static getTailNodeOfLine(textData: ITextData, lineNumber: number): ITextNode {
     if (0 <= lineNumber && lineNumber < textData.lines.length) {
       const line = textData.lines[lineNumber];
       return line.nodes[line.nodes.length - 1];
@@ -585,7 +585,7 @@ export default class TextElementUtils {
    * @param lineNumber 行号
    * @returns 节点
    */
-  static getNodeOfLineTailIfNotBreak(textData: ITextData, lineNumber: number): ITextNode {
+  static getTailNodeOfLineIfNotBreak(textData: ITextData, lineNumber: number): ITextNode {
     if (0 <= lineNumber && lineNumber < textData.lines.length) {
       const line = textData.lines[lineNumber];
       if (line.isTailBreak) {
@@ -603,36 +603,37 @@ export default class TextElementUtils {
    * @param textCursor 文本光标
    * @returns 节点
    */
-  static getClosestStyledNodeOfLineByCursor(
+  static getAnchorNodeByCursor(
     textData: ITextData,
     textCursor: ITextCursor,
   ): {
     textNode: ITextNode;
     lineNumber: number;
+    isHead: boolean;
   } {
     const { lineNumber, nodeId, pos } = textCursor;
     let textNode: ITextNode;
     let nodeLineNumber: number = lineNumber;
+    let isHead = false;
 
     if (nodeId) {
       const line = textData.lines[lineNumber];
       const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      textNode = line.nodes[nodeIndex];
       if (pos === Direction.LEFT) {
         if (nodeIndex > 0) {
           textNode = line.nodes[nodeIndex - 1];
         } else {
-          textNode = TextElementUtils.getNodeOfLineTailIfNotBreak(textData, lineNumber - 1);
-          nodeLineNumber = lineNumber - 1;
+          isHead = true;
         }
-      } else {
-        textNode = line.nodes[nodeIndex + 1];
       }
     } else {
-      textNode = TextElementUtils.getNodeOfLineTailIfNotBreak(textData, lineNumber);
+      isHead = true;
     }
     return {
       textNode,
       lineNumber: nodeLineNumber,
+      isHead,
     };
   }
 

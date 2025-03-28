@@ -265,15 +265,28 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _insertText(textData: ITextData, value: string, states: TextEditingStates): void {
     if (isEmpty(value)) return;
-    const { textNode: prevTextNode, lineNumber: prevLineNumber } = TextElementUtils.getClosestStyledNodeOfLineByCursor(textData, this._prevInputCursor);
-    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, prevTextNode);
+    // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
+    const { textNode: anchorTextNode, lineNumber: prevLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
+    // 获取参考文本节点的样式
+    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode);
+    // 生成新插入的文本节点
     const nodes = value.split("").map(char => {
       const node = TextElementUtils.createTextNode(char, fontStyle);
       node.updateId = states.updateId;
       return node;
     });
-    const prevTextNodeIndex = textData.lines[prevLineNumber].nodes.findIndex(node => node.id === prevTextNode.id);
-    textData.lines[prevLineNumber].nodes.splice(prevTextNodeIndex + 1, 0, ...nodes);
+    // 默认头部插入
+    let anchorTextNodeIndex: number = 0;
+    // 如果不是向行首插入，则需要找到插入位置
+    if (!isHead) {
+      // 找到插入位置
+      anchorTextNodeIndex = textData.lines[prevLineNumber].nodes.findIndex(node => node.id === anchorTextNode.id);
+      // 向后移动一位
+      anchorTextNodeIndex = anchorTextNodeIndex + 1;
+    }
+    // 插入文本节点
+    textData.lines[prevLineNumber].nodes.splice(anchorTextNodeIndex, 0, ...nodes);
+    // 更新光标位置
     this._textCursor = TextElementUtils.getCursorOfNode(nodes[nodes.length - 1], Direction.RIGHT, prevLineNumber);
   }
 
@@ -383,7 +396,7 @@ export default class ElementText extends ElementRect implements IElementText {
             } else if (nodeIndex < line.nodes.length - 1) {
               // 将光标移动到后一个节点的右侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex + 1], Direction.RIGHT, lineNumber);
-            } else if (nextLineNumber < textData.lines.length - 1) {
+            } else if (nextLineNumber <= textData.lines.length - 1) {
               // 将光标移动到后一行的开头
               textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
             }
@@ -398,7 +411,7 @@ export default class ElementText extends ElementRect implements IElementText {
             }
             break;
           case Direction.RIGHT:
-            if (nextLineNumber < textData.lines.length - 1) {
+            if (nextLineNumber <= textData.lines.length - 1) {
               // 将光标移动到后一行的开头
               textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
             }
@@ -471,12 +484,12 @@ export default class ElementText extends ElementRect implements IElementText {
         // 更新maxLineNumber
         maxLineNumber -= deleteTotaldLineNumber;
         // 合并行
-        TextElementUtils.mergeLineNodes(textData, minLineNumber, maxLineNumber);
+        TextElementUtils.margeNodesOfLine(textData, minLineNumber, maxLineNumber);
       } else {
         if (minLineNumber === maxLineNumber) {
           TextElementUtils.deleteSelectedNodesOfLine(textData.lines[minLineNumber]);
         } else {
-          TextElementUtils.mergeLineNodes(textData, minLineNumber, maxLineNumber);
+          TextElementUtils.margeNodesOfLine(textData, minLineNumber, maxLineNumber);
         }
       }
     } else {
