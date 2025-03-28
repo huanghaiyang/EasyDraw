@@ -1,10 +1,12 @@
-import { TextFontStyle } from "@/styles/ElementStyles";
+import { FontStyle, TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
+import { ElementObject } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import LodashUtils from "@/utils/LodashUtils";
 import MathUtils from "@/utils/MathUtils";
 import { every, isBoolean, pick } from "lodash";
 import { nanoid } from "nanoid";
@@ -65,6 +67,21 @@ function getCursorPropsOfLineEnd(line: ITextLine): Partial<ITextCursor> {
  */
 export default class TextElementUtils {
   /**
+   * 创建文本节点
+   *
+   * @param value 值
+   * @param style 样式
+   * @returns 文本节点
+   */
+  static createTextNode(value: string, style: FontStyle): ITextNode {
+    return {
+      id: nanoid(),
+      content: value,
+      fontStyle: style,
+    };
+  }
+
+  /**
    * 创建文本数据
    *
    * @param content 文本内容
@@ -77,11 +94,7 @@ export default class TextElementUtils {
 
     content.split("\n").forEach(line => {
       const nodes = line.split("").map(char => {
-        return {
-          content: char,
-          id: nanoid(),
-          fontStyle,
-        };
+        return TextElementUtils.createTextNode(char, fontStyle);
       });
       lines.push({ nodes, isTailBreak: true });
     });
@@ -551,6 +564,79 @@ export default class TextElementUtils {
   }
 
   /**
+   * 获取文本行的最后一个节点
+   *
+   * @param textData 文本数据
+   * @param lineNumber 行号
+   * @returns 节点
+   */
+  static getNodeOfLineTail(textData: ITextData, lineNumber: number): ITextNode {
+    if (0 <= lineNumber && lineNumber < textData.lines.length) {
+      const line = textData.lines[lineNumber];
+      return line.nodes[line.nodes.length - 1];
+    }
+    return null;
+  }
+
+  /**
+   * 获取文本行的最后一个节点，如果是强制换行的行，则返回null
+   *
+   * @param textData 文本数据
+   * @param lineNumber 行号
+   * @returns 节点
+   */
+  static getNodeOfLineTailIfNotBreak(textData: ITextData, lineNumber: number): ITextNode {
+    if (0 <= lineNumber && lineNumber < textData.lines.length) {
+      const line = textData.lines[lineNumber];
+      if (line.isTailBreak) {
+        return null;
+      }
+      return line.nodes[line.nodes.length - 1];
+    }
+    return null;
+  }
+
+  /**
+   * 获取文本行中最接近文本光标位置的节点,如果光标在文本行的最前面，则查找上一行的最后一个节点，如果上一行是强制换行的行，则返回null
+   *
+   * @param textData 文本数据
+   * @param textCursor 文本光标
+   * @returns 节点
+   */
+  static getClosestStyledNodeOfLineByCursor(
+    textData: ITextData,
+    textCursor: ITextCursor,
+  ): {
+    textNode: ITextNode;
+    lineNumber: number;
+  } {
+    const { lineNumber, nodeId, pos } = textCursor;
+    let textNode: ITextNode;
+    let nodeLineNumber: number = lineNumber;
+
+    if (nodeId) {
+      const line = textData.lines[lineNumber];
+      const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      if (pos === Direction.LEFT) {
+        if (nodeIndex > 0) {
+          textNode = line.nodes[nodeIndex - 1];
+        } else {
+          textNode = TextElementUtils.getNodeOfLineTailIfNotBreak(textData, lineNumber - 1);
+          nodeLineNumber = lineNumber - 1;
+        }
+      } else {
+        textNode = line.nodes[nodeIndex + 1];
+      }
+    } else {
+      textNode = TextElementUtils.getNodeOfLineTailIfNotBreak(textData, lineNumber);
+    }
+    return {
+      textNode,
+      lineNumber: nodeLineNumber,
+    };
+  }
+
+  /**
    * 获取文本行中最接近文本光标位置的节点的光标信息
    *
    * @param line 文本行
@@ -598,5 +684,24 @@ export default class TextElementUtils {
       }
     }
     return textCursor;
+  }
+
+  /**
+   * 获取节点的样式
+   *
+   * @param model 元素模型
+   * @param node 节点
+   * @returns 样式
+   */
+  static getStyleByNodeIfy(model: ElementObject, node: ITextNode): FontStyle {
+    if (node) return LodashUtils.jsonClone(node.fontStyle) as FontStyle;
+    const { fontSize, fontFamily, fontColor, fontColorOpacity, fontLineHeight } = model.styles;
+    return {
+      fontSize,
+      fontFamily,
+      fontColor,
+      fontColorOpacity,
+      fontLineHeight,
+    };
   }
 }

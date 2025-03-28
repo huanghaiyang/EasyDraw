@@ -1,11 +1,11 @@
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
-import { Direction, ElementStatus, IPoint, TextEditingStates } from "@/types";
-import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
+import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
+import ITextData, { ITextCursor, ITextLine, ITextSelection } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every } from "lodash";
+import { every, isEmpty } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
@@ -22,6 +22,10 @@ export default class ElementText extends ElementRect implements IElementText {
   private _cursorVisibleTimer: number;
   // 上一次标记的光标
   private _prevMarkCursor: ITextCursor;
+  // 上一次输入的光标位置
+  private _prevInputCursor: ITextCursor;
+  // 上一次更新文本的id
+  private _prevTextUpdateId: string;
 
   get editingEnable(): boolean {
     return true;
@@ -136,6 +140,7 @@ export default class ElementText extends ElementRect implements IElementText {
     if (!this.isContainsCoord(coord)) {
       this._textCursor = null;
       this._textSelection = null;
+      this._prevInputCursor = null;
       return;
     }
     // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
@@ -164,6 +169,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
     }
     this._markSelection();
+    this._prevInputCursor = null;
   }
 
   /**
@@ -183,8 +189,10 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   updateText(value: string, states: TextEditingStates): void {
     console.log("updateText", value, states);
+    const { updateId, compositionType } = states;
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode } = states;
+
     // 如果是删除键，则删除光标所在的文本节点
     if (CoderUtils.isDeleterKey(keyCode)) {
       this._deleteAtCursor(textData);
@@ -198,10 +206,75 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.BOTTOM, states);
     } else if (CoderUtils.isA(keyCode) && states.ctrlKey) {
       this._selectAll();
+    } else {
+      // 上一次输入时的光标位置，如果是连续输入，则光标位置不变化
+      // 如果是compositionend，那么就重置光标位置
+      if (!this._prevInputCursor || compositionType === InputCompositionType.END || this._prevTextUpdateId !== updateId) {
+        this._prevInputCursor = this._textCursor;
+      }
+      // 如果相同，表示连续输入，需要将上一次插入的节点删除，重新插入新的文本节点
+      if (this._prevTextUpdateId === updateId) {
+        // 光标位置还原
+        this._textCursor = this._prevInputCursor;
+        // 删除更新ID相同的节点
+        this._deleteNodesByUpdateId(textData, updateId);
+      }
+      // 插入文本，批量生成文本节点
+      this._insertText(textData, value, states);
+      // 更新标记id
+      this._prevTextUpdateId = updateId;
     }
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+  }
+
+  /**
+   * 删除文本节点
+   *
+   * @param textData 文本数据
+   * @param updateId 更新ID
+   */
+  private _deleteNodesByUpdateId(textData: ITextData, updateId: string): void {
+    textData.lines = textData.lines
+      .map(line => {
+        const prevNodeLength = line.nodes.length;
+        // 如果行中没有节点，那么就直接返回
+        if (prevNodeLength > 0) {
+          // 如果行中存在节点，那么就删除更新ID相同的节点
+          line.nodes = line.nodes.filter(node => node.updateId !== updateId);
+          // 如果删除节点后，行中没有节点，那么就返回null，否则返回行
+          const afterNodeLength = line.nodes.length;
+          if (prevNodeLength > afterNodeLength) {
+            // 行中没有节点表示行应该被删除
+            if (afterNodeLength === 0) return null;
+            return line;
+          }
+        }
+        return line;
+      })
+      .filter(line => line !== null) as ITextLine[];
+  }
+
+  /**
+   * 插入文本
+   *
+   * @param textData 文本数据
+   * @param value 文本
+   * @param states 文本编辑状态
+   */
+  private _insertText(textData: ITextData, value: string, states: TextEditingStates): void {
+    if (isEmpty(value)) return;
+    const { textNode: prevTextNode, lineNumber: prevLineNumber } = TextElementUtils.getClosestStyledNodeOfLineByCursor(textData, this._prevInputCursor);
+    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, prevTextNode);
+    const nodes = value.split("").map(char => {
+      const node = TextElementUtils.createTextNode(char, fontStyle);
+      node.updateId = states.updateId;
+      return node;
+    });
+    const prevTextNodeIndex = textData.lines[prevLineNumber].nodes.findIndex(node => node.id === prevTextNode.id);
+    textData.lines[prevLineNumber].nodes.splice(prevTextNodeIndex + 1, 0, ...nodes);
+    this._textCursor = TextElementUtils.getCursorOfNode(nodes[nodes.length - 1], Direction.RIGHT, prevLineNumber);
   }
 
   /**
@@ -347,6 +420,7 @@ export default class ElementText extends ElementRect implements IElementText {
         this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
       }
     }
+    this._prevInputCursor = null;
   }
   /**
    * 刷新光标渲染矩形
@@ -476,5 +550,6 @@ export default class ElementText extends ElementRect implements IElementText {
       endCursor: null,
     };
     this._prevMarkCursor = this._textCursor;
+    this._prevInputCursor = null;
   }
 }

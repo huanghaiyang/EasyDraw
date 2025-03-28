@@ -1,10 +1,12 @@
-import { IPoint, ISize } from "@/types";
+import { InputCompositionType, IPoint, ISize } from "@/types";
 import { IDrawerHtml } from "@/types/IStageDrawer";
 import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import { DefaultFontStyle } from "@/styles/ElementStyles";
 import { SelectionStrokeColor } from "@/styles/MaskStyles";
 import FontUtils from "@/utils/FontUtils";
 import ColorUtils from "@/utils/ColorUtils";
+import { nanoid } from "nanoid";
+import CoderUtils from "@/utils/CoderUtils";
 
 const minWidth = 200;
 const minHeight = 20;
@@ -16,6 +18,8 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   textCursorEditor: HTMLTextAreaElement;
   // 输入框位置
   private _textEditorPosition: IPoint;
+  // 文本更新ID
+  private _textEditorUpdateId: string;
   // 最后一次文本光标编辑的按键码
   private _prevTextCursorKeycode: number = -1;
   // 最后一次文本光标编辑的ctrl键状态
@@ -80,8 +84,18 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       this.node.appendChild(textCursorEditor);
       this.textCursorEditor = textCursorEditor;
     }
-    this.textCursorEditor.value = "";
+    this.resetTextCursorInput();
     return this.textCursorEditor;
+  }
+
+  /**
+   * 重置文本内容
+   */
+  resetTextCursorInput(): void {
+    if (this.textCursorEditor) {
+      this.textCursorEditor.value = "";
+      this._textEditorUpdateId = nanoid();
+    }
   }
 
   /**
@@ -197,6 +211,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       keyCode: this._prevTextCursorKeycode,
       ctrlKey: this._prevTextCursorCtrlKey,
       shiftKey: this._prevTextCursorShiftKey,
+      updateId: this._textEditorUpdateId,
     });
   }
 
@@ -212,14 +227,42 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     });
     // 监听键盘按键
     textCursorEditor.addEventListener("keydown", e => {
-      this._prevTextCursorKeycode = e.keyCode;
-      this._prevTextCursorCtrlKey = e.ctrlKey;
-      this._prevTextCursorShiftKey = e.shiftKey;
-      this._emitTextCursorUpdate();
+      const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = e;
+      this._prevTextCursorKeycode = keyCode;
+      this._prevTextCursorCtrlKey = ctrlKey;
+      this._prevTextCursorShiftKey = shiftKey;
+      if (
+        ctrlKey ||
+        shiftKey ||
+        metaKey ||
+        altKey ||
+        CoderUtils.isDeleterKey(keyCode) ||
+        CoderUtils.isArrowLeft(keyCode) ||
+        CoderUtils.isArrowRight(keyCode) ||
+        CoderUtils.isArrowUp(keyCode) ||
+        CoderUtils.isArrowDown(keyCode) ||
+        (ctrlKey && CoderUtils.isA(keyCode)) ||
+        (ctrlKey && CoderUtils.isX(keyCode)) ||
+        (ctrlKey && CoderUtils.isC(keyCode)) ||
+        (ctrlKey && CoderUtils.isV(keyCode)) ||
+        (ctrlKey && CoderUtils.isZ(keyCode)) ||
+        (ctrlKey && CoderUtils.isY(keyCode))
+      ) {
+        this.resetTextCursorInput();
+        this._emitTextCursorUpdate();
+      }
     });
-    // 输入框内容变化
     textCursorEditor.addEventListener("input", () => {
       this._emitTextCursorUpdate();
+    });
+    textCursorEditor.addEventListener("compositionstart", () => {
+      this.resetTextCursorInput();
+    });
+    textCursorEditor.addEventListener("compositionend", () => {
+      this.resetTextCursorInput();
+      this.emit("textUpdate", '', {
+        compositionType: InputCompositionType.END,
+      });
     });
   }
 

@@ -9,6 +9,7 @@ export type ITextNode = Partial<IPoint> &
     fontStyle: TextFontStyle;
     inSelection?: boolean;
     selected?: boolean;
+    updateId?: string;
   };
 
 // 文本行

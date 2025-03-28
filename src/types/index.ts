@@ -133,6 +133,16 @@ export enum ShieldDispatcherNames {
   layerGoDownEnableChanged = "layerGoDownEnableChanged",
 }
 
+// 输入类型
+export enum InputCompositionType {
+  // 开始
+  START,
+  // 更新
+  UPDATE,
+  // 结束
+  END,
+}
+
 // 键盘事件
 export type TextEditingStates = {
   keyCode: number;
@@ -140,6 +150,8 @@ export type TextEditingStates = {
   shiftKey?: boolean;
   altKey?: boolean;
   metaKey?: boolean;
+  updateId?: string;
+  compositionType?: InputCompositionType;
 };
 
 // 方位
