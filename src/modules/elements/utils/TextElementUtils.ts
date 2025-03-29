@@ -728,4 +728,99 @@ export default class TextElementUtils {
     }
     return result;
   }
+
+  /**
+   * 判断是否为文本节点
+   *
+   * @param obj 对象
+   * @returns 是否为文本节点
+   */
+  static isTextNode(obj: Object): boolean {
+    return ["id", "content", "fontStyle"].every(key => key in obj);
+  }
+
+  /**
+   * 判断是否为文本行
+   *
+   * @param obj 对象
+   * @returns 是否为文本行
+   */
+  static isTextLine(obj: Object): boolean {
+    return ["nodes"].every(key => key in obj);
+  }
+
+  /**
+   * 复制文本节点
+   *
+   * @param textNode 文本节点
+   * @returns 复制的文本节点
+   */
+  static cloneTextNode(textNode: ITextNode): ITextNode {
+    const { content, fontStyle } = textNode;
+    return {
+      id: nanoid(),
+      content,
+      fontStyle: LodashUtils.jsonClone(fontStyle),
+    };
+  }
+
+  /**
+   * 批量复制文本节点
+   *
+   * @param textNodes 文本节点数组
+   * @returns 复制的文本节点数组
+   */
+  static batchCloneTextNodes(textNodes: ITextNode[]): ITextNode[] {
+    return textNodes.map(TextElementUtils.cloneTextNode);
+  }
+
+  /**
+   * 复制文本行
+   *
+   * @param line 文本行
+   * @returns 复制的文本行
+   */
+  static cloneTextLine(line: ITextLine): ITextLine {
+    const { nodes, isTailBreak } = line;
+    return {
+      nodes: TextElementUtils.batchCloneTextNodes(nodes),
+      isTailBreak,
+    };
+  }
+
+  /**
+   * 复制混合文本
+   *
+   * @param mixinText 混合文本
+   * @returns 复制的混合文本
+   */
+  static cloneMixinText(mixinText: IMixinText[]): IMixinText[] {
+    return mixinText.map(text => {
+      if (TextElementUtils.isTextLine(text)) {
+        return TextElementUtils.cloneTextLine(text as ITextLine);
+      } else if (TextElementUtils.isTextNode(text)) {
+        return TextElementUtils.cloneTextNode(text as ITextNode);
+      }
+      return text;
+    });
+  }
+
+  /**
+   * 解析混合文本
+   *
+   * @param text 文本
+   * @returns 混合文本
+   */
+  static parseMixinText(text: string): IMixinText[] {
+    let result: IMixinText[] = [];
+    try {
+      const mixinText = JSON.parse(text);
+      if (Array.isArray(mixinText) && mixinText.every(obj => TextElementUtils.isTextNode(obj) || TextElementUtils.isTextLine(obj))) {
+        result = TextElementUtils.cloneMixinText(mixinText);
+      }
+    } catch (e) {
+      console.warn(e);
+    }
+    return result;
+  }
 }

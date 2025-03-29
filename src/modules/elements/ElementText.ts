@@ -1,7 +1,7 @@
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
-import ITextData, { ITextCursor, ITextLine, ITextSelection } from "@/types/IText";
+import ITextData, { IMixinText, ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -233,7 +233,15 @@ export default class ElementText extends ElementRect implements IElementText {
       this._deleteAtCursor(textData);
     }
     this._prevInputCursor = this._textCursor;
-    this._insertText(textData, value, states);
+    // 尝试解析文本节点
+    const mixinText = TextElementUtils.parseMixinText(value);
+    if (mixinText && mixinText.length > 0) {
+      // 如果是混合文本，那么就直接插入节点
+      this._insertMixinText(textData, mixinText);
+    } else {
+      // 直接插入文本
+      this._insertText(textData, value, states);
+    }
   }
 
   /**
@@ -328,6 +336,98 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 插入混合文本
+   *
+   * @param textData 文本数据
+   * @param mixinText 混合文本
+   */
+  private _insertMixinText(textData: ITextData, mixinText: IMixinText[]): void {
+    if (mixinText.length === 0) return;
+    // 混合文本中的完整行的行数
+    const mixinLineCounter = mixinText.filter(TextElementUtils.isTextLine).length;
+    // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
+    let { textNode: anchorTextNode, lineNumber: anchorLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
+    // 获取当前行
+    const startLine = textData.lines[anchorLineNumber];
+    // 默认起始插入位置
+    let anchorTextNodeIndex: number = 0;
+    // 如果光标不在行首，那么需要找到插入位置
+    if (!isHead) {
+      // 计算插入位置
+      anchorTextNodeIndex = startLine.nodes.findIndex(node => node.id === anchorTextNode.id);
+      // 向后移动一位
+      anchorTextNodeIndex = anchorTextNodeIndex + 1;
+    }
+    // 截取光标之后的节点
+    let anchorLineSplittedNodes: ITextNode[] = [];
+    // 最后一次插入完整行的行号
+    let tailInsertLineNumber: number = -1;
+    // 最后一次插入的文本节点
+    let tailInsertTextNode: ITextNode | null = null;
+    // 最后一次插入的文本节点的行号
+    let tailInsertTextNodeLineNumber: number = -1;
+    for (let i = 0; i < mixinText.length; i++) {
+      let mText = mixinText[i];
+      // 更新当前行
+      const line = textData.lines[anchorLineNumber];
+      // 如果要插入的文包含完整行，则需要将当前光标所在的行进行拆分
+      if (i === 0 && mixinLineCounter > 0) {
+        // 截取光标之后的节点
+        anchorLineSplittedNodes = line.nodes.slice(anchorTextNodeIndex);
+        // 复制节点
+        anchorLineSplittedNodes = TextElementUtils.batchCloneTextNodes(anchorLineSplittedNodes);
+        // 截取光标之前的节点
+        line.nodes = line.nodes.slice(0, anchorTextNodeIndex);
+      }
+      // 如果是文本行，则插入行
+      if (TextElementUtils.isTextLine(mText)) {
+        // 判断当前光标所在的行是否是空行，如果是空行，则将空行替换掉
+        if (!(i === 0 && line.nodes.length === 0)) {
+          anchorLineNumber++;
+        }
+        mText = mText as ITextLine;
+        // 插入新行(或者替换行)
+        textData.lines.splice(anchorLineNumber, 0, mText);
+        // 更新节点下标
+        anchorTextNodeIndex = 0;
+        // 更新最后一次插入完整行的行号
+        tailInsertLineNumber = anchorLineNumber;
+      } else if (TextElementUtils.isTextNode(mText)) {
+        mText = mText as ITextNode;
+        // 插入新节点
+        line.nodes.splice(anchorTextNodeIndex, 0, mText);
+        // 更新节点下标
+        anchorTextNodeIndex++;
+        // 更新最后一次插入完整行的行号
+        tailInsertLineNumber = -1;
+        // 更新最后一次插入的文本节点
+        tailInsertTextNode = mText;
+        // 更新最后一次插入的文本节点的行号
+        tailInsertTextNodeLineNumber = anchorLineNumber;
+      }
+    }
+
+    // 如果插入了完整行，那么就将光标移动到行末
+    if (tailInsertLineNumber !== -1) {
+      this._textCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[tailInsertLineNumber], tailInsertLineNumber);
+    } else if (tailInsertTextNode) {
+      // 如果插入了文本节点，那么就将光标移动到文本节点的右侧
+      this._textCursor = TextElementUtils.getCursorOfNode(tailInsertTextNode, Direction.RIGHT, tailInsertTextNodeLineNumber);
+    }
+
+    // 处理被截断的行文本节点
+    if (anchorLineSplittedNodes.length > 0) {
+      // 表示没有插入完整行，那么就将截取的节点插入到当前行的最后一次插入位置的后面
+      if (tailInsertLineNumber === -1) {
+        textData.lines[tailInsertTextNodeLineNumber].nodes.splice(anchorTextNodeIndex, 0, ...anchorLineSplittedNodes);
+      } else {
+        // 如果最后一次插入的是一个完整行，那么就将截取的节点插入到新行
+        textData.lines.splice(tailInsertLineNumber + 1, 0, { nodes: anchorLineSplittedNodes, isTailBreak: true });
+      }
+    }
+  }
+
+  /**
    * 插入文本
    *
    * @param textData 文本数据
@@ -337,7 +437,7 @@ export default class ElementText extends ElementRect implements IElementText {
   private _insertText(textData: ITextData, value: string, states?: TextEditingStates): void {
     if (isEmpty(value)) return;
     // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
-    const { textNode: anchorTextNode, lineNumber: prevLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
+    const { textNode: anchorTextNode, lineNumber: anchorLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
     // 获取参考文本节点的样式
     const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode);
     // 生成新插入的文本节点
@@ -353,14 +453,14 @@ export default class ElementText extends ElementRect implements IElementText {
     // 如果不是向行首插入，则需要找到插入位置
     if (!isHead) {
       // 找到插入位置
-      anchorTextNodeIndex = textData.lines[prevLineNumber].nodes.findIndex(node => node.id === anchorTextNode.id);
+      anchorTextNodeIndex = textData.lines[anchorLineNumber].nodes.findIndex(node => node.id === anchorTextNode.id);
       // 向后移动一位
       anchorTextNodeIndex = anchorTextNodeIndex + 1;
     }
     // 插入文本节点
-    textData.lines[prevLineNumber].nodes.splice(anchorTextNodeIndex, 0, ...nodes);
+    textData.lines[anchorLineNumber].nodes.splice(anchorTextNodeIndex, 0, ...nodes);
     // 更新光标位置
-    this._textCursor = TextElementUtils.getCursorOfNode(nodes[nodes.length - 1], Direction.RIGHT, prevLineNumber);
+    this._textCursor = TextElementUtils.getCursorOfNode(nodes[nodes.length - 1], Direction.RIGHT, anchorLineNumber);
   }
 
   /**

@@ -7,7 +7,6 @@ export type ITextNode = Partial<IPoint> &
     id: string;
     content: string;
     fontStyle: TextFontStyle;
-    inSelection?: boolean;
     selected?: boolean;
     updateId?: string;
   };
