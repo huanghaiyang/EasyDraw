@@ -7,6 +7,7 @@ import FontUtils from "@/utils/FontUtils";
 import ColorUtils from "@/utils/ColorUtils";
 import { nanoid } from "nanoid";
 import CoderUtils from "@/utils/CoderUtils";
+import EventUtils from "@/utils/EventUtils";
 
 const minWidth = 200;
 const minHeight = 20;
@@ -84,14 +85,14 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       this.node.appendChild(textCursorEditor);
       this.textCursorEditor = textCursorEditor;
     }
-    this.resetTextCursorInput();
+    this._resetTextCursorInput();
     return this.textCursorEditor;
   }
 
   /**
    * 重置文本内容
    */
-  resetTextCursorInput(): void {
+  _resetTextCursorInput(): void {
     if (this.textCursorEditor) {
       this.textCursorEditor.value = "";
       this._textEditorUpdateId = nanoid();
@@ -248,20 +249,40 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
         (ctrlKey && CoderUtils.isZ(keyCode)) ||
         (ctrlKey && CoderUtils.isY(keyCode))
       ) {
-        this.resetTextCursorInput();
-        this._emitTextCursorUpdate();
+        if (!CoderUtils.isV(keyCode)) {
+          EventUtils.stopPP(e);
+          this._resetTextCursorInput();
+          this._emitTextCursorUpdate();
+          requestAnimationFrame(() => {
+            this.focusTextCursorInput();
+          });
+        }
       }
+    });
+    // 监听粘贴事件
+    textCursorEditor.addEventListener("paste", e => {
+      EventUtils.stopPP(e);
+      const text = e.clipboardData.getData("text/plain");
+      this.textCursorEditor.value = text;
+      this._prevTextCursorKeycode = 86;
+      this._emitTextCursorUpdate();
+      this._resetTextCursorInput();
+      requestAnimationFrame(() => {
+        this.focusTextCursorInput();
+      });
     });
     textCursorEditor.addEventListener("input", () => {
       this._emitTextCursorUpdate();
     });
     textCursorEditor.addEventListener("compositionstart", () => {
-      this.resetTextCursorInput();
+      this._resetTextCursorInput();
     });
     textCursorEditor.addEventListener("compositionend", () => {
-      this.resetTextCursorInput();
-      this.emit("textUpdate", '', {
+      this.emit("textUpdate", "", {
         compositionType: InputCompositionType.END,
+      });
+      requestAnimationFrame(() => {
+        this.focusTextCursorInput();
       });
     });
   }

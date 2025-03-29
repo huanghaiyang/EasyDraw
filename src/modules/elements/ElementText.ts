@@ -10,6 +10,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
+import DOMUtils from "@/utils/DOMUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -207,6 +208,10 @@ export default class ElementText extends ElementRect implements IElementText {
       this._selectAll();
     } else if (CoderUtils.isX(keyCode) && ctrlKey) {
       this._cutSelection(textData);
+    } else if (CoderUtils.isC(keyCode) && ctrlKey) {
+      this._copySelection(textData);
+    } else if (CoderUtils.isV(keyCode) && ctrlKey) {
+      this._pasteText(value, textData, states);
     } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
       this._updateInput(textData, value, states);
     }
@@ -216,20 +221,50 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 粘贴文本
+   *
+   * @param value 文本
+   * @param textData 文本数据
+   * @param states 文本编辑状态
+   */
+  private _pasteText(value: string, textData: ITextData, states: TextEditingStates): void {
+    // 如果选区有效，那么就先删除选区中的文本节点
+    if (this.isSelectionAvailable) {
+      this._deleteAtCursor(textData);
+    }
+    this._prevInputCursor = this._textCursor;
+    this._insertText(textData, value, states);
+  }
+
+  /**
+   * 复制选区
+   *
+   * @param textData 文本数据
+   */
+  private _doSelectionCopy(textData: ITextData): void {
+    const selectedNodes = TextElementUtils.pickSelectedContent(textData);
+    DOMUtils.copyValueToClipboard(JSON.stringify(selectedNodes));
+  }
+
+  /**
+   * 复制选区
+   *
+   * @param textData 文本数据
+   */
+  private _copySelection(textData: ITextData): void {
+    if (this.isSelectionAvailable) {
+      this._doSelectionCopy(textData);
+    }
+  }
+
+  /**
    * 剪切选区
    *
    * @param textData 文本数据
    */
   private _cutSelection(textData: ITextData): void {
     if (this.isSelectionAvailable) {
-      const selectedNodes = TextElementUtils.pickSelectedContent(textData);
-      const content = JSON.stringify(selectedNodes);
-      const input = document.createElement("input");
-      document.body.appendChild(input);
-      input.value = content;
-      input.select();
-      document.execCommand("copy");
-      input.remove();
+      this._doSelectionCopy(textData);
       this._deleteAtCursor(textData);
     }
   }
@@ -299,7 +334,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param value 文本
    * @param states 文本编辑状态
    */
-  private _insertText(textData: ITextData, value: string, states: TextEditingStates): void {
+  private _insertText(textData: ITextData, value: string, states?: TextEditingStates): void {
     if (isEmpty(value)) return;
     // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
     const { textNode: anchorTextNode, lineNumber: prevLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
@@ -308,7 +343,9 @@ export default class ElementText extends ElementRect implements IElementText {
     // 生成新插入的文本节点
     const nodes = value.split("").map(char => {
       const node = TextElementUtils.createTextNode(char, fontStyle);
-      node.updateId = states.updateId;
+      if (states && states.updateId) {
+        node.updateId = states.updateId;
+      }
       return node;
     });
     // 默认头部插入

@@ -1727,7 +1727,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理粘贴组件
    * @param elementsJson
-   * @param elementsJson
    */
   async _handlePasteElements(elementsJson: Array<ElementObject>): Promise<void> {
     const isEmpty = !elementsJson || elementsJson.length === 0;
