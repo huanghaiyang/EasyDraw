@@ -1564,6 +1564,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshOriginalTransformerCoords();
     // 维护原始组件属性
     this.refreshOriginalElementProps();
+    // 维护原始角度
+    this.refreshOriginalAngle();
   }
 
   /**

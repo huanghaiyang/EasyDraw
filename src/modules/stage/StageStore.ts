@@ -561,6 +561,10 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
         if (element.angle === value) return;
         this.rotateElements([element], value, element.angle, element.centerCoord);
+        element.onRotateAfter();
+        if (element.isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => sub.onRotateAfter());
+        }
       }
     });
   }
