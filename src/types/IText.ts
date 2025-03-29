@@ -17,6 +17,7 @@ export type ITextLine = Partial<IPoint> &
     nodes: ITextNode[]; // 文本节点
     selected?: boolean; // 是否在选区中
     isTailBreak?: boolean; // 行尾是否是换行
+    isFull?: boolean; // 是否是完整行
   };
 
 // 文本数据
@@ -44,6 +45,3 @@ export enum TextSelectionCursorType {
   START,
   END,
 }
-
-// 混合文本
-export type IMixinText = ITextLine | ITextNode;

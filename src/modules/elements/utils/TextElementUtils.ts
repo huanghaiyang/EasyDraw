@@ -3,7 +3,7 @@ import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { ElementObject } from "@/types/IElement";
 import { RenderRect } from "@/types/IRender";
-import ITextData, { IMixinText, ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
@@ -712,17 +712,23 @@ export default class TextElementUtils {
    * @param textData 文本数据
    * @returns 选中的文本节点
    */
-  static pickSelectedContent(textData: ITextData): IMixinText[] {
+  static pickSelectedContent(textData: ITextData): ITextLine[] {
     const { lines } = textData;
-    const result: IMixinText[] = [];
+    const result: ITextLine[] = [];
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       if (line.selected) {
-        result.push(line);
+        result.push({
+          ...line,
+          isFull: true,
+        });
       } else {
         const nodes = line.nodes.filter(node => node.selected);
         if (nodes.length > 0) {
-          result.push(...nodes);
+          result.push({
+            nodes,
+            isFull: false,
+          });
         }
       }
     }
@@ -781,28 +787,22 @@ export default class TextElementUtils {
    * @returns 复制的文本行
    */
   static cloneTextLine(line: ITextLine): ITextLine {
-    const { nodes, isTailBreak } = line;
+    const { nodes, isTailBreak, isFull } = line;
     return {
       nodes: TextElementUtils.batchCloneTextNodes(nodes),
       isTailBreak,
+      isFull,
     };
   }
 
   /**
-   * 复制混合文本
+   * 批量复制文本行
    *
-   * @param mixinText 混合文本
-   * @returns 复制的混合文本
+   * @param lines 文本行数组
+   * @returns 复制的文本行数组
    */
-  static cloneMixinText(mixinText: IMixinText[]): IMixinText[] {
-    return mixinText.map(text => {
-      if (TextElementUtils.isTextLine(text)) {
-        return TextElementUtils.cloneTextLine(text as ITextLine);
-      } else if (TextElementUtils.isTextNode(text)) {
-        return TextElementUtils.cloneTextNode(text as ITextNode);
-      }
-      return text;
-    });
+  static batchCloneTextLine(lines: ITextLine[]): ITextLine[] {
+    return lines.map(TextElementUtils.cloneTextLine);
   }
 
   /**
@@ -811,15 +811,15 @@ export default class TextElementUtils {
    * @param text 文本
    * @returns 混合文本
    */
-  static parseMixinText(text: string): IMixinText[] {
-    let result: IMixinText[] = [];
+  static parseTextLines(text: string): ITextLine[] {
+    let result: ITextLine[] = [];
     try {
-      const mixinText = JSON.parse(text);
-      if (Array.isArray(mixinText) && mixinText.every(obj => TextElementUtils.isTextNode(obj) || TextElementUtils.isTextLine(obj))) {
-        result = TextElementUtils.cloneMixinText(mixinText);
+      const textLines = JSON.parse(text);
+      if (Array.isArray(textLines) && textLines.every(obj => TextElementUtils.isTextLine(obj))) {
+        result = TextElementUtils.batchCloneTextLine(textLines);
       }
     } catch (e) {
-      console.warn(e);
+      e && console.warn(e);
     }
     return result;
   }
