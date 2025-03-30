@@ -27,6 +27,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _prevInputCursor: ITextCursor;
   // 上一次更新文本的id
   private _prevTextUpdateId: string;
+  // 上一次是否重新计算了文本行
+  private _prevTextLinesRecalced: boolean = false;
 
   get editingEnable(): boolean {
     return true;
@@ -752,9 +754,33 @@ export default class ElementText extends ElementRect implements IElementText {
    * 重新计算文本行
    */
   private _recalcTextLines(): void {
+    this._prevTextLinesRecalced = this._doRecalcTextLines(!this._prevTextLinesRecalced);
+  }
+
+  /**
+   * 重新计算文本行
+   *
+   * @param force 是否强制重新计算
+   * @returns 是否重新计算了文本行
+   */
+  private _doRecalcTextLines(force: boolean = false): boolean {
     const textData = this.model.data as ITextData;
-    const textLines = TextElementUtils.recalcTextLines(textData.lines, this.width, this.shield.stageScale);
-    textData.lines = textLines;
-    this.refreshTextCursors();
+    // 舞台缩放系数
+    const scale = this.shield.stageScale;
+    // 未自动换行之前的文本行
+    const noneAutoWrapTextLines = TextElementUtils.restoreTextLines(textData.lines);
+    // 未自动换行之前的文本行的最大宽度
+    const maxWidth = TextElementUtils.cacMaxLineWidth(noneAutoWrapTextLines, scale);
+    // 如果文本行的最大宽度大于元素的宽度,则重新计算文本行
+    const recalced = maxWidth >= this.width || force;
+    if (recalced) {
+      // 重新计算文本行
+      const textLines = TextElementUtils.calcTextLines(noneAutoWrapTextLines, this.width, scale);
+      // 更新文本行
+      textData.lines = textLines;
+      // 刷新光标
+      this.refreshTextCursors();
+    }
+    return recalced;
   }
 }

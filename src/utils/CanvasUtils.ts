@@ -275,6 +275,7 @@ export default class CanvasUtils {
 
     textData.lines.forEach(line => {
       let prevX = flipX ? -points[0].x : points[0].x;
+      // TODO 此处行的宽度是否应该设置为实际的节点总宽度
       Object.assign(line, { x: prevX, y: prevY, width: rect.width });
       const { nodes } = line;
       let rowHeight = 0;

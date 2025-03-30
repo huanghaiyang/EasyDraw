@@ -848,16 +848,20 @@ export default class TextElementUtils {
     let result: ITextLine[] = [
       {
         nodes: [],
+        width: 0,
       },
     ];
     for (let i = 0; i < textLines.length; i++) {
       const line = textLines[i];
       const { nodes, isTailBreak } = line;
-      result[result.length - 1].nodes.push(...nodes);
-      result[result.length - 1].isTailBreak = isTailBreak;
+      const tailLine = result[result.length - 1];
+      tailLine.nodes.push(...nodes);
+      tailLine.isTailBreak = isTailBreak;
+      tailLine.width += nodes.reduce((prev, curr) => prev + curr.width, 0);
       if (isTailBreak && i < textLines.length - 1) {
         result.push({
           nodes: [],
+          width: 0,
         });
       }
     }
@@ -926,5 +930,23 @@ export default class TextElementUtils {
       currentWidth = 0;
     }
     return result;
+  }
+
+  /**
+   * 计算文本行的最大宽度
+   *
+   * @param textLines 文本行
+   * @param scale 缩放
+   * @returns 最大宽度
+   */
+  static cacMaxLineWidth(textLines: ITextLine[], scale: number): number {
+    if (textLines.length === 0) return 0;
+    let maxWidth = 0;
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      const { width } = line;
+      maxWidth = Math.max(maxWidth, width / scale);
+    }
+    return maxWidth;
   }
 }
