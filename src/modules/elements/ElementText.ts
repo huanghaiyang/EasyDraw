@@ -731,4 +731,30 @@ export default class ElementText extends ElementRect implements IElementText {
     this._prevMarkCursor = this._textCursor;
     this._prevInputCursor = null;
   }
+
+  /**
+   * 宽度变化
+   */
+  onWidthChanged(): void {
+    super.onWidthChanged();
+    this._recalcTextLines();
+  }
+
+  /**
+   * 变换时
+   */
+  onTransforming(): void {
+    super.onTransforming();
+    this._recalcTextLines();
+  }
+
+  /**
+   * 重新计算文本行
+   */
+  private _recalcTextLines(): void {
+    const textData = this.model.data as ITextData;
+    const textLines = TextElementUtils.recalcTextLines(textData.lines, this.width, this.shield.stageScale);
+    textData.lines = textLines;
+    this.refreshTextCursors();
+  }
 }

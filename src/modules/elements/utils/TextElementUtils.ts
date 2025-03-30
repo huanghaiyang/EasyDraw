@@ -823,4 +823,108 @@ export default class TextElementUtils {
     }
     return result;
   }
+
+  /**
+   * 重新计算文本行
+   *
+   * @param textLines 文本行
+   * @param width 宽度
+   * @param scale 缩放
+   * @returns 文本行
+   */
+  static recalcTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
+    const lines = TextElementUtils.restoreTextLines(textLines);
+    return TextElementUtils.calcTextLines(lines, width, scale);
+  }
+
+  /**
+   * 恢复文本行
+   *
+   * @param textLines 文本行
+   * @returns 文本行
+   */
+  static restoreTextLines(textLines: ITextLine[]): ITextLine[] {
+    if (textLines.length === 0) return [];
+    let result: ITextLine[] = [
+      {
+        nodes: [],
+      },
+    ];
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      const { nodes, isTailBreak } = line;
+      result[result.length - 1].nodes.push(...nodes);
+      result[result.length - 1].isTailBreak = isTailBreak;
+      if (isTailBreak && i < textLines.length - 1) {
+        result.push({
+          nodes: [],
+        });
+      }
+    }
+    return result;
+  }
+
+  /**
+   * 重新排列文本行
+   *
+   * @param textLines 文本行
+   * @param width 宽度
+   * @returns 文本行
+   */
+  static calcTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
+    if (textLines.length === 0) return [];
+    const result: ITextLine[] = [];
+    let currentLine: ITextLine = {
+      nodes: [],
+    };
+    let currentWidth = 0;
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      const { nodes, isTailBreak } = line;
+      // 如果当前行的节点数量为0，则直接添加到结果中
+      if (nodes.length === 0) {
+        result.push({
+          nodes: [],
+          isTailBreak,
+        });
+        continue;
+      }
+      // 遍历节点
+      for (let j = 0; j < nodes.length; j++) {
+        const node = nodes[j];
+        const nWidth = node.width / scale;
+        if (currentWidth + nWidth <= width) {
+          // 如果当前行的宽度小于给定宽度，则将当前节点添加到当前行中
+          currentLine.nodes.push(node);
+          currentWidth += nWidth;
+        } else {
+          // 出现这种情况是因为单个字符的宽度已经超出了给定宽度
+          if (currentLine.nodes.length === 0) {
+            result.push({
+              nodes: [node],
+            });
+            currentLine.nodes = [];
+            currentWidth = 0;
+          } else {
+            // 如果当前行的宽度大于给定宽度，则将当前行添加到结果中，并将当前节点添加到新的行中
+            result.push(LodashUtils.jsonClone(currentLine));
+            currentLine.nodes = [node];
+            currentWidth = nWidth;
+          }
+        }
+      }
+      // 如果当前行的节点数量大于0，新添加一行
+      if (currentLine.nodes.length > 0) {
+        result.push(LodashUtils.jsonClone(currentLine));
+      }
+      // 如果当前行是尾部换行，则将尾部换行更新到最后一行上
+      if (isTailBreak) {
+        result[result.length - 1].isTailBreak = isTailBreak;
+      }
+      // 重置当前行
+      currentLine.nodes = [];
+      currentWidth = 0;
+    }
+    return result;
+  }
 }
