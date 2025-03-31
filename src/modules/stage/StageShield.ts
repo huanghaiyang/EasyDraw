@@ -1955,9 +1955,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleTextUpdate(value: string, states: TextEditingStates): Promise<void> {
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as ElementText;
-      textElement.updateText(value, states);
+      const shouldReflow = textElement.updateText(value, states);
       // 这里需要等待文本更新渲染完成后再更新光标位置
       this._addRedrawTask(async () => {
+        if (shouldReflow) {
+          textElement.reflowText();
+        }
         // 更新光标位置
         await textElement.refreshTextCursors();
         // 光标重新渲染

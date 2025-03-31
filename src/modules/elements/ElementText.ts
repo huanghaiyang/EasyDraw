@@ -1,6 +1,6 @@
 /**
- * TODO 
- * 
+ * TODO
+ *
  * 1. 光标可以在节点的左侧或者右侧，导致对光标的处理更为复杂，需要优化
  */
 import { IElementText } from "@/types/IElement";
@@ -33,7 +33,7 @@ export default class ElementText extends ElementRect implements IElementText {
   // 上一次更新文本的id
   private _prevTextUpdateId: string;
   // 上一次是否重新计算了文本行
-  private _prevTextLinesRecalced: boolean = false;
+  private _prevTextLinesReflowed: boolean = false;
 
   get editingEnable(): boolean {
     return true;
@@ -195,15 +195,12 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param value 文本
    * @param states 文本编辑状态
    */
-  updateText(value: string, states: TextEditingStates): void {
+  updateText(value: string, states: TextEditingStates): boolean {
     console.log("updateText", value, states);
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = states;
-
-    // 如果是删除键，则删除光标所在的文本节点
-    if (CoderUtils.isDeleterKey(keyCode)) {
-      this._deleteAtCursor(textData);
-    } else if (CoderUtils.isArrowLeft(keyCode)) {
+    let shouldReflow = false;
+    if (CoderUtils.isArrowLeft(keyCode)) {
       this._moveCursorTo(Direction.LEFT, states);
     } else if (CoderUtils.isArrowRight(keyCode)) {
       this._moveCursorTo(Direction.RIGHT, states);
@@ -215,18 +212,24 @@ export default class ElementText extends ElementRect implements IElementText {
       this._insertNewLine(textData);
     } else if (CoderUtils.isA(keyCode) && ctrlKey) {
       this._selectAll();
-    } else if (CoderUtils.isX(keyCode) && ctrlKey) {
-      this._cutSelection(textData);
-    } else if (CoderUtils.isC(keyCode) && ctrlKey) {
-      this._copySelection(textData);
-    } else if (CoderUtils.isV(keyCode) && ctrlKey) {
-      this._pasteText(value, textData, states);
-    } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
-      this._updateInput(textData, value, states);
+    } else {
+      if (CoderUtils.isDeleterKey(keyCode)) {
+        this._deleteAtCursor(textData);
+      } else if (CoderUtils.isX(keyCode) && ctrlKey) {
+        this._cutSelection(textData);
+      } else if (CoderUtils.isC(keyCode) && ctrlKey) {
+        this._copySelection(textData);
+      } else if (CoderUtils.isV(keyCode) && ctrlKey) {
+        this._pasteText(value, textData, states);
+      } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
+        this._updateInput(textData, value, states);
+      }
+      this.model.data = textData;
+      shouldReflow = true;
     }
-    this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+    return shouldReflow;
   }
 
   /**
@@ -801,7 +804,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   onWidthChanged(): void {
     super.onWidthChanged();
-    this._recalcTextLines();
+    this._reflowTextLines();
   }
 
   /**
@@ -809,14 +812,21 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   onTransforming(): void {
     super.onTransforming();
-    this._recalcTextLines();
+    this._reflowTextLines();
+  }
+
+  /**
+   * 重新排版文本
+   */
+  reflowText(): void {
+    this._reflowTextLines();
   }
 
   /**
    * 重新计算文本行
    */
-  private _recalcTextLines(): void {
-    this._prevTextLinesRecalced = this._doRecalcTextLines(!this._prevTextLinesRecalced);
+  private _reflowTextLines(): void {
+    this._prevTextLinesReflowed = this._doReflowTextLines(!this._prevTextLinesReflowed);
   }
 
   /**
@@ -825,24 +835,24 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param force 是否强制重新计算
    * @returns 是否重新计算了文本行
    */
-  private _doRecalcTextLines(force: boolean = false): boolean {
+  private _doReflowTextLines(force: boolean = false): boolean {
     const textData = this.model.data as ITextData;
     // 舞台缩放系数
     const scale = this.shield.stageScale;
     // 未自动换行之前的文本行
     const noneAutoWrapTextLines = TextElementUtils.restoreTextLines(textData.lines);
     // 未自动换行之前的文本行的最大宽度
-    const maxWidth = TextElementUtils.cacMaxLineWidth(noneAutoWrapTextLines, scale);
+    const maxWidth = TextElementUtils.calcMaxLineWidth(noneAutoWrapTextLines, scale);
     // 如果文本行的最大宽度大于元素的宽度,则重新计算文本行
-    const recalced = maxWidth >= this.width || force;
-    if (recalced) {
+    const reflowed = maxWidth >= this.width || force;
+    if (reflowed) {
       // 重新计算文本行
-      const textLines = TextElementUtils.calcTextLines(noneAutoWrapTextLines, this.width, scale);
+      const textLines = TextElementUtils.calcReflowTextLines(noneAutoWrapTextLines, this.width, scale);
       // 更新文本行
       textData.lines = textLines;
       // 刷新光标
       this.refreshTextCursors();
     }
-    return recalced;
+    return reflowed;
   }
 }

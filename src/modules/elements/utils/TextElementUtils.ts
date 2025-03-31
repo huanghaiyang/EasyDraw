@@ -832,9 +832,9 @@ export default class TextElementUtils {
    * @param scale 缩放
    * @returns 文本行
    */
-  static recalcTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
+  static reflowTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
     const lines = TextElementUtils.restoreTextLines(textLines);
-    return TextElementUtils.calcTextLines(lines, width, scale);
+    return TextElementUtils.calcReflowTextLines(lines, width, scale);
   }
 
   /**
@@ -873,9 +873,10 @@ export default class TextElementUtils {
    *
    * @param textLines 文本行
    * @param width 宽度
+   * @param scale 缩放
    * @returns 文本行
    */
-  static calcTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
+  static calcReflowTextLines(textLines: ITextLine[], width: number, scale: number): ITextLine[] {
     if (textLines.length === 0) return [];
     const result: ITextLine[] = [];
     let currentLine: ITextLine = {
@@ -939,7 +940,7 @@ export default class TextElementUtils {
    * @param scale 缩放
    * @returns 最大宽度
    */
-  static cacMaxLineWidth(textLines: ITextLine[], scale: number): number {
+  static calcMaxLineWidth(textLines: ITextLine[], scale: number): number {
     if (textLines.length === 0) return 0;
     let maxWidth = 0;
     for (let i = 0; i < textLines.length; i++) {
