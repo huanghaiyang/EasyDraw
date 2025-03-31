@@ -208,13 +208,13 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.TOP, states);
     } else if (CoderUtils.isArrowDown(keyCode)) {
       this._moveCursorTo(Direction.BOTTOM, states);
-    } else if (CoderUtils.isEnter(keyCode)) {
-      this._insertNewLine(textData);
     } else if (CoderUtils.isA(keyCode) && ctrlKey) {
       this._selectAll();
     } else {
       if (CoderUtils.isDeleterKey(keyCode)) {
         this._deleteAtCursor(textData);
+      } else if (CoderUtils.isEnter(keyCode)) {
+        this._insertNewLine(textData);
       } else if (CoderUtils.isX(keyCode) && ctrlKey) {
         this._cutSelection(textData);
       } else if (CoderUtils.isC(keyCode) && ctrlKey) {
@@ -257,10 +257,19 @@ export default class ElementText extends ElementRect implements IElementText {
     if (nodeIndex <= line.nodes.length - 1) {
       const restNodes = line.nodes.slice(nodeIndex);
       line.nodes = line.nodes.slice(0, nodeIndex);
-      textData.lines.splice(nextLineNumber, 0, {
-        nodes: restNodes,
-        isTailBreak,
-      });
+      line.isTailBreak = true;
+      // 如果当前行不是尾部强制换行
+      if (isTailBreak) {
+        // 插入新行，且新行是尾部强制换行
+        textData.lines.splice(nextLineNumber, 0, {
+          nodes: restNodes,
+          isTailBreak: true,
+        });
+      } else {
+        // 将剩余的文本节点插入到下一行的开头
+        const nextLine = textData.lines[nextLineNumber];
+        nextLine.nodes.splice(0, 0, ...restNodes);
+      }
     } else {
       // 如果光标位置在行尾，则直接在新行添加空行
       textData.lines.splice(nextLineNumber, 0, {
