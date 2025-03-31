@@ -242,6 +242,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
         CoderUtils.isArrowRight(keyCode) ||
         CoderUtils.isArrowUp(keyCode) ||
         CoderUtils.isArrowDown(keyCode) ||
+        CoderUtils.isEnter(keyCode) ||
         (ctrlKey && CoderUtils.isA(keyCode)) ||
         (ctrlKey && CoderUtils.isX(keyCode)) ||
         (ctrlKey && CoderUtils.isC(keyCode)) ||

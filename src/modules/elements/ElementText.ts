@@ -206,6 +206,8 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.TOP, states);
     } else if (CoderUtils.isArrowDown(keyCode)) {
       this._moveCursorTo(Direction.BOTTOM, states);
+    } else if (CoderUtils.isEnter(keyCode)) {
+      this._insertNewLine(textData);
     } else if (CoderUtils.isA(keyCode) && ctrlKey) {
       this._selectAll();
     } else if (CoderUtils.isX(keyCode) && ctrlKey) {
@@ -220,6 +222,51 @@ export default class ElementText extends ElementRect implements IElementText {
     this.model.data = textData;
     this._rerefreshCursorRenderRect();
     this._markSelection();
+  }
+
+  /**
+   * 插入新行
+   *
+   * @param textData 文本数据
+   */
+  private _insertNewLine(textData: ITextData): void {
+    if (this.isSelectionAvailable) {
+      this._deleteAtCursor(textData);
+    }
+    const { lineNumber, nodeId, pos } = this._textCursor;
+    const nextLineNumber = lineNumber + 1;
+    const line = textData.lines[lineNumber];
+    const { isTailBreak } = line;
+    let nodeIndex = 0;
+    if (nodeId) {
+      nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      // 光标在节点右侧表示不包含此节点
+      if (pos === Direction.RIGHT) {
+        nodeIndex++;
+      }
+    }
+    // 如果光标位置不是在行尾，则需要将光标后的文本节点移动到新行
+    if (nodeIndex <= line.nodes.length - 1) {
+      const restNodes = line.nodes.slice(nodeIndex);
+      line.nodes = line.nodes.slice(0, nodeIndex);
+      textData.lines.splice(nextLineNumber, 0, {
+        nodes: restNodes,
+        isTailBreak,
+      });
+    } else {
+      // 如果光标位置在行尾，则直接在新行添加空行
+      textData.lines.splice(nextLineNumber, 0, {
+        nodes: [],
+        isTailBreak: true,
+      });
+    }
+    this._textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[nextLineNumber], nextLineNumber);
+    this._textSelection = {
+      startCursor: this._textCursor,
+      endCursor: null,
+    };
+    this._prevMarkCursor = this._textCursor;
+    this._prevInputCursor = null;
   }
 
   /**
