@@ -353,6 +353,8 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     // 插入文本，批量生成文本节点
     this._insertText(textData, value, states);
+    // 更新标记光标
+    this._prevMarkCursor = this._textCursor;
     // 更新标记id
     this._prevTextUpdateId = updateId;
   }
@@ -364,24 +366,15 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param updateId 更新ID
    */
   private _deleteNodesByUpdateId(textData: ITextData, updateId: string): void {
-    textData.lines = textData.lines
-      .map(line => {
-        const prevNodeLength = line.nodes.length;
-        // 如果行中没有节点，那么就直接返回
-        if (prevNodeLength > 0) {
-          // 如果行中存在节点，那么就删除更新ID相同的节点
-          line.nodes = line.nodes.filter(node => node.updateId !== updateId);
-          // 如果删除节点后，行中没有节点，那么就返回null，否则返回行
-          const afterNodeLength = line.nodes.length;
-          if (prevNodeLength > afterNodeLength) {
-            // 行中没有节点表示行应该被删除
-            if (afterNodeLength === 0) return null;
-            return line;
-          }
-        }
-        return line;
-      })
-      .filter(line => line !== null) as ITextLine[];
+    textData.lines = textData.lines.map(line => {
+      const prevNodeLength = line.nodes.length;
+      // 如果行中没有节点，那么就直接返回
+      if (prevNodeLength > 0) {
+        // 如果行中存在节点，那么就删除更新ID相同的节点
+        line.nodes = line.nodes.filter(node => node.updateId !== updateId);
+      }
+      return line;
+    });
   }
 
   /**
