@@ -1,3 +1,8 @@
+/**
+ * TODO 
+ * 
+ * 1. 光标可以在节点的左侧或者右侧，导致对光标的处理更为复杂，需要优化
+ */
 import { IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
@@ -562,11 +567,19 @@ export default class ElementText extends ElementRect implements IElementText {
     let textCursor: ITextCursor;
 
     if (direction === Direction.TOP) {
-      if (prevLineNumber >= 0) {
+      // 如果是第一行，则光标直接移动到行首
+      if (lineNumber === 0) {
+        textCursor = TextElementUtils.getCursorOfLineStart(line, lineNumber);
+      } else if (prevLineNumber >= 0) {
+        // 否则移动到前一行的标记位置
         textCursor = TextElementUtils.getClosestNodeCursorOfLine(prevLine, this._prevMarkCursor, prevLineNumber);
       }
     } else if (direction === Direction.BOTTOM) {
-      if (nextLineNumber < textData.lines.length) {
+      // 如果是最后一行，则光标直接移动到行尾
+      if (lineNumber === textData.lines.length - 1) {
+        textCursor = TextElementUtils.getCursorOfLineEnd(line, lineNumber);
+      } else if (nextLineNumber < textData.lines.length) {
+        // 否则移动到后一行的标记位置
         textCursor = TextElementUtils.getClosestNodeCursorOfLine(nextLine, this._prevMarkCursor, nextLineNumber);
       }
     } else {
@@ -593,12 +606,21 @@ export default class ElementText extends ElementRect implements IElementText {
               // 将光标移动到前一个节点的左侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex - 1], Direction.LEFT, lineNumber);
             } else if (prevLineNumber >= 0) {
-              // 将光标移动到前一行的末尾
-              textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
+              // 判断前一行是否是强制末尾换行
+              if (prevLine.isTailBreak || prevLine.nodes.length === 0) {
+                // 将光标移动到前一行的末尾
+                textCursor = TextElementUtils.getCursorOfLineEnd(prevLine, prevLineNumber);
+              } else {
+                // 将光标移动到前一行的最后一个节点的左侧
+                textCursor = TextElementUtils.getCursorOfNode(prevLine.nodes[prevLine.nodes.length - 1], Direction.LEFT, prevLineNumber);
+              }
             }
             break;
           case Direction.RIGHT:
-            if (pos === Direction.LEFT) {
+            // 如果当前光标在最后一个节点上，且当前行不是强制末尾换行，那么无论光标在节点的左侧还是右侧，都将光标移动到后一行的开头
+            if ((nodeIndex === line.nodes.length - 1 || (nodeIndex === line.nodes.length - 2 && pos === Direction.RIGHT)) && !line.isTailBreak) {
+              textCursor = TextElementUtils.getCursorOfLineStart(nextLine, nextLineNumber);
+            } else if (pos === Direction.LEFT) {
               // 将光标从节点的左侧移动到右侧
               textCursor = TextElementUtils.getCursorOfNode(line.nodes[nodeIndex], Direction.RIGHT, lineNumber);
             } else if (nodeIndex < line.nodes.length - 1) {
