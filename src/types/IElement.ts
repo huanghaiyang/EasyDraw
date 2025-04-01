@@ -1155,6 +1155,8 @@ export interface IElementText extends IElement {
   updateText(value: string, states: TextEditingStates): boolean;
   // 重新排版文本
   reflowText(): void;
+  // 刷新文本框
+  recalcSize(): void;
 }
 
 // 舞台组件（组件）-线段

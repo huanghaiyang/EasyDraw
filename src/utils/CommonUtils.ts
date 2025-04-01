@@ -118,22 +118,26 @@ export default class CommonUtils {
    * @returns
    */
   static getBoxVertices(point: IPoint, rect: ISize | DOMRect): IPoint[] {
+    const { width, height } = rect;
+    const hWidth = width / 2;
+    const hHeight = height / 2;
+    const { x, y } = point;
     return [
       {
-        x: point.x - rect.width / 2,
-        y: point.y - rect.height / 2,
+        x: x - hWidth,
+        y: y - hHeight,
       },
       {
-        x: point.x + rect.width / 2,
-        y: point.y - rect.height / 2,
+        x: x + hWidth,
+        y: y - hHeight,
       },
       {
-        x: point.x + rect.width / 2,
-        y: point.y + rect.height / 2,
+        x: x + hWidth,
+        y: y + hHeight,
       },
       {
-        x: point.x - rect.width / 2,
-        y: point.y + rect.height / 2,
+        x: x - hWidth,
+        y: y + hHeight,
       },
     ];
   }
@@ -145,22 +149,23 @@ export default class CommonUtils {
    * @returns
    */
   static getRectVertices(rect: DOMRect): IPoint[] {
+    const { width, height } = rect;
     return [
       {
         x: 0,
         y: 0,
       },
       {
-        x: rect.width,
+        x: width,
         y: 0,
       },
       {
-        x: rect.width,
-        y: rect.height,
+        x: width,
+        y: height,
       },
       {
         x: 0,
-        y: rect.height,
+        y: height,
       },
     ];
   }

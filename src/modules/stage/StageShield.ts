@@ -1925,8 +1925,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleTextInput(value: string, fontStyle: FontStyle, size: ISize, position: IPoint): Promise<void> {
     this._clearStageSelects();
     const { x, y } = ElementUtils.calcWorldCoord(position);
-    const { width, height } = size;
-    const element = await this.store.insertTextElement(
+    let { width, height } = size;
+    const element = (await this.store.insertTextElement(
       value,
       fontStyle,
       CommonUtils.get4BoxPoints(
@@ -1936,14 +1936,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         },
         size,
       ),
-    );
-    await this._createAddedCommand([element]);
-    this.selection.refresh();
-    this._emitElementsCreated([element]);
+    )) as IElementText;
     // 如果差值小于50ms，则可以判定是鼠标点击舞台时触发的blur事件
     if (window.performance.now() - this._latestMousedownTimestamp <= 50) {
       this._shouldSelectTopAWhilePressUp = false;
     }
+    await this._addRedrawTask(true);
+    // 因为文本录入时使用的是textarea，但是渲染时是canvas，导致宽度和高度计算不正确（目前没有其他好方法），所以此处需要使用渲染后的文本节点重新计算尺寸
+    element.recalcSize();
+    await this._createAddedCommand([element]);
+    this.selection.refresh();
+    this._emitElementsCreated([element]);
   }
 
   /**

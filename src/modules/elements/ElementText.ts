@@ -859,4 +859,18 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     return reflowed;
   }
+
+  /**
+   * 重新计算组件尺寸以及坐标
+   *
+   * 注意此方法仅可以在组件刚创建时调用，因为对于width\height\coords\boxCoords的处理都没有考虑组件倾斜的情况
+   */
+  recalcSize(): void {
+    const width = Math.ceil(TextElementUtils.calcMaxLineWidthByNodes((this.model.data as ITextData).lines, this.shield.stageScale));
+    const height = Math.ceil(TextElementUtils.calcTextHeight((this.model.data as ITextData).lines, this.shield.stageScale));
+    this.model.width = width;
+    this.model.height = height;
+    this.model.coords = CommonUtils.getBoxVertices(this.model.coords[0], { width, height });
+    this.model.boxCoords = CommonUtils.get4BoxPoints(this.model.boxCoords[0], { width, height });
+  }
 }

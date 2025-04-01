@@ -970,4 +970,34 @@ export default class TextElementUtils {
     }
     return maxWidth;
   }
+
+  /**
+   * 通过重新计算文本行的节点宽度来计算文本行的最大宽度
+   *
+   * @param textLines 文本行
+   * @param scale 缩放
+   * @returns 最大宽度
+   */
+  static calcMaxLineWidthByNodes(textLines: ITextLine[], scale: number): number {
+    if (textLines.length === 0) return 0;
+    let maxWidth = 0;
+    for (let i = 0; i < textLines.length; i++) {
+      const line = textLines[i];
+      const { nodes } = line;
+      maxWidth = Math.max(maxWidth, nodes.reduce((prev, curr) => prev + curr.width, 0) / scale);
+    }
+    return maxWidth;
+  }
+
+  /**
+   * 计算文本的总高度
+   *
+   * @param textLines 文本行
+   * @param scale 缩放
+   * @returns 高度
+   */
+  static calcTextHeight(textLines: ITextLine[], scale: number): number {
+    if (textLines.length === 0) return 0;
+    return textLines.reduce((prev, curr) => prev + curr.height, 0) / scale;
+  }
 }
