@@ -41,8 +41,8 @@ export default class MaskTaskIconCursor extends MaskTaskBase {
     }
   }
 
-  constructor(model: IMaskModel, type: CursorTypes, params?: any) {
-    super(model, params);
+  constructor(model: IMaskModel, canvas: HTMLCanvasElement, type: CursorTypes) {
+    super(model, canvas);
     this.type = type;
   }
 

@@ -16,10 +16,8 @@ export default class BaseRenderer<T extends IStageDrawer> implements IStageRende
     await this.renderQueue.add(cargo);
   }
 
-  get renderParams() {
-    return {
-      canvas: this.drawer.node,
-    };
+  get canvas(): HTMLCanvasElement {
+    return this.drawer.node as HTMLCanvasElement;
   }
 
   clear(): void {

@@ -51,30 +51,30 @@ export enum ElementListEventNames {
 }
 
 export default class ElementUtils {
-  static createElementTask(element: IElement, params?: any): IElementTask {
+  static createElementTask(element: IElement, canvas: HTMLCanvasElement): IElementTask {
     let task: IElementTask;
     switch (element.model.type) {
       case CreatorTypes.rectangle:
-        task = new ElementTaskRect(element, params);
+        task = new ElementTaskRect(element, canvas);
         break;
       case CreatorTypes.image: {
-        task = new ElementTaskImage(element, params);
+        task = new ElementTaskImage(element, canvas);
         break;
       }
       case CreatorTypes.line: {
-        task = new ElementTaskLine(element, params);
+        task = new ElementTaskLine(element, canvas);
         break;
       }
       case CreatorTypes.ellipse: {
-        task = new ElementTaskEllipse(element, params);
+        task = new ElementTaskEllipse(element, canvas);
         break;
       }
       case CreatorTypes.arbitrary: {
-        task = new ElementTaskArbitrary(element, params);
+        task = new ElementTaskArbitrary(element, canvas);
         break;
       }
       case CreatorTypes.text: {
-        task = new ElementTaskText(element, params);
+        task = new ElementTaskText(element, canvas);
         break;
       }
       default:

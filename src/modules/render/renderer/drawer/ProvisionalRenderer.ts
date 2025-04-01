@@ -17,7 +17,7 @@ export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional
     const { creatingElements } = this.drawer.shield.store;
     if (creatingElements.length > 0) {
       creatingElements.forEach(element => {
-        const task = ElementUtils.createElementTask(element, this.renderParams);
+        const task = ElementUtils.createElementTask(element, this.canvas);
         if (task) {
           cargo.add(task);
         }
@@ -26,7 +26,7 @@ export default class ProvisionalRenderer extends BaseRenderer<IDrawerProvisional
     }
     this._latestClearRendered = cargo.isEmpty() && this._latestElementRendered;
     if (!cargo.isEmpty() || this._latestClearRendered) {
-      cargo.prepend(new ElementTaskClear(null, this.renderParams));
+      cargo.prepend(new ElementTaskClear(null, this.canvas));
       await this.renderCargo(cargo);
       if (this._latestClearRendered) {
         this._latestClearRendered = false;

@@ -132,7 +132,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     } else {
       // 处理光标/选区移出舞台的残留
       if ((this._lastCursorRendered || this._lastSelectionRendered) && !selectionTasks.length && !cursorRendered) {
-        cargo.add(new MaskTaskClear(null, this.renderParams));
+        cargo.add(new MaskTaskClear(null, this.canvas));
         await this.renderCargo(cargo);
         // 重置状态缓存
         this._lastCursorRendered = false;
@@ -168,7 +168,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     };
 
     // 创建并返回渲染任务
-    const task = new MaskTaskCursorPosition(model, this.renderParams);
+    const task = new MaskTaskCursorPosition(model, this.canvas);
     return task;
   }
 
@@ -188,7 +188,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     models.forEach(model => {
       if (model && model.points.length > 0) {
         // 创建缩放适配的路径任务
-        const task = new MaskTaskPath(model, this.renderParams);
+        const task = new MaskTaskPath(model, this.canvas);
         tasks.push(task);
       }
     });
@@ -201,8 +201,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @returns
    */
   private createMaskClearTask(): IRenderTask {
-    const task = new MaskTaskClear(null, this.renderParams);
-    return task;
+    return new MaskTaskClear(null, this.canvas);
   }
 
   /**
@@ -220,9 +219,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       .map(model => {
         switch (model.element.transformerType) {
           case TransformerTypes.circle:
-            return new MaskTaskCircleTransformer(model, this.renderParams);
+            return new MaskTaskCircleTransformer(model, this.canvas);
           case TransformerTypes.rect:
-            return new MaskTaskTransformer(model, this.renderParams);
+            return new MaskTaskTransformer(model, this.canvas);
           default:
             return null;
         }
@@ -254,7 +253,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
               type: DrawerMaskModelTypes.transformer,
               radius: DefaultControllerRadius,
             };
-            return new MaskTaskCircleTransformer(model, this.renderParams);
+            return new MaskTaskCircleTransformer(model, this.canvas);
           }
           return null;
         })
@@ -275,7 +274,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       type: DrawerMaskModelTypes.rotate,
       ...pick(rotation, ["points", "angle", "width", "height"]),
     };
-    return new MaskTaskRotate(model, this.renderParams);
+    return new MaskTaskRotate(model, this.canvas);
   }
 
   /**
@@ -320,7 +319,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
     };
-    return new MaskTaskIndicator(model, this.renderParams);
+    return new MaskTaskIndicator(model, this.canvas);
   }
 
   /**
@@ -336,7 +335,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultControllerRadius,
       };
-      return new MaskTaskCircleTransformer(model, this.renderParams);
+      return new MaskTaskCircleTransformer(model, this.canvas);
     }
   }
 
@@ -364,7 +363,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const element = this._getEditingTextElement();
     if (!element) return null;
     if (element.isCursorVisible) {
-      return new ElementTaskTextCursor(element, this.renderParams);
+      return new ElementTaskTextCursor(element, this.canvas);
     }
     return null;
   }
@@ -378,10 +377,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const element = this._getEditingTextElement();
     if (!element) return [];
     if (element.isSelectionAvailable) {
-      return [
-        new ElementTaskTextSelectionCursor(element, TextSelectionCursorType.START, this.renderParams),
-        new ElementTaskTextSelectionCursor(element, TextSelectionCursorType.END, this.renderParams),
-      ];
+      return [new ElementTaskTextSelectionCursor(element, this.canvas, TextSelectionCursorType.START), new ElementTaskTextSelectionCursor(element, this.canvas, TextSelectionCursorType.END)];
     }
     return [];
   }
@@ -395,7 +391,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const element = this._getEditingTextElement();
     if (!element) return null;
     if (element.isSelectionAvailable) {
-      return new ElementTaskTextSelection(element, this.renderParams);
+      return new ElementTaskTextSelection(element, this.canvas);
     }
     return null;
   }

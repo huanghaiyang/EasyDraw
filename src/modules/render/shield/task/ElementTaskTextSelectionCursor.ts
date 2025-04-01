@@ -7,8 +7,8 @@ import { TextSelectionCursorType } from "@/types/IText";
 export default class ElementTaskTextSelectionCursor extends ElementTaskBase implements IElementTaskTextSelectionCursor {
   cursorType: TextSelectionCursorType;
 
-  constructor(element: IElementText, cursorType: TextSelectionCursorType, params?: any) {
-    super(element, params);
+  constructor(element: IElementText, canvas: HTMLCanvasElement, cursorType: TextSelectionCursorType) {
+    super(element, canvas);
     this.cursorType = cursorType;
   }
 

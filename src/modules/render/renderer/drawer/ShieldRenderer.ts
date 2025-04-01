@@ -22,9 +22,9 @@ export default class ShieldRenderer extends BaseRenderer<IStageShield> implement
     if (force || stageElements.length !== this._lastestStageElementsSize) {
       this._lastestStageElementsSize = stageElements.length;
       const cargo = new RenderTaskCargo([]);
-      cargo.add(new ElementTaskClear(null, this.renderParams));
+      cargo.add(new ElementTaskClear(null, this.canvas));
       stageElements.forEach(element => {
-        const task = ElementUtils.createElementTask(element, this.renderParams);
+        const task = ElementUtils.createElementTask(element, this.canvas);
         if (task) {
           cargo.add(task);
         }

@@ -6,12 +6,10 @@ export default abstract class ElementTaskBase extends RenderTaskBase implements 
   element: IElement;
   canvas: HTMLCanvasElement;
 
-  constructor(element: IElement, params?: any) {
+  constructor(element: IElement, canvas: HTMLCanvasElement) {
     super();
     this.element = element;
-    if (params) {
-      this.canvas = params.canvas as HTMLCanvasElement;
-    }
+    this.canvas = canvas;
   }
 
   destroy(): Promise<void> {
