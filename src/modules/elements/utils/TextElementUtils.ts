@@ -269,8 +269,10 @@ export default class TextElementUtils {
    * @returns 光标信息
    */
   static getUpdatedCursorProps(textData: ITextData, textCursor: ITextCursor): Partial<ITextCursor> {
-    const { pos, nodeId } = textCursor;
-    const lineNumber = TextElementUtils.getLineByNodeId(textData, nodeId);
+    let { pos, nodeId, lineNumber } = textCursor;
+    if (nodeId) {
+      lineNumber = TextElementUtils.getLineByNodeId(textData, nodeId);
+    }
     if (lineNumber === -1) return;
     return TextElementUtils.getUpdatedCursorPropsOfLine(textData.lines[lineNumber], lineNumber, textCursor, pos);
   }
