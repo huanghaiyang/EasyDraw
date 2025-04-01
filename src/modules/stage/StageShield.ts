@@ -206,17 +206,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 添加重绘任务
    *
-   * @param callback
    * @param force
    */
-  private _addRedrawTask(callback?: () => Promise<void>, force?: boolean) {
-    this._redrawQueue.add({
-      run: async () => {
-        await Promise.all([this.redraw(force), this.mask.redraw(), this.provisional.redraw()]);
-        if (callback) {
-          await callback();
-        }
-      },
+  private async _addRedrawTask(force?: boolean): Promise<void> {
+    return new Promise(resolve => {
+      this._redrawQueue.add({
+        run: async () => {
+          await Promise.all([this.redraw(force), this.mask.redraw(), this.provisional.redraw()]);
+          resolve();
+        },
+      });
     });
   }
 
@@ -225,8 +224,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _requestAnimationRedraw(): Promise<void> {
     requestAnimationFrame(async () => {
-      this._addRedrawTask(() => this._requestAnimationRedraw(), this._shouldRedraw);
+      await this._addRedrawTask(this._shouldRedraw);
       this._shouldRedraw = false;
+      await this._requestAnimationRedraw();
     });
   }
 
@@ -1167,7 +1167,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 绘制完成之后的重绘
    */
   private async _tryCreatedRedraw(): Promise<void> {
-    await Promise.all([this.selection.refresh(), this._addRedrawTask(null, true), this.tryEmitElementCreated()]);
+    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this.tryEmitElementCreated()]);
   }
 
   /**
@@ -1956,16 +1956,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as ElementText;
       const shouldReflow = textElement.updateText(value, states);
-      // 这里需要等待文本更新渲染完成后再更新光标位置
-      this._addRedrawTask(async () => {
-        if (shouldReflow) {
-          textElement.reflowText();
-        }
-        // 更新光标位置
+      await this._addRedrawTask(true);
+      if (shouldReflow) {
+        textElement.reflowText();
+        await this._addRedrawTask(true);
         await textElement.refreshTextCursors();
-        // 光标重新渲染
-        this._shouldRedraw = true;
-      }, true);
+        await this._addRedrawTask(true);
+      }
     }
   }
 

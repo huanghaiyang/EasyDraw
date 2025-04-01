@@ -131,10 +131,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   onStageChanged(): void {
     super.onStageChanged();
-    if (this._textCursor) {
-      this._updateCursor(this._textCursor);
-      this._rerefreshCursorRenderRect();
-    }
+    this.refreshTextCursors();
   }
 
   /**
@@ -859,8 +856,6 @@ export default class ElementText extends ElementRect implements IElementText {
       const textLines = TextElementUtils.calcReflowTextLines(noneAutoWrapTextLines, this.width, scale);
       // 更新文本行
       textData.lines = textLines;
-      // 刷新光标
-      this.refreshTextCursors();
     }
     return reflowed;
   }
