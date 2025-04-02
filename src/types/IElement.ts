@@ -294,6 +294,8 @@ export default interface IElement {
   get textAlign(): CanvasTextAlign;
   // 文本基线
   get textBaseline(): CanvasTextBaseline;
+  // 字体是否启用
+  get fontEnable(): boolean;
   // 字体大小
   get fontSize(): number;
   // 字体
@@ -1154,7 +1156,7 @@ export interface IElementText extends IElement {
   // 更新文本
   updateText(value: string, states: TextEditingStates): boolean;
   // 重新排版文本
-  reflowText(): void;
+  reflowText(force?: boolean): void;
   // 刷新文本框
   recalcSize(): void;
 }

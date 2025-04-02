@@ -1,6 +1,7 @@
 html,
 body {
   height: 100%;
+  font-family: Arial, "Cascadia Code", "华文中宋", "华文宋体";
 }
 
 #app {

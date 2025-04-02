@@ -532,6 +532,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 重新排版文本
+   *
+   * @param elements
+   * @param force 是否强制重新计算
+   */
+  private async _reflowTextIfy(elements: IElement[], force?: boolean): Promise<void> {
+    await Promise.all(elements.map(async element => (element as IElementText).reflowText(force)));
+    await this._addRedrawTask(true);
+    await Promise.all(elements.map(async element => (element as IElementText).refreshTextCursors()));
+    await this._addRedrawTask(true);
+  }
+
+  /**
    * 设置组件文本对齐方式
    *
    * @param elements
@@ -539,8 +552,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this.store.setElementsTextAlign(elements, value);
+    await this._addRedrawTask(true);
+    await this._reflowTextIfy(elements, true);
     elements.forEach(element => element.onTextAlignChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -551,8 +565,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this.store.setElementsTextBaseline(elements, value);
+    await this._addRedrawTask(true);
+    await this._reflowTextIfy(elements, true);
     elements.forEach(element => element.onTextBaselineChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -563,8 +578,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontSize(elements, value);
+    await this._addRedrawTask(true);
+    await this._reflowTextIfy(elements, true);
     elements.forEach(element => element.onFontSizeChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -575,8 +591,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this.store.setElementsFontFamily(elements, value);
+    await this._addRedrawTask(true);
+    await this._reflowTextIfy(elements, true);
     elements.forEach(element => element.onFontFamilyChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -587,8 +604,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
     await this.store.setElementsFontLineHeight(elements, value);
+    await this._addRedrawTask(true);
+    await this._reflowTextIfy(elements, true);
     elements.forEach(element => element.onFontLineHeightChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -1961,10 +1979,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const shouldReflow = textElement.updateText(value, states);
       await this._addRedrawTask(true);
       if (shouldReflow) {
-        textElement.reflowText();
-        await this._addRedrawTask(true);
-        await textElement.refreshTextCursors();
-        await this._addRedrawTask(true);
+        await this._reflowTextIfy([textElement], false);
       }
     }
   }

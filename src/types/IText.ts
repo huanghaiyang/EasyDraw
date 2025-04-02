@@ -18,6 +18,7 @@ export type ITextLine = Partial<IPoint> &
     selected?: boolean; // 是否在选区中
     isTailBreak?: boolean; // 行尾是否是换行
     isFull?: boolean; // 是否是完整行
+    fontStyle?: TextFontStyle; // 行字体样式
   };
 
 // 文本数据

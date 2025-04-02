@@ -7,6 +7,7 @@
     <size-props></size-props>
     <angle-props></angle-props>
     <corner-props></corner-props>
+    <font-prop></font-prop>
     <fill-props></fill-props>
     <stroke-props></stroke-props>
     <layer-props></layer-props>
@@ -28,6 +29,7 @@
   .angle-props,
   .stroke-props,
   .corners-props,
+  .font-props,
   .fill-props,
   .layer-props {
     &__title {

@@ -35,6 +35,10 @@ export default class ElementText extends ElementRect implements IElementText {
   // 上一次是否重新计算了文本行
   private _prevTextLinesReflowed: boolean = false;
 
+  get fontEnable(): boolean {
+    return true;
+  }
+
   get editingEnable(): boolean {
     return true;
   }
@@ -824,15 +828,15 @@ export default class ElementText extends ElementRect implements IElementText {
   /**
    * 重新排版文本
    */
-  reflowText(): void {
-    this._reflowTextLines();
+  reflowText(force?: boolean): void {
+    this._reflowTextLines(force);
   }
 
   /**
    * 重新计算文本行
    */
-  private _reflowTextLines(): void {
-    this._prevTextLinesReflowed = this._doReflowTextLines(!this._prevTextLinesReflowed);
+  private _reflowTextLines(force?: boolean): void {
+    this._prevTextLinesReflowed = this._doReflowTextLines(!this._prevTextLinesReflowed || force);
   }
 
   /**
@@ -872,5 +876,28 @@ export default class ElementText extends ElementRect implements IElementText {
     this.model.height = height;
     this.model.coords = CommonUtils.getBoxVertices(this.model.coords[0], { width, height });
     this.model.boxCoords = CommonUtils.get4BoxPoints(this.model.boxCoords[0], { width, height });
+  }
+
+  /**
+   * 设置字体
+   *
+   * @param value 字体
+   */
+  setFontFamily(value: string): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontFamily(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontFamily: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontFamily = value;
+        }
+      });
+    });
   }
 }

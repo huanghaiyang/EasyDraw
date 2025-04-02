@@ -379,6 +379,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.textBaseline;
   }
 
+  get fontEnable(): boolean {
+    return false;
+  }
+
   get fontSize(): number {
     return this.model.styles.fontSize;
   }
