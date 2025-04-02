@@ -256,15 +256,21 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     // 如果光标位置不是在行尾，则需要将光标后的文本节点移动到新行
     if (nodeIndex <= line.nodes.length - 1) {
+      const anchorTextNode = line.nodes[nodeIndex];
+      // 样式以当前节点的样式为准
+      const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode, line);
       const restNodes = line.nodes.slice(nodeIndex);
-      line.nodes = line.nodes.slice(0, nodeIndex);
-      line.isTailBreak = true;
-      // 如果当前行不是尾部强制换行
+      Object.assign(line, {
+        nodes: line.nodes.slice(0, nodeIndex),
+        isTailBreak: true,
+      });
+      // 如果当前行是尾部强制换行
       if (isTailBreak) {
         // 插入新行，且新行是尾部强制换行
         textData.lines.splice(nextLineNumber, 0, {
           nodes: restNodes,
           isTailBreak: true,
+          fontStyle,
         });
       } else {
         // 将剩余的文本节点插入到下一行的开头
@@ -276,6 +282,7 @@ export default class ElementText extends ElementRect implements IElementText {
       textData.lines.splice(nextLineNumber, 0, {
         nodes: [],
         isTailBreak: true,
+        fontStyle: TextElementUtils.getStyleOfLineEnd(this.model, line),
       });
     }
     this._textCursor = TextElementUtils.getCursorOfLineStart(textData.lines[nextLineNumber], nextLineNumber);
@@ -491,8 +498,10 @@ export default class ElementText extends ElementRect implements IElementText {
     if (isEmpty(value)) return;
     // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
     const { textNode: anchorTextNode, lineNumber: anchorLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
+    // 文本行
+    const line = textData.lines[anchorLineNumber];
     // 获取参考文本节点的样式
-    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode);
+    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode, line);
     // 生成新插入的文本节点
     const nodes = value.split("").map(char => {
       const node = TextElementUtils.createTextNode(char, fontStyle);

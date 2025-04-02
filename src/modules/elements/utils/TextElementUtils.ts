@@ -75,14 +75,14 @@ export default class TextElementUtils {
    * 创建文本节点
    *
    * @param value 值
-   * @param style 样式
+   * @param fontStyle 样式
    * @returns 文本节点
    */
-  static createTextNode(value: string, style: FontStyle): ITextNode {
+  static createTextNode(value: string, fontStyle: FontStyle): ITextNode {
     return {
       id: nanoid(),
       content: value,
-      fontStyle: style,
+      fontStyle,
     };
   }
 
@@ -99,9 +99,9 @@ export default class TextElementUtils {
 
     content.split("\n").forEach(line => {
       const nodes = line.split("").map(char => {
-        return TextElementUtils.createTextNode(char, fontStyle);
+        return TextElementUtils.createTextNode(char, { ...fontStyle });
       });
-      lines.push({ nodes, isTailBreak: true });
+      lines.push({ nodes, isTailBreak: true, fontStyle: { ...fontStyle } });
     });
     return {
       lines,
@@ -715,15 +715,51 @@ export default class TextElementUtils {
   }
 
   /**
+   * 获取元素模型的样式
+   *
+   * @param model 元素模型
+   * @returns 样式
+   */
+  static getFontStyleOfModel(model: ElementObject): FontStyle {
+    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity", "fontLineHeight"]);
+  }
+
+  /**
    * 获取节点的样式
+   *
+   * 1. 如果节点有样式，则返回节点的样式
+   * 2. 如果行有样式，则返回行的样式
+   * 3. 否则返回元素模型的样式
    *
    * @param model 元素模型
    * @param node 节点
+   * @param line 行
    * @returns 样式
    */
-  static getStyleByNodeIfy(model: ElementObject, node: ITextNode): FontStyle {
-    if (node) return LodashUtils.jsonClone(node.fontStyle) as FontStyle;
-    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity", "fontLineHeight"]);
+  static getStyleByNodeIfy(model: ElementObject, node: ITextNode, line?: ITextLine): FontStyle {
+    if (node && node.fontStyle) return LodashUtils.jsonClone(node.fontStyle) as FontStyle;
+    if (line && line.fontStyle) return LodashUtils.jsonClone(line.fontStyle) as FontStyle;
+    return TextElementUtils.getFontStyleOfModel(model);
+  }
+
+  /**
+   * 获取行尾节点的样式
+   *
+   * 1. 如果行尾有节点，则返回节点的样式
+   * 2. 如果行尾没有节点且行有样式，则返回行的样式
+   * 3. 如果行尾没有节点且行没有样式，则返回元素模型的样式
+   *
+   * @param model 元素模型
+   * @param line 文本行
+   * @returns 样式
+   */
+  static getStyleOfLineEnd(model: ElementObject, line: ITextLine): FontStyle {
+    const { nodes, fontStyle } = line;
+    if (nodes.length) {
+      return TextElementUtils.getStyleByNodeIfy(model, nodes[nodes.length - 1]);
+    }
+    if (fontStyle) return LodashUtils.jsonClone(fontStyle) as FontStyle;
+    return TextElementUtils.getFontStyleOfModel(model);
   }
 
   /**
@@ -807,11 +843,12 @@ export default class TextElementUtils {
    * @returns 复制的文本行
    */
   static cloneTextLine(line: ITextLine): ITextLine {
-    const { nodes, isTailBreak, isFull } = line;
+    const { nodes, isTailBreak, isFull, fontStyle } = line;
     return {
       nodes: TextElementUtils.batchCloneTextNodes(nodes),
       isTailBreak,
       isFull,
+      fontStyle: LodashUtils.jsonClone(fontStyle),
     };
   }
 
@@ -873,10 +910,13 @@ export default class TextElementUtils {
     ];
     for (let i = 0; i < textLines.length; i++) {
       const line = textLines[i];
-      const { nodes, isTailBreak } = line;
+      const { nodes, isTailBreak, fontStyle } = line;
       const tailLine = result[result.length - 1];
       tailLine.nodes.push(...nodes);
       tailLine.isTailBreak = isTailBreak;
+      if (isTailBreak) {
+        tailLine.fontStyle = fontStyle;
+      }
       tailLine.width += nodes.reduce((prev, curr) => prev + curr.width, 0);
       if (isTailBreak && i < textLines.length - 1) {
         result.push({
@@ -905,12 +945,13 @@ export default class TextElementUtils {
     let currentWidth = 0;
     for (let i = 0; i < textLines.length; i++) {
       const line = textLines[i];
-      const { nodes, isTailBreak } = line;
+      const { nodes, isTailBreak, fontStyle = {} } = line;
       // 如果当前行的节点数量为0，则直接添加到结果中
       if (nodes.length === 0) {
         result.push({
           nodes: [],
           isTailBreak,
+          fontStyle,
         });
         continue;
       }
@@ -932,7 +973,7 @@ export default class TextElementUtils {
             currentWidth = 0;
           } else {
             // 如果当前行的宽度大于给定宽度，则将当前行添加到结果中，并将当前节点添加到新的行中
-            result.push(LodashUtils.jsonClone(currentLine));
+            result.push({ ...LodashUtils.jsonClone(currentLine), fontStyle: { ...fontStyle } });
             currentLine.nodes = [node];
             currentWidth = nWidth;
           }
@@ -940,7 +981,7 @@ export default class TextElementUtils {
       }
       // 如果当前行的节点数量大于0，新添加一行
       if (currentLine.nodes.length > 0) {
-        result.push(LodashUtils.jsonClone(currentLine));
+        result.push({ ...LodashUtils.jsonClone(currentLine), fontStyle: { ...fontStyle } });
       }
       // 如果当前行是尾部换行，则将尾部换行更新到最后一行上
       if (isTailBreak) {
