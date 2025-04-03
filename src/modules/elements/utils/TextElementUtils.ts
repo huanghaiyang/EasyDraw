@@ -87,22 +87,33 @@ export default class TextElementUtils {
   }
 
   /**
-   * 创建文本数据
+   * 创建文本行
    *
    * @param content 文本内容
    * @param fontStyle 文本样式
-   * @returns 文本数据
+   * @returns 文本行
    */
-  static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
-    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity"]);
+  static createTextLines(content: string, fontStyle: TextFontStyle): ITextLine[] {
     const lines: ITextLine[] = [];
-
     content.split("\n").forEach(line => {
       const nodes = line.split("").map(char => {
         return TextElementUtils.createTextNode(char, { ...fontStyle });
       });
       lines.push({ nodes, isTailBreak: true, fontStyle: { ...fontStyle } });
     });
+    return lines;
+  }
+
+  /**
+   * 创建文本数据
+
+   * @param content 文本内容
+   * @param fontStyle 文本样式
+   * @returns 文本数据
+   */
+  static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
+    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity"]);
+    const lines: ITextLine[] = this.createTextLines(content, fontStyle);
     return {
       lines,
     };

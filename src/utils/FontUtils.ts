@@ -1,19 +1,10 @@
 import { FontStyle } from "@/styles/ElementStyles";
 import { ISize } from "@/types";
+import TextUtils from "@/utils/TextUtils";
 
 export default class FontUtils {
   // 用于计算文本尺寸的假文本
   static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘{}[]|~!@#$%^&*()_+{}:";
-
-  /**
-   * 替换空格
-   *
-   * @param text
-   * @returns
-   */
-  static replaceAZero(text: string): string {
-    return text.replaceAll(" ", "\u00a0");
-  }
 
   /**
    * 计算文字宽度
@@ -40,7 +31,7 @@ export default class FontUtils {
     }
     lines.forEach(line => {
       line = line || " ";
-      line = FontUtils.replaceAZero(line);
+      line = TextUtils.replaceAZero(line);
       const metrics = ctx.measureText(line);
       const { width, fontBoundingBoxAscent, fontBoundingBoxDescent } = metrics;
       if (width > maxWidth) {
@@ -86,7 +77,7 @@ export default class FontUtils {
     }
     lines.forEach(line => {
       line = line || " ";
-      line = FontUtils.replaceAZero(line);
+      line = TextUtils.replaceAZero(line);
       span.textContent = line;
       const width = span.offsetWidth;
       if (width > maxWidth) {

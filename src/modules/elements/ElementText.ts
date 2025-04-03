@@ -16,6 +16,8 @@ import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
+import { FontStyle } from "@/styles/ElementStyles";
+import TextUtils from "@/utils/TextUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -313,8 +315,18 @@ export default class ElementText extends ElementRect implements IElementText {
       // 如果是混合文本，那么就直接插入节点
       this._insertTextLines(textData, textLines);
     } else {
-      // 直接插入文本
-      this._insertText(textData, value, states);
+      // 如果是单行就直接插入，如果是多行则需要先转换为textLine后再插入
+      if (!TextUtils.isMultiLine(value)) {
+        // 直接插入文本
+        this._insertText(textData, value, states);
+      } else {
+        // 获取光标位置的样式
+        const fontStyle = this._getFontStyleAtInputCursor();
+        // 创建文本行
+        const textLines = TextElementUtils.createTextLines(value, fontStyle);
+        // 插入文本行
+        this._insertTextLines(textData, textLines);
+      }
     }
   }
 
@@ -488,6 +500,17 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 获取光标位置的字体样式
+   *
+   * @returns 字体样式
+   */
+  private _getFontStyleAtInputCursor(): FontStyle {
+    const { textNode: anchorTextNode, lineNumber: anchorLineNumber } = TextElementUtils.getAnchorNodeByCursor(this.model.data as ITextData, this._prevInputCursor);
+    const line = (this.model.data as ITextData).lines[anchorLineNumber];
+    return TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode, line);
+  }
+
+  /**
    * 插入文本
    *
    * @param textData 文本数据
@@ -498,10 +521,8 @@ export default class ElementText extends ElementRect implements IElementText {
     if (isEmpty(value)) return;
     // 参考文本节点，此节点的样式将被应用到新插入的文本节点上
     const { textNode: anchorTextNode, lineNumber: anchorLineNumber, isHead } = TextElementUtils.getAnchorNodeByCursor(textData, this._prevInputCursor);
-    // 文本行
-    const line = textData.lines[anchorLineNumber];
     // 获取参考文本节点的样式
-    const fontStyle = TextElementUtils.getStyleByNodeIfy(this.model, anchorTextNode, line);
+    const fontStyle = this._getFontStyleAtInputCursor();
     // 生成新插入的文本节点
     const nodes = value.split("").map(char => {
       const node = TextElementUtils.createTextNode(char, fontStyle);
