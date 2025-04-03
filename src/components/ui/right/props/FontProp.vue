@@ -1,11 +1,14 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultFontFamily, DefaultFontSize, FontFamilyList, FontSizeList } from "@/styles/ElementStyles";
+import { DefaultFontColor, DefaultFontColorOpacity, DefaultFontFamily, DefaultFontSize, FontFamilyList, FontSizeList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
+const colorPickerRef = ref();
 const stageStore = useStageStore();
 const fontFamily = ref(DefaultFontFamily);
 const fontSize = ref(DefaultFontSize);
+const fontColor = ref(DefaultFontColor);
+const fontColorOpacity = ref(DefaultFontColorOpacity);
 
 watch(
   () => stageStore.fontFamily,
@@ -20,6 +23,24 @@ watch(
     fontSize.value = newValue;
   },
 );
+
+watch(
+  () => stageStore.fontColor,
+  newValue => {
+    fontColor.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontColorOpacity,
+  newValue => {
+    fontColorOpacity.value = newValue;
+  },
+);
+
+const toggleColorPickerVisible = () => {
+  colorPickerRef.value.show();
+};
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.primarySelectedElement?.fontEnable">
@@ -53,6 +74,28 @@ watch(
         >
           <template #prepend>S</template>
           <template #append>px</template>
+        </el-input>
+      </div>
+    </div>
+
+    <div class="font-props__row color">
+      <div class="font-props__row-item">
+        <el-color-picker v-model="fontColor" @change="value => stageStore.setElementsFontColor(value)" ref="colorPickerRef" :disabled="stageStore.inputDisabled" />
+        <el-tag type="info" @click="toggleColorPickerVisible">{{ fontColor }}</el-tag>
+      </div>
+
+      <div class="font-props__row-item">
+        <el-input
+          v-model="fontColorOpacity"
+          placeholder="输入数字"
+          type="number"
+          min="0"
+          max="1"
+          precision="1"
+          @change="value => stageStore.setElementsFontColorOpacity(Number(value))"
+          :disabled="stageStore.inputDisabled"
+        >
+          <template #prepend>O</template>
         </el-input>
       </div>
     </div>

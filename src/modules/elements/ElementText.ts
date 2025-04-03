@@ -941,6 +941,52 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 设置字体颜色
+   *
+   * @param value 字体颜色
+   */
+  setFontColor(value: string): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontColor(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontColor: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontColor = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置字体透明度
+
+   * @param value 字体透明度
+   */
+  setFontColorOpacity(value: number): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontColorOpacity(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontColorOpacity: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontColorOpacity = value;
+        }
+      });
+    });
+  }
+
+  /**
    * 刷新组件原始数据
    */
   refreshOriginalElementProps(): void {
