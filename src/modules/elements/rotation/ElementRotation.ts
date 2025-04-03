@@ -30,7 +30,7 @@ export default class ElementRotation extends PointController implements IElement
     // 纵坐标
     this.y = y;
     // 设置旋转路径点
-    this.points = CommonUtils.getBoxVertices(
+    this.points = CommonUtils.getBoxByCenter(
       { x, y },
       {
         width: this.width / stageScale,

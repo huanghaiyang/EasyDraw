@@ -98,11 +98,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 画布矩形顶点坐标
   get stageRectPoints(): IPoint[] {
-    return CommonUtils.getRectVertices(this.stageRect);
+    return CommonUtils.getRectBySize(this.stageRect);
   }
   // 舞台矩形顶点坐标
   get stageWordRectCoords(): IPoint[] {
-    return CommonUtils.getBoxVertices(this.stageWorldCoord, { width: this.stageRect.width / this.stageScale, height: this.stageRect.height / this.stageScale });
+    return CommonUtils.getBoxByCenter(this.stageWorldCoord, { width: this.stageRect.width / this.stageScale, height: this.stageRect.height / this.stageScale });
   }
 
   // 鼠标按下位置
@@ -908,7 +908,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _createRange(): void {
     // 计算选区
-    const rangeCoords = CommonUtils.getBoxPoints([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
+    const rangeCoords = CommonUtils.getBoxByPoints([this._pressDownStageWorldCoord, this._pressMoveStageWorldCoord]);
     // 更新选区，命中组件
     this.selection.setRange(rangeCoords);
   }
@@ -1580,7 +1580,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   calcScaleAutoFitValue(): number {
-    const elementsBox = CommonUtils.getBoxPoints(this.store.visibleElements.map(element => element.maxOutlineBoxCoords).flat());
+    const elementsBox = CommonUtils.getBoxByPoints(this.store.visibleElements.map(element => element.maxOutlineBoxCoords).flat());
     return this.calcScaleAutoFitValueByBox(elementsBox);
   }
 
@@ -1945,26 +1945,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async _handleTextInput(value: string, fontStyle: FontStyle, size: ISize, position: IPoint): Promise<void> {
     this._clearStageSelects();
-    const { x, y } = ElementUtils.calcWorldCoord(position);
-    let { width, height } = size;
-    const element = (await this.store.insertTextElement(
-      value,
-      fontStyle,
-      CommonUtils.get4BoxPoints(
-        {
-          x: x + width / 2,
-          y: y + height / 2,
-        },
-        size,
-      ),
-    )) as IElementText;
+    const coord = ElementUtils.calcWorldCoord(position);
+    const element = (await this.store.insertTextElement(value, fontStyle, CommonUtils.getBoxByLeftTop(coord, size))) as IElementText;
     // 如果差值小于50ms，则可以判定是鼠标点击舞台时触发的blur事件
     if (window.performance.now() - this._latestMousedownTimestamp <= 50) {
       this._shouldSelectTopAWhilePressUp = false;
     }
     await this._addRedrawTask(true);
     // 因为文本录入时使用的是textarea，但是渲染时是canvas，导致宽度和高度计算不正确（目前没有其他好方法），所以此处需要使用渲染后的文本节点重新计算尺寸
-    element.recalcSize();
+    element.reCalcSizeAndCoords();
+    element.refresh();
     await this._createAddedCommand([element]);
     this.selection.refresh();
     this._emitElementsCreated([element]);

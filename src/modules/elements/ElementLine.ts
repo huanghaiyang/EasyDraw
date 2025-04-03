@@ -91,7 +91,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   private refreshBentOutline() {
     this._outerCoords = this.calcOuterCoords();
-    this._maxOutlineBoxCoords = CommonUtils.getBoxPoints(this._outerCoords.flat());
+    this._maxOutlineBoxCoords = CommonUtils.getBoxByPoints(this._outerCoords.flat());
   }
 
   /**
@@ -192,7 +192,7 @@ export default class ElementLine extends Element implements IElementLine {
   setWidth(value: number): number[][] {
     const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, value, this.angle - 90);
     this.model.coords = [this.startRotateCoord, endRotateCoord];
-    this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
+    this.model.boxCoords = CommonUtils.getBoxByPoints(this.model.coords);
     this.model.width = value;
     this.model.angle = 0;
     return [[]];
@@ -206,7 +206,7 @@ export default class ElementLine extends Element implements IElementLine {
   setAngle(value: number): void {
     const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, this.model.width, value - 90);
     this.model.coords = [this.startRotateCoord, endRotateCoord];
-    this.model.boxCoords = CommonUtils.getBoxPoints(this.model.coords);
+    this.model.boxCoords = CommonUtils.getBoxByPoints(this.model.coords);
     this.model.angle = 0;
   }
 

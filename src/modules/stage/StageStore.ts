@@ -1105,7 +1105,7 @@ export default class StageStore implements IStageStore {
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData): ElementObject {
     const size: ISize = ElementUtils.calcSize({
       coords,
-      boxCoords: CommonUtils.getBoxPoints(coords),
+      boxCoords: CommonUtils.getBoxByPoints(coords),
       type,
     });
     const position: IPoint = ElementUtils.calcPosition({ type, coords });
@@ -1113,7 +1113,7 @@ export default class StageStore implements IStageStore {
       ...ElementUtils.createEmptyObject(),
       type,
       coords,
-      boxCoords: CommonUtils.getBoxPoints(coords),
+      boxCoords: CommonUtils.getBoxByPoints(coords),
       data,
       width: size.width,
       height: size.height,
@@ -1170,7 +1170,7 @@ export default class StageStore implements IStageStore {
         if (this._currentCreatingElementId) {
           delete model.id;
           element = this.updateElementModel(this._currentCreatingElementId, model);
-          element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
+          element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
           this._setElementProvisionalCreating(element);
         } else {
           element = this._createProvisionalElement(model);
@@ -1220,7 +1220,7 @@ export default class StageStore implements IStageStore {
           model.coords.splice(element.tailCoordIndex + 1, 1, coord);
         }
       }
-      element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
+      element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
       this._setElementProvisionalCreating(element);
     } else {
       // 如果当前创建的组件id不存在，则创建一个新的组件
@@ -1265,7 +1265,7 @@ export default class StageStore implements IStageStore {
           }
         }
         this.updateElementById(element.id, { status: ElementStatus.finished });
-        element.model.boxCoords = CommonUtils.getBoxPoints(element.model.coords);
+        element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
         element.refresh();
         return element;
       }
@@ -1553,7 +1553,7 @@ export default class StageStore implements IStageStore {
   async createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject> {
     const { colorSpace } = options;
     const { width, height } = image;
-    const coords = CommonUtils.get4BoxPoints(this.shield.stageWorldCoord, {
+    const coords = CommonUtils.getBoxByCenter(this.shield.stageWorldCoord, {
       width,
       height,
     });
@@ -1561,7 +1561,7 @@ export default class StageStore implements IStageStore {
     const object: ElementObject = {
       ...ElementUtils.createEmptyObject(),
       coords,
-      boxCoords: CommonUtils.getBoxPoints(coords),
+      boxCoords: CommonUtils.getBoxByPoints(coords),
       type: CreatorTypes.image,
       data: image,
       name: "image",
@@ -1807,7 +1807,7 @@ export default class StageStore implements IStageStore {
     // 获取组合组件的子组件id
     const subIds = elements.map(element => element.id);
     // 获取组合组件的坐标
-    const coords = CommonUtils.getBoxPoints(elements.map(element => element.rotateCoords).flat());
+    const coords = CommonUtils.getBoxByPoints(elements.map(element => element.rotateCoords).flat());
     // 获取组合组件的宽高
     const { width, height, x, y } = CommonUtils.getRect(coords);
     // 返回组合组件的数据对象
@@ -1815,7 +1815,7 @@ export default class StageStore implements IStageStore {
       ...ElementUtils.createEmptyGroupObject(),
       subIds,
       coords,
-      boxCoords: CommonUtils.getBoxPoints(coords),
+      boxCoords: CommonUtils.getBoxByPoints(coords),
       width,
       height,
       x: x + width / 2,

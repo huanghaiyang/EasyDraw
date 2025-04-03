@@ -16,7 +16,7 @@ export default class MaskTaskTransformer extends MaskTaskBase {
 
     CanvasUtils.drawPathWithScale(
       this.canvas,
-      CommonUtils.get4BoxPoints(
+      CommonUtils.getBoxByCenter(
         point,
         {
           width: TransformerSize / CanvasUtils.scale,

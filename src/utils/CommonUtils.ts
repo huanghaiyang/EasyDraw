@@ -31,7 +31,7 @@ export default class CommonUtils {
    * @param points
    * @returns
    */
-  static getBoxPoints(points: IPoint[]): IPoint[] {
+  static getBoxByPoints(points: IPoint[]): IPoint[] {
     let minX = Number.MAX_SAFE_INTEGER,
       minY = Number.MAX_SAFE_INTEGER,
       maxX = Number.MIN_SAFE_INTEGER,
@@ -113,16 +113,16 @@ export default class CommonUtils {
   /**
    * 给定中心点及所属的和模型，返回盒模型四个顶点
    *
-   * @param point
+   * @param center
    * @param rect
    * @returns
    */
-  static getBoxVertices(point: IPoint, rect: ISize | DOMRect): IPoint[] {
+  static getBoxByCenter(center: IPoint, rect: ISize | DOMRect, angles?: Partial<AngleModel>): IPoint[] {
     const { width, height } = rect;
     const hWidth = width / 2;
     const hHeight = height / 2;
-    const { x, y } = point;
-    return [
+    const { x, y } = center;
+    const result = [
       {
         x: x - hWidth,
         y: y - hHeight,
@@ -140,16 +140,52 @@ export default class CommonUtils {
         y: y + hHeight,
       },
     ];
+    if (angles) {
+      result.forEach(point => {
+        Object.assign(point, MathUtils.transWithCenter(point, angles, center));
+      });
+    }
+    return result;
+  }
+
+  /**
+   * 给定左上角坐标及所属的和模型，返回盒模型四个顶点
+   *
+   * @param point
+   * @param rect
+   * @returns
+   */
+  static getBoxByLeftTop(point: IPoint, rect: ISize | DOMRect): IPoint[] {
+    const { width, height } = rect;
+    const { x, y } = point;
+    return [
+      {
+        x,
+        y,
+      },
+      {
+        x: x + width,
+        y,
+      },
+      {
+        x: x + width,
+        y: y + height,
+      },
+      {
+        x,
+        y: y + height,
+      },
+    ];
   }
 
   /**
    * 返回rect的四个顶点
    *
-   * @param rect
+   * @param size
    * @returns
    */
-  static getRectVertices(rect: DOMRect): IPoint[] {
-    const { width, height } = rect;
+  static getRectBySize(size: ISize): IPoint[] {
+    const { width, height } = size;
     return [
       {
         x: 0,
@@ -217,38 +253,6 @@ export default class CommonUtils {
     return [left, bottom, right];
   }
 
-  /**
-   * 给定中心点，宽高和角度，返回矩形的四个顶点
-   *
-   * @param center
-   * @param size
-   * @param options
-   * @returns
-   */
-  static get4BoxPoints(center: IPoint, size: ISize, angles?: Partial<AngleModel>): IPoint[] {
-    const points = [
-      {
-        x: center.x - size.width / 2,
-        y: center.y - size.height / 2,
-      },
-      {
-        x: center.x + size.width / 2,
-        y: center.y - size.height / 2,
-      },
-      {
-        x: center.x + size.width / 2,
-        y: center.y + size.height / 2,
-      },
-      {
-        x: center.x - size.width / 2,
-        y: center.y + size.height / 2,
-      },
-    ];
-    points.forEach(point => {
-      Object.assign(point, MathUtils.transWithCenter(point, angles, center));
-    });
-    return points;
-  }
   /**
    * 获取数组中前一个索引
    *

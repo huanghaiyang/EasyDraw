@@ -795,7 +795,7 @@ export default class MathUtils {
    * @returns
    */
   static calcCenter(points: IPoint[]): IPoint {
-    const box = CommonUtils.getBoxPoints(points);
+    const box = CommonUtils.getBoxByPoints(points);
     return MathUtils.calcPolygonCentroid(box);
   }
 

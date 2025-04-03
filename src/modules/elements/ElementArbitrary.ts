@@ -228,7 +228,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
       const lockPoint = this._originalRotateBoxCoords[0];
       this.model.coords = MathUtils.batchPrecisePoint(ElementUtils.calcCoordsByTransPoints(coords, this.angles, lockPoint), 1);
       let boxCoords = MathUtils.batchPrecisePoint(
-        MathUtils.batchLeanWithCenter(CommonUtils.getBoxPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)), 0, this.model.leanYAngle, this.calcCenterCoord()),
+        MathUtils.batchLeanWithCenter(CommonUtils.getBoxByPoints(MathUtils.calcUnLeanByPoints(this.model.coords, 0, this.model.leanYAngle)), 0, this.model.leanYAngle, this.calcCenterCoord()),
         1,
       );
       if (this._flipX) {

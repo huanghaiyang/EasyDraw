@@ -1143,7 +1143,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcMaxBoxCoords(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotateCoords);
+    return CommonUtils.getBoxByPoints(this._rotateCoords);
   }
 
   /**
@@ -1152,7 +1152,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcMaxOutlineBoxCoords(): IPoint[] {
-    return CommonUtils.getBoxPoints(this._rotateOutlineCoords.flat());
+    return CommonUtils.getBoxByPoints(this._rotateOutlineCoords.flat());
   }
 
   /**
@@ -1196,7 +1196,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   getController4BoxCoords(controllerCoord: IPoint, size?: number): IPoint[] {
     size = size || TransformerSize;
-    return CommonUtils.get4BoxPoints(
+    return CommonUtils.getBoxByCenter(
       controllerCoord,
       {
         width: size / this.shield.stageScale,

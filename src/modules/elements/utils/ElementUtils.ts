@@ -164,7 +164,7 @@ export default class ElementUtils {
       case CreatorTypes.text:
       case CreatorTypes.ellipse:
       case CreatorTypes.group:
-        return CommonUtils.getBoxPoints(points);
+        return CommonUtils.getBoxByPoints(points);
       default:
         return points;
     }
