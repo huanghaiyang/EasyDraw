@@ -248,6 +248,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.undoRedo.add(command);
   }
 
+  /**
+   * 创建组件平移命令
+   *
+   * @param elements
+   * @param elementsUpdateFunction
+   */
   private async _createTranslateCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     await elementsUpdateFunction();
@@ -271,7 +277,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件更新命令
+   * 创建组件变换命令
    *
    * @param elements
    * @param elementsUpdateFunction
@@ -279,6 +285,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _createTransformCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     await elementsUpdateFunction();
+    await this._reflowTextIfy(elements, true);
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
   }
@@ -292,10 +299,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsWidth(elements, value);
+      elements.forEach(element => element.onWidthChanged());
+      this.selection.refresh();
     });
-    elements.forEach(element => element.onWidthChanged());
-    this.selection.refresh();
-    this._shouldRedraw = true;
   }
 
   /**
@@ -307,10 +313,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsHeight(elements, value);
+      elements.forEach(element => element.onHeightChanged());
+      this.selection.refresh();
     });
-    elements.forEach(element => element.onHeightChanged());
-    this.selection.refresh();
-    this._shouldRedraw = true;
   }
 
   /**
@@ -322,10 +327,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsLeanYAngle(elements, value);
+      elements.forEach(element => element.onLeanyAngleChanged());
+      this.selection.refresh();
     });
-    elements.forEach(element => element.onLeanyAngleChanged());
-    this.selection.refresh();
-    this._shouldRedraw = true;
   }
 
   /**
@@ -337,10 +341,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsAngle(elements, value);
+      elements.forEach(element => element.onAngleChanged());
+      this.selection.refresh();
     });
-    elements.forEach(element => element.onAngleChanged());
-    this.selection.refresh();
-    this._shouldRedraw = true;
   }
 
   /**
@@ -538,9 +541,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param force 是否强制重新计算
    */
   private async _reflowTextIfy(elements: IElement[], force?: boolean): Promise<void> {
-    await Promise.all(elements.map(async element => (element as IElementText).reflowText(force)));
+    await Promise.all(elements.map(async element => element instanceof ElementText && element.reflowText(force)));
     await this._addRedrawTask(true);
-    await Promise.all(elements.map(async element => (element as IElementText).refreshTextCursors()));
+    await Promise.all(elements.map(async element => element instanceof ElementText && element.refreshTextCursors()));
     await this._addRedrawTask(true);
   }
 
@@ -878,7 +881,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onTransforming();
     });
     this.selection.refresh();
-    this._shouldRedraw = true;
+    this._reflowTextIfy(selectedElements);
   }
 
   /**

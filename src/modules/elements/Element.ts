@@ -71,6 +71,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   _originalSize: Partial<DOMRect> = {};
   // 原始圆角
   _originalCorners: number[] = [];
+  // 原始数据
+  _originalData: any;
 
   // 变换矩阵
   _transformMatrix: number[][] = [];

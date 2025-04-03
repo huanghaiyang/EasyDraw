@@ -3,7 +3,7 @@
  *
  * 1. 光标可以在节点的左侧或者右侧，导致对光标的处理更为复杂，需要优化
  */
-import { IElementText } from "@/types/IElement";
+import { ElementObject, IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
@@ -187,6 +187,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * 刷新文本光标
    */
   refreshTextCursors(): void {
+    if (!this.isEditing) return;
     this._updateCursor(this._textCursor);
     this._updateCursor(this._textSelection?.endCursor);
     this._rerefreshCursorRenderRect();
@@ -840,32 +841,9 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
-   * 宽度变化
-   */
-  onWidthChanged(): void {
-    super.onWidthChanged();
-    this._reflowTextLines();
-  }
-
-  /**
-   * 变换时
-   */
-  onTransforming(): void {
-    super.onTransforming();
-    this._reflowTextLines();
-  }
-
-  /**
    * 重新排版文本
    */
   reflowText(force?: boolean): void {
-    this._reflowTextLines(force);
-  }
-
-  /**
-   * 重新计算文本行
-   */
-  private _reflowTextLines(force?: boolean): void {
     this._prevTextLinesReflowed = this._doReflowTextLines(!this._prevTextLinesReflowed || force);
   }
 
@@ -952,5 +930,39 @@ export default class ElementText extends ElementRect implements IElementText {
         }
       });
     });
+  }
+
+  /**
+   * 刷新组件原始数据
+   */
+  refreshOriginalElementProps(): void {
+    super.refreshOriginalElementProps();
+    this._originalData = LodashUtils.jsonClone(this.model.data);
+  }
+
+  /**
+   * 将组件原始数据转换为json
+   * 
+   * 文本组件在形变时会重新计算文本行，因此需要将文本数据也转换为json
+   *
+   * @returns
+   */
+  async toOriginalTransformJson(): Promise<ElementObject> {
+    const result = await super.toOriginalTransformJson();
+    result.data = this._originalData;
+    return result as ElementObject;
+  }
+
+  /**
+   * 将组件形变之后的数据转换为json
+   *
+   * 文本组件在形变时会重新计算文本行，因此需要将文本数据也转换为json
+   *
+   * @returns
+   */
+  async toTransformJson(): Promise<ElementObject> {
+    const result = await super.toTransformJson();
+    result.data = LodashUtils.jsonClone(this.model.data);
+    return result as ElementObject;
   }
 }
