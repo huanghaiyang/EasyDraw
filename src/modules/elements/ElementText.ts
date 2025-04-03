@@ -930,4 +930,27 @@ export default class ElementText extends ElementRect implements IElementText {
       });
     });
   }
+
+  /**
+   * 设置字体大小
+   *
+   * @param value 字体大小
+   */
+  setFontSize(value: number): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontSize(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontSize: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontSize = value;
+        }
+      });
+    });
+  }
 }

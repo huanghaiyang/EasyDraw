@@ -299,3 +299,23 @@ export const FontFamilyList = [
     url: "../src/assets/fonts/华文中宋.ttf",
   },
 ];
+
+// 字体大小列表
+export const FontSizeList = [
+  { name: "12", value: 12 },
+  { name: "14", value: 14 },
+  { name: "16", value: 16 },
+  { name: "18", value: 18 },
+  { name: "20", value: 20 },
+  { name: "24", value: 24 },
+  { name: "28", value: 28 },
+  { name: "32", value: 32 },
+  { name: "36", value: 36 },
+  { name: "40", value: 40 },
+  { name: "48", value: 48 },
+  { name: "56", value: 56 },
+  { name: "64", value: 64 },
+  { name: "72", value: 72 },
+  { name: "80", value: 80 },
+  { name: "96", value: 96 },
+];

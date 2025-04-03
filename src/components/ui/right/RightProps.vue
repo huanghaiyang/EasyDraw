@@ -87,6 +87,9 @@
             padding: 0 6px;
           }
         }
+        &.full {
+          width: 100%;
+        }
       }
     }
   }
