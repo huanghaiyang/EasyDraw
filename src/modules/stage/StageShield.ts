@@ -922,17 +922,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 开启或者关闭定时重绘功能
-   *
-   * @param value
-   */
-  private _toggleIntervalRedraw(value: boolean): void {
-    setTimeout(() => {
-      this._shouldRedraw = value;
-    }, 0);
-  }
-
-  /**
    * 预处理旋转状态
    *
    * @param controller

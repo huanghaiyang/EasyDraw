@@ -295,10 +295,11 @@ export default class TextElementUtils {
    * @returns 是否可用
    */
   static isTextSelectionAvailable(selection: ITextSelection): boolean {
-    const {
-      startCursor: { lineNumber: startLineNumber, nodeId: startNodeId, pos: startPos },
-      endCursor: { lineNumber: endLineNumber, nodeId: endNodeId, pos: endPos },
-    } = selection;
+    if (!selection) return false;
+    const { startCursor, endCursor } = selection;
+    if (!startCursor || !endCursor) return false;
+    const { lineNumber: startLineNumber, nodeId: startNodeId, pos: startPos } = startCursor;
+    const { lineNumber: endLineNumber, nodeId: endNodeId, pos: endPos } = endCursor;
     return startLineNumber !== endLineNumber || startNodeId !== endNodeId || startPos !== endPos;
   }
 

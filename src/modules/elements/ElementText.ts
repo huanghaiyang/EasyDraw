@@ -54,7 +54,7 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   get isSelectionAvailable(): boolean {
-    return !!this._textSelection && every(this._textSelection, node => !!node) && TextElementUtils.isTextSelectionAvailable(this._textSelection);
+    return TextElementUtils.isTextSelectionAvailable(this._textSelection);
   }
 
   get isCursorVisible(): boolean {
