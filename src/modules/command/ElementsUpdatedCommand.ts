@@ -7,7 +7,7 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElement
    *
    * @param dataList
    */
-  private _restoreElementsFromData(dataList: Array<ICommandElementObject>) {
+  private async _restoreElementsFromData(dataList: Array<ICommandElementObject>): Promise<void> {
     dataList.forEach(data => {
       const { model } = data;
       const element = this.store.updateElementModel(model.id, LodashUtils.jsonClone(model));
@@ -18,17 +18,17 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElement
     });
   }
 
-  undo(): void {
+  async undo(): Promise<void> {
     if (!this.payload.dataList) {
       return;
     }
-    this._restoreElementsFromData(this.payload.dataList);
+    await this._restoreElementsFromData(this.payload.dataList);
   }
-
-  redo(): void {
+  
+  async redo(): Promise<void> {
     if (!this.payload.rDataList) {
       return;
     }
-    this._restoreElementsFromData(this.payload.rDataList);
+    await this._restoreElementsFromData(this.payload.rDataList);
   }
 }

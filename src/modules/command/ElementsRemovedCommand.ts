@@ -4,7 +4,7 @@ import { IElementCommandPayload, IRemovedCommandElementObject } from "@/types/IC
 import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementsRemovedCommand extends ElementsBaseCommand<IElementCommandPayload> {
-  undo(): void {
+  async undo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const { prevId, model } = data as IRemovedCommandElementObject;
       let prevElement: IElement | undefined;
@@ -15,7 +15,7 @@ export default class ElementsRemovedCommand extends ElementsBaseCommand<IElement
     });
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const {
         model: { id },

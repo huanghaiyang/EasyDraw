@@ -7,7 +7,7 @@ export default class ElementsRearrangeCommand extends ElementsBaseCommand<IEleme
    *
    * @param dataList
    */
-  private _rearrange(dataList: Array<ICommandElementObject>): void {
+  private async _rearrange(dataList: Array<ICommandElementObject>): Promise<void> {
     dataList.forEach(data => {
       const {
         model: { id },
@@ -21,17 +21,17 @@ export default class ElementsRearrangeCommand extends ElementsBaseCommand<IEleme
     this.store.resortElementsArray();
     this.store.emitElementsLayerChanged();
   }
-  undo(): void {
+  async undo(): Promise<void> {
     if (!this.payload.dataList) {
       return;
     }
-    this._rearrange(this.payload.dataList);
+    await this._rearrange(this.payload.dataList);
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     if (!this.payload.rDataList) {
       return;
     }
-    this._rearrange(this.payload.rDataList);
+    await this._rearrange(this.payload.rDataList);
   }
 }

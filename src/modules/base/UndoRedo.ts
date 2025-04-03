@@ -25,22 +25,22 @@ export default class UndoRedo<T> implements IUndoRedo<T> {
   /**
    * 撤销
    */
-  undo(): void {
+  async undo(): Promise<void> {
     if (this.undoStack.length > 0) {
       const command = this.undoStack.pop();
       this.redoStack.push(command);
-      command.undo();
+      await command.undo();
     }
   }
 
   /**
    * 重做
    */
-  redo(): void {
+  async redo(): Promise<void> {
     if (this.redoStack.length > 0) {
       const command = this.redoStack.pop();
       this.undoStack.push(command);
-      command.redo();
+      await command.redo();
     }
   }
 }

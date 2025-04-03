@@ -4,7 +4,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import { IGroupCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 
 export default class GroupAddedCommand extends ElementsBaseCommand<IElementCommandPayload> {
-  undo(): void {
+  async undo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const {
         model: { id },
@@ -30,7 +30,7 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
     this.store.emitElementsLayerChanged();
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     // 从后向前还原组件的原因是，在生成组合的时候，子组件层级会提升，因此还原的时候需要先还原组合，在将子组件插入到组合前
     for (let i = this.payload.rDataList.length - 1; i >= 0; i--) {
       const data = this.payload.rDataList[i];

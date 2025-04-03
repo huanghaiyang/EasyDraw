@@ -1905,13 +1905,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理撤销操作
    */
-  _handleUndo(): void {
+  async _handleUndo(): Promise<void> {
     const tailUndoCommand = this.undoRedo.tailUndoCommand;
     if (!tailUndoCommand) return;
     if (!(tailUndoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
-    this.undoRedo.undo();
+    await this.undoRedo.undo();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
@@ -1920,13 +1920,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理重做操作
    */
-  _handleRedo(): void {
+  async _handleRedo(): Promise<void> {
     const tailRedoCommand = this.undoRedo.tailRedoCommand;
     if (!tailRedoCommand) return;
     if (!(tailRedoCommand instanceof ElementsUpdatedCommand)) {
       this.store.deSelectAll();
     }
-    this.undoRedo.redo();
+    await this.undoRedo.redo();
     this.selection.refresh();
     this._shouldRedraw = true;
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);

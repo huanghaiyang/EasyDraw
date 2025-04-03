@@ -1,7 +1,7 @@
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { IElementText } from "@/types/IElement";
 import { IElementTaskCursor } from "@/types/IRenderTask";
-import ElementTaskHelper from "./helpers/ElementTaskHelper";
+import ElementTaskHelper from "@/modules/render/shield/task/helpers/ElementTaskHelper";
 
 export default class ElementTaskTextCursor extends ElementTaskBase implements IElementTaskCursor {
   /**

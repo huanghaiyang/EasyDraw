@@ -10,11 +10,11 @@ export default class ElementsBaseCommand<T> implements ICommand<T> {
     this.store = store;
   }
 
-  undo(): void {
+  async undo(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

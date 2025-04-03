@@ -4,7 +4,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import { IElementCommandPayload } from "@/types/ICommand";
 
 export default class ElementsAddedCommand extends ElementsBaseCommand<IElementCommandPayload> {
-  undo(): void {
+  async undo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const {
         model: { id },
@@ -13,7 +13,7 @@ export default class ElementsAddedCommand extends ElementsBaseCommand<IElementCo
     });
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       this.store.afterAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
     });

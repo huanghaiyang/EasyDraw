@@ -4,7 +4,7 @@ import LodashUtils from "@/utils/LodashUtils";
 import { IGroupCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 
 export default class GroupRemovedCommand extends ElementsBaseCommand<IElementCommandPayload> {
-  undo(): void {
+  async undo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const {
         model: { id, groupId },
@@ -21,7 +21,7 @@ export default class GroupRemovedCommand extends ElementsBaseCommand<IElementCom
     });
   }
 
-  redo(): void {
+  async redo(): Promise<void> {
     this.payload.dataList.forEach(data => {
       const {
         model: { id },

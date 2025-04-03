@@ -35,8 +35,8 @@ export type IGroupCommandElementObject = ICommandElementObject &
 // 命令
 export default interface ICommand<T> {
   payload: T;
-  undo(): void;
-  redo(): void;
+  undo(): Promise<void>;
+  redo(): Promise<void>;
 }
 
 // 组件操作数据

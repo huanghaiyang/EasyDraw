@@ -7,8 +7,8 @@ export default interface IUndoRedo<T> {
   get tailUndoCommand(): ICommand<T> | undefined;
   get tailRedoCommand(): ICommand<T> | undefined;
 
-  undo(): void;
-  redo(): void;
+  undo(): Promise<void>;
+  redo(): Promise<void>;
 
   add(command: ICommand<T>): void;
 }
