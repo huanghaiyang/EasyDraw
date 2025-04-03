@@ -887,6 +887,14 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 组件形变时重新计算文本行
+   */
+  onTransforming(): void {
+    super.onTransforming();
+    this.reflowText();
+  }
+
+  /**
    * 设置字体
    *
    * @param value 字体

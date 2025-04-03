@@ -881,7 +881,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onTransforming();
     });
     this.selection.refresh();
-    this._reflowTextIfy(selectedElements);
+    this._shouldRedraw = true;
   }
 
   /**
