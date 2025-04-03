@@ -1095,6 +1095,11 @@ export default interface IElement {
    * 将组件组合数据转换为json
    */
   toGroupJson(): Promise<ElementObject>;
+
+  /**
+   * 将组件样式数据转换为json
+   */
+  toFontStyleJson(): Promise<ElementObject>;
 }
 
 // 舞台组件（组件）-React

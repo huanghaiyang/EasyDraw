@@ -2585,4 +2585,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   async toGroupJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify(pick(this.model, ["id", "groupId"]))) as ElementObject;
   }
+
+  /**
+   * 将组件字体样式数据转换为json
+   *
+   * @returns
+   */
+  async toFontStyleJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, ["id", "fontSize", "fontFamily", "fontColor", "fontColorOpacity", "textAlign", "textBaseline", "fontLineHeight"]))) as ElementObject;
+  }
 }

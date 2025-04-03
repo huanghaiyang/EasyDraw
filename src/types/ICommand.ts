@@ -18,13 +18,6 @@ export type IRemovedCommandElementObject = ICommandElementObject & INodeRelation
 // 组件顺序调整命令
 export type IRearrangeCommandElementObject = ICommandElementObject & INodeRelation;
 
-// 组件样式命令
-export type IStyleCommandElementObject = ICommandElementObject & {
-  isStyle?: boolean;
-  isStroke?: boolean;
-  isFill?: boolean;
-};
-
 // 组合命令
 export type IGroupCommandElementObject = ICommandElementObject &
   INodeRelation & {

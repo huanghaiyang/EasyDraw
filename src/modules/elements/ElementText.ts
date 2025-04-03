@@ -950,7 +950,7 @@ export default class ElementText extends ElementRect implements IElementText {
 
   /**
    * 将组件原始数据转换为json
-   * 
+   *
    * 文本组件在形变时会重新计算文本行，因此需要将文本数据也转换为json
    *
    * @returns
@@ -970,6 +970,19 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   async toTransformJson(): Promise<ElementObject> {
     const result = await super.toTransformJson();
+    result.data = LodashUtils.jsonClone(this.model.data);
+    return result as ElementObject;
+  }
+
+  /**
+   * 将组件字体样式数据转换为json
+   *
+   * 文本组件在形变时会重新计算文本行，因此需要将文本数据也转换为json
+   *
+   * @returns
+   */
+  async toFontStyleJson(): Promise<ElementObject> {
+    const result = await super.toFontStyleJson();
     result.data = LodashUtils.jsonClone(this.model.data);
     return result as ElementObject;
   }
