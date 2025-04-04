@@ -49,21 +49,21 @@ export enum ElementCommandTypes {
   GroupRemoved = "group_removed",
 }
 
-// 文本组件编辑命令
-export enum TextEditingCommandTypes {
+// 文本编辑器命令类型
+export enum TextEeditorCommandTypes {
   TextUpdated = "text_updated",
 }
 
 // 文本组件编辑命令对象
-export type ICommandTextEditingObject = {
-  model: ITextData;
+export type ICommandTextEditorObject = {
+  textData: ITextData;
   textCursor?: ITextCursor;
   textSelection?: ITextSelection;
 };
 
 // 文本组件编辑命令的保存数据
-export interface ITextEditingCommandPayload {
-  type: TextEditingCommandTypes;
-  dataList: Array<ICommandTextEditingObject>;
-  rDataList?: Array<ICommandTextEditingObject>;
+export interface ITextEditorCommandPayload {
+  type: TextEeditorCommandTypes;
+  data: ICommandTextEditorObject;
+  rData?: ICommandTextEditorObject;
 }

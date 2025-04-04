@@ -6,11 +6,11 @@
 import { ElementObject, IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
-import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextUpdateResult } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { every, isEmpty } from "lodash";
+import { isEmpty } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
@@ -18,6 +18,11 @@ import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
 import { FontStyle } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
+import IUndoRedo from "@/types/IUndoRedo";
+import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
+import UndoRedo from "@/modules/base/UndoRedo";
+import IStageShield from "@/types/IStageShield";
+import TextEditorUpdatedCommand from "../command/text/TextEditorUpdatedCommand";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -36,6 +41,10 @@ export default class ElementText extends ElementRect implements IElementText {
   private _prevTextUpdateId: string;
   // 上一次是否重新计算了文本行
   private _prevTextLinesReflowed: boolean = false;
+  // 撤销回退
+  private _undoRedo: IUndoRedo<ITextEditorCommandPayload>;
+  // 用以维护文本修改前的数据，包含文本内容，光标以及选区
+  private _originalCommandObject: ICommandTextEditorObject;
 
   get fontEnable(): boolean {
     return true;
@@ -72,6 +81,11 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get text(): string {
     return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
+  }
+
+  constructor(model: ElementObject, shield: IStageShield) {
+    super(model, shield);
+    this._undoRedo = new UndoRedo();
   }
 
   /**
@@ -194,16 +208,28 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 更新文本光标
+   *
+   * @param textCursor 文本光标
+   * @param textSelection 文本选区
+   */
+  updateTextCursors(textCursor?: ITextCursor, textSelection?: ITextSelection): void {
+    this._textCursor = textCursor;
+    this._textSelection = textSelection;
+  }
+
+  /**
    * 更新文本
    *
    * @param value 文本
    * @param states 文本编辑状态
    */
-  updateText(value: string, states: TextEditingStates): boolean {
+  updateText(value: string, states: TextEditingStates): TextUpdateResult {
     console.log("updateText", value, states);
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = states;
-    let shouldReflow = false;
+    let changed = false;
+    let reflow = false;
     if (CoderUtils.isArrowLeft(keyCode)) {
       this._moveCursorTo(Direction.LEFT, states);
     } else if (CoderUtils.isArrowRight(keyCode)) {
@@ -214,26 +240,33 @@ export default class ElementText extends ElementRect implements IElementText {
       this._moveCursorTo(Direction.BOTTOM, states);
     } else if (CoderUtils.isA(keyCode) && ctrlKey) {
       this._selectAll();
+    } else if (CoderUtils.isC(keyCode) && ctrlKey) {
+      this._copySelection(textData);
     } else {
+      this._originalCommandObject = this._getTextEditorCommandObject();
       if (CoderUtils.isDeleterKey(keyCode)) {
-        this._deleteAtCursor(textData);
+        changed = this._deleteAtCursor(textData);
       } else if (CoderUtils.isEnter(keyCode)) {
         this._insertNewLine(textData);
       } else if (CoderUtils.isX(keyCode) && ctrlKey) {
         this._cutSelection(textData);
-      } else if (CoderUtils.isC(keyCode) && ctrlKey) {
-        this._copySelection(textData);
       } else if (CoderUtils.isV(keyCode) && ctrlKey) {
         this._pasteText(value, textData, states);
+      } else if (CoderUtils.isZ(keyCode) && ctrlKey) {
+        this._undoRedo.undo();
+      } else if (CoderUtils.isY(keyCode) && ctrlKey) {
+        this._undoRedo.redo();
       } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
         this._updateInput(textData, value, states);
       }
-      this.model.data = textData;
-      shouldReflow = true;
+      if (changed) {
+        this.model.data = textData;
+      }
+      reflow = true;
     }
     this._rerefreshCursorRenderRect();
     this._markSelection();
-    return shouldReflow;
+    return { changed, reflow };
   }
 
   /**
@@ -723,6 +756,20 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 获取文本编辑器命令对象
+   */
+  private _getTextEditorCommandObject(): ICommandTextEditorObject {
+    const textData = LodashUtils.jsonClone(this.model.data as ITextData);
+    const textCursor = LodashUtils.jsonClone(this._textCursor);
+    const textSelection = LodashUtils.jsonClone(this._textSelection);
+    return {
+      textData,
+      textCursor,
+      textSelection,
+    };
+  }
+
+  /**
    * 删除光标所在的文本节点
    *
    * 注意：
@@ -731,7 +778,9 @@ export default class ElementText extends ElementRect implements IElementText {
    *
    * @param textData 文本数据
    */
-  private _deleteAtCursor(textData: ITextData) {
+  private _deleteAtCursor(textData: ITextData): boolean {
+    // 是否实际删除了文本内容
+    let result: boolean = true;
     // 如果选区可用，则删除选区中的文本节点
     if (this.isSelectionAvailable) {
       const [minCursor, maxCursor] = TextElementUtils.sortCursors(textData, [this._textSelection.startCursor, this._textSelection.endCursor]);
@@ -799,6 +848,9 @@ export default class ElementText extends ElementRect implements IElementText {
                 // 将光标移动到前一行的开头
                 this._textCursor = TextElementUtils.getCursorOfLineStart(prevLine, prevLineNumber);
               }
+            } else {
+              // 光标在第一行的行首，表示没有实际内容可以删除
+              result = false;
             }
           } else {
             // 删除光标前面的文本节点
@@ -838,13 +890,18 @@ export default class ElementText extends ElementRect implements IElementText {
     };
     this._prevMarkCursor = this._textCursor;
     this._prevInputCursor = null;
+    return result;
   }
 
   /**
    * 重新排版文本
+   *
+   * @param force 是否强制重新排版
+   * @returns 是否重新排版了文本
    */
-  reflowText(force?: boolean): void {
+  reflowText(force?: boolean): boolean {
     this._prevTextLinesReflowed = this._doReflowTextLines(!this._prevTextLinesReflowed || force);
+    return this._prevTextLinesReflowed;
   }
 
   /**
@@ -1031,5 +1088,35 @@ export default class ElementText extends ElementRect implements IElementText {
     const result = await super.toFontStyleJson();
     result.data = LodashUtils.jsonClone(this.model.data);
     return result as ElementObject;
+  }
+
+  /**
+   * 文本重新排版时触发
+   *
+   * @param changed 是否是因为文本内容变化才重新排版
+   */
+  onTextReflowed(changed?: boolean): void {
+    if (changed) {
+      this._addRedoUndoCommand();
+    }
+  }
+
+  /**
+   * 添加重做和撤销命令
+   */
+  private _addRedoUndoCommand(): void {
+    const data = this._originalCommandObject;
+    if (data) {
+      const rData = this._getTextEditorCommandObject();
+      const command = new TextEditorUpdatedCommand(
+        {
+          type: TextEeditorCommandTypes.TextUpdated,
+          data,
+          rData,
+        },
+        this,
+      );
+      this._undoRedo.add(command);
+    }
   }
 }

@@ -46,3 +46,9 @@ export enum TextSelectionCursorType {
   START,
   END,
 }
+
+// 文本更新结果
+export type TextUpdateResult = {
+  reflow?: boolean; // 是否需要重新排版
+  changed?: boolean; // 是否有内容更新
+};

@@ -552,12 +552,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements
    * @param force 是否强制重新计算
+   * @param changed 是否是因为文本内容变化才重新排版
    */
-  private async _reflowTextIfy(elements: IElement[], force?: boolean): Promise<void> {
-    await Promise.all(elements.map(async element => element instanceof ElementText && element.reflowText(force)));
+  private async _reflowTextIfy(elements: IElement[], force?: boolean, changed?: boolean): Promise<IElementText[]> {
+    const reflowedElements: IElementText[] = [];
+    await Promise.all(elements.map(async element => element instanceof ElementText && element.reflowText(force) && reflowedElements.push(element)));
     await this._addRedrawTask(true);
+    reflowedElements.forEach(element => element.onTextReflowed(changed));
     await Promise.all(elements.map(async element => element instanceof ElementText && element.refreshTextCursors()));
     await this._addRedrawTask(true);
+    return reflowedElements;
   }
 
   /**
@@ -1982,11 +1986,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   async _handleTextUpdate(value: string, states: TextEditingStates): Promise<void> {
     if (this.isTextEditing) {
-      const textElement = this.store.selectedElements[0] as ElementText;
-      const shouldReflow = textElement.updateText(value, states);
+      const textElement = this.store.selectedElements[0] as IElementText;
+      const { changed, reflow } = textElement.updateText(value, states);
       await this._addRedrawTask(true);
-      if (shouldReflow) {
-        await this._reflowTextIfy([textElement], false);
+      if (reflow) {
+        await this._reflowTextIfy([textElement], false, changed);
       }
     }
   }
