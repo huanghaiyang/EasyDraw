@@ -1987,7 +1987,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleTextUpdate(value: string, states: TextEditingStates): Promise<void> {
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as IElementText;
-      const { changed, reflow } = textElement.updateText(value, states);
+      const { changed, reflow } = await textElement.updateText(value, states);
       await this._addRedrawTask(true);
       if (reflow) {
         await this._reflowTextIfy([textElement], false, changed);

@@ -100,6 +100,9 @@ export default class ElementText extends ElementRect implements IElementText {
     this._cursorVisibleStatus = false;
     this._toggleCursorVisibleTimer(value);
     this._markSelection();
+    if (!value) {
+      this._undoRedo.clear();
+    }
   }
 
   /**
@@ -224,8 +227,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param value 文本
    * @param states 文本编辑状态
    */
-  updateText(value: string, states: TextEditingStates): TextUpdateResult {
-    console.log("updateText", value, states);
+  async updateText(value: string, states: TextEditingStates): Promise<TextUpdateResult> {
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = states;
     let changed = false;
@@ -243,6 +245,7 @@ export default class ElementText extends ElementRect implements IElementText {
     } else if (CoderUtils.isC(keyCode) && ctrlKey) {
       this._copySelection(textData);
     } else {
+      reflow = true;
       this._originalCommandObject = this._getTextEditorCommandObject();
       if (CoderUtils.isDeleterKey(keyCode)) {
         changed = this._deleteAtCursor(textData);
@@ -253,16 +256,15 @@ export default class ElementText extends ElementRect implements IElementText {
       } else if (CoderUtils.isV(keyCode) && ctrlKey) {
         this._pasteText(value, textData, states);
       } else if (CoderUtils.isZ(keyCode) && ctrlKey) {
-        this._undoRedo.undo();
+        reflow = await this._undoRedo.undo();
       } else if (CoderUtils.isY(keyCode) && ctrlKey) {
-        this._undoRedo.redo();
+        reflow = await this._undoRedo.redo();
       } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
         this._updateInput(textData, value, states);
       }
       if (changed) {
         this.model.data = textData;
       }
-      reflow = true;
     }
     this._rerefreshCursorRenderRect();
     this._markSelection();
@@ -759,13 +761,10 @@ export default class ElementText extends ElementRect implements IElementText {
    * 获取文本编辑器命令对象
    */
   private _getTextEditorCommandObject(): ICommandTextEditorObject {
-    const textData = LodashUtils.jsonClone(this.model.data as ITextData);
-    const textCursor = LodashUtils.jsonClone(this._textCursor);
-    const textSelection = LodashUtils.jsonClone(this._textSelection);
     return {
-      textData,
-      textCursor,
-      textSelection,
+      textData: LodashUtils.jsonClone(this.model.data as ITextData),
+      textCursor: LodashUtils.jsonClone(this._textCursor),
+      textSelection: LodashUtils.jsonClone(this._textSelection),
     };
   }
 
@@ -890,6 +889,7 @@ export default class ElementText extends ElementRect implements IElementText {
     };
     this._prevMarkCursor = this._textCursor;
     this._prevInputCursor = null;
+    console.log(result);
     return result;
   }
 

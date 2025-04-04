@@ -1163,7 +1163,7 @@ export interface IElementText extends IElement {
   // 更新文本光标
   updateTextCursors(textCursor?: ITextCursor, textSelection?: ITextSelection): void;
   // 更新文本
-  updateText(value: string, states: TextEditingStates): TextUpdateResult;
+  updateText(value: string, states: TextEditingStates): Promise<TextUpdateResult>;
   // 重新排版文本
   reflowText(force?: boolean): boolean;
   // 刷新文本框
