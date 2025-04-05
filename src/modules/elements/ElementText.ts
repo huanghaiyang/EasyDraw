@@ -22,7 +22,7 @@ import IUndoRedo from "@/types/IUndoRedo";
 import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
 import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
-import TextEditorUpdatedCommand from "../command/text/TextEditorUpdatedCommand";
+import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -248,19 +248,29 @@ export default class ElementText extends ElementRect implements IElementText {
       reflow = true;
       this._originalCommandObject = this._getTextEditorCommandObject();
       if (CoderUtils.isDeleterKey(keyCode)) {
+        // 删除
         changed = this._deleteAtCursor(textData);
       } else if (CoderUtils.isEnter(keyCode)) {
+        // 换行
         this._insertNewLine(textData);
       } else if (CoderUtils.isX(keyCode) && ctrlKey) {
+        // 剪切
         this._cutSelection(textData);
       } else if (CoderUtils.isV(keyCode) && ctrlKey) {
+        // 粘贴
         this._pasteText(value, textData, states);
       } else if (CoderUtils.isZ(keyCode) && ctrlKey) {
+        // 撤销
         reflow = await this._undoRedo.undo();
       } else if (CoderUtils.isY(keyCode) && ctrlKey) {
+        // 回退
         reflow = await this._undoRedo.redo();
       } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
+        // 普通按键
         this._updateInput(textData, value, states);
+      } else {
+        // 其他快捷键不支持
+        reflow = false;
       }
       if (changed) {
         this.model.data = textData;
@@ -889,7 +899,6 @@ export default class ElementText extends ElementRect implements IElementText {
     };
     this._prevMarkCursor = this._textCursor;
     this._prevInputCursor = null;
-    console.log(result);
     return result;
   }
 
@@ -1105,18 +1114,14 @@ export default class ElementText extends ElementRect implements IElementText {
    * 添加重做和撤销命令
    */
   private _addRedoUndoCommand(): void {
-    const data = this._originalCommandObject;
-    if (data) {
-      const rData = this._getTextEditorCommandObject();
-      const command = new TextEditorUpdatedCommand(
-        {
-          type: TextEeditorCommandTypes.TextUpdated,
-          data,
-          rData,
-        },
-        this,
-      );
-      this._undoRedo.add(command);
-    }
+    const command = new TextEditorUpdatedCommand(
+      {
+        type: TextEeditorCommandTypes.TextUpdated,
+        data: this._originalCommandObject,
+        rData: this._getTextEditorCommandObject(),
+      },
+      this,
+    );
+    this._undoRedo.add(command);
   }
 }

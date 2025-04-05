@@ -551,16 +551,29 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 重新排版文本
    *
    * @param elements
-   * @param force 是否强制重新计算
+   * @param force 是否强制重新排版
    * @param changed 是否是因为文本内容变化才重新排版
    */
   private async _reflowTextIfy(elements: IElement[], force?: boolean, changed?: boolean): Promise<IElementText[]> {
     const reflowedElements: IElementText[] = [];
-    await Promise.all(elements.map(async element => element instanceof ElementText && element.reflowText(force) && reflowedElements.push(element)));
-    await this._addRedrawTask(true);
-    reflowedElements.forEach(element => element.onTextReflowed(changed));
-    await Promise.all(elements.map(async element => element instanceof ElementText && element.refreshTextCursors()));
-    await this._addRedrawTask(true);
+    await Promise.all(
+      elements.map(async element => {
+        if (element instanceof ElementText) {
+          // 文本改变必定会引发重新排版
+          const reflowed = element.reflowText(force || changed);
+          if (reflowed) {
+            reflowedElements.push(element);
+          }
+        }
+      }),
+    );
+    if (reflowedElements.length > 0) {
+      console.log("_reflowTextIfy", reflowedElements);
+      await this._addRedrawTask(true);
+      reflowedElements.forEach(element => element.onTextReflowed(changed));
+      await Promise.all(elements.map(async element => element instanceof ElementText && element.refreshTextCursors()));
+      await this._addRedrawTask(true);
+    }
     return reflowedElements;
   }
 
@@ -1990,7 +2003,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const { changed, reflow } = await textElement.updateText(value, states);
       await this._addRedrawTask(true);
       if (reflow) {
-        await this._reflowTextIfy([textElement], false, changed);
+        await this._reflowTextIfy([textElement], true, changed);
       }
     }
   }
