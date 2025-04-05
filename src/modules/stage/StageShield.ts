@@ -1066,12 +1066,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const { selectedElements } = this.store;
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
-      if (pressType === TextEditorPressTypes.PRESS_UP) {
-        (targetElement as ElementText).onEditorPressChange(pressType);
-      } else {
+      if (pressType !== TextEditorPressTypes.PRESS_UP) {
         (targetElement as ElementText).refreshTextCursorAtPosition(this.cursor.worldValue, isSelectionMove);
         this._retreiveTextCursorInput(targetElement as unknown as IElementText);
       }
+      (targetElement as ElementText).onEditorPressChange(pressType);
     }
   }
 
