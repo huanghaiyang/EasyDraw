@@ -1,7 +1,7 @@
 import IUndoRedo from "@/types/IUndoRedo";
 import ICommand from "@/types/ICommand";
 
-export default class UndoRedo<T> implements IUndoRedo<T> {
+export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
   undoStack: ICommand<T>[] = [];
   redoStack: ICommand<T>[] = [];
 
@@ -33,22 +33,22 @@ export default class UndoRedo<T> implements IUndoRedo<T> {
   /**
    * 撤销
    */
-  async undo(): Promise<boolean> {
-    if (this.undoStack.length === 0) return false;
+  async undo(): Promise<A> {
+    if (this.undoStack.length === 0) return false as A;
     const command = this.undoStack.pop();
     this.redoStack.push(command);
     await command.undo();
-    return true;
+    return true as A;
   }
 
   /**
    * 重做
    */
-  async redo(): Promise<boolean> {
-    if (this.redoStack.length === 0) return false;
+  async redo(): Promise<A> {
+    if (this.redoStack.length === 0) return false as A;
     const command = this.redoStack.pop();
     this.undoStack.push(command);
     await command.redo();
-    return true;
+    return true as A;
   }
 }

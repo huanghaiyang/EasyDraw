@@ -367,6 +367,26 @@ export default class TextElementUtils {
   }
 
   /**
+   * 判断两个选区是否相等
+   *
+   * @param selectionA 选区A
+   * @param selectionB 选区B
+   * @returns 是否相等
+   */
+  static isSelectionEqual(selectionA: ITextSelection, selectionB: ITextSelection): boolean {
+    return (
+      selectionA &&
+      selectionB &&
+      selectionA.startCursor &&
+      selectionB.startCursor &&
+      selectionA.endCursor &&
+      selectionB.endCursor &&
+      TextElementUtils.isCursorEqual(selectionA.startCursor, selectionB.startCursor) &&
+      TextElementUtils.isCursorEqual(selectionA.endCursor, selectionB.endCursor)
+    );
+  }
+
+  /**
    * 获取文本数据中的文本内容
    *
    * @param textData 文本数据

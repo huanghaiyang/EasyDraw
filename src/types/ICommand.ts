@@ -1,5 +1,5 @@
 import { ElementObject } from "@/types/IElement";
-import ITextData, { ITextCursor, ITextSelection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection, TextEditorOperations } from "@/types/IText";
 
 // 通用组件命令
 export type ICommandElementObject = {
@@ -52,11 +52,12 @@ export enum ElementCommandTypes {
 // 文本编辑器命令类型
 export enum TextEeditorCommandTypes {
   TextUpdated = "text_updated",
+  CursorSelectionUpdated = "cursor_selection_updated",
 }
 
 // 文本组件编辑命令对象
 export type ICommandTextEditorObject = {
-  textData: ITextData;
+  textData?: ITextData;
   textCursor?: ITextCursor;
   textSelection?: ITextSelection;
 };
@@ -64,6 +65,8 @@ export type ICommandTextEditorObject = {
 // 文本组件编辑命令的保存数据
 export interface ITextEditorCommandPayload {
   type: TextEeditorCommandTypes;
+  operation: TextEditorOperations;
+  updateId?: string;
   data: ICommandTextEditorObject;
   rData?: ICommandTextEditorObject;
 }

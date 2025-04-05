@@ -71,7 +71,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 对齐
   align: IStageAlign;
   // 撤销
-  undoRedo: IUndoRedo<IElementCommandPayload>;
+  undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -197,7 +197,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection = new StageSelection(this);
     this.align = new StageAlign(this);
     this.mask = new DrawerMask(this);
-    this.undoRedo = new UndoRedo<IElementCommandPayload>();
+    this.undoRedo = new UndoRedo();
     this.renderer = new ShieldRenderer(this);
     this._requestAnimationRedraw();
     window.shield = this;
@@ -568,7 +568,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       }),
     );
     if (reflowedElements.length > 0) {
-      console.log("_reflowTextIfy", reflowedElements);
       await this._addRedrawTask(true);
       reflowedElements.forEach(element => element.onTextReflowed(changed));
       await Promise.all(elements.map(async element => element instanceof ElementText && element.refreshTextCursors()));
