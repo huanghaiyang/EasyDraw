@@ -5,7 +5,7 @@ import { IGroupCommandElementObject, IElementCommandPayload } from "@/types/ICom
 
 export default class GroupAddedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   async undo(): Promise<void> {
-    this.payload.dataList.forEach(data => {
+    this.payload.uDataList.forEach(data => {
       const {
         model: { id },
         isGroup,

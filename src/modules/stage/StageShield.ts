@@ -48,6 +48,7 @@ import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
 import UndoRedo from "@/modules/base/UndoRedo";
+import { TextEditorPressTypes } from "@/types/IText";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -233,14 +234,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 根据数据创建更新命令
    *
-   * @param dataList
+   * @param uDataList
    * @param rDataList
    */
-  private _createUpdateCommandBy(dataList: ICommandElementObject[], rDataList: ICommandElementObject[]): void {
+  private _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[]): void {
     const command = new ElementsUpdatedCommand(
       {
         type: ElementCommandTypes.ElementsUpdated,
-        dataList,
+        uDataList,
         rDataList,
       },
       this.store,
@@ -818,7 +819,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this._isPressDown) {
       this.calcPressMove(e);
       if (this.isTextEditing) {
-        this._tryRetrieveTextCursor(true);
+        this._tryRetrieveTextCursor(TextEditorPressTypes.PRESS_MOVE, true);
       } else if (this.isArbitraryDrawing) {
         // 移动过程中创建组件
         this._updatingArbitraryElementOnMovement(e);
@@ -1015,7 +1016,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
     if (this.isTextEditing) {
       if (this._isCursorOnEditingElement()) {
-        this._tryRetrieveTextCursor();
+        this._tryRetrieveTextCursor(TextEditorPressTypes.PRESS_DOWN, false);
       } else {
         await this._commitEidting();
         this._shouldSelectTopAWhilePressUp = false;
@@ -1058,13 +1059,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 尝试命中文本组件的光标
+   *
+   * @param pressType - 按压类型
    */
-  private _tryRetrieveTextCursor(isSelectionMove?: boolean): void {
+  private _tryRetrieveTextCursor(pressType: TextEditorPressTypes, isSelectionMove?: boolean): void {
     const { selectedElements } = this.store;
     const targetElement = this.selection.getElementOnCoord(this.cursor.worldValue);
     if (targetElement && targetElement instanceof ElementText && selectedElements[0] === targetElement) {
-      (targetElement as ElementText).refreshTextCursorAtPosition(this.cursor.worldValue, isSelectionMove);
-      this._retreiveTextCursorInput(targetElement as unknown as IElementText);
+      if (pressType === TextEditorPressTypes.PRESS_UP) {
+        (targetElement as ElementText).onEditorPressChange(pressType);
+      } else {
+        (targetElement as ElementText).refreshTextCursorAtPosition(this.cursor.worldValue, isSelectionMove);
+        this._retreiveTextCursorInput(targetElement as unknown as IElementText);
+      }
     }
   }
 
@@ -1155,6 +1162,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this._isPressDown = false;
     this.calcPressUp(e);
     if (this.isTextEditing) {
+      this._tryRetrieveTextCursor(TextEditorPressTypes.PRESS_UP, false);
     } else if (this.isArbitraryDrawing) {
       // 如果是绘制模式，则完成组件的绘制
       this._isPressDown = true;
@@ -1368,7 +1376,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsAddedCommand(
       {
         type: ElementCommandTypes.ElementsAdded,
-        dataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
+        uDataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
       },
       this.store,
     );
@@ -1740,7 +1748,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new ElementsRemovedCommand(
       {
         type: ElementCommandTypes.ElementsRemoved,
-        dataList: await Promise.all(
+        uDataList: await Promise.all(
           this.store.selectedElements.map(async element => {
             return { model: await element.toJson(), ...this._createRearrangeModel(element) };
           }),
@@ -1864,12 +1872,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleSelectGroup(): Promise<void> {
     if (this.isElementsBusy) return;
     if (this.store.isSelectedEmpty) return;
-    const dataList: Array<IGroupCommandElementObject> = await Promise.all(
+    const uDataList: Array<IGroupCommandElementObject> = await Promise.all(
       this.store.selectedElements.map(async element => ({ model: { id: element.id }, isGroupSubject: !element.isGroupSubject, ...this._createRearrangeModel(element) })),
     );
     const group = this.store.selectToGroup();
     if (group) {
-      dataList.push({
+      uDataList.push({
         model: { id: group.id },
         isGroup: true,
       } as IGroupCommandElementObject);
@@ -1878,7 +1886,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       const command = new GroupAddedCommand(
         {
           type: ElementCommandTypes.GroupAdded,
-          dataList,
+          uDataList,
           rDataList,
         },
         this.store,
@@ -1893,16 +1901,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param groups 组合列表
    */
   private async _createGroupRemovedCommand(groups: IElementGroup[]): Promise<void> {
-    const dataList: Array<IGroupCommandElementObject> = [];
+    const uDataList: Array<IGroupCommandElementObject> = [];
     await Promise.all(
       groups.map(async group => {
-        dataList.push({
+        uDataList.push({
           model: await group.toJson(),
           isGroup: true,
           ...this._createRearrangeModel(group),
         });
         group.subs.forEach(async sub => {
-          dataList.push({
+          uDataList.push({
             model: await sub.toGroupJson(),
             isGroup: false,
           });
@@ -1912,7 +1920,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = new GroupRemovedCommand(
       {
         type: ElementCommandTypes.GroupRemoved,
-        dataList,
+        uDataList,
       },
       this.store,
     );
@@ -1999,7 +2007,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleTextUpdate(value: string, states: TextEditingStates): Promise<void> {
     if (this.isTextEditing) {
       const textElement = this.store.selectedElements[0] as IElementText;
-      const { changed, reflow } = await textElement.updateText(value, states);
+      const result = await textElement.updateText(value, states);
+      if (!result) return;
+      const { changed, reflow } = result;
       await this._addRedrawTask(true);
       if (reflow) {
         await this._reflowTextIfy([textElement], true, changed);
@@ -2157,13 +2167,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param callback 回调
    */
   private async _createRearrangeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
     await elementsUpdateFunction();
     const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
     const command = new ElementsRearrangeCommand(
       {
         type: ElementCommandTypes.ElementsRearranged,
-        dataList,
+        uDataList,
         rDataList,
       },
       this.store,

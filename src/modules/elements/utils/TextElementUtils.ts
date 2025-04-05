@@ -363,27 +363,18 @@ export default class TextElementUtils {
    * @returns 是否相等
    */
   static isCursorEqual(cursorA: ITextCursor, cursorB: ITextCursor): boolean {
-    return cursorA.lineNumber === cursorB.lineNumber && cursorA.nodeId === cursorB.nodeId && cursorA.pos === cursorB.pos;
+    return !!cursorA && !!cursorB && cursorA.lineNumber === cursorB.lineNumber && cursorA.nodeId === cursorB.nodeId && cursorA.pos === cursorB.pos;
   }
 
   /**
-   * 判断两个选区是否相等
+   * 判断两个选区是否相等(只比较开始位置)
    *
    * @param selectionA 选区A
    * @param selectionB 选区B
    * @returns 是否相等
    */
-  static isSelectionEqual(selectionA: ITextSelection, selectionB: ITextSelection): boolean {
-    return (
-      selectionA &&
-      selectionB &&
-      selectionA.startCursor &&
-      selectionB.startCursor &&
-      selectionA.endCursor &&
-      selectionB.endCursor &&
-      TextElementUtils.isCursorEqual(selectionA.startCursor, selectionB.startCursor) &&
-      TextElementUtils.isCursorEqual(selectionA.endCursor, selectionB.endCursor)
-    );
+  static isSelectionEqualWithStart(selectionA: ITextSelection, selectionB: ITextSelection): boolean {
+    return !!selectionA && !!selectionB && !!selectionA.startCursor && !!selectionB.startCursor && TextElementUtils.isCursorEqual(selectionA.startCursor, selectionB.startCursor);
   }
 
   /**

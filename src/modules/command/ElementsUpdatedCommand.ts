@@ -5,10 +5,10 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElement
   /**
    * 恢复数据
    *
-   * @param dataList
+   * @param uDataList
    */
-  private async _restoreElementsFromData(dataList: Array<ICommandElementObject>): Promise<void> {
-    dataList.forEach(data => {
+  private async _restoreElementsFromData(uDataList: Array<ICommandElementObject>): Promise<void> {
+    uDataList.forEach(data => {
       const { model } = data;
       const element = this.store.updateElementModel(model.id, LodashUtils.jsonClone(model));
       if (element) {
@@ -19,10 +19,10 @@ export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElement
   }
 
   async undo(): Promise<void> {
-    if (!this.payload.dataList) {
+    if (!this.payload.uDataList) {
       return;
     }
-    await this._restoreElementsFromData(this.payload.dataList);
+    await this._restoreElementsFromData(this.payload.uDataList);
   }
   
   async redo(): Promise<void> {

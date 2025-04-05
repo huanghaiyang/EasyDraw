@@ -35,7 +35,7 @@ export default interface ICommand<T> {
 // 组件操作数据
 export interface IElementCommandPayload {
   type: ElementCommandTypes;
-  dataList: Array<ICommandElementObject>;
+  uDataList: Array<ICommandElementObject>;
   rDataList?: Array<ICommandElementObject>;
 }
 
@@ -67,6 +67,6 @@ export interface ITextEditorCommandPayload {
   type: TextEeditorCommandTypes;
   operation: TextEditorOperations;
   updateId?: string;
-  data: ICommandTextEditorObject;
+  uData: ICommandTextEditorObject;
   rData?: ICommandTextEditorObject;
 }

@@ -17,11 +17,11 @@ export default class TextEditorUpdatedCommand extends TextEditorBaseCommand<ITex
   }
 
   async undo(): Promise<void> {
-    const { data, type } = this.payload;
-    if (!data) {
+    const { uData, type } = this.payload;
+    if (!uData) {
       return;
     }
-    await this._restoreElementsFromData(data, type);
+    await this._restoreElementsFromData(uData, type);
   }
 
   async redo(): Promise<void> {

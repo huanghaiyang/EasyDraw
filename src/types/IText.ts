@@ -55,17 +55,24 @@ export type TextUpdateResult = {
 
 // 文本编辑器操作类型
 export enum TextEditorOperations {
-  NONE,
-  INPUT,
-  DELETE_SELECTION,
-  DELETE_PREV,
-  INSERT_NEWLINE,
-  SELECT_ALL,
-  COPY_SELECTION,
-  CUT_SELECTION,
-  PASTE_TEXT,
-  UNDO,
-  REDO,
-  MOVE_CURSOR,
-  MOVE_SELECTION,
+  NONE = "none",
+  INPUT = "input",
+  DELETE_SELECTION = "delete_selection",
+  DELETE_PREV = "delete_prev",
+  INSERT_NEWLINE = "insert_newline",
+  SELECT_ALL = "select_all",
+  COPY_SELECTION = "copy_selection",
+  CUT_SELECTION = "cut_selection",
+  PASTE_TEXT = "paste_text",
+  UNDO = "undo",
+  REDO = "redo",
+  MOVE_CURSOR = "move_cursor",
+  MOVE_SELECTION = "move_selection",
+}
+
+// 文本编辑器鼠标按压类型
+export enum TextEditorPressTypes {
+  PRESS_DOWN = "press_down",
+  PRESS_MOVE = "press_move",
+  PRESS_UP = "press_up",
 }

@@ -5,10 +5,10 @@ export default class ElementsRearrangeCommand extends ElementsBaseCommand<IEleme
   /**
    * 重新调整组件位置
    *
-   * @param dataList
+   * @param uDataList
    */
-  private async _rearrange(dataList: Array<ICommandElementObject>): Promise<void> {
-    dataList.forEach(data => {
+  private async _rearrange(uDataList: Array<ICommandElementObject>): Promise<void> {
+    uDataList.forEach(data => {
       const {
         model: { id },
         prevId,
@@ -22,10 +22,10 @@ export default class ElementsRearrangeCommand extends ElementsBaseCommand<IEleme
     this.store.emitElementsLayerChanged();
   }
   async undo(): Promise<void> {
-    if (!this.payload.dataList) {
+    if (!this.payload.uDataList) {
       return;
     }
-    await this._rearrange(this.payload.dataList);
+    await this._rearrange(this.payload.uDataList);
   }
 
   async redo(): Promise<void> {

@@ -5,7 +5,7 @@ import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementsRemovedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   async undo(): Promise<void> {
-    this.payload.dataList.forEach(data => {
+    this.payload.uDataList.forEach(data => {
       const { prevId, model } = data as IRemovedCommandElementObject;
       let prevElement: IElement | undefined;
       if (prevId) {
@@ -16,7 +16,7 @@ export default class ElementsRemovedCommand extends ElementsBaseCommand<IElement
   }
 
   async redo(): Promise<void> {
-    this.payload.dataList.forEach(data => {
+    this.payload.uDataList.forEach(data => {
       const {
         model: { id },
       } = data;

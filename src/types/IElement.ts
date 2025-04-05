@@ -16,7 +16,7 @@ import { TransformTypes } from "@/types/Stage";
 import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
-import ITextData, { ITextCursor, ITextSelection, TextUpdateResult } from "@/types/IText";
+import ITextData, { ITextCursor, ITextSelection, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -1156,6 +1156,8 @@ export interface IElementText extends IElement {
   get text(): string;
   // 文本排版后触发
   onTextReflowed(changed?: boolean): void;
+  // 编辑时鼠标状态变化触发
+  onEditorPressChange(pressType: TextEditorPressTypes): void;
   // 刷新文本光标
   refreshTextCursorAtPosition(point: IPoint, isSelectionMove?: boolean): void;
   // 刷新文本光标

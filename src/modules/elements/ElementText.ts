@@ -6,7 +6,7 @@
 import { ElementObject, IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
-import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextEditorOperations, TextUpdateResult } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextEditorOperations, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -23,6 +23,7 @@ import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommand
 import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
+import { nanoid } from "nanoid";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -34,9 +35,9 @@ export default class ElementText extends ElementRect implements IElementText {
   // 光标可见计时器
   private _cursorVisibleTimer: number;
   // 上一次标记的光标
-  private _prevMarkCursor: ITextCursor;
+  private _prevMarkCursor: ITextCursor | null;
   // 上一次输入的光标位置
-  private _prevInputCursor: ITextCursor;
+  private _prevInputCursor: ITextCursor | null;
   // 上一次更新文本的id
   private _textUpdateId: string;
   // 上一次是否重新计算了文本行
@@ -44,9 +45,13 @@ export default class ElementText extends ElementRect implements IElementText {
   // 撤销回退
   private _undoRedo: IUndoRedo<ITextEditorCommandPayload, boolean>;
   // 用以维护文本修改前的数据，包含文本内容，光标以及选区
-  private _originalCommandObject: ICommandTextEditorObject;
+  private _originalCommandObject: ICommandTextEditorObject | null;
   // 上一次操作类型
   private _editorOperation: TextEditorOperations = TextEditorOperations.NONE;
+  // 上一次选区移动的id
+  private _selectionMoveId: string | null;
+  // 是否选区移动
+  private _isSelectionMoved: boolean = false;
 
   get fontEnable(): boolean {
     return true;
@@ -100,6 +105,13 @@ export default class ElementText extends ElementRect implements IElementText {
     this._textCursor = null;
     this._textSelection = null;
     this._cursorVisibleStatus = false;
+    this._originalCommandObject = null;
+    this._editorOperation = TextEditorOperations.NONE;
+    this._textUpdateId = null;
+    this._prevInputCursor = null;
+    this._prevTextLinesReflowed = false;
+    this._selectionMoveId = null;
+    this._isSelectionMoved = false;
     this._toggleCursorVisibleTimer(value);
     this._markSelection();
     if (!value) {
@@ -166,14 +178,11 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param isSelectionMove 是否是选区移动
    */
   refreshTextCursorAtPosition(coord: IPoint, isSelectionMove?: boolean): void {
-    // 如果文本组件不包含给定的坐标，那么就将文本光标和选区都设置为空
-    if (!this.isContainsCoord(coord)) {
-      this._textCursor = null;
-      this._textSelection = null;
-      this._prevInputCursor = null;
-      return;
+    this._isSelectionMoved = isSelectionMove || false;
+    if (!isSelectionMove) {
+      this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+      this._selectionMoveId = null;
     }
-    this._originalCommandObject = this._getTextEditorCommandObject();
     // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
     coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord, true);
     // 转换为舞台坐标
@@ -187,12 +196,18 @@ export default class ElementText extends ElementRect implements IElementText {
       if (isSelectionMove) {
         this._textSelection.endCursor = textCursor;
         this._cursorVisibleStatus = false;
+        this._editorOperation = TextEditorOperations.MOVE_SELECTION;
+        if (!this._selectionMoveId) {
+          this._selectionMoveId = nanoid();
+          this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+        }
       } else {
         this._textCursor = textCursor;
         this._textSelection = {
           startCursor: textCursor,
           endCursor: null,
         };
+        this._editorOperation = TextEditorOperations.MOVE_CURSOR;
       }
       this._cursorVisibleStatus = true;
       this._clearCursorVisibleTimer();
@@ -232,6 +247,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param states 文本编辑状态
    */
   async updateText(value: string, states: TextEditingStates): Promise<TextUpdateResult> {
+    if (this._isSelectionMoved) return;
     const textData = LodashUtils.jsonClone(this.model.data as ITextData);
     const { keyCode, ctrlKey, shiftKey, metaKey, altKey, updateId } = states;
     let changed = false;
@@ -1015,6 +1031,23 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 编辑抬起
+   *
+   * @param pressType - 按压类型
+   */
+  onEditorPressChange(pressType: TextEditorPressTypes) {
+    switch (pressType) {
+      case TextEditorPressTypes.PRESS_UP: {
+        this._selectionMoveId = null;
+        this._isSelectionMoved = false;
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  /**
    * 设置字体
    *
    * @param value 字体
@@ -1186,7 +1219,7 @@ export default class ElementText extends ElementRect implements IElementText {
           type: TextEeditorCommandTypes.TextUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
-          data: this._originalCommandObject,
+          uData: this._originalCommandObject,
           rData: this._getTextEditorCommandObject(),
         },
         this,
@@ -1199,20 +1232,22 @@ export default class ElementText extends ElementRect implements IElementText {
    * 添加文本光标更新命令
    */
   private _addCursorUpdateCommand(): void {
-    let shouldAdd: boolean = false;
+    let shouldUpdate: boolean = false;
     const tailUndoCommand = this._undoRedo.tailUndoCommand;
     if (tailUndoCommand) {
       const {
         payload: {
           operation,
-          data: { textCursor, textSelection },
+          uData: { textCursor, textSelection },
         },
       } = tailUndoCommand;
-      shouldAdd =
-        (this._editorOperation === TextEditorOperations.MOVE_CURSOR && operation === TextEditorOperations.MOVE_CURSOR && !TextElementUtils.isCursorEqual(this._textCursor, textCursor)) ||
-        (this._editorOperation === TextEditorOperations.MOVE_SELECTION && operation === TextEditorOperations.MOVE_SELECTION && !TextElementUtils.isSelectionEqual(this._textSelection, textSelection));
+      shouldUpdate =
+        (this._editorOperation === TextEditorOperations.MOVE_CURSOR && operation === TextEditorOperations.MOVE_CURSOR && TextElementUtils.isCursorEqual(this._textCursor, textCursor)) ||
+        (this._editorOperation === TextEditorOperations.MOVE_SELECTION &&
+          operation === TextEditorOperations.MOVE_SELECTION &&
+          TextElementUtils.isSelectionEqualWithStart(this._textSelection, textSelection));
     }
-    if (shouldAdd) {
+    if (shouldUpdate) {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject({ dataExclude: true });
     } else {
       const command = new TextEditorUpdatedCommand(
@@ -1220,7 +1255,7 @@ export default class ElementText extends ElementRect implements IElementText {
           type: TextEeditorCommandTypes.CursorSelectionUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
-          data: this._originalCommandObject,
+          uData: this._originalCommandObject,
           rData: this._getTextEditorCommandObject({ dataExclude: true }),
         },
         this,
