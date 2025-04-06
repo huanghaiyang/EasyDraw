@@ -7,9 +7,7 @@ import { ElementObject, IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
 import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextEditorOperations, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
-import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import MathUtils from "@/utils/MathUtils";
 import { isEmpty } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
 import CoderUtils from "@/utils/CoderUtils";
@@ -24,6 +22,7 @@ import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
 import { nanoid } from "nanoid";
+import { RenderRect } from "@/types/IRender";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -187,14 +186,12 @@ export default class ElementText extends ElementRect implements IElementText {
       this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
       this._selectionMoveId = null;
     }
-    // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
-    coord = MathUtils.transWithCenter(coord, this.angles, this.centerCoord, true);
-    // 转换为舞台坐标
-    const point = ElementUtils.calcStageRelativePoint(coord);
     // 计算旋转盒模型的rect
-    const rect = ElementRenderHelper.calcElementRenderRect(this);
+    const rect = ElementRenderHelper.calcElementRenderRect(this) as RenderRect;
+    // 转换为组件内的坐标
+    const point = ElementRenderHelper.convertCoordInRect(coord, this, rect);
     // 获取文本光标
-    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, CommonUtils.scalePoint(point, this.shield.stageScale), rect, this.flipX);
+    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point, rect);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
@@ -1273,5 +1270,23 @@ export default class ElementText extends ElementRect implements IElementText {
       );
       this._undoRedo.add(command);
     }
+  }
+
+  /**
+   * 判断给定坐标是否在组件内
+   *
+   * @param coord
+   * @returns
+   */
+  isContainsCoord(coord: IPoint): boolean {
+    if (this.isSelected) return super.isContainsCoord(coord);
+    const textData = this.model.data as ITextData;
+    if (textData.lines.length === 0) return false;
+    const point = ElementRenderHelper.convertCoordInRect(coord, this, ElementRenderHelper.calcElementRenderRect(this) as RenderRect);
+    return textData.lines.some(line => {
+      return line.nodes.some(node => {
+        return !CoderUtils.isSpace(node.content) && CommonUtils.isPointInRect(node, point);
+      });
+    });
   }
 }

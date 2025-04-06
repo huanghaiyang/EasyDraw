@@ -2,13 +2,10 @@ import { FontStyle, TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { ElementObject } from "@/types/IElement";
-import { RenderRect } from "@/types/IRender";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
-import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
-import MathUtils from "@/utils/MathUtils";
-import { every, isBoolean, pick } from "lodash";
+import { pick, every } from "lodash";
 import { nanoid } from "nanoid";
 
 /**
@@ -123,26 +120,19 @@ export default class TextElementUtils {
    * 获取光标位置
    *
    * @param textData 文本数据
-   * @param position 光标位置
+   * @param point 光标位置
    * @param rect 旋转盒模型的rect
-   * @param flipX 是否翻转
    * @returns 光标位置
    */
-  static getTextCursorAtPosition(textData: ITextData, position: IPoint, rect: Partial<DOMRect>, flipX?: boolean): ITextCursor {
-    if (!isBoolean(flipX)) flipX = false;
+  static getTextCursorAtPosition(textData: ITextData, point: IPoint, rect: Partial<DOMRect>): ITextCursor {
     const textCursor: ITextCursor = {};
-    // 将当前鼠标位置转换为文本坐标系的坐标（文本坐标系是相对于文本的中心节点计算的）
-    let [curPoint] = CanvasUtils.transPointsOfBox([position], rect as RenderRect);
-    if (flipX) {
-      curPoint = MathUtils.calcHorizontalSymmetryPointInRect(curPoint, CommonUtils.centerRectConversion(rect));
-    }
     const { lines } = textData;
     let line: ITextLine;
     let lineNumber = -1;
     for (let i = 0; i < lines.length; i++) {
       const curLine = lines[i];
       // 判断当前光标是否在当前文本行内
-      if (CommonUtils.isPointInRect(curLine, curPoint)) {
+      if (CommonUtils.isPointInRect(curLine, point)) {
         line = curLine;
         lineNumber = i;
         break;
@@ -154,10 +144,10 @@ export default class TextElementUtils {
       for (let j = 0; j < line.nodes.length; j++) {
         const node = line.nodes[j];
         // 判断当前光标是否在当前节点内
-        if (CommonUtils.isPointInRect(node, curPoint)) {
+        if (CommonUtils.isPointInRect(node, point)) {
           let pos = Direction.LEFT;
           // 判断当前光标是否在当前节点的右侧位置
-          if (curPoint.x >= node.x + node.width / 2) {
+          if (point.x >= node.x + node.width / 2) {
             pos = Direction.RIGHT;
           }
           Object.assign(textCursor, getCursorPropsOfNode(node, pos, lineNumber));

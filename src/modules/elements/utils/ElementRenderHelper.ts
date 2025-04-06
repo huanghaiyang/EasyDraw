@@ -1,6 +1,10 @@
 import { IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
+import ElementUtils from "./ElementUtils";
+import CanvasUtils from "@/utils/CanvasUtils";
+import MathUtils from "@/utils/MathUtils";
+import { RenderRect } from "@/types/IRender";
 
 export default class ElementRenderHelper {
   /**
@@ -34,5 +38,22 @@ export default class ElementRenderHelper {
     // 根据画布的缩放比例进行缩放
     rect = CommonUtils.scaleRect(rect, scale);
     return rect;
+  }
+
+  /**
+   * 将坐标转换到组件的渲染盒模型中
+   *
+   * @param coord
+   * @param element
+   * @param rect
+   * @returns
+   */
+  static convertCoordInRect(coord: IPoint, element: IElement, rect: RenderRect): IPoint {
+    const point = ElementUtils.calcStageRelativePoint(coord);
+    let [curPoint] = CanvasUtils.transPointsOfBox([point], rect);
+    if (element.flipX) {
+      curPoint = MathUtils.calcHorizontalSymmetryPointInRect(curPoint, CommonUtils.centerRectConversion(rect));
+    }
+    return curPoint;
   }
 }

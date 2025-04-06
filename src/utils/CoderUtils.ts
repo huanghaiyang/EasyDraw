@@ -148,4 +148,14 @@ export default class CoderUtils {
   static isEnglishLetter(char: string): boolean {
     return char.length === 1 && /[a-zA-Z]/.test(char);
   }
+
+  /**
+   * 判断是否为空格
+   *
+   * @param char
+   * @returns
+   */
+  static isSpace(char: string): boolean {
+    return char.length === 1 && (char.charCodeAt(0) === 32 || char.charCodeAt(0) === 160 || char.charCodeAt(0) === 12288);
+  }
 }

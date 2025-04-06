@@ -222,10 +222,6 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * @param textCursorEditor
    */
   private _addCursorInputEvents(textCursorEditor: HTMLTextAreaElement): void {
-    // 失去焦点
-    textCursorEditor.addEventListener("blur", () => {
-      console.log("blur");
-    });
     // 监听键盘按键
     textCursorEditor.addEventListener("keydown", e => {
       const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = e;
