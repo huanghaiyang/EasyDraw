@@ -9,6 +9,7 @@ import { EllipseModel } from "@/types/IElement";
 import ITextData from "@/types/IText";
 import FontUtils from "@/utils/FontUtils";
 import { every, isNumber } from "lodash";
+import CoderUtils from "@/utils/CoderUtils";
 
 // 画布变换参数
 type CtxTransformOptions = {
@@ -286,24 +287,38 @@ export default class CanvasUtils {
           // 注意node节点的fontSize是没有缩放的，所以这里需要再次缩放
           rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
         });
-        nodes.forEach(node => {
+        nodes.forEach((node, index) => {
           ctx.save();
           let { content, fontStyle: nodeFontStyle } = node;
           nodeFontStyle = CanvasUtils.transFontWithScale(nodeFontStyle);
           let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
           ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
           ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
-          const metrics = ctx.measureText(FontUtils.DUMMY_TEXT);
-          const { actualBoundingBoxDescent, fontBoundingBoxDescent } = metrics;
+          const metrics = ctx.measureText(content);
+          const { actualBoundingBoxDescent, fontBoundingBoxDescent, width } = metrics;
           let height: number = 0;
           if (textBaseline === "top") {
             height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
           }
-          const { width } = ctx.measureText(content);
+          let indentX: number = 0;
+          // 如果当前节点是英文字符，且前一个节点也是英文字符
+          if (index !== 0 && CoderUtils.isEnglishLetter(content)) {
+            const prevNode = nodes[index - 1];
+            const { content: prevContent, fontStyle: prevFontStyle, width: prevWidth } = prevNode;
+            // 如果前一个节点是英文字符，且两个节点的样式相同，则需要计算下两个字符是否是连字
+            if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(nodeFontStyle, prevFontStyle)) {
+              const { width: tupleWidth } = ctx.measureText(prevContent + content);
+              const ligatureWidth = prevWidth + width;
+              if (tupleWidth < ligatureWidth) {
+                indentX = tupleWidth - ligatureWidth;
+              }
+            }
+          }
           // TODO 此处直接修改node，需要重新设计
-          Object.assign(node, { x: prevX, y: prevY, width, height: rowHeight });
-          ctx.fillText(content, prevX, prevY + (rowHeight - height) / 2);
-          prevX += width;
+          const x = prevX + indentX;
+          Object.assign(node, { x, y: prevY, width, height: rowHeight });
+          ctx.fillText(content, x, prevY + (rowHeight - height) / 2);
+          prevX = x + width;
           ctx.restore();
         });
       }

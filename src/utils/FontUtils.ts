@@ -1,6 +1,8 @@
 import { FontStyle } from "@/styles/ElementStyles";
 import { ISize } from "@/types";
 import TextUtils from "@/utils/TextUtils";
+import { pick } from "lodash";
+import LodashUtils from "./LodashUtils";
 
 export default class FontUtils {
   // 用于计算文本尺寸的假文本
@@ -91,5 +93,18 @@ export default class FontUtils {
     };
     document.body.removeChild(span);
     return result;
+  }
+
+  /**
+   * 判断两个字体样式是否相同，此法用于计算字体的尺寸缓存判断
+
+   * @param f1
+   * @param f2
+   * @returns
+   */
+  static isFontEqualForMeasureText(f1: FontStyle, f2: FontStyle): boolean {
+    f1 = pick(f1, ["fontSize", "fontFamily"]);
+    f2 = pick(f2, ["fontSize", "fontFamily"]);
+    return LodashUtils.isPlainObjectEqual(f1, f2);
   }
 }

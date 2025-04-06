@@ -51,4 +51,20 @@ export default class LodashUtils {
     console.warn("jsonClone: 非对象或数组类型", obj);
     return cloneDeep(obj);
   }
+
+  /**
+   * 判断两个对象是否相等
+   *
+   * @param obj1
+   * @param obj2
+   * @returns
+   */
+  static isPlainObjectEqual(obj1: Object, obj2: Object): boolean {
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) {
+      return false;
+    }
+    return keys1.every(key => obj1[key] === obj2[key]);
+  }
 }

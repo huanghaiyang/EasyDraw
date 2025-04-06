@@ -128,4 +128,24 @@ export default class CoderUtils {
   static isEnter(keyCode: number): boolean {
     return keyCode === 13;
   }
+
+  /**
+   * 是否是小写的英文字符
+   *
+   * @param char
+   * @returns
+   */
+  static isLowerCaseLetter(char: string): boolean {
+    return char.length === 1 && /[a-z]/.test(char);
+  }
+
+  /**
+   * 判断是否为英文字符
+   *
+   * @param char
+   * @returns
+   */
+  static isEnglishLetter(char: string): boolean {
+    return char.length === 1 && /[a-zA-Z]/.test(char);
+  }
 }
