@@ -1,13 +1,10 @@
-import { FontStyle } from "@/styles/ElementStyles";
+import { FontStyle, FontStylePropsForMeasureText } from "@/styles/ElementStyles";
 import { ISize } from "@/types";
 import TextUtils from "@/utils/TextUtils";
 import { pick } from "lodash";
-import LodashUtils from "./LodashUtils";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class FontUtils {
-  // 用于计算文本尺寸的假文本
-  static DUMMY_TEXT = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789天地玄黄宇宙洪荒日月盈昃辰宿列张孔曹卢甘{}[]|~!@#$%^&*()_+{}:";
-
   /**
    * 计算文字宽度
    *
@@ -103,8 +100,8 @@ export default class FontUtils {
    * @returns
    */
   static isFontEqualForMeasureText(f1: FontStyle, f2: FontStyle): boolean {
-    f1 = pick(f1, ["fontSize", "fontFamily"]);
-    f2 = pick(f2, ["fontSize", "fontFamily"]);
+    f1 = pick(f1, FontStylePropsForMeasureText);
+    f2 = pick(f2, FontStylePropsForMeasureText);
     return LodashUtils.isPlainObjectEqual(f1, f2);
   }
 }

@@ -198,7 +198,12 @@ export default class ElementText extends ElementRect implements IElementText {
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
-        this._textSelection.endCursor = textCursor;
+        // 判断选区的起始光标位置是否与当前的光标位置相同,对于英文连字渲染情况，例如[Te]渲染时，[T]和[e]会相互重叠一部分,光标在中间，既可以属于[T]，也可以属于[e]
+        if (!TextElementUtils.isCursorAtSamePosition(this._textSelection.startCursor, textCursor, this.model.data as ITextData)) {
+          this._textSelection.endCursor = textCursor;
+        } else {
+          this._textSelection.endCursor = null;
+        }
         this._cursorVisibleStatus = false;
         this._editorOperation = TextEditorOperations.MOVE_SELECTION;
         if (!this._selectionMoveId) {
@@ -1246,10 +1251,12 @@ export default class ElementText extends ElementRect implements IElementText {
         },
       } = tailUndoCommand;
       shouldUpdate =
-        (this._editorOperation === TextEditorOperations.MOVE_CURSOR && operation === TextEditorOperations.MOVE_CURSOR && TextElementUtils.isCursorEqual(this._textCursor, textCursor)) ||
+        (this._editorOperation === TextEditorOperations.MOVE_CURSOR &&
+          operation === TextEditorOperations.MOVE_CURSOR &&
+          TextElementUtils.isCursorAtSamePosition(this._textCursor, textCursor, this.model.data as ITextData)) ||
         (this._editorOperation === TextEditorOperations.MOVE_SELECTION &&
           operation === TextEditorOperations.MOVE_SELECTION &&
-          TextElementUtils.isSelectionEqualWithStart(this._textSelection, textSelection));
+          TextElementUtils.isSelectionEqualWithStart(this._textSelection, textSelection, this.model.data as ITextData));
     }
     if (shouldUpdate) {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject({ dataExclude: true });

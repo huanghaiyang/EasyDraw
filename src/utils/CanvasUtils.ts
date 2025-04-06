@@ -55,14 +55,14 @@ export default class CanvasUtils {
    * @param options
    * @returns
    */
-  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, rect: RenderRect, options: RenderParams = {}): Promise<void> {
+  static async drawImgLike(target: HTMLCanvasElement, data: string | HTMLCanvasElement | ImageData | HTMLImageElement, renderRect: RenderRect, options: RenderParams = {}): Promise<void> {
     return new Promise((resolve, reject) => {
       if (data instanceof ImageData) {
         data = CanvasUtils.getCanvasByImageData(data).toDataURL();
       }
       if (typeof data === "string") {
         if (CanvasUtils.ImageCaches.has(data)) {
-          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(data), rect, options);
+          CanvasUtils.drawRotateImage(target, CanvasUtils.ImageCaches.get(data), renderRect, options);
           resolve();
           return;
         }
@@ -70,14 +70,14 @@ export default class CanvasUtils {
         img.src = data;
         img.onload = () => {
           CanvasUtils.ImageCaches.set(data, img);
-          CanvasUtils.drawRotateImage(target, img, rect, options);
+          CanvasUtils.drawRotateImage(target, img, renderRect, options);
           resolve();
         };
         img.onerror = () => {
           reject();
         };
       } else if (data instanceof HTMLCanvasElement || data instanceof HTMLImageElement) {
-        CanvasUtils.drawRotateImage(target, data, rect, options);
+        CanvasUtils.drawRotateImage(target, data, renderRect, options);
         resolve();
       } else {
         resolve();
@@ -121,8 +121,8 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static transformCtx(ctx: CanvasRenderingContext2D, rect: RenderRect, options: CtxTransformOptions) {
-    const { x, y, width, height } = rect;
+  static transformCtx(ctx: CanvasRenderingContext2D, renderRect: RenderRect, options: CtxTransformOptions) {
+    const { x, y, width, height } = renderRect;
     const { radian, scaleX, scaleY, leanY } = options;
 
     ctx.translate(x + width / 2, y + height / 2);
@@ -140,10 +140,10 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static calcOffsetByRect(rect: RenderRect): IPoint {
+  static calcOffsetByRect(renderRect: RenderRect): IPoint {
     return {
-      x: -(rect.x + rect.width / 2),
-      y: -(rect.y + rect.height / 2),
+      x: -(renderRect.x + renderRect.width / 2),
+      y: -(renderRect.y + renderRect.height / 2),
     };
   }
 
@@ -154,8 +154,8 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static transPointsOfBox(points: IPoint[], rect: RenderRect) {
-    const offset = CanvasUtils.calcOffsetByRect(rect);
+  static transPointsOfBox(points: IPoint[], renderRect: RenderRect) {
+    const offset = CanvasUtils.calcOffsetByRect(renderRect);
     return points.map(point => {
       return MathUtils.translate(point, offset);
     });
@@ -169,8 +169,8 @@ export default class CanvasUtils {
    * @param rect
    * @returns
    */
-  static translateArcPoints(arcPoints: ArcPoints[], rect: RenderRect): ArcPoints[] {
-    const offset = CanvasUtils.calcOffsetByRect(rect);
+  static translateArcPoints(arcPoints: ArcPoints[], renderRect: RenderRect): ArcPoints[] {
+    const offset = CanvasUtils.calcOffsetByRect(renderRect);
     return MathUtils.translateArcPoints(arcPoints, offset);
   }
 
@@ -181,9 +181,9 @@ export default class CanvasUtils {
    * @param arcPoints
    * @param rect
    */
-  static drawClipArcPoints(ctx: CanvasRenderingContext2D, arcPoints: ArcPoints[], rect: RenderRect) {
+  static drawClipArcPoints(ctx: CanvasRenderingContext2D, arcPoints: ArcPoints[], renderRect: RenderRect) {
     arcPoints = CanvasUtils.transArcParamsWithScale(arcPoints)[0];
-    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, renderRect);
     ctx.beginPath();
     CanvasUtils.drawBazierPoints(arcPoints, ctx);
     ctx.closePath();
@@ -200,13 +200,13 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, rect: RenderRect, options: RenderParams = {}): void {
-    const { width, height, desX, desY, desWidth, desHeight } = rect;
+  static drawRotateImage(target: HTMLCanvasElement, img: CanvasImageSource | HTMLCanvasElement, renderRect: RenderRect, options: RenderParams = {}): void {
+    const { width, height, desX, desY, desWidth, desHeight } = renderRect;
     const ctx = target.getContext("2d");
     ctx.save();
-    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
+    CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
     if (options.clipArcPoints) {
-      CanvasUtils.drawClipArcPoints(ctx, options.clipArcPoints, rect);
+      CanvasUtils.drawClipArcPoints(ctx, options.clipArcPoints, renderRect);
     }
     if (every([desX, desY, desWidth, desHeight], isNumber)) {
       ctx.drawImage(img, desX - desWidth / 2, desY, desWidth, desHeight);
@@ -224,9 +224,9 @@ export default class CanvasUtils {
    * @param rect
    * @param options
    */
-  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, rect: RenderRect, options: RenderParams = {}) {
+  static drawRotateImageData(target: HTMLCanvasElement, imageData: ImageData, renderRect: RenderRect, options: RenderParams = {}) {
     const img = CanvasUtils.getCanvasByImageData(imageData); // 频繁调用有性能问题
-    CanvasUtils.drawRotateImage(target, img, rect, options);
+    CanvasUtils.drawRotateImage(target, img, renderRect, options);
   }
 
   /**
@@ -237,11 +237,11 @@ export default class CanvasUtils {
    * @param fillStyle
    * @param options
    */
-  static drawRectFill(target: HTMLCanvasElement, rect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}): void {
-    const { width, height, desX, desY, desWidth, desHeight } = rect;
+  static drawRectFill(target: HTMLCanvasElement, renderRect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}): void {
+    const { width, height, desX, desY, desWidth, desHeight } = renderRect;
     const ctx = target.getContext("2d");
     ctx.save();
-    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
+    CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     if (every([desX, desY, desWidth, desHeight], isNumber)) {
       ctx.fillRect(desX, desY, desWidth, desHeight);
@@ -261,13 +261,13 @@ export default class CanvasUtils {
    * @param fontStyle
    * @param options
    */
-  static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
+  static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
     const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
-    CanvasUtils.transformCtx(ctx, rect, this.getTransformValues(options));
-    points = CanvasUtils.transPointsOfBox(points, rect);
+    CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
+    points = CanvasUtils.transPointsOfBox(points, renderRect);
     ctx.font = `${fontSize}px ${fontFamily}`;
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
@@ -277,7 +277,7 @@ export default class CanvasUtils {
     textData.lines.forEach(line => {
       let prevX = flipX ? -points[0].x : points[0].x;
       // TODO 此处行的宽度是否应该设置为实际的节点总宽度
-      Object.assign(line, { x: prevX, y: prevY, width: rect.width });
+      Object.assign(line, { x: prevX, y: prevY, width: renderRect.width });
       const { nodes } = line;
       let rowHeight = 0;
       if (nodes.length === 0) {
@@ -338,10 +338,10 @@ export default class CanvasUtils {
    * @param fontStyle
    * @param options
    */
-  static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], rect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}) {
+  static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}) {
     points = CanvasUtils.transPointsWidthScale(points);
     fontStyle = CanvasUtils.transFontWithScale(fontStyle);
-    CanvasUtils.drawRotateText(target, textData, points, rect, fontStyle, options);
+    CanvasUtils.drawRotateText(target, textData, points, renderRect, fontStyle, options);
   }
 
   /**
@@ -547,10 +547,10 @@ export default class CanvasUtils {
    * @param fillStyle
    * @param options
    */
-  static drawInnerArcPathFillWithScale(target: HTMLCanvasElement, rect: RenderRect, arcPoints: ArcPoints[], fillStyle: FillStyle, options: RenderParams = {}): void {
+  static drawInnerArcPathFillWithScale(target: HTMLCanvasElement, renderRect: RenderRect, arcPoints: ArcPoints[], fillStyle: FillStyle, options: RenderParams = {}): void {
     arcPoints = CanvasUtils.scaleArcPoints(arcPoints);
     if (fillStyle.colorOpacity) {
-      CanvasUtils.drawArcPathFill(target, arcPoints, rect, fillStyle, options);
+      CanvasUtils.drawArcPathFill(target, arcPoints, renderRect, fillStyle, options);
     }
   }
 
@@ -576,9 +576,9 @@ export default class CanvasUtils {
    * @param strokeStyle
    * @param options
    */
-  static drawArcPathStrokeWidthScale(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
+  static drawArcPathStrokeWidthScale(target: HTMLCanvasElement, arcPoints: ArcPoints[], renderRect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
     [arcPoints, strokeStyle] = CanvasUtils.transArcParamsWithScale(arcPoints, strokeStyle);
-    CanvasUtils.drawArcPathStroke(target, arcPoints, rect, strokeStyle, options);
+    CanvasUtils.drawArcPathStroke(target, arcPoints, renderRect, strokeStyle, options);
   }
 
   /**
@@ -705,16 +705,16 @@ export default class CanvasUtils {
    * @param strokeStyle
    * @param options
    */
-  static drawArcPathStroke(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
+  static drawArcPathStroke(target: HTMLCanvasElement, arcPoints: ArcPoints[], renderRect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}) {
     const { isFold = true } = options;
     const ctx = target.getContext("2d");
     ctx.save();
-    CanvasUtils.transformCtx(ctx, rect, CanvasUtils.getTransformValues(options));
+    CanvasUtils.transformCtx(ctx, renderRect, CanvasUtils.getTransformValues(options));
     ctx.miterLimit = 0;
     ctx.lineCap = "round";
     ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
     ctx.beginPath();
-    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, renderRect);
     CanvasUtils.drawBazierPoints(arcPoints, ctx);
     isFold && ctx.closePath();
     // 即使线宽为0，但若是调用了stroke()方法，也会绘制出边框
@@ -756,13 +756,13 @@ export default class CanvasUtils {
    * @param arcPoints
    * @param fillStyle
    */
-  static drawArcPathFill(target: HTMLCanvasElement, arcPoints: ArcPoints[], rect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}) {
+  static drawArcPathFill(target: HTMLCanvasElement, arcPoints: ArcPoints[], renderRect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}) {
     const ctx = target.getContext("2d");
     ctx.save();
-    CanvasUtils.transformCtx(ctx, rect, CanvasUtils.getTransformValues(options));
+    CanvasUtils.transformCtx(ctx, renderRect, CanvasUtils.getTransformValues(options));
     ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
     ctx.beginPath();
-    arcPoints = CanvasUtils.translateArcPoints(arcPoints, rect);
+    arcPoints = CanvasUtils.translateArcPoints(arcPoints, renderRect);
     CanvasUtils.drawBazierPoints(arcPoints, ctx);
     ctx.closePath();
     ctx.fill();

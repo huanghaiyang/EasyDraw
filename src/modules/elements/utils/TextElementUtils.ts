@@ -333,7 +333,7 @@ export default class TextElementUtils {
     const { lines } = textData;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+      const nodeIndex = TextElementUtils.getTextNodeIndexOfLine(line, nodeId);
       if (nodeIndex !== -1) {
         return nodeIndex;
       }
@@ -341,6 +341,24 @@ export default class TextElementUtils {
     return -1;
   }
 
+  /**
+   * 获取文本行中节点的索引
+   *
+   * @param textLine 文本行
+   * @param nodeId 节点id
+   * @returns 节点索引
+   */
+  static getTextNodeIndexOfLine(textLine: ITextLine, nodeId: string): number {
+    return textLine.nodes.findIndex(node => node.id === nodeId);
+  }
+
+  /**
+   * 对光标进行排序
+   *
+   * @param textData 文本数据
+   * @param cursors 光标数组
+   * @returns 排序后的光标数组
+   */
   static sortCursors(textData: ITextData, cursors: ITextCursor[]): ITextCursor[] {
     const result = [...cursors];
     // 先按行号，再按节点索引，最后按照位置排序
@@ -353,6 +371,31 @@ export default class TextElementUtils {
       }
       return a.pos - b.pos;
     });
+  }
+
+  /**
+   * 判断给定的两个光标是否指向的是同一个位置
+   *
+   * @param cursorA 光标A
+   * @param cursorB 光标B
+   * @param textData 文本数据
+   * @returns 是否指向同一个位置
+   */
+  static isCursorAtSamePosition(cursorA: ITextCursor, cursorB: ITextCursor, textData?: ITextData): boolean {
+    if (TextElementUtils.isCursorEqual(cursorA, cursorB)) return true;
+    if (textData) {
+      const { nodeId: aNodeId, lineNumber: aLineNumber, pos: aPos } = cursorA;
+      const { nodeId: bNodeId, lineNumber: bLineNumber, pos: bPos } = cursorB;
+      if (aLineNumber === bLineNumber) {
+        const aNodeIndex = TextElementUtils.getTextNodeIndexOfLine(textData.lines[aLineNumber], aNodeId);
+        const bNodeIndex = TextElementUtils.getTextNodeIndexOfLine(textData.lines[bLineNumber], bNodeId);
+        if (aNodeIndex !== -1 && bNodeIndex !== -1) {
+          if (aNodeIndex + 1 === bNodeIndex && aPos === Direction.RIGHT && bPos === Direction.LEFT) return true;
+          if (aNodeIndex - 1 === bNodeIndex && aPos === Direction.LEFT && bPos === Direction.RIGHT) return true;
+        }
+      }
+    }
+    return false;
   }
 
   /**
@@ -371,10 +414,11 @@ export default class TextElementUtils {
    *
    * @param selectionA 选区A
    * @param selectionB 选区B
+   * @param textData 文本数据
    * @returns 是否相等
    */
-  static isSelectionEqualWithStart(selectionA: ITextSelection, selectionB: ITextSelection): boolean {
-    return !!selectionA && !!selectionB && !!selectionA.startCursor && !!selectionB.startCursor && TextElementUtils.isCursorEqual(selectionA.startCursor, selectionB.startCursor);
+  static isSelectionEqualWithStart(selectionA: ITextSelection, selectionB: ITextSelection, textData?: ITextData): boolean {
+    return !!selectionA && !!selectionB && !!selectionA.startCursor && !!selectionB.startCursor && TextElementUtils.isCursorAtSamePosition(selectionA.startCursor, selectionB.startCursor, textData);
   }
 
   /**

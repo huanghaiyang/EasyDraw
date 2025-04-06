@@ -171,6 +171,9 @@ export const DefaultElementStyle: ElementStyles = {
   ...DefaultFontStyle,
 };
 
+// 可用于计算文本尺寸的样式属性
+export const FontStylePropsForMeasureText = ["fontSize", "fontFamily"]
+
 /**
  * 获取默认组件样式
  *
