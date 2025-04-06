@@ -25,11 +25,12 @@ watch(
 );
 
 const toggleColorPickerVisible = () => {
+  if (!stageStore.strokeInputEnable) return;
   colorPickerRef.value.show();
 };
 </script>
 <template>
-  <div class="stroke-props right-props" v-show="stageStore.primarySelectedElement?.strokeEnable">
+  <div class="stroke-props right-props" v-show="stageStore.strokeEnable">
     <div class="stroke-props__title">
       <span class="stroke-props__title-text">描边</span>
       <el-icon><Plus @click="stageStore.addElementsStroke(strokes.length - 1)" /></el-icon>
@@ -38,7 +39,12 @@ const toggleColorPickerVisible = () => {
     <div v-for="(stroke, index) in strokes" :key="index">
       <div class="stroke-props__row color">
         <div class="stroke-props__row-item">
-          <el-color-picker v-model="stroke.color" @change="value => stageStore.setElementsStrokeColor(value, index)" ref="colorPickerRef" :disabled="stageStore.inputDisabled" />
+          <el-color-picker
+            v-model="stroke.color"
+            @change="value => stageStore.setElementsStrokeColor(value, index)"
+            ref="colorPickerRef"
+            :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
+          />
           <el-tag type="info" @click="toggleColorPickerVisible">{{ stroke.color }}</el-tag>
         </div>
 
@@ -51,7 +57,7 @@ const toggleColorPickerVisible = () => {
             max="1"
             precision="1"
             @change="value => stageStore.setElementsStrokeColorOpacity(Number(value), index)"
-            :disabled="stageStore.inputDisabled"
+            :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
           >
             <template #prepend>O</template>
           </el-input>
@@ -64,7 +70,13 @@ const toggleColorPickerVisible = () => {
 
       <div class="stroke-props__row">
         <div class="stroke-props__row-item">
-          <el-select v-model="stroke.type" placeholder="描边类型" size="small" @change="value => stageStore.setElementsStrokeType(value, index)" :disabled="stageStore.inputDisabled">
+          <el-select
+            v-model="stroke.type"
+            placeholder="描边类型"
+            size="small"
+            @change="value => stageStore.setElementsStrokeType(value, index)"
+            :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
+          >
             <el-option v-for="item in strokeTypes" :key="item.type" :label="item.name" :value="item.type" />
           </el-select>
         </div>
@@ -77,7 +89,7 @@ const toggleColorPickerVisible = () => {
             precision="1"
             :min="stageStore.primarySelectedElement?.model.type === CreatorTypes.line ? 1 : 0"
             @change="value => stageStore.setElementsStrokeWidth(Number(value), index)"
-            :disabled="stageStore.inputDisabled"
+            :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
           >
             <template #prepend>S</template>
             <template #append>px</template>

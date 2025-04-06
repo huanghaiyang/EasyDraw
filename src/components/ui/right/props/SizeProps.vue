@@ -31,7 +31,15 @@ watch(
 
     <div class="size-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="wValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" min="2" type="number" precision="1" @change="value => stageStore.setElementsWidth(Number(value))">
+        <el-input
+          v-model="wValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled || !stageStore.widthInputEnable"
+          min="2"
+          type="number"
+          precision="1"
+          @change="value => stageStore.setElementsWidth(Number(value))"
+        >
           <template #prepend>W</template>
           <template #append>px</template>
         </el-input>
@@ -40,7 +48,7 @@ watch(
         <el-input
           v-model="hValue"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled || !stageStore.primarySelectedElement?.heightModifyEnable"
+          :disabled="stageStore.inputDisabled || !stageStore.heightInputEnable"
           min="2"
           type="number"
           precision="1"

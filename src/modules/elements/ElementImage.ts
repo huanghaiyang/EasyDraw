@@ -3,7 +3,11 @@ import ElementRect from "@/modules/elements/ElementRect";
 import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class ElementImage extends ElementRect implements IElementImage {
-  get fillEnabled(): boolean {
+  get fillEnable(): boolean {
+    return false;
+  }
+
+  get fillInputEnable(): boolean {
     return false;
   }
 

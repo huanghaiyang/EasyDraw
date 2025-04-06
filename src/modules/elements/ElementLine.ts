@@ -31,7 +31,7 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get heightModifyEnable(): boolean {
+  get heightInputEnable(): boolean {
     return false;
   }
 
@@ -43,7 +43,11 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get fillEnabled(): boolean {
+  get fillEnable(): boolean {
+    return false;
+  }
+
+  get fillInputEnable(): boolean {
     return false;
   }
 
@@ -59,7 +63,7 @@ export default class ElementLine extends Element implements IElementLine {
     return false;
   }
 
-  get leanYAngleModifyEnable(): boolean {
+  get leanYAngleInputEnable(): boolean {
     return false;
   }
 

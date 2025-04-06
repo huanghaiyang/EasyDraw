@@ -131,6 +131,8 @@ export enum ShieldDispatcherNames {
   layerShiftMoveEnableChanged = "layerShiftMoveEnableChanged",
   // 层移动状态改变
   layerGoDownEnableChanged = "layerGoDownEnableChanged",
+  // 状态改变
+  statusChanged = "statusChanged",
 }
 
 // 输入类型

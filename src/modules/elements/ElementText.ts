@@ -45,7 +45,7 @@ export default class ElementText extends ElementRect implements IElementText {
   // 撤销回退
   private _undoRedo: IUndoRedo<ITextEditorCommandPayload, boolean>;
   // 用以维护文本修改前的数据，包含文本内容，光标以及选区
-  private _originalCommandObject: ICommandTextEditorObject | null;
+  private _undoCommandObject: ICommandTextEditorObject | null;
   // 上一次操作类型
   private _editorOperation: TextEditorOperations = TextEditorOperations.NONE;
   // 上一次选区移动的id
@@ -54,6 +54,10 @@ export default class ElementText extends ElementRect implements IElementText {
   private _isSelectionMoved: boolean = false;
 
   get fontEnable(): boolean {
+    return true;
+  }
+
+  get fontInputEnable(): boolean {
     return true;
   }
 
@@ -82,7 +86,7 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
-  get cornerEnable(): boolean {
+  get cornersInputEnable(): boolean {
     return this.status === ElementStatus.finished;
   }
 
@@ -105,7 +109,7 @@ export default class ElementText extends ElementRect implements IElementText {
     this._textCursor = null;
     this._textSelection = null;
     this._cursorVisibleStatus = false;
-    this._originalCommandObject = null;
+    this._undoCommandObject = null;
     this._editorOperation = TextEditorOperations.NONE;
     this._textUpdateId = null;
     this._prevInputCursor = null;
@@ -180,7 +184,7 @@ export default class ElementText extends ElementRect implements IElementText {
   refreshTextCursorAtPosition(coord: IPoint, isSelectionMove?: boolean): void {
     this._isSelectionMoved = isSelectionMove || false;
     if (!isSelectionMove) {
-      this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+      this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
       this._selectionMoveId = null;
     }
     // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
@@ -199,7 +203,7 @@ export default class ElementText extends ElementRect implements IElementText {
         this._editorOperation = TextEditorOperations.MOVE_SELECTION;
         if (!this._selectionMoveId) {
           this._selectionMoveId = nanoid();
-          this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+          this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
         }
       } else {
         this._textCursor = textCursor;
@@ -324,7 +328,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param textData 文本数据
    */
   private _insertNewLine(textData: ITextData): boolean {
-    this._originalCommandObject = this._getTextEditorCommandObject();
+    this._undoCommandObject = this._getTextEditorCommandObject();
     if (this.isSelectionAvailable) {
       this._deleteAtCursor(textData);
     }
@@ -391,7 +395,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _pasteText(value: string, textData: ITextData, states: TextEditingStates): boolean {
     if (value.length === 0) return false;
-    this._originalCommandObject = this._getTextEditorCommandObject();
+    this._undoCommandObject = this._getTextEditorCommandObject();
     // 如果选区有效，那么就先删除选区中的文本节点
     if (this.isSelectionAvailable) {
       this._deleteAtCursor(textData);
@@ -449,7 +453,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _cutSelection(textData: ITextData): boolean {
     if (!this.isSelectionAvailable) return false;
-    this._originalCommandObject = this._getTextEditorCommandObject();
+    this._undoCommandObject = this._getTextEditorCommandObject();
     this._doSelectionCopy(textData);
     this._deleteAtCursor(textData);
     this._editorOperation = TextEditorOperations.CUT_SELECTION;
@@ -465,7 +469,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _updateInput(textData: ITextData, value: string, states: TextEditingStates): boolean {
     if (!this._prevInputCursor) {
-      this._originalCommandObject = this._getTextEditorCommandObject();
+      this._undoCommandObject = this._getTextEditorCommandObject();
     }
     // 如果选区有效，那么就先删除选区中的文本节点
     if (this.isSelectionAvailable) {
@@ -645,7 +649,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * 选中所有文本
    */
   private _selectAll(): void {
-    this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+    this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
     const textData = this.model.data as ITextData;
     const startCursor = TextElementUtils.getCursorOfLineHead(textData.lines[0], 0);
     const endCursor = TextElementUtils.getCursorOfLineEnd(textData.lines[textData.lines.length - 1], textData.lines.length - 1);
@@ -673,7 +677,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param states 文本编辑状态
    */
   private _moveCursorTo(direction: Direction, states: TextEditingStates): void {
-    this._originalCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
+    this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
     const textData = this.model.data as ITextData;
     const { shiftKey } = states;
     let prevTextCursor = this._textCursor;
@@ -851,7 +855,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _deleteAtCursor(textData: ITextData, saveBeforeDelete?: boolean): boolean {
     if (saveBeforeDelete) {
-      this._originalCommandObject = this._getTextEditorCommandObject();
+      this._undoCommandObject = this._getTextEditorCommandObject();
     }
     // 是否实际删除了文本内容
     let result: boolean = true;
@@ -926,7 +930,7 @@ export default class ElementText extends ElementRect implements IElementText {
             } else {
               // 光标在第一行的行首，表示没有实际内容可以删除
               result = false;
-              this._originalCommandObject = null;
+              this._undoCommandObject = null;
             }
           } else {
             // 删除光标前面的文本节点
@@ -1219,7 +1223,7 @@ export default class ElementText extends ElementRect implements IElementText {
           type: TextEeditorCommandTypes.TextUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
-          uData: this._originalCommandObject,
+          uData: this._undoCommandObject,
           rData: this._getTextEditorCommandObject(),
         },
         this,
@@ -1255,7 +1259,7 @@ export default class ElementText extends ElementRect implements IElementText {
           type: TextEeditorCommandTypes.CursorSelectionUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
-          uData: this._originalCommandObject,
+          uData: this._undoCommandObject,
           rData: this._getTextEditorCommandObject({ dataExclude: true }),
         },
         this,

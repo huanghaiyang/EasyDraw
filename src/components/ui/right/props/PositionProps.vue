@@ -27,7 +27,7 @@ watch(
         <el-input
           v-model="xValue"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.positionInputEnable"
           type="number"
           precision="1"
           @change="value => stageStore.setElementsPosition({ x: Number(value), y: yValue })"
@@ -41,7 +41,7 @@ watch(
         <el-input
           v-model="yValue"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.positionInputEnable"
           type="number"
           precision="1"
           @change="value => stageStore.setElementsPosition({ x: xValue, y: Number(value) })"

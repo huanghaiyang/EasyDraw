@@ -208,10 +208,14 @@ export default interface IElement {
   get ancestorGroup(): IElementGroup;
   // 是否是组合组件
   get isGroupSubject(): boolean;
+  // 位置是否可修改
+  get positionInputEnable(): boolean;
   // 宽度是否可修改
-  get widthModifyEnable(): boolean;
+  get widthInputEnable(): boolean;
   // 高度是否可修改
-  get heightModifyEnable(): boolean;
+  get heightInputEnable(): boolean;
+  // 角度是否可修改
+  get angleInputEnable(): boolean;
   // 旋转是否可修改
   get rotationEnable(): boolean;
   // 是否可以进行顶点旋转
@@ -224,10 +228,14 @@ export default interface IElement {
   get borderTransformEnable(): boolean;
   // 控制器是否可见
   get transformersEnable(): boolean;
+  // 填充是否可用
+  get fillEnable(): boolean;
   // 填充是否可修改
-  get fillEnabled(): boolean;
-  // 描边是否可修改
+  get fillInputEnable(): boolean;
+  // 描边是否可用
   get strokeEnable(): boolean;
+  // 描边是否可修改
+  get strokeInputEnable(): boolean;
   // 比例锁定是否可修改
   get ratioLockedEnable(): boolean;
   // 是否应该比例锁定
@@ -243,11 +251,11 @@ export default interface IElement {
   // y是否可倾斜
   get leanYAngleCalcEnable(): boolean;
   // y倾斜角度是否可修改
-  get leanYAngleModifyEnable(): boolean;
+  get leanYAngleInputEnable(): boolean;
   // 圆角是否可修改
-  get cornersModifyEnable(): boolean;
+  get cornersInputEnable(): boolean;
   // 圆角是否展示
-  get cornerEnable(): boolean;
+  get cornersEnable(): boolean;
   // 是否在编辑状态改变后刷新
   get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
@@ -296,6 +304,8 @@ export default interface IElement {
   get textBaseline(): CanvasTextBaseline;
   // 字体是否启用
   get fontEnable(): boolean;
+  // 字体是否可修改
+  get fontInputEnable(): boolean;
   // 字体大小
   get fontSize(): number;
   // 字体

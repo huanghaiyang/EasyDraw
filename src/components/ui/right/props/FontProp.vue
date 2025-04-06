@@ -39,17 +39,18 @@ watch(
 );
 
 const toggleColorPickerVisible = () => {
+  if (!stageStore.fontInputEnable) return;
   colorPickerRef.value.show();
 };
 </script>
 <template>
-  <div class="font-props right-props" v-show="stageStore.primarySelectedElement?.fontEnable">
+  <div class="font-props right-props" v-show="stageStore.fontEnable">
     <div class="font-props__title">
       <span class="font-props__title-text">字体</span>
     </div>
     <div class="font-props__row">
       <div class="font-props__row-item full">
-        <el-select v-model="fontFamily" placeholder="字体" size="small" @change="value => stageStore.setElementsFontFamily(value)" :disabled="stageStore.inputDisabled">
+        <el-select v-model="fontFamily" placeholder="字体" size="small" @change="value => stageStore.setElementsFontFamily(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
           <el-option v-for="item in FontFamilyList" :key="item.name" :label="item.name" :value="item.name" :style="{ fontFamily: item.name }" />
         </el-select>
       </div>
@@ -57,14 +58,14 @@ const toggleColorPickerVisible = () => {
 
     <div class="font-props__row">
       <div class="font-props__row-item">
-        <el-select v-model="fontSize" placeholder="字号" size="small" @change="value => stageStore.setElementsFontSize(value)" :disabled="stageStore.inputDisabled">
+        <el-select v-model="fontSize" placeholder="字号" size="small" @change="value => stageStore.setElementsFontSize(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
           <el-option v-for="item in FontSizeList" :key="item.name" :label="item.name" :value="item.value" />
         </el-select>
       </div>
       <div class="font-props__row-item">
         <el-input
           v-model="fontSize"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
           size="small"
           placeholder="字号"
           type="number"
@@ -80,7 +81,7 @@ const toggleColorPickerVisible = () => {
 
     <div class="font-props__row color">
       <div class="font-props__row-item">
-        <el-color-picker v-model="fontColor" @change="value => stageStore.setElementsFontColor(value)" ref="colorPickerRef" :disabled="stageStore.inputDisabled" />
+        <el-color-picker v-model="fontColor" @change="value => stageStore.setElementsFontColor(value)" ref="colorPickerRef" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable" />
         <el-tag type="info" @click="toggleColorPickerVisible">{{ fontColor }}</el-tag>
       </div>
 
@@ -93,7 +94,7 @@ const toggleColorPickerVisible = () => {
           max="1"
           precision="1"
           @change="value => stageStore.setElementsFontColorOpacity(Number(value))"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
           <template #prepend>O</template>
         </el-input>

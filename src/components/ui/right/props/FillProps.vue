@@ -17,11 +17,12 @@ watch(
 );
 
 const toggleColorPickerVisible = () => {
+  if (!stageStore.fillInputEnable) return;
   colorPickerRef.value.show();
 };
 </script>
 <template>
-  <div class="fill-props right-props" v-show="stageStore.primarySelectedElement?.fillEnabled">
+  <div class="fill-props right-props" v-show="stageStore.primarySelectedElement?.fillEnable">
     <div class="fill-props__title">
       <span class="fill-props__title-text">填充</span>
       <el-icon><Plus @click="stageStore.addElementsFill(fills.length - 1)" /></el-icon>
@@ -30,7 +31,12 @@ const toggleColorPickerVisible = () => {
     <div v-for="(fill, index) in fills" :key="index">
       <div class="fill-props__row color">
         <div class="fill-props__row-item">
-          <el-color-picker v-model="fill.color" @change="value => stageStore.setElementsFillColor(value, index)" ref="colorPickerRef" :disabled="stageStore.inputDisabled" />
+          <el-color-picker
+            v-model="fill.color"
+            @change="value => stageStore.setElementsFillColor(value, index)"
+            ref="colorPickerRef"
+            :disabled="stageStore.inputDisabled || !stageStore.fillInputEnable"
+          />
           <el-tag type="info" @click="toggleColorPickerVisible">{{ fill.color }}</el-tag>
         </div>
 
@@ -43,7 +49,7 @@ const toggleColorPickerVisible = () => {
             max="1"
             precision="1"
             @change="value => stageStore.setElementsFillColorOpacity(Number(value), index)"
-            :disabled="stageStore.inputDisabled"
+            :disabled="stageStore.inputDisabled || !stageStore.fillInputEnable"
           >
             <template #prepend>O</template>
           </el-input>

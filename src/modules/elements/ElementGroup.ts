@@ -27,10 +27,18 @@ export default class ElementGroup extends Element implements IElementGroup {
     return false;
   }
 
+  get strokeInputEnable(): boolean {
+    return false;
+  }
+
   /**
    * 是否可以填充
    */
-  get fillEnabled(): boolean {
+  get fillEnable(): boolean {
+    return false;
+  }
+
+  get fillInputEnable(): boolean {
     return false;
   }
 

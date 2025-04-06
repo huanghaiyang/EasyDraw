@@ -44,6 +44,7 @@ function setElementsAngle(value: string) {
  * @param value
  */
 function setElementsLeanYAngle(value: string) {
+  if (!stageStore.leanYAngleInputEnable) return;
   let val = Number(value);
   val = clamp(val, -89, 89);
   stageStore.setElementsLeanYAngle(val);
@@ -58,14 +59,32 @@ function setElementsLeanYAngle(value: string) {
 
     <div class="angle-props__row">
       <div class="angle-props__row-item">
-        <el-input v-model="aValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-180" max="180" precision="1" @change="setElementsAngle">
+        <el-input
+          v-model="aValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled || !stageStore.angleInputEnable"
+          type="number"
+          min="-180"
+          max="180"
+          precision="1"
+          @change="setElementsAngle"
+        >
           <template #prepend>A</template>
           <template #append>°</template>
         </el-input>
       </div>
 
-      <div class="angle-props__row-item" v-if="stageStore.primarySelectedElement?.leanYAngleModifyEnable">
-        <el-input v-model="leanYValue" placeholder="输入数字" :disabled="stageStore.inputDisabled" type="number" min="-89" max="89" precision="1" @change="setElementsLeanYAngle">
+      <div class="angle-props__row-item">
+        <el-input
+          v-model="leanYValue"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled || !stageStore.leanYAngleInputEnable"
+          type="number"
+          min="-89"
+          max="89"
+          precision="1"
+          @change="setElementsLeanYAngle"
+        >
           <template #prepend>LY</template>
           <template #append>°</template>
         </el-input>

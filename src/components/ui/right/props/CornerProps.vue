@@ -25,7 +25,7 @@ watch(
 );
 </script>
 <template>
-  <div class="corners-props right-props" v-show="stageStore.primarySelectedElement?.cornersModifyEnable">
+  <div class="corners-props right-props" v-show="stageStore.cornersEnable">
     <div class="corners-props__title">
       <span class="corners-props__title-text">圆角</span>
     </div>
@@ -35,7 +35,7 @@ watch(
         <el-input
           v-model="value"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled || !isAllCornerEqual"
+          :disabled="stageStore.inputDisabled || !stageStore.cornersInputEnable || !isAllCornerEqual"
           type="number"
           min="0"
           :max="stageStore.primarySelectedElement?.minParallelogramVerticalSize / 2"
@@ -52,7 +52,7 @@ watch(
         <el-input
           v-model="corners[index]"
           placeholder="输入数字"
-          :disabled="stageStore.inputDisabled"
+          :disabled="stageStore.inputDisabled || !stageStore.cornersInputEnable"
           type="number"
           min="0"
           :max="stageStore.primarySelectedElement?.minParallelogramVerticalSize / 2"

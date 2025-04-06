@@ -21,11 +21,11 @@ export default class ElementRect extends Element implements IElementRect {
   _originalArcCoords: ArcPoints[][] = [];
   _originalArcFillCoords: ArcPoints[] = [];
 
-  get cornersModifyEnable(): boolean {
-    return true;
+  get cornersInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
   }
 
-  get cornerEnable(): boolean {
+  get cornersEnable(): boolean {
     return true;
   }
 
@@ -51,7 +51,7 @@ export default class ElementRect extends Element implements IElementRect {
 
   get controllers(): IController[] {
     const result = super.controllers;
-    if (this.cornerEnable) {
+    if (this.cornersEnable) {
       result.push(...this.cornerControllers);
     }
     return result;

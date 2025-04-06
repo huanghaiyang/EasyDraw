@@ -1,6 +1,6 @@
 import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
-import { IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
+import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
@@ -19,6 +19,8 @@ const container = new StageContainer();
 shield.configure.config({ rotationIconEnable: true });
 // 节流时间
 const ThrottleTime = 200;
+// 节流配置
+const tOptions = { leading: true, trailing: true };
 
 // 舞台默认数据
 const DefaultStage = {
@@ -96,6 +98,34 @@ export const useStageStore = defineStore("stage", {
       layerShiftMoveEnable: false,
       // 层下移动是否可用
       layerGoDownEnable: false,
+      // 填充是否可用
+      fillEnable: false,
+      // 描边是否可用
+      strokeEnable: false,
+      // 字体是否可用
+      fontEnable: false,
+      // 圆角是否可用
+      cornersEnable: false,
+      // 填充输入是否可用
+      fillInputEnable: false,
+      // 描边输入是否可用
+      strokeInputEnable: false,
+      // 字体输入是否可用
+      fontInputEnable: false,
+      // 圆角输入是否可用
+      cornersInputEnable: false,
+      // 宽度输入是否可用
+      widthInputEnable: false,
+      // 高度输入是否可用
+      heightInputEnable: false,
+      // 角度输入是否可用
+      angleInputEnable: false,
+      // Y倾斜角度输入是否可用
+      leanYAngleInputEnable: false,
+      // 位置输入是否可用
+      positionInputEnable: false,
+      // 组件状态
+      status: ElementStatus.initialed,
       // 舞台默认数据
       ...LodashUtils.jsonClone(DefaultStage),
     };
@@ -141,47 +171,49 @@ export const useStageStore = defineStore("stage", {
       // 监听主选中状态
       shield.on(ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged.bind(this));
       // 监听位置
-      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), ThrottleTime, tOptions));
       // 监听宽度
-      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), ThrottleTime, tOptions));
       // 监听高度
-      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), ThrottleTime, tOptions));
       // 监听角度
-      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), ThrottleTime, tOptions));
       // 监听圆角
-      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), ThrottleTime, tOptions));
       // 监听X轴翻转
-      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), ThrottleTime, tOptions));
       // 监听Y偏移角度
-      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), ThrottleTime, tOptions));
       // 监听缩放
-      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), ThrottleTime, tOptions));
       // 监听描边
-      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), ThrottleTime, tOptions));
       // 监听填充
-      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), ThrottleTime, tOptions));
+      // 监听状态
+      shield.on(ShieldDispatcherNames.statusChanged, throttle(this.onStatusChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体大小
-      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体
-      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体行高
-      shield.on(ShieldDispatcherNames.fontLineHeightChanged, throttle(this.onFontLineHeightChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fontLineHeightChanged, throttle(this.onFontLineHeightChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色
-      shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色透明度
-      shield.on(ShieldDispatcherNames.fontColorOpacityChanged, throttle(this.onFontColorOpacityChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.fontColorOpacityChanged, throttle(this.onFontColorOpacityChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本对齐方式
-      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本基线
-      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), ThrottleTime, tOptions));
       // 监听宽高比锁定
-      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), ThrottleTime, tOptions));
       // 监听绘制工具
-      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), ThrottleTime, tOptions));
       // 监听层上移状态
-      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), ThrottleTime, tOptions));
       // 监听层下移状态
-      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), ThrottleTime, { leading: true, trailing: true }));
+      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), ThrottleTime, tOptions));
     },
     /**
      * 设置绘制工具
@@ -258,8 +290,28 @@ export const useStageStore = defineStore("stage", {
      */
     onElementChanged(element: IElement) {
       if (!element) return;
-      const { position, width, height, angle, corners, flipX, leanYAngle, strokes, fills, fontSize, fontFamily, fontColor, fontColorOpacity, fontLineHeight, textAlign, textBaseline, isRatioLocked } =
-        element;
+      const {
+        status,
+        position,
+        width,
+        height,
+        angle,
+        corners,
+        flipX,
+        leanYAngle,
+        strokes,
+        fills,
+        fontSize,
+        fontFamily,
+        fontColor,
+        fontColorOpacity,
+        fontLineHeight,
+        textAlign,
+        textBaseline,
+        isRatioLocked,
+      } = element;
+      // 组件状态
+      this.onStatusChanged(element, status);
       // 组件位置
       this.onPositionChanged(element, position);
       // 组件宽度
@@ -304,8 +356,44 @@ export const useStageStore = defineStore("stage", {
       this.targetElements = targetElements;
     },
     /**
-     * 组件坐标变化
+     * 组件状态变化
      *
+     * @param status
+     */
+    onStatusChanged(element: IElement, status: ElementStatus) {
+      this.status = status;
+      const {
+        fillEnable,
+        strokeEnable,
+        fontEnable,
+        cornersEnable,
+        widthInputEnable,
+        heightInputEnable,
+        fillInputEnable,
+        strokeInputEnable,
+        fontInputEnable,
+        cornersInputEnable,
+        angleInputEnable,
+        leanYAngleInputEnable,
+        positionInputEnable,
+      } = element;
+      this.fillEnable = fillEnable;
+      this.strokeEnable = strokeEnable;
+      this.fontEnable = fontEnable;
+      this.cornersEnable = cornersEnable;
+      this.widthInputEnable = widthInputEnable;
+      this.heightInputEnable = heightInputEnable;
+      this.fillInputEnable = fillInputEnable;
+      this.strokeInputEnable = strokeInputEnable;
+      this.fontInputEnable = fontInputEnable;
+      this.angleInputEnable = angleInputEnable;
+      this.leanYAngleInputEnable = leanYAngleInputEnable;
+      this.cornersInputEnable = cornersInputEnable;
+      this.positionInputEnable = positionInputEnable;
+    },
+    /**
+     * 组件坐标变化
+
      * @param position
      */
     onPositionChanged(element: IElement, position: IPoint) {

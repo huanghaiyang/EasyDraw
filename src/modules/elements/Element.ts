@@ -247,14 +247,24 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
+  // 位置是否可修改
+  get positionInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   // 是否可以修改宽度
-  get widthModifyEnable(): boolean {
-    return true;
+  get widthInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
   }
 
   // 是否可以修改高度
-  get heightModifyEnable(): boolean {
-    return true;
+  get heightInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
+  // 角度是否可修改
+  get angleInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
   }
 
   // 是否可以旋转
@@ -287,15 +297,23 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   // 是否可以填充颜色
-  get fillEnabled(): boolean {
+  get fillEnable(): boolean {
     return true;
+  }
+
+  // 填充是否可修改
+  get fillInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
   }
 
   // 是否可以描边
   get strokeEnable(): boolean {
     return true;
   }
-
+  // 描边是否可修改
+  get strokeInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
   // 是否可以锁定比例
   get ratioLockedEnable(): boolean {
     return true;
@@ -382,6 +400,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get fontEnable(): boolean {
+    return false;
+  }
+
+  get fontInputEnable(): boolean {
     return false;
   }
 
@@ -531,6 +553,7 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   _setStatus(status: ElementStatus): void {
     this._status = status;
+    this.emitPropChanged(ShieldDispatcherNames.statusChanged, [this._status]);
   }
 
   _setIsSelected(value: boolean): void {
@@ -719,15 +742,15 @@ export default class Element implements IElement, ILinkedNodeValue {
     return true;
   }
 
-  get leanYAngleModifyEnable(): boolean {
-    return true;
+  get leanYAngleInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
   }
 
-  get cornersModifyEnable(): boolean {
+  get cornersInputEnable(): boolean {
     return false;
   }
 
-  get cornerEnable(): boolean {
+  get cornersEnable(): boolean {
     return false;
   }
 
