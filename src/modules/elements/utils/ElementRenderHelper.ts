@@ -49,9 +49,23 @@ export default class ElementRenderHelper {
    * @returns
    */
   static convertCoordInRect(coord: IPoint, element: IElement, rect: RenderRect): IPoint {
-    const point = ElementUtils.calcStageRelativePoint(coord);
+    const {
+      angles,
+      centerCoord,
+      flipX,
+      shield: { stageScale },
+    } = element;
+    // 如果文本组件是旋转或者倾斜的，那么就需要将给定的鼠标坐标，反向旋转倾斜，这样才可以正确计算出文本光标
+    coord = MathUtils.transWithCenter(coord, angles, centerCoord, true);
+    // 转换为舞台坐标
+    let point = ElementUtils.calcStageRelativePoint(coord);
+    // 根据画布的缩放比例进行缩放
+    point = CommonUtils.scalePoint(point, stageScale);
+    // 转换为组件的渲染盒模型坐标
     let [curPoint] = CanvasUtils.transPointsOfBox([point], rect);
-    if (element.flipX) {
+    // 如果组件是y轴翻转的
+    if (flipX) {
+      // 计算镜像坐标
       curPoint = MathUtils.calcHorizontalSymmetryPointInRect(curPoint, CommonUtils.centerRectConversion(rect));
     }
     return curPoint;
