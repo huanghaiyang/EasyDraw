@@ -106,6 +106,8 @@ export const useStageStore = defineStore("stage", {
       fontEnable: false,
       // 圆角是否可用
       cornersEnable: false,
+      // 锁定比例是否可用
+      ratioLockedEnable: false,
       // 填充输入是否可用
       fillInputEnable: false,
       // 描边输入是否可用
@@ -367,6 +369,7 @@ export const useStageStore = defineStore("stage", {
         strokeEnable,
         fontEnable,
         cornersEnable,
+        ratioLockedEnable,
         widthInputEnable,
         heightInputEnable,
         fillInputEnable,
@@ -381,6 +384,7 @@ export const useStageStore = defineStore("stage", {
       this.strokeEnable = strokeEnable;
       this.fontEnable = fontEnable;
       this.cornersEnable = cornersEnable;
+      this.ratioLockedEnable = ratioLockedEnable;
       this.widthInputEnable = widthInputEnable;
       this.heightInputEnable = heightInputEnable;
       this.fillInputEnable = fillInputEnable;

@@ -22,7 +22,7 @@ const toggleColorPickerVisible = () => {
 };
 </script>
 <template>
-  <div class="fill-props right-props" v-show="stageStore.primarySelectedElement?.fillEnable">
+  <div class="fill-props right-props" v-show="stageStore.fillEnable">
     <div class="fill-props__title">
       <span class="fill-props__title-text">填充</span>
       <el-icon><Plus @click="stageStore.addElementsFill(fills.length - 1)" /></el-icon>

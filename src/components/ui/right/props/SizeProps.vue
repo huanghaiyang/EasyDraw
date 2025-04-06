@@ -58,7 +58,7 @@ watch(
           <template #append>px</template>
         </el-input>
       </div>
-      <el-icon v-if="!!stageStore.primarySelectedElement && stageStore.primarySelectedElement.ratioLockedEnable">
+      <el-icon v-if="stageStore.ratioLockedEnable">
         <Unlock v-if="!stageStore.isRatioLocked" @click="stageStore.setRatioLocked(true)" title="锁定宽高比" />
         <Lock v-else @click="stageStore.setRatioLocked(false)" title="解除宽高比锁定" />
       </el-icon>

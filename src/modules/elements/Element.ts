@@ -316,7 +316,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
   // 是否可以锁定比例
   get ratioLockedEnable(): boolean {
-    return true;
+    return this.status === ElementStatus.finished;
   }
 
   // 是否可以编辑
