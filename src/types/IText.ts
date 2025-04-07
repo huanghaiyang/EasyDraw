@@ -3,12 +3,14 @@ import { Direction, IPoint, ISize } from "@/types";
 
 // 文本节点
 export type ITextNode = Partial<IPoint> &
+  Partial<TextMetrics> &
   Partial<ISize> & {
     id: string;
     content: string;
     fontStyle: TextFontStyle;
     selected?: boolean;
     updateId?: string;
+    baseline?: number; // 基线Y坐标
   };
 
 // 文本行

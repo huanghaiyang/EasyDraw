@@ -46,9 +46,11 @@ export default class ElementTaskTextUnderline extends ElementTaskBase implements
   private _drawUnderline(textLine: ITextLine, renderRect: RenderRect, options: RenderParams): void {
     const { nodes = [] } = textLine;
     if (nodes.length) {
+      const { x, baseline } = nodes[0];
+      const { x: dx, width: dWidth } = nodes[nodes.length - 1];
       CanvasUtils.drawLineInRenderRect(
         this.canvas,
-        { ...renderRect, desX: nodes[0].x, desY: nodes[0].y + nodes[0].height, desWidth: nodes[nodes.length - 1].x + nodes[nodes.length - 1].width - nodes[0].x },
+        { ...renderRect, desX: x, desY: baseline, desWidth: dx + dWidth - x },
         {
           color: TextUnderLineColor,
           colorOpacity: TextUnderLineColorOpacity,

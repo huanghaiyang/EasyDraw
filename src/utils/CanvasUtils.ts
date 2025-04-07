@@ -6,7 +6,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import { ArcPoints, RenderParams, RenderRect } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import { EllipseModel } from "@/types/IElement";
-import ITextData from "@/types/IText";
+import ITextData, { ITextNode } from "@/types/IText";
 import FontUtils from "@/utils/FontUtils";
 import { every, isNumber } from "lodash";
 import CoderUtils from "@/utils/CoderUtils";
@@ -18,6 +18,29 @@ type CtxTransformOptions = {
   scaleY: number;
   leanY: number;
 };
+
+// 遍历文本节点回调函数
+type EachNodeCallback = (node: ITextNode, index: number) => void;
+
+/**
+ * 遍历文本节点
+ *
+ * @param nodes 文本节点数组
+ * @param ctx 2D上下文
+ * @param textBaseline 文本基线
+ * @param eachCallback 遍历回调
+ */
+function iterateNodes(nodes: ITextNode[], ctx: CanvasRenderingContext2D, eachCallback?: EachNodeCallback): void {
+  nodes.forEach((node, index) => {
+    ctx.save();
+    const fontStyle = CanvasUtils.transFontWithScale(node.fontStyle);
+    let { fontColor, fontColorOpacity, fontSize, fontFamily } = fontStyle;
+    ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
+    ctx.font = `${fontSize}px ${fontFamily}`;
+    eachCallback && eachCallback(node, index);
+    ctx.restore();
+  });
+}
 
 export default class CanvasUtils {
   static ImageCaches = new Map();
@@ -307,23 +330,50 @@ export default class CanvasUtils {
       if (nodes.length === 0) {
         rowHeight = fontLineHeight * fontSize;
       } else {
+        let prevFontSize: number;
+        let prevFontFamily: string;
+        let isDiff: boolean = false;
+        // 遍历节点并计算行高、判断字体样式是否一致
         nodes.forEach(node => {
+          const { fontSize, fontFamily } = node.fontStyle;
           // 注意node节点的fontSize是没有缩放的，所以这里需要再次缩放
-          rowHeight = Math.max(fontLineHeight * node.fontStyle.fontSize * CanvasUtils.scale, rowHeight);
-        });
-        nodes.forEach((node, index) => {
-          ctx.save();
-          let { content, fontStyle: nodeFontStyle } = node;
-          nodeFontStyle = CanvasUtils.transFontWithScale(nodeFontStyle);
-          let { fontColor: nodeFontColor, fontColorOpacity: nodeFontColorOpacity, fontSize: nodeFontSize, fontFamily: nodeFontFamily } = nodeFontStyle;
-          ctx.fillStyle = StyleUtils.joinFillColor({ color: nodeFontColor, colorOpacity: nodeFontColorOpacity });
-          ctx.font = `${nodeFontSize}px ${nodeFontFamily}`;
-          const metrics = ctx.measureText(content);
-          const { actualBoundingBoxDescent, fontBoundingBoxDescent, width } = metrics;
-          let height: number = 0;
-          if (textBaseline === "top") {
-            height = Math.max(actualBoundingBoxDescent, fontBoundingBoxDescent);
+          rowHeight = Math.max(fontLineHeight * fontSize * CanvasUtils.scale, rowHeight);
+          if (!isDiff) {
+            if (!prevFontSize) {
+              prevFontSize = fontSize;
+            } else if (fontSize !== prevFontSize) {
+              isDiff = true;
+            }
+            if (!prevFontFamily) {
+              prevFontFamily = fontFamily;
+            } else if (fontFamily !== prevFontFamily) {
+              isDiff = true;
+            }
           }
+        });
+        // 文本节点的度量数组缓存
+        const metricsArr: TextMetrics[] = [];
+        // 此行文本节点最大字体高度
+        let maxHeight: number = 0;
+        // 最大基线值
+        let maxAlphabeticBaseline: number = 0;
+        // 遍历计算此行节点度量
+        iterateNodes(nodes, ctx, node => {
+          const metrics = ctx.measureText(node.content);
+          metricsArr.push(metrics);
+          // 计算此行文本节点最大字体高度
+          maxHeight = Math.max(maxHeight, metrics.fontBoundingBoxDescent - metrics.fontBoundingBoxAscent);
+          // 计算此行文本节点最大基线值
+          maxAlphabeticBaseline = Math.min(maxAlphabeticBaseline, metrics.alphabeticBaseline);
+        });
+        // 行基线坐标
+        const baseline = prevY - maxAlphabeticBaseline + (rowHeight - maxHeight) / 2;
+        // 遍历节点并渲染
+        iterateNodes(nodes, ctx, (node, index) => {
+          const { content, fontStyle: nodeFontStyle } = node;
+          const metrics = isDiff ? metricsArr[index] : ctx.measureText(content);
+          const { width, alphabeticBaseline } = metrics;
+          // 缩进值
           let indentX: number = 0;
           // 如果当前节点是英文字符，且前一个节点也是英文字符
           if (index !== 0 && CoderUtils.isEnglishLetter(content)) {
@@ -338,12 +388,13 @@ export default class CanvasUtils {
               }
             }
           }
-          // TODO 此处直接修改node，需要重新设计
+          // 文本节点的x坐标
           const x = prevX + indentX;
-          Object.assign(node, { x, y: prevY, width, height: rowHeight });
-          ctx.fillText(content, x, prevY + (rowHeight - height) / 2);
+          // 文本节点的y坐标（等于行的基线坐标加上文本的基线坐标）
+          const y = baseline + alphabeticBaseline;
+          Object.assign(node, { x, y: prevY, width, height: rowHeight, baseline });
+          ctx.fillText(content, x, y);
           prevX = x + width;
-          ctx.restore();
         });
       }
       line.height = rowHeight;
