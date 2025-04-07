@@ -27,7 +27,6 @@ export default class MaskTaskTransformer extends MaskTaskBase {
           leanYAngle,
         },
       ),
-      ControllerStyle,
       ControllerStyle.fills[0],
       {
         ...ControllerStyle.strokes[0],

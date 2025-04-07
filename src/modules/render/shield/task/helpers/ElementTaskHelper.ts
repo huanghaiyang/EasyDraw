@@ -38,14 +38,14 @@ export default class ElementTaskHelper {
     // 计算弧线填充的舞台坐标
     const arcFillPoints = ElementUtils.calcStageRelativeArcPoints(arcFillCoords);
     // 计算渲染盒子的画布坐标
-    const rect = ElementRenderHelper.calcElementRenderRect(element) as RenderRect;
+    const renderRect = ElementRenderHelper.calcElementRenderRect(element) as RenderRect;
     // 绘制填充
     styles.fills.forEach(fillStyle => {
-      CanvasUtils.drawInnerArcPathFillWithScale(canvas, rect, arcFillPoints, fillStyle, options);
+      CanvasUtils.drawInnerArcPathFillWithScale(canvas, renderRect, arcFillPoints, fillStyle, options);
     });
     // 绘制边框
     arcPoints.forEach((points, index) => {
-      CanvasUtils.drawArcPathStrokeWidthScale(canvas, points, rect, styles.strokes[index], options);
+      CanvasUtils.drawArcPathStrokeWidthScale(canvas, points, renderRect, styles.strokes[index], options);
     });
   }
 

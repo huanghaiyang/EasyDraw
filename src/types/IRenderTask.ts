@@ -30,6 +30,9 @@ export interface IElementTaskCursor extends IElementTask {}
 // 文本选区绘制任务
 export interface IElementTaskTextSelection extends IElementTask {}
 
+// 文本高亮下划线绘制任务
+export interface IElementTaskTextUnderline extends IElementTask {}
+
 // 文本选区光标绘制任务
 export interface IElementTaskTextSelectionCursor extends IElementTask {
   cursorType: TextSelectionCursorType;

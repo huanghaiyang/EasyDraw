@@ -8,7 +8,7 @@ export default class ElementTaskLine extends ElementTaskBase {
    */
   async run(): Promise<void> {
     if (!this.canvas || !this.element) return;
-    
+
     const {
       strokeCoords,
       model: { styles },
@@ -18,7 +18,7 @@ export default class ElementTaskLine extends ElementTaskBase {
 
     // 绘制边框
     strokePoints.forEach((points, index) => {
-      CanvasUtils.drawPathWithScale(this.canvas, points, styles, styles.fills[0], styles.strokes[index]);
+      CanvasUtils.drawPathWithScale(this.canvas, points, styles.fills[0], styles.strokes[index]);
     });
   }
 }

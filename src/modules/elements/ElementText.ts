@@ -187,11 +187,11 @@ export default class ElementText extends ElementRect implements IElementText {
       this._selectionMoveId = null;
     }
     // 计算旋转盒模型的rect
-    const rect = ElementRenderHelper.calcElementRenderRect(this) as RenderRect;
+    const renderRect = ElementRenderHelper.calcElementRenderRect(this) as RenderRect;
     // 转换为组件内的坐标
-    const point = ElementRenderHelper.convertCoordInRect(coord, this, rect);
+    const point = ElementRenderHelper.convertCoordInRect(coord, this, renderRect);
     // 获取文本光标
-    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point, rect);
+    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point, renderRect);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
@@ -822,12 +822,12 @@ export default class ElementText extends ElementRect implements IElementText {
    * 刷新光标渲染矩形
    */
   private _rerefreshCursorRenderRect(): void {
-    const rect = ElementRenderHelper.calcElementRenderRect(this);
+    const renderRect = ElementRenderHelper.calcElementRenderRect(this);
     if (this._textCursor) {
-      this._textCursor.renderRect = rect;
+      this._textCursor.renderRect = renderRect;
     }
     if (this._textSelection && this._textSelection.endCursor) {
-      this._textSelection.endCursor.renderRect = rect;
+      this._textSelection.endCursor.renderRect = renderRect;
     }
   }
 

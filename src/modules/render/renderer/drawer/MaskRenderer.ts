@@ -29,6 +29,7 @@ import { pick } from "lodash";
 import ElementTaskTextSelection from "@/modules/render/shield/task/ElementTaskTextSelection";
 import ElementTaskTextSelectionCursor from "@/modules/render/shield/task/ElementTaskTextSelectionCursor";
 import { TextSelectionCursorType } from "@/types/IText";
+import ElementTaskTextUnderline from "@/modules/render/shield/task/ElementTaskTextUnderline";
 
 /**
  * 蒙版渲染器
@@ -123,6 +124,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       // 文本编辑时，绘制选区的光标
       cargo.addAll(this.createTextElementSelectionCursorTasks());
     }
+
+    // 文本鼠标命中时，绘制下划线
+    cargo.addAll(this.createTextElementsUndelineTasks());
 
     // 任务执行与状态清理 ==========
     if (!cargo.isEmpty()) {
@@ -394,5 +398,20 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       return new ElementTaskTextSelection(element, this.canvas);
     }
     return null;
+  }
+
+  /**
+   * 创建一组文本组件的下划线任务
+   *
+   * @returns
+   */
+  private createTextElementsUndelineTasks(): IRenderTask[] {
+    const tasks: IRenderTask[] = [];
+    this.drawer.shield.store.targetElements.forEach(element => {
+      if (!element.isSelected && !element.isEditing && element instanceof ElementText) {
+        tasks.push(new ElementTaskTextUnderline(element, this.canvas));
+      }
+    });
+    return tasks;
   }
 }

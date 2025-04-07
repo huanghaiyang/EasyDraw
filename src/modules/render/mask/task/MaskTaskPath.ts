@@ -27,7 +27,6 @@ export default class MaskTaskPath extends MaskTaskBase {
     CanvasUtils.drawPathWithScale(
       this.canvas,
       points,
-      Object.assign({}, { ...SelectionStyle, ...specialStyles }),
       {},
       {
         ...SelectionStyle.strokes[0],

@@ -39,14 +39,14 @@ export default class ElementTaskText extends ElementTaskBase {
     // 计算未倾斜的描边舞台坐标
     const unLeanBoxPoints = ElementUtils.calcStageRelativePoints(unLeanBoxCoords);
     // 计算渲染盒模型的画布坐标
-    const rect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
+    const renderRect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制文本
     CanvasUtils.drawRotateTextWithScale(
       this.canvas,
       data as ITextData,
       unLeanBoxPoints,
-      rect,
+      renderRect,
       {
         fontSize,
         fontFamily,

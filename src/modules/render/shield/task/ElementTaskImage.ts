@@ -35,17 +35,17 @@ export default class ElementTaskImage extends ElementTaskBase {
     };
 
     // 计算渲染盒模型的画布坐标
-    const rect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
+    const renderRect = ElementRenderHelper.calcElementRenderRect(this.element) as RenderRect;
 
     // 绘制图片
-    CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, rect, {
+    CanvasUtils.drawImgLike(this.canvas, this.element.model.data as string, renderRect, {
       ...options,
       clipArcPoints: arcFillPoints,
     });
 
     // 绘制边框
     arcPoints.forEach((points, index) => {
-      CanvasUtils.drawArcPathStrokeWidthScale(this.canvas, points, rect, styles.strokes[index], options);
+      CanvasUtils.drawArcPathStrokeWidthScale(this.canvas, points, renderRect, styles.strokes[index], options);
     });
   }
 }

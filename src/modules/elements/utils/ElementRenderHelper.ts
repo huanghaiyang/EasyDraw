@@ -1,7 +1,7 @@
 import { IPoint } from "@/types";
 import IElement from "@/types/IElement";
 import CommonUtils from "@/utils/CommonUtils";
-import ElementUtils from "./ElementUtils";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CanvasUtils from "@/utils/CanvasUtils";
 import MathUtils from "@/utils/MathUtils";
 import { RenderRect } from "@/types/IRender";

@@ -237,7 +237,7 @@ export default class CanvasUtils {
    * @param fillStyle
    * @param options
    */
-  static drawRectFill(target: HTMLCanvasElement, renderRect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}): void {
+  static drawRectInRenderRect(target: HTMLCanvasElement, renderRect: RenderRect, fillStyle: FillStyle, options: RenderParams = {}): void {
     const { width, height, desX, desY, desWidth, desHeight } = renderRect;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -252,8 +252,32 @@ export default class CanvasUtils {
   }
 
   /**
-   * 绘制一个旋转的文字
+   * 根据给定的rect范围绘制线
    *
+   * @param target
+   * @param rect
+   * @param strokeStyle
+   * @param options
+   */
+  static drawLineInRenderRect(target: HTMLCanvasElement, renderRect: RenderRect, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
+    const { desX, desY, desWidth } = renderRect;
+    const ctx = target.getContext("2d");
+    ctx.save();
+    CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
+    ctx.strokeStyle = StyleUtils.joinStrokeColor(strokeStyle);
+    ctx.lineWidth = strokeStyle.width;
+    if (every([desX, desY, desWidth], isNumber)) {
+      ctx.beginPath();
+      ctx.moveTo(desX, desY);
+      ctx.lineTo(desX + desWidth, desY);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  /**
+   * 绘制一个旋转的文字
+
    * @param target
    * @param textData
    * @param points
@@ -464,10 +488,11 @@ export default class CanvasUtils {
    *
    * @param target
    * @param points
-   * @param styles
+   * @param fillStyle
+   * @param strokeStyle
    * @param options
    */
-  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], styles: ElementStyles, fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
+  static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
     points = CanvasUtils.transPointsWidthScale(points);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     if (fillStyle.colorOpacity) {

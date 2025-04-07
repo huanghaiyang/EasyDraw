@@ -162,7 +162,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
     const desWidth = Math.abs(startCursor.x - endCursor.x);
     const desHeight = startCursor.height;
 
-    CanvasUtils.drawRectFill(
+    CanvasUtils.drawRectInRenderRect(
       this.canvas,
       {
         ...startCursor.renderRect,

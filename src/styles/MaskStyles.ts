@@ -28,6 +28,10 @@ export const SelectionIndicatorFontFamily = "Arial";
 export const SelectionIndicatorTextAlign = "center";
 export const SelectionIndicatorTextBaseline = "middle";
 
+export const TextUnderLineColor = "#0c8ce9";
+export const TextUnderLineWidth = 1;
+export const TextUnderLineColorOpacity = 0.85;
+
 // 文本选区填充色
 export const TextSelectionFillColor = "#0c8ce9";
 // 文本选区填充色透明度
