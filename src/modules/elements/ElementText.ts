@@ -89,6 +89,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  get cornersEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   get text(): string {
     return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
   }
