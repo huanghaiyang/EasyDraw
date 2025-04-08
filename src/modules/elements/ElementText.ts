@@ -51,6 +51,22 @@ export default class ElementText extends ElementRect implements IElementText {
   private _selectionMoveId: string | null;
   // 是否选区移动
   private _isSelectionMoved: boolean = false;
+  // 字体大小
+  private _fontSize: number | null;
+  // 字体
+  private _fontFamily: string | null;
+  // 字体颜色
+  private _fontColor: string | null;
+  // 字体颜色透明度
+  private _fontColorOpacity: number | null;
+  // 字体大小混合
+  private _fontSizeMixin: boolean = false;
+  // 字体混合
+  private _fontFamilyMixin: boolean = false;
+  // 字体颜色混合
+  private _fontColorMixin: boolean = false;
+  // 字体颜色透明度混合
+  private _fontColorOpacityMixin: boolean = false;
 
   get fontEnable(): boolean {
     return true;
@@ -101,6 +117,38 @@ export default class ElementText extends ElementRect implements IElementText {
     return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
   }
 
+  get fontSize(): number | null {
+    return this._fontSize;
+  }
+
+  get fontFamily(): string | null {
+    return this._fontFamily;
+  }
+
+  get fontColor(): string | null {
+    return this._fontColor;
+  }
+
+  get fontColorOpacity(): number | null {
+    return this._fontColorOpacity;
+  }
+
+  get fontSizeMixin(): boolean {
+    return this._fontSizeMixin;
+  }
+
+  get fontFamilyMixin(): boolean {
+    return this._fontFamilyMixin;
+  }
+
+  get fontColorMixin(): boolean {
+    return this._fontColorMixin;
+  }
+
+  get fontColorOpacityMixin(): boolean {
+    return this._fontColorOpacityMixin;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this._undoRedo = new UndoRedo();
@@ -127,6 +175,18 @@ export default class ElementText extends ElementRect implements IElementText {
     this._markSelection();
     if (!value) {
       this._undoRedo.clear();
+    }
+  }
+
+  /**
+   * 选中状态变化
+   *
+   * @param value 选中状态
+   */
+  _setIsSelected(value: boolean): void {
+    super._setIsSelected(value);
+    if (value) {
+      this._updateFontStyleByTextData(false, false, true);
     }
   }
 
@@ -183,6 +243,38 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 字体变化
+   */
+  onFontFamilyChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onFontFamilyChanged();
+  }
+
+  /**
+   * 字号变化
+   */
+  onFontSizeChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onFontSizeChanged();
+  }
+
+  /**
+   * 颜色变化
+   */
+  onFontColorChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onFontColorChanged();
+  }
+
+  /**
+   * 颜色透明度变化
+   */
+  onFontColorOpacityChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onFontColorOpacityChanged();
+  }
+
+  /**
    * 给定坐标获取文本光标
    *
    * @param coord 坐标
@@ -229,7 +321,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
     }
     this._markSelection();
-    this._emitFontStyleChangedByCursor();
+    this._checkFontStyleChangedByCursor();
     this._prevInputCursor = null;
     this._addCursorUpdateCommand();
   }
@@ -330,7 +422,7 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     if (!noUsed) {
       this._markSelection();
-      this._emitFontStyleChangedByCursor();
+      this._checkFontStyleChangedByCursor();
     }
     this._textUpdateId = updateId;
     return { changed, reflow };
@@ -687,22 +779,72 @@ export default class ElementText extends ElementRect implements IElementText {
   /**
    * 根据光标位置更新字体样式
    */
-  private _emitFontStyleChangedByCursor(): void {
+  private _checkFontStyleChangedByCursor(): void {
     let fontStyleSet: FontStyleSet;
     if (this.isSelectionAvailable) {
       fontStyleSet = TextElementUtils.getStyleSetOfTextData(this.model.data as ITextData, true);
-    } else {
+    } else if (this._textCursor) {
       fontStyleSet = TextElementUtils.getStyleSetByCursor(this._textCursor, this.model.data as ITextData);
     }
+    if (fontStyleSet) {
+      this._checkFontStyleChanged(fontStyleSet);
+    }
+  }
+
+  /**
+   * 根据文本数据更新字体样式
+   *
+   * @param useSelection 是否使用选区
+   * @param eventEmit 是否触发事件
+   * @param propsUpdate 是否更新属性
+   */
+  private _updateFontStyleByTextData(useSelection: boolean, eventEmit: boolean = true, propsUpdate?: boolean): void {
+    const fontStyleSet = TextElementUtils.getStyleSetOfTextData(this.model.data as ITextData, useSelection);
+    this._checkFontStyleChanged(fontStyleSet, eventEmit, propsUpdate);
+  }
+
+  /**
+   * 字体样式变更通知
+   *
+   * @param fontStyleSet
+   * @param eventEmit 是否触发事件
+   * @param propsUpdate 是否更新属性
+   */
+  private _checkFontStyleChanged(fontStyleSet: FontStyleSet, eventEmit: boolean = true, propsUpdate?: boolean): void {
+    const moreThanOne = (set: Set<any>) => set.size > 1;
     const { fontSizes, fontFamilies, fontColors, fontColorOpacities } = fontStyleSet;
-    const fontSize = fontSizes.size > 1 ? "" : fontSizes.values().next().value;
-    const fontFamily = fontFamilies.size > 1 ? "" : fontFamilies.values().next().value;
-    const fontColor = fontColors.size > 1 ? "" : fontColors.values().next().value;
-    const fontColorOpacity = fontColorOpacities.size > 1 ? "" : fontColorOpacities.values().next().value;
-    this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [fontSize]);
-    this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [fontFamily]);
-    this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [fontColor]);
-    this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [fontColorOpacity]);
+    const fontSizeMixin = moreThanOne(fontSizes);
+    const fontFamilyMixin = moreThanOne(fontFamilies);
+    const fontColorMixin = moreThanOne(fontColors);
+    const fontColorOpacityMixin = moreThanOne(fontColorOpacities);
+
+    const fontSize = fontSizeMixin ? null : fontSizes.values().next().value;
+    const fontFamily = fontFamilyMixin ? null : fontFamilies.values().next().value;
+    const fontColor = fontColorMixin ? null : fontColors.values().next().value;
+    const fontColorOpacity = fontColorOpacityMixin ? null : fontColorOpacities.values().next().value;
+
+    if (propsUpdate) {
+      this._fontSizeMixin = fontSizeMixin;
+      this._fontFamilyMixin = fontFamilyMixin;
+      this._fontColorMixin = fontColorMixin;
+      this._fontColorOpacityMixin = fontColorOpacityMixin;
+
+      this._fontSize = fontSize;
+      this._fontFamily = fontFamily;
+      this._fontColor = fontColor;
+      this._fontColorOpacity = fontColorOpacity;
+    }
+
+    if (eventEmit) {
+      this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [fontSize]);
+      this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [fontFamily]);
+      this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [fontColor]);
+      this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [fontColorOpacity]);
+      this.emitPropChanged(ShieldDispatcherNames.fontSizeMixinChanged, [fontSizeMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.fontFamilyMixinChanged, [fontFamilyMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.fontColorMixinChanged, [fontColorMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityMixinChanged, [fontColorOpacityMixin]);
+    }
   }
 
   /**
@@ -848,7 +990,7 @@ export default class ElementText extends ElementRect implements IElementText {
       }
     }
     this._prevInputCursor = null;
-    this._emitFontStyleChangedByCursor();
+    this._checkFontStyleChangedByCursor();
     this._addCursorUpdateCommand();
   }
 

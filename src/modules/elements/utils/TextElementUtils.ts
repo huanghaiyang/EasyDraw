@@ -371,6 +371,7 @@ export default class TextElementUtils {
    */
   static isCursorAtSamePosition(cursorA: ITextCursor, cursorB: ITextCursor, textData?: ITextData): boolean {
     if (TextElementUtils.isCursorEqual(cursorA, cursorB)) return true;
+    if ((!cursorA && !!cursorB) || (!cursorB && !!cursorA)) return false;
     if (textData) {
       const { nodeId: aNodeId, lineNumber: aLineNumber, pos: aPos } = cursorA;
       const { nodeId: bNodeId, lineNumber: bLineNumber, pos: bPos } = cursorB;

@@ -318,6 +318,14 @@ export default interface IElement {
   get fontColor(): string;
   // 字体颜色透明度
   get fontColorOpacity(): number;
+  // 字体大小是否混合
+  get fontSizeMixin(): boolean;
+  // 字体是否混合
+  get fontFamilyMixin(): boolean;
+  // 字体颜色是否混合
+  get fontColorMixin(): boolean;
+  // 字体颜色透明度是否混合
+  get fontColorOpacityMixin(): boolean;
   // 圆角
   get corners(): number[];
 

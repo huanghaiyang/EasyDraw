@@ -65,12 +65,52 @@ const DefaultStage = {
   fontColor: DefaultElementStyle.fontColor,
   // 字体颜色透明度
   fontColorOpacity: DefaultElementStyle.fontColorOpacity,
+  // 字体大小是否混合
+  fontSizeMixin: false,
+  // 字体是否混合
+  fontFamilyMixin: false,
+  // 字体颜色是否混合
+  fontColorMixin: false,
+  // 字体颜色透明度是否混合
+  fontColorOpacityMixin: false,
   // 文字对齐方式
   textAlign: DefaultElementStyle.textAlign,
   // 文字基线
   textBaseline: DefaultElementStyle.textBaseline,
   // 是否锁定比例
   isRatioLocked: false,
+  // 填充是否可用
+  fillEnable: false,
+  // 描边是否可用
+  strokeEnable: false,
+  // 字体是否可用
+  fontEnable: false,
+  // 圆角是否可用
+  cornersEnable: false,
+  // 锁定比例是否可用
+  ratioLockedEnable: false,
+  // 填充输入是否可用
+  fillInputEnable: false,
+  // 描边输入是否可用
+  strokeInputEnable: false,
+  // 字体输入是否可用
+  fontInputEnable: false,
+  // 字体行高输入是否可用
+  fontLineHeightInputEnable: false,
+  // 圆角输入是否可用
+  cornersInputEnable: false,
+  // 宽度输入是否可用
+  widthInputEnable: false,
+  // 高度输入是否可用
+  heightInputEnable: false,
+  // 角度输入是否可用
+  angleInputEnable: false,
+  // Y倾斜角度输入是否可用
+  leanYAngleInputEnable: false,
+  // 位置输入是否可用
+  positionInputEnable: false,
+  // 组件状态
+  status: ElementStatus.initialed,
 };
 
 export const useStageStore = defineStore("stage", {
@@ -98,38 +138,6 @@ export const useStageStore = defineStore("stage", {
       layerShiftMoveEnable: false,
       // 层下移动是否可用
       layerGoDownEnable: false,
-      // 填充是否可用
-      fillEnable: false,
-      // 描边是否可用
-      strokeEnable: false,
-      // 字体是否可用
-      fontEnable: false,
-      // 圆角是否可用
-      cornersEnable: false,
-      // 锁定比例是否可用
-      ratioLockedEnable: false,
-      // 填充输入是否可用
-      fillInputEnable: false,
-      // 描边输入是否可用
-      strokeInputEnable: false,
-      // 字体输入是否可用
-      fontInputEnable: false,
-      // 字体行高输入是否可用
-      fontLineHeightInputEnable: false,
-      // 圆角输入是否可用
-      cornersInputEnable: false,
-      // 宽度输入是否可用
-      widthInputEnable: false,
-      // 高度输入是否可用
-      heightInputEnable: false,
-      // 角度输入是否可用
-      angleInputEnable: false,
-      // Y倾斜角度输入是否可用
-      leanYAngleInputEnable: false,
-      // 位置输入是否可用
-      positionInputEnable: false,
-      // 组件状态
-      status: ElementStatus.initialed,
       // 舞台默认数据
       ...LodashUtils.jsonClone(DefaultStage),
     };
@@ -206,6 +214,14 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色透明度
       shield.on(ShieldDispatcherNames.fontColorOpacityChanged, throttle(this.onFontColorOpacityChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体大小混合
+      shield.on(ShieldDispatcherNames.fontSizeMixinChanged, throttle(this.onFontSizeMixinChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体混合
+      shield.on(ShieldDispatcherNames.fontFamilyMixinChanged, throttle(this.onFontFamilyMixinChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体颜色混合
+      shield.on(ShieldDispatcherNames.fontColorMixinChanged, throttle(this.onFontColorMixinChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体颜色透明度混合
+      shield.on(ShieldDispatcherNames.fontColorOpacityMixinChanged, throttle(this.onFontColorOpacityMixinChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本基线
@@ -309,6 +325,10 @@ export const useStageStore = defineStore("stage", {
         fontFamily,
         fontColor,
         fontColorOpacity,
+        fontSizeMixin,
+        fontFamilyMixin,
+        fontColorMixin,
+        fontColorOpacityMixin,
         fontLineHeight,
         textAlign,
         textBaseline,
@@ -344,6 +364,14 @@ export const useStageStore = defineStore("stage", {
       this.onFontColorChanged(element, fontColor);
       // 字体颜色透明度
       this.onFontColorOpacityChanged(element, fontColorOpacity);
+      // 字体大小混合
+      this.onFontSizeMixinChanged(element, fontSizeMixin);
+      // 字体混合
+      this.onFontFamilyMixinChanged(element, fontFamilyMixin);
+      // 字体颜色混合
+      this.onFontColorMixinChanged(element, fontColorMixin);
+      // 字体颜色透明度混合
+      this.onFontColorOpacityMixinChanged(element, fontColorOpacityMixin);
       // 文本对齐方式
       this.onTextAlignChanged(element, textAlign);
       // 文本基线
@@ -539,8 +567,44 @@ export const useStageStore = defineStore("stage", {
       this.fontColorOpacity = fontColorOpacity;
     },
     /**
-     * 组件字体对齐方式变化
+     * 组件字体大小混合变化
      *
+     * @param element
+     * @param fontSizeMixin
+     */
+    onFontSizeMixinChanged(element: IElement, fontSizeMixin: number) {
+      this.fontSizeMixin = fontSizeMixin;
+    },
+    /**
+     * 组件字体变化
+     *
+     * @param element
+     * @param fontFamilyMixin
+     */
+    onFontFamilyMixinChanged(element: IElement, fontFamilyMixin: string) {
+      this.fontFamilyMixin = fontFamilyMixin;
+    },
+    /**
+     * 组件字体颜色变化
+     *
+     * @param element
+     * @param fontColorMixin
+     */
+    onFontColorMixinChanged(element: IElement, fontColorMixin: string) {
+      this.fontColorMixin = fontColorMixin;
+    },
+    /**
+     * 组件字体颜色透明度变化
+
+     * @param element
+     * @param fontColorOpacityMixin
+     */
+    onFontColorOpacityMixinChanged(element: IElement, fontColorOpacityMixin: number) {
+      this.fontColorOpacityMixin = fontColorOpacityMixin;
+    },
+    /**
+     * 组件字体对齐方式变化
+
      * @param element
      * @param textAlign
      */

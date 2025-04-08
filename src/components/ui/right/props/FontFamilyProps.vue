@@ -5,11 +5,19 @@ import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontFamily = ref(DefaultFontFamily);
+const fontFamilyMixin = ref(false);
 
 watch(
   () => stageStore.fontFamily,
   newValue => {
     fontFamily.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontFamilyMixin,
+  newValue => {
+    fontFamilyMixin.value = newValue;
   },
 );
 </script>
@@ -20,7 +28,13 @@ watch(
     </div>
     <div class="font-props__row">
       <div class="font-props__row-item full">
-        <el-select v-model="fontFamily" placeholder="" size="small" @change="value => stageStore.setElementsFontFamily(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
+        <el-select
+          v-model="fontFamily"
+          :placeholder="`${fontFamilyMixin ? '混合字体' : fontFamily}`"
+          size="small"
+          @change="value => stageStore.setElementsFontFamily(value)"
+          :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+        >
           <el-option v-for="item in FontFamilyList" :key="item.name" :label="item.name" :value="item.name" :style="{ fontFamily: item.name }" />
         </el-select>
       </div>

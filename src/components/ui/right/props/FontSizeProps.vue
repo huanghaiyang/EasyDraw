@@ -5,11 +5,19 @@ import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontSize = ref(DefaultFontSize);
+const fontSizeMixin = ref(false);
 
 watch(
   () => stageStore.fontSize,
   newValue => {
     fontSize.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontSizeMixin,
+  newValue => {
+    fontSizeMixin.value = newValue;
   },
 );
 </script>
@@ -21,7 +29,13 @@ watch(
 
     <div class="font-props__row">
       <div class="font-props__row-item">
-        <el-select v-model="fontSize" placeholder="" size="small" @change="value => stageStore.setElementsFontSize(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
+        <el-select
+          v-model="fontSize"
+          :placeholder="`${fontSizeMixin ? '混合字号' : fontSize}`"
+          size="small"
+          @change="value => stageStore.setElementsFontSize(value)"
+          :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+        >
           <el-option v-for="item in FontSizeList" :key="item.name" :label="item.name" :value="item.value" />
         </el-select>
       </div>
@@ -30,7 +44,7 @@ watch(
           v-model="fontSize"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
           size="small"
-          placeholder=""
+          :placeholder="`${fontSizeMixin ? '混合字号' : fontSize}`"
           type="number"
           :min="1"
           :max="100"

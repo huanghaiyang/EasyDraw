@@ -7,6 +7,8 @@ const colorPickerRef = ref();
 const stageStore = useStageStore();
 const fontColor = ref(DefaultFontColor);
 const fontColorOpacity = ref(DefaultFontColorOpacity);
+const fontColorMixin = ref(false);
+const fontColorOpacityMixin = ref(false);
 
 watch(
   () => stageStore.fontColor,
@@ -19,6 +21,20 @@ watch(
   () => stageStore.fontColorOpacity,
   newValue => {
     fontColorOpacity.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontColorMixin,
+  newValue => {
+    fontColorMixin.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontColorOpacityMixin,
+  newValue => {
+    fontColorOpacityMixin.value = newValue;
   },
 );
 
@@ -35,13 +51,13 @@ const toggleColorPickerVisible = () => {
     <div class="font-props__row color">
       <div class="font-props__row-item">
         <el-color-picker v-model="fontColor" @change="value => stageStore.setElementsFontColor(value)" ref="colorPickerRef" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable" />
-        <el-tag type="info" @click="toggleColorPickerVisible">{{ fontColor }}</el-tag>
+        <el-tag type="info" @click="toggleColorPickerVisible">{{ `${fontColorMixin ? "混合颜色" : fontColor}` }}</el-tag>
       </div>
 
       <div class="font-props__row-item">
         <el-input
           v-model="fontColorOpacity"
-          placeholder=""
+          :placeholder="`${fontColorOpacityMixin ? '混合透明度' : fontColorOpacity}`"
           type="number"
           min="0"
           max="1"

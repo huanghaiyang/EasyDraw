@@ -431,6 +431,22 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.fontColorOpacity;
   }
 
+  get fontSizeMixin(): boolean {
+    return false;
+  }
+
+  get fontFamilyMixin(): boolean {
+    return false;
+  }
+
+  get fontColorMixin(): boolean {
+    return false;
+  }
+
+  get fontColorOpacityMixin(): boolean {
+    return false;
+  }
+
   get status(): ElementStatus {
     return this._status;
   }
