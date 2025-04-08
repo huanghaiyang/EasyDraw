@@ -689,7 +689,7 @@ export default class TextElementUtils {
       if (endPos === Direction.LEFT) {
         endNodeIndex--;
       }
-    } else {
+    } else if (startNodeIndex > endNodeIndex) {
       // 起始节点索引大于结束节点索引，表示选区是从右到左
       // 如果起始位置在节点的左侧，则当前节点不选中
       if (startPos === Direction.LEFT) {
