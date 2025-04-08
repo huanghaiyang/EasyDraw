@@ -34,7 +34,6 @@ export type ITextCursor = Partial<IPoint> &
     nodeId?: string;
     lineNumber?: number;
     pos?: Direction;
-    renderRect?: Partial<DOMRect>;
   };
 
 // 文本选区

@@ -199,7 +199,7 @@ export default class ElementText extends ElementRect implements IElementText {
     // 转换为组件内的坐标
     const point = ElementRenderHelper.convertCoordInRect(coord, this, renderRect);
     // 获取文本光标
-    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point, renderRect);
+    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {
@@ -240,7 +240,6 @@ export default class ElementText extends ElementRect implements IElementText {
     if (!this.isEditing) return;
     this._updateCursor(this._textCursor);
     this._updateCursor(this._textSelection?.endCursor);
-    this._rerefreshCursorRenderRect();
   }
 
   /**
@@ -326,7 +325,6 @@ export default class ElementText extends ElementRect implements IElementText {
         this.model.data = textData;
       }
     }
-    this._rerefreshCursorRenderRect();
     this._markSelection();
     this._textUpdateId = updateId;
     return { changed, reflow };
@@ -824,19 +822,6 @@ export default class ElementText extends ElementRect implements IElementText {
     }
     this._prevInputCursor = null;
     this._addCursorUpdateCommand();
-  }
-
-  /**
-   * 刷新光标渲染矩形
-   */
-  private _rerefreshCursorRenderRect(): void {
-    const renderRect = ElementRenderHelper.calcElementRenderRect(this);
-    if (this._textCursor) {
-      this._textCursor.renderRect = renderRect;
-    }
-    if (this._textSelection && this._textSelection.endCursor) {
-      this._textSelection.endCursor.renderRect = renderRect;
-    }
   }
 
   /**

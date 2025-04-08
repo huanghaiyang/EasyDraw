@@ -5,8 +5,9 @@ import CanvasUtils from "@/utils/CanvasUtils";
 import { TextSelectionFillColor, TextSelectionFillColorOpacity } from "@/styles/MaskStyles";
 import ITextData, { ITextCursor, ITextLine } from "@/types/IText";
 import { pick } from "lodash";
-import { RenderParams } from "@/types/IRender";
+import { RenderParams, RenderRect } from "@/types/IRender";
 import { Direction } from "@/types";
+import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 
 export default class ElementTaskTextSelection extends ElementTaskBase implements IElementTaskTextSelection {
   /**
@@ -27,12 +28,13 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
     };
 
     const { startCursor, endCursor } = textSelection;
-    const { lineNumber: startLineNumber, renderRect } = startCursor;
+    const { lineNumber: startLineNumber } = startCursor;
     const { lineNumber: endLineNumber } = endCursor;
+    const renderRect = ElementRenderHelper.calcElementRenderRect(this.element);
 
     // 如果是同一行，则仅绘制当前行的选区效果
     if (startLineNumber === endLineNumber) {
-      this._drawLineSelection(startCursor, endCursor, options);
+      this._drawLineSelection(startCursor, endCursor, renderRect, options);
     } else {
       const { lines } = this.element.model.data as ITextData;
       if (startLineNumber < endLineNumber) {
@@ -78,7 +80,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
    * @param renderRect 渲染矩形
    * @param options 渲染选项
    */
-  private _draweEmptyLine(line: ITextLine, renderRect: Partial<DOMRect>, options: RenderParams): void {
+  private _draweEmptyLine(line: ITextLine, renderRect: RenderRect, options: RenderParams): void {
     const { x, y, height } = line;
     const startCursor = {
       x,
@@ -92,17 +94,16 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
       height,
       renderRect,
     } as ITextCursor;
-    this._drawLineSelection(startCursor, endCursor, options);
+    this._drawLineSelection(startCursor, endCursor, renderRect, options);
   }
 
   /**
    * 绘制完整行的选区
-   *
    * @param line 行
    * @param renderRect 渲染矩形
    * @param options 渲染选项
    */
-  private _drawFullLine(line: ITextLine, renderRect: Partial<DOMRect>, options: RenderParams): void {
+  private _drawFullLine(line: ITextLine, renderRect: RenderRect, options: RenderParams): void {
     const headCursor: ITextCursor = line.nodes[0];
     this._drawPartialLine(
       line,
@@ -125,15 +126,15 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
    * @param renderRect 渲染矩形
    * @param options 渲染选项
    */
-  private _drawPartialLine(line: ITextLine, cursor: ITextCursor, direction: Direction, renderRect: Partial<DOMRect>, options: RenderParams): void {
+  private _drawPartialLine(line: ITextLine, cursor: ITextCursor, direction: Direction, renderRect: RenderRect, options: RenderParams): void {
     if (direction === Direction.LEFT) {
       const headNode = line.nodes[0];
       this._drawLineSelection(
         {
           ...pick(headNode, ["x", "y", "height"]),
-          renderRect,
         },
         cursor,
+        renderRect,
         options,
       );
     } else if (direction === Direction.RIGHT) {
@@ -143,8 +144,8 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
         {
           x: tailNode.x + tailNode.width,
           ...pick(tailNode, ["y", "height"]),
-          renderRect,
         },
+        renderRect,
         options,
       );
     }
@@ -154,9 +155,10 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
    * 绘制选区
    * @param startCursor 开始选区光标
    * @param endCursor 结束选区光标
+   * @param renderRect 渲染矩形
    * @param options 渲染选项
    */
-  private _drawLineSelection(startCursor: ITextCursor, endCursor: ITextCursor, options: RenderParams): void {
+  private _drawLineSelection(startCursor: ITextCursor, endCursor: ITextCursor, renderRect: RenderRect, options: RenderParams): void {
     const desX = Math.min(startCursor.x, endCursor.x);
     const desY = startCursor.y;
     const desWidth = Math.abs(startCursor.x - endCursor.x);
@@ -165,7 +167,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
     CanvasUtils.drawRectInRenderRect(
       this.canvas,
       {
-        ...startCursor.renderRect,
+        ...renderRect,
         desX,
         desY,
         desWidth,
@@ -175,9 +177,7 @@ export default class ElementTaskTextSelection extends ElementTaskBase implements
         color: TextSelectionFillColor,
         colorOpacity: TextSelectionFillColorOpacity,
       },
-      {
-        ...options,
-      },
+      options,
     );
   }
 }

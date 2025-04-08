@@ -121,10 +121,9 @@ export default class TextElementUtils {
    *
    * @param textData 文本数据
    * @param point 光标位置
-   * @param rect 旋转盒模型的rect
    * @returns 光标位置
    */
-  static getTextCursorAtPosition(textData: ITextData, point: IPoint, rect: Partial<DOMRect>): ITextCursor {
+  static getTextCursorAtPosition(textData: ITextData, point: IPoint): ITextCursor {
     const textCursor: ITextCursor = {};
     const { lines } = textData;
     let line: ITextLine;
@@ -163,7 +162,6 @@ export default class TextElementUtils {
       textCursor.lineNumber = lineNumber;
       Object.assign(textCursor, getCursorPropsOfLineEnd(lines[lineNumber], lineNumber));
     }
-    textCursor.renderRect = rect;
     return textCursor;
   }
 

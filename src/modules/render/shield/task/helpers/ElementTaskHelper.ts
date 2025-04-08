@@ -59,7 +59,9 @@ export default class ElementTaskHelper {
   static drawTextCursor(element: IElementText, canvas: HTMLCanvasElement, textCursor: ITextCursor): void {
     const { angle, flipX, leanY, actualAngle } = element;
     if (!textCursor) return;
-    const { x: desX, y: desY, width: desWidth, height: desHeight, renderRect } = textCursor;
+    // 计算渲染盒子的画布坐标
+    const renderRect = ElementRenderHelper.calcElementRenderRect(element) as RenderRect;
+    const { x: desX, y: desY, width: desWidth, height: desHeight } = textCursor;
 
     // 渲染选项
     const options = {

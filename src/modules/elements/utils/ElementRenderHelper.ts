@@ -19,7 +19,7 @@ export default class ElementRenderHelper {
    * @param element
    * @returns
    */
-  static calcElementRenderRect(element: IElement): Partial<DOMRect> {
+  static calcElementRenderRect(element: IElement): RenderRect {
     const { rotateBoxCoords, center } = element;
     return ElementRenderHelper.calcRenderRect(rotateBoxCoords, center, element.shield.stageScale);
   }
@@ -32,7 +32,7 @@ export default class ElementRenderHelper {
    * @param scale
    * @returns
    */
-  static calcRenderRect(rotateBoxCoords: IPoint[], center: IPoint, scale: number): Partial<DOMRect> {
+  static calcRenderRect(rotateBoxCoords: IPoint[], center: IPoint, scale: number): RenderRect {
     // 计算渲染盒子的画布坐标
     let rect = CommonUtils.calcRenderRect(rotateBoxCoords, center);
     // 根据画布的缩放比例进行缩放

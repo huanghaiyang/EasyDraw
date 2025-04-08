@@ -90,4 +90,4 @@ export type DestinationRect = {
   desHeight: number;
 };
 
-export type RenderRect = Partial<DOMRect> & DestinationRect;
+export type RenderRect = Partial<DOMRect> & Partial<DestinationRect>;
