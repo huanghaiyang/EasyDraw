@@ -332,3 +332,11 @@ export const FontLineHeightList = [
   { name: "1.8", value: 1.8 },
   { name: "2", value: 2 },
 ];
+
+// 字体样式集合
+export type FontStyleSet = {
+  fontFamilies?: Set<string>;
+  fontSizes?: Set<number>;
+  fontColors?: Set<string>;
+  fontColorOpacities?: Set<number>;
+};

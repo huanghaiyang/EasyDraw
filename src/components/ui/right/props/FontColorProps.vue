@@ -41,7 +41,7 @@ const toggleColorPickerVisible = () => {
       <div class="font-props__row-item">
         <el-input
           v-model="fontColorOpacity"
-          placeholder="输入数字"
+          placeholder=""
           type="number"
           min="0"
           max="1"

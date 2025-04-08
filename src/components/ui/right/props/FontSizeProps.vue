@@ -21,7 +21,7 @@ watch(
 
     <div class="font-props__row">
       <div class="font-props__row-item">
-        <el-select v-model="fontSize" placeholder="字号" size="small" @change="value => stageStore.setElementsFontSize(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
+        <el-select v-model="fontSize" placeholder="" size="small" @change="value => stageStore.setElementsFontSize(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
           <el-option v-for="item in FontSizeList" :key="item.name" :label="item.name" :value="item.value" />
         </el-select>
       </div>
@@ -30,7 +30,7 @@ watch(
           v-model="fontSize"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
           size="small"
-          placeholder="字号"
+          placeholder=""
           type="number"
           :min="1"
           :max="100"

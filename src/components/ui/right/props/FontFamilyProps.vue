@@ -20,7 +20,7 @@ watch(
     </div>
     <div class="font-props__row">
       <div class="font-props__row-item full">
-        <el-select v-model="fontFamily" placeholder="字体" size="small" @change="value => stageStore.setElementsFontFamily(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
+        <el-select v-model="fontFamily" placeholder="" size="small" @change="value => stageStore.setElementsFontFamily(value)" :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable">
           <el-option v-for="item in FontFamilyList" :key="item.name" :label="item.name" :value="item.name" :style="{ fontFamily: item.name }" />
         </el-select>
       </div>

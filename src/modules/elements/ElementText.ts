@@ -5,7 +5,7 @@
  */
 import { ElementObject, IElementText } from "@/types/IElement";
 import ElementRect from "@/modules/elements/ElementRect";
-import { Direction, ElementStatus, InputCompositionType, IPoint, TextEditingStates } from "@/types";
+import { Direction, ElementStatus, InputCompositionType, IPoint, ShieldDispatcherNames, TextEditingStates } from "@/types";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextEditorOperations, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
 import CommonUtils from "@/utils/CommonUtils";
 import { isEmpty } from "lodash";
@@ -14,7 +14,7 @@ import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
-import { FontStyle } from "@/styles/ElementStyles";
+import { FontStyle, FontStyleSet } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
 import IUndoRedo from "@/types/IUndoRedo";
 import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
@@ -63,7 +63,7 @@ export default class ElementText extends ElementRect implements IElementText {
   get fontLineHeightInputEnable(): boolean {
     return this.status === ElementStatus.finished;
   }
-  
+
   get editingEnable(): boolean {
     return true;
   }
@@ -229,6 +229,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._prevMarkCursor = this._textSelection?.endCursor || this._textCursor;
     }
     this._markSelection();
+    this._emitFontStyleChangedByCursor();
     this._prevInputCursor = null;
     this._addCursorUpdateCommand();
   }
@@ -265,6 +266,7 @@ export default class ElementText extends ElementRect implements IElementText {
     const { keyCode, ctrlKey, shiftKey, metaKey, altKey, updateId } = states;
     let changed = false;
     let reflow = false;
+    let noUsed = false;
     if (CoderUtils.isArrowLeft(keyCode)) {
       this._moveCursorTo(Direction.LEFT, states);
     } else if (CoderUtils.isArrowRight(keyCode)) {
@@ -320,12 +322,16 @@ export default class ElementText extends ElementRect implements IElementText {
       } else {
         // 其他快捷键不支持
         reflow = false;
+        noUsed = true;
       }
       if (changed) {
         this.model.data = textData;
       }
     }
-    this._markSelection();
+    if (!noUsed) {
+      this._markSelection();
+      this._emitFontStyleChangedByCursor();
+    }
     this._textUpdateId = updateId;
     return { changed, reflow };
   }
@@ -679,6 +685,27 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 根据光标位置更新字体样式
+   */
+  private _emitFontStyleChangedByCursor(): void {
+    let fontStyleSet: FontStyleSet;
+    if (this.isSelectionAvailable) {
+      fontStyleSet = TextElementUtils.getStyleSetOfTextData(this.model.data as ITextData, true);
+    } else {
+      fontStyleSet = TextElementUtils.getStyleSetByCursor(this._textCursor, this.model.data as ITextData);
+    }
+    const { fontSizes, fontFamilies, fontColors, fontColorOpacities } = fontStyleSet;
+    const fontSize = fontSizes.size > 1 ? "" : fontSizes.values().next().value;
+    const fontFamily = fontFamilies.size > 1 ? "" : fontFamilies.values().next().value;
+    const fontColor = fontColors.size > 1 ? "" : fontColors.values().next().value;
+    const fontColorOpacity = fontColorOpacities.size > 1 ? "" : fontColorOpacities.values().next().value;
+    this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [fontSize]);
+    this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [fontFamily]);
+    this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [fontColor]);
+    this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [fontColorOpacity]);
+  }
+
+  /**
    * 移动光标
    *
    * @param direction 方向
@@ -821,6 +848,7 @@ export default class ElementText extends ElementRect implements IElementText {
       }
     }
     this._prevInputCursor = null;
+    this._emitFontStyleChangedByCursor();
     this._addCursorUpdateCommand();
   }
 

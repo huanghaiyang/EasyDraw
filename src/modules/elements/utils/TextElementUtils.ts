@@ -1,4 +1,4 @@
-import { FontStyle, TextFontStyle } from "@/styles/ElementStyles";
+import { FontStyle, FontStyleSet, TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { ElementObject } from "@/types/IElement";
@@ -420,7 +420,151 @@ export default class TextElementUtils {
   }
 
   /**
-   * 标记文本未选中
+   * 创建新的字体样式集合
+   * @returns 字体样式集合
+   */
+  static newFontStyleSet(): FontStyleSet {
+    return {
+      fontFamilies: new Set(),
+      fontSizes: new Set(),
+      fontColors: new Set(),
+      fontColorOpacities: new Set(),
+    };
+  }
+
+  /**
+   * 解析样式并缓存
+   *
+   * @param fontStyle
+   * @param result
+   */
+  static cacheStyleSet(fontStyle: FontStyle, result: FontStyleSet): void {
+    if (!fontStyle) return;
+
+    if (fontStyle.fontFamily) {
+      result.fontFamilies.add(fontStyle.fontFamily);
+    }
+    if (fontStyle.fontSize) {
+      result.fontSizes.add(fontStyle.fontSize);
+    }
+    if (fontStyle.fontColor) {
+      result.fontColors.add(fontStyle.fontColor);
+    }
+    if (fontStyle.fontColorOpacity) {
+      result.fontColorOpacities.add(fontStyle.fontColorOpacity);
+    }
+  }
+
+  /**
+   * 缓存文本节点样式
+   *
+   * @param node
+   * @param result
+   */
+  static cacheStyleSetOfNode(node: ITextNode, result: FontStyleSet): void {
+    const { fontStyle } = node;
+    TextElementUtils.cacheStyleSet(fontStyle, result);
+  }
+
+  /**
+   * 获取文本节点的样式
+   *
+   * @param node
+   * @returns
+   */
+  static getStyleSetOfNode(node: ITextNode): FontStyleSet {
+    const result: FontStyleSet = TextElementUtils.newFontStyleSet();
+    TextElementUtils.cacheStyleSetOfNode(node, result);
+    return result;
+  }
+
+  /**
+   * 获取文本节点的字体样式
+   *
+   * @param nodes 文本节点数组
+   * @returns 字体样式
+   */
+  static getStyleSetOfNodes(nodes: ITextNode[]): FontStyleSet {
+    const result: FontStyleSet = TextElementUtils.newFontStyleSet();
+    for (let i = 0; i < nodes.length; i++) {
+      TextElementUtils.cacheStyleSetOfNode(nodes[i], result);
+    }
+    return result;
+  }
+
+  /**
+   * 获取文本数据中的字体样式
+   *
+   * @param textData 文本数据
+   * @returns 字体样式
+   */
+  static getStyleSetOfTextData(textData: ITextData, selected?: boolean): FontStyleSet {
+    const result: FontStyleSet = {
+      fontFamilies: new Set(),
+      fontSizes: new Set(),
+      fontColors: new Set(),
+      fontColorOpacities: new Set(),
+    };
+    textData.lines.forEach(line => {
+      line.nodes.forEach(node => {
+        if (!selected || (selected && node.selected)) {
+          TextElementUtils.cacheStyleSetOfNode(node, result);
+        }
+      });
+    });
+    return result;
+  }
+
+  /**
+   * 给定光标，获取参考节点或行
+   *
+   * @param cursor
+   * @param textData
+   * @returns
+   */
+  static getReferByCursor(cursor: ITextCursor, textData: ITextData): ITextNode | ITextLine {
+    const { lineNumber, nodeId, pos } = cursor;
+    const line = textData.lines[lineNumber];
+    if (!nodeId) return line;
+    const nodeIndex = line.nodes.findIndex(node => node.id === nodeId);
+    if (nodeIndex !== -1) {
+      const node = line.nodes[nodeIndex];
+      if (nodeIndex === 0 || pos === Direction.RIGHT) {
+        return node;
+      }
+      return line.nodes[nodeIndex - 1];
+    }
+    return line;
+  }
+
+  /**
+   * 给定光标，返回参考样式
+   *
+   * @param cursor
+   * @param textData
+   * @returns
+   */
+  static getReferFontStyleByCursor(cursor: ITextCursor, textData: ITextData): FontStyle {
+    const refer = TextElementUtils.getReferByCursor(cursor, textData);
+    if (refer) return refer.fontStyle;
+  }
+
+  /**
+   * 给定光标，返回参考样式集合
+   *
+   * @param cursor
+   * @param textData
+   * @returns
+   */
+  static getStyleSetByCursor(cursor: ITextCursor, textData: ITextData): FontStyleSet {
+    const style = TextElementUtils.getReferFontStyleByCursor(cursor, textData);
+    const result: FontStyleSet = TextElementUtils.newFontStyleSet();
+    TextElementUtils.cacheStyleSet(style, result);
+    return result;
+  }
+
+  /**
+   * 标记文本节点为未选中状态
    *
    * @param textData 文本数据
    */

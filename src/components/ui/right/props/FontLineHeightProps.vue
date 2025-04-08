@@ -23,7 +23,7 @@ watch(
       <div class="font-props__row-item">
         <el-select
           v-model="fontLineHeight"
-          placeholder="行高"
+          placeholder=""
           size="small"
           @change="value => stageStore.setElementsFontLineHeight(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
@@ -36,7 +36,7 @@ watch(
           v-model="fontLineHeight"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
           size="small"
-          placeholder="行高"
+          placeholder=""
           type="number"
           :min="1"
           :max="100"
