@@ -60,6 +60,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return true;
   }
 
+  get fontLineHeightInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+  
   get editingEnable(): boolean {
     return true;
   }

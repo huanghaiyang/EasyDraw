@@ -306,6 +306,8 @@ export default interface IElement {
   get fontEnable(): boolean;
   // 字体是否可修改
   get fontInputEnable(): boolean;
+  // 字体行高是否可修改
+  get fontLineHeightInputEnable(): boolean;
   // 字体大小
   get fontSize(): number;
   // 字体

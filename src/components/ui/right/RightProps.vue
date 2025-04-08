@@ -7,7 +7,10 @@
     <size-props></size-props>
     <angle-props></angle-props>
     <corner-props></corner-props>
-    <font-prop></font-prop>
+    <font-family-props></font-family-props>
+    <font-size-props></font-size-props>
+    <font-line-height-props></font-line-height-props>
+    <font-color-props></font-color-props>
     <fill-props></fill-props>
     <stroke-props></stroke-props>
     <layer-props></layer-props>
@@ -36,7 +39,7 @@
       font-size: 12px;
       font-weight: 500;
       color: #000000;
-      padding: 10px;
+      padding: 4px;
       display: flex;
       align-items: center;
 
@@ -63,7 +66,7 @@
       padding: 0 4px;
 
       &:not(:first-child) {
-        margin: 0 0 8px 0;
+        margin: 0 0 4px 0;
       }
 
       .el-tag {

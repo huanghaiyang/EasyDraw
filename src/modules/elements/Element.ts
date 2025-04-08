@@ -407,6 +407,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get fontLineHeightInputEnable(): boolean {
+    return false;
+  }
+
   get fontSize(): number {
     return this.model.styles.fontSize;
   }

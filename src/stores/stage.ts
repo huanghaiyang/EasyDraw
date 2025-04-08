@@ -114,6 +114,8 @@ export const useStageStore = defineStore("stage", {
       strokeInputEnable: false,
       // 字体输入是否可用
       fontInputEnable: false,
+      // 字体行高输入是否可用
+      fontLineHeightInputEnable: false,
       // 圆角输入是否可用
       cornersInputEnable: false,
       // 宽度输入是否可用
@@ -375,6 +377,7 @@ export const useStageStore = defineStore("stage", {
         fillInputEnable,
         strokeInputEnable,
         fontInputEnable,
+        fontLineHeightInputEnable,
         cornersInputEnable,
         angleInputEnable,
         leanYAngleInputEnable,
@@ -390,6 +393,7 @@ export const useStageStore = defineStore("stage", {
       this.fillInputEnable = fillInputEnable;
       this.strokeInputEnable = strokeInputEnable;
       this.fontInputEnable = fontInputEnable;
+      this.fontLineHeightInputEnable = fontLineHeightInputEnable;
       this.angleInputEnable = angleInputEnable;
       this.leanYAngleInputEnable = leanYAngleInputEnable;
       this.cornersInputEnable = cornersInputEnable;

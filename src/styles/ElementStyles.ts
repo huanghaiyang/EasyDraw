@@ -172,7 +172,7 @@ export const DefaultElementStyle: ElementStyles = {
 };
 
 // 可用于计算文本尺寸的样式属性
-export const FontStylePropsForMeasureText = ["fontSize", "fontFamily"]
+export const FontStylePropsForMeasureText = ["fontSize", "fontFamily"];
 
 /**
  * 获取默认组件样式
@@ -321,4 +321,14 @@ export const FontSizeList = [
   { name: "72", value: 72 },
   { name: "80", value: 80 },
   { name: "96", value: 96 },
+];
+
+// 字体行高列表
+export const FontLineHeightList = [
+  { name: "1", value: 1 },
+  { name: "1.2", value: 1.2 },
+  { name: "1.4", value: 1.4 },
+  { name: "1.6", value: 1.6 },
+  { name: "1.8", value: 1.8 },
+  { name: "2", value: 2 },
 ];
