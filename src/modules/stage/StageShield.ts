@@ -687,9 +687,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(elements, async () => {
       await this.store.setElementsFontLetterSpacing(elements, value);
+      await this._addRedrawTask(true);
+      await this._reflowTextIfy(elements, true);
+      elements.forEach(element => element.onFontLetterSpacingChanged());
     });
-    elements.forEach(element => element.onFontLetterSpacingChanged());
-    this._shouldRedraw = true;
   }
 
   /**

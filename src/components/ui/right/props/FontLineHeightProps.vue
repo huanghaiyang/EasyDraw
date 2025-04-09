@@ -43,7 +43,6 @@ watch(
           @change="value => stageStore.setElementsFontLineHeight(Number(value))"
         >
           <template #prepend>L</template>
-          <template #append>px</template>
         </el-input>
       </div>
     </div>

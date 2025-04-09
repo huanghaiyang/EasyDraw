@@ -5,11 +5,19 @@ import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontLetterSpacing = ref(DefaultFontLetterSpacing);
+const fontLetterSpacingMixin = ref(false);
 
 watch(
   () => stageStore.fontLetterSpacing,
   newValue => {
     fontLetterSpacing.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontLetterSpacingMixin,
+  newValue => {
+    fontLetterSpacingMixin.value = newValue;
   },
 );
 </script>
@@ -23,7 +31,7 @@ watch(
       <div class="font-props__row-item">
         <el-select
           v-model="fontLetterSpacing"
-          placeholder=""
+          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : fontLetterSpacing}`"
           size="small"
           @change="value => stageStore.setElementsFontLetterSpacing(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
@@ -36,14 +44,13 @@ watch(
           v-model="fontLetterSpacing"
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
           size="small"
-          placeholder=""
+          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : fontLetterSpacing}`"
           type="number"
           :min="1"
           :max="100"
           @change="value => stageStore.setElementsFontLetterSpacing(Number(value))"
         >
           <template #prepend>L</template>
-          <template #append>px</template>
         </el-input>
       </div>
     </div>
