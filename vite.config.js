@@ -4,6 +4,7 @@ import vue from "@vitejs/plugin-vue";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import fs from "fs-extra";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -16,6 +17,14 @@ export default defineConfig({
     Components({
       resolvers: [ElementPlusResolver()],
     }),
+    {
+      name: 'copy-fonts',
+      async generateBundle() {
+        const srcFonts = path.resolve(__dirname, 'src/assets/fonts');
+        const destFonts = path.resolve(__dirname, 'docs/assets/fonts');
+        await fs.copy(srcFonts, destFonts);
+      }
+    }
   ],
   resolve: {
     alias: {
