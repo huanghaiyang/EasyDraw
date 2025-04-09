@@ -826,6 +826,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return !isInMultiSelected || (isInMultiSelected && !this.isGroupSubject);
   }
 
+  get strokeEffective(): boolean {
+    return this.strokes.some(stroke => stroke.width > 0);
+  }
+
+  get fillEffective(): boolean {
+    return this.fills.some(fill => !fill.colorOpacity);
+  }
+
   constructor(model: ElementObject, shield: IStageShield, isRangeElement?: boolean) {
     this.model = model;
     this.rotation = new ElementRotation(this);

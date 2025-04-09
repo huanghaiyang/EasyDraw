@@ -335,6 +335,11 @@ export default interface IElement {
   // 圆角
   get corners(): number[];
 
+  // 是否包含有效描边
+  get strokeEffective(): boolean;
+  // 是否包含有效填充
+  get fillEffective(): boolean;
+
   // 是否最顶层
   get isTopmost(): boolean;
   // 是否最底层
@@ -1191,6 +1196,8 @@ export interface IElementText extends IElement {
   get isCursorVisible(): boolean;
   // 文本
   get text(): string;
+  // 文本实际高度
+  get textHeight(): number;
   // 文本排版后触发
   onTextReflowed(changed?: boolean): void;
   // 编辑时鼠标状态变化触发

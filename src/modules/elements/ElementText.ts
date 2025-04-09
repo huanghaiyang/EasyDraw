@@ -23,6 +23,7 @@ import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
 import { nanoid } from "nanoid";
 import { RenderRect } from "@/types/IRender";
+import MathUtils from "@/utils/MathUtils";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -163,6 +164,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get fontLetterSpacingMixin(): boolean {
     return this._fontLetterSpacingMixin;
+  }
+
+  get textHeight(): number {
+    return this._calcTextRenderHeight();
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
@@ -1200,13 +1205,31 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
+   * 计算文本宽度
+   *
+   * @returns 文本宽度
+   */
+  private _calcTextRenderWidth(): number {
+    return Math.ceil(TextElementUtils.calcMaxLineWidthByNodes((this.model.data as ITextData).lines, this.shield.stageScale));
+  }
+
+  /**
+   * 计算文本高度
+   *
+   * @returns 文本高度
+   */
+  private _calcTextRenderHeight(): number {
+    return Math.ceil(TextElementUtils.calcTextHeight((this.model.data as ITextData).lines, this.shield.stageScale));
+  }
+
+  /**
    * 重新计算组件尺寸以及坐标
    *
    * 注意此方法仅可以在组件刚创建时调用，因为对于width\height\coords\boxCoords的处理都没有考虑组件倾斜的情况
    */
   reCalcSizeAndCoords(): void {
-    const width = Math.ceil(TextElementUtils.calcMaxLineWidthByNodes((this.model.data as ITextData).lines, this.shield.stageScale));
-    const height = Math.ceil(TextElementUtils.calcTextHeight((this.model.data as ITextData).lines, this.shield.stageScale));
+    const width = this._calcTextRenderWidth();
+    const height = this._calcTextRenderHeight();
     this.model.width = width;
     this.model.height = height;
     this.model.coords = CommonUtils.getBoxByLeftTop(this.model.coords[0], { width, height });
@@ -1481,13 +1504,12 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
-   * 判断给定坐标是否在组件内
+   * 给定坐标是否在文本区域内
    *
-   * @param coord
-   * @returns
+   * @param coord 点
+   * @returns 是否在文本区域内
    */
-  isContainsCoord(coord: IPoint): boolean {
-    if (this.isSelected) return super.isContainsCoord(coord);
+  private _isTextNodesContainsCoord(coord: IPoint): boolean {
     const textData = this.model.data as ITextData;
     if (textData.lines.length === 0) return false;
     const point = ElementRenderHelper.convertCoordInRect(coord, this, ElementRenderHelper.calcElementRenderRect(this) as RenderRect);
@@ -1496,5 +1518,79 @@ export default class ElementText extends ElementRect implements IElementText {
         return !CoderUtils.isSpace(node.content) && CommonUtils.isPointInRect(node, point);
       });
     });
+  }
+
+  /**
+   * 判断给定坐标是否在文本实际渲染区域内
+   *
+   * @param coord 点
+   * @returns 是否在文本区域内
+   */
+  private _isTextContainsCoord(coord: IPoint): boolean {
+    const coords = this._getTextRotateRenderCoords();
+    return MathUtils.isPointInPolygonByRayCasting(coord, coords);
+  }
+
+  /**
+   * 计算文本实际渲染区域的坐标
+   *
+   * @returns 坐标
+   */
+  private _getTextRenderCoords(): IPoint[] {
+    const textHeight = this._calcTextRenderHeight();
+    let { x, y, width, height } = this.model;
+    x = x - width / 2;
+    y = y - height / 2;
+    // 计算实际渲染区域的盒子坐标
+    return CommonUtils.getBoxByLeftTop({ x, y }, { width, height: textHeight });
+  }
+
+  /**
+   * 计算文本实际渲染区域的坐标(旋转\倾斜后)
+   *
+   * @returns 坐标
+   */
+  private _getTextRotateRenderCoords(): IPoint[] {
+    const coords = this._getTextRenderCoords();
+    // 计算旋转后的盒子坐标
+    return MathUtils.batchTransWithCenter(coords, this.angles, this.centerCoord);
+  }
+
+  /**
+   * 判定文本渲染区域是否与给定的区域相交
+   *
+   * @param coords
+   * @returns
+   */
+  private _isTextPolygnOverlap(coords: IPoint[]): boolean {
+    const renderCoords = this._getTextRotateRenderCoords();
+    // 判断给定的坐标是否与渲染区域相交
+    return MathUtils.isPolygonsOverlap(renderCoords, coords);
+  }
+
+  /**
+   * 判断给定坐标是否在组件内
+   *
+   * @param coord
+   * @returns
+   */
+  isContainsCoord(coord: IPoint): boolean {
+    if (this.isSelected || this.strokeEffective) {
+      return super.isContainsCoord(coord) || this._isTextContainsCoord(coord) || this._isTextNodesContainsCoord(coord);
+    }
+    return this._isTextNodesContainsCoord(coord);
+  }
+
+  /**
+   * 判断当前组件是否与给定的多边形相交
+   *
+   * @param coords
+   * @returns
+   */
+  isPolygonOverlap(coords: IPoint[]): boolean {
+    if (this.isSelected || this.strokeEffective) {
+      return super.isPolygonOverlap(coords) || this._isTextPolygnOverlap(coords);
+    }
+    return this._isTextPolygnOverlap(coords);
   }
 }
