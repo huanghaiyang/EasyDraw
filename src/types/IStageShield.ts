@@ -42,7 +42,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 对齐
   align: IStageAlign;
   // 撤销
-  undoRedo: IUndoRedo<IElementCommandPayload>;
+  undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
   // 当前创建者
   currentCreator: Creator;
   // 渲染组件

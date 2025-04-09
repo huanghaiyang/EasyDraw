@@ -59,6 +59,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _fontColor: string | null;
   // 字体颜色透明度
   private _fontColorOpacity: number | null;
+  // 字体间距
+  private _fontLetterSpacing: number | null;
   // 字体大小混合
   private _fontSizeMixin: boolean = false;
   // 字体混合
@@ -67,6 +69,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _fontColorMixin: boolean = false;
   // 字体颜色透明度混合
   private _fontColorOpacityMixin: boolean = false;
+  // 字体间距混合
+  private _fontLetterSpacingMixin: boolean = false;
 
   get fontEnable(): boolean {
     return true;
@@ -78,6 +82,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get fontLineHeightInputEnable(): boolean {
     return this.status === ElementStatus.finished;
+  }
+
+  get fontLetterSpacingInputEnable(): boolean {
+    return true;
   }
 
   get editingEnable(): boolean {
@@ -133,6 +141,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return this._fontColorOpacity;
   }
 
+  get fontLetterSpacing(): number | null {
+    return this._fontLetterSpacing;
+  }
+
   get fontSizeMixin(): boolean {
     return this._fontSizeMixin;
   }
@@ -147,6 +159,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get fontColorOpacityMixin(): boolean {
     return this._fontColorOpacityMixin;
+  }
+
+  get fontLetterSpacingMixin(): boolean {
+    return this._fontLetterSpacingMixin;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
@@ -812,27 +828,31 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _checkFontStyleChanged(fontStyleSet: FontStyleSet, eventEmit: boolean = true, propsUpdate?: boolean): void {
     const moreThanOne = (set: Set<any>) => set.size > 1;
-    const { fontSizes, fontFamilies, fontColors, fontColorOpacities } = fontStyleSet;
+    const { fontSizes, fontFamilies, fontColors, fontColorOpacities, fontLetterSpacings } = fontStyleSet;
     const fontSizeMixin = moreThanOne(fontSizes);
     const fontFamilyMixin = moreThanOne(fontFamilies);
     const fontColorMixin = moreThanOne(fontColors);
     const fontColorOpacityMixin = moreThanOne(fontColorOpacities);
+    const fontLetterSpacingMixin = moreThanOne(fontLetterSpacings);
 
     const fontSize = fontSizeMixin ? null : fontSizes.values().next().value;
     const fontFamily = fontFamilyMixin ? null : fontFamilies.values().next().value;
     const fontColor = fontColorMixin ? null : fontColors.values().next().value;
     const fontColorOpacity = fontColorOpacityMixin ? null : fontColorOpacities.values().next().value;
+    const fontLetterSpacing = fontLetterSpacingMixin ? null : fontLetterSpacings.values().next().value;
 
     if (propsUpdate) {
       this._fontSizeMixin = fontSizeMixin;
       this._fontFamilyMixin = fontFamilyMixin;
       this._fontColorMixin = fontColorMixin;
       this._fontColorOpacityMixin = fontColorOpacityMixin;
+      this._fontLetterSpacingMixin = fontLetterSpacingMixin;
 
       this._fontSize = fontSize;
       this._fontFamily = fontFamily;
       this._fontColor = fontColor;
       this._fontColorOpacity = fontColorOpacity;
+      this._fontLetterSpacing = fontLetterSpacing;
     }
 
     if (eventEmit) {
@@ -840,10 +860,12 @@ export default class ElementText extends ElementRect implements IElementText {
       this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [fontFamily]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [fontColor]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [fontColorOpacity]);
+      this.emitPropChanged(ShieldDispatcherNames.fontLetterSpacingChanged, [fontLetterSpacing]);
       this.emitPropChanged(ShieldDispatcherNames.fontSizeMixinChanged, [fontSizeMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontFamilyMixinChanged, [fontFamilyMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorMixinChanged, [fontColorMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityMixinChanged, [fontColorOpacityMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.fontLetterSpacingMixinChanged, [fontLetterSpacingMixin]);
     }
   }
 
@@ -1303,6 +1325,29 @@ export default class ElementText extends ElementRect implements IElementText {
       line.nodes.forEach(node => {
         if (node.selected || !isSelectionAvailable) {
           node.fontStyle.fontColorOpacity = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置字间距
+   *
+   * @param value 字间距
+   */
+  setFontLetterSpacing(value: number): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontLetterSpacing(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontLetterSpacing: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontLetterSpacing = value;
         }
       });
     });

@@ -61,6 +61,8 @@ const DefaultStage = {
   fontFamily: DefaultElementStyle.fontFamily,
   // 字体行高
   fontLineHeight: DefaultElementStyle.fontLineHeight,
+  // 字体间距
+  fontLetterSpacing: DefaultElementStyle.fontLetterSpacing,
   // 字体颜色
   fontColor: DefaultElementStyle.fontColor,
   // 字体颜色透明度
@@ -73,6 +75,8 @@ const DefaultStage = {
   fontColorMixin: false,
   // 字体颜色透明度是否混合
   fontColorOpacityMixin: false,
+  // 字体间距是否混合
+  fontLetterSpacingMixin: false,
   // 文字对齐方式
   textAlign: DefaultElementStyle.textAlign,
   // 文字基线
@@ -97,6 +101,8 @@ const DefaultStage = {
   fontInputEnable: false,
   // 字体行高输入是否可用
   fontLineHeightInputEnable: false,
+  // 字体间距输入是否可用
+  fontLetterSpacingInputEnable: false,
   // 圆角输入是否可用
   cornersInputEnable: false,
   // 宽度输入是否可用
@@ -210,6 +216,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体行高
       shield.on(ShieldDispatcherNames.fontLineHeightChanged, throttle(this.onFontLineHeightChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体间距
+      shield.on(ShieldDispatcherNames.fontLetterSpacingChanged, throttle(this.onFontLetterSpacingChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色
       shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色透明度
@@ -222,6 +230,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontColorMixinChanged, throttle(this.onFontColorMixinChanged.bind(this), ThrottleTime, tOptions));
       // 监听字体颜色透明度混合
       shield.on(ShieldDispatcherNames.fontColorOpacityMixinChanged, throttle(this.onFontColorOpacityMixinChanged.bind(this), ThrottleTime, tOptions));
+      // 监听字体间距混合
+      shield.on(ShieldDispatcherNames.fontLetterSpacingMixinChanged, throttle(this.onFontLetterSpacingMixinChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本基线
@@ -329,7 +339,9 @@ export const useStageStore = defineStore("stage", {
         fontFamilyMixin,
         fontColorMixin,
         fontColorOpacityMixin,
+        fontLetterSpacingMixin,
         fontLineHeight,
+        fontLetterSpacing,
         textAlign,
         textBaseline,
         isRatioLocked,
@@ -360,6 +372,8 @@ export const useStageStore = defineStore("stage", {
       this.onFontFamilyChanged(element, fontFamily);
       // 字体行高
       this.onFontLineHeightChanged(element, fontLineHeight);
+      // 字体间距
+      this.onFontLetterSpacingChanged(element, fontLetterSpacing);
       // 字体颜色
       this.onFontColorChanged(element, fontColor);
       // 字体颜色透明度
@@ -372,6 +386,8 @@ export const useStageStore = defineStore("stage", {
       this.onFontColorMixinChanged(element, fontColorMixin);
       // 字体颜色透明度混合
       this.onFontColorOpacityMixinChanged(element, fontColorOpacityMixin);
+      // 字体间距混合
+      this.onFontLetterSpacingMixinChanged(element, fontLetterSpacingMixin);
       // 文本对齐方式
       this.onTextAlignChanged(element, textAlign);
       // 文本基线
@@ -406,6 +422,7 @@ export const useStageStore = defineStore("stage", {
         strokeInputEnable,
         fontInputEnable,
         fontLineHeightInputEnable,
+        fontLetterSpacingInputEnable,
         cornersInputEnable,
         angleInputEnable,
         leanYAngleInputEnable,
@@ -422,6 +439,7 @@ export const useStageStore = defineStore("stage", {
       this.strokeInputEnable = strokeInputEnable;
       this.fontInputEnable = fontInputEnable;
       this.fontLineHeightInputEnable = fontLineHeightInputEnable;
+      this.fontLetterSpacingInputEnable = fontLetterSpacingInputEnable;
       this.angleInputEnable = angleInputEnable;
       this.leanYAngleInputEnable = leanYAngleInputEnable;
       this.cornersInputEnable = cornersInputEnable;
@@ -549,6 +567,15 @@ export const useStageStore = defineStore("stage", {
       this.fontLineHeight = fontLineHeight;
     },
     /**
+     * 组件字体间距变化
+     *
+     * @param element
+     * @param fontLetterSpacing
+     */
+    onFontLetterSpacingChanged(element: IElement, fontLetterSpacing: number) {
+      this.fontLetterSpacing = fontLetterSpacing;
+    },
+    /**
      * 组件字体颜色变化
      *
      * @param element
@@ -601,6 +628,15 @@ export const useStageStore = defineStore("stage", {
      */
     onFontColorOpacityMixinChanged(element: IElement, fontColorOpacityMixin: number) {
       this.fontColorOpacityMixin = fontColorOpacityMixin;
+    },
+    /**
+     * 组件字体间距混合变化
+
+     * @param element
+     * @param fontLetterSpacingMixin
+     */
+    onFontLetterSpacingMixinChanged(element: IElement, fontLetterSpacingMixin: number) {
+      this.fontLetterSpacingMixin = fontLetterSpacingMixin;
     },
     /**
      * 组件字体对齐方式变化
@@ -851,6 +887,14 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFontColorOpacity(value: number): void {
       shield.setElementsFontColorOpacity(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字间距
+     *
+     * @param value
+     */
+    setElementsFontLetterSpacing(value: number): void {
+      shield.setElementsFontLetterSpacing(toRaw(this.selectedElements), value);
     },
     /**
      * 设置舞台缩放

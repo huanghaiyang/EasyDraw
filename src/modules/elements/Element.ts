@@ -411,6 +411,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get fontLetterSpacingInputEnable(): boolean {
+    return false;
+  }
+
   get fontSize(): number {
     return this.model.styles.fontSize;
   }
@@ -421,6 +425,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get fontLineHeight(): number {
     return this.model.styles.fontLineHeight;
+  }
+
+  get fontLetterSpacing(): number {
+    return this.model.styles.fontLetterSpacing;
   }
 
   get fontColor(): string {
@@ -444,6 +452,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get fontColorOpacityMixin(): boolean {
+    return false;
+  }
+
+  get fontLetterSpacingMixin(): boolean {
     return false;
   }
 
@@ -1106,6 +1118,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFontLineHeightChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.fontLineHeightChanged, [this.fontLineHeight]);
+  }
+
+  /**
+   * 字体间距发生变化
+   */
+  onFontLetterSpacingChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontLetterSpacingChanged, [this.fontLetterSpacing]);
   }
 
   /**
@@ -2369,6 +2388,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontLineHeight(value: number): void {
     this.model.styles.fontLineHeight = value;
+  }
+
+  /**
+   * 设置字体间距
+   * @param value
+   */
+  setFontLetterSpacing(value: number): void {
+    this.model.styles.fontLetterSpacing = value;
   }
 
   /**

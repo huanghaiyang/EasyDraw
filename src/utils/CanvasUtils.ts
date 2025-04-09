@@ -42,6 +42,35 @@ function iterateNodes(nodes: ITextNode[], ctx: CanvasRenderingContext2D, eachCal
   });
 }
 
+/**
+ * 判断文本节点的基线是否一致
+ *
+ * @param nodes 文本节点数组
+ * @returns
+ */
+function isDiffBaseline(nodes: ITextNode[]): boolean {
+  let prevFontSize: number;
+  let prevFontFamily: string;
+  let isDiff: boolean = false;
+  // 遍历节点并计算行高、判断字体样式是否一致
+  nodes.forEach(node => {
+    const { fontSize, fontFamily } = node.fontStyle;
+    if (!isDiff) {
+      if (!prevFontSize) {
+        prevFontSize = fontSize;
+      } else if (fontSize !== prevFontSize) {
+        isDiff = true;
+      }
+      if (!prevFontFamily) {
+        prevFontFamily = fontFamily;
+      } else if (fontFamily !== prevFontFamily) {
+        isDiff = true;
+      }
+    }
+  });
+  return isDiff;
+}
+
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
@@ -319,34 +348,19 @@ export default class CanvasUtils {
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
+    // 每行高度都是一致的
     const rowHeight = fontLineHeight * fontSize;
-    let prevY = points[0].y;
+    // 前一个文本行的y坐标
+    let rowY = points[0].y;
 
     textData.lines.forEach(line => {
       let prevX = flipX ? -points[0].x : points[0].x;
       // TODO 此处行的宽度是否应该设置为实际的节点总宽度
-      Object.assign(line, { x: prevX, y: prevY, width: renderRect.width });
+      Object.assign(line, { x: prevX, y: rowY, width: renderRect.width });
       const { nodes } = line;
       if (nodes.length !== 0) {
-        let prevFontSize: number;
-        let prevFontFamily: string;
-        let isDiff: boolean = false;
-        // 遍历节点并计算行高、判断字体样式是否一致
-        nodes.forEach(node => {
-          const { fontSize, fontFamily } = node.fontStyle;
-          if (!isDiff) {
-            if (!prevFontSize) {
-              prevFontSize = fontSize;
-            } else if (fontSize !== prevFontSize) {
-              isDiff = true;
-            }
-            if (!prevFontFamily) {
-              prevFontFamily = fontFamily;
-            } else if (fontFamily !== prevFontFamily) {
-              isDiff = true;
-            }
-          }
-        });
+        // 判断此行文本节点的基线是否一致
+        const isDiff: boolean = isDiffBaseline(nodes);
         // 文本节点的度量数组缓存
         const metricsArr: TextMetrics[] = [];
         // 此行文本节点最大字体高度
@@ -363,38 +377,52 @@ export default class CanvasUtils {
           maxAlphabeticBaseline = Math.min(maxAlphabeticBaseline, metrics.alphabeticBaseline);
         });
         // 行基线坐标
-        const baseline = prevY - maxAlphabeticBaseline + (rowHeight - maxHeight) / 2;
+        const baseline = rowY - maxAlphabeticBaseline + (rowHeight - maxHeight) / 2;
         // 遍历节点并渲染
         iterateNodes(nodes, ctx, (node, index) => {
-          const { content, fontStyle: nodeFontStyle } = node;
+          const { content, fontStyle: nFontStyle } = node;
+          const { fontLetterSpacing: nFontLetterSpacing, fontSize: nFontSize } = nFontStyle;
+          // 字体度量
           const metrics = isDiff ? metricsArr[index] : ctx.measureText(content);
-          const { width, alphabeticBaseline } = metrics;
+          // 字体宽度和基线值
+          const { width, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
           // 缩进值
           let indentX: number = 0;
           // 如果当前节点是英文字符，且前一个节点也是英文字符
           if (index !== 0 && CoderUtils.isEnglishLetter(content)) {
             const prevNode = nodes[index - 1];
-            const { content: prevContent, fontStyle: prevFontStyle, width: prevWidth } = prevNode;
+            const { content: prevContent, fontStyle: prevFontStyle, charWidth: prevCharWidth } = prevNode;
             // 如果前一个节点是英文字符，且两个节点的样式相同，则需要计算下两个字符是否是连字
-            if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(nodeFontStyle, prevFontStyle)) {
+            if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(nFontStyle, prevFontStyle)) {
+              // 计算当前节点和前一个节点的连字宽度
               const { width: tupleWidth } = ctx.measureText(prevContent + content);
-              const ligatureWidth = prevWidth + width;
+              // 两个字符的最大宽度
+              const ligatureWidth = prevCharWidth + width;
+              // 如果连字宽度小于最大宽度，则需要缩进
               if (tupleWidth < ligatureWidth) {
+                // 缩进值
                 indentX = tupleWidth - ligatureWidth;
               }
             }
           }
+          // 字符间距(注意此处的字符间距和字号都是原始值，需要乘以缩放比例)
+          const spaceWidth = nFontLetterSpacing * nFontSize * 2 * CanvasUtils.scale;
+          // 字符占用最大宽度
+          const maxWidth = width + spaceWidth;
           // 文本节点的x坐标
           const x = prevX + indentX;
           // 文本节点的y坐标（等于行的基线坐标加上文本的基线坐标）
           const y = baseline + alphabeticBaseline;
-          Object.assign(node, { x, y: prevY, width, height: rowHeight, baseline });
+          // 更新文本节点关于位置和尺寸的属性
+          Object.assign(node, { x, y: rowY, width: maxWidth, height: rowHeight, charWidth: width, charHeight: fontBoundingBoxDescent - fontBoundingBoxAscent, baseline });
+          // 绘制文本
           ctx.fillText(content, x, y);
-          prevX = x + width;
+          // 更新前一个文本节点的x坐标
+          prevX = x + maxWidth;
         });
       }
       line.height = rowHeight;
-      prevY += rowHeight;
+      rowY += rowHeight;
     });
     ctx.restore();
   }

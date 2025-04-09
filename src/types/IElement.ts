@@ -308,6 +308,8 @@ export default interface IElement {
   get fontInputEnable(): boolean;
   // 字体行高是否可修改
   get fontLineHeightInputEnable(): boolean;
+  // 字体间距是否可修改
+  get fontLetterSpacingInputEnable(): boolean;
   // 字体大小
   get fontSize(): number;
   // 字体
@@ -326,6 +328,10 @@ export default interface IElement {
   get fontColorMixin(): boolean;
   // 字体颜色透明度是否混合
   get fontColorOpacityMixin(): boolean;
+  // 字体间距
+  get fontLetterSpacing(): number;
+  // 字体间距是否混合
+  get fontLetterSpacingMixin(): boolean;
   // 圆角
   get corners(): number[];
 
@@ -587,6 +593,12 @@ export default interface IElement {
    * @param value 字体行高值
    */
   setFontLineHeight(value: number): void;
+
+  /**
+   * 设置字体间距
+   * @param value 字体间距值
+   */
+  setFontLetterSpacing(value: number): void;
 
   /**
    * 设置字体颜色
@@ -1025,6 +1037,11 @@ export default interface IElement {
    * 设置文本字体行高
    */
   onFontLineHeightChanged(): void;
+
+  /**
+   * 设置文本字体间距
+   */
+  onFontLetterSpacingChanged(): void;
 
   /**
    * 设置文本颜色

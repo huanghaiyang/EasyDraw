@@ -1,9 +1,16 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint, ISize } from "@/types";
 
+// 文本字符大小
+export type CharSize = {
+  charWidth: number;
+  charHeight: number;
+};
+
 // 文本节点
 export type ITextNode = Partial<IPoint> &
   Partial<TextMetrics> &
+  Partial<CharSize> &
   Partial<ISize> & {
     id: string;
     content: string;

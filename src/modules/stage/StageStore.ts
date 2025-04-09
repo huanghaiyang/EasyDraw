@@ -865,6 +865,21 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件字间距
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontLetterSpacing === value) return;
+        element.setFontLetterSpacing(value);
+      }
+    });
+  }
+
+  /**
    * 锁定比例
    *
    * @param elements

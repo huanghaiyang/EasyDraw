@@ -5,7 +5,7 @@ import { ElementObject } from "@/types/IElement";
 import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
-import { pick, every } from "lodash";
+import { pick, every, isString, isNumber } from "lodash";
 import { nanoid } from "nanoid";
 
 /**
@@ -109,7 +109,7 @@ export default class TextElementUtils {
    * @returns 文本数据
    */
   static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
-    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity"]);
+    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity", "fontLetterSpacing"]);
     const lines: ITextLine[] = this.createTextLines(content, fontStyle);
     return {
       lines,
@@ -430,6 +430,7 @@ export default class TextElementUtils {
       fontSizes: new Set(),
       fontColors: new Set(),
       fontColorOpacities: new Set(),
+      fontLetterSpacings: new Set(),
     };
   }
 
@@ -442,17 +443,20 @@ export default class TextElementUtils {
   static cacheStyleSet(fontStyle: FontStyle, result: FontStyleSet): void {
     if (!fontStyle) return;
 
-    if (fontStyle.fontFamily) {
+    if (isString(fontStyle.fontFamily)) {
       result.fontFamilies.add(fontStyle.fontFamily);
     }
-    if (fontStyle.fontSize) {
+    if (isNumber(fontStyle.fontSize)) {
       result.fontSizes.add(fontStyle.fontSize);
     }
-    if (fontStyle.fontColor) {
+    if (isString(fontStyle.fontColor)) {
       result.fontColors.add(fontStyle.fontColor);
     }
-    if (fontStyle.fontColorOpacity) {
+    if (isNumber(fontStyle.fontColorOpacity)) {
       result.fontColorOpacities.add(fontStyle.fontColorOpacity);
+    }
+    if (isNumber(fontStyle.fontLetterSpacing)) {
+      result.fontLetterSpacings.add(fontStyle.fontLetterSpacing);
     }
   }
 
@@ -500,12 +504,7 @@ export default class TextElementUtils {
    * @returns 字体样式
    */
   static getStyleSetOfTextData(textData: ITextData, selected?: boolean): FontStyleSet {
-    const result: FontStyleSet = {
-      fontFamilies: new Set(),
-      fontSizes: new Set(),
-      fontColors: new Set(),
-      fontColorOpacities: new Set(),
-    };
+    const result: FontStyleSet = TextElementUtils.newFontStyleSet();
     textData.lines.forEach(line => {
       line.nodes.forEach(node => {
         if (!selected || (selected && node.selected)) {
@@ -921,7 +920,7 @@ export default class TextElementUtils {
    * @returns 样式
    */
   static getFontStyleOfModel(model: ElementObject): FontStyle {
-    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity"]);
+    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity", "fontLetterSpacing"]);
   }
 
   /**

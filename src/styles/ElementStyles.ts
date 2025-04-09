@@ -84,6 +84,8 @@ export type TextFontStyle = {
   fontColorOpacity?: number;
   // 字体行高
   fontLineHeight?: number;
+  // 字体间距
+  fontLetterSpacing?: number;
 };
 
 // 字体样式定义
@@ -132,6 +134,8 @@ export const DefaultLineStrokeWidth = 1;
 export const DefaultLineMeterLimit = 100;
 // 默认字体行高
 export const DefaultFontLineHeight = 1.4;
+// 默认字体间距
+export const DefaultFontLetterSpacing = 0;
 
 // 默认描边样式
 export const DefaultStrokeStyle: StrokeStyle = {
@@ -162,6 +166,7 @@ export const DefaultFontStyle: FontStyle = {
   fontLineHeight: DefaultFontLineHeight,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
+  fontLetterSpacing: DefaultFontLetterSpacing,
 };
 
 // 默认组件样式
@@ -333,10 +338,21 @@ export const FontLineHeightList = [
   { name: "2", value: 2 },
 ];
 
+// 字体间距列表
+export const FontLetterSpacingList = [
+  { name: "0", value: 0 },
+  { name: "0.1", value: 0.1 },
+  { name: "0.2", value: 0.2 },
+  { name: "0.3", value: 0.3 },
+  { name: "0.4", value: 0.4 },
+  { name: "0.5", value: 0.5 },
+];
+
 // 字体样式集合
 export type FontStyleSet = {
   fontFamilies?: Set<string>;
   fontSizes?: Set<number>;
   fontColors?: Set<string>;
   fontColorOpacities?: Set<number>;
+  fontLetterSpacings?: Set<number>;
 };

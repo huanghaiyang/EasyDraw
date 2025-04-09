@@ -111,6 +111,8 @@ export enum ShieldDispatcherNames {
   fontFamilyChanged = "fontFamilyChanged",
   // 字体行高改变
   fontLineHeightChanged = "fontLineHeightChanged",
+  // 字体间距改变
+  fontLetterSpacingChanged = "fontLetterSpacingChanged",
   // 字体颜色改变
   fontColorChanged = "fontColorChanged",
   // 字体颜色透明度改变
@@ -123,6 +125,8 @@ export enum ShieldDispatcherNames {
   fontColorMixinChanged = "fontColorMixinChanged",
   // 字体颜色透明度混合
   fontColorOpacityMixinChanged = "fontColorOpacityMixinChanged",
+  // 字体间距混合
+  fontLetterSpacingMixinChanged = "fontLetterSpacingMixinChanged",
   // 文本对齐改变
   textAlignChanged = "textAlignChanged",
   // 文本基线改变

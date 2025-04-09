@@ -195,6 +195,14 @@ export default interface IStageSetter {
   setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void>;
 
   /**
+   * 设置组件字间距
+   *
+   * @param elements 要修改的元件集合
+   * @param value 字间距
+   */
+  setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void>;
+
+  /**
    * 设置组件比例锁定
    *
    * @param elements 要修改的元件集合
