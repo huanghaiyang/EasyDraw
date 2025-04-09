@@ -208,103 +208,103 @@ export const getDefaultElementStyle = (type: CreatorTypes): ElementStyles => {
 export const FontFamilyList = [
   {
     name: "Arial",
-    url: "../src/assets/fonts/Arial.ttf",
+    url: "@/assets/fonts/Arial.ttf",
   },
   {
     name: "Arial bold",
-    url: "../src/assets/fonts/Arialbd.ttf",
+    url: "@/assets/fonts/Arialbd.ttf",
   },
   {
     name: "Arial bold italic",
-    url: "../src/assets/fonts/Arialbi.ttf",
+    url: "@/assets/fonts/Arialbi.ttf",
   },
   {
     name: "Arial italic",
-    url: "../src/assets/fonts/Ariali.ttf",
+    url: "@/assets/fonts/Ariali.ttf",
   },
   {
     name: "CascadiaCode",
-    url: "../src/assets/fonts/CascadiaCode.ttf",
+    url: "@/assets/fonts/CascadiaCode.ttf",
   },
   {
     name: "CascadiaCode italic",
-    url: "../src/assets/fonts/CascadiaCodeItalic.ttf",
+    url: "@/assets/fonts/CascadiaCodeItalic.ttf",
   },
   {
     name: "CascadiaMono",
-    url: "../src/assets/fonts/CascadiaMono.ttf",
+    url: "@/assets/fonts/CascadiaMono.ttf",
   },
   {
     name: "CascadiaMono italic",
-    url: "../src/assets/fonts/CascadiaMonoItalic.ttf",
+    url: "@/assets/fonts/CascadiaMonoItalic.ttf",
   },
   {
     name: "Comic",
-    url: "../src/assets/fonts/Comic.ttf",
+    url: "@/assets/fonts/Comic.ttf",
   },
   {
     name: "Comic bold",
-    url: "../src/assets/fonts/Comicbd.ttf",
+    url: "@/assets/fonts/Comicbd.ttf",
   },
   {
     name: "Comic italic",
-    url: "../src/assets/fonts/Comici.ttf",
+    url: "@/assets/fonts/Comici.ttf",
   },
   {
     name: "Comic zero",
-    url: "../src/assets/fonts/Comicz.ttf",
+    url: "@/assets/fonts/Comicz.ttf",
   },
   {
     name: "隶书",
-    url: "../src/assets/fonts/隶书.ttf",
+    url: "@/assets/fonts/隶书.ttf",
   },
   {
     name: "楷体",
-    url: "../src/assets/fonts/楷体.ttf",
+    url: "@/assets/fonts/楷体.ttf",
   },
   {
     name: "幼圆",
-    url: "../src/assets/fonts/幼圆.ttf",
+    url: "@/assets/fonts/幼圆.ttf",
   },
   {
     name: "华文彩云",
-    url: "../src/assets/fonts/华文彩云.ttf",
+    url: "@/assets/fonts/华文彩云.ttf",
   },
   {
     name: "华文隶书",
-    url: "../src/assets/fonts/华文隶书.ttf",
+    url: "@/assets/fonts/华文隶书.ttf",
   },
   {
     name: "华文行楷",
-    url: "../src/assets/fonts/华文行楷.ttf",
+    url: "@/assets/fonts/华文行楷.ttf",
   },
   {
     name: "华文细黑",
-    url: "../src/assets/fonts/华文细黑.ttf",
+    url: "@/assets/fonts/华文细黑.ttf",
   },
   {
     name: "华文琥珀",
-    url: "../src/assets/fonts/华文琥珀.ttf",
+    url: "@/assets/fonts/华文琥珀.ttf",
   },
   {
     name: "华文楷体",
-    url: "../src/assets/fonts/华文楷体.ttf",
+    url: "@/assets/fonts/华文楷体.ttf",
   },
   {
     name: "华文新魏",
-    url: "../src/assets/fonts/华文新魏.ttf",
+    url: "@/assets/fonts/华文新魏.ttf",
   },
   {
     name: "华文宋体",
-    url: "../src/assets/fonts/华文宋体.ttf",
+    url: "@/assets/fonts/华文宋体.ttf",
   },
   {
     name: "华文仿宋",
-    url: "../src/assets/fonts/华文仿宋.ttf",
+    url: "@/assets/fonts/华文仿宋.ttf",
   },
   {
     name: "华文中宋",
-    url: "../src/assets/fonts/华文中宋.ttf",
+    url: "@/assets/fonts/华文中宋.ttf",
   },
 ];
 

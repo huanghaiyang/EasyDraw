@@ -6,6 +6,12 @@ export default class FontLoader {
    * @param url 字体文件路径
    */
   static async loadFont(font: string, url: string): Promise<void> {
+    // 如果是dev环境
+    if (import.meta.env.DEV) {
+      url = url.replace("@", "../src");
+    } else if (import.meta.env.PROD) {
+      url = url.replace("@", ".");
+    }
     const fontFace = new FontFace(font, `url(${url})`);
     await fontFace.load();
     document.fonts.add(fontFace);
