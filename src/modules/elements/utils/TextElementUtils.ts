@@ -921,7 +921,7 @@ export default class TextElementUtils {
    * @returns 样式
    */
   static getFontStyleOfModel(model: ElementObject): FontStyle {
-    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity", "fontLineHeight"]);
+    return pick(model.styles, ["fontSize", "fontFamily", "fontColor", "fontColorOpacity"]);
   }
 
   /**

@@ -319,6 +319,7 @@ export default class CanvasUtils {
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
+    const rowHeight = fontLineHeight * fontSize;
     let prevY = points[0].y;
 
     textData.lines.forEach(line => {
@@ -326,18 +327,13 @@ export default class CanvasUtils {
       // TODO 此处行的宽度是否应该设置为实际的节点总宽度
       Object.assign(line, { x: prevX, y: prevY, width: renderRect.width });
       const { nodes } = line;
-      let rowHeight = 0;
-      if (nodes.length === 0) {
-        rowHeight = fontLineHeight * fontSize;
-      } else {
+      if (nodes.length !== 0) {
         let prevFontSize: number;
         let prevFontFamily: string;
         let isDiff: boolean = false;
         // 遍历节点并计算行高、判断字体样式是否一致
         nodes.forEach(node => {
           const { fontSize, fontFamily } = node.fontStyle;
-          // 注意node节点的fontSize是没有缩放的，所以这里需要再次缩放
-          rowHeight = Math.max(fontLineHeight * fontSize * CanvasUtils.scale, rowHeight);
           if (!isDiff) {
             if (!prevFontSize) {
               prevFontSize = fontSize;
