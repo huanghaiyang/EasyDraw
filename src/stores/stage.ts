@@ -3,7 +3,7 @@ import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
-import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
@@ -79,6 +79,8 @@ const DefaultStage = {
   fontLetterSpacingMixin: false,
   // 文字对齐方式
   textAlign: DefaultElementStyle.textAlign,
+  // 文字垂直对齐方式
+  textVerticalAlign: DefaultElementStyle.textVerticalAlign,
   // 文字基线
   textBaseline: DefaultElementStyle.textBaseline,
   // 是否锁定比例
@@ -234,6 +236,8 @@ export const useStageStore = defineStore("stage", {
       shield.on(ShieldDispatcherNames.fontLetterSpacingMixinChanged, throttle(this.onFontLetterSpacingMixinChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本对齐方式
       shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, tOptions));
+      // 监听文本垂直对齐方式
+      shield.on(ShieldDispatcherNames.textVerticalAlignChanged, throttle(this.onTextVerticalAlignChanged.bind(this), ThrottleTime, tOptions));
       // 监听文本基线
       shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), ThrottleTime, tOptions));
       // 监听宽高比锁定
@@ -343,6 +347,7 @@ export const useStageStore = defineStore("stage", {
         fontLineHeight,
         fontLetterSpacing,
         textAlign,
+        textVerticalAlign,
         textBaseline,
         isRatioLocked,
       } = element;
@@ -390,6 +395,8 @@ export const useStageStore = defineStore("stage", {
       this.onFontLetterSpacingMixinChanged(element, fontLetterSpacingMixin);
       // 文本对齐方式
       this.onTextAlignChanged(element, textAlign);
+      // 文本垂直对齐方式
+      this.onTextVerticalAlignChanged(element, textVerticalAlign);
       // 文本基线
       this.onTextBaselineChanged(element, textBaseline);
       // 宽高比锁定
@@ -648,6 +655,15 @@ export const useStageStore = defineStore("stage", {
       this.textAlign = textAlign;
     },
     /**
+     * 组件垂直对齐方式变化
+
+     * @param element
+     * @param textVerticalAlign
+     */
+    onTextVerticalAlignChanged(element: IElement, textVerticalAlign: TextVerticalAlign) {
+      this.textVerticalAlign = textVerticalAlign;
+    },
+    /**
      * 组件字体基线变化
      *
      * @param element
@@ -839,8 +855,17 @@ export const useStageStore = defineStore("stage", {
     },
 
     /**
+     * 设置组件文本垂直对齐方式
+
+     * @param value
+     */
+    setElementsTextVerticalAlign(value: TextVerticalAlign): void {
+      shield.setElementsTextVerticalAlign(toRaw(this.selectedElements), value);
+    },
+
+    /**
      * 设置组件文本基线
-     *
+
      * @param value
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {

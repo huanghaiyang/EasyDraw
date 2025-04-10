@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { FontStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { FontStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -593,9 +593,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 设置组件文本基线
+   * 设置组件文本垂直对齐方式
    *
    * @param elements
+   * @param value
+   */
+  async setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextVerticalAlign(elements, value);
+      await this._addRedrawTask(true);
+      await this._reflowTextIfy(elements, true);
+      elements.forEach(element => element.onTextVerticalAlignChanged());
+    });
+  }
+
+  /**
+   * 设置组件文本基线
+
+ * @param elements
    * @param value
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {

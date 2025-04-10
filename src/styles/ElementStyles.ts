@@ -73,6 +73,13 @@ export type StrokeStyle = FillStyle & {
   width: number;
 };
 
+// 文本垂直对齐方式
+export enum TextVerticalAlign {
+  top = "top",
+  middle = "middle",
+  bottom = "bottom",
+}
+
 export type TextFontStyle = {
   // 字体大小
   fontSize?: number;
@@ -94,6 +101,8 @@ export type FontStyle = TextFontStyle & {
   textAlign?: CanvasTextAlign;
   // 文本基线
   textBaseline?: CanvasTextBaseline;
+  // 文本基线
+  textVerticalAlign?: TextVerticalAlign;
 };
 
 // 画板组件样式定义
@@ -128,6 +137,8 @@ export const DefaultFontColorOpacity = 1;
 export const DefaultTextAlign = "left";
 // 默认文本基线
 export const DefaultTextBaseline = "top";
+// 默认文本垂直对齐方式
+export const DefaultTextVerticalAlign = TextVerticalAlign.top;
 // 默认直线描边宽度
 export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
@@ -166,6 +177,7 @@ export const DefaultFontStyle: FontStyle = {
   fontLineHeight: DefaultFontLineHeight,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
+  textVerticalAlign: DefaultTextVerticalAlign,
   fontLetterSpacing: DefaultFontLetterSpacing,
 };
 

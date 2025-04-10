@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { StrokeTypes } from "@/styles/ElementStyles";
+import { StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 
 export default interface IStageSetter {
@@ -146,6 +146,14 @@ export default interface IStageSetter {
   setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void>;
 
   /**
+   * 设置文本垂直对齐方式
+   *
+   * @param elements 要修改的元件集合
+   * @param value 文本垂直对齐方式
+   */
+  setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void>;
+
+  /**
    * 设置组件文本基线
    *
    * @param elements 要修改的元件集合
@@ -184,7 +192,6 @@ export default interface IStageSetter {
    * @param value 颜色值（十六进制字符串，如#RRGGBB）
    */
   setElementsFontColor(elements: IElement[], value: string): Promise<void>;
-
 
   /**
    * 设置组件字体颜色透明度

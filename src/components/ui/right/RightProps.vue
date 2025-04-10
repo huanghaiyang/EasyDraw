@@ -11,6 +11,7 @@
     <font-size-props></font-size-props>
     <font-line-height-props></font-line-height-props>
     <font-letter-spacing-props></font-letter-spacing-props>
+    <font-align-props></font-align-props>
     <font-color-props></font-color-props>
     <fill-props></fill-props>
     <stroke-props></stroke-props>

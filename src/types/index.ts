@@ -129,6 +129,8 @@ export enum ShieldDispatcherNames {
   fontLetterSpacingMixinChanged = "fontLetterSpacingMixinChanged",
   // 文本对齐改变
   textAlignChanged = "textAlignChanged",
+  // 文本垂直对齐改变
+  textVerticalAlignChanged = "textVerticalAlignChanged",
   // 文本基线改变
   textBaselineChanged = "textBaselineChanged",
   // 锁定比例改变

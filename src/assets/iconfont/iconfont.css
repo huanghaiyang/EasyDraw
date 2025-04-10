@@ -1,9 +1,9 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4781741 */
-  src: url('iconfont.woff2?t=1740382513751') format('woff2'),
-       url('iconfont.woff?t=1740382513751') format('woff'),
-       url('iconfont.ttf?t=1740382513751') format('truetype'),
-       url('iconfont.svg?t=1740382513751#iconfont') format('svg');
+  src: url('iconfont.woff2?t=1744272580007') format('woff2'),
+       url('iconfont.woff?t=1744272580007') format('woff'),
+       url('iconfont.ttf?t=1744272580007') format('truetype'),
+       url('iconfont.svg?t=1744272580007#iconfont') format('svg');
 }
 
 .iconfont {
@@ -12,6 +12,30 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-verbise-text-align-center:before {
+  content: "\e7c3";
+}
+
+.icon-verbise-text-align-left:before {
+  content: "\e7c8";
+}
+
+.icon-verbise-text-align-right:before {
+  content: "\e7c9";
+}
+
+.icon-verbise-vertical-align-bottom:before {
+  content: "\e7ef";
+}
+
+.icon-verbise-vertical-align-middle:before {
+  content: "\e7f0";
+}
+
+.icon-verbise-vertical-align-top:before {
+  content: "\e7f1";
 }
 
 .icon-verbise-layer-go-down:before {

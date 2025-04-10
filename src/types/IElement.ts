@@ -5,7 +5,7 @@
  */
 import { ElementStatus, IPoint, ISize, TextEditingStates } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -300,6 +300,8 @@ export default interface IElement {
   get fills(): FillStyle[];
   // 文本对齐
   get textAlign(): CanvasTextAlign;
+  // 文本垂直对齐
+  get textVerticalAlign(): TextVerticalAlign;
   // 文本基线
   get textBaseline(): CanvasTextBaseline;
   // 字体是否启用
@@ -622,6 +624,12 @@ export default interface IElement {
    * @param value 文本对齐值
    */
   setTextAlign(value: CanvasTextAlign): void;
+
+  /**
+   * 设置文本垂直对齐方式
+   * @param value 文本垂直对齐方式
+   */
+  setTextVerticalAlign(value: TextVerticalAlign): void;
 
   /**
    * 设置文本基线对齐方式
@@ -1022,6 +1030,11 @@ export default interface IElement {
    * 设置文本对齐方式
    */
   onTextAlignChanged(): void;
+
+  /**
+   * 设置文本垂直对齐方式
+   */
+  onTextVerticalAlignChanged(): void;
 
   /**
    * 设置文本基线

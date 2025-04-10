@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
-import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -393,6 +393,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get textAlign(): CanvasTextAlign {
     return this.model.styles.textAlign;
+  }
+
+  get textVerticalAlign(): TextVerticalAlign {
+    return this.model.styles.textVerticalAlign;
   }
 
   get textBaseline(): CanvasTextBaseline {
@@ -1095,13 +1099,23 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 文字对齐方式发生变化
+   *
    */
   onTextAlignChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.textAlignChanged, [this.textAlign]);
   }
 
   /**
+   * 文字垂直对齐方式发生变化
+   *
+   */
+  onTextVerticalAlignChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textVerticalAlignChanged, [this.textVerticalAlign]);
+  }
+
+  /**
    * 文字基线发生变化
+   *
    */
   onTextBaselineChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.textBaselineChanged, [this.textBaseline]);
@@ -2431,6 +2445,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置组件文本垂直对齐方式
+   *
+   * @param value
+   */
+  setTextVerticalAlign(value: TextVerticalAlign): void {
+    this.model.styles.textVerticalAlign = value;
+  }
+
+  /**
    * 设置字体基线
    * @param value
    */
@@ -2670,6 +2693,8 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toFontStyleJson(): Promise<ElementObject> {
-    return JSON.parse(JSON.stringify(pick(this.model, ["id", "fontSize", "fontFamily", "fontColor", "fontColorOpacity", "textAlign", "textBaseline", "fontLineHeight"]))) as ElementObject;
+    return JSON.parse(
+      JSON.stringify(pick(this.model, ["id", "fontSize", "fontFamily", "fontColor", "fontColorOpacity", "textAlign", "textVerticalAlign", "textBaseline", "fontLineHeight"])),
+    ) as ElementObject;
   }
 }

@@ -10,7 +10,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { FontStyle, getDefaultElementStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { FontStyle, getDefaultElementStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
@@ -770,6 +770,21 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id)) {
         if (element.textAlign === value) return;
         element.setTextAlign(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件文本垂直对齐方式
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.textVerticalAlign === value) return;
+        element.setTextVerticalAlign(value);
       }
     });
   }

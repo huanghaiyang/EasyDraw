@@ -18,7 +18,7 @@ export default class ElementTaskText extends ElementTaskBase {
 
     const {
       model: {
-        styles: { fontSize, fontFamily, textAlign, textBaseline, fontColor, fontColorOpacity, fontLineHeight, fontLetterSpacing },
+        styles: { fontSize, fontFamily, textAlign, textVerticalAlign, textBaseline, fontColor, fontColorOpacity, fontLineHeight, fontLetterSpacing },
         data,
       },
       angle,
@@ -51,6 +51,7 @@ export default class ElementTaskText extends ElementTaskBase {
         fontSize,
         fontFamily,
         textAlign,
+        textVerticalAlign,
         textBaseline,
         fontColor,
         fontColorOpacity,
