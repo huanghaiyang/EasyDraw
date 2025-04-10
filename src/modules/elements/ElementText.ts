@@ -193,10 +193,13 @@ export default class ElementText extends ElementRect implements IElementText {
     this._selectionMoveId = null;
     this._isSelectionMoved = false;
     this._toggleCursorVisibleTimer(value);
-    this._markSelection();
-    if (!value) {
+    if (value) {
+      this._selectAll();
+    } else {
       this._undoRedo.clear();
     }
+    this._markSelection();
+    this._checkFontStyleChangedByCursor();
   }
 
   /**
@@ -1017,7 +1020,6 @@ export default class ElementText extends ElementRect implements IElementText {
       }
     }
     this._prevInputCursor = null;
-    this._checkFontStyleChangedByCursor();
     this._addCursorUpdateCommand();
   }
 
