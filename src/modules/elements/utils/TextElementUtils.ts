@@ -141,12 +141,15 @@ export default class TextElementUtils {
       textCursor.lineNumber = lineNumber;
       // 遍历当前文本行的所有节点
       for (let j = 0; j < line.nodes.length; j++) {
-        const node = line.nodes[j];
+        let node = line.nodes[j];
         // 判断当前光标是否在当前节点内
         if (CommonUtils.isPointInRect(node, point)) {
           let pos = Direction.LEFT;
           // 判断当前光标是否在当前节点的右侧位置
           if (point.x >= node.x + node.width / 2) {
+            pos = Direction.RIGHT;
+          } else if (j > 0) {
+            node = line.nodes[j - 1];
             pos = Direction.RIGHT;
           }
           Object.assign(textCursor, getCursorPropsOfNode(node, pos, lineNumber));
