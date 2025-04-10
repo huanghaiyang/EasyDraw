@@ -414,7 +414,7 @@ export default class CanvasUtils {
           // 文本节点的y坐标（等于行的基线坐标加上文本的基线坐标）
           const y = baseline + alphabeticBaseline;
           // 更新文本节点关于位置和尺寸的属性
-          Object.assign(node, { x, y: rowY, width: maxWidth, height: rowHeight, charWidth: width, charHeight: fontBoundingBoxDescent - fontBoundingBoxAscent, baseline });
+          Object.assign(node, { x, y: rowY, width: maxWidth, height: rowHeight, indentX, charWidth: width, charHeight: fontBoundingBoxDescent - fontBoundingBoxAscent, baseline });
           // 绘制文本
           ctx.fillText(content, x, y);
           // 更新前一个文本节点的x坐标

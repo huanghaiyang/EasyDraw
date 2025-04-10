@@ -1119,7 +1119,7 @@ export default class TextElementUtils {
       if (isTailBreak) {
         tailLine.fontStyle = fontStyle;
       }
-      tailLine.width += nodes.reduce((prev, curr) => prev + curr.width, 0);
+      tailLine.width += nodes.reduce((prev, curr) => prev + curr.width + curr.indentX, 0);
       if (isTailBreak && i < textLines.length - 1) {
         result.push({
           nodes: [],
@@ -1160,7 +1160,7 @@ export default class TextElementUtils {
       // 遍历节点
       for (let j = 0; j < nodes.length; j++) {
         const node = nodes[j];
-        const nWidth = node.width / scale;
+        const nWidth = (node.width + node.indentX) / scale;
         if (currentWidth + nWidth <= width) {
           // 如果当前行的宽度小于给定宽度，则将当前节点添加到当前行中
           currentLine.nodes.push(node);
@@ -1227,7 +1227,7 @@ export default class TextElementUtils {
     for (let i = 0; i < textLines.length; i++) {
       const line = textLines[i];
       const { nodes } = line;
-      maxWidth = Math.max(maxWidth, nodes.reduce((prev, curr) => prev + curr.width, 0) / scale);
+      maxWidth = Math.max(maxWidth, nodes.reduce((prev, curr) => prev + curr.width + curr.indentX, 0) / scale);
     }
     return maxWidth;
   }

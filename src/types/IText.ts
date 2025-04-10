@@ -18,6 +18,7 @@ export type ITextNode = Partial<IPoint> &
     selected?: boolean;
     updateId?: string;
     baseline?: number; // 基线Y坐标
+    indentX?: number;
   };
 
 // 文本行
