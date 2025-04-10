@@ -35,6 +35,9 @@ watch(
           @change="value => stageStore.setElementsFontFamily(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
+          <template #label="{ label, value }">
+            <span :style="{ fontFamily: value }">{{ label }}</span>
+          </template>
           <el-option v-for="item in FontFamilyList" :key="item.name" :label="item.name" :value="item.name" :style="{ fontFamily: item.name }" />
         </el-select>
       </div>
