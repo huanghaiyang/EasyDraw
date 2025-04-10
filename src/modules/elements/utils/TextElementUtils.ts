@@ -1236,7 +1236,7 @@ export default class TextElementUtils {
    * @param scale 缩放
    * @returns 高度
    */
-  static calcTextHeight(textLines: ITextLine[], scale: number): number {
+  static calcTextRenderHeight(textLines: ITextLine[], scale: number): number {
     if (textLines.length === 0) return 0;
     return textLines.reduce((prev, curr) => prev + curr.height, 0) / scale;
   }

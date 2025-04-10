@@ -1221,7 +1221,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @returns 文本高度
    */
   private _calcTextRenderHeight(): number {
-    return Math.ceil(TextElementUtils.calcTextHeight((this.model.data as ITextData).lines, this.shield.stageScale));
+    return Math.ceil(TextElementUtils.calcTextRenderHeight((this.model.data as ITextData).lines, this.shield.stageScale));
   }
 
   /**
@@ -1540,6 +1540,16 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _getTextRenderCoords(): IPoint[] {
     const textHeight = this._calcTextRenderHeight();
+    return this._getTextCoordsByHeight(textHeight);
+  }
+
+  /**
+   * 给定文本高度计算文本实际渲染区域的坐标
+   *
+   * @param textHeight 文本高度
+   * @returns 坐标
+   */
+  private _getTextCoordsByHeight(textHeight: number): IPoint[] {
     let { x, y, width, height } = this.model;
     x = x - width / 2;
     y = y - height / 2;
@@ -1594,5 +1604,15 @@ export default class ElementText extends ElementRect implements IElementText {
       return super.isPolygonOverlap(coords) || this._isTextPolygnOverlap(coords);
     }
     return this._isTextPolygnOverlap(coords);
+  }
+
+  /**
+   * 判断当前组件是否与给定的多边形相交
+   *
+   * @param coords
+   * @returns
+   */
+  isModelPolygonOverlap(coords: IPoint[]): boolean {
+    return super.isModelPolygonOverlap(coords) || MathUtils.isPolygonsOverlap(this._getTextRotateRenderCoords(), coords);
   }
 }
