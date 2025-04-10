@@ -165,7 +165,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   private _updateInputStyleWhileInputing(): void {
     let { width, height } = FontUtils.measureTextWithSpan(this.textEditor.value, DefaultFontStyle);
     width = Math.max(width, minWidth);
-    height = Math.max(height, minHeight);
+    height = Math.max(height, minHeight, Math.ceil(this.textEditor.value.split("\n").length * DefaultFontStyle.fontLineHeight * DefaultFontStyle.fontSize));
     Object.assign(this.textEditor.style, {
       minWidth: `${width}px`,
       minHeight: `${height}px`,
