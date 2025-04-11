@@ -315,7 +315,7 @@ export default class ElementText extends ElementRect implements IElementText {
     // 转换为组件内的坐标
     const point = ElementRenderHelper.convertCoordInRect(coord, this, renderRect);
     // 获取文本光标
-    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point);
+    const textCursor = TextElementUtils.getTextCursorAtPosition(this.model.data as ITextData, point, this.textAlign);
     // 如果文本光标存在，那么就更新选区和光标状态
     if (textCursor) {
       if (isSelectionMove) {

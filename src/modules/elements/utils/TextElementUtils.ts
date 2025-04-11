@@ -121,9 +121,10 @@ export default class TextElementUtils {
    *
    * @param textData 文本数据
    * @param point 光标位置
+   * @param textAlign 文本对齐方式
    * @returns 光标位置
    */
-  static getTextCursorAtPosition(textData: ITextData, point: IPoint): ITextCursor {
+  static getTextCursorAtPosition(textData: ITextData, point: IPoint, textAlign: CanvasTextAlign): ITextCursor {
     const textCursor: ITextCursor = {};
     const { lines } = textData;
     let line: ITextLine;
@@ -157,7 +158,11 @@ export default class TextElementUtils {
         }
       }
       if (!textCursor.nodeId) {
-        Object.assign(textCursor, getCursorPropsOfLineEnd(line, lineNumber));
+        if (textAlign === "right" || (textAlign === "center" && point.x <= line.renderX)) {
+          Object.assign(textCursor, this.getCursorOfLineStart(line, lineNumber));
+        } else {
+          Object.assign(textCursor, getCursorPropsOfLineEnd(line, lineNumber));
+        }
       }
     } else {
       lineNumber = lines.length - 1;

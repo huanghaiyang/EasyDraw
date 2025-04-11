@@ -481,7 +481,7 @@ export default class CanvasUtils {
               renderX,
             });
             ctx.fillText(content, renderX, renderY);
-            nodeX += width;
+            nodeX += width + indentX;
           });
         }
       }
