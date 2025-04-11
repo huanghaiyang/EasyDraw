@@ -49,6 +49,8 @@ import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
 import UndoRedo from "@/modules/base/UndoRedo";
 import { TextEditorPressTypes } from "@/types/IText";
+import GlobalConfig from "@/config";
+import { computed, makeObservable, observable, reaction } from "mobx";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -200,8 +202,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.mask = new DrawerMask(this);
     this.undoRedo = new UndoRedo();
     this.renderer = new ShieldRenderer(this);
+    makeObservable(this, {
+      stageCalcParams: computed,
+      stageRect: observable,
+      stageWorldCoord: observable,
+      stageScale: observable,
+    });
+    reaction(
+      () => this.stageCalcParams,
+      () => {
+        GlobalConfig.stageCalcParams = this.stageCalcParams;
+      },
+    );
     this._requestAnimationRedraw();
-    window.shield = this;
   }
 
   /**

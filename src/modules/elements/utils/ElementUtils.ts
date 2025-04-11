@@ -26,6 +26,7 @@ import ElementTaskEllipse from "@/modules/render/shield/task/ElementTaskEllipse"
 import ElementEllipse from "@/modules/elements/ElementEllipse";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementTaskText from "@/modules/render/shield/task/ElementTaskText";
+import GlobalConfig from "@/config";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -114,7 +115,7 @@ export default class ElementUtils {
       rect: { width, height },
       scale,
       worldCoord: { x, y },
-    } = window.shield.stageCalcParams;
+    } = GlobalConfig.stageCalcParams;
     return {
       x: coord.x + width / 2 / scale - x,
       y: coord.y + height / 2 / scale - y,
@@ -142,7 +143,7 @@ export default class ElementUtils {
       rect: { width, height },
       scale,
       worldCoord: { x, y },
-    } = window.shield.stageCalcParams;
+    } = GlobalConfig.stageCalcParams;
     return {
       x: point.x - width / 2 / scale + x,
       y: point.y - height / 2 / scale + y,
