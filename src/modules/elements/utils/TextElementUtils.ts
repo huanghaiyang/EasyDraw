@@ -1220,6 +1220,7 @@ export default class TextElementUtils {
    * @param textLines 文本行
    * @param scale 缩放
    * @returns 最大宽度
+   * @unused
    */
   static calcMaxLineWidthByNodes(textLines: ITextLine[], scale: number): number {
     if (textLines.length === 0) return 0;

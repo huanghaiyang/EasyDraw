@@ -1212,7 +1212,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @returns 文本宽度
    */
   private _calcTextRenderWidth(): number {
-    return Math.ceil(TextElementUtils.calcMaxLineWidthByNodes((this.model.data as ITextData).lines, this.shield.stageScale));
+    return Math.ceil(TextElementUtils.calcMaxLineWidth((this.model.data as ITextData).lines, this.shield.stageScale));
   }
 
   /**

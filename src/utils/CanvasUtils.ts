@@ -71,6 +71,41 @@ function isDiffBaseline(nodes: ITextNode[]): boolean {
   return isDiff;
 }
 
+/**
+ * 给定文本节点，计算缩进值
+ *
+ * @param node
+ * @param nodeIdex
+ * @param metrics
+ * @param nodes
+ * @param ctx
+ */
+function calcTextNodeIndenX(node: ITextNode, nodeIdex: number, metrics: TextMetrics, nodes: ITextNode[], ctx: CanvasRenderingContext2D): number {
+  const { content, fontStyle } = node;
+  // 字体宽度和基线值
+  const { width } = metrics;
+  // 缩进值
+  let indentX: number = 0;
+  // 如果当前节点是英文字符，且前一个节点也是英文字符
+  if (nodeIdex !== 0 && CoderUtils.isEnglishLetter(content)) {
+    const prevNode = nodes[nodeIdex - 1];
+    const { content: prevContent, fontStyle: prevFontStyle, renderWidth: prevRenderWidth } = prevNode;
+    // 如果前一个节点是英文字符，且两个节点的样式相同，则需要计算下两个字符是否是连字
+    if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(fontStyle, prevFontStyle)) {
+      // 计算当前节点和前一个节点的连字宽度
+      const { width: tupleWidth } = ctx.measureText(prevContent + content);
+      // 两个字符的最大宽度
+      const ligatureWidth = prevRenderWidth + width;
+      // 如果连字宽度小于最大宽度，则需要缩进
+      if (tupleWidth < ligatureWidth) {
+        // 缩进值
+        indentX = tupleWidth - ligatureWidth;
+      }
+    }
+  }
+  return indentX;
+}
+
 export default class CanvasUtils {
   static ImageCaches = new Map();
   static scale: number = 1;
@@ -345,18 +380,24 @@ export default class CanvasUtils {
     CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
     points = CanvasUtils.transPointsOfBox(points, renderRect);
     ctx.font = `${fontSize}px ${fontFamily}`;
-    ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
     // 每行高度都是一致的
-    const rowHeight = fontLineHeight * fontSize;
+    const lineHeight = fontLineHeight * fontSize;
     // 前一个文本行的y坐标
-    let rowY = points[0].y;
-
+    let lineY = points[0].y;
+    const { x: left } = points[0];
+    const { x: right } = points[1];
+    // 组件渲染时的x坐标
+    const elementX = flipX ? -left : left;
+    // 组件的宽度
+    const elementWidth = Math.abs(right - left);
     textData.lines.forEach(line => {
-      let prevX = flipX ? -points[0].x : points[0].x;
-      // TODO 此处行的宽度是否应该设置为实际的节点总宽度
-      Object.assign(line, { x: prevX, y: rowY, width: renderRect.width });
+      // 当前整个行文本节点加起来的渲染宽度
+      let lineWidth: number = 0;
+      // 文本节点开始渲染时的x坐标
+      let nodeX: number = elementX;
+      Object.assign(line, { x: elementX, y: lineY, width: elementWidth, height: lineHeight, renderHeight: lineHeight, renderY: lineY });
       const { nodes } = line;
       if (nodes.length !== 0) {
         // 判断此行文本节点的基线是否一致
@@ -377,7 +418,7 @@ export default class CanvasUtils {
           maxAlphabeticBaseline = Math.min(maxAlphabeticBaseline, metrics.alphabeticBaseline);
         });
         // 行基线坐标
-        const baseline = rowY - maxAlphabeticBaseline + (rowHeight - maxHeight) / 2;
+        const baseline = lineY - maxAlphabeticBaseline + (lineHeight - maxHeight) / 2;
         // 遍历节点并渲染
         iterateNodes(nodes, ctx, (node, index) => {
           const { content, fontStyle: nFontStyle } = node;
@@ -385,44 +426,67 @@ export default class CanvasUtils {
           // 字体度量
           const metrics = isDiff ? metricsArr[index] : ctx.measureText(content);
           // 字体宽度和基线值
-          const { width, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
-          // 缩进值
-          let indentX: number = 0;
-          // 如果当前节点是英文字符，且前一个节点也是英文字符
-          if (index !== 0 && CoderUtils.isEnglishLetter(content)) {
-            const prevNode = nodes[index - 1];
-            const { content: prevContent, fontStyle: prevFontStyle, charWidth: prevCharWidth } = prevNode;
-            // 如果前一个节点是英文字符，且两个节点的样式相同，则需要计算下两个字符是否是连字
-            if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(nFontStyle, prevFontStyle)) {
-              // 计算当前节点和前一个节点的连字宽度
-              const { width: tupleWidth } = ctx.measureText(prevContent + content);
-              // 两个字符的最大宽度
-              const ligatureWidth = prevCharWidth + width;
-              // 如果连字宽度小于最大宽度，则需要缩进
-              if (tupleWidth < ligatureWidth) {
-                // 缩进值
-                indentX = tupleWidth - ligatureWidth;
-              }
-            }
-          }
+          const { width: renderWidth, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
+          // 缩进值（通常为负值)
+          const indentX = calcTextNodeIndenX(node, index, metrics, nodes, ctx);
           // 字符间距(注意此处的字符间距和字号都是原始值，需要乘以缩放比例)
           const spaceWidth = nFontLetterSpacing * nFontSize * 2 * CanvasUtils.scale;
           // 字符占用最大宽度
-          const maxWidth = width + spaceWidth;
+          const maxWidth = renderWidth + spaceWidth;
           // 文本节点的x坐标
-          const x = prevX + indentX;
+          const x = nodeX + indentX;
           // 文本节点的y坐标（等于行的基线坐标加上文本的基线坐标）
           const y = baseline + alphabeticBaseline;
           // 更新文本节点关于位置和尺寸的属性
-          Object.assign(node, { x, y: rowY, width: maxWidth, height: rowHeight, indentX, charWidth: width, charHeight: fontBoundingBoxDescent - fontBoundingBoxAscent, baseline });
-          // 绘制文本
-          ctx.fillText(content, x, y);
+          Object.assign(node, {
+            x,
+            y: lineY,
+            width: maxWidth,
+            height: lineHeight,
+            indentX,
+            renderX: x,
+            renderY: y,
+            renderWidth,
+            renderHeight: fontBoundingBoxDescent - fontBoundingBoxAscent,
+            baseline,
+          });
           // 更新前一个文本节点的x坐标
-          prevX = x + maxWidth;
+          nodeX = x + maxWidth;
+          // 更新当前行的宽度
+          lineWidth += maxWidth + indentX;
+          // 如果是最后一个文本节点，更新当前行的宽度
+          if (index === line.nodes.length - 1) {
+            // 更新当前行的宽度
+            line.renderWidth = lineWidth;
+          }
+          // 如果是左对齐，则绘制文本，如果是右对齐或者居中对齐，则此次循环是为了计算行宽，需要另外一个新的循环来绘制文本
+          if (textAlign === "left") {
+            ctx.fillText(content, x, y);
+          }
         });
+        if (textAlign === "right") {
+          // 如果是右对齐那么行左侧会有缩进，需要减去缩进
+          nodeX = elementX + elementWidth - lineWidth;
+        } else if (textAlign === "center") {
+          // 如果是居中对齐那么行左侧、右侧都会有缩进，需要减去缩进
+          nodeX = elementX + elementWidth / 2 - lineWidth / 2;
+        }
+        if (textAlign !== "left") {
+          line.renderX = nodeX;
+          iterateNodes(nodes, ctx, node => {
+            const { renderY, width, renderWidth, indentX, content } = node;
+            const renderX = nodeX + indentX + width - renderWidth;
+            Object.assign(node, {
+              x: nodeX,
+              renderX,
+            });
+            ctx.fillText(content, renderX, renderY);
+            nodeX += width;
+          });
+        }
       }
-      line.height = rowHeight;
-      rowY += rowHeight;
+      line.height = lineHeight;
+      lineY += lineHeight;
     });
     ctx.restore();
   }

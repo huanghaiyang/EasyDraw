@@ -1,16 +1,30 @@
 import { TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint, ISize } from "@/types";
 
-// 文本字符大小
-export type CharSize = {
-  charWidth: number;
-  charHeight: number;
+// 文本字符大小(实际渲染大小)
+export type CharRenderSize = {
+  renderWidth: number;
+  renderHeight: number;
+};
+
+// 文本字符位置(实际渲染位置)
+export type CharRenderPoint = {
+  renderX: number;
+  renderY: number;
+};
+
+// 文本字符缩进
+export type CharIndent = {
+  indentX: number;
+  indentY: number;
 };
 
 // 文本节点
 export type ITextNode = Partial<IPoint> &
   Partial<TextMetrics> &
-  Partial<CharSize> &
+  Partial<CharRenderSize> &
+  Partial<CharRenderPoint> &
+  Partial<CharIndent> &
   Partial<ISize> & {
     id: string;
     content: string;
@@ -18,12 +32,25 @@ export type ITextNode = Partial<IPoint> &
     selected?: boolean;
     updateId?: string;
     baseline?: number; // 基线Y坐标
-    indentX?: number;
   };
+
+// 文本行大小(实际渲染大小)
+export type LineRenderSize = {
+  renderWidth: number;
+  renderHeight: number;
+};
+
+// 文本行位置(实际渲染位置)
+export type LineRenderPoint = {
+  renderX: number;
+  renderY: number;
+};
 
 // 文本行
 export type ITextLine = Partial<IPoint> &
-  Partial<ISize> & {
+  Partial<ISize> &
+  Partial<LineRenderPoint> &
+  Partial<LineRenderSize> & {
     nodes: ITextNode[]; // 文本节点
     selected?: boolean; // 是否在选区中
     isTailBreak?: boolean; // 行尾是否是换行

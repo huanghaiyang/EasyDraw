@@ -813,7 +813,6 @@ export default class StageStore implements IStageStore {
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fontSize === value) return;
         element.setFontSize(value);
       }
     });
@@ -828,7 +827,6 @@ export default class StageStore implements IStageStore {
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fontFamily === value) return;
         element.setFontFamily(value);
       }
     });
@@ -858,7 +856,6 @@ export default class StageStore implements IStageStore {
   async setElementsFontColor(elements: IElement[], value: string): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fontColor === value) return;
         element.setFontColor(value);
       }
     });
@@ -873,7 +870,6 @@ export default class StageStore implements IStageStore {
   async setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fontColorOpacity === value) return;
         element.setFontColorOpacity(value);
       }
     });
@@ -888,7 +884,6 @@ export default class StageStore implements IStageStore {
   async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
-        if (element.fontLetterSpacing === value) return;
         element.setFontLetterSpacing(value);
       }
     });
