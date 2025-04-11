@@ -373,7 +373,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
-    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity } = fontStyle;
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity, textVerticalAlign } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -392,6 +392,21 @@ export default class CanvasUtils {
     const elementX = flipX ? -left : left;
     // 组件的宽度
     const elementWidth = Math.abs(right - left);
+    // 组件的高度
+    const elementHeight = Math.abs(points[3].y - points[0].y);
+    
+    // 计算文本总高度
+    let totalTextHeight = lineHeight * textData.lines.length;
+    
+    // 根据垂直对齐方式调整lineY
+    if (textVerticalAlign === 'middle') {
+      // 垂直居中对齐
+      lineY = points[0].y + (elementHeight - totalTextHeight) / 2;
+    } else if (textVerticalAlign === 'bottom') {
+      // 底部对齐
+      lineY = points[0].y + (elementHeight - totalTextHeight);
+    }
+
     textData.lines.forEach(line => {
       // 当前整个行文本节点加起来的渲染宽度
       let lineWidth: number = 0;
@@ -427,7 +442,7 @@ export default class CanvasUtils {
           const metrics = isDiff ? metricsArr[index] : ctx.measureText(content);
           // 字体宽度和基线值
           const { width: renderWidth, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
-          // 缩进值（通常为负值)
+          // 缩进值（通常为负值）
           const indentX = calcTextNodeIndenX(node, index, metrics, nodes, ctx);
           // 字符间距(注意此处的字符间距和字号都是原始值，需要乘以缩放比例)
           const spaceWidth = nFontLetterSpacing * nFontSize * 2 * CanvasUtils.scale;

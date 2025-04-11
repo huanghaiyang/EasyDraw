@@ -1553,6 +1553,14 @@ export default class ElementText extends ElementRect implements IElementText {
     let { x, y, width, height } = this.model;
     x = x - width / 2;
     y = y - height / 2;
+    switch(this.textVerticalAlign) {
+      case 'middle':
+        y += (height - textHeight) / 2;
+        break;
+      case 'bottom':
+        y += height - textHeight;
+        break;
+    }
     // 计算实际渲染区域的盒子坐标
     return CommonUtils.getBoxByLeftTop({ x, y }, { width, height: textHeight });
   }
