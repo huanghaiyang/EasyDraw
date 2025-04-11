@@ -75,6 +75,8 @@ export default class StageCursor implements IStageCursor {
       this.setStyle("none");
     } else if (this.shield.isHandActive) {
       this.setStyle("grab");
+    } else if (this.shield.isTextEditing && this.shield.store.editingElements.some(element => element.isContainsCoord(this.worldValue))) {
+      this.setStyle("text");
     } else {
       this.setStyle("default");
     }
