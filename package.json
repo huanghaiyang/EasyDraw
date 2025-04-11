@@ -13,7 +13,9 @@
     "docker:stop": "docker rm -f verbise-container || exit 0",
     "docker:clean": "docker rmi verbise-app || exit 0",
     "docker:deploy": "npm run docker:stop && npm run docker:clean && npm run docker:build && npm run docker:run",
-    "docker:logs": "docker logs -f verbise-container"
+    "docker:logs": "docker logs -f verbise-container",
+    "count-code": "powershell -File count_lines.ps1",
+    "count-code-detailed": "powershell -File count_by_type.ps1"
   },
   "dependencies": {
     "axios": "^1.7.9",

@@ -38,3 +38,13 @@ EasyDraw 是一款基于canvas的ui设计软件，支持自由绘制、旋转、
 <image src="./markdown/corner.png" width="1920" />
 <image src="./markdown/text.png" width="1920" />
 
+# 开发工具
+
+## 代码统计
+
+项目提供了两个代码统计脚本，可以通过 npm 命令运行：
+
+- `npm run count-code` - 显示项目中的总行数、空白行数、注释行数和有效代码行数
+- `npm run count-code-detailed` - 按文件类型（TypeScript、Vue、HTML、CSS、JavaScript）显示详细的代码统计信息
+
+这些脚本可以帮助开发者了解项目的代码规模和组成结构。
