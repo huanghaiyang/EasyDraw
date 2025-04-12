@@ -383,7 +383,7 @@ export default class CanvasUtils {
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
     // 每行高度都是一致的
-    const lineHeight = fontLineHeight * fontSize;
+    let lineHeight = fontLineHeight * fontSize;
     // 前一个文本行的y坐标
     let lineY = points[0].y;
     const { x: left } = points[0];
@@ -394,19 +394,20 @@ export default class CanvasUtils {
     const elementWidth = Math.abs(right - left);
     // 组件的高度
     const elementHeight = Math.abs(points[3].y - points[0].y);
-    
     // 计算文本总高度
     let totalTextHeight = lineHeight * textData.lines.length;
-    
     // 根据垂直对齐方式调整lineY
-    if (textVerticalAlign === 'middle') {
+    if (textVerticalAlign === "middle") {
       // 垂直居中对齐
       lineY = points[0].y + (elementHeight - totalTextHeight) / 2;
-    } else if (textVerticalAlign === 'bottom') {
+    } else if (textVerticalAlign === "bottom") {
       // 底部对齐
       lineY = points[0].y + (elementHeight - totalTextHeight);
     }
-
+    // 平均基线值
+    const { alphabeticBaseline: avgAlphabeticBaseline, fontBoundingBoxAscent, fontBoundingBoxDescent } = ctx.measureText("a");
+    // 平均字体高度
+    const avgFontHeight = fontBoundingBoxDescent - fontBoundingBoxAscent;
     textData.lines.forEach(line => {
       // 当前整个行文本节点加起来的渲染宽度
       let lineWidth: number = 0;
@@ -415,31 +416,14 @@ export default class CanvasUtils {
       Object.assign(line, { x: elementX, y: lineY, width: elementWidth, height: lineHeight, renderHeight: lineHeight, renderY: lineY });
       const { nodes } = line;
       if (nodes.length !== 0) {
-        // 判断此行文本节点的基线是否一致
-        const isDiff: boolean = isDiffBaseline(nodes);
-        // 文本节点的度量数组缓存
-        const metricsArr: TextMetrics[] = [];
-        // 此行文本节点最大字体高度
-        let maxHeight: number = 0;
-        // 最大基线值
-        let maxAlphabeticBaseline: number = 0;
-        // 遍历计算此行节点度量
-        iterateNodes(nodes, ctx, node => {
-          const metrics = ctx.measureText(node.content);
-          metricsArr.push(metrics);
-          // 计算此行文本节点最大字体高度
-          maxHeight = Math.max(maxHeight, metrics.fontBoundingBoxDescent - metrics.fontBoundingBoxAscent);
-          // 计算此行文本节点最大基线值
-          maxAlphabeticBaseline = Math.min(maxAlphabeticBaseline, metrics.alphabeticBaseline);
-        });
         // 行基线坐标
-        const baseline = lineY - maxAlphabeticBaseline + (lineHeight - maxHeight) / 2;
+        const baseline = lineY - avgAlphabeticBaseline + (lineHeight - avgFontHeight) / 2;
         // 遍历节点并渲染
         iterateNodes(nodes, ctx, (node, index) => {
           const { content, fontStyle: nFontStyle } = node;
           const { fontLetterSpacing: nFontLetterSpacing, fontSize: nFontSize } = nFontStyle;
           // 字体度量
-          const metrics = isDiff ? metricsArr[index] : ctx.measureText(content);
+          const metrics = ctx.measureText(content);
           // 字体宽度和基线值
           const { width: renderWidth, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
           // 缩进值（通常为负值）
