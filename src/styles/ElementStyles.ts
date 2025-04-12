@@ -162,7 +162,7 @@ export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
 // 默认字体行高
-export const DefaultFontLineHeight = DefaultFontSize;
+export const DefaultFontLineHeight = DefaultFontSize * 1.4;
 // 默认字体间距
 export const DefaultFontLetterSpacing = 0;
 // 默认文本装饰
