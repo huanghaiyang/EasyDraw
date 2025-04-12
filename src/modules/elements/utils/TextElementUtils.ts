@@ -109,7 +109,17 @@ export default class TextElementUtils {
    * @returns 文本数据
    */
   static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
-    fontStyle = pick(fontStyle, ["fontFamily", "fontSize", "fontColor", "fontColorOpacity", "fontLetterSpacing"]);
+    fontStyle = pick(fontStyle, [
+      "fontFamily",
+      "fontSize",
+      "fontColor",
+      "fontColorOpacity",
+      "fontLetterSpacing",
+      "textDecoration",
+      "textDecorationColor",
+      "textDecorationOpacity",
+      "textDecorationThickness",
+    ]);
     const lines: ITextLine[] = this.createTextLines(content, fontStyle);
     return {
       lines,
@@ -439,6 +449,10 @@ export default class TextElementUtils {
       fontColors: new Set(),
       fontColorOpacities: new Set(),
       fontLetterSpacings: new Set(),
+      textDecorations: new Set(),
+      textDecorationColors: new Set(),
+      textDecorationOpacities: new Set(),
+      textDecorationThicknesses: new Set(),
     };
   }
 
@@ -465,6 +479,18 @@ export default class TextElementUtils {
     }
     if (isNumber(fontStyle.fontLetterSpacing)) {
       result.fontLetterSpacings.add(fontStyle.fontLetterSpacing);
+    }
+    if (isString(fontStyle.textDecoration)) {
+      result.textDecorations.add(fontStyle.textDecoration);
+    }
+    if (isString(fontStyle.textDecorationColor)) {
+      result.textDecorationColors.add(fontStyle.textDecorationColor);
+    }
+    if (isNumber(fontStyle.textDecorationOpacity)) {
+      result.textDecorationOpacities.add(fontStyle.textDecorationOpacity);
+    }
+    if (isNumber(fontStyle.textDecorationThickness)) {
+      result.textDecorationThicknesses.add(fontStyle.textDecorationThickness);
     }
   }
 

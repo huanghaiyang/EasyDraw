@@ -27,7 +27,7 @@ watch(
       <span class="font-props__title-text">字体</span>
     </div>
     <div class="font-props__row">
-      <div class="font-props__row-item full">
+      <div class="font-props__row-item" :style="{ width: '212px' }">
         <el-select
           v-model="fontFamily"
           :placeholder="`${fontFamilyMixin ? '混合字体' : fontFamily}`"

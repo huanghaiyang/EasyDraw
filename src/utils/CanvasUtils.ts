@@ -1,5 +1,5 @@
 import { IPoint } from "@/types";
-import { ElementStyles, FillStyle, FontStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyle, StrokeStyle, StrokeTypes, TextDecoration } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -104,6 +104,63 @@ function calcTextNodeIndenX(node: ITextNode, nodeIdex: number, metrics: TextMetr
     }
   }
   return indentX;
+}
+
+/**
+ * 绘制文本装饰
+ *
+ * @param ctx
+ * @param node
+ * @param metrics
+ */
+function drawTextDecoration(ctx: CanvasRenderingContext2D, node: ITextNode): void {
+  const {
+    renderX,
+    renderY,
+    width,
+    fontBoundingBoxDescent,
+    fontStyle: { textDecoration, textDecorationThickness, textDecorationColor, textDecorationOpacity },
+  } = node;
+  // 绘制文本装饰
+  if (textDecoration !== TextDecoration.none && textDecorationThickness !== 0) {
+    ctx.save();
+    ctx.lineWidth = textDecorationThickness * CanvasUtils.scale;
+    ctx.strokeStyle = StyleUtils.joinFillColor({ color: textDecorationColor, colorOpacity: textDecorationOpacity });
+
+    const startX = renderX;
+    const endX = startX + width;
+
+    switch (textDecoration) {
+      case TextDecoration.underline: {
+        const decorationY = renderY + fontBoundingBoxDescent + textDecorationThickness / 2;
+        // 下划线位置在基线下方
+        ctx.beginPath();
+        ctx.moveTo(startX, decorationY);
+        ctx.lineTo(endX, decorationY);
+        ctx.stroke();
+        break;
+      }
+      case TextDecoration.lineThrough: {
+        const decorationY = renderY + (fontBoundingBoxDescent + textDecorationThickness) / 2;
+        // 删除线位置在文本中间
+        ctx.beginPath();
+        ctx.moveTo(startX, decorationY);
+        ctx.lineTo(endX, decorationY);
+        ctx.stroke();
+        break;
+      }
+      case TextDecoration.overline: {
+        const decorationY = renderY - textDecorationThickness / 2;
+        // 上划线位置在基线上方
+        ctx.beginPath();
+        ctx.moveTo(startX, decorationY);
+        ctx.lineTo(endX, decorationY);
+        ctx.stroke();
+        break;
+      }
+    }
+    ctx.restore();
+  }
 }
 
 export default class CanvasUtils {
@@ -447,6 +504,8 @@ export default class CanvasUtils {
             renderY: y,
             renderWidth,
             renderHeight: fontBoundingBoxDescent - fontBoundingBoxAscent,
+            fontBoundingBoxDescent,
+            fontBoundingBoxAscent,
             baseline,
           });
           // 更新前一个文本节点的x坐标
@@ -461,6 +520,7 @@ export default class CanvasUtils {
           // 如果是左对齐，则绘制文本，如果是右对齐或者居中对齐，则此次循环是为了计算行宽，需要另外一个新的循环来绘制文本
           if (textAlign === "left") {
             ctx.fillText(content, x, y);
+            drawTextDecoration(ctx, node);
           }
         });
         if (textAlign === "right") {
@@ -480,6 +540,7 @@ export default class CanvasUtils {
               renderX,
             });
             ctx.fillText(content, renderX, renderY);
+            drawTextDecoration(ctx, node);
             nodeX += width + indentX;
           });
         }
@@ -584,6 +645,7 @@ export default class CanvasUtils {
     return {
       ...fontStyle,
       fontSize: fontStyle.fontSize * CanvasUtils.scale,
+      fontLineHeight: fontStyle.fontLineHeight * CanvasUtils.scale,
     };
   }
 

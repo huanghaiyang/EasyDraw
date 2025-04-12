@@ -16,11 +16,11 @@ watch(
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
     <div class="font-props__title">
-      <span class="font-props__title-text">行高</span>
+      <span class="font-props__title-text text-2">行高</span>
     </div>
 
     <div class="font-props__row">
-      <div class="font-props__row-item">
+      <div class="font-props__row-item" :style="{ width: '80px' }">
         <el-select
           v-model="fontLineHeight"
           placeholder=""
@@ -31,7 +31,7 @@ watch(
           <el-option v-for="item in FontLineHeightList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
-      <div class="font-props__row-item">
+      <div class="font-props__row-item" :style="{ width: '124px' }">
         <el-input
           v-model="fontLineHeight"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
@@ -43,7 +43,7 @@ watch(
           :precision="0"
           @change="value => stageStore.setElementsFontLineHeight(Number(value))"
         >
-          <template #prepend>L</template>
+          <template #prepend>自定义</template>
           <template #append>px</template>
         </el-input>
       </div>

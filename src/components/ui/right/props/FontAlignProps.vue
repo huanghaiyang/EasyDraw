@@ -25,7 +25,7 @@ watch(
 <template>
   <div :class="['font-props right-props']" v-show="stageStore.fontEnable">
     <div class="font-props__title">
-      <span class="font-props__title-text">文本对齐</span>
+      <span class="font-props__title-text text-2">文本对齐</span>
     </div>
     <div class="font-props__row">
       <div class="fill-props__row-item">

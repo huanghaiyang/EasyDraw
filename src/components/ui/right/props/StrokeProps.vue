@@ -48,18 +48,19 @@ const toggleColorPickerVisible = () => {
           <el-tag type="info" @click="toggleColorPickerVisible">{{ stroke.color }}</el-tag>
         </div>
 
-        <div class="stroke-props__row-item">
+        <div class="stroke-props__row-item" :style="{ width: '106px' }">
           <el-input
             v-model="stroke.colorOpacity"
             placeholder="输入数字"
             type="number"
             min="0"
-            max="1"
-            precision="1"
+            max="100"
+            precision="0"
             @change="value => stageStore.setElementsStrokeColorOpacity(Number(value), index)"
             :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
           >
-            <template #prepend>O</template>
+            <template #prepend>透明</template>
+            <template #append>%</template>
           </el-input>
         </div>
 
@@ -81,7 +82,7 @@ const toggleColorPickerVisible = () => {
           </el-select>
         </div>
 
-        <div class="stroke-props__row-item">
+        <div class="stroke-props__row-item" :style="{ width: '106px' }">
           <el-input
             v-model="stroke.width"
             placeholder="输入数字"
@@ -91,7 +92,7 @@ const toggleColorPickerVisible = () => {
             @change="value => stageStore.setElementsStrokeWidth(Number(value), index)"
             :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
           >
-            <template #prepend>S</template>
+            <template #prepend>宽度</template>
             <template #append>px</template>
           </el-input>
         </div>

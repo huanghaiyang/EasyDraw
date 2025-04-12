@@ -9,10 +9,11 @@
     <corner-props></corner-props>
     <font-family-props></font-family-props>
     <font-size-props></font-size-props>
+    <font-color-props></font-color-props>
     <font-line-height-props></font-line-height-props>
     <font-letter-spacing-props></font-letter-spacing-props>
     <font-align-props></font-align-props>
-    <font-color-props></font-color-props>
+    <font-text-decoration-props></font-text-decoration-props>
     <fill-props></fill-props>
     <stroke-props></stroke-props>
     <layer-props></layer-props>
@@ -38,7 +39,7 @@
   .fill-props,
   .layer-props {
     &__title {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 500;
       color: #000000;
       padding: 4px;
@@ -49,8 +50,15 @@
         display: flex;
         align-items: center;
         vertical-align: middle;
-        line-height: 12px;
+        line-height: 14px;
         margin: 0 4px 0 0;
+        &.text-2 {
+          font-size: 12px;
+          line-height: 12px;
+          font-weight: normal;
+          transform: scale(0.9);
+          color: rgba(0, 0, 0, 0.8);
+        }
       }
 
       .el-icon {
@@ -83,17 +91,30 @@
         width: 96px;
         margin-right: 8px;
 
+        &.large {
+          width: 102px;
+        }
+
         .el-select,
         .el-input {
           width: 100%;
 
           .el-input-group__prepend,
           .el-input-group__append {
-            padding: 0 6px;
+            padding: 0 4px;
+          }
+
+          &--small {
+            .el-input__wrapper {
+              padding: 1px 2px;
+            }
           }
         }
         &.full {
           width: 100%;
+        }
+        &.flex {
+          width: auto;
         }
       }
     }

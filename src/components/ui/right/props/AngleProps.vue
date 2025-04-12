@@ -58,7 +58,7 @@ function setElementsLeanYAngle(value: string) {
     </div>
 
     <div class="angle-props__row">
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item large">
         <el-input
           v-model="aValue"
           placeholder="输入数字"
@@ -69,12 +69,12 @@ function setElementsLeanYAngle(value: string) {
           precision="1"
           @change="setElementsAngle"
         >
-          <template #prepend>A</template>
-          <template #append>°</template>
+          <template #prepend>整体</template>
+          <template #append>度</template>
         </el-input>
       </div>
 
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item large">
         <el-input
           v-model="leanYValue"
           placeholder="输入数字"
@@ -85,8 +85,8 @@ function setElementsLeanYAngle(value: string) {
           precision="1"
           @change="setElementsLeanYAngle"
         >
-          <template #prepend>LY</template>
-          <template #append>°</template>
+          <template #prepend>Y轴倾斜</template>
+          <template #append>度</template>
         </el-input>
       </div>
     </div>

@@ -40,18 +40,19 @@ const toggleColorPickerVisible = () => {
           <el-tag type="info" @click="toggleColorPickerVisible">{{ fill.color }}</el-tag>
         </div>
 
-        <div class="fill-props__row-item">
+        <div class="fill-props__row-item" :style="{ width: '106px' }">
           <el-input
             v-model="fill.colorOpacity"
             placeholder="输入数字"
             type="number"
             min="0"
-            max="1"
-            precision="1"
+            max="100"
+            precision="0"
             @change="value => stageStore.setElementsFillColorOpacity(Number(value), index)"
             :disabled="stageStore.inputDisabled || !stageStore.fillInputEnable"
           >
-            <template #prepend>O</template>
+            <template #prepend>透明</template>
+            <template #append>%</template>
           </el-input>
         </div>
         <el-icon>

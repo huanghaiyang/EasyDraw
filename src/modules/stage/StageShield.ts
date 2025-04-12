@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { FontStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -708,10 +708,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 设置组件字间距
-
+   *
    * @param elements
    * @param value
- */
+   */
   async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(elements, async () => {
       await this.store.setElementsFontLetterSpacing(elements, value);
@@ -722,8 +722,64 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 锁定比例
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextDecoration(elements, value);
+    });
+    elements.forEach(element => element.onTextDecorationChanged());
+    this._shouldRedraw = true;
+  }
 
+  /**
+   * 设置组件文本装饰颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextDecorationColor(elements, value);
+    });
+    elements.forEach(element => element.onTextDecorationColorChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件文本装饰透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextDecorationOpacity(elements, value);
+    });
+    elements.forEach(element => element.onTextDecorationOpacityChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextDecorationThickness(elements, value);
+    });
+    elements.forEach(element => element.onTextDecorationThicknessChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 锁定比例
+   *
    * @param elements
    * @param value
    */

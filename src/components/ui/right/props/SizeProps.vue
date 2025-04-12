@@ -30,7 +30,7 @@ watch(
     </div>
 
     <div class="size-props__row">
-      <div class="angle-props__row-item">
+      <div class="size-props__row-item large">
         <el-input
           v-model="wValue"
           placeholder="输入数字"
@@ -40,11 +40,11 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsWidth(Number(value))"
         >
-          <template #prepend>W</template>
+          <template #prepend>宽</template>
           <template #append>px</template>
         </el-input>
       </div>
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item large">
         <el-input
           v-model="hValue"
           placeholder="输入数字"
@@ -54,7 +54,7 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsHeight(Number(value))"
         >
-          <template #prepend>H</template>
+          <template #prepend>高</template>
           <template #append>px</template>
         </el-input>
       </div>

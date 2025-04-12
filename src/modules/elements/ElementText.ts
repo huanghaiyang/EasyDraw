@@ -14,7 +14,7 @@ import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
-import { FontStyle, FontStyleSet } from "@/styles/ElementStyles";
+import { FontStyle, FontStyleSet, TextDecoration } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
 import IUndoRedo from "@/types/IUndoRedo";
 import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
@@ -72,6 +72,22 @@ export default class ElementText extends ElementRect implements IElementText {
   private _fontColorOpacityMixin: boolean = false;
   // 字体间距混合
   private _fontLetterSpacingMixin: boolean = false;
+  // 文本装饰
+  private _textDecoration: TextDecoration = TextDecoration.none;
+  // 文本装饰混合
+  private _textDecorationMixin: boolean = false;
+  // 文本装饰颜色
+  private _textDecorationColor: string | null;
+  // 文本装饰颜色透明度
+  private _textDecorationOpacity: number | null;
+  // 文本装饰粗细
+  private _textDecorationThickness: number | null;
+  // 文本装饰颜色混合
+  private _textDecorationColorMixin: boolean = false;
+  // 文本装饰颜色透明度混合
+  private _textDecorationOpacityMixin: boolean = false;
+  // 文本装饰粗细混合
+  private _textDecorationThicknessMixin: boolean = false;
 
   get fontEnable(): boolean {
     return true;
@@ -168,6 +184,38 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get textHeight(): number {
     return this._calcTextRenderHeight();
+  }
+
+  get textDecoration(): TextDecoration {
+    return this._textDecoration;
+  }
+
+  get textDecorationMixin(): boolean {
+    return this._textDecorationMixin;
+  }
+
+  get textDecorationColor(): string | null {
+    return this._textDecorationColor;
+  }
+
+  get textDecorationOpacity(): number | null {
+    return this._textDecorationOpacity;
+  }
+
+  get textDecorationThickness(): number | null {
+    return this._textDecorationThickness;
+  }
+
+  get textDecorationColorMixin(): boolean {
+    return this._textDecorationColorMixin;
+  }
+
+  get textDecorationOpacityMixin(): boolean {
+    return this._textDecorationOpacityMixin;
+  }
+
+  get textDecorationThicknessMixin(): boolean {
+    return this._textDecorationThicknessMixin;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {
@@ -296,6 +344,38 @@ export default class ElementText extends ElementRect implements IElementText {
   onFontColorOpacityChanged(): void {
     this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
     super.onFontColorOpacityChanged();
+  }
+
+  /**
+   * 文本装饰变化
+   */
+  onTextDecorationChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onTextDecorationChanged();
+  }
+
+  /**
+   * 文本装饰颜色变化
+   */
+  onTextDecorationColorChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onTextDecorationColorChanged();
+  }
+
+  /**
+   * 文本装饰透明度变化
+   */
+  onTextDecorationOpacityChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onTextDecorationOpacityChanged();
+  }
+
+  /**
+   * 文本装饰厚度变化
+   */
+  onTextDecorationThicknessChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onTextDecorationThicknessChanged();
   }
 
   /**
@@ -836,18 +916,26 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _checkFontStyleChanged(fontStyleSet: FontStyleSet, eventEmit: boolean = true, propsUpdate?: boolean): void {
     const moreThanOne = (set: Set<any>) => set.size > 1;
-    const { fontSizes, fontFamilies, fontColors, fontColorOpacities, fontLetterSpacings } = fontStyleSet;
+    const { fontSizes, fontFamilies, fontColors, fontColorOpacities, fontLetterSpacings, textDecorations, textDecorationColors, textDecorationOpacities, textDecorationThicknesses } = fontStyleSet;
     const fontSizeMixin = moreThanOne(fontSizes);
     const fontFamilyMixin = moreThanOne(fontFamilies);
     const fontColorMixin = moreThanOne(fontColors);
     const fontColorOpacityMixin = moreThanOne(fontColorOpacities);
     const fontLetterSpacingMixin = moreThanOne(fontLetterSpacings);
+    const textDecorationMixin = moreThanOne(textDecorations);
+    const textDecorationColorMixin = moreThanOne(textDecorationColors);
+    const textDecorationOpacityMixin = moreThanOne(textDecorationOpacities);
+    const textDecorationThicknessMixin = moreThanOne(textDecorationThicknesses);
 
     const fontSize = fontSizeMixin ? null : fontSizes.values().next().value;
     const fontFamily = fontFamilyMixin ? null : fontFamilies.values().next().value;
     const fontColor = fontColorMixin ? null : fontColors.values().next().value;
     const fontColorOpacity = fontColorOpacityMixin ? null : fontColorOpacities.values().next().value;
     const fontLetterSpacing = fontLetterSpacingMixin ? null : fontLetterSpacings.values().next().value;
+    const textDecoration = textDecorationMixin ? null : textDecorations.values().next().value;
+    const textDecorationColor = textDecorationColorMixin ? null : textDecorationColors.values().next().value;
+    const textDecorationOpacity = textDecorationOpacityMixin ? null : textDecorationOpacities.values().next().value;
+    const textDecorationThickness = textDecorationThicknessMixin ? null : textDecorationThicknesses.values().next().value;
 
     if (propsUpdate) {
       this._fontSizeMixin = fontSizeMixin;
@@ -855,12 +943,20 @@ export default class ElementText extends ElementRect implements IElementText {
       this._fontColorMixin = fontColorMixin;
       this._fontColorOpacityMixin = fontColorOpacityMixin;
       this._fontLetterSpacingMixin = fontLetterSpacingMixin;
+      this._textDecorationMixin = textDecorationMixin;
+      this._textDecorationColorMixin = textDecorationColorMixin;
+      this._textDecorationOpacityMixin = textDecorationOpacityMixin;
+      this._textDecorationThicknessMixin = textDecorationThicknessMixin;
 
       this._fontSize = fontSize;
       this._fontFamily = fontFamily;
       this._fontColor = fontColor;
       this._fontColorOpacity = fontColorOpacity;
       this._fontLetterSpacing = fontLetterSpacing;
+      this._textDecoration = textDecoration;
+      this._textDecorationColor = textDecorationColor;
+      this._textDecorationOpacity = textDecorationOpacity;
+      this._textDecorationThickness = textDecorationThickness;
     }
 
     if (eventEmit) {
@@ -874,6 +970,14 @@ export default class ElementText extends ElementRect implements IElementText {
       this.emitPropChanged(ShieldDispatcherNames.fontColorMixinChanged, [fontColorMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityMixinChanged, [fontColorOpacityMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontLetterSpacingMixinChanged, [fontLetterSpacingMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationChanged, [textDecoration]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationColorChanged, [textDecorationColor]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationOpacityChanged, [textDecorationOpacity]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationThicknessChanged, [textDecorationThickness]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationMixinChanged, [textDecorationMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationColorMixinChanged, [textDecorationColorMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationOpacityMixinChanged, [textDecorationOpacityMixin]);
+      this.emitPropChanged(ShieldDispatcherNames.textDecorationThicknessMixinChanged, [textDecorationThicknessMixin]);
     }
   }
 
@@ -1379,8 +1483,101 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   /**
-   * 刷新组件原始数据
+   * 设置文本装饰类型
+   *
+   * @param value
    */
+  setTextDecoration(value: TextDecoration): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setTextDecoration(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { textDecoration: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.textDecoration = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置文本装饰颜色
+   *
+   * @param value
+   */
+  setTextDecorationColor(value: string): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setTextDecorationColor(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { textDecorationColor: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.textDecorationColor = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置文本装饰透明度
+   *
+   * @param value
+   */
+  setTextDecorationOpacity(value: number): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setTextDecorationOpacity(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { textDecorationOpacity: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.textDecorationOpacity = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置文本装饰粗细
+   *
+   * @param value
+   */
+  setTextDecorationThickness(value: number): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setTextDecorationThickness(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { textDecorationThickness: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.textDecorationThickness = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 刷新组件原始数据
+
+ */
   refreshOriginalElementProps(): void {
     super.refreshOriginalElementProps();
     this._originalData = LodashUtils.jsonClone(this.model.data);
@@ -1553,11 +1750,11 @@ export default class ElementText extends ElementRect implements IElementText {
     let { x, y, width, height } = this.model;
     x = x - width / 2;
     y = y - height / 2;
-    switch(this.textVerticalAlign) {
-      case 'middle':
+    switch (this.textVerticalAlign) {
+      case "middle":
         y += (height - textHeight) / 2;
         break;
-      case 'bottom':
+      case "bottom":
         y += height - textHeight;
         break;
     }

@@ -5,7 +5,7 @@
  */
 import { ElementStatus, IPoint, ISize, TextEditingStates } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -334,6 +334,22 @@ export default interface IElement {
   get fontLetterSpacing(): number;
   // 字体间距是否混合
   get fontLetterSpacingMixin(): boolean;
+  // 文本装饰
+  get textDecoration(): TextDecoration;
+  // 文本装饰透明度
+  get textDecorationOpacity(): number;
+  // 文本装饰厚度
+  get textDecorationThickness(): number;
+  // 文本装饰颜色
+  get textDecorationColor(): string;
+  // 文本装饰是否混合
+  get textDecorationMixin(): boolean;
+  // 文本装饰颜色是否混合
+  get textDecorationColorMixin(): boolean;
+  // 文本装饰透明度是否混合
+  get textDecorationOpacityMixin(): boolean;
+  // 文本装饰厚度是否混合
+  get textDecorationThicknessMixin(): boolean;
   // 圆角
   get corners(): number[];
 
@@ -636,6 +652,30 @@ export default interface IElement {
    * @param value 文本基线值
    */
   setTextBaseline(value: CanvasTextBaseline): void;
+
+  /**
+   * 设置文本装饰
+   * @param value 文本装饰值
+   */
+  setTextDecoration(value: TextDecoration): void;
+
+  /**
+   * 设置文本装饰颜色
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   */
+  setTextDecorationColor(value: string): void;
+
+  /**
+   * 设置文本装饰透明度
+   * @param value 透明度值（0-1）
+   */
+  setTextDecorationOpacity(value: number): void;
+
+  /**
+   * 设置文本装饰厚度
+   * @param value 文本装饰厚度值
+   */
+  setTextDecorationThickness(value: number): void;
 
   /**
    * 设置比例锁定
@@ -1070,6 +1110,26 @@ export default interface IElement {
    * 设置文本颜色透明度
    */
   onFontColorOpacityChanged(): void;
+
+  /**
+   * 设置文本装饰
+   */
+  onTextDecorationChanged(): void;
+
+  /**
+   * 设置文本装饰颜色
+   */
+  onTextDecorationColorChanged(): void;
+
+  /**
+   * 设置文本装饰透明度
+   */
+  onTextDecorationOpacityChanged(): void;
+
+  /**
+   * 设置文本装饰厚度
+   */
+  onTextDecorationThicknessChanged(): void;
 
   /**
    * 锁定比例

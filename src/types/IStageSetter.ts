@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 
 export default interface IStageSetter {
@@ -210,8 +210,40 @@ export default interface IStageSetter {
   setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void>;
 
   /**
-   * 设置组件比例锁定
+   * 设置组件文本装饰
    *
+   * @param elements 要修改的元件集合
+   * @param value 文本装饰方式
+   */
+  setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void>;
+
+  /**
+   * 设置组件文本装饰颜色
+   *
+   * @param elements 要修改的元件集合
+   * @param value 颜色值（十六进制字符串，如#RRGGBB）
+   */
+  setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void>;
+
+  /**
+   * 设置组件文本装饰颜色透明度
+   *
+   * @param elements 要修改的元件集合
+   * @param value 透明度值（0-1）
+   */
+  setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void>;
+
+  /**
+   * 设置组件文本装饰粗细
+   *
+   * @param elements 要修改的元件集合
+   * @param value 粗细值
+   */
+  setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void>;
+
+  /**
+   * 设置组件比例锁定
+
    * @param elements 要修改的元件集合
    * @param value 是否锁定比例
    */

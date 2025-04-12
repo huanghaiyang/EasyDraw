@@ -10,7 +10,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { FontStyle, getDefaultElementStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, getDefaultElementStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
@@ -885,6 +885,62 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setFontLetterSpacing(value);
+      }
+    });
+  }
+
+  /**
+   * 设置文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setTextDecoration(value);
+      }
+    });
+  }
+
+  /**
+   * 设置文本装饰颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setTextDecorationColor(value);
+      }
+    });
+  }
+
+  /**
+   * 设置文本装饰透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setTextDecorationOpacity(value);
+      }
+    });
+  }
+
+  /**
+   * 设置文本装饰粗细
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setTextDecorationThickness(value);
       }
     });
   }

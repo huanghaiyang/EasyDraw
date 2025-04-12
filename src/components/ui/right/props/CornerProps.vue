@@ -23,6 +23,22 @@ watch(
     }
   },
 );
+
+/**
+ * 获取圆角位置的标签
+ */
+function getLabel(index: number): string {
+  switch (index) {
+    case 0:
+      return "左上";
+    case 1:
+      return "右上";
+    case 2:
+      return "右下";
+    case 3:
+      return "左下";
+  }
+}
 </script>
 <template>
   <div class="corners-props right-props" v-show="stageStore.cornersEnable">
@@ -31,7 +47,7 @@ watch(
     </div>
 
     <div class="corners-props__row">
-      <div class="corners-props__row-item">
+      <div class="corners-props__row-item large">
         <el-input
           v-model="value"
           placeholder="输入数字"
@@ -42,13 +58,13 @@ watch(
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val))"
         >
-          <template #prepend>C</template>
+          <template #prepend>整体</template>
           <template #append>px</template>
         </el-input>
       </div>
     </div>
     <div class="corners-props__row">
-      <div class="corners-props__row-item" v-for="(item, index) in corners" :key="index">
+      <div class="corners-props__row-item large" v-for="(item, index) in corners.slice(0, 2)" :key="index">
         <el-input
           v-model="corners[index]"
           placeholder="输入数字"
@@ -59,12 +75,27 @@ watch(
           precision="1"
           @change="val => stageStore.setElementsCorners(Number(val), index)"
         >
+          <template #prepend>{{ getLabel(index) }}</template>
+          <template #append>px</template>
+        </el-input>
+      </div>
+    </div>
+    <div class="corners-props__row">
+      <div class="corners-props__row-item large" v-for="(item, index) in corners.slice(2, 4)" :key="index">
+        <el-input
+          v-model="corners[index + 2]"
+          placeholder="输入数字"
+          :disabled="stageStore.inputDisabled || !stageStore.cornersInputEnable"
+          type="number"
+          min="0"
+          :max="stageStore.primarySelectedElement?.minParallelogramVerticalSize / 2"
+          precision="1"
+          @change="val => stageStore.setElementsCorners(Number(val), index + 2)"
+        >
+          <template #prepend>{{ getLabel(index + 2) }}</template>
+          <template #append>px</template>
         </el-input>
       </div>
     </div>
   </div>
 </template>
-<style lang="less" scoped>
-.corners-props {
-}
-</style>

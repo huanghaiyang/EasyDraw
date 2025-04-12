@@ -23,7 +23,7 @@ watch(
     <div class="position-props__title">坐标</div>
 
     <div class="position-props__row">
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item large">
         <el-input
           v-model="xValue"
           placeholder="输入数字"
@@ -32,12 +32,12 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsPosition({ x: Number(value), y: yValue })"
         >
-          <template #prepend>X</template>
+          <template #prepend>横</template>
           <template #append>px</template>
         </el-input>
       </div>
 
-      <div class="angle-props__row-item">
+      <div class="angle-props__row-item large">
         <el-input
           v-model="yValue"
           placeholder="输入数字"
@@ -46,7 +46,7 @@ watch(
           precision="1"
           @change="value => stageStore.setElementsPosition({ x: xValue, y: Number(value) })"
         >
-          <template #prepend>Y</template>
+          <template #prepend>纵</template>
           <template #append>px</template>
         </el-input>
       </div>

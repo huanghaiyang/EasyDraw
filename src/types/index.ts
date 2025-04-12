@@ -127,6 +127,22 @@ export enum ShieldDispatcherNames {
   fontColorOpacityMixinChanged = "fontColorOpacityMixinChanged",
   // 字体间距混合
   fontLetterSpacingMixinChanged = "fontLetterSpacingMixinChanged",
+  // 字体装饰
+  textDecorationChanged = "textDecorationChanged",
+  // 字体装饰颜色
+  textDecorationColorChanged = "textDecorationColorChanged",
+  // 字体装饰透明度
+  textDecorationOpacityChanged = "textDecorationOpacityChanged",
+  // 字体装饰粗细
+  textDecorationThicknessChanged = "textDecorationThicknessChanged",
+  // 字体装饰混合
+  textDecorationMixinChanged = "textDecorationMixinChanged",
+  // 字体装饰颜色混合
+  textDecorationColorMixinChanged = "textDecorationColorMixinChanged",
+  // 字体装饰透明度混合
+  textDecorationOpacityMixinChanged = "textDecorationOpacityMixinChanged",
+  // 字体装饰粗细混合
+  textDecorationThicknessMixinChanged = "textDecorationThicknessMixinChanged",
   // 文本对齐改变
   textAlignChanged = "textAlignChanged",
   // 文本垂直对齐改变

@@ -5,7 +5,7 @@ export default class StyleUtils {
   // 计算填充颜色
   static joinFillColor(fillStyle: FillStyle): string {
     if (fillStyle.color) {
-      return `${ColorUtils.hashToRgba(fillStyle.color, fillStyle.colorOpacity)}`;
+      return `${ColorUtils.hashToRgba(fillStyle.color, fillStyle.colorOpacity / 100)}`;
     }
     return "";
   }
@@ -13,7 +13,7 @@ export default class StyleUtils {
   // 计算描边颜色
   static joinStrokeColor(strokeStyle: StrokeStyle): string {
     if (strokeStyle.color) {
-      return `${ColorUtils.hashToRgba(strokeStyle.color, strokeStyle.colorOpacity)}`;
+      return `${ColorUtils.hashToRgba(strokeStyle.color, strokeStyle.colorOpacity / 100)}`;
     }
     return "";
   }

@@ -46,7 +46,7 @@ const toggleColorPickerVisible = () => {
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
     <div class="font-props__title">
-      <span class="font-props__title-text">文字颜色</span>
+      <span class="font-props__title-text text-2">文字颜色</span>
     </div>
     <div class="font-props__row color">
       <div class="font-props__row-item">
@@ -54,18 +54,19 @@ const toggleColorPickerVisible = () => {
         <el-tag type="info" @click="toggleColorPickerVisible">{{ `${fontColorMixin ? "混合颜色" : fontColor}` }}</el-tag>
       </div>
 
-      <div class="font-props__row-item">
+      <div class="font-props__row-item" :style="{ width: '106px' }">
         <el-input
           v-model="fontColorOpacity"
           :placeholder="`${fontColorOpacityMixin ? '混合透明度' : fontColorOpacity}`"
           type="number"
           min="0"
-          max="1"
-          precision="1"
+          max="100"
+          precision="0"
           @change="value => stageStore.setElementsFontColorOpacity(Number(value))"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
-          <template #prepend>O</template>
+          <template #prepend>透明</template>
+          <template #append>%</template>
         </el-input>
       </div>
     </div>

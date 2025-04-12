@@ -24,11 +24,11 @@ watch(
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
     <div class="font-props__title">
-      <span class="font-props__title-text">字号</span>
+      <span class="font-props__title-text text-2">字号</span>
     </div>
 
     <div class="font-props__row">
-      <div class="font-props__row-item">
+      <div class="font-props__row-item" :style="{ width: '80px' }">
         <el-select
           v-model="fontSize"
           :placeholder="`${fontSizeMixin ? '混合字号' : `${fontSize}px`}`"
@@ -39,7 +39,7 @@ watch(
           <el-option v-for="item in FontSizeList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
-      <div class="font-props__row-item">
+      <div class="font-props__row-item" :style="{ width: '124px' }">
         <el-input
           v-model="fontSize"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
@@ -51,7 +51,7 @@ watch(
           :precision="0"
           @change="value => stageStore.setElementsFontSize(Number(value))"
         >
-          <template #prepend>S</template>
+          <template #prepend>自定义</template>
           <template #append>px</template>
         </el-input>
       </div>

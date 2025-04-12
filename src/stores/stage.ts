@@ -3,7 +3,7 @@ import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
-import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
@@ -83,6 +83,22 @@ const DefaultStage = {
   textVerticalAlign: DefaultElementStyle.textVerticalAlign,
   // 文字基线
   textBaseline: DefaultElementStyle.textBaseline,
+  // 文字装饰
+  textDecoration: DefaultElementStyle.textDecoration,
+  // 文字装饰颜色
+  textDecorationColor: DefaultElementStyle.textDecorationColor,
+  // 文字装饰透明度
+  textDecorationOpacity: DefaultElementStyle.textDecorationOpacity,
+  // 文字装饰厚度
+  textDecorationThickness: DefaultElementStyle.textDecorationThickness,
+  // 文字装饰是否混合
+  textDecorationMixin: false,
+  // 文字装饰颜色是否混合
+  textDecorationColorMixin: false,
+  // 文字装饰透明度是否混合
+  textDecorationOpacityMixin: false,
+  // 文字装饰厚度是否混合
+  textDecorationThicknessMixin: false,
   // 是否锁定比例
   isRatioLocked: false,
   // 填充是否可用
@@ -180,74 +196,57 @@ export const useStageStore = defineStore("stage", {
 
       this.setCreator(MoveableCreator);
 
-      // 监听组件创建
-      shield.on(ShieldDispatcherNames.elementCreated, this.onElementCreated);
-      // 监听选中
-      shield.on(ShieldDispatcherNames.selectedChanged, this.onSelectedChanged);
-      // 监听目标
-      shield.on(ShieldDispatcherNames.targetChanged, this.onTargetChanged);
-      // 监听多选状态
-      shield.on(ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged.bind(this));
-      // 监听主选中状态
-      shield.on(ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged.bind(this));
-      // 监听位置
-      shield.on(ShieldDispatcherNames.positionChanged, throttle(this.onPositionChanged.bind(this), ThrottleTime, tOptions));
-      // 监听宽度
-      shield.on(ShieldDispatcherNames.widthChanged, throttle(this.onWidthChanged.bind(this), ThrottleTime, tOptions));
-      // 监听高度
-      shield.on(ShieldDispatcherNames.heightChanged, throttle(this.onHeightChanged.bind(this), ThrottleTime, tOptions));
-      // 监听角度
-      shield.on(ShieldDispatcherNames.angleChanged, throttle(this.onAngleChanged.bind(this), ThrottleTime, tOptions));
-      // 监听圆角
-      shield.on(ShieldDispatcherNames.cornersChanged, throttle(this.onCornersChanged.bind(this), ThrottleTime, tOptions));
-      // 监听X轴翻转
-      shield.on(ShieldDispatcherNames.flipXChanged, throttle(this.onFlipXChanged.bind(this), ThrottleTime, tOptions));
-      // 监听Y偏移角度
-      shield.on(ShieldDispatcherNames.leanYAngleChanged, throttle(this.onLeanYAngleChanged.bind(this), ThrottleTime, tOptions));
-      // 监听缩放
-      shield.on(ShieldDispatcherNames.scaleChanged, throttle(this.onScaleChanged.bind(this), ThrottleTime, tOptions));
-      // 监听描边
-      shield.on(ShieldDispatcherNames.strokesChanged, throttle(this.onStrokesChanged.bind(this), ThrottleTime, tOptions));
-      // 监听填充
-      shield.on(ShieldDispatcherNames.fillsChanged, throttle(this.onFillsChanged.bind(this), ThrottleTime, tOptions));
-      // 监听状态
-      shield.on(ShieldDispatcherNames.statusChanged, throttle(this.onStatusChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体大小
-      shield.on(ShieldDispatcherNames.fontSizeChanged, throttle(this.onFontSizeChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体
-      shield.on(ShieldDispatcherNames.fontFamilyChanged, throttle(this.onFontFamilyChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体行高
-      shield.on(ShieldDispatcherNames.fontLineHeightChanged, throttle(this.onFontLineHeightChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体间距
-      shield.on(ShieldDispatcherNames.fontLetterSpacingChanged, throttle(this.onFontLetterSpacingChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体颜色
-      shield.on(ShieldDispatcherNames.fontColorChanged, throttle(this.onFontColorChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体颜色透明度
-      shield.on(ShieldDispatcherNames.fontColorOpacityChanged, throttle(this.onFontColorOpacityChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体大小混合
-      shield.on(ShieldDispatcherNames.fontSizeMixinChanged, throttle(this.onFontSizeMixinChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体混合
-      shield.on(ShieldDispatcherNames.fontFamilyMixinChanged, throttle(this.onFontFamilyMixinChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体颜色混合
-      shield.on(ShieldDispatcherNames.fontColorMixinChanged, throttle(this.onFontColorMixinChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体颜色透明度混合
-      shield.on(ShieldDispatcherNames.fontColorOpacityMixinChanged, throttle(this.onFontColorOpacityMixinChanged.bind(this), ThrottleTime, tOptions));
-      // 监听字体间距混合
-      shield.on(ShieldDispatcherNames.fontLetterSpacingMixinChanged, throttle(this.onFontLetterSpacingMixinChanged.bind(this), ThrottleTime, tOptions));
-      // 监听文本对齐方式
-      shield.on(ShieldDispatcherNames.textAlignChanged, throttle(this.onTextAlignChanged.bind(this), ThrottleTime, tOptions));
-      // 监听文本垂直对齐方式
-      shield.on(ShieldDispatcherNames.textVerticalAlignChanged, throttle(this.onTextVerticalAlignChanged.bind(this), ThrottleTime, tOptions));
-      // 监听文本基线
-      shield.on(ShieldDispatcherNames.textBaselineChanged, throttle(this.onTextBaselineChanged.bind(this), ThrottleTime, tOptions));
-      // 监听宽高比锁定
-      shield.on(ShieldDispatcherNames.ratioLockedChanged, throttle(this.onRatioLockedChanged.bind(this), ThrottleTime, tOptions));
-      // 监听绘制工具
-      shield.on(ShieldDispatcherNames.creatorChanged, throttle(this.onCreatorChanged.bind(this), ThrottleTime, tOptions));
-      // 监听层上移状态
-      shield.on(ShieldDispatcherNames.layerShiftMoveEnableChanged, throttle(this.onLayerShiftMoveEnableChanged.bind(this), ThrottleTime, tOptions));
-      // 监听层下移状态
-      shield.on(ShieldDispatcherNames.layerGoDownEnableChanged, throttle(this.onLayerGoDownEnableChanged.bind(this), ThrottleTime, tOptions));
+      [
+        [ShieldDispatcherNames.elementCreated, this.onElementCreated],
+        [ShieldDispatcherNames.selectedChanged, this.onSelectedChanged],
+        [ShieldDispatcherNames.targetChanged, this.onTargetChanged],
+        [ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged],
+        [ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged],
+      ].forEach(([name, callback]) => {
+        shield.on(name, callback.bind(this));
+      });
+
+      [
+        [ShieldDispatcherNames.positionChanged, this.onPositionChanged],
+        [ShieldDispatcherNames.widthChanged, this.onWidthChanged],
+        [ShieldDispatcherNames.heightChanged, this.onHeightChanged],
+        [ShieldDispatcherNames.angleChanged, this.onAngleChanged],
+        [ShieldDispatcherNames.cornersChanged, this.onCornersChanged],
+        [ShieldDispatcherNames.flipXChanged, this.onFlipXChanged],
+        [ShieldDispatcherNames.leanYAngleChanged, this.onLeanYAngleChanged],
+        [ShieldDispatcherNames.scaleChanged, this.onScaleChanged],
+        [ShieldDispatcherNames.strokesChanged, this.onStrokesChanged],
+        [ShieldDispatcherNames.fillsChanged, this.onFillsChanged],
+        [ShieldDispatcherNames.statusChanged, this.onStatusChanged],
+        [ShieldDispatcherNames.fontSizeChanged, this.onFontSizeChanged],
+        [ShieldDispatcherNames.fontFamilyChanged, this.onFontFamilyChanged],
+        [ShieldDispatcherNames.fontLineHeightChanged, this.onFontLineHeightChanged],
+        [ShieldDispatcherNames.fontLetterSpacingChanged, this.onFontLetterSpacingChanged],
+        [ShieldDispatcherNames.fontColorChanged, this.onFontColorChanged],
+        [ShieldDispatcherNames.fontColorOpacityChanged, this.onFontColorOpacityChanged],
+        [ShieldDispatcherNames.fontSizeMixinChanged, this.onFontSizeMixinChanged],
+        [ShieldDispatcherNames.fontFamilyMixinChanged, this.onFontFamilyMixinChanged],
+        [ShieldDispatcherNames.fontColorMixinChanged, this.onFontColorMixinChanged],
+        [ShieldDispatcherNames.fontColorOpacityMixinChanged, this.onFontColorOpacityMixinChanged],
+        [ShieldDispatcherNames.fontLetterSpacingMixinChanged, this.onFontLetterSpacingMixinChanged],
+        [ShieldDispatcherNames.textDecorationChanged, this.onTextDecorationChanged],
+        [ShieldDispatcherNames.textDecorationColorChanged, this.onTextDecorationColorChanged],
+        [ShieldDispatcherNames.textDecorationOpacityChanged, this.onTextDecorationOpacityChanged],
+        [ShieldDispatcherNames.textDecorationThicknessChanged, this.onTextDecorationThicknessChanged],
+        [ShieldDispatcherNames.textDecorationMixinChanged, this.onTextDecorationMixinChanged],
+        [ShieldDispatcherNames.textDecorationColorMixinChanged, this.onTextDecorationColorMixinChanged],
+        [ShieldDispatcherNames.textDecorationOpacityMixinChanged, this.onTextDecorationOpacityMixinChanged],
+        [ShieldDispatcherNames.textDecorationThicknessMixinChanged, this.onTextDecorationThicknessMixinChanged],
+        [ShieldDispatcherNames.textAlignChanged, this.onTextAlignChanged],
+        [ShieldDispatcherNames.textVerticalAlignChanged, this.onTextVerticalAlignChanged],
+        [ShieldDispatcherNames.textBaselineChanged, this.onTextBaselineChanged],
+        [ShieldDispatcherNames.ratioLockedChanged, this.onRatioLockedChanged],
+        [ShieldDispatcherNames.creatorChanged, this.onCreatorChanged],
+        [ShieldDispatcherNames.layerShiftMoveEnableChanged, this.onLayerShiftMoveEnableChanged],
+        [ShieldDispatcherNames.layerGoDownEnableChanged, this.onLayerGoDownEnableChanged],
+      ].forEach(([name, callback]) => {
+        shield.on(name, throttle(callback.bind(this), ThrottleTime, tOptions));
+      });
     },
     /**
      * 设置绘制工具
@@ -350,6 +349,14 @@ export const useStageStore = defineStore("stage", {
         textVerticalAlign,
         textBaseline,
         isRatioLocked,
+        textDecoration,
+        textDecorationColor,
+        textDecorationOpacity,
+        textDecorationThickness,
+        textDecorationMixin,
+        textDecorationColorMixin,
+        textDecorationOpacityMixin,
+        textDecorationThicknessMixin,
       } = element;
       // 组件状态
       this.onStatusChanged(element, status);
@@ -401,6 +408,22 @@ export const useStageStore = defineStore("stage", {
       this.onTextBaselineChanged(element, textBaseline);
       // 宽高比锁定
       this.onRatioLockedChanged(element, isRatioLocked);
+      // 文本装饰
+      this.onTextDecorationChanged(element, textDecoration);
+      // 文本装饰颜色
+      this.onTextDecorationColorChanged(element, textDecorationColor);
+      // 文本装饰透明度
+      this.onTextDecorationOpacityChanged(element, textDecorationOpacity);
+      // 文本装饰粗细
+      this.onTextDecorationThicknessChanged(element, textDecorationThickness);
+      // 文本装饰混合
+      this.onTextDecorationMixinChanged(element, textDecorationMixin);
+      // 文本装饰颜色混合
+      this.onTextDecorationColorMixinChanged(element, textDecorationColorMixin);
+      // 文本装饰透明度混合
+      this.onTextDecorationOpacityMixinChanged(element, textDecorationOpacityMixin);
+      // 文本装饰粗细混合
+      this.onTextDecorationThicknessMixinChanged(element, textDecorationThicknessMixin);
     },
     /**
      * 舞台组件命中状态改变
@@ -673,6 +696,78 @@ export const useStageStore = defineStore("stage", {
       this.textBaseline = textBaseline;
     },
     /**
+     * 组件文本装饰变化
+     *
+     * @param element
+     * @param textDecoration
+     */
+    onTextDecorationChanged(element: IElement, textDecoration: string) {
+      this.textDecoration = textDecoration;
+    },
+    /**
+     * 组件文本装饰颜色变化
+     *
+     * @param element
+     * @param textDecorationColor
+     */
+    onTextDecorationColorChanged(element: IElement, textDecorationColor: string) {
+      this.textDecorationColor = textDecorationColor;
+    },
+    /**
+     * 组件文本装饰透明度变化
+     *
+     * @param element
+     * @param textDecorationOpacity
+     */
+    onTextDecorationOpacityChanged(element: IElement, textDecorationOpacity: number) {
+      this.textDecorationOpacity = textDecorationOpacity;
+    },
+    /**
+     * 组件文本装饰粗细变化
+     *
+     * @param element
+     * @param textDecorationThickness
+     */
+    onTextDecorationThicknessChanged(element: IElement, textDecorationThickness: number) {
+      this.textDecorationThickness = textDecorationThickness;
+    },
+    /**
+     * 组件文本装饰粗细混合变化
+     *
+     * @param element
+     * @param textDecorationThicknessMixin
+     */
+    onTextDecorationMixinChanged(element: IElement, textDecorationMixin: string) {
+      this.textDecorationMixin = textDecorationMixin;
+    },
+    /**
+     * 组件文本装饰颜色混合变化
+     *
+     * @param element
+     * @param textDecorationColorMixin
+     */
+    onTextDecorationColorMixinChanged(element: IElement, textDecorationColorMixin: string) {
+      this.textDecorationColorMixin = textDecorationColorMixin;
+    },
+    /**
+     * 组件文本装饰透明度混合变化
+     *
+     * @param element
+     * @param textDecorationOpacityMixin
+     */
+    onTextDecorationOpacityMixinChanged(element: IElement, textDecorationOpacityMixin: number) {
+      this.textDecorationOpacityMixin = textDecorationOpacityMixin;
+    },
+    /**
+     * 组件文本装饰粗细混合变化
+     *
+     * @param element
+     * @param textDecorationThicknessMixin
+     */
+    onTextDecorationThicknessMixinChanged(element: IElement, textDecorationThicknessMixin: number) {
+      this.textDecorationThicknessMixin = textDecorationThicknessMixin;
+    },
+    /**
      * 组件锁定比例变更
      *
      * @param element
@@ -920,6 +1015,38 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFontLetterSpacing(value: number): void {
       shield.setElementsFontLetterSpacing(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件文本装饰
+     *
+     * @param value
+     */
+    setElementsTextDecoration(value: TextDecoration): void {
+      shield.setElementsTextDecoration(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件文本装饰颜色
+     *
+     * @param value
+     */
+    setElementsTextDecorationColor(value: string): void {
+      shield.setElementsTextDecorationColor(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件文本装饰透明度
+     *
+     * @param value
+     */
+    setElementsTextDecorationOpacity(value: number): void {
+      shield.setElementsTextDecorationOpacity(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件文本装饰粗细
+     *
+     * @param value
+     */
+    setElementsTextDecorationThickness(value: number): void {
+      shield.setElementsTextDecorationThickness(toRaw(this.selectedElements), value);
     },
     /**
      * 设置舞台缩放

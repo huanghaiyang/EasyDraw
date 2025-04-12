@@ -41,7 +41,7 @@ init().then(() => {
 
 .right {
   right: 0;
-  width: 240px;
+  width: 250px;
 }
 
 .stage {
@@ -49,6 +49,6 @@ init().then(() => {
   top: 0;
   bottom: 0;
   left: 220px;
-  right: 240px;
+  right: 250px;
 }
 </style>

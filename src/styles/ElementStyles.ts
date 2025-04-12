@@ -81,6 +81,13 @@ export enum TextVerticalAlign {
   bottom = "bottom",
 }
 
+// 文本装饰类型
+export enum TextDecoration {
+  none = "none",
+  lineThrough = "line-through",
+  overline = "overline",
+  underline = "underline",
+}
 export type TextFontStyle = {
   // 字体大小
   fontSize?: number;
@@ -94,6 +101,14 @@ export type TextFontStyle = {
   fontLineHeight?: number;
   // 字体间距
   fontLetterSpacing?: number;
+  // 文本装饰
+  textDecoration?: TextDecoration;
+  // 文本装饰颜色
+  textDecorationColor?: string;
+  // 文本装饰透明度
+  textDecorationOpacity?: number;
+  // 文本装饰厚度
+  textDecorationThickness?: number;
 };
 
 // 字体样式定义
@@ -119,11 +134,11 @@ export const DefaultStrokeType = StrokeTypes.middle;
 // 默认描边颜色
 export const DefaultStrokeColor = "#000000";
 // 默认描边透明度
-export const DefaultStrokeColorOpacity = 1;
+export const DefaultStrokeColorOpacity = 100;
 // 默认填充颜色
 export const DefaultFillColor = "#999999";
 // 默认填充透明度
-export const DefaultFillColorOpacity = 0.15;
+export const DefaultFillColorOpacity = 15;
 // 默认边框宽度
 export const DefaultStrokeWidth = 1;
 // 默认字体大小
@@ -133,7 +148,7 @@ export const DefaultFontFamily = "Arial";
 // 默认字体颜色
 export const DefaultFontColor = "#000000";
 // 默认字体颜色透明度
-export const DefaultFontColorOpacity = 1;
+export const DefaultFontColorOpacity = 100;
 // 默认文本对齐方式
 export const DefaultTextAlign = "left";
 // 默认文本基线
@@ -148,6 +163,14 @@ export const DefaultLineMeterLimit = 100;
 export const DefaultFontLineHeight = DefaultFontSize;
 // 默认字体间距
 export const DefaultFontLetterSpacing = 0;
+// 默认文本装饰
+export const DefaultTextDecoration = TextDecoration.none;
+// 默认文本装饰颜色
+export const DefaultTextDecorationColor = "#000000";
+// 默认文本装饰透明度
+export const DefaultTextDecorationOpacity = 100;
+// 默认文本装饰粗细
+export const DefaultTextDecorationThickness = 1;
 
 // 默认描边样式
 export const DefaultStrokeStyle: StrokeStyle = {
@@ -180,6 +203,10 @@ export const DefaultFontStyle: FontStyle = {
   textBaseline: DefaultTextBaseline,
   textVerticalAlign: DefaultTextVerticalAlign,
   fontLetterSpacing: DefaultFontLetterSpacing,
+  textDecoration: DefaultTextDecoration,
+  textDecorationColor: DefaultTextDecorationColor,
+  textDecorationOpacity: DefaultTextDecorationOpacity,
+  textDecorationThickness: DefaultTextDecorationThickness,
 };
 
 // 默认组件样式
@@ -337,4 +364,8 @@ export type FontStyleSet = {
   fontColors?: Set<string>;
   fontColorOpacities?: Set<number>;
   fontLetterSpacings?: Set<number>;
+  textDecorations?: Set<TextDecoration>;
+  textDecorationThicknesses?: Set<number>;
+  textDecorationColors?: Set<string>;
+  textDecorationOpacities?: Set<number>;
 };

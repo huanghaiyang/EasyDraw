@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
-import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -441,6 +441,38 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get fontColorOpacity(): number {
     return this.model.styles.fontColorOpacity;
+  }
+
+  get textDecoration(): TextDecoration {
+    return this.model.styles.textDecoration;
+  }
+
+  get textDecorationColor(): string {
+    return this.model.styles.textDecorationColor;
+  }
+
+  get textDecorationOpacity(): number {
+    return this.model.styles.textDecorationOpacity;
+  }
+
+  get textDecorationThickness(): number {
+    return this.model.styles.textDecorationThickness;
+  }
+
+  get textDecorationMixin(): boolean {
+    return false;
+  }
+
+  get textDecorationColorMixin(): boolean {
+    return false;
+  }
+
+  get textDecorationOpacityMixin(): boolean {
+    return false;
+  }
+
+  get textDecorationThicknessMixin(): boolean {
+    return false;
   }
 
   get fontSizeMixin(): boolean {
@@ -1163,6 +1195,30 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [this.fontColorOpacity]);
   }
 
+  /**
+   * 文本装饰发生变化
+   */
+  onTextDecorationChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textDecorationChanged, [this.textDecoration]);
+  }
+  /**
+   * 文本装饰颜色发生变化
+   */
+  onTextDecorationColorChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textDecorationColorChanged, [this.textDecorationColor]);
+  }
+  /**
+   * 文本装饰透明度发生变化
+   */
+  onTextDecorationOpacityChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textDecorationOpacityChanged, [this.textDecorationOpacity]);
+  }
+  /**
+   * 文本装饰厚度发生变化
+*/
+  onTextDecorationThicknessChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textDecorationThicknessChanged, [this.textDecorationThickness]);
+  }
   /**
    * 锁定比例发生变化
    */
@@ -2309,7 +2365,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setStrokeColorOpacity(value: number, index: number): void {
-    this.model.styles.strokes[index].colorOpacity = clamp(value, 0, 1);
+    this.model.styles.strokes[index].colorOpacity = clamp(value, 0, 100);
   }
 
   /**
@@ -2367,7 +2423,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param index
    */
   setFillColorOpacity(value: number, index: number): void {
-    this.model.styles.fills[index].colorOpacity = clamp(value, 0, 1);
+    this.model.styles.fills[index].colorOpacity = clamp(value, 0, 100);
   }
 
   /**
@@ -2433,7 +2489,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @param value
    */
   setFontColorOpacity(value: number): void {
-    this.model.styles.fontColorOpacity = clamp(value, 0, 1);
+    this.model.styles.fontColorOpacity = clamp(value, 0, 100);
   }
 
   /**
@@ -2459,6 +2515,38 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setTextBaseline(value: CanvasTextBaseline): void {
     this.model.styles.textBaseline = value;
+  }
+
+  /**
+   * 设置文本装饰
+   * @param value
+   */
+  setTextDecoration(value: TextDecoration): void {
+    this.model.styles.textDecoration = value;
+  }
+
+  /**
+   * 设置文本装饰颜色
+   * @param value
+   */
+  setTextDecorationColor(value: string): void {
+    this.model.styles.textDecorationColor = value;
+  }
+
+  /**
+   * 设置文本装饰透明度
+   * @param value
+   */
+  setTextDecorationOpacity(value: number): void {
+    this.model.styles.textDecorationOpacity = clamp(value, 0, 100);
+  }
+
+  /**
+   * 设置文本装饰粗细
+   * @param value
+   */
+  setTextDecorationThickness(value: number): void {
+    this.model.styles.textDecorationThickness = value;
   }
 
   /**
