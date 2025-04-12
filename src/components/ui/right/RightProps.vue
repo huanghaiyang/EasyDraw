@@ -52,7 +52,7 @@
         align-items: center;
         vertical-align: middle;
         line-height: 14px;
-        margin: 0 4px 0 0;
+        margin: 0 4px 4px 4px;
         &.text-2 {
           font-size: 12px;
           line-height: 12px;
@@ -77,7 +77,7 @@
       padding: 0 4px;
 
       &:not(:first-child) {
-        margin: 0 0 4px 0;
+        margin: 0 0 8px 0;
       }
 
       .el-tag {

@@ -85,7 +85,7 @@ function setElementsLeanYAngle(value: string) {
           precision="1"
           @change="setElementsLeanYAngle"
         >
-          <template #prepend>Y轴倾斜</template>
+          <template #prepend>Y轴</template>
           <template #append>度</template>
         </el-input>
       </div>
