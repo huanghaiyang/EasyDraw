@@ -165,7 +165,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   private _updateInputStyleWhileInputing(): void {
     let { width, height } = FontUtils.measureTextWithSpan(this.textEditor.value, DefaultFontStyle);
     width = Math.max(width, minWidth);
-    height = Math.max(height, minHeight, Math.ceil(this.textEditor.value.split("\n").length * DefaultFontStyle.fontLineHeight * DefaultFontStyle.fontSize));
+    height = Math.max(height, minHeight, Math.ceil(this.textEditor.value.split("\n").length * DefaultFontStyle.fontLineHeight));
     Object.assign(this.textEditor.style, {
       minWidth: `${width}px`,
       minHeight: `${height}px`,
@@ -300,7 +300,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       boxShadow: `0 -${strokeWidth}px 0 0 ${SelectionStrokeColor}, -${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, ${strokeWidth}px 0 0 0 ${SelectionStrokeColor}, 0 ${strokeWidth}px 0 0 ${SelectionStrokeColor}`,
       fontSize: `${DefaultFontStyle.fontSize}px`,
       fontFamily: DefaultFontStyle.fontFamily,
-      lineHeight: `${DefaultFontStyle.fontLineHeight}`,
+      lineHeight: `${DefaultFontStyle.fontLineHeight}px`,
       color: ColorUtils.hashToRgba(DefaultFontStyle.fontColor, DefaultFontStyle.fontColorOpacity),
       verticalAlign: DefaultFontStyle.textBaseline,
       textAlign: DefaultFontStyle.textAlign,

@@ -31,12 +31,12 @@ watch(
       <div class="font-props__row-item">
         <el-select
           v-model="fontSize"
-          :placeholder="`${fontSizeMixin ? '混合字号' : fontSize}`"
+          :placeholder="`${fontSizeMixin ? '混合字号' : `${fontSize}px`}`"
           size="small"
           @change="value => stageStore.setElementsFontSize(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
-          <el-option v-for="item in FontSizeList" :key="item.name" :label="item.name" :value="item.value" />
+          <el-option v-for="item in FontSizeList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
       <div class="font-props__row-item">
@@ -44,10 +44,11 @@ watch(
           v-model="fontSize"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
           size="small"
-          :placeholder="`${fontSizeMixin ? '混合字号' : fontSize}`"
+          :placeholder="`${fontSizeMixin ? '混合字号' : `${fontSize}px`}`"
           type="number"
           :min="1"
           :max="100"
+          :precision="0"
           @change="value => stageStore.setElementsFontSize(Number(value))"
         >
           <template #prepend>S</template>

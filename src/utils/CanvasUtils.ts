@@ -373,7 +373,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
-    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight, fontColorOpacity, textVerticalAlign } = fontStyle;
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -382,8 +382,6 @@ export default class CanvasUtils {
     ctx.font = `${fontSize}px ${fontFamily}`;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
-    // 每行高度都是一致的
-    let lineHeight = fontLineHeight * fontSize;
     // 前一个文本行的y坐标
     let lineY = points[0].y;
     const { x: left } = points[0];
@@ -420,16 +418,18 @@ export default class CanvasUtils {
         const baseline = lineY - avgAlphabeticBaseline + (lineHeight - avgFontHeight) / 2;
         // 遍历节点并渲染
         iterateNodes(nodes, ctx, (node, index) => {
-          const { content, fontStyle: nFontStyle } = node;
-          const { fontLetterSpacing: nFontLetterSpacing, fontSize: nFontSize } = nFontStyle;
+          const {
+            content,
+            fontStyle: { fontLetterSpacing },
+          } = node;
           // 字体度量
           const metrics = ctx.measureText(content);
           // 字体宽度和基线值
           const { width: renderWidth, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
           // 缩进值（通常为负值）
           const indentX = calcTextNodeIndenX(node, index, metrics, nodes, ctx);
-          // 字符间距(注意此处的字符间距和字号都是原始值，需要乘以缩放比例)
-          const spaceWidth = nFontLetterSpacing * nFontSize * 2 * CanvasUtils.scale;
+          // 字符间距(注意此处的字符间距是原始值，需要乘以缩放比例)
+          const spaceWidth = fontLetterSpacing * CanvasUtils.scale;
           // 字符占用最大宽度
           const maxWidth = renderWidth + spaceWidth;
           // 文本节点的x坐标

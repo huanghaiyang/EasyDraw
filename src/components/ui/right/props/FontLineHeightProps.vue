@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultFontLineHeight, FontLineHeightList } from "@/styles/ElementStyles";
+import { DefaultFontLineHeight, DefaultFontSize, FontLineHeightList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
@@ -28,7 +28,7 @@ watch(
           @change="value => stageStore.setElementsFontLineHeight(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
         >
-          <el-option v-for="item in FontLineHeightList" :key="item.name" :label="item.name" :value="item.value" />
+          <el-option v-for="item in FontLineHeightList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
       <div class="font-props__row-item">
@@ -38,11 +38,13 @@ watch(
           size="small"
           placeholder=""
           type="number"
-          :min="1"
+          :min="DefaultFontSize"
           :max="100"
+          :precision="0"
           @change="value => stageStore.setElementsFontLineHeight(Number(value))"
         >
           <template #prepend>L</template>
+          <template #append>px</template>
         </el-input>
       </div>
     </div>

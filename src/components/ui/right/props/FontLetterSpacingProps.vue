@@ -31,12 +31,12 @@ watch(
       <div class="font-props__row-item">
         <el-select
           v-model="fontLetterSpacing"
-          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : fontLetterSpacing}`"
+          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
           size="small"
           @change="value => stageStore.setElementsFontLetterSpacing(value)"
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
         >
-          <el-option v-for="item in FontLetterSpacingList" :key="item.name" :label="item.name" :value="item.value" />
+          <el-option v-for="item in FontLetterSpacingList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
       <div class="font-props__row-item">
@@ -44,13 +44,15 @@ watch(
           v-model="fontLetterSpacing"
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
           size="small"
-          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : fontLetterSpacing}`"
+          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
           type="number"
           :min="1"
           :max="100"
+          :precision="0"
           @change="value => stageStore.setElementsFontLetterSpacing(Number(value))"
         >
           <template #prepend>L</template>
+          <template #append>px</template>
         </el-input>
       </div>
     </div>

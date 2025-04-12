@@ -66,7 +66,7 @@ export default class FontUtils {
     span.style.fontFamily = fontFamily;
     span.style.display = "inline-block";
     if (fontLineHeight) {
-      span.style.lineHeight = `${fontLineHeight}`;
+      span.style.lineHeight = `${fontLineHeight}px`;
     }
     if (textBaseline) {
       span.style.verticalAlign = textBaseline;

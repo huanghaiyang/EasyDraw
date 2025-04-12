@@ -1,5 +1,6 @@
 import { CreatorTypes } from "@/types/Creator";
 import LodashUtils from "@/utils/LodashUtils";
+import { range } from "lodash";
 
 export enum StrokeTypes {
   inside = 0,
@@ -144,7 +145,7 @@ export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
 // 默认字体行高
-export const DefaultFontLineHeight = 1.4;
+export const DefaultFontLineHeight = DefaultFontSize;
 // 默认字体间距
 export const DefaultFontLetterSpacing = 0;
 
@@ -321,44 +322,13 @@ export const FontFamilyList = [
 ];
 
 // 字体大小列表
-export const FontSizeList = [
-  { name: "12", value: 12 },
-  { name: "14", value: 14 },
-  { name: "16", value: 16 },
-  { name: "18", value: 18 },
-  { name: "20", value: 20 },
-  { name: "24", value: 24 },
-  { name: "28", value: 28 },
-  { name: "32", value: 32 },
-  { name: "36", value: 36 },
-  { name: "40", value: 40 },
-  { name: "48", value: 48 },
-  { name: "56", value: 56 },
-  { name: "64", value: 64 },
-  { name: "72", value: 72 },
-  { name: "80", value: 80 },
-  { name: "96", value: 96 },
-];
+export const FontSizeList = range(12, 121, 2).map(i => ({ name: i.toString(), value: i }));
 
 // 字体行高列表
-export const FontLineHeightList = [
-  { name: "1", value: 1 },
-  { name: "1.2", value: 1.2 },
-  { name: "1.4", value: 1.4 },
-  { name: "1.6", value: 1.6 },
-  { name: "1.8", value: 1.8 },
-  { name: "2", value: 2 },
-];
+export const FontLineHeightList = range(12, 121, 2).map(i => ({ name: i.toString(), value: i }));
 
 // 字体间距列表
-export const FontLetterSpacingList = [
-  { name: "0", value: 0 },
-  { name: "0.1", value: 0.1 },
-  { name: "0.2", value: 0.2 },
-  { name: "0.3", value: 0.3 },
-  { name: "0.4", value: 0.4 },
-  { name: "0.5", value: 0.5 },
-];
+export const FontLetterSpacingList = range(0, 101, 1).map(i => ({ name: i.toString(), value: i }));
 
 // 字体样式集合
 export type FontStyleSet = {
