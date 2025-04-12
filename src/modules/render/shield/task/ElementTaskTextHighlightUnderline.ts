@@ -1,4 +1,4 @@
-import { IElementTaskTextUnderline } from "@/types/IRenderTask";
+import { IElementTaskTextHighlightUnderline } from "@/types/IRenderTask";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
 import { IElementText } from "@/types/IElement";
 import CanvasUtils from "@/utils/CanvasUtils";
@@ -7,7 +7,7 @@ import { RenderParams, RenderRect } from "@/types/IRender";
 import { TextUnderLineColor, TextUnderLineColorOpacity, TextUnderLineWidth } from "@/styles/MaskStyles";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 
-export default class ElementTaskTextUnderline extends ElementTaskBase implements IElementTaskTextUnderline {
+export default class ElementTaskTextHighlightUnderline extends ElementTaskBase implements IElementTaskTextHighlightUnderline {
   /**
    * 运行任务
    */

@@ -31,7 +31,7 @@ export interface IElementTaskCursor extends IElementTask {}
 export interface IElementTaskTextSelection extends IElementTask {}
 
 // 文本高亮下划线绘制任务
-export interface IElementTaskTextUnderline extends IElementTask {}
+export interface IElementTaskTextHighlightUnderline extends IElementTask {}
 
 // 文本选区光标绘制任务
 export interface IElementTaskTextSelectionCursor extends IElementTask {
