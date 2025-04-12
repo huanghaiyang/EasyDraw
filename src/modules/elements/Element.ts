@@ -418,6 +418,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   get fontLetterSpacingInputEnable(): boolean {
     return false;
   }
+  get paragraphSpacingInputEnable(): boolean {
+    return false;
+  }
 
   get fontSize(): number {
     return this.model.styles.fontSize;
@@ -493,6 +496,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get fontLetterSpacingMixin(): boolean {
     return false;
+  }
+
+  get paragraphSpacing(): number {
+    return this.model.styles.paragraphSpacing;
   }
 
   get status(): ElementStatus {
@@ -1215,9 +1222,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
   /**
    * 文本装饰厚度发生变化
-*/
+   */
   onTextDecorationThicknessChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.textDecorationThicknessChanged, [this.textDecorationThickness]);
+  }
+  /**
+   * 段落间距发生变化
+   */
+  onParagraphSpacingChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.paragraphSpacingChanged, [this.paragraphSpacing]);
   }
   /**
    * 锁定比例发生变化
@@ -2055,7 +2068,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     if ([1, 3].includes(index) && matrix[1][1] < 0) {
       matrix[1][1] = Math.abs(matrix[1][1]);
     }
-    // 如果是调整高度，并且横轴缩放系数小于0，则取绝对值
+    // 如果是调整高度，并且横轴缩放系数小于0，则取绝值
     if ([0, 2].includes(index) && matrix[0][0] < 0) {
       matrix[0][0] = Math.abs(matrix[0][0]);
     }
@@ -2074,8 +2087,6 @@ export default class Element implements IElement, ILinkedNodeValue {
       const lockCoord = this.getBorderTransformLockCoord(index);
       // 当前拖动的点的原始位置
       const currentCoordOriginal = this._originalTransformerCoords[index];
-      // 当前拖动的点的原始位置
-      this._originalTransformMoveCoord = currentCoordOriginal;
       // 当前拖动的点当前的位置
       const currentCoord = {
         x: currentCoordOriginal.x + offset.x,
@@ -2550,6 +2561,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置段落间距
+   * @param value
+   */
+  setParagraphSpacing(value: number): void {
+    this.model.styles.paragraphSpacing = value;
+  }
+
+  /**
    * 锁定比例
    *
    * @param value
@@ -2782,7 +2801,25 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   async toFontStyleJson(): Promise<ElementObject> {
     return JSON.parse(
-      JSON.stringify(pick(this.model, ["id", "fontSize", "fontFamily", "fontColor", "fontColorOpacity", "textAlign", "textVerticalAlign", "textBaseline", "fontLineHeight"])),
+      JSON.stringify(
+        pick(this.model, [
+          "id",
+          "fontSize",
+          "fontFamily",
+          "fontColor",
+          "fontColorOpacity",
+          "textAlign",
+          "textVerticalAlign",
+          "textBaseline",
+          "fontLineHeight",
+          "fontLetterSpacing",
+          "textDecoration",
+          "textDecorationColor",
+          "textDecorationOpacity",
+          "textDecorationThickness",
+          "paragraphSpacing",
+        ]),
+      ),
     ) as ElementObject;
   }
 }

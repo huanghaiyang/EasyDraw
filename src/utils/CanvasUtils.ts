@@ -430,7 +430,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
-    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign } = fontStyle;
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign, paragraphSpacing } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -449,8 +449,10 @@ export default class CanvasUtils {
     const elementWidth = Math.abs(right - left);
     // 组件的高度
     const elementHeight = Math.abs(points[3].y - points[0].y);
+    // 段落数量
+    const paragraphSize = textData.lines.filter(line => line.isTailBreak).length;
     // 计算文本总高度
-    let totalTextHeight = lineHeight * textData.lines.length;
+    let totalTextHeight = lineHeight * textData.lines.length + (paragraphSize - 1) * paragraphSpacing;
     // 根据垂直对齐方式调整lineY
     if (textVerticalAlign === "middle") {
       // 垂直居中对齐
@@ -469,7 +471,7 @@ export default class CanvasUtils {
       // 文本节点开始渲染时的x坐标
       let nodeX: number = elementX;
       Object.assign(line, { x: elementX, y: lineY, width: elementWidth, height: lineHeight, renderHeight: lineHeight, renderY: lineY });
-      const { nodes } = line;
+      const { nodes, isTailBreak } = line;
       if (nodes.length !== 0) {
         // 行基线坐标
         const baseline = lineY - avgAlphabeticBaseline + (lineHeight - avgFontHeight) / 2;
@@ -547,6 +549,10 @@ export default class CanvasUtils {
       }
       line.height = lineHeight;
       lineY += lineHeight;
+      // isTailBreak表示是否是段落尾部，如果是则需要加上段落间距
+      if (isTailBreak) {
+        lineY += paragraphSpacing;
+      }
     });
     ctx.restore();
   }
@@ -646,6 +652,7 @@ export default class CanvasUtils {
       ...fontStyle,
       fontSize: fontStyle.fontSize * CanvasUtils.scale,
       fontLineHeight: fontStyle.fontLineHeight * CanvasUtils.scale,
+      paragraphSpacing: fontStyle.paragraphSpacing * CanvasUtils.scale,
     };
   }
 

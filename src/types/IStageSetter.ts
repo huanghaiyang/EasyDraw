@@ -242,6 +242,14 @@ export default interface IStageSetter {
   setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void>;
 
   /**
+   * 设置组件段落间距
+   *
+   * @param elements 要修改的元件集合
+   * @param value 段落间距
+   */
+  setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void>;
+
+  /**
    * 设置组件比例锁定
 
    * @param elements 要修改的元件集合

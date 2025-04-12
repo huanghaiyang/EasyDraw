@@ -109,6 +109,8 @@ export type TextFontStyle = {
   textDecorationOpacity?: number;
   // 文本装饰厚度
   textDecorationThickness?: number;
+  // 段落间距
+  paragraphSpacing?: number;
 };
 
 // 字体样式定义
@@ -171,6 +173,8 @@ export const DefaultTextDecorationColor = "#000000";
 export const DefaultTextDecorationOpacity = 100;
 // 默认文本装饰粗细
 export const DefaultTextDecorationThickness = 1;
+// 默认段落间距
+export const DefaultParagraphSpacing = 0;
 
 // 默认描边样式
 export const DefaultStrokeStyle: StrokeStyle = {
@@ -207,6 +211,7 @@ export const DefaultFontStyle: FontStyle = {
   textDecorationColor: DefaultTextDecorationColor,
   textDecorationOpacity: DefaultTextDecorationOpacity,
   textDecorationThickness: DefaultTextDecorationThickness,
+  paragraphSpacing: DefaultParagraphSpacing,
 };
 
 // 默认组件样式
@@ -356,6 +361,9 @@ export const FontLineHeightList = range(12, 121, 2).map(i => ({ name: i.toString
 
 // 字体间距列表
 export const FontLetterSpacingList = range(0, 101, 1).map(i => ({ name: i.toString(), value: i }));
+
+// 段落间距列表
+export const ParagraphSpacingList = range(0, 101, 4).map(i => ({ name: i.toString(), value: i }));
 
 // 字体样式集合
 export type FontStyleSet = {

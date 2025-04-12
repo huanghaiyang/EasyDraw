@@ -778,6 +778,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置段落间距
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsParagraphSpacing(elements, value);
+    });
+    elements.forEach(element => element.onParagraphSpacingChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 锁定比例
    *
    * @param elements

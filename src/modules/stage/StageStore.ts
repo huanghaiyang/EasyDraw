@@ -2220,4 +2220,18 @@ export default class StageStore implements IStageStore {
     this.resortElementsArray();
     this.emitElementsLayerChanged();
   }
+
+  /**
+   * 设置组件段落间距
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setParagraphSpacing(value);
+      }
+    });
+  }
 }

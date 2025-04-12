@@ -12,6 +12,7 @@
     <font-color-props></font-color-props>
     <font-line-height-props></font-line-height-props>
     <font-letter-spacing-props></font-letter-spacing-props>
+    <font-paragraph-spacing-props></font-paragraph-spacing-props>
     <font-align-props></font-align-props>
     <font-text-decoration-props></font-text-decoration-props>
     <fill-props></fill-props>

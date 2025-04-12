@@ -312,6 +312,8 @@ export default interface IElement {
   get fontLineHeightInputEnable(): boolean;
   // 字体间距是否可修改
   get fontLetterSpacingInputEnable(): boolean;
+  // 段落间距是否可修改
+  get paragraphSpacingInputEnable(): boolean;
   // 字体大小
   get fontSize(): number;
   // 字体
@@ -350,9 +352,10 @@ export default interface IElement {
   get textDecorationOpacityMixin(): boolean;
   // 文本装饰厚度是否混合
   get textDecorationThicknessMixin(): boolean;
+  // 段落间距
+  get paragraphSpacing(): number;
   // 圆角
   get corners(): number[];
-
   // 是否包含有效描边
   get strokeEffective(): boolean;
   // 是否包含有效填充
@@ -676,6 +679,12 @@ export default interface IElement {
    * @param value 文本装饰厚度值
    */
   setTextDecorationThickness(value: number): void;
+
+  /**
+   * 设置段落间距
+   * @param value 段落间距值
+   */
+  setParagraphSpacing(value: number): void;
 
   /**
    * 设置比例锁定
@@ -1132,6 +1141,11 @@ export default interface IElement {
   onTextDecorationThicknessChanged(): void;
 
   /**
+   * 设置段落间距
+   */
+  onParagraphSpacingChanged(): void;
+
+  /**
    * 锁定比例
    */
   onRatioLockedChanged(): void;
@@ -1271,6 +1285,8 @@ export interface IElementText extends IElement {
   get text(): string;
   // 文本实际高度
   get textHeight(): number;
+  // 文本段落个数
+  get paragraphSize(): number;
   // 文本排版后触发
   onTextReflowed(changed?: boolean): void;
   // 编辑时鼠标状态变化触发

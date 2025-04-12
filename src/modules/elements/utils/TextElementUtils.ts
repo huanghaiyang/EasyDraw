@@ -1273,6 +1273,9 @@ export default class TextElementUtils {
    */
   static calcTextRenderHeight(textLines: ITextLine[], scale: number): number {
     if (textLines.length === 0) return 0;
-    return textLines.reduce((prev, curr) => prev + curr.height, 0) / scale;
+    if (textLines.length === 1) return textLines[0].height / scale;
+    const startY = textLines[0].y;
+    const endY = textLines[textLines.length - 1].y + textLines[textLines.length - 1].height;
+    return (endY - startY) / scale;
   }
 }

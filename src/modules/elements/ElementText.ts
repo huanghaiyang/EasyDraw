@@ -104,6 +104,9 @@ export default class ElementText extends ElementRect implements IElementText {
   get fontLetterSpacingInputEnable(): boolean {
     return true;
   }
+  get paragraphSpacingInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
 
   get editingEnable(): boolean {
     return true;
@@ -216,6 +219,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get textDecorationThicknessMixin(): boolean {
     return this._textDecorationThicknessMixin;
+  }
+
+  get paragraphSize(): number {
+    return (this.model.data as ITextData).lines.filter(line => line.isTailBreak).length;
   }
 
   constructor(model: ElementObject, shield: IStageShield) {

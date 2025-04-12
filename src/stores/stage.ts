@@ -99,6 +99,10 @@ const DefaultStage = {
   textDecorationOpacityMixin: false,
   // 文字装饰厚度是否混合
   textDecorationThicknessMixin: false,
+  // 段落间距
+  paragraphSpacing: DefaultElementStyle.paragraphSpacing,
+  // 段落间距是否混合
+  paragraphSpacingMixin: false,
   // 是否锁定比例
   isRatioLocked: false,
   // 填充是否可用
@@ -133,6 +137,8 @@ const DefaultStage = {
   leanYAngleInputEnable: false,
   // 位置输入是否可用
   positionInputEnable: false,
+  // 段落间距输入是否可用
+  paragraphSpacingInputEnable: false,
   // 组件状态
   status: ElementStatus.initialed,
 };
@@ -244,6 +250,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.creatorChanged, this.onCreatorChanged],
         [ShieldDispatcherNames.layerShiftMoveEnableChanged, this.onLayerShiftMoveEnableChanged],
         [ShieldDispatcherNames.layerGoDownEnableChanged, this.onLayerGoDownEnableChanged],
+        [ShieldDispatcherNames.paragraphSpacingChanged, this.onParagraphSpacingChanged],
       ].forEach(([name, callback]) => {
         shield.on(name, throttle(callback.bind(this), ThrottleTime, tOptions));
       });
@@ -357,6 +364,7 @@ export const useStageStore = defineStore("stage", {
         textDecorationColorMixin,
         textDecorationOpacityMixin,
         textDecorationThicknessMixin,
+        paragraphSpacing,
       } = element;
       // 组件状态
       this.onStatusChanged(element, status);
@@ -424,6 +432,8 @@ export const useStageStore = defineStore("stage", {
       this.onTextDecorationOpacityMixinChanged(element, textDecorationOpacityMixin);
       // 文本装饰粗细混合
       this.onTextDecorationThicknessMixinChanged(element, textDecorationThicknessMixin);
+      // 段落间距
+      this.onParagraphSpacingChanged(element, paragraphSpacing);
     },
     /**
      * 舞台组件命中状态改变
@@ -457,6 +467,7 @@ export const useStageStore = defineStore("stage", {
         angleInputEnable,
         leanYAngleInputEnable,
         positionInputEnable,
+        paragraphSpacingInputEnable,
       } = element;
       this.fillEnable = fillEnable;
       this.strokeEnable = strokeEnable;
@@ -474,6 +485,7 @@ export const useStageStore = defineStore("stage", {
       this.leanYAngleInputEnable = leanYAngleInputEnable;
       this.cornersInputEnable = cornersInputEnable;
       this.positionInputEnable = positionInputEnable;
+      this.paragraphSpacingInputEnable = paragraphSpacingInputEnable;
     },
     /**
      * 组件坐标变化
@@ -775,6 +787,15 @@ export const useStageStore = defineStore("stage", {
      */
     onRatioLockedChanged(element: IElement, isRatioLocked: boolean) {
       this.isRatioLocked = isRatioLocked;
+    },
+    /**
+     * 组件段落间距变化
+     *
+     * @param element
+     * @param paragraphSpacing
+     */
+    onParagraphSpacingChanged(element: IElement, paragraphSpacing: number) {
+      this.paragraphSpacing = paragraphSpacing;
     },
     /**
      * 层上移是否可用
@@ -1171,6 +1192,14 @@ export const useStageStore = defineStore("stage", {
      */
     commitArbitraryDrawing(): void {
       shield.commitArbitraryDrawing();
+    },
+    /**
+     * 设置组件段落间距
+     *
+     * @param value
+     */
+    setElementsParagraphSpacing(value: number): void {
+      shield.setElementsParagraphSpacing(toRaw(this.selectedElements), value);
     },
   },
 });
