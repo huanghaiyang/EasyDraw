@@ -19,6 +19,7 @@ export default class ElementTaskText extends ElementTaskBase {
     const {
       model: {
         styles: {
+          fontStyler,
           fontSize,
           fontFamily,
           textAlign,
@@ -63,6 +64,7 @@ export default class ElementTaskText extends ElementTaskBase {
       unLeanBoxPoints,
       renderRect,
       {
+        fontStyler,
         fontSize,
         fontFamily,
         textAlign,
