@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyler, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 
 export default interface IStageSetter {
@@ -160,6 +160,14 @@ export default interface IStageSetter {
    * @param value 文本基线方式
    */
   setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void>;
+
+  /**
+   * 设置组件字体样式
+   *
+   * @param elements 要修改的元件集合
+   * @param value 字体样式
+   */
+  setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void>;
 
   /**
    * 设置组件字体大小

@@ -10,7 +10,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { FontStyle, getDefaultElementStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, FontStyler, getDefaultElementStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
@@ -800,6 +800,20 @@ export default class StageStore implements IStageStore {
       if (this.hasElement(element.id)) {
         if (element.textBaseline === value) return;
         element.setTextBaseline(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件字体样式
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setFontStyler(value);
       }
     });
   }

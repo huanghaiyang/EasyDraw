@@ -1,5 +1,5 @@
 import { IPoint } from "@/types";
-import { ElementStyles, FillStyle, FontStyle, StrokeStyle, StrokeTypes, TextDecoration } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
@@ -34,9 +34,9 @@ function iterateNodes(nodes: ITextNode[], ctx: CanvasRenderingContext2D, eachCal
   nodes.forEach((node, index) => {
     ctx.save();
     const fontStyle = CanvasUtils.transFontWithScale(node.fontStyle);
-    let { fontColor, fontColorOpacity, fontSize, fontFamily } = fontStyle;
+    let { fontColor, fontColorOpacity, fontSize, fontFamily, fontStyler } = fontStyle;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
-    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.font = `${fontStyler !== FontStyler.normal ? fontStyler : ""} ${fontSize}px ${fontFamily}`;
     eachCallback && eachCallback(node, index);
     ctx.restore();
   });
@@ -430,13 +430,13 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
-    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign, paragraphSpacing } = fontStyle;
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign, paragraphSpacing, fontStyler } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
     CanvasUtils.transformCtx(ctx, renderRect, this.getTransformValues(options));
     points = CanvasUtils.transPointsOfBox(points, renderRect);
-    ctx.font = `${fontSize}px ${fontFamily}`;
+    ctx.font = `${fontStyler !== FontStyler.normal ? fontStyler : ""} ${fontSize}px ${fontFamily}`;
     ctx.textBaseline = textBaseline;
     ctx.fillStyle = StyleUtils.joinFillColor({ color: fontColor, colorOpacity: fontColorOpacity });
     // 前一个文本行的y坐标

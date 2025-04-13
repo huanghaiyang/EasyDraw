@@ -105,6 +105,8 @@ export enum ShieldDispatcherNames {
   strokesChanged = "strokesChanged",
   // 填充改变
   fillsChanged = "fillsChanged",
+  // 字体样式改变
+  fontStylerChanged = "fontStylerChanged",
   // 字体大小改变
   fontSizeChanged = "fontSizeChanged",
   // 字体改变
@@ -121,6 +123,8 @@ export enum ShieldDispatcherNames {
   fontColorChanged = "fontColorChanged",
   // 字体颜色透明度改变
   fontColorOpacityChanged = "fontColorOpacityChanged",
+  // 字体样式混合
+  fontStylerMixinChanged = "fontStylerMixinChanged",
   // 字体大小混合
   fontSizeMixinChanged = "fontSizeMixinChanged",
   // 字体混合

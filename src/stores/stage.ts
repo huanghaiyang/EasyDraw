@@ -3,7 +3,7 @@ import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
-import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
@@ -55,6 +55,8 @@ const DefaultStage = {
       ...DefaultFillStyle,
     },
   ],
+  // 字体样式
+  fontStyler: DefaultElementStyle.fontStyler,
   // 字体大小
   fontSize: DefaultElementStyle.fontSize,
   // 字体
@@ -71,6 +73,8 @@ const DefaultStage = {
   fontColor: DefaultElementStyle.fontColor,
   // 字体颜色透明度
   fontColorOpacity: DefaultElementStyle.fontColorOpacity,
+  // 字体样式是否混合
+  fontStylerMixin: false,
   // 字体大小是否混合
   fontSizeMixin: false,
   // 字体是否混合
@@ -230,6 +234,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.strokesChanged, this.onStrokesChanged],
         [ShieldDispatcherNames.fillsChanged, this.onFillsChanged],
         [ShieldDispatcherNames.statusChanged, this.onStatusChanged],
+        [ShieldDispatcherNames.fontStylerChanged, this.onFontStylerChanged],
         [ShieldDispatcherNames.fontSizeChanged, this.onFontSizeChanged],
         [ShieldDispatcherNames.fontFamilyChanged, this.onFontFamilyChanged],
         [ShieldDispatcherNames.fontLineHeightChanged, this.onFontLineHeightChanged],
@@ -238,6 +243,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.fontLetterSpacingChanged, this.onFontLetterSpacingChanged],
         [ShieldDispatcherNames.fontColorChanged, this.onFontColorChanged],
         [ShieldDispatcherNames.fontColorOpacityChanged, this.onFontColorOpacityChanged],
+        [ShieldDispatcherNames.fontStylerMixinChanged, this.onFontStylerMixinChanged],
         [ShieldDispatcherNames.fontSizeMixinChanged, this.onFontSizeMixinChanged],
         [ShieldDispatcherNames.fontFamilyMixinChanged, this.onFontFamilyMixinChanged],
         [ShieldDispatcherNames.fontColorMixinChanged, this.onFontColorMixinChanged],
@@ -349,10 +355,12 @@ export const useStageStore = defineStore("stage", {
         leanYAngle,
         strokes,
         fills,
+        fontStyler,
         fontSize,
         fontFamily,
         fontColor,
         fontColorOpacity,
+        fontStylerMixin,
         fontSizeMixin,
         fontFamilyMixin,
         fontColorMixin,
@@ -396,6 +404,8 @@ export const useStageStore = defineStore("stage", {
       this.onStrokesChanged(element, strokes);
       // 填充颜色
       this.onFillsChanged(element, fills);
+      // 字体样式
+      this.onFontStylerChanged(element, fontStyler);
       // 字体大小
       this.onFontSizeChanged(element, fontSize);
       // 字体
@@ -412,6 +422,8 @@ export const useStageStore = defineStore("stage", {
       this.onFontColorChanged(element, fontColor);
       // 字体颜色透明度
       this.onFontColorOpacityChanged(element, fontColorOpacity);
+      // 字体样式混合
+      this.onFontStylerMixinChanged(element, fontStylerMixin);
       // 字体大小混合
       this.onFontSizeMixinChanged(element, fontSizeMixin);
       // 字体混合
@@ -598,6 +610,15 @@ export const useStageStore = defineStore("stage", {
       this.fills = LodashUtils.jsonClone(fills);
     },
     /**
+     * 组件字体样式变化
+     *
+     * @param element
+     * @param fontStyler
+     */
+    onFontStylerChanged(element: IElement, fontStyler: FontStyler) {
+      this.fontStyler = LodashUtils.jsonClone(fontStyler);
+    },
+    /**
      * 组件字体大小变化
      *
      * @param element
@@ -668,6 +689,15 @@ export const useStageStore = defineStore("stage", {
      */
     onFontColorOpacityChanged(element: IElement, fontColorOpacity: number) {
       this.fontColorOpacity = fontColorOpacity;
+    },
+    /**
+     * 组件字体样式混合变化
+     *
+     * @param element
+     * @param fontStylerMixin
+     */
+    onFontStylerMixinChanged(element: IElement, fontStylerMixin: boolean) {
+      this.fontStylerMixin = fontStylerMixin;
     },
     /**
      * 组件字体大小混合变化
@@ -1020,6 +1050,15 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsTextBaseline(value: CanvasTextBaseline): void {
       shield.setElementsTextBaseline(toRaw(this.selectedElements), value);
+    },
+
+    /**
+     * 设置组件字体样式
+     *
+     * @param value
+     */
+    setElementsFontStyler(value: FontStyler): void {
+      shield.setElementsFontStyler(toRaw(this.selectedElements), value);
     },
 
     /**

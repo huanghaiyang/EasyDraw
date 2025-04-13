@@ -8,6 +8,7 @@
     <angle-props></angle-props>
     <corner-props></corner-props>
     <font-family-props></font-family-props>
+    <font-styler-props></font-styler-props>
     <font-color-props></font-color-props>
     <el-row :gutter="0">
       <el-col :span="11">
@@ -67,8 +68,8 @@
         height: 32px;
         box-sizing: border-box;
         &.text-2 {
-          font-size: 12px;
-          line-height: 12px;
+          font-size: 14px;
+          line-height: 14px;
           font-weight: normal;
           transform: scale(0.9);
           color: rgba(0, 0, 0, 0.8);

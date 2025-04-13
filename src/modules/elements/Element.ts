@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
-import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -426,6 +426,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get fontStyler(): FontStyler {
+    return this.model.styles.fontStyler;
+  }
+
   get fontSize(): number {
     return this.model.styles.fontSize;
   }
@@ -487,6 +491,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get textDecorationThicknessMixin(): boolean {
+    return false;
+  }
+
+  get fontStylerMixin(): boolean {
     return false;
   }
 
@@ -1170,6 +1178,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onTextBaselineChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.textBaselineChanged, [this.textBaseline]);
+  }
+
+  /**
+   * 字体样式发生变化
+   */
+  onFontStylerChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontStylerChanged, [this.fontStyler]);
   }
 
   /**
@@ -2482,6 +2497,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置字体样式
+   * @param value
+   */
+  setFontStyler(value: FontStyler): void {
+    this.model.styles.fontStyler = value;
+  }
+
+  /**
    * 设置字体大小
    * @param value
    */
@@ -2861,6 +2884,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       JSON.stringify(
         pick(this.model, [
           "id",
+          "styles.fontStyler",
           "styles.fontSize",
           "styles.fontFamily",
           "styles.fontColor",

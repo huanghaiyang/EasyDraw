@@ -88,7 +88,18 @@ export enum TextDecoration {
   overline = "overline",
   underline = "underline",
 }
+
+// 字体样式
+export enum FontStyler {
+  normal = "normal",
+  italic = "italic",
+  bold = "bold",
+  boldItalic = "bold italic",
+}
+
+// 文本字体样式定义
 export type TextFontStyle = {
+  fontStyler?: FontStyler;
   // 字体大小
   fontSize?: number;
   // 字体
@@ -147,6 +158,8 @@ export const DefaultFillColor = "#999999";
 export const DefaultFillColorOpacity = 15;
 // 默认边框宽度
 export const DefaultStrokeWidth = 1;
+// 默认文字样式
+export const DefaultFontStyler = FontStyler.normal;
 // 默认字体大小
 export const DefaultFontSize = 16;
 // 默认字体家族
@@ -206,6 +219,7 @@ export const DefaultFillStyle: FillStyle = {
 
 // 默认字体样式
 export const DefaultFontStyle: FontStyle = {
+  fontStyler: DefaultFontStyler,
   fontSize: DefaultFontSize,
   fontFamily: DefaultFontFamily,
   fontColor: DefaultFontColor,
@@ -383,6 +397,7 @@ export const FontLineHeightFactorList = range(1, 2.1, 0.1).map(i => {
 
 // 字体样式集合
 export type FontStyleSet = {
+  fontStylers?: Set<FontStyler>;
   fontFamilies?: Set<string>;
   fontSizes?: Set<number>;
   fontColors?: Set<string>;

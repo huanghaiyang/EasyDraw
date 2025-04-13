@@ -5,7 +5,7 @@
  */
 import { ElementStatus, IPoint, ISize, TextEditingStates } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -316,6 +316,8 @@ export default interface IElement {
   get fontLetterSpacingInputEnable(): boolean;
   // 段落间距是否可修改
   get paragraphSpacingInputEnable(): boolean;
+  // 字体样式
+  get fontStyler(): FontStyler;
   // 字体大小
   get fontSize(): number;
   // 字体
@@ -330,6 +332,8 @@ export default interface IElement {
   get fontColor(): string;
   // 字体颜色透明度
   get fontColorOpacity(): number;
+  // 字体样式是否混合
+  get fontStylerMixin(): boolean;
   // 字体大小是否混合
   get fontSizeMixin(): boolean;
   // 字体是否混合
@@ -607,6 +611,12 @@ export default interface IElement {
    * @throws 当索引超出范围时抛出错误
    */
   removeFill(index: number): void;
+
+  /**
+   * 设置字体样式
+   * @param value 字体样式
+   */
+  setFontStyler(value: FontStyler): void;
 
   /**
    * 设置字体大小
@@ -1106,6 +1116,11 @@ export default interface IElement {
    * 设置文本基线
    */
   onTextBaselineChanged(): void;
+
+  /**
+   * 设置文本字体样式
+   */
+  onFontStylerChanged(): void;
 
   /**
    * 设置文本字体大小

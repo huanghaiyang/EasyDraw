@@ -14,7 +14,7 @@ import CoderUtils from "@/utils/CoderUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
-import { FontStyle, FontStyleSet, TextDecoration } from "@/styles/ElementStyles";
+import { FontStyle, FontStyler, FontStyleSet, TextDecoration } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
 import IUndoRedo from "@/types/IUndoRedo";
 import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
@@ -52,6 +52,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _selectionMoveId: string | null;
   // 是否选区移动
   private _isSelectionMoved: boolean = false;
+  // 字体样式
+  private _fontStyler: FontStyler;
   // 字体大小
   private _fontSize: number | null;
   // 字体
@@ -62,6 +64,8 @@ export default class ElementText extends ElementRect implements IElementText {
   private _fontColorOpacity: number | null;
   // 字体间距
   private _fontLetterSpacing: number | null;
+  // 字体样式混合
+  private _fontStylerMixin: boolean = false;
   // 字体大小混合
   private _fontSizeMixin: boolean = false;
   // 字体混合
@@ -150,6 +154,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return TextElementUtils.getTextFromTextData(this.model.data as ITextData);
   }
 
+  get fontStyler(): FontStyler {
+    return this._fontStyler;
+  }
+
   get fontSize(): number | null {
     return this._fontSize;
   }
@@ -168,6 +176,10 @@ export default class ElementText extends ElementRect implements IElementText {
 
   get fontLetterSpacing(): number | null {
     return this._fontLetterSpacing;
+  }
+
+  get fontStylerMixin(): boolean {
+    return this._fontStylerMixin;
   }
 
   get fontSizeMixin(): boolean {
@@ -332,6 +344,14 @@ export default class ElementText extends ElementRect implements IElementText {
   onFontFamilyChanged(): void {
     this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
     super.onFontFamilyChanged();
+  }
+
+  /**
+   * 字体样式变化
+   */
+  onFontStylerChanged(): void {
+    this._updateFontStyleByTextData(this.isSelectionAvailable, false, true);
+    super.onFontStylerChanged();
   }
 
   /**
@@ -928,7 +948,10 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _checkFontStyleChanged(fontStyleSet: FontStyleSet, eventEmit: boolean = true, propsUpdate?: boolean): void {
     const moreThanOne = (set: Set<any>) => set.size > 1;
-    const { fontSizes, fontFamilies, fontColors, fontColorOpacities, fontLetterSpacings, textDecorations, textDecorationColors, textDecorationOpacities, textDecorationThicknesses } = fontStyleSet;
+    const { fontStylers, fontSizes, fontFamilies, fontColors, fontColorOpacities, fontLetterSpacings, textDecorations, textDecorationColors, textDecorationOpacities, textDecorationThicknesses } =
+      fontStyleSet;
+
+    const fontStylerMixin = moreThanOne(fontStylers);
     const fontSizeMixin = moreThanOne(fontSizes);
     const fontFamilyMixin = moreThanOne(fontFamilies);
     const fontColorMixin = moreThanOne(fontColors);
@@ -939,6 +962,7 @@ export default class ElementText extends ElementRect implements IElementText {
     const textDecorationOpacityMixin = moreThanOne(textDecorationOpacities);
     const textDecorationThicknessMixin = moreThanOne(textDecorationThicknesses);
 
+    const fontStyler = fontStylerMixin ? null : fontStylers.values().next().value;
     const fontSize = fontSizeMixin ? null : fontSizes.values().next().value;
     const fontFamily = fontFamilyMixin ? null : fontFamilies.values().next().value;
     const fontColor = fontColorMixin ? null : fontColors.values().next().value;
@@ -950,6 +974,7 @@ export default class ElementText extends ElementRect implements IElementText {
     const textDecorationThickness = textDecorationThicknessMixin ? null : textDecorationThicknesses.values().next().value;
 
     if (propsUpdate) {
+      this._fontStylerMixin = fontStylerMixin;
       this._fontSizeMixin = fontSizeMixin;
       this._fontFamilyMixin = fontFamilyMixin;
       this._fontColorMixin = fontColorMixin;
@@ -960,6 +985,7 @@ export default class ElementText extends ElementRect implements IElementText {
       this._textDecorationOpacityMixin = textDecorationOpacityMixin;
       this._textDecorationThicknessMixin = textDecorationThicknessMixin;
 
+      this._fontStyler = fontStyler;
       this._fontSize = fontSize;
       this._fontFamily = fontFamily;
       this._fontColor = fontColor;
@@ -972,11 +998,13 @@ export default class ElementText extends ElementRect implements IElementText {
     }
 
     if (eventEmit) {
+      this.emitPropChanged(ShieldDispatcherNames.fontStylerChanged, [fontStyler]);
       this.emitPropChanged(ShieldDispatcherNames.fontSizeChanged, [fontSize]);
       this.emitPropChanged(ShieldDispatcherNames.fontFamilyChanged, [fontFamily]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorChanged, [fontColor]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorOpacityChanged, [fontColorOpacity]);
       this.emitPropChanged(ShieldDispatcherNames.fontLetterSpacingChanged, [fontLetterSpacing]);
+      this.emitPropChanged(ShieldDispatcherNames.fontStylerMixinChanged, [fontStylerMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontSizeMixinChanged, [fontSizeMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontFamilyMixinChanged, [fontFamilyMixin]);
       this.emitPropChanged(ShieldDispatcherNames.fontColorMixinChanged, [fontColorMixin]);
@@ -1397,6 +1425,29 @@ export default class ElementText extends ElementRect implements IElementText {
       line.nodes.forEach(node => {
         if (node.selected || !isSelectionAvailable) {
           node.fontStyle.fontFamily = value;
+        }
+      });
+    });
+  }
+
+  /**
+   * 设置字体样式
+   *
+   * @param value 字体样式
+   */
+  setFontStyler(value: FontStyler): void {
+    const textData = this.model.data as ITextData;
+    let isSelectionAvailable = this.isSelectionAvailable;
+    if (!isSelectionAvailable) {
+      super.setFontStyler(value);
+    }
+    textData.lines.forEach(line => {
+      if (line.selected || !isSelectionAvailable) {
+        line.fontStyle = Object.assign({}, line.fontStyle || {}, { fontStyler: value });
+      }
+      line.nodes.forEach(node => {
+        if (node.selected || !isSelectionAvailable) {
+          node.fontStyle.fontStyler = value;
         }
       });
     });

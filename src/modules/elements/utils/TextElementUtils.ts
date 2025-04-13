@@ -111,6 +111,7 @@ export default class TextElementUtils {
   static createTextData(content: string, fontStyle: TextFontStyle): ITextData {
     fontStyle = pick(fontStyle, [
       "fontFamily",
+      "fontStyler",
       "fontSize",
       "fontColor",
       "fontColorOpacity",
@@ -445,6 +446,7 @@ export default class TextElementUtils {
   static newFontStyleSet(): FontStyleSet {
     return {
       fontFamilies: new Set(),
+      fontStylers: new Set(),
       fontSizes: new Set(),
       fontColors: new Set(),
       fontColorOpacities: new Set(),
@@ -467,6 +469,9 @@ export default class TextElementUtils {
 
     if (isString(fontStyle.fontFamily)) {
       result.fontFamilies.add(fontStyle.fontFamily);
+    }
+    if (isString(fontStyle.fontStyler)) {
+      result.fontStylers.add(fontStyle.fontStyler);
     }
     if (isNumber(fontStyle.fontSize)) {
       result.fontSizes.add(fontStyle.fontSize);

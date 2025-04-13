@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { FontStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, FontStyler, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -632,6 +632,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     });
     elements.forEach(element => element.onTextBaselineChanged());
     this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体样式
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsFontStyler(elements, value);
+      await this._addRedrawTask(true);
+      await this._reflowTextIfy(elements, true);
+      elements.forEach(element => element.onFontStylerChanged());
+    });
   }
 
   /**
