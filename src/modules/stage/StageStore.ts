@@ -848,6 +848,36 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件字体行高倍数
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontLineHeightFactor === value) return;
+        element.setFontLineHeightFactor(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件字体行高自动适应
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        if (element.fontLineHeightAutoFit === value) return;
+        element.setFontLineHeightAutoFit(value);
+      }
+    });
+  }
+
+  /**
    * 设置组件字体颜色
    *
    * @param elements

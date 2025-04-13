@@ -1,10 +1,13 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
-import { DefaultFontLineHeight, DefaultFontSize, FontLineHeightList } from "@/styles/ElementStyles";
+import { DefaultFontLineHeight, DefaultFontLineHeightAutoFit, DefaultFontLineHeightFactor, DefaultFontSize, FontLineHeightFactorList, FontLineHeightList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontLineHeight = ref(DefaultFontLineHeight);
+const fontLineHeightFactor = ref(DefaultFontLineHeightFactor);
+const fontLineHeightAutoFit = ref(DefaultFontLineHeightAutoFit);
+const fontLineHeightFactorInputEnable = ref(false);
 
 watch(
   () => stageStore.fontLineHeight,
@@ -12,22 +15,76 @@ watch(
     fontLineHeight.value = newValue;
   },
 );
+
+watch(
+  () => stageStore.fontLineHeightFactor,
+  newValue => {
+    fontLineHeightFactor.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontLineHeightAutoFit,
+  newValue => {
+    fontLineHeightAutoFit.value = newValue;
+  },
+);
+
+watch(
+  () => stageStore.fontLineHeightFactorInputEnable,
+  newValue => {
+    fontLineHeightFactorInputEnable.value = newValue;
+  },
+);
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
     <div class="font-props__title">
       <span class="font-props__title-text text-2">行高</span>
+      <el-tooltip class="item" effect="dark" :content="`点击${stageStore.fontLineHeightAutoFit ? '关闭' : '开启'}按字号自动适应行高功能，当前行高${stageStore.fontLineHeight}px`" placement="top">
+        <el-switch
+          v-model="fontLineHeightAutoFit"
+          class="ml-2"
+          inline-prompt
+          style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+          active-text="自适应行高"
+          inactive-text="自定义行高"
+          @change="value => stageStore.setElementsFontLineHeightAutoFit(value as boolean)"
+        />
+      </el-tooltip>
     </div>
 
-    <div class="font-props__row">
+    <div class="font-props__row" v-if="fontLineHeightAutoFit">
       <div class="font-props__row-item" :style="{ width: '80px' }">
         <el-select
-          v-model="fontLineHeight"
-          placeholder=""
+          v-model="fontLineHeightFactor"
           size="small"
-          @change="value => stageStore.setElementsFontLineHeight(value)"
-          :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
+          @change="value => stageStore.setElementsFontLineHeightFactor(value)"
+          :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightFactorInputEnable"
         >
+          <el-option v-for="item in FontLineHeightFactorList" :key="item.name" :label="`${item.value}x字号`" :value="item.value"> {{ item.value }}x字号 </el-option>
+        </el-select>
+      </div>
+      <div class="font-props__row-item" :style="{ width: '124px' }">
+        <el-input
+          v-model="fontLineHeightFactor"
+          :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightFactorInputEnable"
+          size="small"
+          type="number"
+          :min="0"
+          :max="2"
+          :precision="1"
+          @change="value => stageStore.setElementsFontLineHeightFactor(Number(value))"
+        >
+          <template #prepend>自定义</template>
+          <template #append>x字号</template>
+        </el-input>
+      </div>
+    </div>
+
+    <div class="font-props__row" v-else>
+      <div class="font-props__row-item" :style="{ width: '80px' }">
+        <el-select v-model="fontLineHeight" size="small" @change="value => stageStore.setElementsFontLineHeight(value)" :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable">
           <el-option v-for="item in FontLineHeightList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
         </el-select>
       </div>
@@ -36,11 +93,11 @@ watch(
           v-model="fontLineHeight"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable"
           size="small"
-          placeholder=""
+          placeholder="请输入行高"
           type="number"
           :min="DefaultFontSize"
           :max="100"
-          :precision="0"
+          :precision="1"
           @change="value => stageStore.setElementsFontLineHeight(Number(value))"
         >
           <template #prepend>自定义</template>

@@ -310,6 +310,8 @@ export default interface IElement {
   get fontInputEnable(): boolean;
   // 字体行高是否可修改
   get fontLineHeightInputEnable(): boolean;
+  // 字体行高倍数是否可修改
+  get fontLineHeightFactorInputEnable(): boolean;
   // 字体间距是否可修改
   get fontLetterSpacingInputEnable(): boolean;
   // 段落间距是否可修改
@@ -320,6 +322,10 @@ export default interface IElement {
   get fontFamily(): string;
   // 字体行高
   get fontLineHeight(): number;
+  // 字体行高倍数
+  get fontLineHeightFactor(): number;
+  // 字体行高自动适应
+  get fontLineHeightAutoFit(): boolean;
   // 字体颜色
   get fontColor(): string;
   // 字体颜色透明度
@@ -619,6 +625,17 @@ export default interface IElement {
    * @param value 字体行高值
    */
   setFontLineHeight(value: number): void;
+
+  /**
+   * 设置字体行高倍数
+   * @param value 字体行高倍数值
+   */
+  setFontLineHeightFactor(value: number): void;
+
+  /**
+   * 设置字体行高自动适应
+   */
+  setFontLineHeightAutoFit(value: boolean): void;
 
   /**
    * 设置字体间距
@@ -1104,6 +1121,16 @@ export default interface IElement {
    * 设置文本字体行高
    */
   onFontLineHeightChanged(): void;
+
+  /**
+   * 设置文本字体行高倍数
+   */
+  onFontLineHeightFactorChanged(): void;
+
+  /**
+   * 设置文本字体行高自动适应
+   */
+  onFontLineHeightAutoFitChanged(): void;
 
   /**
    * 设置文本字体间距

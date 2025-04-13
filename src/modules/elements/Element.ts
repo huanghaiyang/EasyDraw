@@ -415,6 +415,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return false;
   }
 
+  get fontLineHeightFactorInputEnable(): boolean {
+    return false;
+  }
+
   get fontLetterSpacingInputEnable(): boolean {
     return false;
   }
@@ -432,6 +436,14 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get fontLineHeight(): number {
     return this.model.styles.fontLineHeight;
+  }
+
+  get fontLineHeightFactor(): number {
+    return this.model.styles.fontLineHeightFactor;
+  }
+
+  get fontLineHeightAutoFit(): boolean {
+    return this.model.styles.fontLineHeightAutoFit;
   }
 
   get fontLetterSpacing(): number {
@@ -1179,6 +1191,20 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFontLineHeightChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.fontLineHeightChanged, [this.fontLineHeight]);
+  }
+
+  /**
+   * 字体行高倍数发生变化
+   */
+  onFontLineHeightFactorChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontLineHeightFactorChanged, [this.fontLineHeightFactor]);
+  }
+
+  /**
+   * 字体行高自动适应发生变化
+   */
+  onFontLineHeightAutoFitChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.fontLineHeightAutoFitChanged, [this.fontLineHeightAutoFit]);
   }
 
   /**
@@ -2461,6 +2487,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setFontSize(value: number): void {
     this.model.styles.fontSize = value;
+    this._updateLineHeightByFactor();
   }
 
   /**
@@ -2472,11 +2499,41 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 更新字体行高
+   */
+  private _updateLineHeightByFactor(): void {
+    const { fontSize, fontLineHeightFactor, fontLineHeightAutoFit } = this.model.styles;
+    if (fontLineHeightAutoFit) {
+      this.model.styles.fontLineHeight = MathUtils.precise(fontSize * fontLineHeightFactor, 0);
+    }
+  }
+
+  /**
    * 设置字体行高
    * @param value
    */
   setFontLineHeight(value: number): void {
     this.model.styles.fontLineHeight = value;
+    this.model.styles.fontLineHeightFactor = MathUtils.precise(value / this.model.styles.fontSize, 2);
+  }
+
+  /**
+   * 设置字体行高倍数
+   * @param value
+   */
+  setFontLineHeightFactor(value: number): void {
+    this.model.styles.fontLineHeightFactor = value;
+    this._updateLineHeightByFactor();
+  }
+
+  /**
+   * 设置字体行高自动适应
+   *
+   * @param value
+   */
+  setFontLineHeightAutoFit(value: boolean): void {
+    this.model.styles.fontLineHeightAutoFit = value;
+    this._updateLineHeightByFactor();
   }
 
   /**
@@ -2812,6 +2869,8 @@ export default class Element implements IElement, ILinkedNodeValue {
           "textVerticalAlign",
           "textBaseline",
           "fontLineHeight",
+          "fontLineHeightFactor",
+          "fontLineHeightAutoFit",
           "fontLetterSpacing",
           "textDecoration",
           "textDecorationColor",

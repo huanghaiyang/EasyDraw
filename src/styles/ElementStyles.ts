@@ -99,6 +99,10 @@ export type TextFontStyle = {
   fontColorOpacity?: number;
   // 字体行高
   fontLineHeight?: number;
+  // 字体行高字号倍数
+  fontLineHeightFactor?: number;
+  // 字体行高自动适应
+  fontLineHeightAutoFit?: boolean;
   // 字体间距
   fontLetterSpacing?: number;
   // 文本装饰
@@ -161,8 +165,12 @@ export const DefaultTextVerticalAlign = TextVerticalAlign.top;
 export const DefaultLineStrokeWidth = 1;
 // 默认直线描边长度限制
 export const DefaultLineMeterLimit = 100;
+// 默认字体行高倍数
+export const DefaultFontLineHeightFactor = 1.4;
+// 默认字体行高自动适应
+export const DefaultFontLineHeightAutoFit = true;
 // 默认字体行高
-export const DefaultFontLineHeight = DefaultFontSize * 1.4;
+export const DefaultFontLineHeight = DefaultFontSize * DefaultFontLineHeightFactor;
 // 默认字体间距
 export const DefaultFontLetterSpacing = 0;
 // 默认文本装饰
@@ -203,6 +211,8 @@ export const DefaultFontStyle: FontStyle = {
   fontColor: DefaultFontColor,
   fontColorOpacity: DefaultFontColorOpacity,
   fontLineHeight: DefaultFontLineHeight,
+  fontLineHeightFactor: DefaultFontLineHeightFactor,
+  fontLineHeightAutoFit: DefaultFontLineHeightAutoFit,
   textAlign: DefaultTextAlign,
   textBaseline: DefaultTextBaseline,
   textVerticalAlign: DefaultTextVerticalAlign,
@@ -364,6 +374,12 @@ export const FontLetterSpacingList = range(0, 101, 1).map(i => ({ name: i.toStri
 
 // 段落间距列表
 export const ParagraphSpacingList = range(0, 101, 4).map(i => ({ name: i.toString(), value: i }));
+
+// 字体行高倍数列表
+export const FontLineHeightFactorList = range(1, 2.1, 0.1).map(i => {
+  i = Math.round(i * 10) / 10;
+  return { name: i.toString(), value: i };
+});
 
 // 字体样式集合
 export type FontStyleSet = {

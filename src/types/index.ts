@@ -111,6 +111,10 @@ export enum ShieldDispatcherNames {
   fontFamilyChanged = "fontFamilyChanged",
   // 字体行高改变
   fontLineHeightChanged = "fontLineHeightChanged",
+  // 字体行高倍数改变
+  fontLineHeightFactorChanged = "fontLineHeightFactorChanged",
+  // 字体行高自动适应改变
+  fontLineHeightAutoFitChanged = "fontLineHeightAutoFitChanged",
   // 字体间距改变
   fontLetterSpacingChanged = "fontLetterSpacingChanged",
   // 字体颜色改变

@@ -101,9 +101,14 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  get fontLineHeightFactorInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   get fontLetterSpacingInputEnable(): boolean {
     return true;
   }
+
   get paragraphSpacingInputEnable(): boolean {
     return this.status === ElementStatus.finished;
   }

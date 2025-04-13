@@ -186,6 +186,22 @@ export default interface IStageSetter {
   setElementsFontLineHeight(elements: IElement[], value: number): Promise<void>;
 
   /**
+   * 设置组件字体行高倍数
+   *
+   * @param elements 要修改的元件集合
+   * @param value 字体行高倍数
+   */
+  setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void>;
+
+  /**
+   * 设置组件字体行高自动适应
+   *
+   * @param elements 要修改的元件集合
+   * @param value 是否自动适应
+   */
+  setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void>;
+
+  /**
    * 设置组件字体颜色
    *
    * @param elements 要修改的元件集合

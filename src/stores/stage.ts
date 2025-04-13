@@ -61,6 +61,10 @@ const DefaultStage = {
   fontFamily: DefaultElementStyle.fontFamily,
   // 字体行高
   fontLineHeight: DefaultElementStyle.fontLineHeight,
+  // 字体行高是否混合
+  fontLineHeightFactor: DefaultElementStyle.fontLineHeightFactor,
+  // 字体行高自动适应
+  fontLineHeightAutoFit: DefaultElementStyle.fontLineHeightAutoFit,
   // 字体间距
   fontLetterSpacing: DefaultElementStyle.fontLetterSpacing,
   // 字体颜色
@@ -123,6 +127,8 @@ const DefaultStage = {
   fontInputEnable: false,
   // 字体行高输入是否可用
   fontLineHeightInputEnable: false,
+  // 字体行高倍数输入是否可用
+  fontLineHeightFactorInputEnable: false,
   // 字体间距输入是否可用
   fontLetterSpacingInputEnable: false,
   // 圆角输入是否可用
@@ -227,6 +233,8 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.fontSizeChanged, this.onFontSizeChanged],
         [ShieldDispatcherNames.fontFamilyChanged, this.onFontFamilyChanged],
         [ShieldDispatcherNames.fontLineHeightChanged, this.onFontLineHeightChanged],
+        [ShieldDispatcherNames.fontLineHeightFactorChanged, this.onFontLineHeightFactorChanged],
+        [ShieldDispatcherNames.fontLineHeightAutoFitChanged, this.onFontLineHeightAutoFitChanged],
         [ShieldDispatcherNames.fontLetterSpacingChanged, this.onFontLetterSpacingChanged],
         [ShieldDispatcherNames.fontColorChanged, this.onFontColorChanged],
         [ShieldDispatcherNames.fontColorOpacityChanged, this.onFontColorOpacityChanged],
@@ -351,6 +359,8 @@ export const useStageStore = defineStore("stage", {
         fontColorOpacityMixin,
         fontLetterSpacingMixin,
         fontLineHeight,
+        fontLineHeightFactor,
+        fontLineHeightAutoFit,
         fontLetterSpacing,
         textAlign,
         textVerticalAlign,
@@ -392,6 +402,10 @@ export const useStageStore = defineStore("stage", {
       this.onFontFamilyChanged(element, fontFamily);
       // 字体行高
       this.onFontLineHeightChanged(element, fontLineHeight);
+      // 字体行高倍数
+      this.onFontLineHeightFactorChanged(element, fontLineHeightFactor);
+      // 字体行高自动适应
+      this.onFontLineHeightAutoFitChanged(element, fontLineHeightAutoFit);
       // 字体间距
       this.onFontLetterSpacingChanged(element, fontLetterSpacing);
       // 字体颜色
@@ -462,6 +476,7 @@ export const useStageStore = defineStore("stage", {
         strokeInputEnable,
         fontInputEnable,
         fontLineHeightInputEnable,
+        fontLineHeightFactorInputEnable,
         fontLetterSpacingInputEnable,
         cornersInputEnable,
         angleInputEnable,
@@ -480,6 +495,7 @@ export const useStageStore = defineStore("stage", {
       this.strokeInputEnable = strokeInputEnable;
       this.fontInputEnable = fontInputEnable;
       this.fontLineHeightInputEnable = fontLineHeightInputEnable;
+      this.fontLineHeightFactorInputEnable = fontLineHeightFactorInputEnable;
       this.fontLetterSpacingInputEnable = fontLetterSpacingInputEnable;
       this.angleInputEnable = angleInputEnable;
       this.leanYAngleInputEnable = leanYAngleInputEnable;
@@ -607,6 +623,24 @@ export const useStageStore = defineStore("stage", {
      */
     onFontLineHeightChanged(element: IElement, fontLineHeight: number) {
       this.fontLineHeight = fontLineHeight;
+    },
+    /**
+     * 组件字体行高倍数变化
+     *
+     * @param element
+     * @param fontLineHeightFactor
+     */
+    onFontLineHeightFactorChanged(element: IElement, fontLineHeightFactor: number) {
+      this.fontLineHeightFactor = fontLineHeightFactor;
+    },
+    /**
+     * 组件字体行高自动适应变化
+     *
+     * @param element
+     * @param fontLineHeightAutoFit
+     */
+    onFontLineHeightAutoFitChanged(element: IElement, fontLineHeightAutoFit: boolean) {
+      this.fontLineHeightAutoFit = fontLineHeightAutoFit;
     },
     /**
      * 组件字体间距变化
@@ -1012,6 +1046,22 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFontLineHeight(value: number): void {
       shield.setElementsFontLineHeight(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字体行高倍数
+     *
+     * @param value
+     */
+    setElementsFontLineHeightFactor(value: number): void {
+      shield.setElementsFontLineHeightFactor(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件字体行高自动适应
+     *
+     * @param value
+     */
+    setElementsFontLineHeightAutoFit(value: boolean): void {
+      shield.setElementsFontLineHeightAutoFit(toRaw(this.selectedElements), value);
     },
     /**
      * 设置组件字体颜色

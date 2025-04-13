@@ -645,7 +645,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       await this.store.setElementsFontSize(elements, value);
       await this._addRedrawTask(true);
       await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onFontSizeChanged());
+      elements.forEach(element => {
+        element.onFontSizeChanged();
+        if (!(element as IElementText).isSelectionAvailable && element.fontLineHeightAutoFit) {
+          element.onFontLineHeightChanged();
+        }
+      });
     });
   }
 
@@ -674,7 +679,44 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this._createFontStyleCommand(elements, async () => {
       await this.store.setElementsFontLineHeight(elements, value);
     });
-    elements.forEach(element => element.onFontLineHeightChanged());
+    elements.forEach(element => {
+      element.onFontLineHeightChanged();
+      element.onFontLineHeightFactorChanged();
+    });
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体行高倍数
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsFontLineHeightFactor(elements, value);
+    });
+    elements.forEach(element => {
+      element.onFontLineHeightFactorChanged();
+      element.onFontLineHeightChanged();
+    });
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体行高自动适应
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsFontLineHeightAutoFit(elements, value);
+    });
+    elements.forEach(element => {
+      element.onFontLineHeightAutoFitChanged();
+      element.onFontLineHeightChanged();
+    });
     this._shouldRedraw = true;
   }
 
