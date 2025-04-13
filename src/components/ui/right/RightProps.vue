@@ -8,11 +8,23 @@
     <angle-props></angle-props>
     <corner-props></corner-props>
     <font-family-props></font-family-props>
-    <font-size-props></font-size-props>
     <font-color-props></font-color-props>
-    <font-line-height-props></font-line-height-props>
-    <font-letter-spacing-props></font-letter-spacing-props>
-    <font-paragraph-spacing-props></font-paragraph-spacing-props>
+    <el-row :gutter="0">
+      <el-col :span="11">
+        <font-size-props></font-size-props>
+      </el-col>
+      <el-col :span="13">
+        <font-line-height-props></font-line-height-props>
+      </el-col>
+    </el-row>
+    <el-row :gutter="0">
+      <el-col :span="11">
+        <font-letter-spacing-props></font-letter-spacing-props>
+      </el-col>
+      <el-col :span="13">
+        <font-paragraph-spacing-props></font-paragraph-spacing-props>
+      </el-col>
+    </el-row>
     <font-align-props></font-align-props>
     <font-text-decoration-props></font-text-decoration-props>
     <fill-props></fill-props>
@@ -51,8 +63,9 @@
         display: flex;
         align-items: center;
         vertical-align: middle;
-        line-height: 14px;
-        margin: 0 4px 4px 4px;
+        line-height: 32px;
+        height: 32px;
+        box-sizing: border-box;
         &.text-2 {
           font-size: 12px;
           line-height: 12px;

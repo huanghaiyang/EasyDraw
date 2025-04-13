@@ -20,7 +20,7 @@ watch(
     </div>
 
     <div class="font-props__row">
-      <div class="font-props__row-item" :style="{ width: '80px' }">
+      <div class="font-props__row-item">
         <el-select
           v-model="paragraphSpacing"
           placeholder=""
@@ -29,23 +29,23 @@ watch(
           :disabled="stageStore.inputDisabled || !stageStore.paragraphSpacingInputEnable"
         >
           <el-option v-for="item in ParagraphSpacingList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
+          <template #header>
+            <el-input
+              v-model="paragraphSpacing"
+              :disabled="stageStore.inputDisabled || !stageStore.paragraphSpacingInputEnable"
+              size="small"
+              placeholder=""
+              type="number"
+              :min="0"
+              :max="100"
+              :precision="0"
+              @change="value => stageStore.setElementsParagraphSpacing(Number(value))"
+            >
+              <template #prepend>自定义</template>
+              <template #append>px</template>
+            </el-input>
+          </template>
         </el-select>
-      </div>
-      <div class="font-props__row-item" :style="{ width: '124px' }">
-        <el-input
-          v-model="paragraphSpacing"
-          :disabled="stageStore.inputDisabled || !stageStore.paragraphSpacingInputEnable"
-          size="small"
-          placeholder=""
-          type="number"
-          :min="0"
-          :max="100"
-          :precision="0"
-          @change="value => stageStore.setElementsParagraphSpacing(Number(value))"
-        >
-          <template #prepend>自定义</template>
-          <template #append>px</template>
-        </el-input>
       </div>
     </div>
   </div>

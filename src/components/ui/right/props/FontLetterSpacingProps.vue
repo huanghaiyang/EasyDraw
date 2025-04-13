@@ -28,7 +28,7 @@ watch(
     </div>
 
     <div class="font-props__row">
-      <div class="font-props__row-item" :style="{ width: '80px' }">
+      <div class="font-props__row-item">
         <el-select
           v-model="fontLetterSpacing"
           :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
@@ -37,23 +37,23 @@ watch(
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
         >
           <el-option v-for="item in FontLetterSpacingList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
+          <template #header>
+            <el-input
+              v-model="fontLetterSpacing"
+              :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
+              size="small"
+              :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
+              type="number"
+              :min="1"
+              :max="100"
+              :precision="0"
+              @change="value => stageStore.setElementsFontLetterSpacing(Number(value))"
+            >
+              <template #prepend>自定义</template>
+              <template #append>px</template>
+            </el-input>
+          </template>
         </el-select>
-      </div>
-      <div class="font-props__row-item" :style="{ width: '124px' }">
-        <el-input
-          v-model="fontLetterSpacing"
-          :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
-          size="small"
-          :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
-          type="number"
-          :min="1"
-          :max="100"
-          :precision="0"
-          @change="value => stageStore.setElementsFontLetterSpacing(Number(value))"
-        >
-          <template #prepend>自定义</template>
-          <template #append>px</template>
-        </el-input>
       </div>
     </div>
   </div>
