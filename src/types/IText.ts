@@ -28,6 +28,7 @@ export type ITextNode = Partial<IPoint> &
   Partial<ISize> & {
     id: string;
     content: string;
+    renderContent?: string;
     fontStyle: TextFontStyle;
     selected?: boolean;
     updateId?: string;

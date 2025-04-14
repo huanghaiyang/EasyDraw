@@ -1,5 +1,5 @@
 import { IPoint } from "@/types/index";
-import { FontStyler, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyler, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 
 export default interface IStageSetter {
@@ -274,8 +274,16 @@ export default interface IStageSetter {
   setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void>;
 
   /**
-   * 设置组件比例锁定
+   * 设置组件文本大小写
+   *
+   * @param elements 要修改的元件集合
+   * @param value 文本大小写方式
+   */
+  setElementsTextCase(elements: IElement[], value: TextCase): Promise<void>;
 
+  /**
+   * 设置组件比例锁定
+   *
    * @param elements 要修改的元件集合
    * @param value 是否锁定比例
    */

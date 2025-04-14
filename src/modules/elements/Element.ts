@@ -6,7 +6,7 @@ import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
-import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
@@ -422,7 +422,12 @@ export default class Element implements IElement, ILinkedNodeValue {
   get fontLetterSpacingInputEnable(): boolean {
     return false;
   }
+
   get paragraphSpacingInputEnable(): boolean {
+    return false;
+  }
+
+  get textCaseInputEnable(): boolean {
     return false;
   }
 
@@ -520,6 +525,10 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   get paragraphSpacing(): number {
     return this.model.styles.paragraphSpacing;
+  }
+
+  get textCase(): TextCase {
+    return this.model.styles.textCase;
   }
 
   get status(): ElementStatus {
@@ -1272,6 +1281,12 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onParagraphSpacingChanged(): void {
     this.emitPropChanged(ShieldDispatcherNames.paragraphSpacingChanged, [this.paragraphSpacing]);
+  }
+  /**
+   * 文本大小写发生变化
+   */
+  onTextCaseChanged(): void {
+    this.emitPropChanged(ShieldDispatcherNames.textCaseChanged, [this.textCase]);
   }
   /**
    * 锁定比例发生变化
@@ -2649,6 +2664,14 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置文本大小写
+   * @param value
+   */
+  setTextCase(value: TextCase): void {
+    this.model.styles.textCase = value;
+  }
+
+  /**
    * 锁定比例
    *
    * @param value
@@ -2901,6 +2924,7 @@ export default class Element implements IElement, ILinkedNodeValue {
           "styles.textDecorationOpacity",
           "styles.textDecorationThickness",
           "styles.paragraphSpacing",
+          "styles.textCase",
         ]),
       ),
     ) as ElementObject;

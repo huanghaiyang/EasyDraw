@@ -25,7 +25,7 @@ watch(
           <el-button
             :type="fontStyler === FontStyler.normal ? 'success' : 'default'"
             :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
-            :class="['iconfont', 'icon-verbise-A']"
+            :class="['iconfont', 'icon-verbise-point-hyphen']"
             @click="stageStore.setElementsFontStyler(FontStyler.normal)"
           ></el-button>
           <el-button

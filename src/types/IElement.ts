@@ -5,7 +5,7 @@
  */
 import { ElementStatus, IPoint, ISize, TextEditingStates } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
-import { ElementStyles, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElementRotation from "@/types/IElementRotation";
 import IStageShield from "@/types/IStageShield";
 import { TransformerTypes } from "@/types/ITransformer";
@@ -316,6 +316,8 @@ export default interface IElement {
   get fontLetterSpacingInputEnable(): boolean;
   // 段落间距是否可修改
   get paragraphSpacingInputEnable(): boolean;
+  // 文本大小写是否可修改
+  get textCaseInputEnable(): boolean;
   // 字体样式
   get fontStyler(): FontStyler;
   // 字体大小
@@ -364,6 +366,8 @@ export default interface IElement {
   get textDecorationThicknessMixin(): boolean;
   // 段落间距
   get paragraphSpacing(): number;
+  // 文本大小写
+  get textCase(): TextCase;
   // 圆角
   get corners(): number[];
   // 是否包含有效描边
@@ -712,6 +716,12 @@ export default interface IElement {
    * @param value 段落间距值
    */
   setParagraphSpacing(value: number): void;
+
+  /**
+   * 设置文本大小写
+   * @param value 文本大小写
+   */
+  setTextCase(value: TextCase): void;
 
   /**
    * 设置比例锁定
@@ -1186,6 +1196,11 @@ export default interface IElement {
    * 设置段落间距
    */
   onParagraphSpacingChanged(): void;
+
+  /**
+   * 设置文本大小写
+   */
+  onTextCaseChanged(): void;
 
   /**
    * 锁定比例

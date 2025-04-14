@@ -140,6 +140,16 @@ export default class CoderUtils {
   }
 
   /**
+   * 是否是大写的英文字符
+   *
+   * @param char
+   * @returns
+   */
+  static isUpperCaseLetter(char: string): boolean {
+    return char.length === 1 && /[A-Z]/.test(char);
+  }
+
+  /**
    * 判断是否为英文字符
    *
    * @param char

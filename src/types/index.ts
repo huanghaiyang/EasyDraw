@@ -159,6 +159,8 @@ export enum ShieldDispatcherNames {
   textBaselineChanged = "textBaselineChanged",
   // 段落间距改变
   paragraphSpacingChanged = "paragraphSpacingChanged",
+  // 文本大小写改变
+  textCaseChanged = "textCaseChanged",
   // 锁定比例改变
   creatorChanged = "creatorChanged",
   // 锁定比例改变

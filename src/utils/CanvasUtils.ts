@@ -1,12 +1,12 @@
 import { IPoint } from "@/types";
-import { ElementStyles, FillStyle, FontStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, FontStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration } from "@/styles/ElementStyles";
 import MathUtils from "@/utils/MathUtils";
 import StyleUtils from "@/utils/StyleUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import { ArcPoints, RenderParams, RenderRect } from "@/types/IRender";
 import ArbitraryUtils from "@/utils/ArbitraryUtils";
 import { EllipseModel } from "@/types/IElement";
-import ITextData, { ITextNode } from "@/types/IText";
+import ITextData, { ITextLine, ITextNode } from "@/types/IText";
 import FontUtils from "@/utils/FontUtils";
 import { every, isNumber } from "lodash";
 import CoderUtils from "@/utils/CoderUtils";
@@ -81,19 +81,19 @@ function isDiffBaseline(nodes: ITextNode[]): boolean {
  * @param ctx
  */
 function calcTextNodeIndenX(node: ITextNode, nodeIdex: number, metrics: TextMetrics, nodes: ITextNode[], ctx: CanvasRenderingContext2D): number {
-  const { content, fontStyle } = node;
+  const { renderContent, fontStyle } = node;
   // 字体宽度和基线值
   const { width } = metrics;
   // 缩进值
   let indentX: number = 0;
   // 如果当前节点是英文字符，且前一个节点也是英文字符
-  if (nodeIdex !== 0 && CoderUtils.isEnglishLetter(content)) {
+  if (nodeIdex !== 0 && CoderUtils.isEnglishLetter(renderContent)) {
     const prevNode = nodes[nodeIdex - 1];
-    const { content: prevContent, fontStyle: prevFontStyle, renderWidth: prevRenderWidth } = prevNode;
+    const { renderContent: prevRenderContent, fontStyle: prevFontStyle, renderWidth: prevRenderWidth } = prevNode;
     // 如果前一个节点是英文字符，且两个节点的样式相同，则需要计算下两个字符是否是连字
-    if (CoderUtils.isEnglishLetter(prevContent) && FontUtils.isFontEqualForMeasureText(fontStyle, prevFontStyle)) {
+    if (CoderUtils.isEnglishLetter(prevRenderContent) && FontUtils.isFontEqualForMeasureText(fontStyle, prevFontStyle)) {
       // 计算当前节点和前一个节点的连字宽度
-      const { width: tupleWidth } = ctx.measureText(prevContent + content);
+      const { width: tupleWidth } = ctx.measureText(prevRenderContent + renderContent);
       // 两个字符的最大宽度
       const ligatureWidth = prevRenderWidth + width;
       // 如果连字宽度小于最大宽度，则需要缩进
@@ -104,6 +104,66 @@ function calcTextNodeIndenX(node: ITextNode, nodeIdex: number, metrics: TextMetr
     }
   }
   return indentX;
+}
+
+/**
+ * 获取文本节点的渲染内容,转换大小写
+ *
+ * @param node
+ * @param index
+ * @param line
+ * @param lineIndex
+ * @param textCase
+ * @param textData
+ * @returns
+ */
+function getTextCaseContent(node: ITextNode, index: number, line: ITextLine, lineIndex: number, textCase: TextCase, textData: ITextData): string {
+  const { content } = node;
+  let renderContent: string = content;
+  switch (textCase) {
+    case TextCase.uppercase:
+      renderContent = content.toUpperCase();
+      break;
+    case TextCase.lowercase:
+      renderContent = content.toLowerCase();
+      break;
+    case TextCase.capitalize: {
+      if (CoderUtils.isEnglishLetter(content)) {
+        let converted: boolean = false;
+        let prevWordNode;
+        // 判断当前字符是否是行首字符
+        if (index === 0) {
+          // 判断当前行是否是首行，如果不是，向前查找
+          if (lineIndex !== 0) {
+            // 前一行
+            const prevLine = textData.lines[lineIndex - 1];
+            // 前一行不是尾部换行
+            if (!prevLine.isTailBreak) {
+              // 前一行的最后一个字符，此字符可能不存在
+              prevWordNode = prevLine.nodes[prevLine.nodes.length - 1];
+            }
+          } else {
+            // 首行，直接首字母大写
+            renderContent = content.toUpperCase();
+            converted = true;
+          }
+        } else {
+          prevWordNode = line.nodes[index - 1];
+        }
+        if (!converted) {
+          if (prevWordNode && !CoderUtils.isEnglishLetter(prevWordNode.content)) {
+            // 如果前一个字符不是英文则转换为大写
+            renderContent = content.toUpperCase();
+          } else if (!CoderUtils.isUpperCaseLetter(content)) {
+            // 如果字符本身是大写，则不转换为小写
+            renderContent = content.toLowerCase();
+          }
+        }
+      }
+      break;
+    }
+  }
+  return renderContent;
 }
 
 /**
@@ -430,7 +490,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateText(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}): void {
-    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign, paragraphSpacing, fontStyler } = fontStyle;
+    const { fontColor, fontFamily, fontSize, textAlign, textBaseline, fontLineHeight: lineHeight, fontColorOpacity, textVerticalAlign, paragraphSpacing, fontStyler, textCase } = fontStyle;
     const { flipX } = options;
     const ctx = target.getContext("2d");
     ctx.save();
@@ -465,7 +525,7 @@ export default class CanvasUtils {
     const { alphabeticBaseline: avgAlphabeticBaseline, fontBoundingBoxAscent, fontBoundingBoxDescent } = ctx.measureText("a");
     // 平均字体高度
     const avgFontHeight = fontBoundingBoxDescent - fontBoundingBoxAscent;
-    textData.lines.forEach(line => {
+    textData.lines.forEach((line, lineIndex) => {
       // 当前整个行文本节点加起来的渲染宽度
       let lineWidth: number = 0;
       // 文本节点开始渲染时的x坐标
@@ -478,11 +538,12 @@ export default class CanvasUtils {
         // 遍历节点并渲染
         iterateNodes(nodes, ctx, (node, index) => {
           const {
-            content,
             fontStyle: { fontLetterSpacing },
           } = node;
+          const renderContent = getTextCaseContent(node, index, line, lineIndex, textCase, textData);
+          node.renderContent = renderContent;
           // 字体度量
-          const metrics = ctx.measureText(content);
+          const metrics = ctx.measureText(renderContent);
           // 字体宽度和基线值
           const { width: renderWidth, fontBoundingBoxDescent, fontBoundingBoxAscent, alphabeticBaseline } = metrics;
           // 缩进值（通常为负值）
@@ -521,7 +582,7 @@ export default class CanvasUtils {
           }
           // 如果是左对齐，则绘制文本，如果是右对齐或者居中对齐，则此次循环是为了计算行宽，需要另外一个新的循环来绘制文本
           if (textAlign === "left") {
-            ctx.fillText(content, x, y);
+            ctx.fillText(renderContent, x, y);
             drawTextDecoration(ctx, node);
           }
         });
@@ -535,13 +596,13 @@ export default class CanvasUtils {
         if (textAlign !== "left") {
           line.renderX = nodeX;
           iterateNodes(nodes, ctx, node => {
-            const { renderY, width, renderWidth, indentX, content } = node;
+            const { renderY, width, renderWidth, indentX, renderContent } = node;
             const renderX = nodeX + indentX + width - renderWidth;
             Object.assign(node, {
               x: nodeX,
               renderX,
             });
-            ctx.fillText(content, renderX, renderY);
+            ctx.fillText(renderContent, renderX, renderY);
             drawTextDecoration(ctx, node);
             nodeX += width + indentX;
           });

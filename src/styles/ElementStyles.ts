@@ -97,6 +97,14 @@ export enum FontStyler {
   boldItalic = "bold italic",
 }
 
+// 文本大小写类型
+export enum TextCase {
+  none = "none",
+  uppercase = "uppercase",
+  lowercase = "lowercase",
+  capitalize = "capitalize",
+}
+
 // 文本字体样式定义
 export type TextFontStyle = {
   fontStyler?: FontStyler;
@@ -126,6 +134,8 @@ export type TextFontStyle = {
   textDecorationThickness?: number;
   // 段落间距
   paragraphSpacing?: number;
+  // 文本大小写
+  textCase?: TextCase;
 };
 
 // 字体样式定义
@@ -196,6 +206,8 @@ export const DefaultTextDecorationOpacity = 100;
 export const DefaultTextDecorationThickness = 1;
 // 默认段落间距
 export const DefaultParagraphSpacing = 0;
+// 默认文本大小写
+export const DefaultTextCase = TextCase.none;
 
 // 默认描边样式
 export const DefaultStrokeStyle: StrokeStyle = {
@@ -236,6 +248,7 @@ export const DefaultFontStyle: FontStyle = {
   textDecorationOpacity: DefaultTextDecorationOpacity,
   textDecorationThickness: DefaultTextDecorationThickness,
   paragraphSpacing: DefaultParagraphSpacing,
+  textCase: DefaultTextCase,
 };
 
 // 默认组件样式

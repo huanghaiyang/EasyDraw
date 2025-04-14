@@ -3,7 +3,7 @@ import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel } from "@/types/IElement";
-import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
@@ -109,8 +109,8 @@ const DefaultStage = {
   textDecorationThicknessMixin: false,
   // 段落间距
   paragraphSpacing: DefaultElementStyle.paragraphSpacing,
-  // 段落间距是否混合
-  paragraphSpacingMixin: false,
+  // 文本大小写
+  textCase: DefaultElementStyle.textCase,
   // 是否锁定比例
   isRatioLocked: false,
   // 填充是否可用
@@ -149,6 +149,8 @@ const DefaultStage = {
   positionInputEnable: false,
   // 段落间距输入是否可用
   paragraphSpacingInputEnable: false,
+  // 文本大小写输入是否可用
+  textCaseInputEnable: false,
   // 组件状态
   status: ElementStatus.initialed,
 };
@@ -265,6 +267,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.layerShiftMoveEnableChanged, this.onLayerShiftMoveEnableChanged],
         [ShieldDispatcherNames.layerGoDownEnableChanged, this.onLayerGoDownEnableChanged],
         [ShieldDispatcherNames.paragraphSpacingChanged, this.onParagraphSpacingChanged],
+        [ShieldDispatcherNames.textCaseChanged, this.onTextCaseChanged],
       ].forEach(([name, callback]) => {
         shield.on(name, throttle(callback.bind(this), ThrottleTime, tOptions));
       });
@@ -383,6 +386,7 @@ export const useStageStore = defineStore("stage", {
         textDecorationOpacityMixin,
         textDecorationThicknessMixin,
         paragraphSpacing,
+        textCase,
       } = element;
       // 组件状态
       this.onStatusChanged(element, status);
@@ -460,7 +464,10 @@ export const useStageStore = defineStore("stage", {
       this.onTextDecorationThicknessMixinChanged(element, textDecorationThicknessMixin);
       // 段落间距
       this.onParagraphSpacingChanged(element, paragraphSpacing);
+      // 文本大小写
+      this.onTextCaseChanged(element, textCase);
     },
+
     /**
      * 舞台组件命中状态改变
      *
@@ -495,6 +502,7 @@ export const useStageStore = defineStore("stage", {
         leanYAngleInputEnable,
         positionInputEnable,
         paragraphSpacingInputEnable,
+        textCaseInputEnable,
       } = element;
       this.fillEnable = fillEnable;
       this.strokeEnable = strokeEnable;
@@ -514,6 +522,7 @@ export const useStageStore = defineStore("stage", {
       this.cornersInputEnable = cornersInputEnable;
       this.positionInputEnable = positionInputEnable;
       this.paragraphSpacingInputEnable = paragraphSpacingInputEnable;
+      this.textCaseInputEnable = textCaseInputEnable;
     },
     /**
      * 组件坐标变化
@@ -616,7 +625,7 @@ export const useStageStore = defineStore("stage", {
      * @param fontStyler
      */
     onFontStylerChanged(element: IElement, fontStyler: FontStyler) {
-      this.fontStyler = LodashUtils.jsonClone(fontStyler);
+      this.fontStyler = fontStyler;
     },
     /**
      * 组件字体大小变化
@@ -860,6 +869,15 @@ export const useStageStore = defineStore("stage", {
      */
     onParagraphSpacingChanged(element: IElement, paragraphSpacing: number) {
       this.paragraphSpacing = paragraphSpacing;
+    },
+    /**
+     * 组件文本大小写变化
+     *
+     * @param element
+     * @param textCase
+     */
+    onTextCaseChanged(element: IElement, textCase: TextCase) {
+      this.textCase = textCase;
     },
     /**
      * 层上移是否可用
@@ -1289,6 +1307,14 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsParagraphSpacing(value: number): void {
       shield.setElementsParagraphSpacing(toRaw(this.selectedElements), value);
+    },
+    /**
+     * 设置组件文本大小写
+     *
+     * @param value
+     */
+    setElementsTextCase(value: TextCase): void {
+      shield.setElementsTextCase(toRaw(this.selectedElements), value);
     },
   },
 });

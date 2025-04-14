@@ -10,7 +10,7 @@ import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
 import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
-import { FontStyle, FontStyler, getDefaultElementStyle, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, FontStyler, getDefaultElementStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
@@ -2275,6 +2275,20 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setParagraphSpacing(value);
+      }
+    });
+  }
+
+  /**
+   * 设置组件文本大小写
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id)) {
+        element.setTextCase(value);
       }
     });
   }

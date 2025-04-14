@@ -22,7 +22,7 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { FontStyle, FontStyler, StrokeTypes, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
+import { FontStyle, FontStyler, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IController from "@/types/IController";
 import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
@@ -846,6 +846,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     });
     elements.forEach(element => element.onParagraphSpacingChanged());
     this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
+    await this._createFontStyleCommand(elements, async () => {
+      await this.store.setElementsTextCase(elements, value);
+      await this._addRedrawTask(true);
+      await this._reflowTextIfy(elements, true);
+      elements.forEach(element => element.onTextCaseChanged());
+    });
   }
 
   /**

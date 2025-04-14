@@ -8,7 +8,14 @@
     <angle-props></angle-props>
     <corner-props></corner-props>
     <font-family-props></font-family-props>
-    <font-styler-props></font-styler-props>
+    <el-row :gutter="0">
+      <el-col :span="12">
+        <font-styler-props></font-styler-props>
+      </el-col>
+      <el-col :span="12">
+        <font-text-case-props></font-text-case-props>
+      </el-col>
+    </el-row>
     <font-color-props></font-color-props>
     <el-row :gutter="0">
       <el-col :span="11">

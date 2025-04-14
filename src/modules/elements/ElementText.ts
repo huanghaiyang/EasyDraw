@@ -117,6 +117,10 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  get textCaseInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   get editingEnable(): boolean {
     return true;
   }
