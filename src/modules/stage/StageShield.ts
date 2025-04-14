@@ -235,6 +235,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 重绘所有组件
+   * 
+   * TODO 有性能问题，比较直观的浮现方式
+   * 1. 打开控制台
+   * 2. 绘制一个矩形
+   * 3. 立刻拖动
+   * 4. 发现拖动缓慢
    */
   private async _requestAnimationRedraw(): Promise<void> {
     requestAnimationFrame(async () => {
@@ -888,6 +894,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsRotate(elements, value);
       elements.forEach(element => element.onAngleChanged());
+      this.selection.refresh();
+    });
+    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件水平翻转
+   *
+   * @param elements
+   */
+  async setElementsFlipX(elements: IElement[]): Promise<void> {
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsFlipX(elements);
+      elements.forEach(element => element.onFlipXChanged());
       this.selection.refresh();
     });
     this._shouldRedraw = true;

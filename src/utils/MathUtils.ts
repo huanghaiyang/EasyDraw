@@ -905,7 +905,7 @@ export default class MathUtils {
    */
   static calcViewAngleByPoints(boxPoints: IPoint[]): number {
     const angle = MathUtils.calcAngle(boxPoints[2], boxPoints[1]);
-    return MathUtils.mirrorAngle(angle + 90);
+    return MathUtils.constraintAngle(angle + 90);
   }
 
   /**
@@ -918,16 +918,16 @@ export default class MathUtils {
     const internalAngle = MathUtils.calcInternalAngle(boxPoints);
     const leanYAngle = MathUtils.calcLeanYAngle(internalAngle, MathUtils.calcFlipXByPoints(boxPoints));
     const viewAngle = MathUtils.calcViewAngleByPoints(boxPoints);
-    return MathUtils.mirrorAngle(viewAngle - leanYAngle);
+    return MathUtils.constraintAngle(viewAngle - leanYAngle);
   }
 
   /**
-   * 镜像角度
+   * 角度约束
    *
    * @param angle
    * @returns
    */
-  static mirrorAngle(angle: number): number {
+  static constraintAngle(angle: number): number {
     // 将角度限制在[-180, 180]之间
     while (angle > 180) {
       angle -= 360;

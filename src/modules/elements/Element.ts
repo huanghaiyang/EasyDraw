@@ -1002,6 +1002,13 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 水平翻转后
+   */
+  onFlipXAfter(): void {
+    this.refreshOriginalProps();
+  }
+
+  /**
    * 旋转中
    */
   onRotating(): void {
@@ -1054,6 +1061,17 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
+  }
+
+  /**
+   * 水平翻转变化
+   */
+  onFlipXChanged(): void {
+    this.refreshFlipX();
+    this.refresh();
+    this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
+    this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
+    this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
   }
 
   /**
@@ -1618,7 +1636,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   calcActualAngle(): number {
-    return MathUtils.mirrorAngle(this.model.viewAngle - this.model.leanYAngle);
+    return MathUtils.constraintAngle(this.model.viewAngle - this.model.leanYAngle);
   }
 
   /**
@@ -1824,7 +1842,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     } else {
       angle = this.model.angle + 180;
     }
-    this.model.angle = MathUtils.mirrorAngle(angle);
+    this.model.angle = MathUtils.constraintAngle(angle);
   }
 
   /**
@@ -1930,7 +1948,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算y倾斜角度
     this.model.leanYAngle = MathUtils.calcLeanYAngle(this.model.internalAngle, MathUtils.calcFlipXByPoints(boxCoords));
     // 计算变换后的角度
-    this.model.angle = MathUtils.mirrorAngle(MathUtils.calcActualAngleByPoints(boxCoords));
+    this.model.angle = MathUtils.constraintAngle(MathUtils.calcActualAngleByPoints(boxCoords));
     // 设置变换后的坐标
     this.model.coords = MathUtils.batchPrecisePoint(ElementUtils.calcCoordsByTransPoints(coords, this.angles, lockCoord), 1);
     // 设置变换后的盒模型坐标
@@ -2686,6 +2704,37 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 设置水平翻转
+   */
+  setFlipX(): void {
+    // 计算未倾斜的盒模型坐标
+    const unLeanBoxCoords = this.calcUnLeanBoxCoords();
+    // 计算未倾斜的坐标
+    const unLeanCoords = this.calcUnLeanCoords();
+    // p0是盒模型的左上角坐标，p1是盒模型的右上角坐标
+    const [p0, p1] = unLeanBoxCoords;
+    // p0p1m是盒模型的中心点坐标
+    const m_p0p1 = {
+      x: (p0.x + p1.x) / 2,
+      y: (p0.y + p1.y) / 2,
+    };
+    // 中心点坐标
+    const centerCoord = this.centerCoord;
+    // 计算翻转后的盒模型坐标
+    this.model.boxCoords = MathUtils.batchCalcSymmetryPoints(unLeanBoxCoords, centerCoord, m_p0p1);
+    // 计算翻转后的坐标
+    this.model.coords = MathUtils.batchCalcSymmetryPoints(unLeanCoords, centerCoord, m_p0p1);
+    // 角度镜像
+    this.model.angle = -this.model.angle;
+    // 倾斜角度镜像
+    this.model.leanYAngle = -this.model.leanYAngle;
+    // 计算倾斜后的盒模型坐标
+    this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(this.model.boxCoords, this.model.leanYAngle, centerCoord), 1);
+    // 计算倾斜后的坐标
+    this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(this.model.coords, this.model.leanYAngle, centerCoord), 1);
+  }
+
+  /**
    * 按照某一点为圆心，旋转指定角度
    *
    * @param value
@@ -2708,7 +2757,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 设置变换盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoint(boxCoords, 1);
     // 设置变换角度
-    this.model.angle = MathUtils.mirrorAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
+    this.model.angle = MathUtils.constraintAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
   }
 
   /**

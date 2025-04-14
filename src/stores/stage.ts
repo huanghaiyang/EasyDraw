@@ -1328,5 +1328,11 @@ export const useStageStore = defineStore("stage", {
     setElementsTextCase(value: TextCase): void {
       shield.setElementsTextCase(toRaw(this.selectedElements), value);
     },
+    /**
+     * 设置组件水平翻转
+     */
+    setElementsFlipX(): void {
+      shield.setElementsFlipX(toRaw(this.selectedElements));
+    },
   },
 });

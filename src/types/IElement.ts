@@ -730,6 +730,11 @@ export default interface IElement {
   setRatioLocked(value: boolean): void;
 
   /**
+   * 水平翻转
+   */
+  setFlipX(): void;
+
+  /**
    * 拉伸
    * @param center 中心点坐标
    * @param scaleX X轴缩放值
@@ -1023,6 +1028,11 @@ export default interface IElement {
   onRotateAfter(): void;
 
   /**
+   * 水平翻转后
+   */
+  onFlipXAfter(): void;
+
+  /**
    * 旋转中
    */
   onRotating(): void;
@@ -1041,6 +1051,11 @@ export default interface IElement {
    * 变换中
    */
   onTransforming(): void;
+
+  /**
+   * 水平翻转变化
+   */
+  onFlipXChanged(): void;
 
   /**
    * 角度变化

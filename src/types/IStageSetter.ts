@@ -311,12 +311,12 @@ export default interface IStageSetter {
    */
   setElementsRotate(elements: IElement[], angle: number): Promise<void>;
 
-  // /**
-  //  * 组件水平翻转
-  //  *
-  //  * @param elements
-  //  */
-  // setElementsFlipX(elements: IElement[]): Promise<void>;
+  /**
+   * 组件水平翻转
+   *
+   * @param elements
+   */
+  setElementsFlipX(elements: IElement[]): Promise<void>;
 
   // /**
   //  * 组件垂直翻转

@@ -589,6 +589,21 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件水平翻转
+   */
+  async setElementsFlipX(elements: IElement[]): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        element.setFlipX();
+        element.onFlipXAfter();
+        if (element.isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => sub.onFlipXAfter());
+        }
+      }
+    });
+  }
+
+  /**
    * 设置组件圆角
    *
    * @param elements
@@ -1674,7 +1689,7 @@ export default class StageStore implements IStageStore {
   rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint): void {
     elements.forEach(element => {
       if (element.model.type !== CreatorTypes.line) {
-        angle = MathUtils.mirrorAngle(element.originalAngle + angle - originalAngle);
+        angle = MathUtils.constraintAngle(element.originalAngle + angle - originalAngle);
         angle = MathUtils.precise(angle, 1);
       }
       element.setAngle(angle);
