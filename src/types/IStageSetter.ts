@@ -302,4 +302,26 @@ export default interface IStageSetter {
    * @param elements 要修改的元件集合
    */
   setElementsGoDown(elements: IElement[]): Promise<void>;
+
+  /**
+   * 组件旋转
+   *
+   * @param elements 要修改的元件集合
+   * @param angle 旋转角度
+   */
+  setElementsRotate(elements: IElement[], angle: number): Promise<void>;
+
+  // /**
+  //  * 组件水平翻转
+  //  *
+  //  * @param elements
+  //  */
+  // setElementsFlipX(elements: IElement[]): Promise<void>;
+
+  // /**
+  //  * 组件垂直翻转
+  //  *
+  //  * @param elements
+  //  */
+  // setElementsFlipY(elements: IElement[]): Promise<void>;
 }

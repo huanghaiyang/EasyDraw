@@ -1,9 +1,9 @@
 @font-face {
   font-family: "iconfont"; /* Project id 4781741 */
-  src: url('iconfont.woff2?t=1744594137925') format('woff2'),
-       url('iconfont.woff?t=1744594137925') format('woff'),
-       url('iconfont.ttf?t=1744594137925') format('truetype'),
-       url('iconfont.svg?t=1744594137925#iconfont') format('svg');
+  src: url('iconfont.woff2?t=1744617640552') format('woff2'),
+       url('iconfont.woff?t=1744617640552') format('woff'),
+       url('iconfont.ttf?t=1744617640552') format('truetype'),
+       url('iconfont.svg?t=1744617640552#iconfont') format('svg');
 }
 
 .iconfont {
@@ -12,6 +12,22 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-verbise-rotate-left:before {
+  content: "\e901";
+}
+
+.icon-verbise-rotate-right:before {
+  content: "\e902";
+}
+
+.icon-verbise-rotateY:before {
+  content: "\e6b9";
+}
+
+.icon-verbise-rotateX:before {
+  content: "\e6ba";
 }
 
 .icon-verbise-text-align-justify:before {

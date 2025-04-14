@@ -193,6 +193,9 @@ export const useStageStore = defineStore("stage", {
     alignEnable(): boolean {
       return this.selectedElements?.length >= 2;
     },
+    rotateEnable(): boolean {
+      return this.selectedElements?.length >= 1;
+    },
     // 平均是否可用
     averageEnable(): boolean {
       return this.selectedElements?.length >= 3;
@@ -1283,6 +1286,15 @@ export const useStageStore = defineStore("stage", {
     setElementsShiftMove(): void {
       if (!this.layerShiftMoveEnable) return;
       shield.setElementsShiftMove(toRaw(this.selectedElements));
+    },
+    /**
+     * 设置组件旋转指定角度
+     *
+     * @param angle
+     */
+    setElementsRotate(angle: number): void {
+      if (!this.rotateEnable) return;
+      shield.setElementsRotate(toRaw(this.selectedElements), angle);
     },
     /**
      * 上传图片

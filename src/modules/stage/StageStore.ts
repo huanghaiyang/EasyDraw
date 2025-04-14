@@ -570,6 +570,25 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 旋转组件
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsRotate(elements: IElement[], value: number): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        if (!value) return;
+        this.rotateElements([element], element.angle + value, element.angle, element.centerCoord);
+        element.onRotateAfter();
+        if (element.isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => sub.onRotateAfter());
+        }
+      }
+    });
+  }
+
+  /**
    * 设置组件圆角
    *
    * @param elements

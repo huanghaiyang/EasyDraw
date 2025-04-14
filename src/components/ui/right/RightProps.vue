@@ -6,6 +6,7 @@
     <position-props></position-props>
     <size-props></size-props>
     <angle-props></angle-props>
+    <rotate-flip-props></rotate-flip-props>
     <corner-props></corner-props>
     <font-family-props></font-family-props>
     <el-row :gutter="0">
@@ -58,6 +59,7 @@
   .corners-props,
   .font-props,
   .fill-props,
+  .rotate-props,
   .layer-props {
     &__title {
       font-size: 14px;

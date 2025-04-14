@@ -316,6 +316,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       elements.forEach(element => element.onWidthChanged());
       this.selection.refresh();
     });
+    this._shouldRedraw = true;
   }
 
   /**
@@ -330,6 +331,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       elements.forEach(element => element.onHeightChanged());
       this.selection.refresh();
     });
+    this._shouldRedraw = true;
   }
 
   /**
@@ -344,6 +346,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       elements.forEach(element => element.onLeanyAngleChanged());
       this.selection.refresh();
     });
+    this._shouldRedraw = true;
   }
 
   /**
@@ -358,6 +361,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       elements.forEach(element => element.onAngleChanged());
       this.selection.refresh();
     });
+    this._shouldRedraw = true;
   }
 
   /**
@@ -872,6 +876,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
     await this.store.setElementsRatioLocked(elements, value);
     elements.forEach(element => element.onRatioLockedChanged());
+  }
+
+  /**
+   * 设置组件旋转角度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsRotate(elements: IElement[], value: number): Promise<void> {
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsRotate(elements, value);
+      elements.forEach(element => element.onAngleChanged());
+      this.selection.refresh();
+    });
+    this._shouldRedraw = true;
   }
 
   /**
