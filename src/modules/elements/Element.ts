@@ -1002,13 +1002,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 水平翻转后
-   */
-  onFlipXAfter(): void {
-    this.refreshOriginalProps();
-  }
-
-  /**
    * 旋转中
    */
   onRotating(): void {
@@ -1068,7 +1061,19 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFlipXChanged(): void {
     this.refreshFlipX();
-    this.refresh();
+    this.refresh(
+      {
+        points: true,
+        rotation: true,
+        position: this.isGroupSubject,
+        angles: true,
+        outline: true,
+        strokes: true,
+        corners: true,
+        originals: true,
+      },
+      { angles: { view: true, actual: true } },
+    );
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);

@@ -1036,11 +1036,6 @@ export default interface IElement {
   onRotateAfter(): void;
 
   /**
-   * 水平翻转后
-   */
-  onFlipXAfter(): void;
-
-  /**
    * 旋转中
    */
   onRotating(): void;
