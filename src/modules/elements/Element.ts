@@ -1005,16 +1005,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 旋转中
    */
   onRotating(): void {
-    // 刷新
-    this.refresh({
-      points: true,
-      rotation: true,
-      position: true,
-      angles: true,
-      outline: true,
-      strokes: true,
-      corners: true,
-    });
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "angles", "outline", "strokes", "corners"]));
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
@@ -1036,19 +1027,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 变换中
    */
   onTransforming(): void {
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        size: true,
-        position: true,
-        angles: true,
-        outline: true,
-        strokes: true,
-        corners: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "size", "angles", "outline", "strokes", "corners"]), {
+      angles: LodashUtils.toBooleanObject(["view", "actual"]),
+    });
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
     this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
@@ -1061,19 +1042,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFlipXChanged(): void {
     this.refreshFlipX();
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        position: this.isGroupSubject,
-        angles: true,
-        outline: true,
-        strokes: true,
-        corners: true,
-        originals: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size", "angles", "outline", "strokes", "corners", "originals", { position: this.isGroupSubject }]), {
+      angles: LodashUtils.toBooleanObject(["view", "actual"]),
+    });
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
@@ -1084,19 +1055,9 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onFlipYChanged(): void {
     this.refreshFlipX();
-    this.refresh(
-      {
-        points: true,
-        rotation: true,
-        position: this.isGroupSubject,
-        angles: true,
-        outline: true,
-        strokes: true,
-        corners: true,
-        originals: true,
-      },
-      { angles: { view: true, actual: true } },
-    );
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size", "angles", "outline", "strokes", "corners", "originals", { position: this.isGroupSubject }]), {
+      angles: LodashUtils.toBooleanObject(["view", "actual"]),
+    });
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipY而不是flipY用以减少属性值计算
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
@@ -1106,7 +1067,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 角度发生变化
    */
   onAngleChanged(): void {
-    this.refresh(null, { angles: { view: true, actual: true } });
+    this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual"]) });
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
@@ -1115,9 +1076,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   onLeanyAngleChanged(): void {
     // 刷新角度选项
-    this.refresh(null, {
-      angles: { view: true, actual: true, internal: true },
-    });
+    this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual", "internal"]) });
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
   }
 
@@ -1125,7 +1084,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 圆角变化中
    */
   onCornerChanging(): void {
-    this.refresh({ corners: true, strokes: true });
+    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes"]));
     this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
@@ -1133,7 +1092,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 圆角发生变化
    */
   onCornerChanged(): void {
-    this.refresh({ corners: true, strokes: true, originals: true });
+    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
@@ -1141,7 +1100,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边类型发生变化
    */
   onStrokeTypeChanged(): void {
-    this.refresh({ strokes: true, outline: true, originals: true });
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1149,7 +1108,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边宽度发生变化
    */
   onStrokeWidthChanged(): void {
-    this.refresh({ strokes: true, outline: true, originals: true });
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1171,7 +1130,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边添加
    */
   onStrokeAdded(): void {
-    this.refresh({ strokes: true, outline: true, originals: true });
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1179,7 +1138,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边删除
    */
   onStrokeRemoved(): void {
-    this.refresh({ strokes: true, outline: true, originals: true });
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -2324,16 +2283,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.model.coords = MathUtils.batchPrecisePoint(this.batchCalcTransformPointsByCenter(this._originalRotateCoords, matrix, center, this._originalCenterCoord), 1);
       this.model.boxCoords = MathUtils.batchPrecisePoint(this.batchCalcTransformPointsByCenter(this._originalRotateBoxCoords, matrix, center, this._originalCenterCoord), 1);
     }
-    this.refresh({
-      points: true,
-      size: true,
-      position: true,
-      rotation: true,
-      originals: true,
-      outline: true,
-      strokes: true,
-      corners: true,
-    });
+    this.refresh();
   }
 
   /**

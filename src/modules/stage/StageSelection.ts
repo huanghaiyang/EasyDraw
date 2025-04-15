@@ -358,14 +358,7 @@ export default class StageSelection implements IStageSelection {
         });
       }
       if (this.rangeElement.isTransforming) {
-        this.rangeElement.refresh({
-          points: true,
-          size: true,
-          rotation: true,
-          angles: true,
-          outline: true,
-          strokes: true,
-        });
+        this.rangeElement.refresh(LodashUtils.toBooleanObject(["points", "size", "rotation", "angles", "outline", "strokes"]));
       } else {
         this.rangeElement.refresh();
       }

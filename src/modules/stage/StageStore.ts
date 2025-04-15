@@ -1406,7 +1406,7 @@ export default class StageStore implements IStageStore {
       element.tailCoordIndex = 0;
     }
     this.selectElement(element);
-    element.refresh({ size: true, points: true, position: true });
+    element.refresh(LodashUtils.toBooleanObject(["size", "points", "position"]));
     return element;
   }
 
@@ -1606,7 +1606,7 @@ export default class StageStore implements IStageStore {
     // 此处有性能问题
     this._elementList.forEach(({ value: element }) => {
       this._updateElementStageStatusIfy(element);
-      element.refresh({ points: true, rotation: true, originals: true, outline: true, strokes: true });
+      element.refresh(LodashUtils.toBooleanObject(["points", "rotation", "originals", "outline", "strokes"]));
     });
   }
 

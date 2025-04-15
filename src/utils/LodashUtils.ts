@@ -67,4 +67,25 @@ export default class LodashUtils {
     }
     return keys1.every(key => obj1[key] === obj2[key]);
   }
+
+  /**
+   * 将字符串数组映射为对象，且值为boolean
+   *
+   * @param array
+   * @param value
+   * @returns
+   */
+  static toBooleanObject(array: (string | { [key: string]: boolean })[], value: boolean = true): { [key: string]: boolean } {
+    return array.reduce(
+      (obj, key) => {
+        if (typeof key === "string") {
+          obj[key] = value;
+        } else if (isPlainObject(key)) {
+          Object.assign(obj, key);
+        }
+        return obj;
+      },
+      {} as { [key: string]: boolean },
+    ) as { [key: string]: boolean };
+  }
 }
