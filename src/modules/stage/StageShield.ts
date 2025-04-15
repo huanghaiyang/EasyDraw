@@ -914,6 +914,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件垂直翻转
+   *
+   * @param elements
+   */
+  async setElementsFlipY(elements: IElement[]): Promise<void> {
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsFlipY(elements);
+      elements.forEach(element => element.onFlipYChanged());
+      this.selection.refresh();
+    });
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 初始化
    *
    * @param renderEl

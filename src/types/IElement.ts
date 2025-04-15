@@ -743,6 +743,19 @@ export default interface IElement {
   flipXBy(flipLineStart: IPoint, flipLineEnd: IPoint): void;
 
   /**
+   * 垂直翻转
+   */
+  setFlipY(): [IPoint, IPoint];
+
+  /**
+   * 给定参考线，进行垂直翻转
+   *
+   * @param flipLineStart
+   * @param flipLineEnd
+   */
+  flipYBy(flipLineStart: IPoint, flipLineEnd: IPoint): void;
+
+  /**
    * 拉伸
    * @param center 中心点坐标
    * @param scaleX X轴缩放值
@@ -1059,6 +1072,11 @@ export default interface IElement {
    * 水平翻转变化
    */
   onFlipXChanged(): void;
+
+  /**
+   * 垂直翻转变化
+   */
+  onFlipYChanged(): void;
 
   /**
    * 角度变化

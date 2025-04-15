@@ -318,10 +318,10 @@ export default interface IStageSetter {
    */
   setElementsFlipX(elements: IElement[]): Promise<void>;
 
-  // /**
-  //  * 组件垂直翻转
-  //  *
-  //  * @param elements
-  //  */
-  // setElementsFlipY(elements: IElement[]): Promise<void>;
+  /**
+   * 组件垂直翻转
+   *
+   * @param elements
+   */
+  setElementsFlipY(elements: IElement[]): Promise<void>;
 }

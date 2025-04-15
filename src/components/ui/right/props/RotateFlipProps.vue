@@ -12,6 +12,7 @@ const stageStore = useStageStore();
       <el-icon :class="['iconfont', 'icon-verbise-rotate-left', { disabled: !stageStore.rotateEnable }]" @click="stageStore.setElementsRotate(-90)" title="逆时针旋转90度"></el-icon>
       <el-icon :class="['iconfont', 'icon-verbise-rotate-right', { disabled: !stageStore.rotateEnable }]" @click="stageStore.setElementsRotate(90)" title="顺时针旋转90度"></el-icon>
       <el-icon :class="['iconfont', 'icon-verbise-rotateY', { disabled: !stageStore.rotateEnable }]" @click="stageStore.setElementsFlipX()" title="水平翻转"></el-icon>
+      <el-icon :class="['iconfont', 'icon-verbise-rotateX', { disabled: !stageStore.rotateEnable }]" @click="stageStore.setElementsFlipY()" title="垂直翻转"></el-icon>
     </div>
   </div>
 </template>

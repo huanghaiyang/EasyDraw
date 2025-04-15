@@ -605,6 +605,22 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 设置组件垂直翻转
+   */
+  async setElementsFlipY(elements: IElement[]): Promise<void> {
+    elements.forEach(element => {
+      if (this.hasElement(element.id) && !element.isGroupSubject) {
+        const [flipLineStart, flipLineEnd] = element.setFlipY();
+        if (element.isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => {
+            sub.flipYBy(flipLineStart, flipLineEnd);
+          });
+        }
+      }
+    });
+  }
+
+  /**
    * 设置组件圆角
    *
    * @param elements

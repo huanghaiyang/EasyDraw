@@ -1334,5 +1334,11 @@ export const useStageStore = defineStore("stage", {
     setElementsFlipX(): void {
       shield.setElementsFlipX(toRaw(this.selectedElements));
     },
+    /**
+     * 设置组件垂直翻转
+     */
+    setElementsFlipY(): void {
+      shield.setElementsFlipY(toRaw(this.selectedElements));
+    },
   },
 });
