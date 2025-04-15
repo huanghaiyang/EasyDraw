@@ -2161,6 +2161,8 @@ export default class Element implements IElement, ILinkedNodeValue {
       const lockCoord = this.getBorderTransformLockCoord(index);
       // 当前拖动的点的原始位置
       const currentCoordOriginal = this._originalTransformerCoords[index];
+      // 当前拖动的点的原始位置
+      this._originalTransformMoveCoord = currentCoordOriginal;
       // 当前拖动的点当前的位置
       const currentCoord = {
         x: currentCoordOriginal.x + offset.x,
