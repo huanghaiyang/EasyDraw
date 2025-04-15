@@ -594,10 +594,13 @@ export default class StageStore implements IStageStore {
   async setElementsFlipX(elements: IElement[]): Promise<void> {
     elements.forEach(element => {
       if (this.hasElement(element.id) && !element.isGroupSubject) {
-        element.setFlipX();
+        const [flipLineStart, flipLineEnd] = element.setFlipX();
         element.onFlipXAfter();
         if (element.isGroup) {
-          (element as IElementGroup).deepSubs.forEach(sub => sub.onFlipXAfter());
+          (element as IElementGroup).deepSubs.forEach(sub => {
+            sub.flipXBy(flipLineStart, flipLineEnd);
+            sub.onFlipXAfter();
+          });
         }
       }
     });

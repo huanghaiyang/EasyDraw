@@ -235,7 +235,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 重绘所有组件
-   * 
+   *
    * TODO 有性能问题，比较直观的浮现方式
    * 1. 打开控制台
    * 2. 绘制一个矩形

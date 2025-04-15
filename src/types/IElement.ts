@@ -732,7 +732,15 @@ export default interface IElement {
   /**
    * 水平翻转
    */
-  setFlipX(): void;
+  setFlipX(): [IPoint, IPoint];
+
+  /**
+   * 给定参考线，进行水平翻转
+   *
+   * @param flipLineStart
+   * @param flipLineEnd
+   */
+  flipXBy(flipLineStart: IPoint, flipLineEnd: IPoint): void;
 
   /**
    * 拉伸
