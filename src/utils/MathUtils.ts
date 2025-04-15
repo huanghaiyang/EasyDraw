@@ -583,6 +583,22 @@ export default class MathUtils {
   }
 
   /**
+   * 给出点数组和直线数组，返回点数组相对于直线的多次对称点数组
+   *
+   * @param coords
+   * @param lines
+   * @returns
+   */
+  static batchCalcSymmetryPointsMuch(coords: IPoint[], lines: [lineStart: IPoint, lineEnd: IPoint][]): IPoint[] {
+    return coords.map(coord => {
+      lines.forEach(line => {
+        coord = MathUtils.calcSymmetryPoint(coord, line[0], line[1]);
+      });
+      return coord;
+    });
+  }
+
+  /**
    * 缩放
    *
    * @param coord

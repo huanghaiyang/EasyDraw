@@ -754,7 +754,7 @@ export default interface IElement {
    * @param flipLineEnd
    */
   flipYBy(flipLineStart: IPoint, flipLineEnd: IPoint): void;
-
+  
   /**
    * 拉伸
    * @param center 中心点坐标

@@ -2696,17 +2696,17 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算未倾斜的坐标
     const unLeanCoords = this.calcUnLeanCoords();
     // 计算翻转后的盒模型坐标
-    this.model.boxCoords = MathUtils.batchCalcSymmetryPoints(unLeanBoxCoords, flipLineStart, flipLineEnd);
+    const boxCoords = MathUtils.batchCalcSymmetryPoints(unLeanBoxCoords, flipLineStart, flipLineEnd);
     // 计算翻转后的坐标
-    this.model.coords = MathUtils.batchCalcSymmetryPoints(unLeanCoords, flipLineStart, flipLineEnd);
+    const coords = MathUtils.batchCalcSymmetryPoints(unLeanCoords, flipLineStart, flipLineEnd);
     // 执行翻转动作
     flipAction();
-    // 计算翻转参考的中心点，如果是单个翻转，那么此值与组件的centerCoord相同，如果是组合，则子组件计算出的翻转中心点实际为祖先组合的中心点
-    const flipCenterCoord = MathUtils.calcCenter(this.model.boxCoords);
+    // 计算新的组件中心点
+    const centerCoord = MathUtils.calcCenter(boxCoords);
     // 计算倾斜后的盒模型坐标
-    this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(this.model.boxCoords, this.model.leanYAngle, flipCenterCoord), 1);
+    this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(boxCoords, this.model.leanYAngle, centerCoord), 1);
     // 计算倾斜后的坐标
-    this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(this.model.coords, this.model.leanYAngle, flipCenterCoord), 1);
+    this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(coords, this.model.leanYAngle, centerCoord), 1);
   }
 
   /**
@@ -2725,11 +2725,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 获取组件水平或者垂直翻转时的参考线端点坐标
+   * 获取组件水平翻转时的参考线端点坐标
    *
    * @returns
    */
-  _getFlipLinePoints(): [IPoint, IPoint] {
+  _getFlipXLinePoints(): [IPoint, IPoint] {
     // 计算未倾斜的盒模型坐标
     const unLeanBoxCoords = this.calcUnLeanBoxCoords();
     // p0是盒模型的左上角坐标，p1是盒模型的右上角坐标
@@ -2746,10 +2746,33 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 获取垂直翻转时的参考线端点坐标
+
+   * @returns
+ */
+  _getFlipYLinePoints(): [IPoint, IPoint] {
+    // 计算未倾斜的盒模型坐标
+    const unLeanBoxCoords = this.calcUnLeanBoxCoords();
+    // p0是盒模型的左上角坐标
+    const p0 = unLeanBoxCoords[0];
+    // p3是盒模型的左下角坐标
+    const p3 = unLeanBoxCoords[3];
+    // m_p0p3是p0p3的中点坐标，为参考线的结束点
+    const m_p0p3 = {
+      x: (p0.x + p3.x) / 2,
+      y: (p0.y + p3.y) / 2,
+    };
+    // 组件的中心点坐标为其中参考线的起始点
+    const centerCoord = this.centerCoord;
+    // 返回参考线坐标，用于子节点的翻转参考
+    return [centerCoord, m_p0p3];
+  }
+
+  /**
    * 设置水平翻转
    */
   setFlipX(): [IPoint, IPoint] {
-    const points = this._getFlipLinePoints();
+    const points = this._getFlipXLinePoints();
     // 开始翻转
     this.flipXBy(points[0], points[1]);
     // 返回参考线坐标，用于子节点的翻转参考
@@ -2758,26 +2781,63 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 按照某一条线为翻转线，垂直翻转组件
-
+   * 组件的翻转过程如下：
+   * 1. 按照父组件的垂水平考线进行第一次翻转
+   * 2. 按照当前组件的垂直参考线进行第二次翻转
+   * 3. 按照当前组件的水平参考线进行第三次翻转
+   *
    * @param flipLineStart 翻转线起点坐标
    * @param flipLineEnd 翻转线终点坐标
    */
   flipYBy(flipLineStart: IPoint, flipLineEnd: IPoint): void {
-    this._flipBy(flipLineStart, flipLineEnd, () => {
-      this.model.angle = MathUtils.constraintAngle(180 - this.model.angle);
-      this.model.leanYAngle = -this.model.leanYAngle;
-    });
+    // 计算未倾斜的盒模型坐标
+    const unLeanBoxCoords = this.calcUnLeanBoxCoords();
+    // 计算未倾斜的坐标
+    const unLeanCoords = this.calcUnLeanCoords();
+    // 计算翻转后的盒模型坐标（执行第1步）
+    let boxCoords = MathUtils.batchCalcSymmetryPoints(unLeanBoxCoords, flipLineStart, flipLineEnd);
+    // 计算翻转后的坐标（执行第1步）
+    let coords = MathUtils.batchCalcSymmetryPoints(unLeanCoords, flipLineStart, flipLineEnd);
+    // 计算新的组件中心点
+    const centerCoord = MathUtils.calcCenter(boxCoords);
+    // 计算参考线的中点坐标，用于子节点的翻转参考
+    const m_p0p1 = {
+      x: (boxCoords[0].x + boxCoords[1].x) / 2,
+      y: (boxCoords[0].y + boxCoords[1].y) / 2,
+    };
+    const m_p0p3 = {
+      x: (boxCoords[0].x + boxCoords[3].x) / 2,
+      y: (boxCoords[0].y + boxCoords[3].y) / 2,
+    };
+    // 重新计算翻转后的盒模型坐标（执行第2、3步)
+    boxCoords = MathUtils.batchCalcSymmetryPointsMuch(boxCoords, [
+      [centerCoord, m_p0p1],
+      [centerCoord, m_p0p3],
+    ]);
+    // 重新计算翻转后的坐标（执行第2、3步)
+    coords = MathUtils.batchCalcSymmetryPointsMuch(coords, [
+      [centerCoord, m_p0p1],
+      [centerCoord, m_p0p3],
+    ]);
+    // 设置角度
+    this.model.angle = MathUtils.constraintAngle(180 - this.model.angle);
+    // 翻转倾斜角度
+    this.model.leanYAngle = -this.model.leanYAngle;
+    // 计算倾斜后的盒模型坐标
+    this.model.boxCoords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(boxCoords, this.model.leanYAngle, centerCoord), 1);
+    // 计算倾斜后的坐标
+    this.model.coords = MathUtils.batchPrecisePoint(MathUtils.batchLeanYWithCenter(coords, this.model.leanYAngle, centerCoord), 1);
   }
 
   /**
    * 设置垂直翻转
    */
   setFlipY(): [IPoint, IPoint] {
-    const points = this._getFlipLinePoints();
+    const flipPoints = this._getFlipYLinePoints();
     // 开始翻转
-    this.flipYBy(points[0], points[1]);
+    this.flipYBy(flipPoints[0], flipPoints[1]);
     // 返回参考线坐标，用于子节点的翻转参考
-    return points;
+    return flipPoints;
   }
 
   /**
