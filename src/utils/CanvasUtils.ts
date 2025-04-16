@@ -228,6 +228,36 @@ export default class CanvasUtils {
   static scale: number = 1;
 
   /**
+   * 批量缓存字符串类图片
+   *
+   * @param imgStrs
+   * @returns
+   */
+  static async cacheStringImages(imgStrs: string[]): Promise<void> {
+    await Promise.all(imgStrs.map(str => CanvasUtils.cacheStringImage(str)));
+  }
+
+  /**
+   * 缓存字符串类图片
+   *
+   * @param str
+   * @returns
+   */
+  static async cacheStringImage(str: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = str;
+      img.onload = () => {
+        CanvasUtils.ImageCaches.set(str, img);
+        resolve();
+      };
+      img.onerror = () => {
+        reject();
+      };
+    });
+  }
+
+  /**
    * 根据线型转换点坐标
    *
    * @param points
