@@ -246,6 +246,14 @@ export default class ElementText extends ElementRect implements IElementText {
     return (this.model.data as ITextData).lines.filter(line => line.isTailBreak).length;
   }
 
+  get alignCoords(): IPoint[] {
+    return CommonUtils.getBoxByPoints([...super.alignCoords, ...this._getTextRotateRenderCoords()]);
+  }
+
+  get alignOutlineCoords(): IPoint[][] {
+    return [CommonUtils.getBoxByPoints([...super.alignOutlineCoords.flat(), ...this._getTextRotateRenderCoords()])];
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this._undoRedo = new UndoRedo();
