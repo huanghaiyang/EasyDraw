@@ -2228,7 +2228,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     await this._addRedrawTask(true);
     // 因为文本录入时使用的是textarea，但是渲染时是canvas，导致宽度和高度计算不正确（目前没有其他好方法），所以此处需要使用渲染后的文本节点重新计算尺寸
-    element.reCalcSizeAndCoords();
+    element.refreshTextSizeCoords();
     element.refresh();
     await this._createAddedCommand([element]);
     this.selection.refresh();

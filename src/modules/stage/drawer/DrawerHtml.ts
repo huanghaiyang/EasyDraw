@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 import CoderUtils from "@/utils/CoderUtils";
 import EventUtils from "@/utils/EventUtils";
 
-const minWidth = 200;
+const minWidth = 100;
 const minHeight = 20;
 
 export default class DrawerHtml extends DrawerBase implements IDrawerHtml {

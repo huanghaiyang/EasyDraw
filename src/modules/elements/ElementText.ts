@@ -1385,7 +1385,7 @@ export default class ElementText extends ElementRect implements IElementText {
    *
    * 注意此方法仅可以在组件刚创建时调用，因为对于width\height\coords\boxCoords的处理都没有考虑组件倾斜的情况
    */
-  reCalcSizeAndCoords(): void {
+  refreshTextSizeCoords(): void {
     const width = this._calcTextRenderWidth();
     const height = this._calcTextRenderHeight();
     this.model.width = width;

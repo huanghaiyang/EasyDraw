@@ -1244,8 +1244,8 @@ export default class TextElementUtils {
     let maxWidth = 0;
     for (let i = 0; i < textLines.length; i++) {
       const line = textLines[i];
-      const { width } = line;
-      maxWidth = Math.max(maxWidth, width / scale);
+      const { renderWidth } = line;
+      maxWidth = Math.max(maxWidth, renderWidth / scale);
     }
     return maxWidth;
   }
