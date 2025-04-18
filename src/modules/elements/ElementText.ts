@@ -553,7 +553,7 @@ export default class ElementText extends ElementRect implements IElementText {
             reflow = true;
           }
         }
-      } else if (!shiftKey && !metaKey && !altKey && !ctrlKey) {
+      } else if (!metaKey && !altKey && !ctrlKey) {
         // 普通按键
         changed = this._updateInput(textData, value, states);
         if (changed) {

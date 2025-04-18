@@ -173,7 +173,7 @@ export const DefaultFontStyler = FontStyler.normal;
 // 默认字体大小
 export const DefaultFontSize = 16;
 // 默认字体家族
-export const DefaultFontFamily = "Arial";
+export const DefaultFontFamily = "Arial 楷体";
 // 默认字体颜色
 export const DefaultFontColor = "#000000";
 // 默认字体颜色透明度

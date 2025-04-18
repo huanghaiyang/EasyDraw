@@ -139,6 +139,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
             caret-color: #000;
             color: #000;
             box-sizing: border-box;
+            font-variant-ligatures: discretionary-ligatures;
         }
         #html-drawer textarea::-webkit-scrollbar {
             display: none;
@@ -224,15 +225,11 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   private _addCursorInputEvents(textCursorEditor: HTMLTextAreaElement): void {
     // 监听键盘按键
     textCursorEditor.addEventListener("keydown", e => {
-      const { keyCode, ctrlKey, shiftKey, metaKey, altKey } = e;
+      const { keyCode, ctrlKey, shiftKey } = e;
       this._prevTextCursorKeycode = keyCode;
       this._prevTextCursorCtrlKey = ctrlKey;
       this._prevTextCursorShiftKey = shiftKey;
       if (
-        ctrlKey ||
-        shiftKey ||
-        metaKey ||
-        altKey ||
         CoderUtils.isDeleterKey(keyCode) ||
         CoderUtils.isArrowLeft(keyCode) ||
         CoderUtils.isArrowRight(keyCode) ||
@@ -242,18 +239,15 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
         (ctrlKey && CoderUtils.isA(keyCode)) ||
         (ctrlKey && CoderUtils.isX(keyCode)) ||
         (ctrlKey && CoderUtils.isC(keyCode)) ||
-        (ctrlKey && CoderUtils.isV(keyCode)) ||
         (ctrlKey && CoderUtils.isZ(keyCode)) ||
         (ctrlKey && CoderUtils.isY(keyCode))
       ) {
-        if (!CoderUtils.isV(keyCode)) {
-          EventUtils.stopPP(e);
-          this._resetTextCursorInput();
-          this._emitTextCursorUpdate();
-          requestAnimationFrame(() => {
-            this.focusTextCursorInput();
-          });
-        }
+        EventUtils.stopPP(e);
+        this._resetTextCursorInput();
+        this._emitTextCursorUpdate();
+        requestAnimationFrame(() => {
+          this.focusTextCursorInput();
+        });
       }
     });
     // 监听粘贴事件

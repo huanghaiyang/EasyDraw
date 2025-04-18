@@ -195,36 +195,36 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     document.addEventListener("keydown", (e: KeyboardEvent) => {
       this._isCtrl = this._isCtrlEvent(e);
 
-      // 放大操作
-      if (this._isCtrlPlusEvent(e)) {
-        EventUtils.stopPP(e);
-        this.emit("scaleIncrease");
-      }
-
-      // 缩小操作
-      if (this._isCtrlReduceEvent(e)) {
-        EventUtils.stopPP(e);
-        this.emit("scaleReduce");
-      }
-
-      // 还原缩放到100%
-      if (this._isCtrl0Event(e)) {
-        EventUtils.stopPP(e);
-        this.emit("scale100");
-      }
-
-      // 舞台自适应操作
-      if (this._isShift1Event(e)) {
-        EventUtils.stopPP(e);
-        this.emit("scaleAutoFit");
-      } else if (this._isShiftEvent(e)) {
-        this._isShift = true;
-      } else {
-        this._isShift = false;
-      }
-
       // 非输入操作
       if (!this._isInputEvent(e)) {
+        // 放大操作
+        if (this._isCtrlPlusEvent(e)) {
+          EventUtils.stopPP(e);
+          this.emit("scaleIncrease");
+        }
+
+        // 缩小操作
+        if (this._isCtrlReduceEvent(e)) {
+          EventUtils.stopPP(e);
+          this.emit("scaleReduce");
+        }
+
+        // 还原缩放到100%
+        if (this._isCtrl0Event(e)) {
+          EventUtils.stopPP(e);
+          this.emit("scale100");
+        }
+
+        // 舞台自适应操作
+        if (this._isShift1Event(e)) {
+          EventUtils.stopPP(e);
+          this.emit("scaleAutoFit");
+        } else if (this._isShiftEvent(e)) {
+          this._isShift = true;
+        } else {
+          this._isShift = false;
+        }
+
         // 监听组件删除操作
         if (this._isDeleteEvent(e)) {
           EventUtils.stopPP(e);

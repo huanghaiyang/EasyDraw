@@ -560,7 +560,7 @@ export default class CanvasUtils {
       let lineWidth: number = 0;
       // 文本节点开始渲染时的x坐标
       let nodeX: number = elementX;
-      Object.assign(line, { x: elementX, y: lineY, width: elementWidth, height: lineHeight, renderHeight: lineHeight, renderY: lineY });
+      Object.assign(line, { x: elementX, y: lineY, width: elementWidth, height: lineHeight, renderWidth: 0, renderHeight: lineHeight, renderY: lineY });
       const { nodes, isTailBreak } = line;
       if (nodes.length !== 0) {
         // 行基线坐标
