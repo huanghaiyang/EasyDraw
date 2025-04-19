@@ -215,6 +215,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
     );
     this._requestAnimationRedraw();
+    window.shield = this
   }
 
   /**

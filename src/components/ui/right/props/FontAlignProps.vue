@@ -32,19 +32,19 @@ watch(
         <el-button-group>
           <el-button
             :type="textAlign === 'left' ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textAlignInputEnable"
             :class="['iconfont', 'icon-verbise-text-align-left']"
             @click="stageStore.setElementsTextAlign('left')"
           ></el-button>
           <el-button
             :type="textAlign === 'center' ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textAlignInputEnable"
             :class="['iconfont', 'icon-verbise-text-align-center']"
             @click="stageStore.setElementsTextAlign('center')"
           ></el-button>
           <el-button
             :type="textAlign === 'right' ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textAlignInputEnable"
             :class="['iconfont', 'icon-verbise-text-align-right']"
             @click="stageStore.setElementsTextAlign('right')"
           ></el-button>
@@ -54,19 +54,19 @@ watch(
         <el-button-group>
           <el-button
             :type="textVerticalAlign === TextVerticalAlign.top ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textVerticalAlignInputEnable"
             :class="['iconfont', 'icon-verbise-vertical-align-top']"
             @click="stageStore.setElementsTextVerticalAlign(TextVerticalAlign.top)"
           ></el-button>
           <el-button
             :type="textVerticalAlign === TextVerticalAlign.middle ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textVerticalAlignInputEnable"
             :class="['iconfont', 'icon-verbise-vertical-align-middle']"
             @click="stageStore.setElementsTextVerticalAlign(TextVerticalAlign.middle)"
           ></el-button>
           <el-button
             :type="textVerticalAlign === TextVerticalAlign.bottom ? 'success' : 'default'"
-            :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
+            :disabled="stageStore.inputDisabled || !stageStore.textVerticalAlignInputEnable"
             :class="['iconfont', 'icon-verbise-vertical-align-bottom']"
             @click="stageStore.setElementsTextVerticalAlign(TextVerticalAlign.bottom)"
           ></el-button>

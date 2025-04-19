@@ -302,6 +302,10 @@ export default interface IElement {
   get textAlign(): CanvasTextAlign;
   // 文本垂直对齐
   get textVerticalAlign(): TextVerticalAlign;
+  // 文本对齐是否可修改
+  get textAlignInputEnable(): boolean;
+  // 文本垂直对齐是否可修改
+  get textVerticalAlignInputEnable(): boolean;
   // 文本基线
   get textBaseline(): CanvasTextBaseline;
   // 字体是否启用
@@ -754,7 +758,7 @@ export default interface IElement {
    * @param flipLineEnd
    */
   flipYBy(flipLineStart: IPoint, flipLineEnd: IPoint): void;
-  
+
   /**
    * 拉伸
    * @param center 中心点坐标

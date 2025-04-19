@@ -399,6 +399,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.model.styles.textVerticalAlign;
   }
 
+  get textAlignInputEnable(): boolean {
+    return false;
+  }
+
+  get textVerticalAlignInputEnable(): boolean {
+    return false;
+  }
+
   get textBaseline(): CanvasTextBaseline {
     return this.model.styles.textBaseline;
   }

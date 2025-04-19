@@ -121,10 +121,16 @@ export default class ElementText extends ElementRect implements IElementText {
     return this.status === ElementStatus.finished;
   }
 
+  get textAlignInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+  get textVerticalAlignInputEnable(): boolean {
+    return this.status === ElementStatus.finished;
+  }
+
   get editingEnable(): boolean {
     return true;
   }
-
   get textCursor(): ITextCursor {
     return this._textCursor;
   }
@@ -1040,6 +1046,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @param states 文本编辑状态
    */
   private _moveCursorTo(direction: Direction, states: TextEditingStates): void {
+    if (!this._textCursor) return;
     this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
     const textData = this.model.data as ITextData;
     const { shiftKey } = states;
