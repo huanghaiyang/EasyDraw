@@ -2,7 +2,7 @@ import { FontStyle, FontStyleSet, TextFontStyle } from "@/styles/ElementStyles";
 import { Direction, IPoint } from "@/types";
 import { TextCursorWidth } from "@/types/constants";
 import { ElementObject } from "@/types/IElement";
-import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection } from "@/types/IText";
+import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextFontStyleUpdateTypes } from "@/types/IText";
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
 import { pick, every, isString, isNumber } from "lodash";
@@ -1282,5 +1282,33 @@ export default class TextElementUtils {
     const startY = textLines[0].y;
     const endY = textLines[textLines.length - 1].y + textLines[textLines.length - 1].height;
     return (endY - startY) / scale;
+  }
+
+  /**
+   * 判断是否应该为撤销回退命令关联到当前的文本编辑命令
+
+   * @param updateType 更新类型
+   * @returns 是否为关系型命令
+   */
+  static shouldRelationUndoCommand(updateType: TextFontStyleUpdateTypes): boolean {
+    return [
+      TextFontStyleUpdateTypes.FONT_FAMILY,
+      TextFontStyleUpdateTypes.FONT_SIZE,
+      TextFontStyleUpdateTypes.FONT_COLOR,
+      TextFontStyleUpdateTypes.FONT_COLOR_OPACITY,
+      TextFontStyleUpdateTypes.FONT_LETTER_SPACING,
+      TextFontStyleUpdateTypes.FONT_STYLER,
+      TextFontStyleUpdateTypes.FONT_TEXT_CASE,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_COLOR,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_OPACITY,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_THICKNESS,
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT,
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT_FACTOR,
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT_AUTO_FIT,
+      TextFontStyleUpdateTypes.FONT_TEXT_ALIGN,
+      TextFontStyleUpdateTypes.FONT_TEXT_VERTICAL_ALIGN,
+      TextFontStyleUpdateTypes.FONT_PARAGRAPH_SPACING,
+    ].includes(updateType);
   }
 }

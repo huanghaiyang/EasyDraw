@@ -105,6 +105,11 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   commitArbitraryDrawing(): Promise<void>;
   // 提交编辑绘制
   commitEditingDrawing(): Promise<void>;
+
+  // 执行撤销
+  execUndo(): Promise<void>;
+  // 执行重做
+  execRedo(): Promise<void>;
 }
 
 // 舞台计算参数

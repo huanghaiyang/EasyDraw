@@ -4,10 +4,14 @@ import { IElementText } from "@/types/IElement";
 export default class TextEditorBaseCommand<T> implements ICommand<T> {
   payload: T;
   element: IElementText;
+  id: string;
+  relationId?: string;
 
-  constructor(payload: T, element: IElementText) {
+  constructor(id: string, payload: T, element: IElementText, relationId?: string) {
     this.payload = payload;
     this.element = element;
+    this.id = id;
+    this.relationId = relationId;
   }
 
   async undo(): Promise<void> {

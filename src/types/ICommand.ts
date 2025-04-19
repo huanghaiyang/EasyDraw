@@ -27,6 +27,8 @@ export type IGroupCommandElementObject = ICommandElementObject &
 
 // 命令
 export default interface ICommand<T> {
+  id: string;
+  relationId?: string;
   payload: T;
   undo(): Promise<void>;
   redo(): Promise<void>;

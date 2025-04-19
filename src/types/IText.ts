@@ -113,3 +113,26 @@ export enum TextEditorPressTypes {
   PRESS_MOVE = "press_move",
   PRESS_UP = "press_up",
 }
+
+// 文本字体样式更新类型
+export enum TextFontStyleUpdateTypes {
+  FONT_SIZE = "font_size",
+  FONT_FAMILY = "font_family",
+  FONT_STYLER = "font_styler",
+  FONT_COLOR = "font_color",
+  FONT_COLOR_OPACITY = "font_color_opacity",
+  FONT_ALIGN = "font_align",
+  FONT_LINE_HEIGHT = "font_line_height",
+  FONT_LINE_HEIGHT_FACTOR = "font_line_height_factor",
+  FONT_LINE_HEIGHT_AUTO_FIT = "font_line_height_auto_fit",
+  FONT_LETTER_SPACING = "font_letter_spacing",
+  FONT_PARAGRAPH_SPACING = "font_paragraph_spacing",
+  FONT_TEXT_CASE = "font_text_case",
+  FONT_TEXT_ALIGN = "font_text_align",
+  FONT_TEXT_VERTICAL_ALIGN = "font_text_vertical_align",
+  FONT_TEXT_DECORATION = "font_text_decoration",
+  FONT_TEXT_DECORATION_COLOR = "font_text_decoration_color",
+  FONT_TEXT_DECORATION_OPACITY = "font_text_decoration_opacity",
+  FONT_TEXT_DECORATION_THICKNESS = "font_text_decoration_thickness",
+  FONT_TEXT_BASELINE = "font_text_baseline",
+}

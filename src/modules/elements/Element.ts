@@ -1337,6 +1337,20 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 发送撤销事件
+   */
+  protected async emitUndo(): Promise<void> {
+    await this.shield.execUndo();
+  }
+
+  /**
+   * 发送重做事件
+   */
+  protected async emitRedo(): Promise<void> {
+    await this.shield.execRedo();
+  }
+
+  /**
    * 将坐标根据描边类型进行转换
    *
    * @param points

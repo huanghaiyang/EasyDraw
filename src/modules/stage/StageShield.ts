@@ -48,9 +48,11 @@ import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
 import UndoRedo from "@/modules/base/UndoRedo";
-import { TextEditorPressTypes } from "@/types/IText";
+import { TextEditorPressTypes, TextFontStyleUpdateTypes } from "@/types/IText";
 import GlobalConfig from "@/config";
 import { computed, makeObservable, observable, reaction } from "mobx";
+import { nanoid } from "nanoid";
+import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -131,7 +133,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.MOVING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus);
+    return (
+      [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.MOVING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) ||
+      this.isTextCreating ||
+      this.isTextEditing ||
+      this.isArbitraryDrawing ||
+      this.isArbitraryEditing
+    );
   }
 
   // 舞台是否在移动
@@ -215,7 +223,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
     );
     this._requestAnimationRedraw();
-    window.shield = this
   }
 
   /**
@@ -256,9 +263,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param uDataList
    * @param rDataList
+   * @param id
    */
-  private _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[]): void {
+  private _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): void {
     const command = new ElementsUpdatedCommand(
+      id || nanoid(),
       {
         type: ElementCommandTypes.ElementsUpdated,
         uDataList,
@@ -564,12 +573,29 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements
    * @param elementsUpdateFunction
+   * @param updateType
    */
-  private async _createFontStyleCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const dataList = await Promise.all(elements.map(async element => ({ model: await element.toFontStyleJson() })));
+  private async _createFontStyleCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>, updateType: TextFontStyleUpdateTypes): Promise<void> {
+    const shouldRelationUndoCommand = TextElementUtils.shouldRelationUndoCommand(updateType);
+    const commandId = nanoid();
+    const dataList = await Promise.all(
+      elements.map(async element => {
+        if (shouldRelationUndoCommand && element.isEditing && element instanceof ElementText) {
+          element.refreshUndoCommandObject();
+        }
+        return { model: await element.toFontStyleJson() };
+      }),
+    );
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toFontStyleJson() })));
-    this._createUpdateCommandBy(dataList, rDataList);
+    const rDataList = await Promise.all(
+      elements.map(async element => {
+        if (shouldRelationUndoCommand && element.isEditing && element instanceof ElementText) {
+          element.relationUndoCommand(commandId);
+        }
+        return { model: await element.toFontStyleJson() };
+      }),
+    );
+    this._createUpdateCommandBy(dataList, rDataList, commandId);
   }
 
   /**
@@ -608,12 +634,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextAlign(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onTextAlignChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextAlign(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onTextAlignChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_ALIGN,
+    );
   }
 
   /**
@@ -623,12 +653,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextVerticalAlign(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onTextVerticalAlignChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextVerticalAlign(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onTextVerticalAlignChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_VERTICAL_ALIGN,
+    );
   }
 
   /**
@@ -638,9 +672,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextBaseline(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextBaseline(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_BASELINE,
+    );
     elements.forEach(element => element.onTextBaselineChanged());
     this._shouldRedraw = true;
   }
@@ -652,12 +690,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontStyler(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onFontStylerChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontStyler(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onFontStylerChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_STYLER,
+    );
   }
 
   /**
@@ -667,17 +709,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontSize(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => {
-        element.onFontSizeChanged();
-        if (!(element as IElementText).isSelectionAvailable && element.fontLineHeightAutoFit) {
-          element.onFontLineHeightChanged();
-        }
-      });
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontSize(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => {
+          element.onFontSizeChanged();
+          if (!(element as IElementText).isSelectionAvailable && element.fontLineHeightAutoFit) {
+            element.onFontLineHeightChanged();
+          }
+        });
+      },
+      TextFontStyleUpdateTypes.FONT_SIZE,
+    );
   }
 
   /**
@@ -687,12 +733,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontFamily(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onFontFamilyChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontFamily(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onFontFamilyChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_FAMILY,
+    );
   }
 
   /**
@@ -702,9 +752,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontLineHeight(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontLineHeight(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT,
+    );
     elements.forEach(element => {
       element.onFontLineHeightChanged();
       element.onFontLineHeightFactorChanged();
@@ -719,9 +773,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontLineHeightFactor(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontLineHeightFactor(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT_FACTOR,
+    );
     elements.forEach(element => {
       element.onFontLineHeightFactorChanged();
       element.onFontLineHeightChanged();
@@ -736,9 +794,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontLineHeightAutoFit(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontLineHeightAutoFit(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_LINE_HEIGHT_AUTO_FIT,
+    );
     elements.forEach(element => {
       element.onFontLineHeightAutoFitChanged();
       element.onFontLineHeightChanged();
@@ -753,9 +815,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontColor(elements: IElement[], value: string): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontColor(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontColor(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_COLOR,
+    );
     elements.forEach(element => element.onFontColorChanged());
     this._shouldRedraw = true;
   }
@@ -767,9 +833,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontColorOpacity(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontColorOpacity(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_COLOR_OPACITY,
+    );
     elements.forEach(element => element.onFontColorOpacityChanged());
     this._shouldRedraw = true;
   }
@@ -781,12 +851,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsFontLetterSpacing(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onFontLetterSpacingChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontLetterSpacing(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onFontLetterSpacingChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_LETTER_SPACING,
+    );
   }
 
   /**
@@ -796,9 +870,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextDecoration(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextDecoration(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION,
+    );
     elements.forEach(element => element.onTextDecorationChanged());
     this._shouldRedraw = true;
   }
@@ -810,9 +888,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextDecorationColor(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextDecorationColor(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_COLOR,
+    );
     elements.forEach(element => element.onTextDecorationColorChanged());
     this._shouldRedraw = true;
   }
@@ -824,9 +906,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextDecorationOpacity(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextDecorationOpacity(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_OPACITY,
+    );
     elements.forEach(element => element.onTextDecorationOpacityChanged());
     this._shouldRedraw = true;
   }
@@ -838,9 +924,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextDecorationThickness(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextDecorationThickness(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_THICKNESS,
+    );
     elements.forEach(element => element.onTextDecorationThicknessChanged());
     this._shouldRedraw = true;
   }
@@ -852,9 +942,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsParagraphSpacing(elements, value);
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsParagraphSpacing(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_PARAGRAPH_SPACING,
+    );
     elements.forEach(element => element.onParagraphSpacingChanged());
     this._shouldRedraw = true;
   }
@@ -866,12 +960,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
-    await this._createFontStyleCommand(elements, async () => {
-      await this.store.setElementsTextCase(elements, value);
-      await this._addRedrawTask(true);
-      await this._reflowTextIfy(elements, true);
-      elements.forEach(element => element.onTextCaseChanged());
-    });
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextCase(elements, value);
+        await this._addRedrawTask(true);
+        await this._reflowTextIfy(elements, true);
+        elements.forEach(element => element.onTextCaseChanged());
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_CASE,
+    );
   }
 
   /**
@@ -1612,6 +1710,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createAddedCommand(elements: IElement[]): Promise<void> {
     const command = new ElementsAddedCommand(
+      nanoid(),
       {
         type: ElementCommandTypes.ElementsAdded,
         uDataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
@@ -1984,6 +2083,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       return;
     }
     const command = new ElementsRemovedCommand(
+      nanoid(),
       {
         type: ElementCommandTypes.ElementsRemoved,
         uDataList: await Promise.all(
@@ -2122,6 +2222,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.selectGroup(group);
       const rDataList = await this._createGroupAddedDataList(group, this.store.selectedElements);
       const command = new GroupAddedCommand(
+        nanoid(),
         {
           type: ElementCommandTypes.GroupAdded,
           uDataList,
@@ -2156,6 +2257,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       }),
     );
     const command = new GroupRemovedCommand(
+      nanoid(),
       {
         type: ElementCommandTypes.GroupRemoved,
         uDataList,
@@ -2185,6 +2287,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理撤销操作
    */
   async _handleUndo(): Promise<void> {
+    await this._doUndo();
+  }
+
+  /**
+   * 处理重做操作
+   */
+  async _handleRedo(): Promise<void> {
+    await this._doRedo();
+  }
+
+  /**
+   * 执行撤销
+   */
+  async _doUndo(): Promise<void> {
     const tailUndoCommand = this.undoRedo.tailUndoCommand;
     if (!tailUndoCommand) return;
     if (!(tailUndoCommand instanceof ElementsUpdatedCommand)) {
@@ -2192,14 +2308,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     await this.undoRedo.undo();
     this.selection.refresh();
-    this._shouldRedraw = true;
+    await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
   }
 
   /**
-   * 处理重做操作
+   * 执行重做
    */
-  async _handleRedo(): Promise<void> {
+  async _doRedo(): Promise<void> {
     const tailRedoCommand = this.undoRedo.tailRedoCommand;
     if (!tailRedoCommand) return;
     if (!(tailRedoCommand instanceof ElementsUpdatedCommand)) {
@@ -2207,8 +2323,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     await this.undoRedo.redo();
     this.selection.refresh();
-    this._shouldRedraw = true;
+    await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
+  }
+
+  /**
+   * 执行撤销
+   */
+  async execUndo(): Promise<void> {
+    await this._doUndo();
+  }
+
+  /**
+   * 执行重做
+   */
+  async execRedo(): Promise<void> {
+    await this._doRedo();
   }
 
   /**
@@ -2409,6 +2539,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await elementsUpdateFunction();
     const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
     const command = new ElementsRearrangeCommand(
+      nanoid(),
       {
         type: ElementCommandTypes.ElementsRearranged,
         uDataList,

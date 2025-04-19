@@ -1400,6 +1400,10 @@ export interface IElementText extends IElement {
   reflowText(force?: boolean): boolean;
   // 刷新文本框
   refreshTextSizeCoords(): void;
+  // 刷新撤销命令对象
+  refreshUndoCommandObject(): void;
+  // 关联撤销命令
+  relationUndoCommand(commandId: string): void;
 }
 
 // 舞台组件（组件）-线段

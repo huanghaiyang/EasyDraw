@@ -106,7 +106,7 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   get fontLineHeightFactorInputEnable(): boolean {
-    return this.status === ElementStatus.finished;
+    return true;
   }
 
   get fontLetterSpacingInputEnable(): boolean {
@@ -114,18 +114,18 @@ export default class ElementText extends ElementRect implements IElementText {
   }
 
   get paragraphSpacingInputEnable(): boolean {
-    return this.status === ElementStatus.finished;
+    return true;
   }
 
   get textCaseInputEnable(): boolean {
-    return this.status === ElementStatus.finished;
+    return true;
   }
 
   get textAlignInputEnable(): boolean {
-    return this.status === ElementStatus.finished;
+    return true;
   }
   get textVerticalAlignInputEnable(): boolean {
-    return this.status === ElementStatus.finished;
+    return true;
   }
 
   get editingEnable(): boolean {
@@ -543,6 +543,8 @@ export default class ElementText extends ElementRect implements IElementText {
         // 撤销
         const tailUndoCommand = this._undoRedo.tailUndoCommand;
         if (tailUndoCommand) {
+          const { relationId } = tailUndoCommand;
+          if (relationId) await this.emitUndo();
           await this._undoRedo.undo();
           this._editorOperation = TextEditorOperations.UNDO;
           if (![TextEditorOperations.MOVE_CURSOR, TextEditorOperations.MOVE_SELECTION].includes(tailUndoCommand.payload.operation)) {
@@ -553,6 +555,8 @@ export default class ElementText extends ElementRect implements IElementText {
         // 回退
         const tailRedoCommand = this._undoRedo.tailRedoCommand;
         if (tailRedoCommand) {
+          const { relationId } = tailRedoCommand;
+          if (relationId) await this.emitRedo();
           await this._undoRedo.redo();
           this._editorOperation = TextEditorOperations.REDO;
           if (![TextEditorOperations.MOVE_CURSOR, TextEditorOperations.MOVE_SELECTION].includes(tailRedoCommand.payload.operation)) {
@@ -1733,6 +1737,7 @@ export default class ElementText extends ElementRect implements IElementText {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject();
     } else {
       const command = new TextEditorUpdatedCommand(
+        nanoid(),
         {
           type: TextEeditorCommandTypes.TextUpdated,
           operation: this._editorOperation,
@@ -1771,6 +1776,7 @@ export default class ElementText extends ElementRect implements IElementText {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject({ dataExclude: true });
     } else {
       const command = new TextEditorUpdatedCommand(
+        nanoid(),
         {
           type: TextEeditorCommandTypes.CursorSelectionUpdated,
           operation: this._editorOperation,
@@ -1901,5 +1907,32 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   isModelPolygonOverlap(coords: IPoint[]): boolean {
     return super.isModelPolygonOverlap(coords) || MathUtils.isPolygonsOverlap(this._getTextRotateRenderCoords(), coords);
+  }
+
+  /**
+   * 刷新文本编辑器撤销命令对象（刷新当前状态以便回退）
+   */
+  refreshUndoCommandObject(): void {
+    this._undoCommandObject = this._getTextEditorCommandObject();
+  }
+
+  /**
+   * 关联组件撤销命令
+   *
+   * @param commandId
+   */
+  relationUndoCommand(commandId: string): void {
+    const editCommand = new TextEditorUpdatedCommand(
+      nanoid(),
+      {
+        type: TextEeditorCommandTypes.CursorSelectionUpdated,
+        operation: this._editorOperation,
+        updateId: this._textUpdateId,
+        uData: this._undoCommandObject,
+      },
+      this,
+      commandId,
+    );
+    this._undoRedo.add(editCommand);
   }
 }
