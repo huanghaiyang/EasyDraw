@@ -151,6 +151,10 @@ const DefaultStage = {
   paragraphSpacingInputEnable: false,
   // 文本大小写输入是否可用
   textCaseInputEnable: false,
+  // 文本对齐方式输入是否可用
+  textAlignInputEnable: false,
+  // 文本垂直对齐方式输入是否可用
+  textVerticalAlignInputEnable: false,
   // 组件状态
   status: ElementStatus.initialed,
 };
@@ -506,6 +510,8 @@ export const useStageStore = defineStore("stage", {
         positionInputEnable,
         paragraphSpacingInputEnable,
         textCaseInputEnable,
+        textAlignInputEnable,
+        textVerticalAlignInputEnable,
       } = element;
       this.fillEnable = fillEnable;
       this.strokeEnable = strokeEnable;
@@ -526,6 +532,8 @@ export const useStageStore = defineStore("stage", {
       this.positionInputEnable = positionInputEnable;
       this.paragraphSpacingInputEnable = paragraphSpacingInputEnable;
       this.textCaseInputEnable = textCaseInputEnable;
+      this.textAlignInputEnable = textAlignInputEnable;
+      this.textVerticalAlignInputEnable = textVerticalAlignInputEnable;
     },
     /**
      * 组件坐标变化
