@@ -88,4 +88,15 @@ export default class LodashUtils {
       {} as { [key: string]: boolean },
     ) as { [key: string]: boolean };
   }
+
+  /**
+   * 判断两个数组是否相等
+   *
+   * @param array1
+   * @param array2
+   * @returns
+   */
+  static isArrayEqual(array1: any[], array2: any[]): boolean {
+    return array1.length === array2.length && array1.every((item, index) => item === array2[index]);
+  }
 }

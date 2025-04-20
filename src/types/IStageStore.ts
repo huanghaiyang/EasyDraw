@@ -1,4 +1,4 @@
-import IElement, { ElementModelData, ElementObject, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementModelData, ElementObject, ElementTreeNode, RefreshSubOptions } from "@/types/IElement";
 import { IPoint, ShieldDispatcherNames } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
@@ -27,6 +27,8 @@ export default interface IStageStore extends IStageSetter {
   get rotatingTargetElements(): IElement[];
   // 编辑组件
   get editingElements(): IElement[];
+  // 组件树节点
+  get treeNodes(): ElementTreeNode[];
   // 是否选中组件为空
   get isSelectedEmpty(): boolean;
   // 是否高亮目标组件为空

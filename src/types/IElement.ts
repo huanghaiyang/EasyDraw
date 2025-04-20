@@ -1446,3 +1446,12 @@ export interface IElementArbitrary extends IElement {
    */
   deActiveEditingCoord(): void;
 }
+
+// 组件树节点
+export type ElementTreeNode = {
+  id: string;
+  parentId?: string;
+  label: string;
+  isGroup: boolean;
+  children: ElementTreeNode[];
+};

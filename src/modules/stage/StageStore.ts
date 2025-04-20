@@ -8,7 +8,17 @@ import MathUtils from "@/utils/MathUtils";
 import CreatorHelper from "@/types/CreatorHelper";
 import IStageStore from "@/types/IStageStore";
 import IStageShield from "@/types/IStageShield";
-import IElement, { DefaultAngleModel, ElementObject, IElementArbitrary, RefreshSubOptions, DefaultRefreshSubOptions, DefaultCornerModel, IElementRect, ElementModelData } from "@/types/IElement";
+import IElement, {
+  DefaultAngleModel,
+  ElementObject,
+  IElementArbitrary,
+  RefreshSubOptions,
+  DefaultRefreshSubOptions,
+  DefaultCornerModel,
+  IElementRect,
+  ElementModelData,
+  ElementTreeNode,
+} from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { FontStyle, FontStyler, getDefaultElementStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import LodashUtils from "@/utils/LodashUtils";
@@ -63,7 +73,8 @@ export default class StageStore implements IStageStore {
   private _editingElementIds: Set<string> = observable.set(new Set<string>());
   // 旋转组件目标组件
   private _rotatingTargetElementIds: Set<string> = observable.set(new Set<string>());
-
+  // 组件树节点
+  private _treeNodes: ElementTreeNode[] = [];
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
@@ -156,6 +167,11 @@ export default class StageStore implements IStageStore {
     return this._editingElements;
   }
 
+  // 组件树节点
+  get treeNodes(): ElementTreeNode[] {
+    return this._treeNodes;
+  }
+
   // 是否选中组件为空
   get isSelectedEmpty(): boolean {
     return this._selectedElementIds.size === 0;
@@ -214,6 +230,7 @@ export default class StageStore implements IStageStore {
       Object.keys(ElementReactionPropNames).forEach(propName => {
         this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
       });
+      this._emitTreeNodesChanged();
     });
   }
 
@@ -232,6 +249,7 @@ export default class StageStore implements IStageStore {
       this._rangeElementIds.delete(id);
       this._visibleElementIds.delete(id);
       this._stageElementIds.delete(id);
+      this._emitTreeNodesChanged();
     });
   }
 
@@ -472,6 +490,95 @@ export default class StageStore implements IStageStore {
     if (element.id === this.primarySelectedElement?.id || element.id === this._currentCreatingElementId) {
       this.shield.emit(name, element, ...args);
     }
+  }
+
+  /**
+   * 发送树节点变化事件
+   */
+  private _emitTreeNodesChanged(): void {
+    //延迟一下，防止卡顿和数据不准确问题
+    setTimeout(() => {
+      this._treeNodes = this._toTreeNodes();
+      this.shield.emit(ShieldDispatcherNames.treeNodesChanged, this._treeNodes);
+    });
+  }
+
+  /**
+   * 将组件列表转换为树结构
+   *
+   * @returns
+   */
+  private _toTreeNodes(): ElementTreeNode[] {
+    const tree: ElementTreeNode[] = [];
+    this._elementList.forEach(node => {
+      const element = node.value;
+      const {
+        isGroupSubject,
+        isGroup,
+        model: { id, name, groupId },
+      } = element;
+      if (!isGroupSubject) {
+        const treeNode = {
+          id,
+          parentId: groupId,
+          label: name,
+          children: [],
+          isGroup,
+        };
+        tree.push(treeNode);
+        if (isGroup) {
+          const subTreeNodes = this._findGroupSubs(node, []);
+          treeNode.children = subTreeNodes;
+        }
+      }
+    });
+    return tree;
+  }
+
+  /**
+   * 查找组合组件的子组件,并转换为树节点
+   *
+   * @param node
+   * @param result
+   * @returns
+   */
+  private _findGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
+    const {
+      value: {
+        isGroup,
+        model: { subIds, id },
+      },
+    } = node;
+    if (isGroup) {
+      const findedSubs: string[] = [];
+      let prevNode = node.prev;
+      while (prevNode) {
+        const prevElement = prevNode.value;
+        const {
+          isGroup: prevIsGroup,
+          model: { id: prevId, groupId: prevGroupId, name },
+        } = prevElement;
+        if (subIds.includes(prevId) && prevGroupId === id) {
+          const treeNode = {
+            id: prevId,
+            parentId: id,
+            label: name,
+            children: [],
+            isGroup: prevIsGroup,
+          };
+          // 将节点插入到头部
+          result.unshift(treeNode);
+          if (prevIsGroup) {
+            this._findGroupSubs(prevNode, treeNode.children);
+          }
+        }
+        if (LodashUtils.isArrayEqual(findedSubs, subIds)) {
+          break;
+        }
+        prevNode = prevNode.prev;
+      }
+    }
+    return result;
   }
 
   /**
@@ -1293,7 +1400,7 @@ export default class StageStore implements IStageStore {
       data,
       width: size.width,
       height: size.height,
-      name: `${CreatorHelper.getCreatorByType(type).name} ${+new Date()}`,
+      name: CreatorHelper.getCreatorByType(type).name,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
       ...position,
@@ -1740,7 +1847,7 @@ export default class StageStore implements IStageStore {
       boxCoords: CommonUtils.getBoxByPoints(coords),
       type: CreatorTypes.image,
       data: image,
-      name: "image",
+      name: "图片",
       width,
       height,
       length: 0,
@@ -1989,6 +2096,7 @@ export default class StageStore implements IStageStore {
     // 返回组合组件的数据对象
     return {
       ...ElementUtils.createEmptyGroupObject(),
+      name: "组合",
       subIds,
       coords,
       boxCoords: CommonUtils.getBoxByPoints(coords),
@@ -2278,6 +2386,7 @@ export default class StageStore implements IStageStore {
     this._doElementsGoDown(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
+    this._emitTreeNodesChanged();
   }
 
   /**
@@ -2314,6 +2423,7 @@ export default class StageStore implements IStageStore {
     this._doElementsShiftMove(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
+    this._emitTreeNodesChanged();
   }
 
   /**

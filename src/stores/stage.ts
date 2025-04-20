@@ -2,7 +2,7 @@ import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
-import IElement, { DefaultCornerModel } from "@/types/IElement";
+import IElement, { DefaultCornerModel, ElementTreeNode } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
@@ -172,6 +172,8 @@ export const useStageStore = defineStore("stage", {
       currentTextCreator: TextCreator,
       // 当前自由工具
       currentArbitraryCreator: PenCreator,
+      // 组件树形结构
+      treeNodes: [] as ElementTreeNode[],
       // 选中组件
       selectedElements: [],
       // 目标组件
@@ -227,6 +229,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.targetChanged, this.onTargetChanged],
         [ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged],
         [ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged],
+        [ShieldDispatcherNames.treeNodesChanged, this.onTreeNodesChanged],
       ].forEach(([name, callback]) => {
         shield.on(name, callback.bind(this));
       });
@@ -319,6 +322,14 @@ export const useStageStore = defineStore("stage", {
      */
     onPrimarySelectedChanged(primarySelectedElement: IElement | null) {
       this.primarySelectedElement = primarySelectedElement;
+    },
+    /**
+     * 舞台组件树形结构变更
+     *
+     * @param treeNodes
+     */
+    onTreeNodesChanged(treeNodes: ElementTreeNode[]) {
+      this.treeNodes = treeNodes;
     },
     /**
      * 舞台组件创建完毕
