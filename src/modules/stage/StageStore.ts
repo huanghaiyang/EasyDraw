@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isEqual } from "lodash";
+import { every, isEqual, pick } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -75,6 +75,8 @@ export default class StageStore implements IStageStore {
   private _rotatingTargetElementIds: Set<string> = observable.set(new Set<string>());
   // 组件树节点
   private _treeNodes: ElementTreeNode[] = [];
+  // 组件树节点映射关系，加快查询
+  private _treeNodesMap: Map<string, ElementTreeNode> = new Map<string, ElementTreeNode>();
   // 旋转组件中心点
   private _rotatingCenter: IPoint;
   // 旋转组件中心点-世界坐标
@@ -230,7 +232,7 @@ export default class StageStore implements IStageStore {
       Object.keys(ElementReactionPropNames).forEach(propName => {
         this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
       });
-      this._emitTreeNodesChanged();
+      this._preserveTreeNodesChanged();
     });
   }
 
@@ -249,7 +251,7 @@ export default class StageStore implements IStageStore {
       this._rangeElementIds.delete(id);
       this._visibleElementIds.delete(id);
       this._stageElementIds.delete(id);
-      this._emitTreeNodesChanged();
+      this._preserveTreeNodesChanged();
     });
   }
 
@@ -475,6 +477,23 @@ export default class StageStore implements IStageStore {
         break;
       }
     }
+    if (
+      [
+        ElementReactionPropNames.isSelected,
+        ElementReactionPropNames.isVisible,
+        ElementReactionPropNames.isOnStage,
+        ElementReactionPropNames.isTarget,
+        ElementReactionPropNames.isRotatingTarget,
+        ElementReactionPropNames.isProvisional,
+        ElementReactionPropNames.isEditing,
+        ElementReactionPropNames.isInRange,
+      ].includes(propName as ElementReactionPropNames)
+    ) {
+      const treeNode = this._treeNodesMap.get(element.id);
+      if (treeNode) {
+        treeNode[propName] = value;
+      }
+    }
   }
 
   /**
@@ -495,12 +514,23 @@ export default class StageStore implements IStageStore {
   /**
    * 发送树节点变化事件
    */
-  private _emitTreeNodesChanged(): void {
+  private _preserveTreeNodesChanged(): void {
     //延迟一下，防止卡顿和数据不准确问题
     setTimeout(() => {
+      this._treeNodesMap.clear();
       this._treeNodes = this._toTreeNodes();
       this.shield.emit(ShieldDispatcherNames.treeNodesChanged, this._treeNodes);
     });
+  }
+
+  /**
+   * 获取组件树节点属性
+   *
+   * @param element
+   * @returns
+   */
+  private _getElementTreeNodeProps(element: IElement): Partial<IElement> {
+    return pick(element, ["isSelected", "isVisible", "isOnStage", "isTarget", "isRotatingTarget", "isProvisional", "isEditing", "isGroup", "isInRange", "isGroupSubject"]);
   }
 
   /**
@@ -523,11 +553,12 @@ export default class StageStore implements IStageStore {
           parentId: groupId,
           label: name,
           children: [],
-          isGroup,
+          ...this._getElementTreeNodeProps(element),
         };
         tree.push(treeNode);
+        this._treeNodesMap.set(id, treeNode);
         if (isGroup) {
-          const subTreeNodes = this._findGroupSubs(node, []);
+          const subTreeNodes = this._preserveGroupSubs(node, []);
           treeNode.children = subTreeNodes;
         }
       }
@@ -542,7 +573,7 @@ export default class StageStore implements IStageStore {
    * @param result
    * @returns
    */
-  private _findGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
+  private _preserveGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
     const {
       value: {
         isGroup,
@@ -564,12 +595,13 @@ export default class StageStore implements IStageStore {
             parentId: id,
             label: name,
             children: [],
-            isGroup: prevIsGroup,
+            ...this._getElementTreeNodeProps(prevElement),
           };
           // 将节点插入到头部
           result.unshift(treeNode);
+          this._treeNodesMap.set(prevId, treeNode);
           if (prevIsGroup) {
-            this._findGroupSubs(prevNode, treeNode.children);
+            this._preserveGroupSubs(prevNode, treeNode.children);
           }
         }
         if (LodashUtils.isArrayEqual(findedSubs, subIds)) {
@@ -2386,7 +2418,7 @@ export default class StageStore implements IStageStore {
     this._doElementsGoDown(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this._emitTreeNodesChanged();
+    this._preserveTreeNodesChanged();
   }
 
   /**
@@ -2423,7 +2455,7 @@ export default class StageStore implements IStageStore {
     this._doElementsShiftMove(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this._emitTreeNodesChanged();
+    this._preserveTreeNodesChanged();
   }
 
   /**
@@ -2450,6 +2482,20 @@ export default class StageStore implements IStageStore {
     elements.forEach(element => {
       if (this.hasElement(element.id)) {
         element.setTextCase(value);
+      }
+    });
+  }
+
+  /**
+   * 切换目标
+   *
+   * @param ids 目标id集合
+   * @param isTarget 是否目标
+   */
+  toggleElementsTarget(ids: string[], isTarget: boolean): void {
+    ids.forEach(id => {
+      if (this.hasElement(id)) {
+        this.updateElementById(id, { isTarget });
       }
     });
   }

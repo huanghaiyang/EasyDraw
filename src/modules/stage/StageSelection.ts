@@ -111,7 +111,7 @@ export default class StageSelection implements IStageSelection {
     const result: IMaskModel[] = [];
     elements.forEach(element => {
       if (!element) return;
-      if (element.isGroupSubject) return;
+      // if (element.isGroupSubject) return; // 忘记此处为什么要限制子组件了
       result.push({
         type,
         ...this._getElementMaskModelProps(element),

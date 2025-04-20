@@ -2575,4 +2575,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
   }
+  /**
+   * 切换目标
+   *
+   * @param ids 目标id集合
+   * @param isTarget 是否目标
+   */
+  toggleElementsTarget(ids: string[], isTarget: boolean): void {
+    this.store.toggleElementsTarget(ids, isTarget);
+  }
 }

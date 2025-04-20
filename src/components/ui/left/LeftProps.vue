@@ -1,7 +1,7 @@
 <template>
   <div class="props-left-panel">
     <div class="title">
-      <span>组件层级</span>
+      <span>组件序列</span>
     </div>
     <Elements-tree></Elements-tree>
   </div>

@@ -493,6 +493,7 @@ export const useStageStore = defineStore("stage", {
      */
     onTargetChanged(targetElements: IElement[]) {
       this.targetElements = targetElements;
+      this.targetElementIds = targetElements.map(element => element.id);
     },
     /**
      * 组件状态变化
@@ -1358,6 +1359,15 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsFlipY(): void {
       shield.setElementsFlipY(toRaw(this.selectedElements));
+    },
+    /**
+     * 设置组件目标
+     *
+     * @param ids
+     * @param isTarget
+     */
+    toggleElementsTarget(ids: string[], isTarget: boolean): void {
+      shield.toggleElementsTarget(ids, isTarget);
     },
   },
 });
