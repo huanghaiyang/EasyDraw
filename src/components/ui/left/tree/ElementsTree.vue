@@ -3,7 +3,7 @@
     style="max-width: 600px"
     :allow-drop="allowDrop"
     :allow-drag="allowDrag"
-    :data="data"
+    :data="stageStore.treeNodes"
     draggable
     default-expand-all
     node-key="id"
@@ -18,20 +18,21 @@
     @node-drag-end="handleDragEnd"
     @node-drop="handleDrop"
   >
-    <template #default="{ data }">
+    <template #default="{ data: { id, label, isSelected, isDetachedSelected, isTarget, isGroup } }">
       <span
-        @mouseenter="handleMouseEnter(data)"
-        @mouseleave="handleMouseLeave(data)"
+        @mouseenter="handleMouseEnter(id)"
+        @mouseleave="handleMouseLeave(id)"
         :class="[
           'tree-node',
           {
-            selected: isSelected(data),
-            target: isTargetNode(data),
-            group: data.isGroup,
+            selected: isSelected,
+            detached: isDetachedSelected,
+            target: isTarget,
+            group: isGroup,
           },
         ]"
       >
-        <span>{{ data.label }}</span>
+        <span>{{ label }}</span>
       </span>
     </template>
   </el-tree>
@@ -43,55 +44,28 @@ import { ElementTreeNode } from "@/types/IElement";
 import { TreeInstance } from "element-plus";
 import type Node from "element-plus/es/components/tree/src/model/node";
 import type { DragEvents } from "element-plus/es/components/tree/src/model/useDragNode";
-import type { AllowDropType, NodeDropType, TreeKey } from "element-plus/es/components/tree/src/tree.type";
-import { computed, ref, watch } from "vue";
+import type { AllowDropType, NodeDropType } from "element-plus/es/components/tree/src/tree.type";
+import { ref, toRaw } from "vue";
 
 const stageStore = useStageStore();
-const data = ref<ElementTreeNode[]>([]);
 const treeRef = ref<TreeInstance>();
-
-watch(
-  () => stageStore.treeNodes,
-  treeNodes => {
-    data.value = treeNodes;
-  },
-  { immediate: true },
-);
-
-/**
- * 判断节点是否被选中
- *
- * @param node
- */
-function isSelected(node: ElementTreeNode) {
-  return stageStore.selectedElements.map(element => element.id).includes(node.id);
-}
-
-/**
- * 判断节点是否为目标节点
- *
- * @param node
- */
-function isTargetNode(node: ElementTreeNode) {
-  return stageStore.targetElements.map(element => element.id).includes(node.id);
-}
 
 /**
  * 鼠标进入节点
  *
- * @param node
+ * @param id
  */
-function handleMouseEnter(node: ElementTreeNode) {
-  stageStore.toggleElementsTarget([node.id], true);
+function handleMouseEnter(id: string) {
+  stageStore.toggleElementsTarget([id], true);
 }
 
 /**
  * 鼠标离开节点
  *
- * @param node
+ * @param id
  */
-function handleMouseLeave(node: ElementTreeNode) {
-  stageStore.toggleElementsTarget([node.id], false);
+function handleMouseLeave(id: string) {
+  stageStore.toggleElementsTarget([id], false);
 }
 
 /**

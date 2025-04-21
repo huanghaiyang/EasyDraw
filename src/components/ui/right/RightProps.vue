@@ -75,7 +75,6 @@
         vertical-align: middle;
         line-height: 32px;
         height: 32px;
-        box-sizing: border-box;
         &.text-2 {
           font-size: 14px;
           line-height: 14px;

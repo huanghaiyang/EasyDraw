@@ -19,4 +19,5 @@ body {
   scrollbar-width: none;
   -webkit-scrollbar: none;
   -ms-overflow-style: none;
+  box-sizing: border-box;
 }

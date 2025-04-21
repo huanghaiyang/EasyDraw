@@ -174,6 +174,8 @@ export const useStageStore = defineStore("stage", {
       currentArbitraryCreator: PenCreator,
       // 组件树形结构
       treeNodes: [] as ElementTreeNode[],
+      // 组件树形结构映射关系，加快查询
+      treeNodesMap: new Map<string, ElementTreeNode>(),
       // 选中组件
       selectedElements: [],
       // 目标组件
@@ -230,6 +232,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged],
         [ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged],
         [ShieldDispatcherNames.treeNodesChanged, this.onTreeNodesChanged],
+        [ShieldDispatcherNames.treeNodePropsChanged, this.onTreeNodePropsChanged],
       ].forEach(([name, callback]) => {
         shield.on(name, callback.bind(this));
       });
@@ -324,12 +327,44 @@ export const useStageStore = defineStore("stage", {
       this.primarySelectedElement = primarySelectedElement;
     },
     /**
+     * 递归为舞台组件树形结构添加节点到 Map 中
+     *
+     * @param node
+     */
+    _recusiveAddNode(node: ElementTreeNode) {
+      this.treeNodesMap.set(node.id, node);
+      if (node.children?.length) {
+        node.children.forEach(child => {
+          this._recusiveAddNode(child);
+        });
+      }
+    },
+    /**
      * 舞台组件树形结构变更
      *
      * @param treeNodes
      */
     onTreeNodesChanged(treeNodes: ElementTreeNode[]) {
       this.treeNodes = treeNodes;
+      this.treeNodesMap.clear();
+      treeNodes.forEach(node => {
+        this._recusiveAddNode(node);
+      });
+    },
+    /**
+     * 舞台组件树形结构属性变更
+     *
+     * @param id
+     * @param props
+     */
+    onTreeNodePropsChanged(id: string, props: Object) {
+      this.treeNodes.forEach(node => {
+        if (node.id === id) {
+          for (const key in props) {
+            node[key] = props[key];
+          }
+        }
+      });
     },
     /**
      * 舞台组件创建完毕
@@ -1367,7 +1402,7 @@ export const useStageStore = defineStore("stage", {
      * @param isTarget
      */
     toggleElementsTarget(ids: string[], isTarget: boolean): void {
-      shield.toggleElementsTarget(ids, isTarget);
+      shield.toggleElementsTarget(toRaw(ids), isTarget);
     },
     /**
      * 切换组件选中状态(组件脱离组合的独立选中状态切换)
@@ -1376,7 +1411,7 @@ export const useStageStore = defineStore("stage", {
      * @param isDetachedSelected 是否选中
      */
     toggleElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
-      shield.toggleElementsDetachedSelected(ids, isDetachedSelected);
+      shield.toggleElementsDetachedSelected(toRaw(ids), isDetachedSelected);
     },
   },
 });

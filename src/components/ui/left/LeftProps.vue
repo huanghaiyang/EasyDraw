@@ -1,12 +1,18 @@
 <template>
   <div class="props-left-panel">
     <div class="title">
-      <span>组件序列</span>
+      <span>组件序列({{ Array.from(stageStore.treeNodesMap.keys()).length }})</span>
     </div>
-    <Elements-tree></Elements-tree>
+    <div class="tree">
+      <Elements-tree></Elements-tree>
+    </div>
   </div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { useStageStore } from '@/stores/stage';
+
+const stageStore = useStageStore();
+</script>
 <style lang="less" scoped>
 .props-left-panel {
   width: 100%;
@@ -18,6 +24,11 @@
     line-height: 22px;
     border-bottom: 1px solid #e5e5e5;
     padding: 10px;
+    height: 42px;
+  }
+  .tree {
+    height: calc(100% - 42px);
+    overflow-y: scroll;
   }
 }
 </style>

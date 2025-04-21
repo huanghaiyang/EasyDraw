@@ -1,7 +1,9 @@
 import IStageShield from "@/types/IStageShield";
 
 declare global {
-  interface Window {}
+  interface Window {
+    shield?: IStageShield;
+  }
 }
 
 export {};

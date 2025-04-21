@@ -482,41 +482,42 @@ export default class StageStore implements IStageStore {
    * @param value
    */
   private _reactionElementPropsChanged(propName: string, element: IElement, value: boolean | ElementStatus | IPoint): void {
+    const { id } = element;
     switch (propName) {
       case ElementReactionPropNames.isSelected: {
-        this._setAddDelete(this._selectedElementIds, element.id, value as boolean);
+        this._setAddDelete(this._selectedElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isDetachedSelected: {
-        this._setAddDelete(this._detachedSelectedElementIds, element.id, value as boolean);
+        this._setAddDelete(this._detachedSelectedElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isProvisional: {
-        this._setAddDelete(this._provisionalElementIds, element.id, value as boolean);
+        this._setAddDelete(this._provisionalElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isTarget: {
-        this._setAddDelete(this._targetElementIds, element.id, value as boolean);
+        this._setAddDelete(this._targetElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isRotatingTarget: {
-        this._setAddDelete(this._rotatingTargetElementIds, element.id, value as boolean);
+        this._setAddDelete(this._rotatingTargetElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isEditing: {
-        this._setAddDelete(this._editingElementIds, element.id, value as boolean);
+        this._setAddDelete(this._editingElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isInRange: {
-        this._setAddDelete(this._rangeElementIds, element.id, value as boolean);
+        this._setAddDelete(this._rangeElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isVisible: {
-        this._setAddDelete(this._visibleElementIds, element.id, value as boolean);
+        this._setAddDelete(this._visibleElementIds, id, value as boolean);
         break;
       }
       case ElementReactionPropNames.isOnStage: {
-        this._setAddDelete(this._stageElementIds, element.id, value as boolean);
+        this._setAddDelete(this._stageElementIds, id, value as boolean);
         break;
       }
     }
@@ -533,9 +534,9 @@ export default class StageStore implements IStageStore {
         ElementReactionPropNames.isInRange,
       ].includes(propName as ElementReactionPropNames)
     ) {
-      const treeNode = this._treeNodesMap.get(element.id);
+      const treeNode = this._treeNodesMap.get(id);
       if (treeNode) {
-        treeNode[propName] = value;
+        this.shield.emit(ShieldDispatcherNames.treeNodePropsChanged, id, { [propName]: value });
       }
     }
   }

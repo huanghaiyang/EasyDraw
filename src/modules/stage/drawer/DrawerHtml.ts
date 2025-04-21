@@ -138,7 +138,6 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
             background: transparent;
             caret-color: #000;
             color: #000;
-            box-sizing: border-box;
             font-variant-ligatures: discretionary-ligatures;
         }
         #html-drawer textarea::-webkit-scrollbar {

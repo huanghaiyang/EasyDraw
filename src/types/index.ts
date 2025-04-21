@@ -81,6 +81,8 @@ export type ScaleValue = {
 export enum ShieldDispatcherNames {
   // 组件树变更
   treeNodesChanged = "treeNodesChanged",
+  // 组件树属性变更
+  treeNodePropsChanged = "treeNodePropsChanged",
   // 组件创建
   elementCreated = "elementCreated",
   // 选中改变
