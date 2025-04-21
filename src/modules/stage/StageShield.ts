@@ -254,6 +254,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     requestAnimationFrame(async () => {
       await this._addRedrawTask(this._shouldRedraw);
       this._shouldRedraw = false;
+      // 如果存在编辑中的文本组件
+      if (!this.store.isEditingTextEmpty && !DOMUtils.isFocusOnInput()) {
+        this.html.focusTextCursorInput();
+      }
       await this._requestAnimationRedraw();
     });
   }

@@ -47,6 +47,8 @@ export default interface IStageStore extends IStageSetter {
   get isEmpty(): boolean;
   // 是否可见组件为空
   get isVisibleEmpty(): boolean;
+  // 是否不存在正在编辑的文本组件
+  get isEditingTextEmpty(): boolean;
   // 选中的根组件
   get selectedAncestorElement(): IElement;
   // 不属于任何组合的组件

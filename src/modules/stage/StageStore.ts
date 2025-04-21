@@ -218,8 +218,21 @@ export default class StageStore implements IStageStore {
     return this._stageElementIds.size === 0;
   }
 
+  // 待旋转的组件是否为空
   get isRotatingTargetEmpty(): boolean {
     return this._rotatingTargetElementIds.size === 0;
+  }
+
+  // 编辑中的文本是否为空
+  get isEditingTextEmpty(): boolean {
+    if (this.isEditingEmpty) return true;
+    for (let key of this._editingElementIds) {
+      const element = this._elementsMap.get(key);
+      if (element && element.model.type === CreatorTypes.text) {
+        return false;
+      }
+    }
+    return true;
   }
 
   // 不属于任何组合的组件

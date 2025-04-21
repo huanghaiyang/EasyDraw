@@ -47,4 +47,11 @@ export default class DOMUtils {
   static async writeValueToClipboard(value: string): Promise<void> {
     return navigator.clipboard.writeText(value);
   }
+
+  /**
+   * 判断焦点是否在input、textarea等编辑元素上
+   */
+  static isFocusOnInput(): boolean {
+    return document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA";
+  }
 }
