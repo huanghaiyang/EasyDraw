@@ -249,21 +249,49 @@ export default class StageSelection implements IStageSelection {
   /**
    * 根据坐标获取命中的组件
    *
+   * 1. 如果命中组合，那么还需要判断当前组合的子组件中是否包含独立选中的子组件，如果有，则优先命中独立选中的子组件，当前组合不命中
+   *
    * @param coord
    */
   hitTargetElements(coord: IPoint): void {
     const { store } = this.shield;
     for (let i = store.stageElements.length - 1; i >= 0; i--) {
       const element = store.stageElements[i];
+      const { id, isGroup } = element;
       const isTarget = element.isContainsCoord(coord);
-      store.updateElementById(element.id, { isTarget });
+      let targetId = id;
       if (isTarget) {
+        if (isGroup) {
+          let targetSubElement: IElement;
+          const detachedSubElements = (element as IElementGroup).deepSubs.filter(sub => sub.isDetachedSelected);
+          if (detachedSubElements.length) {
+            for (let j = detachedSubElements.length - 1; j >= 0; j--) {
+              // 优先命中独立选中的子组件，当前组合不命中
+              if (detachedSubElements[j].isContainsCoord(coord)) {
+                targetSubElement = detachedSubElements[j];
+                break;
+              }
+            }
+          }
+          // 如果命中子组件，那么设置子组件为命中状态
+          if (targetSubElement) {
+            store.updateElementById(targetSubElement.id, { isTarget: true });
+            targetId = targetSubElement.id;
+            break;
+          }
+        }
+
+        // 执行此行代码有两种情况，1.组件为独立组件2.组件为组合，但是没有命中独立选中状态的子组件
+        store.updateElementById(id, { isTarget: true });
+        // 将其他组件设置为非命中状态
         store.targetElements.forEach(target => {
-          if (target.id !== element.id) {
+          if (target.id !== targetId) {
             store.updateElementById(target.id, { isTarget: false });
           }
         });
         break;
+      } else {
+        store.updateElementById(id, { isTarget: false });
       }
     }
   }

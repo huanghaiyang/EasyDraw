@@ -944,6 +944,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       _isEditing: observable,
       _isMoving: observable,
       _isSelected: observable,
+      _isDetachedSelected: observable,
       _isVisible: observable,
       _isLocked: observable,
       _isTarget: observable,

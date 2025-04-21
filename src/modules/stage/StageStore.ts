@@ -2547,7 +2547,7 @@ export default class StageStore implements IStageStore {
       });
       this._detachedSelectedElementIds.forEach(id => {
         if (this.hasElement(id) && !ids.includes(id)) {
-          this.updateElementById(id, { isDetachedSelected });
+          this.updateElementById(id, { isDetachedSelected: false });
         }
       });
     }

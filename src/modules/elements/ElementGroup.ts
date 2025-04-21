@@ -129,10 +129,10 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
     subs.forEach(sub => {
-      result.push(sub);
       if (sub.isGroup) {
         this._getDeepSubs(result, (sub as ElementGroup).subs);
       }
+      result.push(sub);
     });
     return result;
   }
@@ -213,5 +213,33 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   calcRotateOutlineCoords(): IPoint[][] {
     return [this._rotateCoords];
+  }
+
+  /**
+   * 命中子组件,返回的结果倒序的集合
+   *
+   * @param point
+   */
+  hitSubs(point: IPoint, result?: IElement[]): IElement[] {
+    const subs = this.getSubs();
+    for (let i = subs.length - 1; i >= 0; i--) {
+      const sub = subs[i];
+      if (sub.isContainsCoord(point)) {
+        result.push(sub);
+        if (sub.isGroup) {
+          (sub as ElementGroup).hitSubs(point, result);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * 命中子组件,返回的结果倒序的集合的第一个组件
+   *
+   * @param point
+   */
+  hitTopASub(point: IPoint): IElement {
+    return this.hitSubs(point, []).shift();
   }
 }

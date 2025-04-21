@@ -1,5 +1,6 @@
 import IElement from "@/types/IElement";
 import { CreatorTypes } from "@/types/Creator";
+import { IPoint } from "@/types/index";
 
 export interface IElementGroup extends IElement {
   // 子组件
@@ -28,4 +29,8 @@ export interface IElementGroup extends IElement {
   getAllSubElementGroups(): IElementGroup[];
   // 清除子组件
   clearSubs(): void;
+  // 命中子组件
+  hitSubs(point: IPoint, result?: IElement[]): IElement[];
+  // 命中最顶层子组件
+  hitTopASub(point: IPoint): IElement;
 }
