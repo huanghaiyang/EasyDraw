@@ -1453,10 +1453,9 @@ export interface IElementArbitrary extends IElement {
 
 // 组件树节点
 export type ElementTreeNode = Partial<
-  Pick<IElement, "isGroup" | "isSelected" | "isGroupSubject" | "isOnStage" | "isVisible" | "isEditing" | "isRotatingTarget" | "isInRange" | "isProvisional" | "isTarget">
+  Pick<IElement, "isGroup" | "isSelected" | "isGroupSubject" | "isOnStage" | "isVisible" | "isEditing" | "isRotatingTarget" | "isInRange" | "isProvisional" | "isTarget"> &
+    Pick<ElementObject, "id" | "type" | "groupId">
 > & {
-  id: string;
-  parentId?: string;
   label: string;
   children: ElementTreeNode[];
 };

@@ -590,12 +590,13 @@ export default class StageStore implements IStageStore {
       const {
         isGroupSubject,
         isGroup,
-        model: { id, name, groupId },
+        model: { id, name, groupId, type },
       } = element;
       if (!isGroupSubject) {
         const treeNode = {
           id,
-          parentId: groupId,
+          groupId,
+          type,
           label: name,
           children: [],
           ...this._getElementTreeNodeProps(element),
@@ -632,12 +633,13 @@ export default class StageStore implements IStageStore {
         const prevElement = prevNode.value;
         const {
           isGroup: prevIsGroup,
-          model: { id: prevId, groupId: prevGroupId, name },
+          model: { id: prevId, groupId: prevGroupId, name, type },
         } = prevElement;
         if (subIds.includes(prevId) && prevGroupId === id) {
           const treeNode = {
             id: prevId,
-            parentId: id,
+            groupId: id,
+            type,
             label: name,
             children: [],
             ...this._getElementTreeNodeProps(prevElement),

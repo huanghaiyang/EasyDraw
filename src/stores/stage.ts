@@ -358,13 +358,10 @@ export const useStageStore = defineStore("stage", {
      * @param props
      */
     onTreeNodePropsChanged(id: string, props: Object) {
-      this.treeNodes.forEach(node => {
-        if (node.id === id) {
-          for (const key in props) {
-            node[key] = props[key];
-          }
-        }
-      });
+      const treeNode = this.treeNodesMap.get(id);
+      if (treeNode) {
+        Object.assign(treeNode, props);
+      }
     },
     /**
      * 舞台组件创建完毕

@@ -18,7 +18,7 @@
     @node-drag-end="handleDragEnd"
     @node-drop="handleDrop"
   >
-    <template #default="{ data: { id, label, isSelected, isDetachedSelected, isTarget, isGroup } }">
+    <template #default="{ data: { id, label, isSelected, isDetachedSelected, isTarget, isGroup, type } }">
       <span
         @mouseenter="handleMouseEnter(id)"
         @mouseleave="handleMouseLeave(id)"
@@ -32,6 +32,7 @@
           },
         ]"
       >
+        <el-icon :class="['iconfont', CreatorIcons[type]]"></el-icon>
         <span>{{ label }}</span>
       </span>
     </template>
@@ -40,12 +41,13 @@
 
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
+import { CreatorIcons } from "@/types/CreatorDicts";
 import { ElementTreeNode } from "@/types/IElement";
 import { TreeInstance } from "element-plus";
 import type Node from "element-plus/es/components/tree/src/model/node";
 import type { DragEvents } from "element-plus/es/components/tree/src/model/useDragNode";
 import type { AllowDropType, NodeDropType } from "element-plus/es/components/tree/src/tree.type";
-import { ref, toRaw } from "vue";
+import { ref } from "vue";
 
 const stageStore = useStageStore();
 const treeRef = ref<TreeInstance>();
@@ -118,6 +120,9 @@ const allowDrag = (draggingNode: Node) => {
   align-items: center;
   padding: 0 4px;
   border-radius: 6px 0 0 6px;
+  .iconfont {
+    margin: 0 2px;
+  }
   &.selected {
     background-color: rgba(66, 161, 255, 0.1);
   }
