@@ -44,6 +44,8 @@ export default class StageStore implements IStageStore {
   private _provisionalElements: IElement[] = [];
   // 选中的组件
   private _selectedElements: IElement[] = [];
+  // 分离的选中组件
+  private _detachedSelectedElements: IElement[] = [];
   // 目标组件
   private _targetElements: IElement[] = [];
   // 范围组件
@@ -61,6 +63,8 @@ export default class StageStore implements IStageStore {
   private _provisionalElementIds: Set<string> = observable.set(new Set<string>());
   // 选中的组件
   private _selectedElementIds: Set<string> = observable.set(new Set<string>());
+  // 分离的选中组件
+  private _detachedSelectedElementIds: Set<string> = observable.set(new Set<string>());
   // 目标组件
   private _targetElementIds: Set<string> = observable.set(new Set<string>());
   // 可见组件
@@ -125,6 +129,11 @@ export default class StageStore implements IStageStore {
   // 选中的组件
   get selectedElements(): IElement[] {
     return this._selectedElements;
+  }
+
+  // 分离的选中组件
+  get detachedSelectedElements(): IElement[] {
+    return this._detachedSelectedElements;
   }
 
   // 命中的组件
@@ -244,6 +253,7 @@ export default class StageStore implements IStageStore {
       const { id } = node.value;
       this._elementsMap.delete(id);
       this._selectedElementIds.delete(id);
+      this._detachedSelectedElementIds.delete(id);
       this._targetElementIds.delete(id);
       this._provisionalElementIds.delete(id);
       this._rotatingTargetElementIds.delete(id);
@@ -277,6 +287,15 @@ export default class StageStore implements IStageStore {
         this.shield.selection.refresh();
       },
     );
+
+    reaction(
+      () => Array.from(this._detachedSelectedElementIds),
+      () => {
+        this._reactionDetachedSelectedElementsChanged();
+        this.shield.selection.refresh();
+      },
+    );
+
     reaction(
       () => Array.from(this._targetElementIds),
       () => this._reactionTargetElementsChanged(),
@@ -346,6 +365,13 @@ export default class StageStore implements IStageStore {
       this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, false);
       this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, false);
     }
+  }
+
+  /**
+   * 分离选中元素发生变化
+   */
+  private _reactionDetachedSelectedElementsChanged(): void {
+    this._detachedSelectedElements = this._filterList(this._detachedSelectedElementIds);
   }
 
   /**
@@ -448,6 +474,10 @@ export default class StageStore implements IStageStore {
         this._setAddDelete(this._selectedElementIds, element.id, value as boolean);
         break;
       }
+      case ElementReactionPropNames.isDetachedSelected: {
+        this._setAddDelete(this._detachedSelectedElementIds, element.id, value as boolean);
+        break;
+      }
       case ElementReactionPropNames.isProvisional: {
         this._setAddDelete(this._provisionalElementIds, element.id, value as boolean);
         break;
@@ -480,6 +510,7 @@ export default class StageStore implements IStageStore {
     if (
       [
         ElementReactionPropNames.isSelected,
+        ElementReactionPropNames.isDetachedSelected,
         ElementReactionPropNames.isVisible,
         ElementReactionPropNames.isOnStage,
         ElementReactionPropNames.isTarget,
@@ -530,7 +561,7 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   private _getElementTreeNodeProps(element: IElement): Partial<IElement> {
-    return pick(element, ["isSelected", "isVisible", "isOnStage", "isTarget", "isRotatingTarget", "isProvisional", "isEditing", "isGroup", "isInRange", "isGroupSubject"]);
+    return pick(element, ["isSelected", "isDetachedSelected", "isVisible", "isOnStage", "isTarget", "isRotatingTarget", "isProvisional", "isEditing", "isGroup", "isInRange", "isGroupSubject"]);
   }
 
   /**
@@ -2496,6 +2527,33 @@ export default class StageStore implements IStageStore {
     ids.forEach(id => {
       if (this.hasElement(id)) {
         this.updateElementById(id, { isTarget });
+      }
+    });
+  }
+
+  /**
+   * 切换组件选中状态(组件脱离组合的独立选中状态切换)
+   *
+   * @param ids 组件id集合
+   * @param isDetachedSelected 是否选中
+   */
+  toggleElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+    // 先取消选中先前的组件
+    if (isDetachedSelected) {
+      this._selectedElementIds.forEach(id => {
+        if (this.hasElement(id) && !ids.includes(id) && !this._detachedSelectedElementIds.has(id)) {
+          this.updateElementById(id, { isSelected: false });
+        }
+      });
+      this._detachedSelectedElementIds.forEach(id => {
+        if (this.hasElement(id) && !ids.includes(id)) {
+          this.updateElementById(id, { isDetachedSelected });
+        }
+      });
+    }
+    ids.forEach(id => {
+      if (this.hasElement(id)) {
+        this.updateElementById(id, { isDetachedSelected });
       }
     });
   }

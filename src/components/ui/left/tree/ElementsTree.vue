@@ -10,6 +10,7 @@
     ref="treeRef"
     auto-expand-parent
     :expand-on-click-node="false"
+    @node-click="handleClickNode"
     @node-drag-start="handleDragStart"
     @node-drag-enter="handleDragEnter"
     @node-drag-leave="handleDragLeave"
@@ -17,15 +18,15 @@
     @node-drag-end="handleDragEnd"
     @node-drop="handleDrop"
   >
-    <template #default="{ node, data }">
+    <template #default="{ data }">
       <span
         @mouseenter="handleMouseEnter(data)"
         @mouseleave="handleMouseLeave(data)"
         :class="[
           'tree-node',
           {
-            selected: isSelected(node),
-            target: isTargetNode(node),
+            selected: isSelected(data),
+            target: isTargetNode(data),
             group: data.isGroup,
           },
         ]"
@@ -62,8 +63,8 @@ watch(
  *
  * @param node
  */
-function isSelected(node: Node) {
-  return stageStore.selectedElements.map(element => element.id).includes(node.key as string);
+function isSelected(node: ElementTreeNode) {
+  return stageStore.selectedElements.map(element => element.id).includes(node.id);
 }
 
 /**
@@ -71,8 +72,8 @@ function isSelected(node: Node) {
  *
  * @param node
  */
-function isTargetNode(node: Node) {
-  return stageStore.targetElements.map(element => element.id).includes(node.key as string);
+function isTargetNode(node: ElementTreeNode) {
+  return stageStore.targetElements.map(element => element.id).includes(node.id);
 }
 
 /**
@@ -91,6 +92,15 @@ function handleMouseEnter(node: ElementTreeNode) {
  */
 function handleMouseLeave(node: ElementTreeNode) {
   stageStore.toggleElementsTarget([node.id], false);
+}
+
+/**
+ * 点击节点
+ *
+ * @param node
+ */
+function handleClickNode(node: ElementTreeNode) {
+  stageStore.toggleElementsDetachedSelected([node.id], true);
 }
 
 const handleDragStart = (node: Node, ev: DragEvents) => {

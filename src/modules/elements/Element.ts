@@ -126,6 +126,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   _status: ElementStatus = ElementStatus.initialed;
   // 是否选中
   _isSelected: boolean = false;
+  // 是否孤立选中（未选中组合，选中子组件）
+  _isDetachedSelected: boolean = false;
   // 是否可见
   _isVisible: boolean = true;
   // 是否正在编辑
@@ -555,6 +557,14 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._setIsSelected(value);
   }
 
+  get isDetachedSelected(): boolean {
+    return this._isDetachedSelected;
+  }
+  set isDetachedSelected(value: boolean) {
+    this._isDetachedSelected = value;
+    this.isSelected = value;
+  }
+
   get isVisible(): boolean {
     return this._isVisible;
   }
@@ -670,6 +680,9 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   _setIsSelected(value: boolean): void {
     this._isSelected = value;
+    if (!value) {
+      this._isDetachedSelected = false;
+    }
   }
 
   _setIsVisible(value: boolean): void {

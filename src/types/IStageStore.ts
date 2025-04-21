@@ -15,6 +15,8 @@ export default interface IStageStore extends IStageSetter {
   get provisionalElements(): IElement[];
   // 选中的组件
   get selectedElements(): IElement[];
+  // 分离选中的组件
+  get detachedSelectedElements(): IElement[];
   // 高亮目标组件
   get targetElements(): IElement[];
   // 舞台组件

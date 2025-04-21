@@ -2584,4 +2584,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   toggleElementsTarget(ids: string[], isTarget: boolean): void {
     this.store.toggleElementsTarget(ids, isTarget);
   }
+
+  /**
+   * 切换组件选中状态(组件脱离组合的独立选中状态切换)
+   *
+   * @param ids 组件id集合
+   * @param isDetachedSelected 是否选中
+   */
+  toggleElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+    this.store.toggleElementsDetachedSelected(ids, isDetachedSelected);
+  }
 }

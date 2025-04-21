@@ -30,6 +30,7 @@ import GlobalConfig from "@/config";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
+  isDetachedSelected = "isDetachedSelected",
   isVisible = "isVisible",
   isLocked = "isLocked",
   isEditing = "isEditing",

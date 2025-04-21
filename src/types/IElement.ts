@@ -442,6 +442,8 @@ export default interface IElement {
 
   // 是否选中
   get isSelected(): boolean;
+  // 是否是孤立选中（未选中组合，选中子组件）
+  get isDetachedSelected(): boolean;
   // 是否可见
   get isVisible(): boolean;
   // 是否在编辑
@@ -475,6 +477,8 @@ export default interface IElement {
 
   // 设置是否选中
   set isSelected(value: boolean);
+  // 设置是否孤立选中（未选中组合，选中子组件）
+  set isDetachedSelected(value: boolean);
   // 设置是否可见
   set isVisible(value: boolean);
   // 设置是否在编辑
