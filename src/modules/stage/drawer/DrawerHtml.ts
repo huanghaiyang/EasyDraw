@@ -133,7 +133,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
             outline: none;
             resize: none;
             word-break: break-word;
-            white-space: nowrap;
+            white-space: pre;
             pointer-events: auto;
             background: transparent;
             caret-color: #000;
