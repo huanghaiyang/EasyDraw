@@ -99,4 +99,15 @@ export default class LodashUtils {
   static isArrayEqual(array1: any[], array2: any[]): boolean {
     return array1.length === array2.length && array1.every((item, index) => item === array2[index]);
   }
+
+  /**
+   * 判断两个Set是否相等
+   *
+   * @param set1 第一个Set
+   * @param set2 第二个Set
+   * @returns 是否相等
+   */
+  static isSetEqual(set1: Set<any>, set2: Set<any>): boolean {
+    return set1.size === set2.size && [...set1].every(item => set2.has(item));
+  }
 }

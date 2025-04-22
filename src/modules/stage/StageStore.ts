@@ -613,13 +613,14 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 查找组合组件的子组件,并转换为树节点
+   * 向链表前面查找组合组件的子组件,并转换为树节点
    *
-   * @param node
-   * @param result
+   * @param node 组合节点
+   * @param result 子组件树节点数组
+   * @param findedSubs 已找到的子组件id集合
    * @returns
    */
-  private _preserveGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
+  private _findSubTreeNodesForward(node: ILinkedNode<IElement>, result: ElementTreeNode[], findedSubs: Set<string>): ElementTreeNode[] {
     const {
       value: {
         isGroup,
@@ -627,7 +628,6 @@ export default class StageStore implements IStageStore {
       },
     } = node;
     if (isGroup) {
-      const findedSubs: string[] = [];
       let prevNode = node.prev;
       while (prevNode) {
         const prevElement = prevNode.value;
@@ -650,11 +650,86 @@ export default class StageStore implements IStageStore {
           if (prevIsGroup) {
             this._preserveGroupSubs(prevNode, treeNode.children);
           }
+          findedSubs.add(prevId);
         }
-        if (LodashUtils.isArrayEqual(findedSubs, subIds)) {
+        if (LodashUtils.isSetEqual(findedSubs, new Set(subIds))) {
           break;
         }
         prevNode = prevNode.prev;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * 向链表后面查找组合组件的子组件,并转换为树节点
+   *
+   * @param node 组合节点
+   * @param result 子组件树节点数组
+   * @param findedSubs 已找到的子组件id集合
+   * @returns
+   */
+  private _findSubTreeNodesBackward(node: ILinkedNode<IElement>, result: ElementTreeNode[], findedSubs: Set<string>): ElementTreeNode[] {
+    const {
+      value: {
+        isGroup,
+        model: { subIds, id },
+      },
+    } = node;
+    if (isGroup) {
+      let nextNode = node.next;
+      while (nextNode) {
+        const nextElement = nextNode.value;
+        const {
+          isGroup: nextIsGroup,
+          model: { id: nextId, groupId: nextGroupId, name, type },
+        } = nextElement;
+        if (subIds.includes(nextId) && nextGroupId === id) {
+          const treeNode = {
+            id: nextId,
+            groupId: id,
+            type,
+            label: name,
+            children: [],
+            ...this._getElementTreeNodeProps(nextElement),
+          };
+          // 将节点插入到头部
+          result.unshift(treeNode);
+          this._treeNodesMap.set(nextId, treeNode);
+          if (nextIsGroup) {
+            this._preserveGroupSubs(nextNode, treeNode.children);
+          }
+        }
+        findedSubs.add(nextId);
+        if (LodashUtils.isSetEqual(findedSubs, new Set(subIds))) {
+          break;
+        }
+        nextNode = nextNode.next;
+      }
+    }
+    return result;
+  }
+
+  /**
+   * 在链表中查找组合组件的子组件,并转换为树节点
+   *
+   * @param node
+   * @param result
+   * @returns
+   */
+  private _preserveGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
+    const {
+      value: {
+        isGroup,
+        model: { subIds, id },
+      },
+    } = node;
+    if (isGroup) {
+      const findedSubs: Set<string> = new Set();
+      this._findSubTreeNodesForward(node, result, findedSubs);
+      if (!LodashUtils.isSetEqual(findedSubs, new Set(subIds))) {
+        console.warn(`组件树结构异常,组合子组件可能在组合顺序之后，当前组合id:${id}, 共找到子组件:${findedSubs}`);
+        this._findSubTreeNodesBackward(node, result, findedSubs);
       }
     }
     return result;
