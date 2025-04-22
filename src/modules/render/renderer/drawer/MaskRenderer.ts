@@ -30,7 +30,7 @@ import ElementTaskTextSelection from "@/modules/render/shield/task/ElementTaskTe
 import ElementTaskTextSelectionCursor from "@/modules/render/shield/task/ElementTaskTextSelectionCursor";
 import { TextSelectionCursorType } from "@/types/IText";
 import ElementTaskTextHighlightUnderline from "@/modules/render/shield/task/ElementTaskTextHighlightUnderline";
-
+import { StageShieldElementsStatus } from "@/types/IStageShield";
 
 /**
  * 蒙版渲染器
@@ -128,6 +128,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
 
     // 文本鼠标命中时，绘制下划线
     cargo.addAll(this.createTextElementsHighlightUndelineTasks());
+    // 范围组件中心指示器
+    cargo.add(this.createRangeElementCenterIndicatorTask());
 
     // 任务执行与状态清理 ==========
     if (!cargo.isEmpty()) {
@@ -414,5 +416,27 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       }
     });
     return tasks;
+  }
+
+  /**
+   * 创建一个范围组件的中心指示器任务
+   *
+   * @returns
+   */
+  private createRangeElementCenterIndicatorTask(): IRenderTask | null {
+    if (![StageShieldElementsStatus.MOVING, StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING].includes(this.drawer.shield.elementsStatus)) {
+      return null;
+    }
+    const rangeElement = this.drawer.shield.selection.rangeElement;
+    if (!rangeElement) return null;
+    const {
+      centerCoord: { x, y },
+    } = rangeElement;
+    const model: IMaskModel = {
+      point: { x, y },
+      type: DrawerMaskModelTypes.transformer,
+      radius: DefaultControllerRadius,
+    };
+    return new MaskTaskCircleTransformer(model, this.canvas);
   }
 }

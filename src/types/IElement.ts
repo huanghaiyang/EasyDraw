@@ -206,6 +206,8 @@ export default interface IElement {
   get group(): IElementGroup;
   // 祖先组合
   get ancestorGroup(): IElementGroup;
+  // 祖先组合列表
+  get ancestorGroups(): IElementGroup[];
   // 是否是组合组件
   get isGroupSubject(): boolean;
   // 位置是否可修改

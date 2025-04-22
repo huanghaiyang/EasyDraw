@@ -190,6 +190,19 @@ export default class Element implements IElement, ILinkedNodeValue {
     return group;
   }
 
+  // 祖先组合列表
+  get ancestorGroups(): IElementGroup[] {
+    if (!this.isGroupSubject) return [];
+    const groups: IElementGroup[] = [];
+    let group = this.group;
+    groups.push(group);
+    while (group && group.isGroupSubject) {
+      group = group.group;
+      groups.push(group);
+    }
+    return groups;
+  }
+
   // 是否是组合组件
   get isGroupSubject(): boolean {
     return this.model.groupId !== undefined;
