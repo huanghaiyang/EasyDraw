@@ -892,8 +892,8 @@ export default class MathUtils {
    * 计算不倾斜的点集
    *
    * @param points
-   * @param leanYAngle
    * @param leanXAngle
+   * @param leanYAngle
    * @returns
    */
   static calcUnLeanByPoints(points: IPoint[], leanXAngle: number, leanYAngle: number): IPoint[] {
@@ -1805,6 +1805,30 @@ export default class MathUtils {
       y: yVector.y / yVectorLength,
     };
 
+    // 计算两个向量之间的夹角（弧度）
+    const dotProduct = xVectorNormalized.x * (yVector.x / yVectorLength) + xVectorNormalized.y * (yVector.y / yVectorLength);
+    const angle = Math.acos(dotProduct);
+
+    // 如果向量近似垂直，直接使用原向量
+    if (Math.abs(angle - Math.PI / 2) < 0.001) {
+      const yVectorNormalized = {
+        x: yVector.x / yVectorLength,
+        y: yVector.y / yVectorLength,
+      };
+      return this._calculateParallelogram(points, xVectorNormalized, yVectorNormalized);
+    }
+
+    // 否则，计算正交基
+    // 以xVectorNormalized为基准，计算正交向量
+    const orthogonalVector = {
+      x: -xVectorNormalized.y,
+      y: xVectorNormalized.x,
+    };
+
+    return this._calculateParallelogram(points, xVectorNormalized, orthogonalVector);
+  }
+
+  private static _calculateParallelogram(points: IPoint[], xVector: IPoint, yVector: IPoint): IPoint[] {
     // 初始化投影值的极值
     let uMin = Infinity;
     let uMax = -Infinity;
@@ -1814,9 +1838,9 @@ export default class MathUtils {
     // 计算每个点在两个向量方向上的投影
     for (const point of points) {
       // 计算点在xVector方向上的投影u
-      const u = point.x * xVectorNormalized.x + point.y * xVectorNormalized.y;
+      const u = point.x * xVector.x + point.y * xVector.y;
       // 计算点在yVector方向上的投影v
-      const v = point.x * yVectorNormalized.x + point.y * yVectorNormalized.y;
+      const v = point.x * yVector.x + point.y * yVector.y;
 
       // 更新极值
       uMin = Math.min(uMin, u);
@@ -1827,20 +1851,20 @@ export default class MathUtils {
 
     // 计算平行四边形的四个顶点
     const A = {
-      x: uMin * xVectorNormalized.x + vMin * yVectorNormalized.x,
-      y: uMin * xVectorNormalized.y + vMin * yVectorNormalized.y,
+      x: uMin * xVector.x + vMin * yVector.x,
+      y: uMin * xVector.y + vMin * yVector.y,
     };
     const B = {
-      x: uMax * xVectorNormalized.x + vMin * yVectorNormalized.x,
-      y: uMax * xVectorNormalized.y + vMin * yVectorNormalized.y,
+      x: uMax * xVector.x + vMin * yVector.x,
+      y: uMax * xVector.y + vMin * yVector.y,
     };
     const C = {
-      x: uMax * xVectorNormalized.x + vMax * yVectorNormalized.x,
-      y: uMax * xVectorNormalized.y + vMax * yVectorNormalized.y,
+      x: uMax * xVector.x + vMax * yVector.x,
+      y: uMax * xVector.y + vMax * yVector.y,
     };
     const D = {
-      x: uMin * xVectorNormalized.x + vMax * yVectorNormalized.x,
-      y: uMin * xVectorNormalized.y + vMax * yVectorNormalized.y,
+      x: uMin * xVector.x + vMax * yVector.x,
+      y: uMin * xVector.y + vMax * yVector.y,
     };
 
     return [A, B, C, D];
