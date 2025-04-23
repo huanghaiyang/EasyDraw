@@ -4,6 +4,8 @@ import { IElementGroup } from "@/types/IElementGroup";
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
+import MathUtils from "@/utils/MathUtils";
+import LodashUtils from "@/utils/LodashUtils";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
@@ -241,5 +243,67 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   hitTopASub(point: IPoint): IElement {
     return this.hitSubs(point, []).shift();
+  }
+
+  /**
+   * 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出
+   */
+  refreshBySubs(): void {
+    // 所有子组件的点坐标集合
+    const subsCoords = this.deepSubs.map(sub => sub.rotateBoxCoords).flat();
+    // 当前的中心点
+    const centerCoord = this._originalCenterCoord;
+    // 通过中心点平行于y轴的直线（已考虑角度与y轴倾斜）
+    const ySlopLine = {
+      start: centerCoord,
+      end: {
+        x: (this._originalRotateBoxCoords[0].x + this._originalRotateBoxCoords[1].x) / 2,
+        y: (this._originalRotateBoxCoords[0].y + this._originalRotateBoxCoords[1].y) / 2,
+      },
+    };
+    // 通过中心点平行于x轴的直线（已考虑角度与x轴倾斜）
+    const xSlopeLine = {
+      start: centerCoord,
+      end: {
+        x: (this._originalRotateBoxCoords[1].x + this._originalRotateBoxCoords[2].x) / 2,
+        y: (this._originalRotateBoxCoords[1].y + this._originalRotateBoxCoords[2].y) / 2,
+      },
+    };
+    // 计算包含所有子组件的最小平行四边形
+    const minParallelogramPoints = MathUtils.calcMinParallelogramByPointsByCenter(subsCoords, xSlopeLine.end, ySlopLine.end, centerCoord);
+    // 计算子组件的中心点
+    const subsCenterCoord = MathUtils.calcPolygonCentroid(minParallelogramPoints);
+    // 计算过subsCenterCoord与ySlopLine平行的直线
+    const yParrelSlopeLine = MathUtils.calcParrelLine(ySlopLine, subsCenterCoord);
+    // 计算过subsCenterCoord与xSlopeLine平行的直线
+    const xParrelSlopeLine = MathUtils.calcParrelLine(xSlopeLine, subsCenterCoord);
+    // 计算最小平行四边形的左上角
+    const topLeft = minParallelogramPoints.find(
+      point => !MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && !MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
+    );
+    // 计算最小平行四边形的右上角
+    const topRight = minParallelogramPoints.find(
+      point => MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && !MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
+    );
+    // 计算最小平行四边形的右下角
+    const bottomRight = minParallelogramPoints.find(
+      point => MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
+    );
+    // 计算最小平行四边形的左下角
+    const bottomLeft = minParallelogramPoints.find(
+      point => !MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
+    );
+    // 旋转倾斜后的盒模型坐标
+    const rotateBoxCoords = [topLeft, topRight, bottomRight, bottomLeft];
+    // 计算不旋转的盒模型坐标
+    this.model.boxCoords = MathUtils.batchPrecisePoints(MathUtils.batchRotateWithCenter(rotateBoxCoords, -this.model.angle, subsCenterCoord));
+    // 计算不倾斜的坐标
+    this.model.coords = LodashUtils.jsonClone(this.model.boxCoords);
+    // 更新中心点x值
+    this.model.x = subsCenterCoord.x;
+    // 更新中心点y值
+    this.model.y = subsCenterCoord.y;
+    // 刷新组件属性
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size"]));
   }
 }

@@ -1130,6 +1130,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 刷新祖先组件的原始数据
+   *
+   * @param elements
+   */
+  private _refreshAncesorGroupsOriginalsByElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      // 判断是否是子组件
+      if (element.isGroupSubject) {
+        // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
+        element.ancestorGroups.forEach(group => {
+          group.refreshOriginalProps();
+        });
+      }
+    });
+  }
+
+  /**
    * 当组件操作时更新状态
    */
   private async _updateStatusWhileElementsOperating(): Promise<void> {
@@ -1138,8 +1155,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.isSelectedContainsTarget() &&
       this.store.isEditingEmpty
     ) {
+      // 已经确定是拖动操作的情况下，做如下逻辑判断
+      if (this.elementsStatus !== StageShieldElementsStatus.MOVING) {
+        this._refreshAncesorGroupsOriginalsByElements(this.store.detachedSelectedElements);
+      }
       this.elementsStatus = StageShieldElementsStatus.MOVING;
-      await this._dragElements();
     }
   }
 
@@ -1176,8 +1196,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (this.store.isSelectedEmpty) {
           this._createRange();
         } else if (this.checkCursorPressMovedALittle(e)) {
-          await this._doElementsOperating();
           await this._updateStatusWhileElementsOperating();
+          await this._doElementsOperating();
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
@@ -1223,11 +1243,27 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 刷新组件的祖先组件
+   *
+   * @param elements
+   */
+  private _refreshAncesorGroupsByDetachedElements(elements: IElement[]): void {
+    elements.forEach(element => {
+      if (element.isDetachedSelected && element.isGroupSubject) {
+        element.ancestorGroups.forEach(group => {
+          (group as IElementGroup).refreshBySubs();
+        });
+      }
+    });
+  }
+
+  /**
    * 拖动组件移动
    */
   private _dragElements(): void {
     const { selectedElements } = this.store;
     this.store.updateElementsTranslate(selectedElements, this.movingOffset);
+    this._refreshAncesorGroupsByDetachedElements(selectedElements);
     selectedElements.forEach(element => {
       element.isDragging = true;
       element.onTranslating();

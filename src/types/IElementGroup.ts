@@ -33,4 +33,6 @@ export interface IElementGroup extends IElement {
   hitSubs(point: IPoint, result?: IElement[]): IElement[];
   // 命中最顶层子组件
   hitTopASub(point: IPoint): IElement;
+  // 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出
+  refreshBySubs(): void;
 }

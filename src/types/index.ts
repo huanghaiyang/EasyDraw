@@ -209,3 +209,9 @@ export enum Direction {
   TOP,
   BOTTOM,
 }
+
+// 线条
+export type ILine = {
+  start: IPoint;
+  end: IPoint;
+};

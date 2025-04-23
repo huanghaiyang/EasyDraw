@@ -1,4 +1,4 @@
-import { IPoint, ISize, ScaleValue } from "@/types";
+import { ILine, IPoint, ISize, ScaleValue } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import { AngleModel } from "@/types/IElement";
 import { ArcPoints } from "@/types/IRender";
@@ -1247,7 +1247,7 @@ export default class MathUtils {
    * @param digits
    * @returns
    */
-  static batchPrecisePoint(points: IPoint[], digits: number): IPoint[] {
+  static batchPrecisePoints(points: IPoint[], digits: number = 1): IPoint[] {
     return points.map(point => MathUtils.precisePoint(point, digits));
   }
 
@@ -1483,6 +1483,8 @@ export default class MathUtils {
   /**
    * 判断点在直线的哪一侧
    *
+   * 给定点在起点到结束点的右侧，则返回true，否则返回false
+   *
    * @param point
    * @param lineStart
    * @param lineEnd
@@ -1710,5 +1712,153 @@ export default class MathUtils {
     const distance = MathUtils.calcDistance(point, projection);
     const angle = MathUtils.calcAngle(start, end);
     return MathUtils.calcTargetPoint(projection, distance * 2, angle);
+  }
+
+  /**
+   * 计算点相对于中心点的坐标
+   * @param point
+   * @param center
+   * @returns
+   */
+  static calcRelativePointWithCenter(point: IPoint, center: IPoint): IPoint {
+    return {
+      x: point.x - center.x,
+      y: point.y - center.y,
+    };
+  }
+
+  /**
+   * 批量计算点相对于中心点的坐标
+   * @param points
+   * @param center
+   * @returns
+   */
+  static batchCalcRelativePointWithCenter(points: IPoint[], center: IPoint): IPoint[] {
+    return points.map(point => MathUtils.calcRelativePointWithCenter(point, center));
+  }
+
+  /**
+   * 计算全局坐标
+   *
+   * @param point
+   * @param center
+   * @returns
+   */
+  static calcAbsolutePointWithCenter(point: IPoint, center: IPoint): IPoint {
+    return {
+      x: point.x + center.x,
+      y: point.y + center.y,
+    };
+  }
+
+  /**
+   * 批量计算全局坐标
+   * @param points
+   * @param center
+   * @returns
+   */
+  static batchCalcAbsolutePointWithCenter(points: IPoint[], center: IPoint): IPoint[] {
+    return points.map(point => MathUtils.calcAbsolutePointWithCenter(point, center));
+  }
+
+  /**
+   * 给定一条直线，求过点start的平行线
+
+   * @param line
+   * @param start
+   * @returns
+   */
+  static calcParrelLine(line: ILine, start: IPoint): ILine {
+    const angle = MathUtils.calcAngle(line.start, line.end);
+    const end = MathUtils.calcTargetPoint(start, MathUtils.calcDistance(line.start, line.end), angle);
+    return { start, end };
+  }
+
+  /**
+   * 计算包含所有点的最小平行四边形
+   * @param points 点集合
+   * @param xVector 第一个方向向量（平行四边形的一条边方向）
+   * @param yVector 第二个方向向量（平行四边形的另一条边方向）
+   * @returns 平行四边形的四个顶点坐标，顺序为 [A, B, C, D]
+   */
+  static calcMinParallelogramByPoints(points: IPoint[], xVector: IPoint, yVector: IPoint): IPoint[] {
+    if (points.length === 0) {
+      return [
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+        { x: 0, y: 0 },
+      ];
+    }
+
+    // 计算向量的模（长度）
+    const xVectorLength = Math.sqrt(xVector.x * xVector.x + xVector.y * xVector.y);
+    const yVectorLength = Math.sqrt(yVector.x * yVector.x + yVector.y * yVector.y);
+
+    // 归一化向量（转换为单位向量）
+    const xVectorNormalized = {
+      x: xVector.x / xVectorLength,
+      y: xVector.y / xVectorLength,
+    };
+    const yVectorNormalized = {
+      x: yVector.x / yVectorLength,
+      y: yVector.y / yVectorLength,
+    };
+
+    // 初始化投影值的极值
+    let uMin = Infinity;
+    let uMax = -Infinity;
+    let vMin = Infinity;
+    let vMax = -Infinity;
+
+    // 计算每个点在两个向量方向上的投影
+    for (const point of points) {
+      // 计算点在xVector方向上的投影u
+      const u = point.x * xVectorNormalized.x + point.y * xVectorNormalized.y;
+      // 计算点在yVector方向上的投影v
+      const v = point.x * yVectorNormalized.x + point.y * yVectorNormalized.y;
+
+      // 更新极值
+      uMin = Math.min(uMin, u);
+      uMax = Math.max(uMax, u);
+      vMin = Math.min(vMin, v);
+      vMax = Math.max(vMax, v);
+    }
+
+    // 计算平行四边形的四个顶点
+    const A = {
+      x: uMin * xVectorNormalized.x + vMin * yVectorNormalized.x,
+      y: uMin * xVectorNormalized.y + vMin * yVectorNormalized.y,
+    };
+    const B = {
+      x: uMax * xVectorNormalized.x + vMin * yVectorNormalized.x,
+      y: uMax * xVectorNormalized.y + vMin * yVectorNormalized.y,
+    };
+    const C = {
+      x: uMax * xVectorNormalized.x + vMax * yVectorNormalized.x,
+      y: uMax * xVectorNormalized.y + vMax * yVectorNormalized.y,
+    };
+    const D = {
+      x: uMin * xVectorNormalized.x + vMax * yVectorNormalized.x,
+      y: uMin * xVectorNormalized.y + vMax * yVectorNormalized.y,
+    };
+
+    return [A, B, C, D];
+  }
+
+  /**
+   * 计算包含所有点的最小平行四边形（给定中心点参照）
+   * @param points
+   * @param xVector
+   * @param yVector
+   * @param center
+   * @returns
+   */
+  static calcMinParallelogramByPointsByCenter(points: IPoint[], xVector: IPoint, yVector: IPoint, center: IPoint): IPoint[] {
+    points = MathUtils.batchCalcRelativePointWithCenter(points, center);
+    xVector = MathUtils.calcRelativePointWithCenter(xVector, center);
+    yVector = MathUtils.calcRelativePointWithCenter(yVector, center);
+    const result = this.calcMinParallelogramByPoints(points, xVector, yVector);
+    return MathUtils.batchCalcAbsolutePointWithCenter(result, center);
   }
 }
