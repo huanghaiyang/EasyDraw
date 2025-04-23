@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp } from "lodash";
+import { clamp, unionBy } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { ElementObject, IElementText, RefreshSubOptions } from "@/types/IElement";
@@ -1315,6 +1315,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else {
       this.store.updateElementsRotation(noParentElements, this._pressMovePosition);
     }
+    this._refreshAncesorGroupsByDetachedElements(selectedElements);
     selectedElements.forEach(element => {
       element.isRotating = true;
       element.onRotating();
@@ -1607,11 +1608,41 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 扁平化组件和其祖代组件
+   * @param elements - 组件列表
+   * @returns 扁平化后的组件列表
+   */
+  private _flatElementsWithAncestorGroups(elements: IElement[]): IElement[] {
+    const result = elements
+      .map(element => {
+        if (element.isGroupSubject && element.isDetachedSelected) {
+          return [element, ...element.ancestorGroups];
+        }
+        return [element];
+      })
+      .flat();
+    return unionBy(result, "id");
+  }
+
+  /**
+   * 刷新组件祖代组件的变换状态
+   * @param element - 组件
+   */
+  private _refreshDetachedElementAncestorGroupsAfterOperation(element: IElement): void {
+    if (element.isGroupSubject && element.isDetachedSelected) {
+      element.ancestorGroups.forEach(group => {
+        group.onTransformAfter();
+      });
+    }
+  }
+
+  /**
    * 创建组件原始平移命令
    *
    * @param elements
    */
   private async _createOriginalTranslateCommand(elements: IElement[]): Promise<void> {
+    elements = this._flatElementsWithAncestorGroups(elements);
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTranslateJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
@@ -1627,6 +1658,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     selectedElements.forEach(element => {
       element.isDragging = false;
       element.onTranslateAfter();
+      this._refreshDetachedElementAncestorGroupsAfterOperation(element);
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isDragging = false;
@@ -1639,6 +1671,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createOrignalRotateCommand(elements: IElement[]): Promise<void> {
+    elements = this._flatElementsWithAncestorGroups(elements);
     const datalist = await Promise.all(elements.map(async element => ({ model: await element.toOriginalRotateJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toRotateJson() })));
     this._createUpdateCommandBy(datalist, rDataList);
@@ -1655,6 +1688,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.isRotatingTarget = false;
       element.isRotating = false;
       element.onRotateAfter();
+      this._refreshDetachedElementAncestorGroupsAfterOperation(element);
     });
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = false;

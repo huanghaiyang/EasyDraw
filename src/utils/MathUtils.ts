@@ -1815,7 +1815,7 @@ export default class MathUtils {
         x: yVector.x / yVectorLength,
         y: yVector.y / yVectorLength,
       };
-      return this._calculateParallelogram(points, xVectorNormalized, yVectorNormalized);
+      return MathUtils.calculateParallelogram(points, xVectorNormalized, yVectorNormalized);
     }
 
     // 否则，计算正交基
@@ -1825,10 +1825,18 @@ export default class MathUtils {
       y: xVectorNormalized.x,
     };
 
-    return this._calculateParallelogram(points, xVectorNormalized, orthogonalVector);
+    return MathUtils.calculateParallelogram(points, xVectorNormalized, orthogonalVector);
   }
 
-  private static _calculateParallelogram(points: IPoint[], xVector: IPoint, yVector: IPoint): IPoint[] {
+  /**
+   * 计算平行四边形
+   *
+   * @param points
+   * @param xVector
+   * @param yVector
+   * @returns
+   */
+  static calculateParallelogram(points: IPoint[], xVector: IPoint, yVector: IPoint): IPoint[] {
     // 初始化投影值的极值
     let uMin = Infinity;
     let uMax = -Infinity;
