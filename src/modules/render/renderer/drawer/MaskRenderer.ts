@@ -80,7 +80,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     }
 
     const {
-      store: { noParentElements },
+      store: { nonHomologousElements },
       configure: { rotationIconEnable },
       selection: { rangeElement },
       cursor,
@@ -89,15 +89,15 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     } = this.drawer.shield;
 
     // 特殊组件处理（单个无父组件）===
-    if (noParentElements.length === 1) {
-      const element = noParentElements[0];
+    if (nonHomologousElements.length === 1) {
+      const element = nonHomologousElements[0];
       // 添加旋转图标（当组件允许旋转且处于完成状态）
       if (rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
         cargo.add(this.createMaskRotateTask(element.rotation));
       }
       // 添加指示器
       cargo.add(this.createMaskIndicatorTask(element));
-    } else if (noParentElements.length > 1) {
+    } else if (nonHomologousElements.length > 1 && rangeElement.subs.length > 0) {
       // 多选时添加范围组件的旋转任务
       cargo.add(this.createMaskRotateTask(rangeElement.rotation));
     }

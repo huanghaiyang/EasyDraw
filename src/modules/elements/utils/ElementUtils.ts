@@ -499,8 +499,7 @@ export default class ElementUtils {
    */
   static isSameAncestorGroup(elements: IElement[]): boolean {
     if (elements.length <= 1) return true;
-    const ancestorGroup = ElementUtils.getAncestorGroup(elements);
-    return ancestorGroup !== null;
+    return ElementUtils.getAncestorGroup(elements) !== null;
   }
 
   /**
@@ -510,18 +509,41 @@ export default class ElementUtils {
    */
   static getAncestorGroup(elements: IElement[]): IElement {
     if (elements.length === 0) return null;
-    const noParentElements = ElementUtils.getNoParentElements(elements);
-    if (noParentElements.length > 1) return null;
-    return noParentElements[0];
+    const nonHomologousElements = ElementUtils.getNonHomologousElements(elements);
+    if (nonHomologousElements.length > 1) return null;
+    return nonHomologousElements[0];
   }
 
   /**
-   * 获取非组合组件
+   * 获取非同一个组合的组件集合，结果中可能是组合也可能是普通组件
    *
    * @param elements
    */
-  static getNoParentElements(elements: IElement[]): IElement[] {
-    return elements.filter(element => !element.isGroupSubject);
+  static getNonHomologousElements(elements: IElement[]): IElement[] {
+    const resultIds: Set<string> = new Set();
+    const elementsIds = new Set(elements.map(element => element.id));
+    elements.forEach(element => {
+      if (!element.isGroupSubject) {
+        resultIds.add(element.id);
+      } else {
+        let ancestorAdded: boolean = false;
+        const ancestorGroups = element.ancestorGroups;
+        // 倒序遍历，只取最顶层的祖先组件加入到返回结果中
+        for (let i = ancestorGroups.length - 1; i >= 0; i--) {
+          const ancestorGroup = ancestorGroups[i];
+          if (elementsIds.has(ancestorGroup.id)) {
+            resultIds.add(ancestorGroup.id);
+            ancestorAdded = true;
+            break;
+          }
+        }
+        // 没有找到父组件，那么把当前组件加入到结果中
+        if (!ancestorAdded) {
+          resultIds.add(element.id);
+        }
+      }
+    });
+    return elements.filter(element => resultIds.has(element.id));
   }
 
   /**

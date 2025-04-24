@@ -138,7 +138,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignLeft(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { x } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -155,7 +155,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignRight(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -172,7 +172,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignTop(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { y } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -189,7 +189,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignBottom(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -206,7 +206,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignCenter(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { x: eX, width: eWidth } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -223,7 +223,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAlignMiddle(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     elements.forEach(element => {
       const { y: eY, height: eHeight } = CommonUtils.getRect(this._getElementAlignCoords(element));
@@ -240,7 +240,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAverageVertical(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     elements = this._sortElementsByY(elements);
     const { y, height } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));
@@ -266,7 +266,7 @@ export default class StageAlign implements IStageAlign {
    * @param elements
    */
   setElementsAverageHorizontal(elements: IElement[]): void {
-    elements = ElementUtils.getNoParentElements(elements);
+    elements = ElementUtils.getNonHomologousElements(elements);
     elements = this._sortElementsByX(elements);
     const { x, width } = this._getElementsCoordsRect(elements);
     const firstElementRect = CommonUtils.getRect(this._getElementAlignCoords(elements[0]));

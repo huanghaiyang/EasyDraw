@@ -1308,12 +1308,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 旋转组件
    */
   private _rotateElements(): void {
-    const { selectedElements, noParentElements } = this.store;
+    const { selectedElements, nonHomologousElements } = this.store;
     if (this.store.isMultiSelected) {
       this.selection.rangeElement.isRotating = true;
       this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
     } else {
-      this.store.updateElementsRotation(noParentElements, this._pressMovePosition);
+      this.store.updateElementsRotation(nonHomologousElements, this._pressMovePosition);
     }
     this._refreshAncesorGroupsByDetachedElements(selectedElements);
     selectedElements.forEach(element => {

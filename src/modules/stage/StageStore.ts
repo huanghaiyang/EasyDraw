@@ -90,7 +90,7 @@ export default class StageStore implements IStageStore {
   // 是否多选
   private _isMultiSelected: boolean = false;
   // 未定位父组件的选中组件
-  private _noParentElements: IElement[] = [];
+  private _nonHomologousElements: IElement[] = [];
   // 选中的祖先组件
   private _selectedAncestorElement: IElement;
   // 主选中的组件
@@ -236,8 +236,8 @@ export default class StageStore implements IStageStore {
   }
 
   // 不属于任何组合的组件
-  get noParentElements(): IElement[] {
-    return this._noParentElements;
+  get nonHomologousElements(): IElement[] {
+    return this._nonHomologousElements;
   }
 
   // 是否多选
@@ -350,8 +350,8 @@ export default class StageStore implements IStageStore {
    */
   private _reactionSelectedElementsChanged(): void {
     this._selectedElements = this._filterList(this._selectedElementIds);
-    this._noParentElements = ElementUtils.getNoParentElements(this._selectedElements);
-    this._isMultiSelected = this._noParentElements.length > 1;
+    this._nonHomologousElements = ElementUtils.getNonHomologousElements(this._selectedElements);
+    this._isMultiSelected = this._nonHomologousElements.length > 1;
     this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
     this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
 
@@ -2381,7 +2381,7 @@ export default class StageStore implements IStageStore {
    * 获取选中的根组合
    */
   getSelectedAncestorElementGroups(): IElementGroup[] {
-    return ElementUtils.getNoParentElements(this.getSelectedElementGroups()) as IElementGroup[];
+    return ElementUtils.getNonHomologousElements(this.getSelectedElementGroups()) as IElementGroup[];
   }
 
   /**

@@ -51,8 +51,8 @@ export default interface IStageStore extends IStageSetter {
   get isEditingTextEmpty(): boolean;
   // 选中的根组件
   get selectedAncestorElement(): IElement;
-  // 不属于任何组合的组件
-  get noParentElements(): IElement[];
+  // 非同组的组件
+  get nonHomologousElements(): IElement[];
   // 是否多选
   get isMultiSelected(): boolean;
   // 选中的组件ID
