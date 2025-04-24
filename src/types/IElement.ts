@@ -541,10 +541,11 @@ export default interface IElement {
 
   /**
    * 设置旋转角度
-   * @param value 旋转角度值（度）
+   *
+   * @param value
+   * @param rotating
    */
-  setAngle(value: number): void;
-
+  setAngle(value: number, rotating?: boolean): void;
   /**
    * 设置Y倾斜角度
    * @param value Y倾斜角度值（度）
@@ -776,10 +777,12 @@ export default interface IElement {
 
   /**
    * 旋转
+   *
    * @param deltaAngle 旋转角度值（度）
    * @param lockCenterCoord 锁定中心点坐标
+   * @param rotating 是否正在旋转
    */
-  rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void;
+  rotateBy(deltaAngle: number, lockCenterCoord: IPoint, rotating?: boolean): void;
 
   /**
    * 刷新尺寸

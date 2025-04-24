@@ -207,11 +207,12 @@ export default class ElementLine extends Element implements IElementLine {
    *
    * @param value
    */
-  setAngle(value: number): void {
+  setAngle(value: number, rotating?: boolean): void {
     const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, this.model.width, value - 90);
     this.model.coords = [this.startRotateCoord, endRotateCoord];
     this.model.boxCoords = CommonUtils.getBoxByPoints(this.model.coords);
     this.model.angle = 0;
+    this._refreshOnAngleChanged(rotating);
   }
 
   /**

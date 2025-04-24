@@ -970,7 +970,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 位置发生变化
    */
   onPositionChanged(): void {
-    this.refresh();
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
@@ -978,7 +977,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 宽度发生变化
    */
   onWidthChanged(): void {
-    this.refresh();
     this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
   }
 
@@ -986,7 +984,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 高度发生变化
    */
   onHeightChanged(): void {
-    this.refresh();
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
   }
 
@@ -1013,12 +1010,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 平移中
    */
   onTranslating(): void {
-    const { x, y } = ElementUtils.calcPosition({ type: this.model.type, coords: this.model.coords });
-    this.model.x = x;
-    this.model.y = y;
-    this.refreshCorners();
-    this.refreshRotation();
-    this.refreshTransformers();
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
   }
 
@@ -1040,7 +1031,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 旋转中
    */
   onRotating(): void {
-    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "angles", "outline", "strokes", "corners"]));
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
@@ -1062,9 +1052,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 变换中
    */
   onTransforming(): void {
-    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "size", "angles", "outline", "strokes", "corners"]), {
-      angles: LodashUtils.toBooleanObject(["view", "actual"]),
-    });
     this.emitPropChanged(ShieldDispatcherNames.positionChanged, [this.position]);
     this.emitPropChanged(ShieldDispatcherNames.widthChanged, [this.width]);
     this.emitPropChanged(ShieldDispatcherNames.heightChanged, [this.height]);
@@ -1076,10 +1063,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 水平翻转变化
    */
   onFlipXChanged(): void {
-    this.refreshFlipX();
-    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size", "angles", "outline", "strokes", "corners", "originals", { position: this.isGroupSubject }]), {
-      angles: LodashUtils.toBooleanObject(["view", "actual"]),
-    });
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipX而不是flipX用以减少属性值计算
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
@@ -1089,10 +1072,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 垂直翻转变化
    */
   onFlipYChanged(): void {
-    this.refreshFlipX();
-    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size", "angles", "outline", "strokes", "corners", "originals", { position: this.isGroupSubject }]), {
-      angles: LodashUtils.toBooleanObject(["view", "actual"]),
-    });
     this.emitPropChanged(ShieldDispatcherNames.flipXChanged, [this._flipX]); // 此处需要使用_flipY而不是flipY用以减少属性值计算
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
@@ -1102,7 +1081,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 角度发生变化
    */
   onAngleChanged(): void {
-    this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual"]) });
     this.emitPropChanged(ShieldDispatcherNames.angleChanged, [this.angle]);
   }
 
@@ -1110,8 +1088,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 倾斜角度发生变化
    */
   onLeanyAngleChanged(): void {
-    // 刷新角度选项
-    this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual", "internal"]) });
     this.emitPropChanged(ShieldDispatcherNames.leanYAngleChanged, [this.leanYAngle]);
   }
 
@@ -1119,7 +1095,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 圆角变化中
    */
   onCornerChanging(): void {
-    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes"]));
     this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
@@ -1127,7 +1102,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 圆角发生变化
    */
   onCornerChanged(): void {
-    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.cornersChanged, [this.corners]);
   }
 
@@ -1135,7 +1109,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边类型发生变化
    */
   onStrokeTypeChanged(): void {
-    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1143,7 +1116,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边宽度发生变化
    */
   onStrokeWidthChanged(): void {
-    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1165,7 +1137,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边添加
    */
   onStrokeAdded(): void {
-    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1173,7 +1144,6 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 描边删除
    */
   onStrokeRemoved(): void {
-    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
     this.emitPropChanged(ShieldDispatcherNames.strokesChanged, [this.strokes]);
   }
 
@@ -1914,6 +1884,15 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 当形变时刷新必要属性
+   */
+  private _refreshOnTransformChanged(): void {
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "size", "angles", "outline", "strokes", "corners"]), {
+      angles: LodashUtils.toBooleanObject(["view", "actual"]),
+    });
+  }
+
+  /**
    * 形变
    *
    * @param offset
@@ -1928,6 +1907,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       this.transformByBorder(offset);
       this._transformType = TransformTypes.border;
     }
+    this._refreshOnTransformChanged();
   }
 
   /**
@@ -1950,6 +1930,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
     // 执行矩阵变换
     this._doTransformBy(matrix, lockCoord, groupAngles, originalMovingCoord);
+    this._refreshOnTransformChanged();
   }
 
   /**
@@ -2240,6 +2221,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._maxBoxCoords = MathUtils.batchTranslate(this._originalMaxBoxCoords, offset);
     this._maxOutlineBoxCoords = MathUtils.batchTranslate(this._originalMaxOutlineBoxCoords, offset);
     this._rotateOutlineCoords = this._originalRotateOutlineCoords.map(coords => MathUtils.batchTranslate(coords, offset));
+    const { x, y } = ElementUtils.calcPosition({ type: this.model.type, coords: this.model.coords });
+    this.model.x = x;
+    this.model.y = y;
+    this.refreshCorners();
+    this.refreshRotation();
+    this.refreshTransformers();
   }
 
   /**
@@ -2349,6 +2336,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = MathUtils.batchPrecisePoints(this.batchCalcTransformPointsByCenter(this._originalRotateCoords, matrix, this._originalCenterCoord, this._originalCenterCoord), 1);
     // 设置变换盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoints(this.batchCalcTransformPointsByCenter(this._originalRotateBoxCoords, matrix, this._originalCenterCoord, this._originalCenterCoord), 1);
+    this.refresh();
   }
 
   /**
@@ -2366,6 +2354,20 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.coords = MathUtils.batchPrecisePoints(MathUtils.batchTranslate(this.model.coords, offset), 1);
     // 设置变换盒模型坐标
     this.model.boxCoords = MathUtils.batchPrecisePoints(MathUtils.batchTranslate(this.model.boxCoords, offset), 1);
+    this.refresh();
+  }
+
+  /**
+   * 当角度发生变化时，刷新必要属性
+   *
+   * @param rotating
+   */
+  protected _refreshOnAngleChanged(rotating: boolean): void {
+    if (rotating) {
+      this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "angles", "outline", "strokes", "corners"]));
+    } else {
+      this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual"]) });
+    }
   }
 
   /**
@@ -2373,8 +2375,16 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param value
    */
-  setAngle(value: number): void {
+  setAngle(value: number, rotating?: boolean): void {
     this.model.angle = value;
+    this._refreshOnAngleChanged(rotating);
+  }
+
+  /**
+   * 当Y倾斜角度发生变化时，刷新必要属性
+   */
+  private _refreshOnLeanYChanged(): void {
+    this.refresh(null, { angles: LodashUtils.toBooleanObject(["view", "actual", "internal"]) });
   }
 
   /**
@@ -2397,6 +2407,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchPrecisePoints(MathUtils.batchLeanYWithCenter(boxCoords, value, centerCoord), 1);
     // 刷新y倾斜角度
     this.model.leanYAngle = value;
+    // 刷新角度选项
+    this._refreshOnLeanYChanged();
   }
 
   /**
@@ -2417,6 +2429,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 计算偏移后的盒模型坐标
     boxCoords = MathUtils.batchTransWithCenter(boxCoords, { angle: groupAngle, leanYAngle: value }, centerCoord);
     this._doTransformByPoints(coords, boxCoords, centerCoord);
+    // 刷新角度选项
+    this._refreshOnLeanYChanged();
   }
 
   /**
@@ -2450,6 +2464,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     else values.fill(value);
     values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
     this.model.corners = values;
+    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes"]));
   }
 
   /**
@@ -2460,6 +2475,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   setStrokeType(value: StrokeTypes, index: number): void {
     this.model.styles.strokes[index].type = value;
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
   }
 
   /**
@@ -2502,6 +2518,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
     value = MathUtils.precise(value, 1);
     this.model.styles.strokes[index].width = value;
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
   }
 
   /**
@@ -2511,6 +2528,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   addStroke(prevIndex: number): void {
     this.model.styles.strokes.splice(prevIndex + 1, 0, { ...DefaultStrokeStyle });
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
   }
 
   /**
@@ -2520,6 +2538,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   removeStroke(index: number): void {
     this.model.styles.strokes.splice(index, 1);
+    this.refresh(LodashUtils.toBooleanObject(["strokes", "outline", "originals"]));
   }
 
   /**
@@ -2759,6 +2778,16 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 刷新组件翻转状态
+   */
+  private _refreshOnFlipChanged(): void {
+    this.refreshFlipX();
+    this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size", "angles", "outline", "strokes", "corners", "originals", { position: this.isGroupSubject }]), {
+      angles: LodashUtils.toBooleanObject(["view", "actual"]),
+    });
+  }
+
+  /**
    * 按照某一条线为翻转线，水平翻转组件
    *
    * @param flipLineStart 翻转线起点坐标
@@ -2771,6 +2800,7 @@ export default class Element implements IElement, ILinkedNodeValue {
       // 倾斜角度镜像
       this.model.leanYAngle = -this.model.leanYAngle;
     });
+    this._refreshOnFlipChanged();
   }
 
   /**
@@ -2824,6 +2854,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const points = this._getFlipXLinePoints();
     // 开始翻转
     this.flipXBy(points[0], points[1]);
+    this._refreshOnFlipChanged();
     // 返回参考线坐标，用于子节点的翻转参考
     return points;
   }
@@ -2876,6 +2907,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchPrecisePoints(MathUtils.batchLeanYWithCenter(boxCoords, this.model.leanYAngle, centerCoord), 1);
     // 计算倾斜后的坐标
     this.model.coords = MathUtils.batchPrecisePoints(MathUtils.batchLeanYWithCenter(coords, this.model.leanYAngle, centerCoord), 1);
+    this._refreshOnFlipChanged();
   }
 
   /**
@@ -2885,16 +2917,18 @@ export default class Element implements IElement, ILinkedNodeValue {
     const flipPoints = this._getFlipYLinePoints();
     // 开始翻转
     this.flipYBy(flipPoints[0], flipPoints[1]);
+    this._refreshOnFlipChanged();
     // 返回参考线坐标，用于子节点的翻转参考
     return flipPoints;
   }
 
   /**
    * 按照某一点为圆心，旋转指定角度
-   * @param value
-   * @param lockCenter
+   * @param deltaAngle 旋转角度
+   * @param lockCenter 锁定中心点
+   * @param rotating 是否正在旋转
    */
-  rotateBy(deltaAngle: number, lockCenterCoord: IPoint): void {
+  rotateBy(deltaAngle: number, lockCenterCoord: IPoint, rotating: boolean): void {
     // 计算旋转后的中心点坐标
     const newCenterCoord = MathUtils.rotateWithCenter(this._originalCenterCoord, deltaAngle, lockCenterCoord);
     // 计算偏移量
@@ -2912,6 +2946,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.model.boxCoords = MathUtils.batchPrecisePoints(boxCoords, 1);
     // 设置变换角度
     this.model.angle = MathUtils.constraintAngle(MathUtils.normalizeAngle(this._originalAngle) + (MathUtils.normalizeAngle(deltaAngle) % 360));
+    this._refreshOnAngleChanged(rotating);
   }
 
   /**
