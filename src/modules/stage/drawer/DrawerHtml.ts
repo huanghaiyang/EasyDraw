@@ -267,7 +267,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
     textCursorEditor.addEventListener("paste", e => {
       EventUtils.stopPP(e);
       const text = e.clipboardData.getData("text/plain");
-      this.textCursorEditor.value = text;
+      this.textCursorEditor.value = text.replaceAll("\t", " ".repeat(4));
       this._prevTextCursorKeycode = 86;
       this._emitTextCursorUpdate();
       this._resetTextCursorInput();
