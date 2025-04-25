@@ -2023,15 +2023,16 @@ export default class StageStore implements IStageStore {
    */
   rotateElements(elements: IElement[], angle: number, originalAngle: number, centerCoord: IPoint, rotating: boolean = false): void {
     elements.forEach(element => {
+      const elementOriginalAngle = element.originalAngle;
       if (element.model.type !== CreatorTypes.line) {
-        angle = MathUtils.constraintAngle(element.originalAngle + angle - originalAngle);
+        angle = MathUtils.constraintAngle(elementOriginalAngle + angle - originalAngle);
         angle = MathUtils.precise(angle, 1);
       }
       element.setAngle(angle, rotating);
       !element.isOnStage && this._updateElementStageStatusIfy(element);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
-          sub.rotateBy(angle - element.originalAngle, centerCoord, rotating);
+          sub.rotateBy(angle - elementOriginalAngle, centerCoord, rotating);
           !sub.isOnStage && this._updateElementStageStatusIfy(sub);
         });
       }
