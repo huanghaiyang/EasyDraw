@@ -290,7 +290,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createTranslateCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    elements = this._flatElementsWithAncestorGroups(elements);
+    elements = this._flatWithAncestors(elements);
     // 记录原始数据
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     await elementsUpdateFunction();
@@ -324,7 +324,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createTransformCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    elements = this._flatElementsWithAncestorGroups(elements);
+    elements = this._flatWithAncestors(elements);
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     await elementsUpdateFunction();
     await this._reflowTextIfy(elements, true);
@@ -1165,20 +1165,44 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 处理祖先组件
+   *
+   * @param elements
+   * @param func
+   */
+  private _processAncestorsByElements(elements: IElement[], func: (group: IElementGroup) => void): void {
+    const ancestors: Set<string> = new Set();
+    elements.forEach(element => {
+      // 判断是否是子组件
+      if (element.isDetachedSelected && element.isGroupSubject) {
+        // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
+        element.ancestorGroups.forEach(group => {
+          if (!ancestors.has(group.id)) {
+            func(group);
+            ancestors.add(group.id);
+          }
+        });
+      }
+    });
+    ancestors.clear();
+  }
+
+  /**
    * 刷新祖先组件的原始数据
    *
    * @param elements
    */
   private _refreshAncesorGroupsOriginals(elements: IElement[]): void {
-    elements.forEach(element => {
-      // 判断是否是子组件
-      if (element.isGroupSubject) {
-        // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
-        element.ancestorGroups.forEach(group => {
-          group.refreshOriginalProps();
-        });
-      }
-    });
+    this._processAncestorsByElements(elements, group => group.refreshOriginalProps());
+  }
+
+  /**
+   * 刷新组件的祖先组件
+   *
+   * @param elements
+   */
+  private _refreshAncesorsByDetachedElements(elements: IElement[]): void {
+    this._processAncestorsByElements(elements, group => (group as IElementGroup).refreshBySubs());
   }
 
   /**
@@ -1275,26 +1299,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection.refresh();
     this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
-  }
-
-  /**
-   * 刷新组件的祖先组件
-   *
-   * @param elements
-   */
-  private _refreshAncesorsByDetachedElements(elements: IElement[]): void {
-    const ancestors: Set<string> = new Set();
-    elements.forEach(element => {
-      if (element.isDetachedSelected && element.isGroupSubject) {
-        element.ancestorGroups.forEach(group => {
-          if (!ancestors.has(group.id)) {
-            (group as IElementGroup).refreshBySubs();
-            ancestors.add(group.id);
-          }
-        });
-      }
-    });
-    ancestors.clear();
   }
 
   /**
@@ -1660,7 +1664,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements - 组件列表
    * @returns 扁平化后的组件列表
    */
-  private _flatElementsWithAncestorGroups(elements: IElement[]): IElement[] {
+  private _flatWithAncestors(elements: IElement[]): IElement[] {
     const result = elements
       .map(element => {
         if (element.isGroupSubject && element.isDetachedSelected) {
@@ -1690,7 +1694,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createOriginalTranslateCommand(elements: IElement[]): Promise<void> {
-    elements = this._flatElementsWithAncestorGroups(elements);
+    elements = this._flatWithAncestors(elements);
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTranslateJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
@@ -1719,7 +1723,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createOrignalRotateCommand(elements: IElement[]): Promise<void> {
-    elements = this._flatElementsWithAncestorGroups(elements);
+    elements = this._flatWithAncestors(elements);
     const datalist = await Promise.all(elements.map(async element => ({ model: await element.toOriginalRotateJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toRotateJson() })));
     this._createUpdateCommandBy(datalist, rDataList);
@@ -1750,7 +1754,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createOriginalTransformCommand(elements: IElement[]): Promise<void> {
-    elements = this._flatElementsWithAncestorGroups(elements);
+    elements = this._flatWithAncestors(elements);
     const dataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTransformJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
     this._createUpdateCommandBy(dataList, rDataList);
