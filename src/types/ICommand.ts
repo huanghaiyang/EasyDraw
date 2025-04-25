@@ -15,6 +15,18 @@ export type INodeRelation = {
 // 组件删除命令
 export type IRemovedCommandElementObject = ICommandElementObject & INodeRelation;
 
+// 组件移除类型
+export enum DetachedRemovedType {
+  GroupUpdated = "groupSubRemoved",
+  Removed = "removed",
+}
+
+// 独立组件移除命令
+export type IDetachedRemovedCommandElementObject = ICommandElementObject &
+  INodeRelation & {
+    type: DetachedRemovedType;
+  };
+
 // 组件顺序调整命令
 export type IRearrangeCommandElementObject = ICommandElementObject & INodeRelation;
 
