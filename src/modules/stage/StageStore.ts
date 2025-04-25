@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isEqual, pick } from "lodash";
+import { every, isEqual, pick, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -102,6 +102,7 @@ export default class StageStore implements IStageStore {
     this._reactionElementRemoved();
     this._reactionElementsPropsChanged();
     this._reactionElementsSelectionChanged();
+    this.throttleRefreshTreeNodes = throttle(this.throttleRefreshTreeNodes.bind(this), 100, { leading: false, trailing: true });
   }
 
   get selectedElementIds(): Set<string> {
@@ -254,7 +255,7 @@ export default class StageStore implements IStageStore {
       Object.keys(ElementReactionPropNames).forEach(propName => {
         this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
       });
-      this.refreshTreeNodes();
+      this.throttleRefreshTreeNodes();
     });
   }
 
@@ -274,7 +275,7 @@ export default class StageStore implements IStageStore {
       this._rangeElementIds.delete(id);
       this._visibleElementIds.delete(id);
       this._stageElementIds.delete(id);
-      this.refreshTreeNodes();
+      this.throttleRefreshTreeNodes();
     });
   }
 
@@ -559,13 +560,10 @@ export default class StageStore implements IStageStore {
   /**
    * 发送树节点变化事件
    */
-  refreshTreeNodes(): void {
-    //延迟一下，防止卡顿和数据不准确问题
-    setTimeout(() => {
-      this._treeNodesMap.clear();
-      this._treeNodes = this._toTreeNodes();
-      this.shield.emit(ShieldDispatcherNames.treeNodesChanged, this._treeNodes);
-    });
+  throttleRefreshTreeNodes(): void {
+    this._treeNodesMap.clear();
+    this._treeNodes = this._toTreeNodes();
+    this.shield.emit(ShieldDispatcherNames.treeNodesChanged, this._treeNodes);
   }
 
   /**
@@ -2599,7 +2597,7 @@ export default class StageStore implements IStageStore {
     this._doElementsGoDown(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this.refreshTreeNodes();
+    this.throttleRefreshTreeNodes();
   }
 
   /**
@@ -2636,7 +2634,7 @@ export default class StageStore implements IStageStore {
     this._doElementsShiftMove(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this.refreshTreeNodes();
+    this.throttleRefreshTreeNodes();
   }
 
   /**

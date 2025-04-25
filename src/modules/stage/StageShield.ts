@@ -2483,7 +2483,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
     if (tailCommand instanceof ElementsRearrangeCommand) {
-      this.store.refreshTreeNodes();
+      this.store.throttleRefreshTreeNodes();
     }
   }
 

@@ -199,5 +199,5 @@ export default interface IStageStore extends IStageSetter {
   // 发送元素层改变事件
   emitElementsLayerChanged(): void;
   // 刷新树节点
-  refreshTreeNodes(): void;
+  throttleRefreshTreeNodes(): void;
 }
