@@ -254,7 +254,7 @@ export default class StageStore implements IStageStore {
       Object.keys(ElementReactionPropNames).forEach(propName => {
         this._reactionElementPropsChanged(ElementReactionPropNames[propName], element, element[propName]);
       });
-      this._preserveTreeNodesChanged();
+      this.refreshTreeNodes();
     });
   }
 
@@ -274,7 +274,7 @@ export default class StageStore implements IStageStore {
       this._rangeElementIds.delete(id);
       this._visibleElementIds.delete(id);
       this._stageElementIds.delete(id);
-      this._preserveTreeNodesChanged();
+      this.refreshTreeNodes();
     });
   }
 
@@ -559,7 +559,7 @@ export default class StageStore implements IStageStore {
   /**
    * 发送树节点变化事件
    */
-  private _preserveTreeNodesChanged(): void {
+  refreshTreeNodes(): void {
     //延迟一下，防止卡顿和数据不准确问题
     setTimeout(() => {
       this._treeNodesMap.clear();
@@ -2599,7 +2599,7 @@ export default class StageStore implements IStageStore {
     this._doElementsGoDown(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this._preserveTreeNodesChanged();
+    this.refreshTreeNodes();
   }
 
   /**
@@ -2636,7 +2636,7 @@ export default class StageStore implements IStageStore {
     this._doElementsShiftMove(elements);
     this.resortElementsArray();
     this.emitElementsLayerChanged();
-    this._preserveTreeNodesChanged();
+    this.refreshTreeNodes();
   }
 
   /**
