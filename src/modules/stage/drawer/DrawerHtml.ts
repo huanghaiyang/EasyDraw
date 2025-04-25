@@ -178,6 +178,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    * @param textEditor
    */
   private _addInputEvents(textEditor: HTMLTextAreaElement): void {
+    // 监听失焦
     textEditor.addEventListener("blur", () => {
       if (this.textEditor.value) {
         this.emit(
@@ -194,13 +195,26 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
       this.textEditor.remove();
       this.textEditor = null;
     });
+    // 监听键盘事件
     textEditor.addEventListener("keydown", e => {
       if (e.key === "Enter") {
         this._updateInputStyleWhileInputing();
       }
     });
+    // 监听输入
     textEditor.addEventListener("input", () => {
       this._updateInputStyleWhileInputing();
+    });
+    // 拦截粘贴事件，处理制表符
+    textEditor.addEventListener("paste", e => {
+      try {
+        EventUtils.stopPP(e);
+        const text = e.clipboardData.getData("text/plain");
+        // 将制表符替换为空格
+        document.execCommand("insertText", false, text.replaceAll("\t", " ".repeat(4)));
+      } catch (error) {
+        console.error(error);
+      }
     });
   }
 
