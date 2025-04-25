@@ -69,7 +69,13 @@ export default interface IStageStore extends IStageSetter {
   // 根据组件数据模型在某组件之前添加组件
   beforeAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 移除组件
-  removeElement(id: string): IElement;
+  removeElementById(id: string): IElement;
+  // 批量移除组件
+  removeElementsByIds(ids: string[]): IElement[];
+  // 移除组件
+  removeElement(element: IElement): IElement;
+  // 批量移除组件
+  removeElements(elements: IElement[]): IElement[];
   // 更新组件
   updateElementById(id: string, props: Partial<IElement>): IElement;
   // 批量更新组件
@@ -86,6 +92,8 @@ export default interface IStageStore extends IStageSetter {
   getElementById(id: string): IElement;
   // 获取组件
   getElementsByIds(ids: string[]): IElement[];
+  // 获取组件列表（要求返回的顺序要按照链表从前的到后排序）
+  getOrderedElementsByIds(ids: string[]): IElement[];
   // 获取组件索引
   getIndexById(id: string): number;
   // 创建组件

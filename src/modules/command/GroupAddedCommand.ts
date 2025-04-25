@@ -13,7 +13,7 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
         prevId,
       } = data as IGroupCommandElementObject;
       if (isGroup) {
-        this.store.removeElement(id);
+        this.store.removeElementById(id);
       } else {
         const element = this.store.getElementById(id);
         if (element) {

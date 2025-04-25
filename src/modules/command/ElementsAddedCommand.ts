@@ -9,7 +9,7 @@ export default class ElementsAddedCommand extends ElementsBaseCommand<IElementCo
       const {
         model: { id },
       } = data;
-      this.store.removeElement(id);
+      this.store.removeElementById(id);
     });
   }
 

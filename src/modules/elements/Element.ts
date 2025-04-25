@@ -195,10 +195,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     if (!this.isGroupSubject) return [];
     const groups: IElementGroup[] = [];
     let group = this.group;
-    groups.push(group);
-    while (group && group.isGroupSubject) {
-      group = group.group;
+    if (group) {
       groups.push(group);
+      while (group && group.isGroupSubject) {
+        group = group.group;
+        groups.push(group);
+      }
     }
     return groups;
   }

@@ -111,7 +111,7 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取子组件
    */
   getSubs(): IElement[] {
-    return this.shield.store.getElementsByIds(this.model.subIds);
+    return this.shield.store.getOrderedElementsByIds(this.model.subIds);
   }
 
   /**

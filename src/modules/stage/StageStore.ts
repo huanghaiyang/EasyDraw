@@ -1347,6 +1347,22 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 获取组件列表（要求返回的顺序要按照链表从前的到后排序）
+   *
+   * @param ids
+   * @returns
+   */
+  getOrderedElementsByIds(ids: string[]): IElement[] {
+    const result: IElement[] = [];
+    this._elementList.forEach(node => {
+      if (ids.includes(node.value.id)) {
+        result.push(node.value);
+      }
+    });
+    return result;
+  }
+
+  /**
    * 获取组件在列表中的索引
    *
    * @param id
@@ -1464,7 +1480,7 @@ export default class StageStore implements IStageStore {
    *
    * @param id
    */
-  removeElement(id: string): IElement {
+  removeElementById(id: string): IElement {
     if (this.hasElement(id)) {
       let element = this._elementsMap.get(id);
       this._elementList.removeBy(node => node.value.id === id);
@@ -1472,6 +1488,36 @@ export default class StageStore implements IStageStore {
       element = null;
       return element;
     }
+  }
+
+  /**
+   * 批量删除组件
+   *
+   * @param ids
+   * @returns
+   */
+  removeElementsByIds(ids: string[]): IElement[] {
+    return ids.map(id => this.removeElementById(id)).filter(element => element !== undefined);
+  }
+
+  /**
+   * 删除组件
+   *
+   * @param element
+   * @returns
+   */
+  removeElement(element: IElement): IElement {
+    return this.removeElementById(element.id);
+  }
+
+  /**
+   * 批量删除组件
+   *
+   * @param elements
+   * @returns
+   */
+  removeElements(elements: IElement[]): IElement[] {
+    return elements.map(element => this.removeElementById(element.id)).filter(element => element !== undefined);
   }
 
   /**
@@ -2063,7 +2109,7 @@ export default class StageStore implements IStageStore {
    */
   deleteSelects(): void {
     this.selectedElements.forEach(element => {
-      this.removeElement(element.id);
+      this.removeElementById(element.id);
     });
   }
 
@@ -2345,7 +2391,7 @@ export default class StageStore implements IStageStore {
       // 取消选中组合
       this.deSelectGroup(group);
       // 删除组合组件
-      this.removeElement(group.id);
+      this.removeElementById(group.id);
     }
   }
 

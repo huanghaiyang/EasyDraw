@@ -28,7 +28,7 @@ export default class GroupRemovedCommand extends ElementsBaseCommand<IElementCom
         isGroup,
       } = data as IGroupCommandElementObject;
       if (isGroup) {
-        this.store.removeElement(id);
+        this.store.removeElementById(id);
       } else {
         this.store.updateElementModel(id, {
           groupId: undefined,

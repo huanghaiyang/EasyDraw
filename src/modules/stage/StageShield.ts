@@ -35,7 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import { ElementCommandTypes, ICommandElementObject, IElementCommandPayload, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
+import ICommand, { ElementCommandTypes, ICommandElementObject, IElementCommandPayload, IGroupCommandElementObject, INodeRelation } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
@@ -1165,12 +1165,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 处理祖先组件
+   * 获取祖先组件ID
    *
    * @param elements
-   * @param func
    */
-  private _processAncestorsByElements(elements: IElement[], func: (group: IElementGroup) => void): void {
+  private _getAncestorIdsByElements(elements: IElement[]): string[] {
     const ancestors: Set<string> = new Set();
     elements.forEach(element => {
       // 判断是否是子组件
@@ -1178,13 +1177,33 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
         element.ancestorGroups.forEach(group => {
           if (!ancestors.has(group.id)) {
-            func(group);
             ancestors.add(group.id);
           }
         });
       }
     });
-    ancestors.clear();
+    return Array.from(ancestors);
+  }
+
+  /**
+   * 获取祖先组件
+   *
+   * @param elements
+   */
+  private _getAncestorsByElements(elements: IElement[]): IElementGroup[] {
+    const ancestors: string[] = this._getAncestorIdsByElements(elements);
+    return this.store.getOrderedElementsByIds(Array.from(ancestors)) as IElementGroup[];
+  }
+
+  /**
+   * 处理祖先组件
+   *
+   * @param elements
+   * @param func
+   */
+  private _processAncestorsByElements(elements: IElement[], func: (group: IElementGroup) => void): void {
+    const ancestors = this._getAncestorsByElements(elements);
+    ancestors.forEach(func);
   }
 
   /**
@@ -1657,23 +1676,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 扁平化组件和其祖代组件
-   *
-   * 返回的结果是无序的，不会按照组合层级返回
+   * 扁平化组件和其祖代组件,返回的结果链表有序
    *
    * @param elements - 组件列表
    * @returns 扁平化后的组件列表
    */
   private _flatWithAncestors(elements: IElement[]): IElement[] {
-    const result = elements
-      .map(element => {
-        if (element.isGroupSubject && element.isDetachedSelected) {
-          return [element, ...element.ancestorGroups];
-        }
-        return [element];
-      })
-      .flat();
-    return unionBy(result, "id");
+    const ancestorIds = this._getAncestorIdsByElements(elements);
+    const ids = new Set(ancestorIds);
+    elements.forEach(element => {
+      ids.add(element.id);
+    });
+    return this.store.getOrderedElementsByIds(Array.from(ids));
   }
 
   /**
@@ -2206,26 +2220,58 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 检查是否有分离的元素有祖先元素被选中
+   *
+   * @param elements
+   * @returns
+   */
+  private _isDetachedElementsAncestorNotSelected(elements: IElement[]): boolean {
+    return elements.some(element => {
+      return element.isDetachedSelected && element.isGroupSubject && !element.ancestorGroup.isSelected;
+    });
+  }
+
+  /**
    * 处理选中组件删除
    */
   async _handleSelectsDelete(): Promise<void> {
     if (this.store.isSelectedEmpty) {
       return;
     }
-    const command = new ElementsRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.ElementsRemoved,
-        uDataList: await Promise.all(
-          this.store.selectedElements.map(async element => {
-            return { model: await element.toJson(), ...this._createRearrangeModel(element) };
-          }),
-        ),
-      },
-      this.store,
-    );
+    let command: ICommand<IElementCommandPayload> | null = null;
+    const removedAncestorIds: Set<string> = new Set();
+    const updateAncestorIds: Set<string> = new Set();
+    if (this._isDetachedElementsAncestorNotSelected(this.store.selectedElements)) {
+    } else {
+      command = new ElementsRemovedCommand(
+        nanoid(),
+        {
+          type: ElementCommandTypes.ElementsRemoved,
+          uDataList: await Promise.all(
+            this.store.selectedElements.map(async element => {
+              return { model: await element.toJson(), ...this._createRearrangeModel(element) };
+            }),
+          ),
+        },
+        this.store,
+      );
+    }
     this.undoRedo.add(command);
     this.store.deleteSelects();
+    // 删除祖先组件
+    if (removedAncestorIds.size) {
+      const removedAncestors = this.store.getOrderedElementsByIds(Array.from(removedAncestorIds));
+      if (removedAncestors.length) {
+        this.store.removeElements(removedAncestors);
+      }
+    }
+    // 更新祖先组件属性
+    if (updateAncestorIds.size) {
+      const updateAncestors = this.store.getOrderedElementsByIds(Array.from(updateAncestorIds));
+      if (updateAncestors.length) {
+        updateAncestors.forEach(ancestor => (ancestor as IElementGroup).refreshBySubs());
+      }
+    }
   }
 
   /**
