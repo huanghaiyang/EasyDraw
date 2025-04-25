@@ -1417,7 +1417,7 @@ export default class StageStore implements IStageStore {
    * @param isAppend
    * @returns
    */
-  beforeAddElement(element: IElement, targetElement?: any, isAppend?: boolean): IElement {
+  insertBeforeElement(element: IElement, targetElement?: any, isAppend?: boolean): IElement {
     const node = new LinkedNode(element);
     element.node = node;
     if (targetElement) {
@@ -1453,7 +1453,7 @@ export default class StageStore implements IStageStore {
    * @param isPrepend
    * @returns
    */
-  afterAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
+  insertAfterElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
     const element = this._createElementByModel(model);
     this.addElement(element, targetElement, isPrepend);
     element.refresh();
@@ -1468,9 +1468,9 @@ export default class StageStore implements IStageStore {
    * @param isPrepend
    * @returns
    */
-  beforeAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
+  insertBeforeElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement {
     const element = this._createElementByModel(model);
-    this.beforeAddElement(element, targetElement, isPrepend);
+    this.insertBeforeElement(element, targetElement, isPrepend);
     element.refresh();
     return element;
   }
@@ -2088,7 +2088,7 @@ export default class StageStore implements IStageStore {
       await ImageUtils.waitForImageLoad(image);
     }
     const model = await this.createImageElementModel(image, { colorSpace });
-    return this.afterAddElementByModel(model);
+    return this.insertAfterElementByModel(model);
   }
 
   /**
@@ -2101,7 +2101,7 @@ export default class StageStore implements IStageStore {
   insertTextElement(text: string, fontStyle: FontStyle, coords?: IPoint[]): IElement {
     const textData = TextElementUtils.createTextData(text, fontStyle);
     const model = this.createElementModel(CreatorTypes.text, coords, textData);
-    return this.afterAddElementByModel(model);
+    return this.insertAfterElementByModel(model);
   }
 
   /**
@@ -2489,7 +2489,7 @@ export default class StageStore implements IStageStore {
     const models = ElementUtils.convertElementsJson(elementsJson);
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
-      const element = this.afterAddElementByModel(model);
+      const element = this.insertAfterElementByModel(model);
       result.push(element);
     }
     return result;

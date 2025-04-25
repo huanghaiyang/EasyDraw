@@ -12,7 +12,7 @@ export default class GroupRemovedCommand extends ElementsBaseCommand<IElementCom
         prevId,
       } = data as IGroupCommandElementObject;
       if (isGroup) {
-        this.store.afterAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, prevId ? this.store.getElementById(prevId) : null, true);
+        this.store.insertAfterElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, prevId ? this.store.getElementById(prevId) : null, true);
       } else {
         this.store.updateElementModel(id, {
           groupId,

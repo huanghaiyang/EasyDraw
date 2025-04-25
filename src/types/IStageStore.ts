@@ -63,11 +63,11 @@ export default interface IStageStore extends IStageSetter {
   // 添加组件
   addElement(element: IElement, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 根据组件数据模型添加组件
-  afterAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
+  insertAfterElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 在某组件之前添加组件
-  beforeAddElement(element: IElement, targetElement, isAppend?: boolean): IElement;
+  insertBeforeElement(element: IElement, targetElement, isAppend?: boolean): IElement;
   // 根据组件数据模型在某组件之前添加组件
-  beforeAddElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
+  insertBeforeElementByModel(model: ElementObject, targetElement?: IElement, isPrepend?: boolean): IElement;
   // 移除组件
   removeElementById(id: string): IElement;
   // 批量移除组件

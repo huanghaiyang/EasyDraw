@@ -41,7 +41,7 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
         nextId,
       } = data as IGroupCommandElementObject;
       if (isGroup) {
-        this.store.beforeAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, nextId ? this.store.getElementById(nextId) : null, true);
+        this.store.insertBeforeElementByModel(LodashUtils.jsonClone(data.model) as ElementObject, nextId ? this.store.getElementById(nextId) : null, true);
       } else {
         const element = this.store.getElementById(id);
         if (element) {

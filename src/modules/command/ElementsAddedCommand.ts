@@ -15,7 +15,7 @@ export default class ElementsAddedCommand extends ElementsBaseCommand<IElementCo
 
   async redo(): Promise<void> {
     this.payload.uDataList.forEach(data => {
-      this.store.afterAddElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
+      this.store.insertAfterElementByModel(LodashUtils.jsonClone(data.model) as ElementObject);
     });
   }
 }
