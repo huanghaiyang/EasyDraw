@@ -16,7 +16,7 @@ const shield = new StageShield();
 // 舞台容器
 const container = new StageContainer();
 // 配置
-shield.configure.config({ rotationIconEnable: true });
+shield.configure.config({ rotationIconEnable: false });
 // 节流时间
 const ThrottleTime = 200;
 // 节流配置

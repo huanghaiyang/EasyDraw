@@ -57,28 +57,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 初始化渲染任务容器
     let cargo = new RenderTaskCargo([]);
     let cursorRendered = false;
-
-    // 选区绘制阶段 ================
-    const selectionTasks = this.createMaskSelectionTasks();
-    selectionTasks.forEach(task => {
-      cargo.add(task);
-    });
-    if (selectionTasks.length) {
-      this._lastSelectionRendered = true; // 标记选区已渲染
-    }
-
-    // 形变控制器绘制阶段 ===========
-    const transformerTasks = this.createMaskTransformerTasks();
-    if (transformerTasks.length) {
-      cargo.addAll(transformerTasks);
-    }
-
-    // 普通控制器绘制阶段 ============
-    const controllerTasks = this.createControllerTasks();
-    if (controllerTasks.length) {
-      cargo.addAll(controllerTasks);
-    }
-
+    let selectionTasks: IRenderTask[] = [];
     const {
       store: { nonHomologousElements },
       configure: { rotationIconEnable },
@@ -86,20 +65,46 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       cursor,
       isDrawerActive,
       isTextEditing,
+      elementsStatus,
     } = this.drawer.shield;
 
-    // 特殊组件处理（单个无父组件）===
-    if (nonHomologousElements.length === 1) {
-      const element = nonHomologousElements[0];
-      // 添加旋转图标（当组件允许旋转且处于完成状态）
-      if (rotationIconEnable && element.rotationEnable && element.status === ElementStatus.finished) {
-        cargo.add(this.createMaskRotateTask(element.rotation));
+    // 选区绘制阶段 ================
+    if (elementsStatus !== StageShieldElementsStatus.MOVING) {
+      selectionTasks = this.createMaskSelectionTasks();
+      selectionTasks.forEach(task => {
+        cargo.add(task);
+      });
+      if (selectionTasks.length) {
+        this._lastSelectionRendered = true; // 标记选区已渲染
       }
-      // 添加指示器
-      cargo.add(this.createMaskIndicatorTask(element));
-    } else if (nonHomologousElements.length > 1 && rangeElement.subs.length > 0) {
-      // 多选时添加范围组件的旋转任务
-      cargo.add(this.createMaskRotateTask(rangeElement.rotation));
+      // 形变控制器绘制阶段 ===========
+      const transformerTasks = this.createMaskTransformerTasks();
+      if (transformerTasks.length) {
+        cargo.addAll(transformerTasks);
+      }
+      // 普通控制器绘制阶段 ============
+      const controllerTasks = this.createControllerTasks();
+      if (controllerTasks.length) {
+        cargo.addAll(controllerTasks);
+      }
+
+      let rotation: IElementRotation | null = null;
+      // 特殊组件处理（单个无父组件）===
+      if (nonHomologousElements.length === 1) {
+        const element = nonHomologousElements[0];
+        // 添加旋转图标（当组件允许旋转且处于完成状态）
+        if (element.rotationEnable && element.status === ElementStatus.finished) {
+          rotation = element.rotation;
+        }
+        // 添加指示器
+        cargo.add(this.createMaskIndicatorTask(element));
+      } else if (nonHomologousElements.length > 1 && rangeElement.subs.length > 0) {
+        // 多选时添加范围组件的旋转任务
+        rotation = rangeElement.rotation;
+      }
+      if (rotation && rotationIconEnable) {
+        cargo.add(this.createMaskRotateTask(rotation));
+      }
     }
 
     // 光标绘制阶段 ================
@@ -191,7 +196,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const tasks: IRenderTask[] = [];
     // 合并主选区和子选区模型
     const models: IMaskModel[] = [...selection.getModels(), selection.selectionModel];
-
     models.forEach(model => {
       if (model && model.points.length > 0) {
         // 创建缩放适配的路径任务
