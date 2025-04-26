@@ -94,6 +94,8 @@ export default interface IStageStore extends IStageSetter {
   getElementsByIds(ids: string[]): IElement[];
   // 获取组件列表（要求返回的顺序要按照链表从前的到后排序）
   getOrderedElementsByIds(ids: string[]): IElement[];
+  // 获取组件ID列表(要求返回的顺序要按照链表从前的到后排序)
+  getOrderedElementIds(ids: string[]): string[];
   // 获取组件索引
   getIndexById(id: string): number;
   // 创建组件

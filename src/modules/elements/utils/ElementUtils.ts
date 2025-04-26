@@ -52,6 +52,8 @@ export enum ElementListEventNames {
   removed,
 }
 
+export const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y"];
+
 export default class ElementUtils {
   static createElementTask(element: IElement, canvas: HTMLCanvasElement): IElementTask {
     let task: IElementTask;
@@ -544,6 +546,15 @@ export default class ElementUtils {
       }
     });
     return elements.filter(element => resultIds.has(element.id));
+  }
+
+  /**
+   * 给定一个独立被选中的组件，检查其父组件是否未选中
+
+   * @param element
+   */
+  static isDetachedElementAncestorUnNotSelected(element: IElement): boolean {
+    return element.isDetachedSelected && element.isGroupSubject && !element.group.isSelected;
   }
 
   /**

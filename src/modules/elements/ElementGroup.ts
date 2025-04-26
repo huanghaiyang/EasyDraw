@@ -1,11 +1,13 @@
 import { CreatorTypes } from "@/types/Creator";
-import IElement from "@/types/IElement";
+import IElement, { ElementObject } from "@/types/IElement";
 import { IElementGroup } from "@/types/IElementGroup";
 import Element from "@/modules/elements/Element";
 import { IPoint } from "@/types";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import LodashUtils from "@/utils/LodashUtils";
+import { pick } from "lodash";
+import { CommonJsonKeys } from "./utils/ElementUtils";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
@@ -247,10 +249,12 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   /**
    * 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出
+   *
+   * @param subs
    */
-  refreshBySubs(): void {
+  private _doRefreshBySubs(subs: IElement[]): void {
     // 所有子组件的点坐标集合
-    const subsCoords = this.deepSubs.map(sub => sub.rotateBoxCoords).flat();
+    const subsCoords = subs.map(sub => sub.rotateBoxCoords).flat();
     // 当前的中心点
     const centerCoord = this._originalCenterCoord;
     // 通过中心点平行于y轴的直线（已考虑角度与y轴倾斜）
@@ -305,5 +309,28 @@ export default class ElementGroup extends Element implements IElementGroup {
     this.model.y = subsCenterCoord.y;
     // 刷新组件属性
     this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "size"]));
+  }
+
+  /**
+   * 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出
+   */
+  refreshBySubs(): void {
+    this._doRefreshBySubs(this.deepSubs);
+  }
+
+  /**
+   * 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出(不包含指定子组件)
+   *
+   * @param subIds
+   */
+  refreshBySubsWithout(subIds: string[]): void {
+    this._doRefreshBySubs(this.deepSubs.filter(sub => !subIds.includes(sub.id)));
+  }
+
+  /**
+   * 生成子组件删除数据模型
+   */
+  async toSubRemovedJson(): Promise<ElementObject> {
+    return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys, "width", "height", "subIds"]))) as ElementObject;
   }
 }

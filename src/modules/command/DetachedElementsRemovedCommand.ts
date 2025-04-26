@@ -31,12 +31,17 @@ export default class DetachedElementsRemovedCommand extends ElementsBaseCommand<
         type,
       } = data as IDetachedRemovedCommandElementObject;
       switch (type) {
-        case DetachedRemovedType.GroupUpdated: {
-          CommandHelper.restoreElementsFromData([data], this.store);
-          break;
-        }
         case DetachedRemovedType.Removed: {
           this.store.removeElementById(id);
+          break;
+        }
+      }
+    });
+    this.payload.rDataList.forEach(data => {
+      const { type } = data as IDetachedRemovedCommandElementObject;
+      switch (type) {
+        case DetachedRemovedType.GroupUpdated: {
+          CommandHelper.restoreElementsFromData([data], this.store);
           break;
         }
       }

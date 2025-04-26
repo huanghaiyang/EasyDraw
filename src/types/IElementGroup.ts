@@ -1,4 +1,4 @@
-import IElement from "@/types/IElement";
+import IElement, { ElementObject } from "@/types/IElement";
 import { CreatorTypes } from "@/types/Creator";
 import { IPoint } from "@/types/index";
 
@@ -35,4 +35,8 @@ export interface IElementGroup extends IElement {
   hitTopASub(point: IPoint): IElement;
   // 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出
   refreshBySubs(): void;
+  // 通过子组件刷新组件属性，例如子组件旋转、形变、等情况下，父组件需要同时进行更新，否则会溢出(不包含指定子组件)
+  refreshBySubsWithout(subIds: string[]): void;
+  // 生成子组件删除数据模型
+  toSubRemovedJson(): Promise<ElementObject>;
 }

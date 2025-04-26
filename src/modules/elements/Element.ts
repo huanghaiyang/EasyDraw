@@ -1,6 +1,6 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
-import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import ElementUtils, { CommonJsonKeys } from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, pick, some } from "lodash";
@@ -22,8 +22,6 @@ import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
 import LodashUtils from "@/utils/LodashUtils";
-
-const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y"];
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型

@@ -741,7 +741,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         const { x: prevLeft, y: prevTop } = element.model;
         const { x, y } = value;
         if (prevLeft === x && prevTop === y) return;
@@ -764,7 +764,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsWidth(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         if (element.width === value) return;
         const matrix = element.setWidth(value);
         if (element.isGroup) {
@@ -782,7 +782,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         if (element.height === value) return;
         const matrix = element.setHeight(value);
         if (element.isGroup) {
@@ -817,7 +817,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         if (element.angle === value) return;
         this.rotateElements([element], value, element.angle, element.centerCoord);
         element.onRotateAfter();
@@ -836,7 +836,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsRotate(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         if (!value) return;
         this.rotateElements([element], element.angle + value, element.angle, element.centerCoord);
         element.onRotateAfter();
@@ -852,7 +852,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsFlipX(elements: IElement[]): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         const [flipLineStart, flipLineEnd] = element.setFlipX();
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
@@ -868,7 +868,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsFlipY(elements: IElement[]): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         const [flipLineStart, flipLineEnd] = element.setFlipY();
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
@@ -903,7 +903,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
+      if (this.hasElement(element.id) && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         if (element.leanYAngle === value) return;
         const prevValue = element.leanYAngle;
         value = MathUtils.precise(value, 1);
@@ -1361,6 +1361,22 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 获取组件ID列表（要求返回的顺序要按照链表从前的到后排序）
+   *
+   * @param ids
+   * @returns
+   */
+  getOrderedElementIds(ids: string[]): string[] {
+    const result: string[] = [];
+    this._elementList.forEach(node => {
+      if (ids.includes(node.value.id)) {
+        result.push(node.value.id);
+      }
+    });
+    return result;
+  }
+
+  /**
    * 获取组件在列表中的索引
    *
    * @param id
@@ -1770,16 +1786,6 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 判断组件是否需要更新
-   *
-   * @param element
-   * @returns
-   */
-  private _shouldElementUpdate(element: IElement): boolean {
-    return !element.isGroupSubject || (element.isGroupSubject && !element.ancestorGroup.isSelected);
-  }
-
-  /**
    * 形变
    *
    * @param elements
@@ -1790,7 +1796,7 @@ export default class StageStore implements IStageStore {
       // 尝试调用组件本身的transform方法，如果组件是子组件或者当前是多选状态且所有选中的组件分属不同的组合，那么transform方法将会失效
       element.transform(offset);
       // 如果当前组件是组合且组件的父组件没有被选中，那么可以遍历所有子孙组件，调用transformBy方法
-      if (element.isGroup && this._shouldElementUpdate(element)) {
+      if (element.isGroup && ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
         (element as IElementGroup).deepSubs.forEach(sub => {
           const {
             transformLockCoord,

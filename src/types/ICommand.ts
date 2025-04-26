@@ -61,6 +61,7 @@ export enum ElementCommandTypes {
   ElementsRearranged = "elements_rearranged",
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
+  DetachedElementsRemoved = "detached_elements_removed",
 }
 
 // 文本编辑器命令类型
