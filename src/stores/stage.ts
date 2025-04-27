@@ -325,6 +325,7 @@ export const useStageStore = defineStore("stage", {
      */
     onPrimarySelectedChanged(primarySelectedElement: IElement | null) {
       this.primarySelectedElement = primarySelectedElement;
+      this.onElementChanged(primarySelectedElement);
     },
     /**
      * 递归为舞台组件树形结构添加节点到 Map 中
@@ -380,15 +381,6 @@ export const useStageStore = defineStore("stage", {
      */
     onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
-      if (!!this.selectedElements.length) {
-        // 获取组合或者组件
-        const element: IElement = ElementUtils.getAncestorGroup(this.selectedElements);
-        if (!element) {
-          Object.assign(this, LodashUtils.jsonClone(DefaultStage));
-          return;
-        }
-        this.onElementChanged(element);
-      }
     },
     /**
      * 舞台组件变更

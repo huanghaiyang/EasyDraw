@@ -2196,17 +2196,23 @@ export default class StageStore implements IStageStore {
    * 全选
    */
   selectAll(): void {
-    this._elementList.forEach(node => {
-      this.selectElement(node.value);
+    this._elementList.forEachRevert(node => {
+      // 前置逻辑是，父组件选中状态变化，子组件一定会变化，此处减少子组件的重复选中操作
+      if (!node.value.isGroupSubject) {
+        this.selectElement(node.value);
+      }
     });
   }
-
+  
   /**
    * 取消全选
    */
   deSelectAll(): void {
     this._elementList.forEach(node => {
-      this.deSelectElement(node.value);
+      // 前置逻辑是，父组件选中状态变化，子组件一定会变化，此处减少子组件的重复选中操作
+      if (!node.value.isGroupSubject) {
+        this.deSelectElement(node.value);
+      }
     });
   }
   /**
