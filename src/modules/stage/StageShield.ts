@@ -2314,7 +2314,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _processAfterUndoRedo(tailCommand: ICommand<IElementCommandPayload>): Promise<void> {
     this.selection.refresh();
     await this._addRedrawTask(true);
-    this.emit(ShieldDispatcherNames.selectedChanged, this.store.selectedElements);
+    this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
     if (tailCommand instanceof ElementsRearrangeCommand) {
       this.store.throttleRefreshTreeNodes();
     }

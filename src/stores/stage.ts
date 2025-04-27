@@ -388,7 +388,10 @@ export const useStageStore = defineStore("stage", {
      * @param element
      */
     onElementChanged(element: IElement) {
-      if (!element) return;
+      if (!element) {
+        Object.assign(this, LodashUtils.jsonClone(DefaultStage));
+        return;
+      }
       const {
         status,
         position,
