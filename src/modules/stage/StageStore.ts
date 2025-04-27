@@ -932,7 +932,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
     elements.forEach(element => {
-      if (this.hasElement(element.id) && !element.isGroupSubject) {
+      if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
         if (isEqual(element.corners, [value, value, value, value])) return;
         element.setCorners(value, index);
       }
