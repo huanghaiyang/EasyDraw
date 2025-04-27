@@ -573,8 +573,10 @@ export default class Element implements IElement, ILinkedNodeValue {
   get isDetachedSelected(): boolean {
     return this._isDetachedSelected;
   }
+
   set isDetachedSelected(value: boolean) {
     this._isDetachedSelected = value;
+    // 同步更新选中状态
     this.isSelected = value;
   }
 
@@ -694,6 +696,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   _setIsSelected(value: boolean): void {
     this._isSelected = value;
     if (!value) {
+      // 如果取消选中，则取消脱离组合的选中状态
       this._isDetachedSelected = false;
     }
   }

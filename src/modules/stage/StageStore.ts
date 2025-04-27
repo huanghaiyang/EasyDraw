@@ -2737,12 +2737,12 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 切换组件选中状态(组件脱离组合的独立选中状态切换)
+   * 设置组件脱离组合的独立选中状态
    *
    * @param ids 组件id集合
    * @param isDetachedSelected 是否选中
    */
-  toggleElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+  private _setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
     // 先取消选中先前的组件
     if (isDetachedSelected) {
       this._selectedElementIds.forEach(id => {
@@ -2761,5 +2761,42 @@ export default class StageStore implements IStageStore {
         this.updateElementById(id, { isDetachedSelected });
       }
     });
+  }
+
+  /**
+   * 树节点多选
+   *
+   * @param ids
+   */
+  private _setElementsMixinDetachedSelected(ids: string[]): void {
+    ids.forEach(id => {
+      if (this.hasElement(id)) {
+        const element = this.getElementById(id);
+        const { isSelected, isGroup, isGroupSubject } = element;
+        // 如果是子组要取消选中，且父组已选中，则不取消
+        if (isSelected && isGroupSubject && element.group.isSelected) return;
+        // 如果当前是组合且被选中，则先取消子组件的选中状态
+        if (!isSelected && isGroup) {
+          (element as IElementGroup).deepSubs.forEach(sub => {
+            this.updateElementById(sub.id, { isSelected: false });
+          });
+        }
+        this.updateElementById(id, { isDetachedSelected: !isSelected });
+      }
+    });
+  }
+
+  /**
+   * 切换组件选中状态(组件脱离组合的独立选中状态切换)
+   *
+   * @param ids 组件id集合
+   * @param isDetachedSelected 是否选中
+   */
+  toggleElementsDetachedSelected(ids: string[]): void {
+    if (this.shield.event.isCtrl) {
+      this._setElementsMixinDetachedSelected(ids);
+    } else {
+      this._setElementsDetachedSelected(ids, true);
+    }
   }
 }

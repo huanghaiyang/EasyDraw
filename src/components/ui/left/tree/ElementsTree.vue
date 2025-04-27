@@ -76,7 +76,7 @@ function handleMouseLeave(id: string) {
  * @param node
  */
 function handleClickNode(node: ElementTreeNode) {
-  stageStore.toggleElementsDetachedSelected([node.id], true);
+  stageStore.toggleElementsDetachedSelected([node.id]);
 }
 
 const handleDragStart = (node: Node, ev: DragEvents) => {

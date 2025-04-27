@@ -337,7 +337,6 @@ export default interface IStageSetter {
    * 切换组件选中状态(组件脱离组合的独立选中状态切换)
    *
    * @param ids 组件id集合
-   * @param isDetachedSelected 是否选中
    */
-  toggleElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
+  toggleElementsDetachedSelected(ids: string[]): void;
 }
