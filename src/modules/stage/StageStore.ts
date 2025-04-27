@@ -861,9 +861,26 @@ export default class StageStore implements IStageStore {
    * 设置组件水平翻转
    */
   async setElementsFlipX(elements: IElement[]): Promise<void> {
+    let flipLineStart: IPoint;
+    let flipLineEnd: IPoint;
+    if (this._isMultiSelected) {
+      const boxCoords = CommonUtils.getBoxByPoints(elements.map(element => element.rotateBoxCoords).flat());
+      flipLineStart = {
+        x: (boxCoords[0].x + boxCoords[1].x) / 2,
+        y: boxCoords[0].y,
+      };
+      flipLineEnd = {
+        x: flipLineStart.x,
+        y: boxCoords[3].y,
+      };
+    }
     elements.forEach(element => {
       if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
-        const [flipLineStart, flipLineEnd] = element.setFlipX();
+        if (this._isMultiSelected) {
+          element.flipXBy(flipLineStart, flipLineEnd);
+        } else {
+          [flipLineStart, flipLineEnd] = element.setFlipX();
+        }
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
             sub.flipXBy(flipLineStart, flipLineEnd);
@@ -877,9 +894,26 @@ export default class StageStore implements IStageStore {
    * 设置组件垂直翻转
    */
   async setElementsFlipY(elements: IElement[]): Promise<void> {
+    let flipLineStart: IPoint;
+    let flipLineEnd: IPoint;
+    if (this._isMultiSelected) {
+      const boxCoords = CommonUtils.getBoxByPoints(elements.map(element => element.rotateBoxCoords).flat());
+      flipLineStart = {
+        x: boxCoords[0].x,
+        y: (boxCoords[0].y + boxCoords[3].y) / 2,
+      };
+      flipLineEnd = {
+        x: boxCoords[1].x,
+        y: flipLineStart.y,
+      };
+    }
     elements.forEach(element => {
       if (this.hasElement(element.id) && this._shouldElementUpdate(element)) {
-        const [flipLineStart, flipLineEnd] = element.setFlipY();
+        if (this._isMultiSelected) {
+          element.flipYBy(flipLineStart, flipLineEnd);
+        } else {
+          [flipLineStart, flipLineEnd] = element.setFlipY();
+        }
         if (element.isGroup) {
           (element as IElementGroup).deepSubs.forEach(sub => {
             sub.flipYBy(flipLineStart, flipLineEnd);
@@ -2203,7 +2237,7 @@ export default class StageStore implements IStageStore {
       }
     });
   }
-  
+
   /**
    * 取消全选
    */
