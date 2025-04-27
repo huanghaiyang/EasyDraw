@@ -44,7 +44,7 @@ export default class StageStore implements IStageStore {
   private _provisionalElements: IElement[] = [];
   // 选中的组件
   private _selectedElements: IElement[] = [];
-  // 分离的选中组件
+  // 独立组件的选中组件
   private _detachedSelectedElements: IElement[] = [];
   // 目标组件
   private _targetElements: IElement[] = [];
@@ -63,7 +63,7 @@ export default class StageStore implements IStageStore {
   private _provisionalElementIds: Set<string> = observable.set(new Set<string>());
   // 选中的组件
   private _selectedElementIds: Set<string> = observable.set(new Set<string>());
-  // 分离的选中组件
+  // 独立组件的选中组件
   private _detachedSelectedElementIds: Set<string> = observable.set(new Set<string>());
   // 目标组件
   private _targetElementIds: Set<string> = observable.set(new Set<string>());
@@ -132,7 +132,7 @@ export default class StageStore implements IStageStore {
     return this._selectedElements;
   }
 
-  // 分离的选中组件
+  // 独立组件的选中组件
   get detachedSelectedElements(): IElement[] {
     return this._detachedSelectedElements;
   }
@@ -382,7 +382,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 分离选中元素发生变化
+   * 独立组件选中元素发生变化
    */
   private _reactionDetachedSelectedElementsChanged(): void {
     this._detachedSelectedElements = this._filterList(this._detachedSelectedElementIds);
@@ -2798,5 +2798,61 @@ export default class StageStore implements IStageStore {
     } else {
       this._setElementsDetachedSelected(ids, true);
     }
+  }
+
+  /**
+   * 删除组件之前先标记哪些组件的父组件需要删除，哪些父组件需要更新
+   *
+   * @param elements
+   * @param store
+   * @returns
+   */
+  findRemovedElemements(elements: IElement[]): {
+    list: IElement[];
+    ancestors: IElement[];
+  } {
+    const elementIds: Set<string> = new Set(elements.map(element => element.id));
+    const ancestorIdsSet: Set<string> = new Set();
+    const ancestorMap = new Map<string, IElement>();
+    elements.forEach(element => {
+      // 检查父组件是否未选中
+      if (ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
+        let group = element.group;
+        // 遍历祖先组件
+        while (group && !group.isSelected) {
+          const { id } = group;
+          // 如果父组件的所有子组件都需要被删除，那么父组件也需要被删除，否则就是更新
+          if (group.model.subIds.every(subId => elementIds.has(subId))) {
+            elementIds.add(id);
+          } else {
+            ancestorIdsSet.add(id);
+          }
+          ancestorMap.set(id, group);
+          group = group.group;
+        }
+      }
+    });
+    let ancestorIds = this.getOrderedElementIds(Array.from(ancestorIdsSet));
+    ancestorIds.filter(ancestorId => {
+      const ancestor = ancestorMap.get(ancestorId);
+      if (ancestor.model.subIds.every(subId => elementIds.has(subId))) {
+        elementIds.add(ancestorId);
+        ancestorIdsSet.delete(ancestorId);
+      }
+    });
+    const ancestors: IElement[] = this.getOrderedElementsByIds(Array.from(ancestorIdsSet));
+    const list: IElement[] = this.getOrderedElementsByIds(Array.from(elementIds));
+    return { list, ancestors };
+  }
+
+  /**
+   * 获取独立组件的祖先组件集合
+   *
+   * @param elements
+   * @returns
+   */
+  getAncestorsByDetachedElements(elements: IElement[]): IElementGroup[] {
+    const ancestors: string[] = ElementUtils.getAncestorIdsByDetachedElements(elements);
+    return this.getOrderedElementsByIds(Array.from(ancestors)) as IElementGroup[];
   }
 }

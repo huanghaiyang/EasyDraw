@@ -558,6 +558,27 @@ export default class ElementUtils {
   }
 
   /**
+   * 获取独立选中组件的祖先组件ID集合
+   *
+   * @param elements
+   */
+  static getAncestorIdsByDetachedElements(elements: IElement[]): string[] {
+    const ancestors: Set<string> = new Set();
+    elements.forEach(element => {
+      // 判断是否是子组件
+      if (element.isDetachedSelected && element.isGroupSubject) {
+        // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
+        element.ancestorGroups.forEach(group => {
+          if (!ancestors.has(group.id)) {
+            ancestors.add(group.id);
+          }
+        });
+      }
+    });
+    return Array.from(ancestors);
+  }
+
+  /**
    * 创建组合对象
    */
   static createEmptyGroupObject(): Partial<ElementObject> {

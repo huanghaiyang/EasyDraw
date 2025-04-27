@@ -8,7 +8,7 @@ export const SelectionStrokeColor = "#0c8ce9";
 export const SelectionStrokeColorOpacity = 100;
 export const SelectionFillColor = "#0c8ce9";
 export const SelectionFillColorOpacity = 2.5;
-export const SelectionLineWidth = 2;
+export const SelectionLineWidth = 1;
 
 export const TransformerStrokeColor = "#0c8ce9";
 export const TransformerStrokeColorOpacity = 100;

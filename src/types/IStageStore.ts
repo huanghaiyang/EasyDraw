@@ -15,7 +15,7 @@ export default interface IStageStore extends IStageSetter {
   get provisionalElements(): IElement[];
   // 选中的组件
   get selectedElements(): IElement[];
-  // 分离选中的组件
+  // 独立组件选中的组件
   get detachedSelectedElements(): IElement[];
   // 高亮目标组件
   get targetElements(): IElement[];
@@ -202,4 +202,8 @@ export default interface IStageStore extends IStageSetter {
   emitElementsLayerChanged(): void;
   // 刷新树节点
   throttleRefreshTreeNodes(): void;
+  // 删除组件之前先标记哪些组件的父组件需要删除，哪些父组件需要更新
+  findRemovedElemements(elements: IElement[]): { list: IElement[]; ancestors: IElement[] };
+  // 获取独立组件的祖先组件集合
+  getAncestorsByDetachedElements(elements: IElement[]): IElementGroup[];
 }

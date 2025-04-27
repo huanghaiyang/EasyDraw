@@ -35,23 +35,12 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import ICommand, {
-  DetachedRemovedType,
-  ElementCommandTypes,
-  ICommandElementObject,
-  IDetachedRemovedCommandElementObject,
-  IElementCommandPayload,
-  IGroupCommandElementObject,
-  INodeRelation,
-} from "@/types/ICommand";
+import ICommand, { DetachedRemovedType, ElementCommandTypes, ICommandElementObject, IDetachedRemovedCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
-import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
 import LodashUtils from "@/utils/LodashUtils";
-import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
-import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
-import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommnd";
+import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommand";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
@@ -61,7 +50,7 @@ import GlobalConfig from "@/config";
 import { computed, makeObservable, observable, reaction } from "mobx";
 import { nanoid } from "nanoid";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
-import DetachedElementsRemovedCommand from "@/modules/command/DetachedElementsRemovedCommand";
+import CommandHelper from "@/modules/command/helpers/CommandHelper";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -279,16 +268,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param rDataList
    * @param id
    */
-  private _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): void {
-    const command = new ElementsUpdatedCommand(
-      id || nanoid(),
-      {
-        type: ElementCommandTypes.ElementsUpdated,
-        uDataList,
-        rDataList,
-      },
-      this.store,
-    );
+  private async _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): Promise<void> {
+    const command = await CommandHelper.createUpdateCommandBy(uDataList, rDataList, this.store, id);
     this.undoRedo.add(command);
   }
 
@@ -304,7 +285,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
     await elementsUpdateFunction();
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    await this._createUpdateCommandBy(uDataList, rDataList);
   }
 
   /**
@@ -338,7 +319,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await elementsUpdateFunction();
     await this._reflowTextIfy(elements, true);
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    await this._createUpdateCommandBy(uDataList, rDataList);
   }
 
   /**
@@ -1174,44 +1155,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 获取祖先组件ID
-   *
-   * @param elements
-   */
-  private _getAncestorIdsByElements(elements: IElement[]): string[] {
-    const ancestors: Set<string> = new Set();
-    elements.forEach(element => {
-      // 判断是否是子组件
-      if (element.isDetachedSelected && element.isGroupSubject) {
-        // 将所有祖先节点都更新下原始数据，方便子组件操作之后，更新祖先组件的属性，例如位置、尺寸、坐标等
-        element.ancestorGroups.forEach(group => {
-          if (!ancestors.has(group.id)) {
-            ancestors.add(group.id);
-          }
-        });
-      }
-    });
-    return Array.from(ancestors);
-  }
-
-  /**
-   * 获取祖先组件
-   *
-   * @param elements
-   */
-  private _getAncestorsByElements(elements: IElement[]): IElementGroup[] {
-    const ancestors: string[] = this._getAncestorIdsByElements(elements);
-    return this.store.getOrderedElementsByIds(Array.from(ancestors)) as IElementGroup[];
-  }
-
-  /**
    * 处理祖先组件
    *
    * @param elements
    * @param func
    */
   private _processAncestorsByElements(elements: IElement[], func: (group: IElementGroup) => void): void {
-    const ancestors = this._getAncestorsByElements(elements);
+    const ancestors = this.store.getAncestorsByDetachedElements(elements);
     ancestors.forEach(func);
   }
 
@@ -1685,13 +1635,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 扁平化组件和其祖代组件,返回的结果链表有序
+   * 扁平化组件和其祖先组件,返回的结果链表有序
    *
    * @param elements - 组件列表
    * @returns 扁平化后的组件列表
    */
   private _flatWithAncestors(elements: IElement[]): IElement[] {
-    const ancestorIds = this._getAncestorIdsByElements(elements);
+    const ancestorIds = ElementUtils.getAncestorIdsByDetachedElements(elements);
     const ids = new Set(ancestorIds);
     elements.forEach(element => {
       ids.add(element.id);
@@ -1700,7 +1650,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 刷新组件祖代组件的变换状态
+   * 刷新组件祖先组件的变换状态
    * @param element - 组件
    */
   private _refreshAncestorsTransformed(element: IElement): void {
@@ -1802,22 +1752,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件原始圆角半径命令
-   *
-   * @param elements
-   */
-  private async _createOriginalCornerCommand(elements: IElement[]): Promise<void> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson() })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
-  }
-
-  /**
    * 结束组件圆角半径操作
    */
   private async _endMovingElementsCorner(): Promise<void> {
     const { selectedElements } = this.store;
-    await this._createOriginalCornerCommand(selectedElements);
+    const command = await CommandHelper.createOriginalCornerCommand(selectedElements, this.store);
+    this.undoRedo.add(command);
     // 更新组件状态
     selectedElements.forEach(element => {
       element.isCornerMoving = false;
@@ -2217,79 +2157,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件顺序调整数据模型
-   *
-   * @param element
-   */
-  private _createRearrangeModel(element: IElement): INodeRelation {
-    return {
-      prevId: element.node.prev?.value?.id,
-      nextId: element.node.next?.value?.id,
-    };
-  }
-
-  /**
-   * 删除组件之前先标记哪些组件的父组件需要删除，哪些父组件需要更新
-   *
-   * @param elements
-   * @returns
-   */
-  private _findRemovedElemements(elements: IElement[]): {
-    list: IElement[];
-    ancestors: IElement[];
-  } {
-    const elementIds: Set<string> = new Set(elements.map(element => element.id));
-    const ancestorIdsSet: Set<string> = new Set();
-    const ancestorMap = new Map<string, IElement>();
-    elements.forEach(element => {
-      // 检查父组件是否未选中
-      if (ElementUtils.isDetachedElementAncestorUnNotSelected(element)) {
-        let group = element.group;
-        // 遍历祖先组件
-        while (group && !group.isSelected) {
-          const { id } = group;
-          // 如果父组件的所有子组件都需要被删除，那么父组件也需要被删除，否则就是更新
-          if (group.model.subIds.every(subId => elementIds.has(subId))) {
-            elementIds.add(id);
-          } else {
-            ancestorIdsSet.add(id);
-          }
-          ancestorMap.set(id, group);
-          group = group.group;
-        }
-      }
-    });
-    let ancestorIds = this.store.getOrderedElementIds(Array.from(ancestorIdsSet));
-    ancestorIds.filter(ancestorId => {
-      const ancestor = ancestorMap.get(ancestorId);
-      if (ancestor.model.subIds.every(subId => elementIds.has(subId))) {
-        elementIds.add(ancestorId);
-        ancestorIdsSet.delete(ancestorId);
-      }
-    });
-    const ancestors: IElement[] = this.store.getOrderedElementsByIds(Array.from(ancestorIdsSet));
-    const list: IElement[] = this.store.getOrderedElementsByIds(Array.from(elementIds));
-    return { list, ancestors };
-  }
-
-  /**
-   * 获取祖先组件更新数据
-   *
-   * @param ancestors
-   * @returns
-   */
-  private async _getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<IDetachedRemovedCommandElementObject[]> {
-    return (await Promise.all(
-      ancestors.map(async ancestor => {
-        return {
-          model: await (ancestor as IElementGroup).toSubRemovedJson(),
-          type: DetachedRemovedType.GroupUpdated,
-        };
-      }),
-    )) as IDetachedRemovedCommandElementObject[];
-  }
-
-  /**
    * 处理选中组件删除
    */
   async _handleSelectsDelete(): Promise<void> {
@@ -2297,15 +2164,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       return;
     }
     let command: ICommand<IElementCommandPayload> | null = null;
-    const { list, ancestors } = this._findRemovedElemements(this.store.selectedElements);
+    const { list, ancestors } = this.store.findRemovedElemements(this.store.selectedElements);
     const uDataList = (await Promise.all(
       list.map(async element => {
-        return { model: await element.toJson(), ...this._createRearrangeModel(element), type: DetachedRemovedType.Removed };
+        return { model: await element.toJson(), ...CommandHelper.createRearrangeModel(element), type: DetachedRemovedType.Removed };
       }),
     )) as IDetachedRemovedCommandElementObject[];
     // 如果存在子组件被删除，但是父组件没有被删除，则需要解除绑定关系并更新父组件的一些属性数据
     if (ancestors.length) {
-      uDataList.push(...(await this._getAncestorsUpdateJson(ancestors as IElementGroup[])));
+      uDataList.push(...(await CommandHelper.getAncestorsUpdateJson(ancestors as IElementGroup[])));
       const elementIds = new Set(list.map(element => element.id));
       ancestors.forEach(ancestor => {
         this.store.updateElementModel(ancestor.id, {
@@ -2313,25 +2180,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         });
         (ancestor as IElementGroup).refreshBySubsWithout(Array.from(elementIds));
       });
-      const rDataList = await this._getAncestorsUpdateJson(ancestors as IElementGroup[]);
-      command = new DetachedElementsRemovedCommand(
-        nanoid(),
-        {
-          type: ElementCommandTypes.DetachedElementsRemoved,
-          uDataList,
-          rDataList,
-        },
-        this.store,
-      );
+      const rDataList = await CommandHelper.getAncestorsUpdateJson(ancestors as IElementGroup[]);
+      command = await CommandHelper.createDetachedElementsRemovedCommand(uDataList, rDataList, this.store);
     } else {
-      command = new ElementsRemovedCommand(
-        nanoid(),
-        {
-          type: ElementCommandTypes.ElementsRemoved,
-          uDataList,
-        },
-        this.store,
-      );
+      command = await CommandHelper.createElementsRemovedCommand(uDataList, this.store);
     }
     this.undoRedo.add(command);
     this.store.removeElements(list);
@@ -2408,98 +2260,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件组合添加数据模型
-   *
-   * @param group 组合
-   * @param elements 组件
-   * @returns
-   */
-  private async _createGroupAddedDataList(group: IElementGroup, elements: IElement[]): Promise<Array<IGroupCommandElementObject>> {
-    const { id: groupId } = group;
-    return await Promise.all(
-      elements.map(async element => {
-        const {
-          id,
-          model: { groupId: eGroupId },
-        } = element;
-        let model: Partial<ElementObject>;
-        const isGroup = groupId === id;
-        // 是当前组合
-        if (isGroup) {
-          model = await element.toJson();
-        } else if (eGroupId === groupId) {
-          // 是当前组合的子组件
-          model = await element.toGroupJson();
-        } else {
-          // 当前组合的孙子组件
-          model = { id };
-        }
-        const result: IGroupCommandElementObject = { model, isGroup, ...this._createRearrangeModel(element) };
-        if (eGroupId === groupId) {
-          result.isGroupSubject = true;
-        }
-        return result;
-      }),
-    );
-  }
-
-  /**
    * 处理组件组合操作
    */
   async _handleSelectGroup(): Promise<void> {
     if (this.isElementsBusy) return;
     if (this.store.isSelectedEmpty) return;
-    const uDataList: Array<IGroupCommandElementObject> = await Promise.all(
-      this.store.selectedElements.map(async element => ({ model: { id: element.id }, isGroupSubject: !element.isGroupSubject, ...this._createRearrangeModel(element) })),
-    );
-    const group = this.store.selectToGroup();
-    if (group) {
-      uDataList.push({
-        model: { id: group.id },
-        isGroup: true,
-      } as IGroupCommandElementObject);
-      this.store.selectGroup(group);
-      const rDataList = await this._createGroupAddedDataList(group, this.store.selectedElements);
-      const command = new GroupAddedCommand(
-        nanoid(),
-        {
-          type: ElementCommandTypes.GroupAdded,
-          uDataList,
-          rDataList,
-        },
-        this.store,
-      );
-      this.undoRedo.add(command);
-    }
-  }
-
-  /**
-   * 创建组件组合取消命令
-   *
-   * @param groups 组合列表
-   */
-  private async _createGroupRemovedCommand(groups: IElementGroup[]): Promise<void> {
-    const uDataList: Array<IGroupCommandElementObject> = [];
-    await Promise.all(
-      groups.map(async group => {
-        uDataList.push({
-          model: await group.toJson(),
-          isGroup: true,
-          ...this._createRearrangeModel(group),
-        });
-        group.subs.forEach(async sub => {
-          uDataList.push({
-            model: await sub.toGroupJson(),
-            isGroup: false,
-          });
-        });
-      }),
-    );
-    const command = new GroupRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.GroupRemoved,
-        uDataList,
+    const command = await CommandHelper.createGroupAddedCommand(
+      this.store.selectedElements,
+      (): { group: IElementGroup; elements: IElement[] } => {
+        const group = this.store.selectToGroup();
+        this.store.selectGroup(group);
+        return { group, elements: this.store.selectedElements };
       },
       this.store,
     );
@@ -2513,12 +2284,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isElementsBusy) return;
     const groups = this.store.getSelectedAncestorElementGroups();
     if (groups.length === 0) return;
-    await this._createGroupRemovedCommand(groups);
+    const command = await CommandHelper.createGroupRemovedCommand(groups, this.store);
+    this.undoRedo.add(command);
     this.store.cancelGroups(groups);
     groups.forEach(group => {
-      group.subs.forEach(sub => {
-        sub.isSelected = true;
-      });
+      this.store.selectElements(group.subs);
     });
   }
 
@@ -2769,7 +2539,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _commitEidting(): Promise<void> {
     const { editingElements } = this.store;
     const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
-    this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
+    await this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
     this.store.endEditingElements(editingElements);
     this.selection.refresh();
     this.elementsStatus = StageShieldElementsStatus.NONE;
@@ -2792,18 +2562,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param callback 回调
    */
   private async _createRearrangeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
-    await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...this._createRearrangeModel(element) })));
-    const command = new ElementsRearrangeCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.ElementsRearranged,
-        uDataList,
-        rDataList,
-      },
-      this.store,
-    );
+    const command = await CommandHelper.createRearrangeCommand(elements, elementsUpdateFunction, this.store);
     this.undoRedo.add(command);
   }
 
