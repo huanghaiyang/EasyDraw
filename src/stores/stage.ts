@@ -1354,7 +1354,7 @@ export const useStageStore = defineStore("stage", {
       }
     },
     /**
-     * 提交自由绘制
+     * 提交自由折线
      */
     commitArbitraryDrawing(): void {
       shield.commitArbitraryDrawing();

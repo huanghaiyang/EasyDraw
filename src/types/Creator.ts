@@ -31,7 +31,7 @@ export enum CreatorCategories {
   cursor = "cursor",
   // 形状
   shapes = "shapes",
-  // 自由绘制
+  // 自由折线
   freedom = "freedom",
   // 文本
   text = "text",

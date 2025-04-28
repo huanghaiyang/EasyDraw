@@ -376,7 +376,7 @@ export default class StageSelection implements IStageSelection {
       Object.assign(this.rangeElement.model, ElementUtils.createEmptyGroupObject());
     } else {
       if (!this.rangeElement.isRotating && !this.rangeElement.isTransforming) {
-        const coords = CommonUtils.getBoxByPoints(elements.map(element => element.rotateCoords).flat());
+        const coords = CommonUtils.getBoxByPoints(elements.map(element => element.rotateBoxCoords).flat());
         Object.assign(this.rangeElement.model, {
           coords,
           boxCoords: LodashUtils.jsonClone(coords),

@@ -1726,7 +1726,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 创建一个自由绘制的组件
+   * 创建一个自由折线的组件
    *
    * @param coord
    * @param tailAppend true表示追加节点，false表示更新尾部节点
@@ -1776,7 +1776,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 完成创建自由绘制组件
+   * 完成创建自由折线组件
    *
    * @param element
    */

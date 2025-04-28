@@ -103,7 +103,7 @@ export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 // 形状工具
 export const ShapeCreators: Creator[] = [RectangleCreator, LineRectangleCreator, EllipseCreator, PolygonCreator, ImageCreator];
 
-// 自由绘制工具
+// 自由折线工具
 export const FreedomCreators: Creator[] = [PenCreator, PencilCreator];
 
 // 所有工具

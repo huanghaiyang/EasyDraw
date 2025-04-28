@@ -324,7 +324,7 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算自由绘制非闭合线框区块
+   * 计算自由折线非闭合线框区块
    *
    * @param coords
    * @param styles
@@ -348,7 +348,7 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算自由绘制闭合线框区块
+   * 计算自由折线闭合线框区块
    *
    * @param coords
    * @param styles
@@ -367,7 +367,7 @@ export default class ElementUtils {
   }
 
   /**
-   * 计算自由绘制线框区块
+   * 计算自由折线线框区块
    *
    * @param coords
    * @param styles

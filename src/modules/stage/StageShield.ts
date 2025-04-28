@@ -1492,7 +1492,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 处理自由绘制下的鼠标按下事件
+   * 处理自由折线下的鼠标按下事件
    */
   private _handleArbitraryPressUp(): void {
     const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
@@ -1588,7 +1588,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isHandActive) {
       this._processHandCreatorMove(e);
     }
-    // 非自由绘制模式，绘制完成之后重绘
+    // 非自由折线模式，绘制完成之后重绘
     if (!this.isArbitraryDrawing) {
       await this._tryCreatedRedraw();
     }
@@ -1935,7 +1935,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 更新自由绘制组件
+   * 更新自由折线组件
    *
    * @param e
    * @returns
@@ -2523,7 +2523,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 提交自由绘制
+   * 提交自由折线
    */
   async commitArbitraryDrawing(): Promise<void> {
     if (this.isArbitraryDrawing) {
