@@ -773,11 +773,21 @@ export default class Element implements IElement, ILinkedNodeValue {
     return result;
   }
 
+  // 是否在最顶层，如果是子组件，则判断子组件在所属组合中是否是最顶层
   get isTopmost(): boolean {
+    if (this.isGroupSubject) {
+      const groupSubIds = this.group.model.subIds;
+      return groupSubIds.findIndex(id => id === this.model.id) === groupSubIds.length - 1;
+    }
     return this.node.next === null;
   }
 
+  // 是否在最底层，如果是子组件，则判断子组件在所属组合中是否是最底层
   get isBottommost(): boolean {
+    if (this.isGroupSubject) {
+      const groupSubIds = this.group.model.subIds;
+      return groupSubIds.findIndex(id => id === this.model.id) === 0;
+    }
     return this.node.prev === null;
   }
 

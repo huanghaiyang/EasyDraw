@@ -367,18 +367,19 @@ export default class StageStore implements IStageStore {
    * 舞台元素层级发生变化时，发送事件
    */
   emitElementsLayerChanged(): void {
+    let shifMoveEnable: boolean = false;
+    let goDownEnable: boolean = false;
     if (this._selectedElements.length) {
       if (ElementList.isConsecutive(this._selectedElements.map(element => element.node))) {
-        this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, !this._selectedElements[this._selectedElements.length - 1].isTopmost);
-        this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, !this._selectedElements[0].isBottommost);
+        shifMoveEnable = !this._selectedElements[this._selectedElements.length - 1].isTopmost;
+        goDownEnable = !this._selectedElements[0].isBottommost;
       } else {
-        this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, true);
-        this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, true);
+        shifMoveEnable = true;
+        goDownEnable = true;
       }
-    } else {
-      this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, false);
-      this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, false);
     }
+    this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, shifMoveEnable);
+    this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, goDownEnable);
   }
 
   /**
@@ -578,6 +579,8 @@ export default class StageStore implements IStageStore {
 
   /**
    * 将组件列表转换为树结构
+   * 
+   * 注意：树结构中，节点是按照添加顺序倒序排列的
    *
    * @returns
    */
@@ -599,7 +602,7 @@ export default class StageStore implements IStageStore {
           children: [],
           ...this._getElementTreeNodeProps(element),
         };
-        tree.push(treeNode);
+        tree.unshift(treeNode);
         this._treeNodesMap.set(id, treeNode);
         if (isGroup) {
           const subTreeNodes = this._preserveGroupSubs(node, []);
@@ -643,7 +646,7 @@ export default class StageStore implements IStageStore {
             ...this._getElementTreeNodeProps(prevElement),
           };
           // 将节点插入到头部
-          result.unshift(treeNode);
+          result.push(treeNode);
           this._treeNodesMap.set(prevId, treeNode);
           if (prevIsGroup) {
             this._preserveGroupSubs(prevNode, treeNode.children);
@@ -692,7 +695,7 @@ export default class StageStore implements IStageStore {
             ...this._getElementTreeNodeProps(nextElement),
           };
           // 将节点插入到头部
-          result.unshift(treeNode);
+          result.push(treeNode);
           this._treeNodesMap.set(nextId, treeNode);
           if (nextIsGroup) {
             this._preserveGroupSubs(nextNode, treeNode.children);

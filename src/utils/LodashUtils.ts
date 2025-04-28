@@ -1,4 +1,4 @@
-import { cloneDeep, isArray, isPlainObject } from "lodash";
+import { cloneDeep, isArray, isPlainObject, reverse } from "lodash";
 
 export default class LodashUtils {
   /**
@@ -109,5 +109,22 @@ export default class LodashUtils {
    */
   static isSetEqual(set1: Set<any>, set2: Set<any>): boolean {
     return set1.size === set2.size && [...set1].every(item => set2.has(item));
+  }
+
+  /**
+   * 嵌套反转数组
+   *
+   * @param arr
+   */
+  static reverseArray(arr: any[]): any[] {
+    return reverse(
+      arr.map(item => {
+        if (isArray(item)) {
+          return this.reverseArray(item);
+        } else {
+          return item;
+        }
+      }),
+    );
   }
 }
