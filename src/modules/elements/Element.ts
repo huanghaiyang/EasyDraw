@@ -127,31 +127,31 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否孤立选中（未选中组合，选中子组件）
   _isDetachedSelected: boolean = false;
   // 是否可见
-  _isVisible: boolean = true;
+  isVisible: boolean = true;
   // 是否正在编辑
   _isEditing: boolean = false;
   // 是否锁定
-  _isLocked: boolean = false;
+  isLocked: boolean = false;
   // 是否正在移动
-  _isMoving: boolean = false;
+  isMoving: boolean = false;
   // 是否正在变换
-  _isTransforming: boolean = false;
+  isTransforming: boolean = false;
   // 是否正在旋转
-  _isRotating: boolean = false;
-  // 是否正在旋转目标
-  _isRotatingTarget: boolean = false;
+  isRotating: boolean = false;
+  // 是否是待旋转的目标
+  isRotatingTarget: boolean = false;
   // 是否正在拖动
-  _isDragging: boolean = false;
-  // 是否正在修改圆角
-  _isCornerMoving: boolean = false;
+  isDragging: boolean = false;
+  // 是否正在移动圆角
+  isCornerMoving: boolean = false;
   // 是否处于临时状态
-  _isProvisional: boolean = false;
+  isProvisional: boolean = false;
   // 是否命中
-  _isTarget: boolean = false;
+  isTarget: boolean = false;
   // 是否在选区范围内
-  _isInRange: boolean = false;
+  isInRange: boolean = false;
   // 是否在舞台上
-  _isOnStage: boolean = false;
+  isOnStage: boolean = false;
 
   get isRangeElement(): boolean {
     return this._isRangeElement;
@@ -234,7 +234,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   // x轴是否翻转
   get flipX(): boolean {
     if (!this.flipXEnable) return false;
-    if (!this._isTransforming || this._isEditing) return this._flipX;
+    if (!this.isTransforming || this._isEditing) return this._flipX;
     this.refreshFlipX();
     return this._flipX;
   }
@@ -580,108 +580,12 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.isSelected = value;
   }
 
-  get isVisible(): boolean {
-    return this._isVisible;
-  }
-
-  set isVisible(value: boolean) {
-    this._setIsVisible(value);
-  }
-
   get isEditing(): boolean {
     return this._isEditing;
   }
 
   set isEditing(value: boolean) {
     this._setIsEditing(value);
-  }
-
-  get isLocked(): boolean {
-    return this._isLocked;
-  }
-
-  set isLocked(value: boolean) {
-    this._setIsLocked(value);
-  }
-
-  get isMoving(): boolean {
-    return this._isMoving;
-  }
-
-  set isMoving(value: boolean) {
-    this._setIsMoving(value);
-  }
-
-  get isTransforming(): boolean {
-    return this._isTransforming;
-  }
-
-  set isTransforming(value: boolean) {
-    this._setIsTransforming(value);
-  }
-
-  get isRotating(): boolean {
-    return this._isRotating;
-  }
-
-  set isRotating(value: boolean) {
-    this._setIsRotating(value);
-  }
-
-  get isRotatingTarget(): boolean {
-    return this._isRotatingTarget;
-  }
-
-  set isRotatingTarget(value: boolean) {
-    this._setIsRotatingTarget(value);
-  }
-
-  get isDragging(): boolean {
-    return this._isDragging;
-  }
-
-  set isDragging(value: boolean) {
-    this._setIsDragging(value);
-  }
-
-  get isCornerMoving(): boolean {
-    return this._isCornerMoving;
-  }
-
-  set isCornerMoving(value: boolean) {
-    this._setIsCornerMoving(value);
-  }
-
-  get isProvisional(): boolean {
-    return this._isProvisional;
-  }
-
-  set isProvisional(value: boolean) {
-    this._setIsRendered(value);
-  }
-
-  get isTarget(): boolean {
-    return this._isTarget;
-  }
-
-  set isTarget(value: boolean) {
-    this._setIsTarget(value);
-  }
-
-  get isInRange(): boolean {
-    return this._isInRange;
-  }
-
-  set isInRange(value: boolean) {
-    this._setIsInRange(value);
-  }
-
-  get isOnStage(): boolean {
-    return this._isOnStage;
-  }
-
-  set isOnStage(value: boolean) {
-    this._setIsOnStage(value);
   }
 
   get isRatioLocked(): boolean {
@@ -701,56 +605,8 @@ export default class Element implements IElement, ILinkedNodeValue {
     }
   }
 
-  _setIsVisible(value: boolean): void {
-    this._isVisible = value;
-  }
-
   _setIsEditing(value: boolean): void {
     this._isEditing = value;
-  }
-
-  _setIsLocked(value: boolean): void {
-    this._isLocked = value;
-  }
-
-  _setIsMoving(value: boolean): void {
-    this._isMoving = value;
-  }
-
-  _setIsTransforming(value: boolean): void {
-    this._isTransforming = value;
-  }
-
-  _setIsRotating(value: boolean): void {
-    this._isRotating = value;
-  }
-
-  _setIsRotatingTarget(value: boolean): void {
-    this._isRotatingTarget = value;
-  }
-
-  _setIsDragging(value: boolean): void {
-    this._isDragging = value;
-  }
-
-  _setIsRendered(value: boolean): void {
-    this._isProvisional = value;
-  }
-
-  _setIsTarget(value: boolean): void {
-    this._isTarget = value;
-  }
-
-  _setIsOnStage(value: boolean): void {
-    this._isOnStage = value;
-  }
-
-  _setIsInRange(value: boolean): void {
-    this._isInRange = value;
-  }
-
-  _setIsCornerMoving(value: boolean): void {
-    this._isCornerMoving = value;
   }
 
   get maxBoxCoords(): IPoint[] {
@@ -951,21 +807,21 @@ export default class Element implements IElement, ILinkedNodeValue {
     this.refreshFlipX();
     makeObservable(this, {
       _status: observable,
-      _isDragging: observable,
-      _isRotating: observable,
-      _isTransforming: observable,
-      _isRotatingTarget: observable,
-      _isProvisional: observable,
-      _isOnStage: observable,
+      isDragging: observable,
+      isRotating: observable,
+      isTransforming: observable,
+      isRotatingTarget: observable,
+      isProvisional: observable,
+      isOnStage: observable,
       _isEditing: observable,
-      _isMoving: observable,
+      isMoving: observable,
       _isSelected: observable,
       _isDetachedSelected: observable,
-      _isVisible: observable,
-      _isLocked: observable,
-      _isTarget: observable,
-      _isInRange: observable,
-      _isCornerMoving: observable,
+      isVisible: observable,
+      isLocked: observable,
+      isTarget: observable,
+      isInRange: observable,
+      isCornerMoving: observable,
     });
   }
 

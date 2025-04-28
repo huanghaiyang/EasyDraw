@@ -418,7 +418,7 @@ export default class ElementRect extends Element implements IElementRect {
    * @param value 圆角值
    */
   private _getCorner(value: number): number {
-    if (this._isCornerMoving) return value;
+    if (this.isCornerMoving) return value;
     if (value === 0) return (this.minParallelogramVerticalSize / 2) * 0.2;
     return value;
   }

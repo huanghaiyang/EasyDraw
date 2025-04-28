@@ -194,7 +194,31 @@ export default interface IElement {
   shield: IStageShield;
   // 所属节点
   node: ILinkedNode<IElement>;
-
+  // 是否是鼠标位置目标对象
+  isTarget: boolean;
+  // 是否在选区范围内
+  isInRange: boolean;
+  // 是否在移动圆角
+  isCornerMoving: boolean;
+  // 是否在舞台上
+  isOnStage: boolean;
+  // 是否锁定
+  isLocked: boolean;
+  // 是否可见
+  isVisible: boolean;
+  // 组件是否在移动中
+  isMoving: boolean;
+  // 组件是否在变换形状中
+  isTransforming: boolean;
+  // 是否是待旋转的目标
+  isRotatingTarget: boolean;
+  // 是否正在旋转
+  isRotating: boolean;
+  // 是否是临时创建中的组件
+  isProvisional: boolean;
+  // 是否拖动中
+  isDragging: boolean;
+  
   get isRangeElement(): boolean;
   // 组件ID
   get id(): string;
@@ -446,32 +470,8 @@ export default interface IElement {
   get isSelected(): boolean;
   // 是否是孤立选中（未选中组合，选中子组件）
   get isDetachedSelected(): boolean;
-  // 是否可见
-  get isVisible(): boolean;
   // 是否在编辑
   get isEditing(): boolean;
-  // 是否锁定
-  get isLocked(): boolean;
-  // 是否移动
-  get isMoving(): boolean;
-  // 是否变换
-  get isTransforming(): boolean;
-  // 是否旋转
-  get isRotating(): boolean;
-  // 是否旋转目标
-  get isRotatingTarget(): boolean;
-  // 是否拖动
-  get isDragging(): boolean;
-  // 是否修改圆角
-  get isCornerMoving(): boolean;
-  // 是否临时
-  get isProvisional(): boolean;
-  // 是否目标
-  get isTarget(): boolean;
-  // 是否在舞台上
-  get isOnStage(): boolean;
-  // 是否在范围内
-  get isInRange(): boolean;
   // 是否比例锁定
   get isRatioLocked(): boolean;
   // 状态
@@ -481,32 +481,8 @@ export default interface IElement {
   set isSelected(value: boolean);
   // 设置是否孤立选中（未选中组合，选中子组件）
   set isDetachedSelected(value: boolean);
-  // 设置是否可见
-  set isVisible(value: boolean);
   // 设置是否在编辑
   set isEditing(value: boolean);
-  // 设置是否锁定
-  set isLocked(value: boolean);
-  // 设置是否移动
-  set isMoving(value: boolean);
-  // 设置是否变换
-  set isTransforming(value: boolean);
-  // 设置是否旋转
-  set isRotating(value: boolean);
-  // 设置是否旋转目标
-  set isRotatingTarget(value: boolean);
-  // 设置是否拖动
-  set isDragging(value: boolean);
-  // 设置是否修改圆角
-  set isCornerMoving(value: boolean);
-  // 设置是否临时
-  set isProvisional(value: boolean);
-  // 设置是否目标
-  set isTarget(value: boolean);
-  // 设置是否在舞台上
-  set isOnStage(value: boolean);
-  // 设置是否在范围内
-  set isInRange(value: boolean);
   // 设置状态
   set status(value: ElementStatus);
   // 设置原始旋转角度
