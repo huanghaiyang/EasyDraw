@@ -7,7 +7,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import LodashUtils from "@/utils/LodashUtils";
 import { pick } from "lodash";
-import { CommonJsonKeys } from "./utils/ElementUtils";
+import { CommonJsonKeys } from "@/modules/elements/utils/ElementUtils";
 
 export default class ElementGroup extends Element implements IElementGroup {
   /**
@@ -22,6 +22,14 @@ export default class ElementGroup extends Element implements IElementGroup {
    */
   get deepSubs(): IElement[] {
     return this.getDeepSubs();
+  }
+
+  get subIds(): string[] {
+    return this.model.subIds;
+  }
+
+  get deepSubIds(): string[] {
+    return this.getDeepSubIds();
   }
 
   /**
@@ -120,23 +128,35 @@ export default class ElementGroup extends Element implements IElementGroup {
    * 获取深度子组件
    */
   getDeepSubs(): IElement[] {
-    const result: IElement[] = [];
-    this._getDeepSubs(result, this.getSubs());
-    return result;
+    const deepSubIds = this.getDeepSubIds();
+    return this.shield.store.getOrderedElementsByIds(deepSubIds);
   }
 
   /**
-   * 获取深度子组件
+   * 获取深度子组件ID集合
+   *
+   * @returns
+   */
+  getDeepSubIds(): string[] {
+    const result: string[] = [];
+    this._getDeepSubIds(result, this.getSubs());
+    return result;
+  }
+  r;
+
+  /**
+   * 获取深度子组件ID集合
    *
    * @param result
    * @param subs
+   * @returns
    */
-  private _getDeepSubs(result: IElement[], subs: IElement[]): IElement[] {
+  private _getDeepSubIds(result: string[], subs: IElement[]): string[] {
     subs.forEach(sub => {
       if (sub.isGroup) {
-        this._getDeepSubs(result, (sub as ElementGroup).subs);
+        this._getDeepSubIds(result, (sub as ElementGroup).subs);
       }
-      result.push(sub);
+      result.push(sub.id);
     });
     return result;
   }
@@ -330,7 +350,7 @@ export default class ElementGroup extends Element implements IElementGroup {
   /**
    * 生成子组件删除数据模型
    */
-  async toSubRemovedJson(): Promise<ElementObject> {
+  async toSubUpdatedJson(): Promise<ElementObject> {
     return JSON.parse(JSON.stringify(pick(this.model, [...CommonJsonKeys, "width", "height", "subIds"]))) as ElementObject;
   }
 }

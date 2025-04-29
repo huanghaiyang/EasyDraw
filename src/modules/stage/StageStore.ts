@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isEqual, pick, throttle } from "lodash";
+import { every, isArray, isEqual, pick, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -25,10 +25,12 @@ import LodashUtils from "@/utils/LodashUtils";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import { ArbitraryPointClosestMargin } from "@/types/constants";
-import { IElementGroup } from "@/types/IElementGroup";
+import { GroupedElements, IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
+import { LayerChangeCallback, LayerActionParam } from "@/types/IStageSetter";
+import { LayerChangedType } from "@/types/ICommand";
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -442,7 +444,7 @@ export default class StageStore implements IStageStore {
   /**
    * 重新整理组件的顺序
    */
-  resortElementsArray(): void {
+  retrieveElements(): void {
     this._reactionStageElementsChanged();
     this._reactionVisibleElementsChanged();
     this._reactionSelectedElementsChanged();
@@ -579,7 +581,7 @@ export default class StageStore implements IStageStore {
 
   /**
    * 将组件列表转换为树结构
-   * 
+   *
    * 注意：树结构中，节点是按照添加顺序倒序排列的
    *
    * @returns
@@ -1399,9 +1401,12 @@ export default class StageStore implements IStageStore {
    */
   getOrderedElementsByIds(ids: string[]): IElement[] {
     const result: IElement[] = [];
-    this._elementList.forEach(node => {
+    this._elementList.forEachBreak(node => {
       if (ids.includes(node.value.id)) {
         result.push(node.value);
+      }
+      if (result.length === ids.length) {
+        return true;
       }
     });
     return result;
@@ -1415,9 +1420,12 @@ export default class StageStore implements IStageStore {
    */
   getOrderedElementIds(ids: string[]): string[] {
     const result: string[] = [];
-    this._elementList.forEach(node => {
+    this._elementList.forEachBreak(node => {
       if (ids.includes(node.value.id)) {
         result.push(node.value.id);
+      }
+      if (result.length === ids.length) {
+        return true;
       }
     });
     return result;
@@ -2560,7 +2568,7 @@ export default class StageStore implements IStageStore {
    * @param targetElement
    * @param isPrepend
    */
-  rearrangeElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void {
+  moveElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void {
     const { node } = element;
     this._elementList.remove(node, false);
     if (targetElement) {
@@ -2627,7 +2635,7 @@ export default class StageStore implements IStageStore {
   /**
    * 执行组件下移操作
    *
-   * @param elements 要修改的组件集合
+   * @param elements 要移动层级的组件集合
    */
   private _doElementsGoDown(elements: IElement[]): void {
     const headNode: ILinkedNode<IElement> = elements[0].node;
@@ -2650,49 +2658,165 @@ export default class StageStore implements IStageStore {
   /**
    * 组件下移
    *
-   * @param elements 要修改的组件集合
+   * @param elements 要移动层级的组件集合
+   * @param layerChangeBefore 在执行操作前的回调函数
+   * @param layerChangeAfter 在执行操作后的回调函数
    */
-  async setElementsGoDown(elements: IElement[]): Promise<void> {
+  async setElementsGoDown(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
     if (elements.length === 0) return;
     this._doElementsGoDown(elements);
-    this.resortElementsArray();
+    this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
   }
 
   /**
-   * 执行元件的Shift移动操作
+   * 获取分组组件中的最后一个组件
    *
-   * @param elements 要移动的元件集合
+   * @param elements
+   * @returns
    */
-  private _doElementsShiftMove(elements: IElement[]): void {
+  private _getTailOfDividedGroupElements(elements: GroupedElements): IElement {
+    if (elements.length) {
+      const tail = elements[elements.length - 1];
+      if (isArray(tail)) return tail[tail.length - 1];
+      return tail;
+    }
+  }
+
+  /**
+   * 将给定的组件按照组合进行分组
+   *
+   * @param elements
+   */
+  private _divideElementsByGroup(elements: IElement[]): GroupedElements {
+    const result: GroupedElements = [];
+    elements.forEach(element => {
+      if (element.isGroupSubject) {
+        const tail = this._getTailOfDividedGroupElements(result);
+        if (tail && tail.model.groupId === element.model.groupId) {
+          result[result.length - 1] = [...(result[result.length - 1] as IElement[]), element];
+        } else {
+          result.push([element]);
+        }
+      } else {
+        result.push(element);
+      }
+    });
+    return result;
+  }
+
+  /**
+   * 将给定的组件在所属组合的内部提升层级
+   *
+   * 注意组件没有变化，变化的是组件所属链表节点在链表中的位置
+   *
+   * @param elements
+   * @param isGroupInternal 是否是组合内部提升
+   */
+  private _doGroupInternalShiftMoveIfy(elements: IElement[], isGroupInternal: boolean = false): void {
+    elements = ElementUtils.flatElementsWithDeepSubs(elements);
+    // 待调整顺序组件集合的末尾节点
     const tailNode: ILinkedNode<IElement> = elements[elements.length - 1].node;
+    // 因为是上移，所以目标节点是尾节点的下一个节点
     let targetNode: ILinkedNode<IElement> | null = tailNode.next;
-    if (targetNode?.value.isGroupSubject) {
+    // 组合节点
+    let group: IElementGroup;
+    // 判断是否是组合内部子组件移动排序
+    if (isGroupInternal) {
+      group = tailNode.next?.value.group;
+    } else if (targetNode?.value.isGroupSubject) {
+      // 如果目标节点是子组件，那么应该将目标节点替换为最顶层的组合节点
       targetNode = targetNode.value.ancestorGroup.node;
     }
+    // 先将要排序的组件从链表中移除
     const removedNodes = this._removeNodesByElements(elements);
+    // 判断是否存在目标节点
     if (targetNode) {
+      // 按顺序将被临时移除的组件节点插入到目标节点前
       removedNodes.forEach(node => {
         this._elementList.insertAfter(node, targetNode, false);
+        // 更新目标节点
         targetNode = node;
       });
     } else {
+      // 如果不存在目标节点，那么将被临时移除的组件节点插入到链表的末尾
       removedNodes.forEach(node => {
         this._elementList.insert(node, false);
       });
+    }
+    // 如果是组合内部子组件调整顺序
+    if (group) {
+      // 更新组合子组件的顺序
+      this.updateElementModel(group.id, {
+        subIds: this.getOrderedElementIds(group.subIds),
+      });
+    }
+  }
+
+  /**
+   * 执行元件的Shift移动操作
+
+   * @param elements 要移动的元件集合
+   * @param layerChangeBefore 在执行操作前的回调函数
+   * @param layerChangeAfter 在执行操作后的回调函数
+   */
+  private async _doElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
+    const groupElements = this._divideElementsByGroup(elements);
+    const noGroupElements: IElement[] = [];
+    await Promise.all(
+      groupElements.map(partElements => {
+        return new Promise<void>(async resolve => {
+          if (isArray(partElements)) {
+            // 获取组件所属的组合
+            const group = partElements[0].group;
+            // 如果组合内子组件全部调整顺序相当于没有调整顺序，无意义的操作
+            if (partElements.length === group.model.subIds.length) return resolve();
+            // 组合更新参数
+            const actionParams: LayerActionParam[] = [
+              {
+                type: LayerChangedType.LayerChanged,
+                data: partElements,
+              },
+              {
+                type: LayerChangedType.GroupUpdated,
+                data: [group],
+              },
+            ];
+            await layerChangeBefore(actionParams);
+            this._doGroupInternalShiftMoveIfy(partElements, true);
+            await layerChangeAfter(actionParams);
+          } else {
+            noGroupElements.push(partElements);
+          }
+          resolve();
+        });
+      }),
+    );
+    if (noGroupElements.length) {
+      const actionParams: LayerActionParam[] = [
+        {
+          type: LayerChangedType.LayerChanged,
+          data: noGroupElements,
+        },
+      ];
+      await layerChangeBefore(actionParams);
+      this._doGroupInternalShiftMoveIfy(noGroupElements, false);
+      await layerChangeAfter(actionParams);
     }
   }
 
   /**
    * 组件上移
    *
-   * @param elements 要修改的元件集合
+   * @param elements 要移动层级的组件集合
+   * @param layerChangeBefore 在执行操作前的回调函数
+   * @param layerChangeAfter 在执行操作后的回调函数
    */
-  async setElementsShiftMove(elements: IElement[]): Promise<void> {
+  async setElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
     if (elements.length === 0) return;
-    this._doElementsShiftMove(elements);
-    this.resortElementsArray();
+    await this._doElementsShiftMove(elements, layerChangeBefore, layerChangeAfter);
+    this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
   }

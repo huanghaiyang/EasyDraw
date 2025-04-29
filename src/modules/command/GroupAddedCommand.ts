@@ -2,6 +2,7 @@ import { ElementObject } from "@/types/IElement";
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IGroupCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
+import CommandHelper from "@/modules/command/helpers/CommandHelper";
 
 export default class GroupAddedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   async undo(): Promise<void> {
@@ -22,12 +23,11 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
               groupId: undefined,
             });
           }
-          this.store.rearrangeElementAfter(element, prevId ? this.store.getElementById(prevId) : null, true);
+          this.store.moveElementAfter(element, prevId ? this.store.getElementById(prevId) : null, true);
         }
       }
     });
-    this.store.resortElementsArray();
-    this.store.emitElementsLayerChanged();
+    CommandHelper.refreshStoreAfterLayerChanged(this.store);
   }
 
   async redo(): Promise<void> {
@@ -54,7 +54,6 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
         }
       }
     }
-    this.store.resortElementsArray();
-    this.store.emitElementsLayerChanged();
+    CommandHelper.refreshStoreAfterLayerChanged(this.store);
   }
 }

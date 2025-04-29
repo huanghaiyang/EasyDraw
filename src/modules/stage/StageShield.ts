@@ -35,12 +35,19 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import ICommand, { DetachedRemovedType, ElementCommandTypes, ICommandElementObject, IDetachedRemovedCommandElementObject, IElementCommandPayload } from "@/types/ICommand";
+import ICommand, {
+  DetachedRemovedType,
+  ElementCommandTypes,
+  ICommandElementObject,
+  IDetachedRemovedCommandElementObject,
+  IElementCommandPayload,
+  IRearrangeCommandElementObject,
+} from "@/types/ICommand";
 import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
-import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommand";
+import ElementsRearrangeCommand from "@/modules/command/ElementsRearrangeCommand";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
@@ -51,6 +58,7 @@ import { computed, makeObservable, observable, reaction } from "mobx";
 import { nanoid } from "nanoid";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
+import { LayerActionParam } from "@/types/IStageSetter";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -2556,25 +2564,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 创建组件顺序调整的命令
-   *
-   * @param elements 要修改的元件集合
-   * @param callback 回调
-   */
-  private async _createRearrangeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const command = await CommandHelper.createRearrangeCommand(elements, elementsUpdateFunction, this.store);
-    this.undoRedo.add(command);
-  }
-
-  /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
-    await this._createRearrangeCommand(elements, async () => {
-      await this.store.setElementsGoDown(elements);
-    });
+    const uDataList: Array<IRearrangeCommandElementObject> = [];
+    const rDataList: Array<IRearrangeCommandElementObject> = [];
+    await this.store.setElementsGoDown(
+      elements,
+      async (params: LayerActionParam[]) => {
+        uDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
+      },
+      async (params: LayerActionParam[]) => {
+        rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
+      },
+    );
+    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
+    this.undoRedo.add(command);
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
   }
@@ -2585,9 +2592,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements 要修改的元件集合
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
-    await this._createRearrangeCommand(elements, async () => {
-      await this.store.setElementsShiftMove(elements);
-    });
+    const uDataList: Array<IRearrangeCommandElementObject> = [];
+    const rDataList: Array<IRearrangeCommandElementObject> = [];
+    await this.store.setElementsShiftMove(
+      elements,
+      async (params: LayerActionParam[]) => {
+        uDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
+      },
+      async (params: LayerActionParam[]) => {
+        rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
+      },
+    );
+    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
+    this.undoRedo.add(command);
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
   }

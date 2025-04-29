@@ -7,11 +7,12 @@ import ICommand, {
   IGroupCommandElementObject,
   INodeRelation,
   IRearrangeCommandElementObject,
+  LayerChangedType,
 } from "@/types/ICommand";
 import IElement, { ElementObject } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import LodashUtils from "@/utils/LodashUtils";
-import ElementsRearrangeCommand from "@/modules/command/ElementRearrangeCommand";
+import ElementsRearrangeCommand from "@/modules/command/ElementsRearrangeCommand";
 import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
 import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
@@ -19,22 +20,45 @@ import { nanoid } from "nanoid";
 import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
 import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
 import DetachedElementsRemovedCommand from "@/modules/command/DetachedElementsRemovedCommand";
+import { LayerActionParam } from "@/types/IStageSetter";
+import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class CommandHelper {
   /**
+   * 当组件层级变更后，重新刷新store数据
+   *
+   * @param store
+   */
+  static refreshStoreAfterLayerChanged(store: IStageStore): void {
+    store.retrieveElements();
+    store.emitElementsLayerChanged();
+  }
+
+  /**
    * 组件数据恢复
+
+   * @param commandElementObject
+   * @param store
+   */
+
+  static async restoreElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<void> {
+    const { model } = commandElementObject;
+    const element = store.updateElementModel(model.id, LodashUtils.jsonClone(model));
+    if (element) {
+      element.refreshFlipX();
+      element.refresh();
+    }
+  }
+
+  /**
+   * 多组件数据恢复
    *
    * @param uDataList
    * @param store
    */
   static async restoreElementsFromData(uDataList: Array<ICommandElementObject>, store: IStageStore): Promise<void> {
     uDataList.forEach(data => {
-      const { model } = data;
-      const element = store.updateElementModel(model.id, LodashUtils.jsonClone(model));
-      if (element) {
-        element.refreshFlipX();
-        element.refresh();
-      }
+      CommandHelper.restoreElementFromData(data, store);
     });
   }
 
@@ -52,11 +76,9 @@ export default class CommandHelper {
       } = data as IRearrangeCommandElementObject;
       const element = store.getElementById(id);
       if (element) {
-        store.rearrangeElementAfter(element, prevId ? store.getElementById(prevId) : null, true);
+        store.moveElementAfter(element, prevId ? store.getElementById(prevId) : null, true);
       }
     });
-    store.resortElementsArray();
-    store.emitElementsLayerChanged();
   }
 
   /**
@@ -116,10 +138,11 @@ export default class CommandHelper {
    * @param elementsUpdateFunction
    * @param store
    */
-  static async createRearrangeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...CommandHelper.createRearrangeModel(element) })));
-    await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: { id: element.id }, ...CommandHelper.createRearrangeModel(element) })));
+  static async createRearrangeCommand(
+    uDataList: Array<IRearrangeCommandElementObject>,
+    rDataList: Array<IRearrangeCommandElementObject>,
+    store: IStageStore,
+  ): Promise<ICommand<IElementCommandPayload>> {
     const command = new ElementsRearrangeCommand(
       nanoid(),
       {
@@ -276,10 +299,71 @@ export default class CommandHelper {
     return (await Promise.all(
       ancestors.map(async ancestor => {
         return {
-          model: await (ancestor as IElementGroup).toSubRemovedJson(),
+          model: await (ancestor as IElementGroup).toSubUpdatedJson(),
           type: DetachedRemovedType.GroupUpdated,
         };
       }),
     )) as IDetachedRemovedCommandElementObject[];
+  }
+
+  /**
+   * 根据给定的层级调换参数，返回处理好撤销回退数据
+   *
+   * @param params
+   * @returns
+   */
+  static async createRearrangeDataList(params: LayerActionParam[]): Promise<Array<IRearrangeCommandElementObject>> {
+    const result: Array<IRearrangeCommandElementObject> = [];
+    await Promise.all(
+      params.map(param => {
+        return new Promise<void>(resolve => {
+          const { type, data: elements } = param;
+          switch (type) {
+            case LayerChangedType.LayerChanged: {
+              const flatElements = ElementUtils.flatElementsWithDeepSubs(elements);
+              flatElements.forEach(element => {
+                result.push({ model: { id: element.id }, ...CommandHelper.createRearrangeModel(element), type });
+              });
+              break;
+            }
+            case LayerChangedType.GroupUpdated: {
+              elements.forEach(async element => {
+                result.push({ model: await (element as IElementGroup).toSubUpdatedJson(), type });
+              });
+              break;
+            }
+          }
+          resolve();
+        });
+      }),
+    );
+    return result;
+  }
+
+  /**
+   * 还原组件位置
+   *
+   * @param dataList
+   * @param store
+   */
+  static async restoreRearrangeDataList(dataList: Array<IRearrangeCommandElementObject>, store: IStageStore): Promise<void> {
+    await Promise.all(
+      dataList.map(item => {
+        return new Promise<void>(async resolve => {
+          const { type } = item as IRearrangeCommandElementObject;
+          switch (type) {
+            case LayerChangedType.LayerChanged: {
+              await CommandHelper.rearrange([item], store);
+              break;
+            }
+            case LayerChangedType.GroupUpdated: {
+              await CommandHelper.restoreElementFromData(item, store);
+              break;
+            }
+          }
+          resolve();
+        });
+      }),
+    );
   }
 }

@@ -17,8 +17,14 @@ export type IRemovedCommandElementObject = ICommandElementObject & INodeRelation
 
 // 组件移除类型
 export enum DetachedRemovedType {
-  GroupUpdated = "groupSubRemoved",
+  GroupUpdated = "GroupUpdated",
   Removed = "removed",
+}
+
+// 层级变更数据操作类型
+export enum LayerChangedType {
+  GroupUpdated = "GroupUpdated",
+  LayerChanged = "LayerChanged",
 }
 
 // 独立组件移除命令
@@ -28,7 +34,10 @@ export type IDetachedRemovedCommandElementObject = ICommandElementObject &
   };
 
 // 组件顺序调整命令
-export type IRearrangeCommandElementObject = ICommandElementObject & INodeRelation;
+export type IRearrangeCommandElementObject = ICommandElementObject &
+  INodeRelation & {
+    type: LayerChangedType;
+  };
 
 // 组合命令
 export type IGroupCommandElementObject = ICommandElementObject &

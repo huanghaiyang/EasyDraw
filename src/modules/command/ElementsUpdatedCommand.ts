@@ -1,6 +1,6 @@
 import ElementsBaseCommand from "@/modules/command/ElementsBaseCommand";
 import { IElementCommandPayload } from "@/types/ICommand";
-import CommandHelper from "./helpers/CommandHelper";
+import CommandHelper from "@/modules/command/helpers/CommandHelper";
 export default class ElementsUpdatedCommand extends ElementsBaseCommand<IElementCommandPayload> {
   async undo(): Promise<void> {
     if (!this.payload.uDataList) {
