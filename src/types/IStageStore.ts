@@ -193,11 +193,11 @@ export default interface IStageStore extends IStageSetter {
   // 粘贴组件
   pasteElements(elementsJson: Array<ElementObject>): Promise<IElement[]>;
   // 将给定组件移动到指定组件之后
-  rearrangeElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void;
+  moveElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void;
   // 将给定组件移动到指定组件之前
-  rearrangeElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void;
+  moveElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void;
   // 重新整理下组件的顺序
-  resortElementsArray(): void;
+  retrieveElements(): void;
   // 发送元素层改变事件
   emitElementsLayerChanged(): void;
   // 刷新树节点

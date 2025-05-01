@@ -9,8 +9,12 @@ const stageStore = useStageStore();
       <span class="layer-props__title-text">层级</span>
     </div>
     <div class="layer-props__row">
-      <el-icon :class="['iconfont', 'icon-verbise-layer-go-down', { disabled: !stageStore.layerGoDownEnable }]" @click="stageStore.setElementsGoDown" title="下移"></el-icon>
-      <el-icon :class="['iconfont', 'icon-verbise-layer-shift-move', { disabled: !stageStore.layerShiftMoveEnable }]" @click="stageStore.setElementsShiftMove" title="上移"></el-icon>
+      <el-tooltip effect="dark" content="下移">
+        <el-icon :class="['iconfont', 'icon-verbise-layer-go-down', { disabled: !stageStore.layerGoDownEnable }]" @click="stageStore.setElementsGoDown"></el-icon>
+      </el-tooltip>
+      <el-tooltip effect="dark" content="上移">
+        <el-icon :class="['iconfont', 'icon-verbise-layer-shift-move', { disabled: !stageStore.layerShiftMoveEnable }]" @click="stageStore.setElementsShiftMove"></el-icon>
+      </el-tooltip>
     </div>
   </div>
 </template>

@@ -1,4 +1,4 @@
-import { cloneDeep, isArray, isPlainObject, reverse } from "lodash";
+import { cloneDeep, isArray, isPlainObject, remove, reverse } from "lodash";
 
 export default class LodashUtils {
   /**
@@ -126,5 +126,51 @@ export default class LodashUtils {
         }
       }),
     );
+  }
+
+  /**
+   * 给定一个元素不重复的数组，将数组中的某些元素，移动到数组中某个元素的后面
+   *
+   * @param arr
+   * @param elements
+   * @param targetElement
+   */
+  static moveArrayElementsAfter<T>(arr: T[], elements: T[], targetElement: T): T[] {
+    let result: T[] = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (!elements.includes(arr[i])) {
+        result.push(arr[i]);
+      }
+    }
+    const index = result.findIndex(item => item === targetElement);
+    if (index !== -1) {
+      result.splice(index + 1, 0, ...elements);
+    } else {
+      result = [...result, ...elements];
+    }
+    return result;
+  }
+
+  /**
+   * 给定一个元素不重复的数组，将数组中的某些元素，移动到数组中某个元素的前面
+   *
+   * @param arr
+   * @param elements
+   * @param targetElement
+   */
+  static moveArryElementsBefore<T>(arr: T[], elements: T[], targetElement: T): T[] {
+    let result: T[] = [];
+    for (let i = 0; i < arr.length; i++) {
+      if (!elements.includes(arr[i])) {
+        result.push(arr[i]);
+      }
+    }
+    const index = result.findIndex(item => item === targetElement);
+    if (index !== -1) {
+      result.splice(index, 0, ...elements);
+    } else {
+      result = [...elements, ...result];
+    }
+    return result;
   }
 }

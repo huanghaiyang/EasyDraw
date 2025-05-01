@@ -27,6 +27,7 @@ import ElementEllipse from "@/modules/elements/ElementEllipse";
 import ImageUtils from "@/utils/ImageUtils";
 import ElementTaskText from "@/modules/render/shield/task/ElementTaskText";
 import GlobalConfig from "@/config";
+import { IElementGroup } from "@/types/IElementGroup";
 
 export enum ElementReactionPropNames {
   isSelected = "isSelected",
@@ -52,7 +53,7 @@ export enum ElementListEventNames {
   removed,
 }
 
-export const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y"];
+export const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y", "type"];
 
 export default class ElementUtils {
   static createElementTask(element: IElement, canvas: HTMLCanvasElement): IElementTask {
@@ -576,6 +577,21 @@ export default class ElementUtils {
       }
     });
     return Array.from(ancestors);
+  }
+
+  /**
+   * 扁平化分组组件中的子组件
+   *
+   * @param elements
+   * @returns
+   */
+  static flatElementsWithDeepSubs(elements: IElement[]): IElement[] {
+    return elements
+      .map(element => {
+        if (element.isGroup) return [...(element as IElementGroup).deepSubs, element];
+        return element;
+      })
+      .flat();
   }
 
   /**
