@@ -2564,6 +2564,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 生成组件层级变更命令
+   *
+   * @param elements
+   * @param uDataList
+   * @param rDataList
+   */
+  private async _createElementsRearrangeCommand(elements: IElement[], uDataList: Array<IRearrangeCommandElementObject>, rDataList: Array<IRearrangeCommandElementObject>): Promise<void> {
+    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
+    this.undoRedo.add(command);
+    elements.forEach(element => element.onLayerChanged());
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
@@ -2580,10 +2594,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
-    this.undoRedo.add(command);
-    elements.forEach(element => element.onLayerChanged());
-    this._shouldRedraw = true;
+    await this._createElementsRearrangeCommand(elements, uDataList, rDataList);
   }
 
   /**
@@ -2603,10 +2614,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
-    this.undoRedo.add(command);
-    elements.forEach(element => element.onLayerChanged());
-    this._shouldRedraw = true;
+    await this._createElementsRearrangeCommand(elements, uDataList, rDataList);
   }
   /**
    * 切换目标

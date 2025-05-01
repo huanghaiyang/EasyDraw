@@ -50,7 +50,7 @@ export default class GroupAddedCommand extends ElementsBaseCommand<IElementComma
               groupId,
             });
           }
-          this.store.rearrangeElementBefore(element, nextId ? this.store.getElementById(nextId) : null, true);
+          this.store.moveElementBefore(element, nextId ? this.store.getElementById(nextId) : null, true);
         }
       }
     }

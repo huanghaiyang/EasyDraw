@@ -195,7 +195,7 @@ export default interface IStageStore extends IStageSetter {
   // 将给定组件移动到指定组件之后
   moveElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void;
   // 将给定组件移动到指定组件之前
-  rearrangeElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void;
+  moveElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void;
   // 重新整理下组件的顺序
   retrieveElements(): void;
   // 发送元素层改变事件

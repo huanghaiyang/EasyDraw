@@ -11,6 +11,10 @@ export interface IElementGroup extends IElement {
   get subIds(): string[];
   // 深度子组件id集合
   get deepSubIds(): string[];
+  // 第一个子组件
+  get firstSub(): IElement;
+  // 第一个子孙组件
+  get firstDeeoSub(): IElement;
   // 添加子组件
   addSub(sub: IElement): void;
   // 移除子组件

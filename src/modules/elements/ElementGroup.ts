@@ -32,6 +32,18 @@ export default class ElementGroup extends Element implements IElementGroup {
     return this.getDeepSubIds();
   }
 
+  get firstSub(): IElement {
+    return this.shield.store.getElementById(this.subIds[0]);
+  }
+
+  get firstDeeoSub(): IElement {
+    let result = this.firstSub;
+    while (result.isGroup) {
+      result = (result as IElementGroup).firstSub;
+    }
+    return result;
+  }
+
   /**
    * 是否可以描边
    */
@@ -142,7 +154,6 @@ export default class ElementGroup extends Element implements IElementGroup {
     this._getDeepSubIds(result, this.getSubs());
     return result;
   }
-  r;
 
   /**
    * 获取深度子组件ID集合

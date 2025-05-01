@@ -788,6 +788,9 @@ export default class Element implements IElement, ILinkedNodeValue {
       const groupSubIds = this.group.model.subIds;
       return groupSubIds.findIndex(id => id === this.model.id) === 0;
     }
+    if (this.isGroup) {
+      return (this as unknown as IElementGroup).firstDeeoSub.node.prev === null;
+    }
     return this.node.prev === null;
   }
 

@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isArray, isEqual, pick, throttle } from "lodash";
+import { every, isArray, isEqual, pick, remove, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -31,6 +31,16 @@ import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import { LayerChangeCallback, LayerActionParam } from "@/types/IStageSetter";
 import { LayerChangedType } from "@/types/ICommand";
+
+/**
+ * 调整组件层级
+ *
+ * @param elements 要调整层级的组件集合
+ * @param isGroupInternal 组内调整
+ */
+interface ElementsLayerExecuteFunction {
+  (elements: IElement[], isGroupInternal: boolean): void;
+}
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
@@ -366,19 +376,34 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 判断层级是否可变动
+   *
+   * @param groupElements
+   * @param propKey
+   * @param tail
+   * @returns
+   */
+  private _shouldLayerChange(groupElements: GroupedElements, propKey: string, tail: boolean = true): boolean {
+    return groupElements.some(partElements => {
+      partElements = partElements as IElement[];
+      if (ElementList.isConsecutive(partElements.map(element => element.node))) {
+        return !partElements[tail ? partElements.length - 1 : 0][propKey];
+      }
+      return partElements.some(element => !element[propKey]);
+    });
+  }
+
+  /**
    * 舞台元素层级发生变化时，发送事件
    */
   emitElementsLayerChanged(): void {
     let shifMoveEnable: boolean = false;
     let goDownEnable: boolean = false;
     if (this._selectedElements.length) {
-      if (ElementList.isConsecutive(this._selectedElements.map(element => element.node))) {
-        shifMoveEnable = !this._selectedElements[this._selectedElements.length - 1].isTopmost;
-        goDownEnable = !this._selectedElements[0].isBottommost;
-      } else {
-        shifMoveEnable = true;
-        goDownEnable = true;
-      }
+      const groupElements = this._divideElementsByGroup(this.selectedElements, true);
+      groupElements;
+      shifMoveEnable = this._shouldLayerChange(groupElements, "isTopmost", true);
+      goDownEnable = this._shouldLayerChange(groupElements, "isBottommost", false);
     }
     this.shield.emit(ShieldDispatcherNames.layerShiftMoveEnableChanged, shifMoveEnable);
     this.shield.emit(ShieldDispatcherNames.layerGoDownEnableChanged, goDownEnable);
@@ -2589,7 +2614,7 @@ export default class StageStore implements IStageStore {
    * @param targetElement
    * @param isAppend
    */
-  rearrangeElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void {
+  moveElementBefore(element: IElement, targetElement?: IElement, isAppend?: boolean): void {
     const { node } = element;
     this._elementList.remove(node, false);
     if (targetElement) {
@@ -2619,30 +2644,55 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 获取组合组件在链表中位置最靠前的子组件
+   * 获取组合的最底层的第一个子孙组件
    *
    * @param group
-   * @returns
    */
-  private _getPrevmostElement(group: IElementGroup): IElement {
-    let result = group.subs[0];
-    if (result && result.isGroup) {
-      result = this._getPrevmostElement(result as IElementGroup);
-    }
-    return result;
+  private _getGroupFirstDeepSubNode(groupNode: ILinkedNode<IElement>): ILinkedNode<IElement> | null {
+    if (!groupNode.value.isGroup) return groupNode;
+    return this._elementsMap.get((groupNode.value as IElementGroup).deepSubIds[0])?.node;
   }
 
   /**
-   * 执行组件下移操作
+   * 将给定的组件在所属组合的内部降低层级
    *
-   * @param elements 要移动层级的组件集合
+   * 注意组件没有变化，变化的是组件所属链表节点在链表中的位置
+   *
+   * @param elements
+   * @param isGroupInternal 是否是组合内部提升
    */
-  private _doElementsGoDown(elements: IElement[]): void {
+  private _doElementsGoDownIfy(elements: IElement[], isGroupInternal: boolean = false): void {
+    const elementIds = elements.map(el => el.id);
+    const group: IElementGroup = elements[0].group;
+    elements = ElementUtils.flatElementsWithDeepSubs(elements);
     const headNode: ILinkedNode<IElement> = elements[0].node;
     let targetNode: ILinkedNode<IElement> | null = headNode.prev;
-    if (targetNode?.value.isGroup) {
-      targetNode = this._getPrevmostElement(targetNode.value as IElementGroup).node;
+    if (!targetNode) return;
+    let groupSubIds: string[] = [];
+    // 判断是否是组合内部子组件移动排序
+    if (isGroupInternal) {
+      const subIds = group.subIds;
+      groupSubIds = LodashUtils.moveArryElementsBefore(subIds, elementIds, targetNode.value.id);
+      if (targetNode.value.isGroup) {
+        targetNode = this._getGroupFirstDeepSubNode(targetNode);
+      }
+    } else if (targetNode?.value.isGroup) {
+      // 如果目标节点是组合，那么应该将目标节点替换为最顶层的组合节点
+      targetNode = this._getGroupFirstDeepSubNode(targetNode);
     }
+    this._moveElememntsBeforeTarget(elements, targetNode);
+    if (isGroupInternal) {
+      this.updateElementModel(group.id, { subIds: groupSubIds });
+    }
+  }
+
+  /**
+   * 移动组件到目标节点之前
+   *
+   * @param elements 要移动层级的组件集合
+   * @param targetNode 目标节点
+   */
+  private _moveElememntsBeforeTarget(elements: IElement[], targetNode: ILinkedNode<IElement> | null): void {
     const removedNodes = this._removeNodesByElements(elements);
     if (targetNode) {
       removedNodes.forEach(node => {
@@ -2656,6 +2706,64 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 重新整理组件的顺序
+   *
+   * @param elements 要重新整理的组件集合
+   * @param executeFunction 执行组件重新整理的函数
+   * @param layerChangeBefore 在执行操作前的回调函数
+   * @param layerChangeAfter 在执行操作后的回调函数
+   */
+  private async _doElementsLayerChange(
+    elements: IElement[],
+    executeFunction: ElementsLayerExecuteFunction,
+    layerChangeBefore: LayerChangeCallback,
+    layerChangeAfter: LayerChangeCallback,
+  ): Promise<void> {
+    const groupElements = this._divideElementsByGroup(elements);
+    const noGroupElements: IElement[] = [];
+    await Promise.all(
+      groupElements.map(partElements => {
+        return new Promise<void>(async resolve => {
+          if (isArray(partElements)) {
+            // 获取组件所属的组合
+            const group = partElements[0].group;
+            // 如果组合内子组件全部调整顺序相当于没有调整顺序，无意义的操作
+            if (partElements.length === group.model.subIds.length) return resolve();
+            // 组合更新参数
+            const actionParams: LayerActionParam[] = [
+              {
+                type: LayerChangedType.LayerChanged,
+                data: partElements,
+              },
+              {
+                type: LayerChangedType.GroupUpdated,
+                data: [group],
+              },
+            ];
+            await layerChangeBefore(actionParams);
+            executeFunction(partElements, true);
+            await layerChangeAfter(actionParams);
+          } else {
+            noGroupElements.push(partElements);
+          }
+          resolve();
+        });
+      }),
+    );
+    if (noGroupElements.length) {
+      const actionParams: LayerActionParam[] = [
+        {
+          type: LayerChangedType.LayerChanged,
+          data: noGroupElements,
+        },
+      ];
+      await layerChangeBefore(actionParams);
+      executeFunction(noGroupElements, false);
+      await layerChangeAfter(actionParams);
+    }
+  }
+
+  /**
    * 组件下移
    *
    * @param elements 要移动层级的组件集合
@@ -2664,7 +2772,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsGoDown(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
     if (elements.length === 0) return;
-    this._doElementsGoDown(elements);
+    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsGoDownIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
@@ -2688,9 +2796,11 @@ export default class StageStore implements IStageStore {
    * 将给定的组件按照组合进行分组
    *
    * @param elements
+   * @param forceGroup
    */
-  private _divideElementsByGroup(elements: IElement[]): GroupedElements {
+  private _divideElementsByGroup(elements: IElement[], forceGroup: boolean = false): GroupedElements {
     const result: GroupedElements = [];
+    const noGroupElements: IElement[] = [];
     elements.forEach(element => {
       if (element.isGroupSubject) {
         const tail = this._getTailOfDividedGroupElements(result);
@@ -2700,35 +2810,24 @@ export default class StageStore implements IStageStore {
           result.push([element]);
         }
       } else {
-        result.push(element);
+        if (forceGroup) {
+          noGroupElements.push(element);
+        } else {
+          result.push(element);
+        }
       }
     });
+    if (forceGroup) return [...result, noGroupElements];
     return result;
   }
 
   /**
-   * 将给定的组件在所属组合的内部提升层级
+   * 将给定的组件移动到目标组件之后，或者移动到链表末尾
    *
-   * 注意组件没有变化，变化的是组件所属链表节点在链表中的位置
-   *
-   * @param elements
-   * @param isGroupInternal 是否是组合内部提升
+   * @param elements 给定的组件集合
+   * @param targetNode 目标组件的链表节点
    */
-  private _doGroupInternalShiftMoveIfy(elements: IElement[], isGroupInternal: boolean = false): void {
-    elements = ElementUtils.flatElementsWithDeepSubs(elements);
-    // 待调整顺序组件集合的末尾节点
-    const tailNode: ILinkedNode<IElement> = elements[elements.length - 1].node;
-    // 因为是上移，所以目标节点是尾节点的下一个节点
-    let targetNode: ILinkedNode<IElement> | null = tailNode.next;
-    // 组合节点
-    let group: IElementGroup;
-    // 判断是否是组合内部子组件移动排序
-    if (isGroupInternal) {
-      group = tailNode.next?.value.group;
-    } else if (targetNode?.value.isGroupSubject) {
-      // 如果目标节点是子组件，那么应该将目标节点替换为最顶层的组合节点
-      targetNode = targetNode.value.ancestorGroup.node;
-    }
+  private _moveElementsAfterTarget(elements: IElement[], targetNode: ILinkedNode<IElement> | null): void {
     // 先将要排序的组件从链表中移除
     const removedNodes = this._removeNodesByElements(elements);
     // 判断是否存在目标节点
@@ -2745,64 +2844,50 @@ export default class StageStore implements IStageStore {
         this._elementList.insert(node, false);
       });
     }
-    // 如果是组合内部子组件调整顺序
-    if (group) {
-      // 更新组合子组件的顺序
-      this.updateElementModel(group.id, {
-        subIds: this.getOrderedElementIds(group.subIds),
-      });
-    }
   }
 
   /**
-   * 执行元件的Shift移动操作
-
-   * @param elements 要移动的元件集合
-   * @param layerChangeBefore 在执行操作前的回调函数
-   * @param layerChangeAfter 在执行操作后的回调函数
+   * 将给定的组件在所属组合的内部提升层级
+   *
+   * 注意组件没有变化，变化的是组件所属链表节点在链表中的位置
+   *
+   * @param elements
+   * @param isGroupInternal 是否是组合内部提升
    */
-  private async _doElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
-    const groupElements = this._divideElementsByGroup(elements);
-    const noGroupElements: IElement[] = [];
-    await Promise.all(
-      groupElements.map(partElements => {
-        return new Promise<void>(async resolve => {
-          if (isArray(partElements)) {
-            // 获取组件所属的组合
-            const group = partElements[0].group;
-            // 如果组合内子组件全部调整顺序相当于没有调整顺序，无意义的操作
-            if (partElements.length === group.model.subIds.length) return resolve();
-            // 组合更新参数
-            const actionParams: LayerActionParam[] = [
-              {
-                type: LayerChangedType.LayerChanged,
-                data: partElements,
-              },
-              {
-                type: LayerChangedType.GroupUpdated,
-                data: [group],
-              },
-            ];
-            await layerChangeBefore(actionParams);
-            this._doGroupInternalShiftMoveIfy(partElements, true);
-            await layerChangeAfter(actionParams);
-          } else {
-            noGroupElements.push(partElements);
-          }
-          resolve();
-        });
-      }),
-    );
-    if (noGroupElements.length) {
-      const actionParams: LayerActionParam[] = [
-        {
-          type: LayerChangedType.LayerChanged,
-          data: noGroupElements,
-        },
-      ];
-      await layerChangeBefore(actionParams);
-      this._doGroupInternalShiftMoveIfy(noGroupElements, false);
-      await layerChangeAfter(actionParams);
+  private _doElementsShiftMoveIfy(elements: IElement[], isGroupInternal: boolean = false): void {
+    const elementIds = elements.map(el => el.id);
+    const group = elements[0].group;
+    elements = ElementUtils.flatElementsWithDeepSubs(elements);
+    // 待调整顺序组件集合的末尾节点
+    const tailNode: ILinkedNode<IElement> = elements[elements.length - 1].node;
+    // 因为是上移，所以目标节点是尾节点的下一个节点
+    let targetNode: ILinkedNode<IElement> | null = tailNode.next;
+    let groupSubIds: string[] = [];
+    // 判断是否是组合内部子组件移动排序
+    if (isGroupInternal) {
+      const subIds = group.subIds;
+      // 因为多个子组件在组合内部是不连续的，且tailNode可能是组合中最后一个子组件，所以，需要倒序查找第一个不在给定子组件集合中的子组件作为插入目标节点
+      for (let i = subIds.length - 1; i >= 0; i--) {
+        const targetIndex = elementIds.findIndex(id => id === subIds[i]);
+        if (targetIndex === -1) {
+          const targetId = subIds[i];
+          targetNode = this._elementsMap.get(targetId)?.node;
+          groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetId);
+          break;
+        }
+      }
+      // 如果要插入的目标节点是当前组合，表示数据出现异常，终止节点移动
+      if (targetNode && targetNode.value === group) {
+        console.log(`组合内部子组件向上移动排序时，目标节点是当前组合，表示数据出现异常，终止节点移动, 组合id: ${group.id}, 需要向上移动的子组件集合: ${elements.map(el => el.id).join(", ")}`);
+        return;
+      }
+    } else if (targetNode?.value.isGroupSubject) {
+      // 如果目标节点是子组件，那么应该将目标节点替换为最顶层的组合节点
+      targetNode = targetNode.value.ancestorGroup.node;
+    }
+    this._moveElementsAfterTarget(elements, targetNode);
+    if (isGroupInternal) {
+      this.updateElementModel(group.id, { subIds: groupSubIds });
     }
   }
 
@@ -2815,7 +2900,7 @@ export default class StageStore implements IStageStore {
    */
   async setElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
     if (elements.length === 0) return;
-    await this._doElementsShiftMove(elements, layerChangeBefore, layerChangeAfter);
+    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsShiftMoveIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
