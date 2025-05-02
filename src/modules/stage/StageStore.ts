@@ -2670,10 +2670,26 @@ export default class StageStore implements IStageStore {
     let groupSubIds: string[] = [];
     // 判断是否是组合内部子组件移动排序
     if (isGroupInternal) {
+      let targetId: string;
       const subIds = group.subIds;
-      groupSubIds = LodashUtils.moveArryElementsBefore(subIds, elementIds, targetNode.value.id);
-      if (targetNode.value.isGroup) {
-        targetNode = this._getGroupFirstDeepSubNode(targetNode);
+      const isHeadInGroup = subIds[0] === headNode.value.id;
+      if (isHeadInGroup) {
+        for (let i = 0; i < subIds.length; i++) {
+          if (!elementIds.includes(subIds[i])) {
+            targetId = subIds[i];
+            break;
+          }
+        }
+      } else {
+        const headIndex = subIds.findIndex(id => id === headNode.value.id);
+        targetId = subIds[headIndex - 1];
+      }
+      if (targetId) {
+        targetNode = this._elementsMap.get(targetId)?.node;
+        groupSubIds = LodashUtils.moveArryElementsBefore(subIds, elementIds, targetId);
+        if (targetNode && targetNode.value.isGroup) {
+          targetNode = this._getGroupFirstDeepSubNode(targetNode);
+        }
       }
     } else if (targetNode?.value.isGroup) {
       // 如果目标节点是组合，那么应该将目标节点替换为最顶层的组合节点
@@ -2864,6 +2880,7 @@ export default class StageStore implements IStageStore {
     let groupSubIds: string[] = [];
     // 判断是否是组合内部子组件移动排序
     if (isGroupInternal) {
+      let targetId: string;
       const subIds = group.subIds;
       const isTailInGroup = subIds[subIds.length - 1] === tailNode.value.id;
       if (isTailInGroup) {
@@ -2871,27 +2888,32 @@ export default class StageStore implements IStageStore {
         for (let i = subIds.length - 1; i >= 0; i--) {
           const targetIndex = elementIds.findIndex(id => id === subIds[i]);
           if (targetIndex === -1) {
-            const targetId = subIds[i];
-            targetNode = this._elementsMap.get(targetId)?.node;
-            groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetId);
+            targetId = subIds[i];
             break;
           }
         }
       } else {
-        groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetNode.value.id);
+        const tailIndex = subIds.findIndex(id => id === tailNode.value.id);
+        targetId = subIds[tailIndex + 1];
       }
-      // 如果要插入的目标节点是当前组合，表示数据出现异常，终止节点移动
-      if (targetNode && targetNode.value === group) {
-        console.log(`组合内部子组件向上移动排序时，目标节点是当前组合，表示数据出现异常，终止节点移动, 组合id: ${group.id}, 需要向上移动的子组件集合: ${elements.map(el => el.id).join(", ")}`);
-        return;
+      if (targetId) {
+        targetNode = this._elementsMap.get(targetId)?.node;
+        groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetId);
+        // 如果要插入的目标节点是当前组合，表示数据出现异常，终止节点移动
+        if (targetNode && targetNode.value === group) {
+          console.log(`组合内部子组件向上移动排序时，目标节点是当前组合，表示数据出现异常，终止节点移动, 组合id: ${group.id}, 需要向上移动的子组件集合: ${elements.map(el => el.id).join(", ")}`);
+          return;
+        }
       }
     } else if (targetNode?.value.isGroupSubject) {
       // 如果目标节点是子组件，那么应该将目标节点替换为最顶层的组合节点
       targetNode = targetNode.value.ancestorGroup.node;
     }
-    this._moveElementsAfterTarget(elements, targetNode);
-    if (isGroupInternal) {
-      this.updateElementModel(group.id, { subIds: groupSubIds });
+    if (targetNode) {
+      this._moveElementsAfterTarget(elements, targetNode);
+      if (isGroupInternal) {
+        this.updateElementModel(group.id, { subIds: groupSubIds });
+      }
     }
   }
 
