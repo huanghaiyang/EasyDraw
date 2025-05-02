@@ -631,7 +631,7 @@ export default class StageStore implements IStageStore {
         tree.unshift(treeNode);
         this._treeNodesMap.set(id, treeNode);
         if (isGroup) {
-          const subTreeNodes = this._preserveGroupSubs(node, []);
+          const subTreeNodes = this._findGroupSubs(node, []);
           treeNode.children = subTreeNodes;
         }
       }
@@ -675,7 +675,7 @@ export default class StageStore implements IStageStore {
           result.push(treeNode);
           this._treeNodesMap.set(prevId, treeNode);
           if (prevIsGroup) {
-            this._preserveGroupSubs(prevNode, treeNode.children);
+            this._findGroupSubs(prevNode, treeNode.children);
           }
           findedSubs.add(prevId);
         }
@@ -724,7 +724,7 @@ export default class StageStore implements IStageStore {
           result.push(treeNode);
           this._treeNodesMap.set(nextId, treeNode);
           if (nextIsGroup) {
-            this._preserveGroupSubs(nextNode, treeNode.children);
+            this._findGroupSubs(nextNode, treeNode.children);
           }
         }
         findedSubs.add(nextId);
@@ -744,7 +744,7 @@ export default class StageStore implements IStageStore {
    * @param result
    * @returns
    */
-  private _preserveGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
+  private _findGroupSubs(node: ILinkedNode<IElement>, result: ElementTreeNode[]): ElementTreeNode[] {
     const {
       value: {
         isGroup,
@@ -2865,15 +2865,20 @@ export default class StageStore implements IStageStore {
     // 判断是否是组合内部子组件移动排序
     if (isGroupInternal) {
       const subIds = group.subIds;
-      // 因为多个子组件在组合内部是不连续的，且tailNode可能是组合中最后一个子组件，所以，需要倒序查找第一个不在给定子组件集合中的子组件作为插入目标节点
-      for (let i = subIds.length - 1; i >= 0; i--) {
-        const targetIndex = elementIds.findIndex(id => id === subIds[i]);
-        if (targetIndex === -1) {
-          const targetId = subIds[i];
-          targetNode = this._elementsMap.get(targetId)?.node;
-          groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetId);
-          break;
+      const isTailInGroup = subIds[subIds.length - 1] === tailNode.value.id;
+      if (isTailInGroup) {
+        // 因为多个子组件在组合内部是不连续的，且tailNode可能是组合中最后一个子组件，所以，需要倒序查找第一个不在给定子组件集合中的子组件作为插入目标节点
+        for (let i = subIds.length - 1; i >= 0; i--) {
+          const targetIndex = elementIds.findIndex(id => id === subIds[i]);
+          if (targetIndex === -1) {
+            const targetId = subIds[i];
+            targetNode = this._elementsMap.get(targetId)?.node;
+            groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetId);
+            break;
+          }
         }
+      } else {
+        groupSubIds = LodashUtils.moveArrayElementsAfter(subIds, elementIds, targetNode.value.id);
       }
       // 如果要插入的目标节点是当前组合，表示数据出现异常，终止节点移动
       if (targetNode && targetNode.value === group) {

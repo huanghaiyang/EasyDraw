@@ -38,7 +38,7 @@ export default class ElementGroup extends Element implements IElementGroup {
 
   get firstDeeoSub(): IElement {
     let result = this.firstSub;
-    while (result.isGroup) {
+    while (result && result.isGroup) {
       result = (result as IElementGroup).firstSub;
     }
     return result;
