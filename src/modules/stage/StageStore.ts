@@ -386,7 +386,7 @@ export default class StageStore implements IStageStore {
   private _shouldLayerChange(groupElements: GroupedElements, propKey: string, tail: boolean = true): boolean {
     return groupElements.some(partElements => {
       partElements = partElements as IElement[];
-      if (ElementList.isConsecutive(partElements.map(element => element.node))) {
+      if (partElements.length && ElementList.isConsecutive(partElements.map(element => element.node))) {
         return !partElements[tail ? partElements.length - 1 : 0][propKey];
       }
       return partElements.some(element => !element[propKey]);
@@ -401,7 +401,6 @@ export default class StageStore implements IStageStore {
     let goDownEnable: boolean = false;
     if (this._selectedElements.length) {
       const groupElements = this._divideElementsByGroup(this.selectedElements, true);
-      groupElements;
       shifMoveEnable = this._shouldLayerChange(groupElements, "isTopmost", true);
       goDownEnable = this._shouldLayerChange(groupElements, "isBottommost", false);
     }
