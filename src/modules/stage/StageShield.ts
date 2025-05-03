@@ -2273,16 +2273,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handleSelectGroup(): Promise<void> {
     if (this.isElementsBusy) return;
     if (this.store.isSelectedEmpty) return;
-    const command = await CommandHelper.createGroupAddedCommand(
+    const command = await CommandHelper.createGroupAddedCommandBy(
       this.store.selectedElements,
       (): { group: IElementGroup; elements: IElement[] } => {
-        const group = this.store.selectToGroup();
-        this.store.selectGroup(group);
-        return { group, elements: this.store.selectedElements };
+        const group = this.store.createGroup(this.store.selectedElements);
+        if (group) {
+          this.store.selectGroup(group);
+          return { group, elements: this.store.selectedElements };
+        }
       },
       this.store,
     );
-    this.undoRedo.add(command);
+    if (command) {
+      this.undoRedo.add(command);
+    }
   }
 
   /**
@@ -2292,7 +2296,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.isElementsBusy) return;
     const groups = this.store.getSelectedAncestorElementGroups();
     if (groups.length === 0) return;
-    const command = await CommandHelper.createGroupRemovedCommand(groups, this.store);
+    const command = await CommandHelper.createGroupRemovedCommandBy(groups, this.store);
     this.undoRedo.add(command);
     this.store.cancelGroups(groups);
     groups.forEach(group => {

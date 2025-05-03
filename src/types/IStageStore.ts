@@ -175,7 +175,7 @@ export default interface IStageStore extends IStageSetter {
   // 删除组合
   removeElementGroup(group: IElementGroup): void;
   // 将选中的组件转换为组合
-  selectToGroup(): IElementGroup;
+  createGroup(elements: IElement[]): IElementGroup;
   // 取消组合
   cancelGroups(groups: IElementGroup[]): void;
   // 获取选中的根组合

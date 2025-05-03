@@ -225,6 +225,27 @@ export default class CommandHelper {
   }
 
   /**
+   * 创建组件组合添加命令
+   *
+   * @param uDataList 组件数据
+   * @param rDataList 组件数据
+   * @param store 画板
+   * @returns
+   */
+  static createGroupAddedCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
+    const command = new GroupAddedCommand(
+      nanoid(),
+      {
+        type: ElementCommandTypes.GroupAdded,
+        uDataList,
+        rDataList,
+      },
+      store,
+    );
+    return command;
+  }
+
+  /**
    * 组合创建命令
    *
    * @param elements 组件列表
@@ -232,28 +253,37 @@ export default class CommandHelper {
    * @param store 画板
    * @returns
    */
-  static async createGroupAddedCommand(elements: IElement[], groupAddFunction: () => { group: IElementGroup; elements: IElement[] }, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
+  static async createGroupAddedCommandBy(elements: IElement[], groupAddFunction: () => { group: IElementGroup; elements: IElement[] }, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
     const uDataList: Array<IGroupCommandElementObject> = await Promise.all(
       elements.map(async element => ({ model: { id: element.id }, isGroupSubject: !element.isGroupSubject, ...CommandHelper.createRearrangeModel(element) })),
     );
-    const { group, elements: newElements } = groupAddFunction();
+    const { group, elements: newElements } = groupAddFunction() || {};
     if (group) {
       uDataList.push({
         model: { id: group.id },
         isGroup: true,
       } as IGroupCommandElementObject);
       const rDataList = await CommandHelper.createGroupAddedDataList(group, newElements);
-      const command = new GroupAddedCommand(
-        nanoid(),
-        {
-          type: ElementCommandTypes.GroupAdded,
-          uDataList,
-          rDataList,
-        },
-        store,
-      );
-      return command;
+      return CommandHelper.createGroupAddedCommand(uDataList, rDataList, store);
     }
+  }
+
+  /**
+   * 创建组件组合移除命令
+   *
+   * @param elements 组件列表
+   * @param store 画板
+   */
+  static createGroupRemovedCommand(uDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
+    const command = new GroupRemovedCommand(
+      nanoid(),
+      {
+        type: ElementCommandTypes.GroupRemoved,
+        uDataList,
+      },
+      store,
+    );
+    return command;
   }
 
   /**
@@ -261,7 +291,7 @@ export default class CommandHelper {
    *
    * @param groups 组合列表
    */
-  static async createGroupRemovedCommand(groups: IElementGroup[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
+  static async createGroupRemovedCommandBy(groups: IElementGroup[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
     const uDataList: Array<IGroupCommandElementObject> = [];
     await Promise.all(
       groups.map(async group => {
@@ -278,15 +308,7 @@ export default class CommandHelper {
         });
       }),
     );
-    const command = new GroupRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.GroupRemoved,
-        uDataList,
-      },
-      store,
-    );
-    return command;
+    return CommandHelper.createGroupRemovedCommand(uDataList, store);
   }
 
   /**

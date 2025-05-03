@@ -2497,9 +2497,10 @@ export default class StageStore implements IStageStore {
 
   /**
    * 将选中的组件转换为组合
+   * 
+   * @param elements
    */
-  selectToGroup(): IElementGroup {
-    const elements = this.selectedElements;
+  createGroup(elements: IElement[]): IElementGroup {
     if (elements.length < 2) {
       return null;
     }
