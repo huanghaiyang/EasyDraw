@@ -1,27 +1,18 @@
 import ICommand, {
-  DetachedRemovedType,
+  ElementActionTypes,
   ElementCommandTypes,
-  ICommandElementObject,
-  IDetachedRemovedCommandElementObject,
+  ElementsActionParam,
   IElementCommandPayload,
-  IGroupCommandElementObject,
-  INodeRelation,
-  IRearrangeCommandElementObject,
-  LayerChangedType,
+  IRelationNode,
+  ICommandElementObject,
 } from "@/types/ICommand";
 import IElement, { ElementObject } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import LodashUtils from "@/utils/LodashUtils";
-import ElementsRearrangeCommand from "@/modules/command/ElementsRearrangeCommand";
-import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import { IElementGroup } from "@/types/IElementGroup";
-import GroupRemovedCommand from "@/modules/command/GroupRemovedCommand";
 import { nanoid } from "nanoid";
-import GroupAddedCommand from "@/modules/command/GroupAddedCommand";
-import ElementsRemovedCommand from "@/modules/command/ElementsRemovedCommand";
-import DetachedElementsRemovedCommand from "@/modules/command/DetachedElementsRemovedCommand";
-import { LayerActionParam } from "@/types/IStageSetter";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
+import ElementsChangedCommand from "@/modules/command/ElementsChangedCommand";
 
 export default class CommandHelper {
   /**
@@ -73,12 +64,28 @@ export default class CommandHelper {
       const {
         model: { id },
         prevId,
-      } = data as IRearrangeCommandElementObject;
+      } = data;
       const element = store.getElementById(id);
+      const prevElement = prevId ? store.getElementById(prevId) : undefined;
       if (element) {
-        store.moveElementAfter(element, prevId ? store.getElementById(prevId) : null, true);
+        store.moveElementAfter(element, prevElement, true);
       }
     });
+  }
+
+  /**
+   * 还原被删除的组件
+   * 
+   * @param data
+   * @param store 
+   */
+  static restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): void {
+    const { model, prevId } = data;
+    let prevElement: IElement | undefined;
+    if (prevId) {
+      prevElement = store.getElementById(prevId);
+    }
+    store.insertAfterElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
   }
 
   /**
@@ -86,94 +93,11 @@ export default class CommandHelper {
    *
    * @param element
    */
-  static createRearrangeModel(element: IElement): INodeRelation {
+  static createRearrangeModel(element: IElement): IRelationNode {
     return {
       prevId: element.node.prev?.value?.id,
       nextId: element.node.next?.value?.id,
     };
-  }
-
-  /**
-   * 创建组件移除命令
-   *
-   * @param elements
-   * @param store
-   */
-  static createElementsRemovedCommand(uDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
-    const command = new ElementsRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.ElementsRemoved,
-        uDataList,
-      },
-      store,
-    );
-    return command;
-  }
-
-  /**
-   * 创建组件独立组件移除命令
-   *
-   * @param uDataList
-   * @param rDataList
-   * @param store
-   */
-  static createDetachedElementsRemovedCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
-    const command = new DetachedElementsRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.DetachedElementsRemoved,
-        uDataList,
-        rDataList,
-      },
-      store,
-    );
-    return command;
-  }
-
-  /**
-   * 创建重新调整组件位置的命令
-   *
-   * @param elements
-   * @param elementsUpdateFunction
-   * @param store
-   */
-  static async createRearrangeCommand(
-    uDataList: Array<IRearrangeCommandElementObject>,
-    rDataList: Array<IRearrangeCommandElementObject>,
-    store: IStageStore,
-  ): Promise<ICommand<IElementCommandPayload>> {
-    const command = new ElementsRearrangeCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.ElementsRearranged,
-        uDataList,
-        rDataList,
-      },
-      store,
-    );
-    return command;
-  }
-
-  /**
-   * 根据数据创建更新命令
-   *
-   * @param uDataList
-   * @param rDataList
-   * @param store
-   * @param id
-   */
-  static async createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], store: IStageStore, id?: string): Promise<ICommand<IElementCommandPayload>> {
-    const command = new ElementsUpdatedCommand(
-      id || nanoid(),
-      {
-        type: ElementCommandTypes.ElementsUpdated,
-        uDataList,
-        rDataList,
-      },
-      store,
-    );
-    return command;
   }
 
   /**
@@ -185,43 +109,20 @@ export default class CommandHelper {
   static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
     const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson() })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
-    return CommandHelper.createUpdateCommandBy(uDataList, rDataList, store);
+    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsUpdated, store);
   }
 
   /**
-   * 创建组件组合添加数据模型
+   * 根据给定参数创建组件命令
    *
-   * @param group 组合
-   * @param elements 组件
-   * @returns
+   * @param elements
+   * @param type
+   * @param store
    */
-  static async createGroupAddedDataList(group: IElementGroup, elements: IElement[]): Promise<Array<IGroupCommandElementObject>> {
-    const { id: groupId } = group;
-    return await Promise.all(
-      elements.map(async element => {
-        const {
-          id,
-          model: { groupId: eGroupId },
-        } = element;
-        let model: Partial<ElementObject>;
-        const isGroup = groupId === id;
-        // 是当前组合
-        if (isGroup) {
-          model = await element.toJson();
-        } else if (eGroupId === groupId) {
-          // 是当前组合的子组件
-          model = await element.toGroupJson();
-        } else {
-          // 当前组合的孙子组件
-          model = { id };
-        }
-        const result: IGroupCommandElementObject = { model, isGroup, ...CommandHelper.createRearrangeModel(element) };
-        if (eGroupId === groupId) {
-          result.isGroupSubject = true;
-        }
-        return result;
-      }),
-    );
+  static async createCommandByActionParams(actionParams: ElementsActionParam[], type: ElementCommandTypes, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
+    const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
+    const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
+    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, type, store);
   }
 
   /**
@@ -229,14 +130,16 @@ export default class CommandHelper {
    *
    * @param uDataList 组件数据
    * @param rDataList 组件数据
+   * @param type 命令类型
    * @param store 画板
+   * @param id 命令ID
    * @returns
    */
-  static createGroupAddedCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
-    const command = new GroupAddedCommand(
-      nanoid(),
+  static createElementsChangedCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>, type: ElementCommandTypes, store: IStageStore, id?: string): ICommand<IElementCommandPayload> {
+    const command = new ElementsChangedCommand(
+      id || nanoid(),
       {
-        type: ElementCommandTypes.GroupAdded,
+        type,
         uDataList,
         rDataList,
       },
@@ -246,86 +149,74 @@ export default class CommandHelper {
   }
 
   /**
-   * 组合创建命令
-   *
-   * @param elements 组件列表
-   * @param groupAddFunction 组合创建函数
-   * @param store 画板
-   * @returns
-   */
-  static async createGroupAddedCommandBy(elements: IElement[], groupAddFunction: () => { group: IElementGroup; elements: IElement[] }, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
-    const uDataList: Array<IGroupCommandElementObject> = await Promise.all(
-      elements.map(async element => ({ model: { id: element.id }, isGroupSubject: !element.isGroupSubject, ...CommandHelper.createRearrangeModel(element) })),
-    );
-    const { group, elements: newElements } = groupAddFunction() || {};
-    if (group) {
-      uDataList.push({
-        model: { id: group.id },
-        isGroup: true,
-      } as IGroupCommandElementObject);
-      const rDataList = await CommandHelper.createGroupAddedDataList(group, newElements);
-      return CommandHelper.createGroupAddedCommand(uDataList, rDataList, store);
-    }
-  }
-
-  /**
-   * 创建组件组合移除命令
-   *
-   * @param elements 组件列表
-   * @param store 画板
-   */
-  static createGroupRemovedCommand(uDataList: Array<ICommandElementObject>, store: IStageStore): ICommand<IElementCommandPayload> {
-    const command = new GroupRemovedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.GroupRemoved,
-        uDataList,
-      },
-      store,
-    );
-    return command;
-  }
-
-  /**
-   * 创建组件组合取消命令
-   *
-   * @param groups 组合列表
-   */
-  static async createGroupRemovedCommandBy(groups: IElementGroup[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
-    const uDataList: Array<IGroupCommandElementObject> = [];
-    await Promise.all(
-      groups.map(async group => {
-        uDataList.push({
-          model: await group.toJson(),
-          isGroup: true,
-          ...CommandHelper.createRearrangeModel(group),
-        });
-        group.subs.forEach(async sub => {
-          uDataList.push({
-            model: await sub.toGroupJson(),
-            isGroup: false,
-          });
-        });
-      }),
-    );
-    return CommandHelper.createGroupRemovedCommand(uDataList, store);
-  }
-
-  /**
    * 获取祖先组件更新数据
    *
    * @param ancestors
    * @returns
    */
-  static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<IDetachedRemovedCommandElementObject[]> {
+  static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<ICommandElementObject[]> {
     return (await Promise.all(
       ancestors.map(async ancestor => {
         return {
           model: await (ancestor as IElementGroup).toSubUpdatedJson(),
-          type: DetachedRemovedType.GroupUpdated,
+          type: ElementActionTypes.GroupUpdated,
         };
       }),
-    )) as IDetachedRemovedCommandElementObject[];
+    ));
+  }
+
+  /**
+   * 获取组件层级调换数据
+   *
+   * @param elements
+   * @returns
+   */
+  static async getRearrangeDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
+    return Promise.all(
+      elements.map(async element => {
+        return {
+          model: await element.toGroupJson(),
+          type: ElementActionTypes.Moved,
+          ...CommandHelper.createRearrangeModel(element),
+        };
+      }),
+    );
+  }
+
+  /**
+   * 获取组件删除数据
+   *
+   * @param elements
+   * @returns
+   */
+  static async getElementsRemovedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
+    return Promise.all(
+      elements.map(async element => {
+        return {
+          model: await element.toJson(),
+          type: ElementActionTypes.Removed,
+          ...CommandHelper.createRearrangeModel(element),
+        };
+      }),
+    );
+  }
+
+  /**
+   * 获取组件添加数据
+   *
+   * @param elements
+   * @returns
+   */
+  static async getElementsAddedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
+    return Promise.all(
+      elements.map(async element => {
+        return {
+          model: await element.toJson(),
+          type: ElementActionTypes.Added,
+          ...CommandHelper.createRearrangeModel(element),
+        };
+      }),
+    );
   }
 
   /**
@@ -334,24 +225,20 @@ export default class CommandHelper {
    * @param params
    * @returns
    */
-  static async createRearrangeDataList(params: LayerActionParam[]): Promise<Array<IRearrangeCommandElementObject>> {
-    const result: Array<IRearrangeCommandElementObject> = [];
+  static async createRearrangeDataList(params: ElementsActionParam[]): Promise<Array<ICommandElementObject>> {
+    const result: Array<ICommandElementObject> = [];
     await Promise.all(
       params.map(param => {
-        return new Promise<void>(resolve => {
+        return new Promise<void>(async resolve => {
           const { type, data: elements } = param;
           switch (type) {
-            case LayerChangedType.LayerChanged: {
+            case ElementActionTypes.Moved: {
               const flatElements = ElementUtils.flatElementsWithDeepSubs(elements);
-              flatElements.forEach(element => {
-                result.push({ model: { id: element.id }, ...CommandHelper.createRearrangeModel(element), type });
-              });
+              result.push(...(await CommandHelper.getRearrangeDataList(flatElements)));
               break;
             }
-            case LayerChangedType.GroupUpdated: {
-              elements.forEach(async element => {
-                result.push({ model: await (element as IElementGroup).toSubUpdatedJson(), type });
-              });
+            case ElementActionTypes.GroupUpdated: {
+              result.push(...((await CommandHelper.getAncestorsUpdateJson(elements as IElementGroup[]))));
               break;
             }
           }
@@ -363,29 +250,87 @@ export default class CommandHelper {
   }
 
   /**
-   * 还原组件位置
-   *
-   * @param dataList
-   * @param store
+   * 执行撤销操作
+   * 
+   * @param datalist
+   * @param isRedo 
+   * @param store 
+   * @returns
    */
-  static async restoreRearrangeDataList(dataList: Array<IRearrangeCommandElementObject>, store: IStageStore): Promise<void> {
+  static async restoreDataList(datalist: ICommandElementObject[], isRedo: boolean, store: IStageStore): Promise<void> {
     await Promise.all(
-      dataList.map(item => {
+      datalist.map(data => {
         return new Promise<void>(async resolve => {
-          const { type } = item as IRearrangeCommandElementObject;
+          const { model, type } = data;
+          const { id } = model;
           switch (type) {
-            case LayerChangedType.LayerChanged: {
-              await CommandHelper.rearrange([item], store);
+            case ElementActionTypes.Added: {
+              // 对于add命令，如果是redo操作，需要还原插入组件，否则直接删除组件
+              if(isRedo)  {
+                CommandHelper.restoreRemovedElementFromData(data, store);
+              } else {
+                store.removeElementById(id);
+              }
               break;
             }
-            case LayerChangedType.GroupUpdated: {
-              await CommandHelper.restoreElementFromData(item, store);
+            case ElementActionTypes.Updated:
+            case ElementActionTypes.GroupUpdated:  {
+              CommandHelper.restoreElementFromData(data, store);
+              break;
+            }
+            case ElementActionTypes.Removed: {
+              // 对于remove命令，如果是redo操作，需要删除组件，否则还原插入组件
+              if (isRedo) {
+                store.removeElementById(id);
+              } else {
+                CommandHelper.restoreRemovedElementFromData(data, store);
+              }
+              break;
+            }
+            case ElementActionTypes.Moved: {
+              CommandHelper.rearrange([data], store);
+              // 组件移动位置时，可能会改变组件的所属组合，需要更新组件的model
+              store.updateElementModel(id, model);
               break;
             }
           }
           resolve();
-        });
+        })
+      })
+    )
+  }
+
+  /**
+   * 给定组合添加参数，返回处理好撤销数据
+   *
+   * @param params
+   * @returns
+   */
+  static async createDataListByActionParams(params: ElementsActionParam[]): Promise<Array<ICommandElementObject>> {
+    const dataList: Array<ICommandElementObject> = [];
+    await Promise.all(
+      params.map(async param => {
+        const { data, type } = param;
+        switch (type) {
+          case ElementActionTypes.Moved: {
+            dataList.push(...(await CommandHelper.getRearrangeDataList(data)));
+            break;
+          }
+          case ElementActionTypes.Removed: {
+            dataList.push(...(await CommandHelper.getElementsRemovedDataList(data)));
+            break;
+          }
+          case ElementActionTypes.GroupUpdated: {
+            dataList.push(...(await CommandHelper.getAncestorsUpdateJson(data as IElementGroup[])));
+            break;
+          }
+          case ElementActionTypes.Added: {
+            dataList.push(...(await CommandHelper.getElementsAddedDataList(data)));
+            break;
+          }
+        }
       }),
     );
+    return dataList;
   }
 }

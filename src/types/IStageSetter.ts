@@ -1,18 +1,7 @@
 import { IPoint } from "@/types/index";
 import { FontStyler, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
-import { LayerChangedType } from "@/types/ICommand";
-
-// 层级变更，数据操作回调函数参数
-export type LayerActionParam = {
-  type: LayerChangedType;
-  data: IElement[];
-};
-
-// 层级变更，数据回传函数
-export interface LayerChangeCallback {
-  (params: LayerActionParam[]): Promise<void>;
-}
+import { ElementActionCallback } from "@/types/ICommand";
 
 export default interface IStageSetter {
   /**
@@ -306,14 +295,14 @@ export default interface IStageSetter {
    *
    * @param elements 要修改的元件集合
    */
-  setElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void>;
+  setElementsShiftMove(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void>;
 
   /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
    */
-  setElementsGoDown(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void>;
+  setElementsGoDown(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void>;
 
   /**
    * 组件旋转

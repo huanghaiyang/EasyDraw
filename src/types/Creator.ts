@@ -35,6 +35,8 @@ export enum CreatorCategories {
   freedom = "freedom",
   // 文本
   text = "text",
+  // 组合
+  group = "group",
 }
 
 // 创作工具

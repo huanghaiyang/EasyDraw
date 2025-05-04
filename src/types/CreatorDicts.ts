@@ -97,6 +97,14 @@ export const TextCreator: Creator = {
   icon: CreatorIcons.text,
 };
 
+// 组合
+export const GroupCreator: Creator = {
+  type: CreatorTypes.group,
+  name: "组合",
+  category: CreatorCategories.group,
+  icon: CreatorIcons.group,
+}
+
 // 光标工具
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];
 
@@ -107,4 +115,4 @@ export const ShapeCreators: Creator[] = [RectangleCreator, LineRectangleCreator,
 export const FreedomCreators: Creator[] = [PenCreator, PencilCreator];
 
 // 所有工具
-export const Creators: Creator[] = [MoveableCreator, ...CursorCreators, RectangleCreator, ...ShapeCreators, PenCreator, ...FreedomCreators, TextCreator];
+export const Creators: Creator[] = [MoveableCreator, ...CursorCreators, RectangleCreator, ...ShapeCreators, PenCreator, ...FreedomCreators, TextCreator, GroupCreator];

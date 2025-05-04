@@ -501,7 +501,6 @@ export default class ElementUtils {
    * @param elements
    */
   static isSameAncestorGroup(elements: IElement[]): boolean {
-    if (elements.length <= 1) return true;
     return ElementUtils.getAncestorGroup(elements) !== null;
   }
 
@@ -534,7 +533,7 @@ export default class ElementUtils {
         // 倒序遍历，只取最顶层的祖先组件加入到返回结果中
         for (let i = ancestorGroups.length - 1; i >= 0; i--) {
           const ancestorGroup = ancestorGroups[i];
-          if (elementsIds.has(ancestorGroup.id)) {
+          if (ancestorGroup && elementsIds.has(ancestorGroup.id)) {
             resultIds.add(ancestorGroup.id);
             ancestorAdded = true;
             break;
@@ -580,7 +579,7 @@ export default class ElementUtils {
   }
 
   /**
-   * 扁平化分组组件中的子组件
+   * 扁平化组合组件中的子组件
    *
    * @param elements
    * @returns

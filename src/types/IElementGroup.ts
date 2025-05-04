@@ -51,5 +51,5 @@ export interface IElementGroup extends IElement {
   toSubUpdatedJson(): Promise<ElementObject>;
 }
 
-// 按组合分组的子组件集合
+// 按组合组合的子组件集合
 export type GroupedElements = (IElement | IElement[])[];

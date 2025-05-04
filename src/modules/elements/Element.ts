@@ -3,7 +3,7 @@ import { ILinkedNode, ILinkedNodeValue } from "@/modules/struct/LinkedNode";
 import ElementUtils, { CommonJsonKeys } from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
-import { clamp, isNumber, pick, some } from "lodash";
+import { clamp, isNumber, isUndefined, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
 import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
@@ -775,7 +775,7 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否在最顶层，如果是子组件，则判断子组件在所属组合中是否是最顶层
   get isTopmost(): boolean {
-    if (this.isGroupSubject) {
+    if (this.isGroupSubject && this.group) {
       const groupSubIds = this.group.model.subIds;
       return groupSubIds.findIndex(id => id === this.model.id) === groupSubIds.length - 1;
     }
@@ -784,12 +784,12 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   // 是否在最底层，如果是子组件，则判断子组件在所属组合中是否是最底层
   get isBottommost(): boolean {
-    if (this.isGroupSubject) {
+    if (this.isGroupSubject && this.group) {
       const groupSubIds = this.group.model.subIds;
       return groupSubIds.findIndex(id => id === this.model.id) === 0;
     }
     if (this.isGroup) {
-      return (this as unknown as IElementGroup).firstDeeoSub.node.prev === null;
+      return (this as unknown as IElementGroup).firstDeeoSub?.node?.prev === null;
     }
     return this.node.prev === null;
   }
@@ -868,14 +868,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 平移前
    */
   onTranslateBefore(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
    * 平移后
    */
   onTranslateAfter(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
@@ -889,14 +889,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 旋转前
    */
   onRotateBefore(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
    * 旋转后
    */
   onRotateAfter(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
@@ -910,14 +910,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 变换前
    */
   onTransformBefore(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
    * 变换后
    */
   onTransformAfter(): void {
-    this.refreshOriginalProps();
+    this.refreshOriginals();
   }
 
   /**
@@ -1670,7 +1670,7 @@ export default class Element implements IElement, ILinkedNodeValue {
   /**
    * 重新维护原始属性，用于组件的移动、旋转、大小变换
    */
-  refreshOriginalProps(): void {
+  refreshOriginals(): void {
     // 维护原始变换器坐标
     this.refreshOriginalTransformerCoords();
     // 维护原始组件属性
@@ -2128,7 +2128,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     // 刷新外轮廓
     if (options?.outline) this.refreshOutlinePoints();
     // 刷新原始属性
-    if (options?.originals) this.refreshOriginalProps();
+    if (options?.originals) this.refreshOriginals();
   }
 
   /**
@@ -3004,7 +3004,11 @@ export default class Element implements IElement, ILinkedNodeValue {
    * @returns
    */
   async toGroupJson(): Promise<ElementObject> {
-    return JSON.parse(JSON.stringify(pick(this.model, ["id", "groupId"]))) as ElementObject;
+    const result = JSON.parse(JSON.stringify(pick(this.model, ["id", "groupId"]))) as ElementObject;
+    if (isUndefined(result.groupId)) {
+      result.groupId = undefined;
+    }
+    return result;
   }
 
   /**

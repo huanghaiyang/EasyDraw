@@ -14,7 +14,7 @@ self.onmessage = function (event: MessageEvent<MathCalcFunc>) {
   self.postMessage({
     result,
     id,
-    offset: args[args.length - 1]
+    offset: args[args.length - 1],
   });
 };
 

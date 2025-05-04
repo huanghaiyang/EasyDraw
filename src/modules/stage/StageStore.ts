@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isArray, isEqual, pick, throttle } from "lodash";
+import { every, isArray, isBoolean, isEqual, isString, pick, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -29,8 +29,7 @@ import { GroupedElements, IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
-import { LayerChangeCallback, LayerActionParam } from "@/types/IStageSetter";
-import { LayerChangedType } from "@/types/ICommand";
+import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "@/types/ICommand";
 
 /**
  * 调整组件层级
@@ -51,7 +50,18 @@ export default class StageStore implements IStageStore {
   private _currentCreatingElementId: string;
   // 组件对象映射关系，加快查询
   private _elementsMap: Map<string, IElement> = new Map<string, IElement>();
-
+  // 当前组件类别下的最大序列号
+  private _elementSerialNumberMap: Map<CreatorTypes, number> = new Map<CreatorTypes, number>([
+    [CreatorTypes.group, 0],
+    [CreatorTypes.arbitrary, 0],
+    [CreatorTypes.rectangle, 0],
+    [CreatorTypes.text, 0],
+    [CreatorTypes.image, 0],
+    [CreatorTypes.line, 0],
+    [CreatorTypes.polygon, 0],
+    [CreatorTypes.ellipse, 0],
+    [CreatorTypes.pencil, 0],
+  ]);
   // 临时组件
   private _provisionalElements: IElement[] = [];
   // 选中的组件
@@ -115,6 +125,43 @@ export default class StageStore implements IStageStore {
     this._reactionElementsPropsChanged();
     this._reactionElementsSelectionChanged();
     this.throttleRefreshTreeNodes = throttle(this.throttleRefreshTreeNodes.bind(this), 100, { leading: false, trailing: true });
+  }
+
+  // 当前最大组序列号
+  get groupSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.group);
+  }
+
+  get rectSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.rectangle);
+  }
+
+  get textSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.text);
+  }
+
+  get imageSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.image);
+  }
+
+  get lineSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.line);
+  }
+
+  get ellipseSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.ellipse);
+  }
+
+  get polygonSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.polygon);
+  }
+
+  get arbitrarySerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.arbitrary);
+  }
+
+  get pencilSerialNumber(): number {
+    return this._elementSerialNumberMap.get(CreatorTypes.pencil);
   }
 
   get selectedElementIds(): Set<string> {
@@ -256,6 +303,19 @@ export default class StageStore implements IStageStore {
   // 是否多选
   get isMultiSelected(): boolean {
     return this._isMultiSelected;
+  }
+
+  /**
+   * 序号自增
+   * 
+   * @param type 组件类型
+   * @returns 自增后的序号
+   */
+  private _increaseElementSerialNumber(type: CreatorTypes): number {
+    let value = this._elementSerialNumberMap.get(type);
+    value ++;
+    this._elementSerialNumberMap.set(type, value);
+    return value;
   }
 
   /**
@@ -1425,14 +1485,16 @@ export default class StageStore implements IStageStore {
    */
   getOrderedElementsByIds(ids: string[]): IElement[] {
     const result: IElement[] = [];
-    this._elementList.forEachBreak(node => {
-      if (ids.includes(node.value.id)) {
-        result.push(node.value);
-      }
-      if (result.length === ids.length) {
-        return true;
-      }
-    });
+    if (ids.length) {
+      this._elementList.forEachBreak(node => {
+        if (ids.includes(node.value.id)) {
+          result.push(node.value);
+        }
+        if (result.length === ids.length) {
+          return true;
+        }
+      });
+    }
     return result;
   }
 
@@ -1444,14 +1506,16 @@ export default class StageStore implements IStageStore {
    */
   getOrderedElementIds(ids: string[]): string[] {
     const result: string[] = [];
-    this._elementList.forEachBreak(node => {
-      if (ids.includes(node.value.id)) {
-        result.push(node.value.id);
-      }
-      if (result.length === ids.length) {
-        return true;
-      }
-    });
+    if (ids.length) {
+      this._elementList.forEachBreak(node => {
+        if (ids.includes(node.value.id)) {
+          result.push(node.value.id);
+        }
+        if (result.length === ids.length) {
+          return true;
+        }
+      });
+    }
     return result;
   }
 
@@ -1676,9 +1740,11 @@ export default class StageStore implements IStageStore {
    * @param type
    * @param coords
    * @param data
+   * @param serialGen
    * @returns
    */
-  createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData): ElementObject {
+  createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData, serialGen?: boolean): ElementObject {
+    serialGen = isBoolean(serialGen) ? serialGen : true;
     const size: ISize = ElementUtils.calcSize({
       coords,
       boxCoords: CommonUtils.getBoxByPoints(coords),
@@ -1693,7 +1759,7 @@ export default class StageStore implements IStageStore {
       data,
       width: size.width,
       height: size.height,
-      name: CreatorHelper.getCreatorByType(type).name,
+      name: `${CreatorHelper.getCreatorByType(type).name} ${serialGen? this._increaseElementSerialNumber(type): this._elementSerialNumberMap.get(type)}`,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
       ...position,
@@ -1742,7 +1808,7 @@ export default class StageStore implements IStageStore {
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type));
+        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type), null, !isString(this._currentCreatingElementId));
         if (this._currentCreatingElementId) {
           delete model.id;
           element = this.updateElementModel(this._currentCreatingElementId, model);
@@ -1941,7 +2007,7 @@ export default class StageStore implements IStageStore {
    * @param options
    */
   refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-    this._refreshElementsByFunc(elements, element => element.refreshOriginalProps(), options);
+    this._refreshElementsByFunc(elements, element => element.refreshOriginals(), options);
   }
 
   /**
@@ -2030,7 +2096,7 @@ export default class StageStore implements IStageStore {
    */
   isSelectedContainsTarget(): boolean {
     if (this.isTargetEmpty) return false;
-    // 由于mobx对set进行了代理，所以every遍历时值并不是组件id而是代理实例名称，例如‘ObservableSet@2’
+    // 由于mobx对set进行了代理，所以every遍历时值并不是组件id而是代理实例名称，例如'ObservableSet@2'
     return every(Array.from(this._targetElementIds), id => {
       return this._selectedElementIds.has(id as string);
     });
@@ -2144,7 +2210,7 @@ export default class StageStore implements IStageStore {
       boxCoords: CommonUtils.getBoxByPoints(coords),
       type: CreatorTypes.image,
       data: image,
-      name: "图片",
+      name: `${CreatorHelper.getCreatorByType(CreatorTypes.image).name} ${this._increaseElementSerialNumber(CreatorTypes.image)}`,
       width,
       height,
       length: 0,
@@ -2388,8 +2454,6 @@ export default class StageStore implements IStageStore {
    * @param elements
    */
   private _createElementGroupObject(elements: (IElement | IElementGroup)[]): ElementObject {
-    // 过滤掉组合组件
-    elements = elements.filter(element => !element.isGroupSubject);
     // 获取组合组件的子组件id
     const subIds = elements.map(element => element.id);
     // 获取组合组件的坐标
@@ -2399,7 +2463,7 @@ export default class StageStore implements IStageStore {
     // 返回组合组件的数据对象
     return {
       ...ElementUtils.createEmptyGroupObject(),
-      name: "组合",
+      name: `${CreatorHelper.getCreatorByType(CreatorTypes.group).name} ${this._increaseElementSerialNumber(CreatorTypes.group)}`,
       subIds,
       coords,
       boxCoords: CommonUtils.getBoxByPoints(coords),
@@ -2411,54 +2475,32 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 对给定的组件列表进行层级排序
+   * 删除组合
    *
-   * @param elements 组件列表
-   * @returns 排序后的组件列表
+   * @param group
    */
-  private _sortElementsByLevel(elements: IElement[]): IElement[] {
-    return elements.sort((a, b) => {
-      return this.getIndexById(a.id) - this.getIndexById(b.id);
-    });
-  }
-
-  /**
-   * 对给定的组件列表进行层级排序
-   *
-   * @param elements 组件列表
-   * @returns 排序后的组件列表
-   */
-  private _rearrangeForwardElementNodes(elements: IElement[]): IElement[] {
-    let sortedElements = elements;
-    // 如果给定的组件是连续的,则不需要重新排序
-    if (!ElementList.isConsecutive(elements.map(element => element.node))) {
-      sortedElements = this._sortElementsByLevel(elements);
-      // 因为是不连续的，所以需要将给定的组件的层级进行提高，使用层级最高的组件作为提高的基准
-      const levelHighestElement = sortedElements[sortedElements.length - 1];
-      // 先把组件的节点从链表中删除
-      this._removeNodesByElements(sortedElements.slice(0, sortedElements.length - 1));
-      // 再把节点插入到层级最高的组件之前
-      for (let i = 0; i <= sortedElements.length - 2; i++) {
-        this._elementList.insertBefore(sortedElements[i].node, levelHighestElement.node, false);
-      }
+  removeElementGroup(group: IElementGroup): void {
+    if (this.hasElement(group.id)) {
+      // 取消绑定组合组件的子组件
+      this._unbindElementsGroup(group);
+      // 取消选中组合
+      this.deSelectElement(group);
+      // 删除组合组件
+      this.removeElementById(group.id);
     }
-    return sortedElements;
   }
 
   /**
-   * 创建组合
+   * 插入组合
    *
-   * @param elements
+   * @param group
+   * @param targetElement
    */
-  createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup {
-    // 对给定的组件所属的链表节点进行重新排序
-    const sortedElements = this._rearrangeForwardElementNodes(elements);
-    // 创建组合组件
-    const group = new ElementGroup(this._createElementGroupObject(sortedElements), this.shield);
+  private _insertNewGroup(group: IElementGroup, targetElement: IElement): void {
     // 绑定组合组件的子组件
     this._bindElementsGroup(group);
     // 添加组合组件
-    this.addElement(group, sortedElements[sortedElements.length - 1]);
+    this.addElement(group, targetElement);
     // 设置组合组件状态
     this.updateElementById(group.id, {
       status: ElementStatus.finished,
@@ -2466,49 +2508,166 @@ export default class StageStore implements IStageStore {
     });
     // 刷新组合组件
     group.refresh();
-    return group;
-  }
-
-  /**
-   * 删除组合
-   *
-   * @param group
-   */
-  removeElementGroup(group: IElementGroup): void {
-    if (this.hasElementGroup(group.id)) {
-      // 取消绑定组合组件的子组件
-      this._unbindElementsGroup(group);
-      // 取消选中组合
-      this.deSelectGroup(group);
-      // 删除组合组件
-      this.removeElementById(group.id);
-    }
-  }
-
-  /**
-   * 判断组合是否存在
-   *
-   * @param id
-   * @returns
-   */
-  hasElementGroup(id: string): boolean {
-    return this.hasElement(id);
   }
 
   /**
    * 将选中的组件转换为组合
    * 
+   * 处理组件的流程如下：
+   * 
+   * 1. 将被选中的组件移动到被选中的层级最高的组件之前
+   * 2. 查找需要删除和更新的组合
+   * 3. 在层级最高的组件后插入新的组合
+   * 4. 删除或者更新需要删除和更新的组合
+   *
    * @param elements
    */
-  createGroup(elements: IElement[]): IElementGroup {
-    if (elements.length < 2) {
-      return null;
+  async createElementGroup(elements: IElement[], actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElementGroup> {
+    if (elements.length < 1) return;
+    // 组合id集合
+    const elementIds: string[] = elements.map(element => element.id);
+    // 对给定的组件所属的链表节点进行重新排序
+    const sortedElements = this.sortElements(elements);
+    // 找到给定组件的层级最高的组件，我们将要把组合组件插入到这个组件之后
+    const targetElement = sortedElements[sortedElements.length - 1];
+    // 目标组件所属的组合
+    const targetElementGroup = targetElement.group;
+    // 目标组件所属的组合的祖先组件
+    const targetElementGroupAncestors = targetElementGroup?.ancestorGroups;
+    // 目标组件在目标组件所属的组合中的索引
+    let targetIndexOfGroupSubs = -1;
+    // 计算目标组件在目标组件所属的组合中的索引
+    targetIndexOfGroupSubs = targetElementGroup?.model.subIds.indexOf(targetElement.id);
+    // 需要删除或者更新的组合
+    const groupIdSet: Set<string> = new Set();
+    // 需要删除的组合id集合，用于后续删除组合
+    const removedGroupIdSet: Set<string> = new Set();
+    // 需要更新的组合id集合，用于后续更新组合
+    const updatedGroupIdSet: Set<string> = new Set();
+    // 当前给定组件中的非子组件id集合
+    const nonSubIdSet: Set<string> = new Set();
+    // 组合添加之前的回调函数的参数
+    const actionParams: ElementsActionParam[] = [];
+    // 找到需要删除或者更新的组合
+    elements.forEach(element => {
+      if (element.isGroupSubject) {
+        if (!element.group.isSelected) {
+          groupIdSet.add(element.model.groupId);
+          nonSubIdSet.add(element.id);
+        }
+      } else {
+        nonSubIdSet.add(element.id);
+      }
+      // 标记需要移动位置的组件
+      actionParams.push({
+        type: ElementActionTypes.Moved,
+        data: [element],
+      });
+    });
+    // 获取排序后的组合集合
+    const groups: IElement[] = this.getOrderedElementsByIds(Array.from(groupIdSet));
+    // 顶层组合集合
+    const nonSubElements: IElement[] = this.getOrderedElementsByIds(Array.from(nonSubIdSet));
+
+    /**
+     * 判断是否需要删除组合
+     *
+     * @param group
+     * @returns
+     */
+    function groupShouldRemove(group: IElementGroup): boolean {
+      const subIds = group.model.subIds;
+      // 如果组合内的所有子组件都在给定的组件集合内，则需要删除组合
+      return subIds.every(id => elementIds.includes(id) || subIds.every(id => removedGroupIdSet.has(id))) && group.id !== targetElementGroup?.id && !targetElementGroupAncestors?.includes(group);
     }
-    const isSameGroup = ElementUtils.isSameAncestorGroup(elements);
-    if (isSameGroup) {
-      return null;
+
+    // 找到需要删除或者更新的组合
+    groups.forEach(group => {
+      // 如果组合内的所有子组件都在给定的组件集合内，则需要删除组合
+      if (groupShouldRemove(group as IElementGroup)) {
+        removedGroupIdSet.add(group.id);
+      } else {
+        updatedGroupIdSet.add(group.id);
+      }
+      // 找到组合的祖先组件，判断是否需要删除或者更新
+      let ancestor = group.group;
+      while (ancestor) {
+        if (groupShouldRemove(ancestor)) {
+          removedGroupIdSet.add(ancestor.id);
+        } else {
+          updatedGroupIdSet.add(ancestor.id);
+        }
+        ancestor = ancestor.group;
+      }
+    });
+
+    // 获取需要删除的组合
+    const removedGroups = this.getOrderedElementsByIds(Array.from(removedGroupIdSet));
+    removedGroups.forEach(group => {
+      actionParams.push({
+        type: ElementActionTypes.Removed,
+        data: [group],
+      });
+    });
+    // 获取需要更新的组合
+    const updatedGroups = this.getOrderedElementsByIds(Array.from([...updatedGroupIdSet, ...(targetElementGroupAncestors?.map(group => group.id).flat() || [])]));
+    updatedGroups.forEach(group => {
+      actionParams.push({
+        type: ElementActionTypes.GroupUpdated,
+        data: [group],
+      });
+    });
+    await actionUndoCallback(actionParams);
+    // 创建组合组件
+    const group = new ElementGroup(this._createElementGroupObject(nonSubElements), this.shield);
+    // 将前n-1个组件从链表中删除
+    const removeNodes = this._removeNodesByElements(elements.slice(0, elements.length - 1));
+    // 将removeNodes移动到targetElement之前
+    removeNodes.forEach(node => {
+      // 插入到targetElement之前
+      this._elementList.insertBefore(node, targetElement.node, false);
+      // 这里只更新非子组件的groupId
+      if (nonSubIdSet.has(node.value.id)) {
+        // 更新组件的groupId
+        this.updateElementModel(node.value.id, { groupId: group.id });
+      }
+    });
+    // 如果目标组合存在，则需要维护目标组合与新建组合的父子关系
+    if (targetElementGroup) {
+      // 原始的目标组合的子组件id集合
+      const subIds = [...targetElementGroup.model.subIds];
+      // 将目标组件id替换为新建组合的id
+      subIds.splice(targetIndexOfGroupSubs, 1, group.id);
+      // 更新目标组合的子组件id集合
+      this.updateElementModel(targetElementGroup.id, { subIds });
+      // 更新新建组合的groupId
+      group.model.groupId = targetElementGroup.id;
     }
-    return this.createElementGroup(elements);
+    // 将新建组合插入到targetElement之后
+    this._insertNewGroup(group, targetElement);
+    const groupAddedParams: ElementsActionParam = 
+    {
+      type: ElementActionTypes.Added,
+      data: [group],
+    }
+    await actionUndoCallback([groupAddedParams]);
+    // 组合添加之前的回调函数的参数
+    actionParams.push(groupAddedParams);
+    // 移除需要删除的组合
+    removedGroups.forEach(group => {
+      this.removeElement(group);
+    });
+    // 更新需要更新的组合
+    updatedGroups.forEach(group => {
+      // 计算组合的子组件id集合
+      const subIds = group.model.subIds.filter(id => !elementIds.includes(id) && !removedGroupIdSet.has(id));
+      // 更新组合的子组件id集合
+      this.updateElementModel(group.id, { subIds });
+      // 因为组合内的子组件发生变化，需要刷新组合的尺寸和位置
+      (group as IElementGroup).refreshBySubs();
+      group.refreshOriginals();
+    });
+    await actionRedoCallback(actionParams);
   }
 
   /**
@@ -2535,32 +2694,14 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 选中组合
+   * 对给定的组件列表进行排序
    *
-   * @param group
+   * @param elements 组件列表
+   * @returns 排序后的组件列表
    */
-  selectGroup(group: IElementGroup): void {
-    this.updateElementById(group.id, { isSelected: true });
-  }
-
-  /**
-   * 取消选中组合
-   *
-   * @param group
-   */
-  deSelectGroup(group: IElementGroup): void {
-    this.updateElementById(group.id, { isSelected: false });
-  }
-
-  /**
-   * 取消选中组合
-   *
-   * @param groups
-   */
-  deSelectGroups(groups: IElementGroup[]): void {
-    groups.forEach(group => {
-      this.deSelectGroup(group);
-    });
+  sortElements(elements: IElement[]): IElement[] {
+    const ids = elements.map(element => element.id);
+    return this.getElementsByIds(ids);
   }
 
   /**
@@ -2580,6 +2721,7 @@ export default class StageStore implements IStageStore {
     const models = ElementUtils.convertElementsJson(elementsJson);
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
+      model.name = `${CreatorHelper.getCreatorByType(model.type).name} ${this._increaseElementSerialNumber(model.type)}`;
       const element = this.insertAfterElementByModel(model);
       result.push(element);
     }
@@ -2732,8 +2874,8 @@ export default class StageStore implements IStageStore {
   private async _doElementsLayerChange(
     elements: IElement[],
     executeFunction: ElementsLayerExecuteFunction,
-    layerChangeBefore: LayerChangeCallback,
-    layerChangeAfter: LayerChangeCallback,
+    layerChangeBefore: ElementActionCallback,
+    layerChangeAfter: ElementActionCallback,
   ): Promise<void> {
     const groupElements = this._divideElementsByGroup(elements);
     const noGroupElements: IElement[] = [];
@@ -2746,13 +2888,13 @@ export default class StageStore implements IStageStore {
             // 如果组合内子组件全部调整顺序相当于没有调整顺序，无意义的操作
             if (partElements.length === group.model.subIds.length) return resolve();
             // 组合更新参数
-            const actionParams: LayerActionParam[] = [
+            const actionParams: ElementsActionParam[] = [
               {
-                type: LayerChangedType.LayerChanged,
+                type: ElementActionTypes.Moved,
                 data: partElements,
               },
               {
-                type: LayerChangedType.GroupUpdated,
+                type: ElementActionTypes.GroupUpdated,
                 data: [group],
               },
             ];
@@ -2767,9 +2909,9 @@ export default class StageStore implements IStageStore {
       }),
     );
     if (noGroupElements.length) {
-      const actionParams: LayerActionParam[] = [
+      const actionParams: ElementsActionParam[] = [
         {
-          type: LayerChangedType.LayerChanged,
+          type: ElementActionTypes.Moved,
           data: noGroupElements,
         },
       ];
@@ -2786,7 +2928,7 @@ export default class StageStore implements IStageStore {
    * @param layerChangeBefore 在执行操作前的回调函数
    * @param layerChangeAfter 在执行操作后的回调函数
    */
-  async setElementsGoDown(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
+  async setElementsGoDown(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
     await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsGoDownIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
     this.retrieveElements();
@@ -2925,7 +3067,7 @@ export default class StageStore implements IStageStore {
    * @param layerChangeBefore 在执行操作前的回调函数
    * @param layerChangeAfter 在执行操作后的回调函数
    */
-  async setElementsShiftMove(elements: IElement[], layerChangeBefore: LayerChangeCallback, layerChangeAfter: LayerChangeCallback): Promise<void> {
+  async setElementsShiftMove(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
     await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsShiftMoveIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
     this.retrieveElements();

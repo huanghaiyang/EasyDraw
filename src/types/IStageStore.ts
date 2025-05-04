@@ -4,6 +4,7 @@ import { CreatorTypes } from "@/types/Creator";
 import IStageSetter from "@/types/IStageSetter";
 import { IElementGroup } from "@/types/IElementGroup";
 import { FontStyle } from "@/styles/ElementStyles";
+import { ElementActionCallback } from "@/types/ICommand";
 
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
@@ -57,6 +58,24 @@ export default interface IStageStore extends IStageSetter {
   get isMultiSelected(): boolean;
   // 选中的组件ID
   get selectedElementIds(): Set<string>;
+  // 当前最大组序列号
+  get groupSerialNumber(): number;
+  // 当前最大矩形序列号
+  get rectSerialNumber(): number;
+  // 当前最大文本序列号
+  get textSerialNumber(): number;
+  // 当前最大图片序列号
+  get imageSerialNumber(): number;
+  // 当前最大直线序列号
+  get lineSerialNumber(): number;
+  // 当前最大多边形序列号
+  get polygonSerialNumber(): number;
+  // 当前最大椭圆序列号
+  get ellipseSerialNumber(): number;
+  // 当前最大自由折线组件序列号
+  get arbitrarySerialNumber(): number;
+  // 当前最大铅笔组件序列号
+  get pencilSerialNumber(): number;
 
   // 创建组件数据模型
   createElementModel(type: CreatorTypes, coords: IPoint[], data?: ElementModelData): Partial<ElementObject>;
@@ -168,26 +187,16 @@ export default interface IStageStore extends IStageSetter {
   isSelectedEqCreating(): boolean;
   // 过滤事件并发送
   filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void;
-  // 是否存在组合
-  hasElementGroup(id: string): boolean;
   // 创建组合
-  createElementGroup(elements: (IElement | IElementGroup)[]): IElementGroup;
+  createElementGroup(elements: (IElement | IElementGroup)[], actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElementGroup>;
   // 删除组合
   removeElementGroup(group: IElementGroup): void;
-  // 将选中的组件转换为组合
-  createGroup(elements: IElement[]): IElementGroup;
   // 取消组合
   cancelGroups(groups: IElementGroup[]): void;
   // 获取选中的根组合
   getSelectedAncestorElementGroups(): IElementGroup[];
   // 获取选中的组合
   getSelectedElementGroups(): IElementGroup[];
-  // 选中组合
-  selectGroup(group: IElementGroup): void;
-  // 取消选中组合
-  deSelectGroup(group: IElementGroup): void;
-  // 取消选中组合
-  deSelectGroups(groups: IElementGroup[]): void;
   // 复制选中的组件
   copySelectElements(): Promise<Array<ElementObject>>;
   // 粘贴组件
@@ -206,4 +215,6 @@ export default interface IStageStore extends IStageSetter {
   findRemovedElemements(elements: IElement[]): { list: IElement[]; ancestors: IElement[] };
   // 获取独立组件的祖先组件集合
   getAncestorsByDetachedElements(elements: IElement[]): IElementGroup[];
+  // 排序组件
+  sortElements(elements: IElement[]): IElement[];
 }

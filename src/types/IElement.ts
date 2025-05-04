@@ -218,7 +218,7 @@ export default interface IElement {
   isProvisional: boolean;
   // 是否拖动中
   isDragging: boolean;
-  
+
   get isRangeElement(): boolean;
   // 组件ID
   get id(): string;
@@ -980,7 +980,7 @@ export default interface IElement {
   /**
    * 刷新原始属性
    */
-  refreshOriginalProps(): void;
+  refreshOriginals(): void;
 
   /**
    * 刷新变换器

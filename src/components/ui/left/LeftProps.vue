@@ -9,7 +9,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { useStageStore } from '@/stores/stage';
+import { useStageStore } from "@/stores/stage";
 
 const stageStore = useStageStore();
 </script>

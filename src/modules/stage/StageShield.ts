@@ -36,18 +36,14 @@ import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
 import ICommand, {
-  DetachedRemovedType,
+  ElementActionTypes,
   ElementCommandTypes,
+  ElementsActionParam,
   ICommandElementObject,
-  IDetachedRemovedCommandElementObject,
   IElementCommandPayload,
-  IRearrangeCommandElementObject,
 } from "@/types/ICommand";
-import ElementsAddedCommand from "@/modules/command/ElementsAddedCommand";
-import ElementsUpdatedCommand from "@/modules/command/ElementsUpdatedCommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
-import ElementsRearrangeCommand from "@/modules/command/ElementsRearrangeCommand";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
 import ElementText from "@/modules/elements/ElementText";
 import IUndoRedo from "@/types/IUndoRedo";
@@ -58,7 +54,6 @@ import { computed, makeObservable, observable, reaction } from "mobx";
 import { nanoid } from "nanoid";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
-import { LayerActionParam } from "@/types/IStageSetter";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -276,8 +271,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param rDataList
    * @param id
    */
-  private async _createUpdateCommandBy(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): Promise<void> {
-    const command = await CommandHelper.createUpdateCommandBy(uDataList, rDataList, this.store, id);
+  private async _addUpdatedCommandByDataList(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): Promise<void> {
+    const command = CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsUpdated, this.store, id);
     this.undoRedo.add(command);
   }
 
@@ -290,10 +285,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _createTranslateCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
     elements = this._flatWithAncestors(elements);
     // 记录原始数据
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson(), type: ElementActionTypes.Updated })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
-    await this._createUpdateCommandBy(uDataList, rDataList);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson(), type: ElementActionTypes.Updated })));
+    await this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -323,11 +318,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createTransformCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
     elements = this._flatWithAncestors(elements);
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson(), type: ElementActionTypes.Updated })));
     await elementsUpdateFunction();
     await this._reflowTextIfy(elements, true);
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
-    await this._createUpdateCommandBy(uDataList, rDataList);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson(), type: ElementActionTypes.Updated })));
+    await this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -414,10 +409,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
     await this.store.setElementsCorners(elements, value, index);
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
     elements.forEach(element => element.onCornerChanged());
     this._shouldRedraw = true;
   }
@@ -429,10 +424,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createStrokeCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), type: ElementActionTypes.Updated })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toStrokesJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -530,10 +525,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsUpdateFunction
    */
   private async _createFillCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>): Promise<void> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), type: ElementActionTypes.Updated })));
     await elementsUpdateFunction();
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toFillsJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -609,7 +604,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (shouldRelationUndoCommand && element.isEditing && element instanceof ElementText) {
           element.refreshUndoCommandObject();
         }
-        return { model: await element.toFontStyleJson() };
+        return { model: await element.toFontStyleJson(), type: ElementActionTypes.Updated };
       }),
     );
     await elementsUpdateFunction();
@@ -618,10 +613,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (shouldRelationUndoCommand && element.isEditing && element instanceof ElementText) {
           element.relationUndoCommand(commandId);
         }
-        return { model: await element.toFontStyleJson() };
+        return { model: await element.toFontStyleJson(), type: ElementActionTypes.Updated };
       }),
     );
-    this._createUpdateCommandBy(uDataList, rDataList, commandId);
+    this._addUpdatedCommandByDataList(uDataList, rDataList, commandId);
   }
 
   /**
@@ -1110,8 +1105,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("cancel", this._handleCancel.bind(this));
     this.event.on("selectMoveable", this._handleSelectMoveable.bind(this));
     this.event.on("selectHand", this._handleSelectHand.bind(this));
-    this.event.on("selectGroup", this._handleSelectGroup.bind(this));
-    this.event.on("selectGroupCancel", this._handleSelectGroupCancel.bind(this));
+    this.event.on("groupAdd", this._handleGroupAdd.bind(this));
+    this.event.on("groupRemove", this._handleGroupCancel.bind(this));
     this.event.on("undo", this._handleUndo.bind(this));
     this.event.on("redo", this._handleRedo.bind(this));
     this.html.on("textInput", this._handleTextInput.bind(this));
@@ -1179,7 +1174,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private _refreshAncesorGroupsOriginals(elements: IElement[]): void {
-    this._processAncestorsByElements(elements, group => group.refreshOriginalProps());
+    this._processAncestorsByElements(elements, group => group.refreshOriginals());
   }
 
   /**
@@ -1627,7 +1622,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._selectTopAElement(stageElements);
       this.store.beginEditingElements(selectedElements);
       this.selection.refresh();
-      this._originalEditingDataList = await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson() })));
+      this._originalEditingDataList = await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
       // 如果是文本编辑模式，则创建文本光标输入框并聚焦
       if (this.isTextEditing) {
         this._retreiveTextCursorInput(selectedElements[0] as IElementText);
@@ -1676,9 +1671,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createOriginalTranslateCommand(elements: IElement[]): Promise<void> {
     elements = this._flatWithAncestors(elements);
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTranslateJson() })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTranslateJson(), type: ElementActionTypes.Updated })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTranslateJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -1705,9 +1700,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createOrignalRotateCommand(elements: IElement[]): Promise<void> {
     elements = this._flatWithAncestors(elements);
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalRotateJson() })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toRotateJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalRotateJson(), type: ElementActionTypes.Updated })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toRotateJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -1736,9 +1731,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createOriginalTransformCommand(elements: IElement[]): Promise<void> {
     elements = this._flatWithAncestors(elements);
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTransformJson() })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson() })));
-    this._createUpdateCommandBy(uDataList, rDataList);
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toTransformJson(), type: ElementActionTypes.Updated })));
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
   }
 
   /**
@@ -1769,7 +1764,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 更新组件状态
     selectedElements.forEach(element => {
       element.isCornerMoving = false;
-      element.refreshOriginalProps();
+      element.refreshOriginals();
       element.onCornerChanged();
     });
   }
@@ -1810,14 +1805,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createAddedCommand(elements: IElement[]): Promise<void> {
-    const command = new ElementsAddedCommand(
-      nanoid(),
-      {
-        type: ElementCommandTypes.ElementsAdded,
-        uDataList: await Promise.all(elements.map(async element => ({ model: await element.toJson() }))),
-      },
-      this.store,
-    );
+    const actionParams: ElementsActionParam[] =[{
+      type: ElementActionTypes.Added,
+      data: elements,
+    }];
+    const command = await CommandHelper.createCommandByActionParams(actionParams, ElementCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
   }
 
@@ -2173,26 +2165,31 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     let command: ICommand<IElementCommandPayload> | null = null;
     const { list, ancestors } = this.store.findRemovedElemements(this.store.selectedElements);
-    const uDataList = (await Promise.all(
-      list.map(async element => {
-        return { model: await element.toJson(), ...CommandHelper.createRearrangeModel(element), type: DetachedRemovedType.Removed };
-      }),
-    )) as IDetachedRemovedCommandElementObject[];
-    // 如果存在子组件被删除，但是父组件没有被删除，则需要解除绑定关系并更新父组件的一些属性数据
-    if (ancestors.length) {
-      uDataList.push(...(await CommandHelper.getAncestorsUpdateJson(ancestors as IElementGroup[])));
-      const elementIds = new Set(list.map(element => element.id));
-      ancestors.forEach(ancestor => {
-        this.store.updateElementModel(ancestor.id, {
-          subIds: (ancestor as IElementGroup).model.subIds.filter(subId => !elementIds.has(subId)),
-        });
-        (ancestor as IElementGroup).refreshBySubsWithout(Array.from(elementIds));
+    const actionParams: ElementsActionParam[] = [];
+    list.forEach(element => {
+      actionParams.push({
+        type: ElementActionTypes.Removed,
+        data: [element],
       });
-      const rDataList = await CommandHelper.getAncestorsUpdateJson(ancestors as IElementGroup[]);
-      command = await CommandHelper.createDetachedElementsRemovedCommand(uDataList, rDataList, this.store);
-    } else {
-      command = await CommandHelper.createElementsRemovedCommand(uDataList, this.store);
-    }
+    });
+    // 如果存在子组件被删除，但是父组件没有被删除，则需要解除绑定关系并更新父组件的一些属性数据
+    ancestors.forEach(ancestor => {
+      actionParams.push({
+        type: ElementActionTypes.GroupUpdated,
+        data: [ancestor],
+      });
+    });
+    const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
+    const elementIds = new Set(list.map(element => element.id));
+    ancestors.forEach(ancestor => {
+      this.store.updateElementModel(ancestor.id, {
+        subIds: (ancestor as IElementGroup).model.subIds.filter(subId => !elementIds.has(subId)),
+      });
+      (ancestor as IElementGroup).refreshBySubsWithout(Array.from(elementIds));
+      ancestor.refreshOriginals();
+    });
+    const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
+    command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsRemoved, this.store);
     this.undoRedo.add(command);
     this.store.removeElements(list);
   }
@@ -2270,20 +2267,30 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理组件组合操作
    */
-  async _handleSelectGroup(): Promise<void> {
+  async _handleGroupAdd(): Promise<void> {
     if (this.isElementsBusy) return;
     if (this.store.isSelectedEmpty) return;
-    const command = await CommandHelper.createGroupAddedCommandBy(
+    let uDataList: ICommandElementObject[] = [];
+    let rDataList: ICommandElementObject[] = [];
+    let group: IElementGroup | null = null;
+    await this.store.createElementGroup(
       this.store.selectedElements,
-      (): { group: IElementGroup; elements: IElement[] } => {
-        const group = this.store.createGroup(this.store.selectedElements);
-        if (group) {
-          this.store.selectGroup(group);
-          return { group, elements: this.store.selectedElements };
+      async (params: ElementsActionParam[]) => {
+        uDataList.push(...await CommandHelper.createDataListByActionParams(params))
+      },
+      async (params: ElementsActionParam[]) => {
+        rDataList.push(...await CommandHelper.createDataListByActionParams(params));
+        const tailParam: ElementsActionParam = params[params.length - 1];
+        if (tailParam?.data?.length) {
+          group = tailParam.data[0] as IElementGroup;
         }
       },
-      this.store,
     );
+    if (group) {
+      this._clearStageSelects();
+      this.store.selectElement(group);
+    }
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupAdded, this.store);
     if (command) {
       this.undoRedo.add(command);
     }
@@ -2292,13 +2299,28 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理组件组合取消操作
    */
-  async _handleSelectGroupCancel(): Promise<void> {
+  async _handleGroupCancel(): Promise<void> {
     if (this.isElementsBusy) return;
     const groups = this.store.getSelectedAncestorElementGroups();
     if (groups.length === 0) return;
-    const command = await CommandHelper.createGroupRemovedCommandBy(groups, this.store);
-    this.undoRedo.add(command);
+    const actionParams: ElementsActionParam[] = [];
+    groups.forEach(group => {
+      actionParams.push({
+        type: ElementActionTypes.Removed,
+        data: [group],
+      });
+      group.subs.forEach(sub => {
+        actionParams.push({
+          type: ElementActionTypes.Moved,
+          data: [sub],
+        })
+      });
+    });
+    const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     this.store.cancelGroups(groups);
+    const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupRemoved, this.store);
+    this.undoRedo.add(command);
     groups.forEach(group => {
       this.store.selectElements(group.subs);
     });
@@ -2327,7 +2349,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection.refresh();
     await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
-    if (tailCommand instanceof ElementsRearrangeCommand) {
+    if (tailCommand && [
+      ElementCommandTypes.ElementsRearranged, 
+      ElementCommandTypes.ElementsRemoved, 
+      ElementCommandTypes.ElementsAdded, 
+      ElementCommandTypes.GroupAdded,
+      ElementCommandTypes.GroupRemoved, 
+      ElementCommandTypes.DetachedElementsRemoved
+    ].includes(tailCommand.payload.type)) {
+      this.store.refreshStageElements();
       this.store.throttleRefreshTreeNodes();
     }
   }
@@ -2338,7 +2368,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _doUndo(): Promise<void> {
     const tailUndoCommand = this.undoRedo.tailUndoCommand;
     if (!tailUndoCommand) return;
-    if (!(tailUndoCommand instanceof ElementsUpdatedCommand)) {
+    if (!(tailUndoCommand.payload.type === ElementCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
     await this.undoRedo.undo();
@@ -2351,7 +2381,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _doRedo(): Promise<void> {
     const tailRedoCommand = this.undoRedo.tailRedoCommand;
     if (!tailRedoCommand) return;
-    if (!(tailRedoCommand instanceof ElementsUpdatedCommand)) {
+    if (!(tailRedoCommand.payload.type === ElementCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
     await this.undoRedo.redo();
@@ -2550,8 +2580,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _commitEidting(): Promise<void> {
     const { editingElements } = this.store;
-    const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson() })));
-    await this._createUpdateCommandBy(this._originalEditingDataList, rDataList);
+    const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson(), type: ElementActionTypes.Updated })));
+    await this._addUpdatedCommandByDataList(this._originalEditingDataList, rDataList);
     this.store.endEditingElements(editingElements);
     this.selection.refresh();
     this.elementsStatus = StageShieldElementsStatus.NONE;
@@ -2574,8 +2604,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param uDataList
    * @param rDataList
    */
-  private async _createElementsRearrangeCommand(elements: IElement[], uDataList: Array<IRearrangeCommandElementObject>, rDataList: Array<IRearrangeCommandElementObject>): Promise<void> {
-    const command = await CommandHelper.createRearrangeCommand(uDataList, rDataList, this.store);
+  private async _createElementsRearrangeCommand(elements: IElement[], uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>): Promise<void> {
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsRearranged, this.store);
     this.undoRedo.add(command);
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
@@ -2587,14 +2617,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements 要修改的元件集合
    */
   async setElementsGoDown(elements: IElement[]): Promise<void> {
-    const uDataList: Array<IRearrangeCommandElementObject> = [];
-    const rDataList: Array<IRearrangeCommandElementObject> = [];
+    const uDataList: Array<ICommandElementObject> = [];
+    const rDataList: Array<ICommandElementObject> = [];
     await this.store.setElementsGoDown(
       elements,
-      async (params: LayerActionParam[]) => {
+      async (params: ElementsActionParam[]) => {
         uDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
-      async (params: LayerActionParam[]) => {
+      async (params: ElementsActionParam[]) => {
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
@@ -2607,14 +2637,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements 要修改的元件集合
    */
   async setElementsShiftMove(elements: IElement[]): Promise<void> {
-    const uDataList: Array<IRearrangeCommandElementObject> = [];
-    const rDataList: Array<IRearrangeCommandElementObject> = [];
+    const uDataList: Array<ICommandElementObject> = [];
+    const rDataList: Array<ICommandElementObject> = [];
     await this.store.setElementsShiftMove(
       elements,
-      async (params: LayerActionParam[]) => {
+      async (params: ElementsActionParam[]) => {
         uDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
-      async (params: LayerActionParam[]) => {
+      async (params: ElementsActionParam[]) => {
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );

@@ -248,7 +248,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         // 监听组件组合操作
         if (this._isCtrlGEvent(e)) {
           EventUtils.stopPP(e);
-          this.emit("selectGroup");
+          this.emit("groupAdd");
         }
         // 监听组件复制操作
         if (this._isCtrlCEvent(e)) {
@@ -268,7 +268,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         // 监听组件组合取消操作
         if (this._isCtrlShiftGEvent(e)) {
           EventUtils.stopPP(e);
-          this.emit("selectGroupCancel");
+          this.emit("groupRemove");
         }
         // 监听esc键
         if (this._isEscEvent(e)) {

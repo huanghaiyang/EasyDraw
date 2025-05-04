@@ -18,13 +18,13 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
     {
-      name: 'copy-fonts',
+      name: "copy-fonts",
       async generateBundle() {
-        const srcFonts = path.resolve(__dirname, 'src/assets/fonts');
-        const destFonts = path.resolve(__dirname, 'docs/assets/fonts');
+        const srcFonts = path.resolve(__dirname, "src/assets/fonts");
+        const destFonts = path.resolve(__dirname, "docs/assets/fonts");
         await fs.copy(srcFonts, destFonts);
-      }
-    }
+      },
+    },
   ],
   resolve: {
     alias: {
