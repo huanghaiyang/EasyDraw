@@ -16,7 +16,7 @@ export type IRelationNode = {
 export type IGroupNode = {
   isGroup?: boolean;
   isGroupSubject?: boolean;
-}
+};
 
 // 组件变更类型
 export enum ElementActionTypes {
@@ -40,7 +40,8 @@ export interface ElementActionCallback {
 
 // 独立组件移除命令
 export type ICommandElementObject = IBaseCommandElementObject &
-  IRelationNode & IGroupNode & {
+  IRelationNode &
+  IGroupNode & {
     type?: ElementActionTypes;
   };
 

@@ -307,13 +307,13 @@ export default class StageStore implements IStageStore {
 
   /**
    * 序号自增
-   * 
+   *
    * @param type 组件类型
    * @returns 自增后的序号
    */
   private _increaseElementSerialNumber(type: CreatorTypes): number {
     let value = this._elementSerialNumberMap.get(type);
-    value ++;
+    value++;
     this._elementSerialNumberMap.set(type, value);
     return value;
   }
@@ -1759,7 +1759,7 @@ export default class StageStore implements IStageStore {
       data,
       width: size.width,
       height: size.height,
-      name: `${CreatorHelper.getCreatorByType(type).name} ${serialGen? this._increaseElementSerialNumber(type): this._elementSerialNumberMap.get(type)}`,
+      name: `${CreatorHelper.getCreatorByType(type).name} ${serialGen ? this._increaseElementSerialNumber(type) : this._elementSerialNumberMap.get(type)}`,
       styles: getDefaultElementStyle(type),
       isRatioLocked: false,
       ...position,
@@ -2512,9 +2512,9 @@ export default class StageStore implements IStageStore {
 
   /**
    * 将选中的组件转换为组合
-   * 
+   *
    * 处理组件的流程如下：
-   * 
+   *
    * 1. 将被选中的组件移动到被选中的层级最高的组件之前
    * 2. 查找需要删除和更新的组合
    * 3. 在层级最高的组件后插入新的组合
@@ -2645,11 +2645,10 @@ export default class StageStore implements IStageStore {
     }
     // 将新建组合插入到targetElement之后
     this._insertNewGroup(group, targetElement);
-    const groupAddedParams: ElementsActionParam = 
-    {
+    const groupAddedParams: ElementsActionParam = {
       type: ElementActionTypes.Added,
       data: [group],
-    }
+    };
     await actionUndoCallback([groupAddedParams]);
     // 组合添加之前的回调函数的参数
     actionParams.push(groupAddedParams);

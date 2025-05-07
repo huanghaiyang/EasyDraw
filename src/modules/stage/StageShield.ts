@@ -35,13 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import ICommand, {
-  ElementActionTypes,
-  ElementCommandTypes,
-  ElementsActionParam,
-  ICommandElementObject,
-  IElementCommandPayload,
-} from "@/types/ICommand";
+import ICommand, { ElementActionTypes, ElementCommandTypes, ElementsActionParam, ICommandElementObject, IElementCommandPayload } from "@/types/ICommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
@@ -1805,10 +1799,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _createAddedCommand(elements: IElement[]): Promise<void> {
-    const actionParams: ElementsActionParam[] =[{
-      type: ElementActionTypes.Added,
-      data: elements,
-    }];
+    const actionParams: ElementsActionParam[] = [
+      {
+        type: ElementActionTypes.Added,
+        data: elements,
+      },
+    ];
     const command = await CommandHelper.createCommandByActionParams(actionParams, ElementCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
   }
@@ -2276,10 +2272,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     await this.store.createElementGroup(
       this.store.selectedElements,
       async (params: ElementsActionParam[]) => {
-        uDataList.push(...await CommandHelper.createDataListByActionParams(params))
+        uDataList.push(...(await CommandHelper.createDataListByActionParams(params)));
       },
       async (params: ElementsActionParam[]) => {
-        rDataList.push(...await CommandHelper.createDataListByActionParams(params));
+        rDataList.push(...(await CommandHelper.createDataListByActionParams(params)));
         const tailParam: ElementsActionParam = params[params.length - 1];
         if (tailParam?.data?.length) {
           group = tailParam.data[0] as IElementGroup;
@@ -2313,7 +2309,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         actionParams.push({
           type: ElementActionTypes.Moved,
           data: [sub],
-        })
+        });
       });
     });
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
@@ -2349,14 +2345,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.selection.refresh();
     await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
-    if (tailCommand && [
-      ElementCommandTypes.ElementsRearranged, 
-      ElementCommandTypes.ElementsRemoved, 
-      ElementCommandTypes.ElementsAdded, 
-      ElementCommandTypes.GroupAdded,
-      ElementCommandTypes.GroupRemoved, 
-      ElementCommandTypes.DetachedElementsRemoved
-    ].includes(tailCommand.payload.type)) {
+    if (
+      tailCommand &&
+      [
+        ElementCommandTypes.ElementsRearranged,
+        ElementCommandTypes.ElementsRemoved,
+        ElementCommandTypes.ElementsAdded,
+        ElementCommandTypes.GroupAdded,
+        ElementCommandTypes.GroupRemoved,
+        ElementCommandTypes.DetachedElementsRemoved,
+      ].includes(tailCommand.payload.type)
+    ) {
       this.store.refreshStageElements();
       this.store.throttleRefreshTreeNodes();
     }

@@ -103,7 +103,7 @@ export const GroupCreator: Creator = {
   name: "组合",
   category: CreatorCategories.group,
   icon: CreatorIcons.group,
-}
+};
 
 // 光标工具
 export const CursorCreators: Creator[] = [MoveableCreator, HandCreator];

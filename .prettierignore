@@ -1,1 +1,4 @@
 src/assets/**/*
+docs/**/*
+dist/**/*
+.github/**/*

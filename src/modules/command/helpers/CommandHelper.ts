@@ -1,11 +1,4 @@
-import ICommand, {
-  ElementActionTypes,
-  ElementCommandTypes,
-  ElementsActionParam,
-  IElementCommandPayload,
-  IRelationNode,
-  ICommandElementObject,
-} from "@/types/ICommand";
+import ICommand, { ElementActionTypes, ElementCommandTypes, ElementsActionParam, IElementCommandPayload, IRelationNode, ICommandElementObject } from "@/types/ICommand";
 import IElement, { ElementObject } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import LodashUtils from "@/utils/LodashUtils";
@@ -75,9 +68,9 @@ export default class CommandHelper {
 
   /**
    * 还原被删除的组件
-   * 
+   *
    * @param data
-   * @param store 
+   * @param store
    */
   static restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): void {
     const { model, prevId } = data;
@@ -135,7 +128,13 @@ export default class CommandHelper {
    * @param id 命令ID
    * @returns
    */
-  static createElementsChangedCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>, type: ElementCommandTypes, store: IStageStore, id?: string): ICommand<IElementCommandPayload> {
+  static createElementsChangedCommand(
+    uDataList: Array<ICommandElementObject>,
+    rDataList: Array<ICommandElementObject>,
+    type: ElementCommandTypes,
+    store: IStageStore,
+    id?: string,
+  ): ICommand<IElementCommandPayload> {
     const command = new ElementsChangedCommand(
       id || nanoid(),
       {
@@ -155,14 +154,14 @@ export default class CommandHelper {
    * @returns
    */
   static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<ICommandElementObject[]> {
-    return (await Promise.all(
+    return await Promise.all(
       ancestors.map(async ancestor => {
         return {
           model: await (ancestor as IElementGroup).toSubUpdatedJson(),
           type: ElementActionTypes.GroupUpdated,
         };
       }),
-    ));
+    );
   }
 
   /**
@@ -238,7 +237,7 @@ export default class CommandHelper {
               break;
             }
             case ElementActionTypes.GroupUpdated: {
-              result.push(...((await CommandHelper.getAncestorsUpdateJson(elements as IElementGroup[]))));
+              result.push(...(await CommandHelper.getAncestorsUpdateJson(elements as IElementGroup[])));
               break;
             }
           }
@@ -251,10 +250,10 @@ export default class CommandHelper {
 
   /**
    * 执行撤销操作
-   * 
+   *
    * @param datalist
-   * @param isRedo 
-   * @param store 
+   * @param isRedo
+   * @param store
    * @returns
    */
   static async restoreDataList(datalist: ICommandElementObject[], isRedo: boolean, store: IStageStore): Promise<void> {
@@ -266,7 +265,7 @@ export default class CommandHelper {
           switch (type) {
             case ElementActionTypes.Added: {
               // 对于add命令，如果是redo操作，需要还原插入组件，否则直接删除组件
-              if(isRedo)  {
+              if (isRedo) {
                 CommandHelper.restoreRemovedElementFromData(data, store);
               } else {
                 store.removeElementById(id);
@@ -274,7 +273,7 @@ export default class CommandHelper {
               break;
             }
             case ElementActionTypes.Updated:
-            case ElementActionTypes.GroupUpdated:  {
+            case ElementActionTypes.GroupUpdated: {
               CommandHelper.restoreElementFromData(data, store);
               break;
             }
@@ -295,9 +294,9 @@ export default class CommandHelper {
             }
           }
           resolve();
-        })
-      })
-    )
+        });
+      }),
+    );
   }
 
   /**
