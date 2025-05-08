@@ -1768,7 +1768,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private _selectTopAElement(elements: IElement[]): void {
     const detachedSelectedElements = elements.filter(element => element.isDetachedSelected);
-    const topAElement = ElementUtils.getTopAElementByCoord(detachedSelectedElements.length? detachedSelectedElements: elements, this.cursor.worldValue);
+    const topAElement = ElementUtils.getTopAElementByCoord(detachedSelectedElements.length ? detachedSelectedElements : elements, this.cursor.worldValue);
     this.store.deSelectElements(
       this.store.selectedElements.filter(element => {
         if (topAElement && topAElement.isGroup) {
@@ -1813,7 +1813,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 发送组件创建事件
-   * 
+   *
    * @param elements - 组件列表
    */
   private _emitElementsCreated(elements: IElement[]): void {
@@ -2224,16 +2224,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async _handlePasteElements(elementsJson: Array<ElementObject>): Promise<void> {
     let uDataList: ICommandElementObject[] = [];
     let rDataList: ICommandElementObject[] = [];
-    const elements = await this.store.pasteElements(elementsJson, async (actionParams) => {
-      uDataList.push(...await CommandHelper.createDataListByActionParams(actionParams));
-    }, async (actionParams) => {
-      rDataList.push(...await CommandHelper.createDataListByActionParams(actionParams));
-    });
+    const elements = await this.store.pasteElements(
+      elementsJson,
+      async actionParams => {
+        uDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+      },
+      async actionParams => {
+        rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+      },
+    );
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsAdded, this.store);
     if (command) {
       this.undoRedo.add(command);
     }
-    this.store.setElementsDetachedSelected(elements.map(element => element.id), true);
+    this.store.setElementsDetachedSelected(
+      elements.map(element => element.id),
+      true,
+    );
     this.selection.refresh();
   }
 

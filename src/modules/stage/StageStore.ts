@@ -2721,7 +2721,7 @@ export default class StageStore implements IStageStore {
    */
   async pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]> {
     // 被选中组件中的最高层级组件
-    let topLevelSelectedElement = this.isSelectedEmpty? null: this.selectedElements[this.selectedElements.length - 1];
+    let topLevelSelectedElement = this.isSelectedEmpty ? null : this.selectedElements[this.selectedElements.length - 1];
     // 目标组件的节点，新的组件将插入到这个组件之后
     let targetElement: IElement | null = null;
     let targetGroupId: string | undefined = undefined;

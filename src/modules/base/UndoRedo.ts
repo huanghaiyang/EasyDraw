@@ -39,18 +39,20 @@ export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
    */
   async undo(): Promise<A> {
     let result: A = false as A;
-    await new Promise<void>((resolve) => {
-      this.renderQueue.add(new QueueTask(async () => {
-        if (this.undoStack.length !== 0) {
-          const command = this.undoStack.pop();
-          this.redoStack.push(command);
-          await command.undo();
-          result = true as A;
-        } else {
-          result = false as A;
-        }
-        resolve();
-      }));
+    await new Promise<void>(resolve => {
+      this.renderQueue.add(
+        new QueueTask(async () => {
+          if (this.undoStack.length !== 0) {
+            const command = this.undoStack.pop();
+            this.redoStack.push(command);
+            await command.undo();
+            result = true as A;
+          } else {
+            result = false as A;
+          }
+          resolve();
+        }),
+      );
     });
     return result;
   }
@@ -60,19 +62,21 @@ export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
    */
   async redo(): Promise<A> {
     let result: A = false as A;
-    await new Promise<void>((resolve) => {
-      this.renderQueue.add(new QueueTask(async () => {
-        if (this.redoStack.length !== 0) {
-          const command = this.redoStack.pop();
-          this.undoStack.push(command);
-          await command.redo();
-          result = true as A;
-        } else {
-          result = false as A;
-        }
-        resolve();
-      }))
-    })
+    await new Promise<void>(resolve => {
+      this.renderQueue.add(
+        new QueueTask(async () => {
+          if (this.redoStack.length !== 0) {
+            const command = this.redoStack.pop();
+            this.undoStack.push(command);
+            await command.redo();
+            result = true as A;
+          } else {
+            result = false as A;
+          }
+          resolve();
+        }),
+      );
+    });
     return result;
   }
 }

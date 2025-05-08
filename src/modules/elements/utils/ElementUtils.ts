@@ -766,4 +766,20 @@ export default class ElementUtils {
   static batchCalcStageRelativeArcPoints(arcCoords: ArcPoints[][]): ArcPoints[][] {
     return arcCoords.map(coords => ElementUtils.calcStageRelativeArcPoints(coords));
   }
+
+  /**
+   * 给定坐标获取命中的组件
+   *
+   * @param coord 坐标
+   * @param elements 组件列表
+   * @returns
+   */
+  static getElementOnPoint(coord: IPoint, elements: IElement[]): IElement {
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const element = elements[i];
+      if (element.isContainsCoord(coord)) {
+        return element;
+      }
+    }
+  }
 }
