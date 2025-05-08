@@ -1,9 +1,13 @@
 import IUndoRedo from "@/types/IUndoRedo";
 import ICommand from "@/types/ICommand";
+import { IRenderQueue } from "@/types/IRender";
+import { QueueTask } from "@/modules/render/RenderTask";
+import RenderQueue from "@/modules/render/RenderQueue";
 
 export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
   undoStack: ICommand<T>[] = [];
   redoStack: ICommand<T>[] = [];
+  renderQueue: IRenderQueue = new RenderQueue();
 
   get tailUndoCommand(): ICommand<T> | undefined {
     return this.undoStack[this.undoStack.length - 1];
@@ -34,21 +38,41 @@ export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
    * 撤销
    */
   async undo(): Promise<A> {
-    if (this.undoStack.length === 0) return false as A;
-    const command = this.undoStack.pop();
-    this.redoStack.push(command);
-    await command.undo();
-    return true as A;
+    let result: A = false as A;
+    await new Promise<void>((resolve) => {
+      this.renderQueue.add(new QueueTask(async () => {
+        if (this.undoStack.length !== 0) {
+          const command = this.undoStack.pop();
+          this.redoStack.push(command);
+          await command.undo();
+          result = true as A;
+        } else {
+          result = false as A;
+        }
+        resolve();
+      }));
+    });
+    return result;
   }
 
   /**
    * 重做
    */
   async redo(): Promise<A> {
-    if (this.redoStack.length === 0) return false as A;
-    const command = this.redoStack.pop();
-    this.undoStack.push(command);
-    await command.redo();
-    return true as A;
+    let result: A = false as A;
+    await new Promise<void>((resolve) => {
+      this.renderQueue.add(new QueueTask(async () => {
+        if (this.redoStack.length !== 0) {
+          const command = this.redoStack.pop();
+          this.undoStack.push(command);
+          await command.redo();
+          result = true as A;
+        } else {
+          result = false as A;
+        }
+        resolve();
+      }))
+    })
+    return result;
   }
 }

@@ -2286,7 +2286,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._clearStageSelects();
       this.store.selectElement(group);
     }
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupAdded, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.GroupAdded, this.store);
     if (command) {
       this.undoRedo.add(command);
     }
