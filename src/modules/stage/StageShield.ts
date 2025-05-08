@@ -1767,7 +1767,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
   private _selectTopAElement(elements: IElement[]): void {
-    const topAElement = ElementUtils.getTopAElementByCoord(elements, this.cursor.worldValue);
+    const detachedSelectedElements = elements.filter(element => element.isDetachedSelected);
+    const topAElement = ElementUtils.getTopAElementByCoord(detachedSelectedElements.length? detachedSelectedElements: elements, this.cursor.worldValue);
     this.store.deSelectElements(
       this.store.selectedElements.filter(element => {
         if (topAElement && topAElement.isGroup) {
@@ -2134,8 +2135,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param callback
    */
   async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
-    // 选中组件中层级最高的组件，将图片粘贴到该组件后面
-    const topLevelSelectedElement = this.store.selectedElements[this.store.selectedElements.length - 1];
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
