@@ -815,8 +815,9 @@ export default class StageStore implements IStageStore {
       const findedSubs: Set<string> = new Set();
       this._findSubTreeNodesForward(node, result, findedSubs);
       if (!LodashUtils.isSetEqual(findedSubs, new Set(subIds))) {
-        console.warn(`组件树结构异常,组合子组件可能在组合顺序之后，当前组合id:${id}, 共找到子组件:${findedSubs}`);
+        console.warn(`组件树结构异常,组合子组件可能在组合顺序之后，当前组合id:${id}, 共找到子组件:${findedSubs.values().toArray().join(",")}`);
         this._findSubTreeNodesBackward(node, result, findedSubs);
+        console.warn(`组合子组件查找完毕，当前组合id:${id}, 共找到子组件:${findedSubs.values().toArray().join(",")}`);
       }
     }
     return result;
@@ -2714,16 +2715,69 @@ export default class StageStore implements IStageStore {
    * 粘贴组件
    *
    * @param elementsJson
+   * @param actionUndoCallback
+   * @param actionRedoCallback
+   * @returns
    */
-  async pasteElements(elementsJson: Array<ElementObject>): Promise<IElement[]> {
+  async pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]> {
+    // 被选中组件中的最高层级组件
+    let topLevelSelectedElement = this.isSelectedEmpty? null: this.selectedElements[this.selectedElements.length - 1];
+    // 目标组件的节点，新的组件将插入到这个组件之后
+    let targetElement: IElement | null = null;
+    let targetGroupId: string | undefined = undefined;
+    let targetGroup: IElementGroup | undefined = undefined;
+    let targetSubIds: string[] = [];
+    let targetIndexOfGroupSubs = -1;
+    if (topLevelSelectedElement) {
+      // 如果被选中组件中存在组合，则将新的组件插入到这个组合的最后一个节点之后
+      if (topLevelSelectedElement.isGroup) {
+        targetGroupId = topLevelSelectedElement.id;
+        targetSubIds = topLevelSelectedElement.model.subIds;
+        targetElement = this._elementsMap.get(targetSubIds[targetSubIds.length - 1]);
+      } else {
+        targetElement = topLevelSelectedElement;
+        if (targetElement.isGroupSubject) {
+          targetGroupId = targetElement.model.groupId;
+          targetSubIds = this._elementsMap.get(targetGroupId)?.model.subIds || [];
+          targetIndexOfGroupSubs = targetSubIds.indexOf(targetElement.id);
+        }
+      }
+    }
+    const actionParams: ElementsActionParam[] = [];
     const result: IElement[] = [];
     const models = ElementUtils.convertElementsJson(elementsJson);
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
       model.name = `${CreatorHelper.getCreatorByType(model.type).name} ${this._increaseElementSerialNumber(model.type)}`;
-      const element = this.insertAfterElementByModel(model);
+      model.groupId = targetGroupId;
+      const element = this.insertAfterElementByModel(model, targetElement);
+      actionParams.push({
+        type: ElementActionTypes.Added,
+        data: [element],
+      });
       result.push(element);
+      targetElement = element;
     }
+    if (targetGroupId) {
+      actionParams.push({
+        type: ElementActionTypes.GroupUpdated,
+        data: [this.getElementById(targetGroupId)],
+      });
+      targetGroup = this.getElementById(targetGroupId) as IElementGroup;
+    }
+    await actionUndoCallback(actionParams);
+    if (targetGroup) {
+      const elementIds = result.map(element => element.id);
+      if (targetIndexOfGroupSubs > -1) {
+        targetSubIds.splice(targetIndexOfGroupSubs + 1, 0, ...elementIds);
+      } else {
+        targetSubIds.push(...elementIds);
+      }
+      this.updateElementModel(targetGroupId, { subIds: targetSubIds });
+      targetGroup.refreshBySubs();
+      targetGroup.refreshOriginals();
+    }
+    await actionRedoCallback(actionParams);
     return result;
   }
 
@@ -3122,7 +3176,7 @@ export default class StageStore implements IStageStore {
    * @param ids 组件id集合
    * @param isDetachedSelected 是否选中
    */
-  private _setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
     // 先取消选中先前的组件
     if (isDetachedSelected) {
       this._selectedElementIds.forEach(id => {
@@ -3176,7 +3230,7 @@ export default class StageStore implements IStageStore {
     if (this.shield.event.isCtrl) {
       this._setElementsMixinDetachedSelected(ids);
     } else {
-      this._setElementsDetachedSelected(ids, true);
+      this.setElementsDetachedSelected(ids, true);
     }
   }
 

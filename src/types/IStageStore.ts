@@ -200,7 +200,7 @@ export default interface IStageStore extends IStageSetter {
   // 复制选中的组件
   copySelectElements(): Promise<Array<ElementObject>>;
   // 粘贴组件
-  pasteElements(elementsJson: Array<ElementObject>): Promise<IElement[]>;
+  pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]>;
   // 将给定组件移动到指定组件之后
   moveElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void;
   // 将给定组件移动到指定组件之前
@@ -215,6 +215,8 @@ export default interface IStageStore extends IStageSetter {
   findRemovedElemements(elements: IElement[]): { list: IElement[]; ancestors: IElement[] };
   // 获取独立组件的祖先组件集合
   getAncestorsByDetachedElements(elements: IElement[]): IElementGroup[];
+  // 选中给定组件
+  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
   // 排序组件
   sortElements(elements: IElement[]): IElement[];
 }

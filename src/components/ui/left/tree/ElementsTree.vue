@@ -33,7 +33,20 @@
         ]"
       >
         <el-icon :class="['iconfont', CreatorIcons[type]]"></el-icon>
-        <span>{{ label }}</span>
+        <div class="node-content">
+          <span>{{ label }}</span>
+          <el-tooltip effect="dark" content="节点详情" placement="right">
+            <el-icon>
+              <Paperclip />
+            </el-icon>
+            <template #content>
+              <div>
+                <p>节点ID: {{ id }}</p>
+                <p>节点类型: {{ CreatorHelper.getCreatorByType(type)?.name || type }}</p>
+              </div>
+            </template>
+          </el-tooltip>
+        </div>
       </span>
     </template>
   </el-tree>
@@ -47,7 +60,9 @@ import { TreeInstance } from "element-plus";
 import type Node from "element-plus/es/components/tree/src/model/node";
 import type { DragEvents } from "element-plus/es/components/tree/src/model/useDragNode";
 import type { AllowDropType, NodeDropType } from "element-plus/es/components/tree/src/tree.type";
+import { Paperclip } from "@element-plus/icons-vue";
 import { ref } from "vue";
+import CreatorHelper from "@/types/CreatorHelper";
 
 const stageStore = useStageStore();
 const treeRef = ref<TreeInstance>();
@@ -136,6 +151,13 @@ const allowDrag = (draggingNode: Node) => {
     &.target {
       background-color: rgba(66, 161, 255, 0.2);
     }
+  }
+  .node-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
 }
 </style>

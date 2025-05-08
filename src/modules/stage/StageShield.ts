@@ -1796,9 +1796,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 创建添加组件命令
    *
-   * @param elements
+   * @param elements - 组件列表
+   * @param selectedAppend - 是否添加到选中组件的后面
    */
-  private async _createAddedCommand(elements: IElement[]): Promise<void> {
+  private async _createAddedCommand(elements: IElement[], selectedAppend?: boolean): Promise<void> {
     const actionParams: ElementsActionParam[] = [
       {
         type: ElementActionTypes.Added,
@@ -1811,6 +1812,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 发送组件创建事件
+   * 
+   * @param elements - 组件列表
    */
   private _emitElementsCreated(elements: IElement[]): void {
     this.setCreator(MoveableCreator);
@@ -2131,13 +2134,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param callback
    */
   async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
+    // 选中组件中层级最高的组件，将图片粘贴到该组件后面
+    const topLevelSelectedElement = this.store.selectedElements[this.store.selectedElements.length - 1];
     this._clearStageSelects();
     const element = await this.store.insertImageElement(imageData);
     const nextScale = this.calcElementAutoFitValue(element);
     if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
     }
-    await this._createAddedCommand([element]);
+    await this._createAddedCommand([element], true);
     callback && callback();
   }
 
@@ -2218,15 +2223,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elementsJson
    */
   async _handlePasteElements(elementsJson: Array<ElementObject>): Promise<void> {
-    const isEmpty = !elementsJson || elementsJson.length === 0;
-    if (!isEmpty) {
-      this._clearStageSelects();
+    let uDataList: ICommandElementObject[] = [];
+    let rDataList: ICommandElementObject[] = [];
+    const elements = await this.store.pasteElements(elementsJson, async (actionParams) => {
+      uDataList.push(...await CommandHelper.createDataListByActionParams(actionParams));
+    }, async (actionParams) => {
+      rDataList.push(...await CommandHelper.createDataListByActionParams(actionParams));
+    });
+    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsAdded, this.store);
+    if (command) {
+      this.undoRedo.add(command);
     }
-    const elements = await this.store.pasteElements(elementsJson);
-    if (!isEmpty) {
-      this.selection.refresh();
-    }
-    await this._createAddedCommand(elements);
+    this.store.setElementsDetachedSelected(elements.map(element => element.id), true);
+    this.selection.refresh();
   }
 
   /**
