@@ -2746,10 +2746,20 @@ export default class StageStore implements IStageStore {
     const actionParams: ElementsActionParam[] = [];
     const result: IElement[] = [];
     const models = ElementUtils.convertElementsJson(elementsJson);
+    const groupModelIds: Set<string> = new Set();
+    models.forEach(model => {
+      if (model.type === CreatorTypes.group) {
+        groupModelIds.add(model.id);
+      }
+    });
+    let newSubIds: string[] = [];
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
       model.name = `${CreatorHelper.getCreatorByType(model.type).name} ${this._increaseElementSerialNumber(model.type)}`;
-      model.groupId = targetGroupId;
+      if (!groupModelIds.has(model.groupId)) {
+        model.groupId = targetGroupId;
+        newSubIds.push(model.id);
+      }
       const element = this.insertAfterElementByModel(model, targetElement);
       actionParams.push({
         type: ElementActionTypes.Added,
@@ -2767,11 +2777,10 @@ export default class StageStore implements IStageStore {
     }
     await actionUndoCallback(actionParams);
     if (targetGroup) {
-      const elementIds = result.map(element => element.id);
       if (targetIndexOfGroupSubs > -1) {
-        targetSubIds.splice(targetIndexOfGroupSubs + 1, 0, ...elementIds);
+        targetSubIds.splice(targetIndexOfGroupSubs + 1, 0, ...newSubIds);
       } else {
-        targetSubIds.push(...elementIds);
+        targetSubIds.push(...newSubIds);
       }
       this.updateElementModel(targetGroupId, { subIds: targetSubIds });
       targetGroup.refreshBySubs();

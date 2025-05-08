@@ -1,7 +1,7 @@
 <template>
   <div class="props-left-panel">
     <div class="title">
-      <span>组件序列({{ Array.from(stageStore.treeNodesMap.keys()).length }})</span>
+      <span>组件序列({{ stageStore.selectedElements.length }} / {{ Array.from(stageStore.treeNodesMap.keys()).length }})</span>
     </div>
     <div class="tree">
       <Elements-tree></Elements-tree>
