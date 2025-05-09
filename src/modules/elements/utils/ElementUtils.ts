@@ -782,4 +782,70 @@ export default class ElementUtils {
       }
     }
   }
+
+  /**
+   * 计算最外层组件
+   * 
+   * 1. 遍历所有组件，将组件的id和组件本身存入map中
+   * 2. 遍历所有组件，判断当前组件是否是子组
+   * 3. 如果当前组件是子组，那么需要找到最外层组合
+   * 4. 如果当前组件不是子组，那么直接将当前组件id存入set中
+   * 5. 将set中的id转换为组件数组
+   * 6. 返回组件数组
+   *
+   * 示例：
+   * 输入：[{id: '1', isGroupSubject: true, model: {groupId: '2'}}, {id: '2', isGroupSubject: true, model: {groupId: '3'}}, {id: '3', isGroupSubject: false}]
+   * 输出：[{id: '3', isGroupSubject: false}]
+   * 说明：
+   * 1. 组件1是子组，组件2是子组，组件3不是子组
+   * 2. 组件1的groupId是2，组件2的groupId是3
+   * 3. 组件1的groupId指向组件2，组件2的groupId指向组件3
+   * 4. 组件3是最外层组件
+   * 5. 组件3的id是3
+   * 6. 返回组件3
+   *
+   * @param elements 
+   * @returns 
+   */
+  static calcOuterLayerElements(elements: IElement[]): IElement[] {
+    const elementMap: Map<string, IElement> = new Map();
+    // 遍历所有组件，将组件的id和组件本身存入map中
+    elements.forEach(element => {
+      elementMap.set(element.id, element);
+    });
+    const outerLayerIds: Set<string> = new Set();
+    elements.forEach(element => {
+      // 如果当前组件是子组，那么需要找到最外层组合
+      if (element.isGroupSubject) {
+        // 组合id
+        let groupId = element.model.groupId;
+        // 判断组合是否存在
+        if (elementMap.has(groupId)) {
+          // 获取组合
+          let group = elementMap.get(groupId) as IElementGroup;
+          // 遍历组合的祖先组件，直到找到最外层组合
+          while (group.isGroupSubject) {
+            // 更新组合id
+            groupId = group.model.groupId;
+            // 如果map中存在组合id，那么说明当前组合不是最外层组合，需要继续遍历
+            if (elementMap.has(groupId)) {
+              // 更新组合
+              group = elementMap.get(groupId) as IElementGroup;
+            } else {
+              // 如果map中不存在组合id，那么说明当前组合是最外层组合，将其id存入set中
+              outerLayerIds.add(group.id);
+              break;
+            }
+          }
+        } else {
+          // 如果map中不存在组合id，那么说明当前组件是最外层组件，将其id存入set中
+          outerLayerIds.add(element.id);
+        }
+      } else {
+        outerLayerIds.add(element.id);
+      }
+    });
+    // 将set中的id转换为组件数组
+    return Array.from(outerLayerIds).map(id => elementMap.get(id));
+  }
 }

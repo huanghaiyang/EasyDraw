@@ -7,7 +7,6 @@ import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, 
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
-import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { toRaw } from "vue";
 import LodashUtils from "@/utils/LodashUtils";
 

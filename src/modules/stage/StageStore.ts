@@ -3298,4 +3298,15 @@ export default class StageStore implements IStageStore {
     const ancestors: string[] = ElementUtils.getAncestorIdsByDetachedElements(elements);
     return this.getOrderedElementsByIds(Array.from(ancestors)) as IElementGroup[];
   }
+
+  /**
+   * 给定组件集合，返回该集合中的所有外层组件
+   * 
+   * @param elements
+   * @returns
+   */
+  getOuterLayerElements(elements: IElement[]): IElement[] {
+    const result = ElementUtils.calcOuterLayerElements(elements);
+    return this.sortElements(result);
+  }
 }

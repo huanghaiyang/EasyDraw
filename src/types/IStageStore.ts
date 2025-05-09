@@ -219,4 +219,6 @@ export default interface IStageStore extends IStageSetter {
   setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
   // 排序组件
   sortElements(elements: IElement[]): IElement[];
+  // 获取最外层组件
+  getOuterLayerElements(elements: IElement[]): IElement[];
 }
