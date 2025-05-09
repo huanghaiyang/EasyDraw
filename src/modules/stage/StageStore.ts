@@ -18,6 +18,7 @@ import IElement, {
   IElementRect,
   ElementModelData,
   ElementTreeNode,
+  TreeNodeDropType,
 } from "@/types/IElement";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import { FontStyle, FontStyler, getDefaultElementStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
@@ -2533,7 +2534,7 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    */
-  async createElementGroup(elements: IElement[], actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElementGroup> {
+  async createElementGroup(elements: IElement[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<IElementGroup> {
     if (elements.length < 1) return;
     // 组合id集合
     const elementIds: string[] = elements.map(element => element.id);
@@ -2628,7 +2629,7 @@ export default class StageStore implements IStageStore {
         data: [group],
       });
     });
-    await actionUndoCallback(actionParams);
+    await undoActionCallback(actionParams);
     // 创建组合组件
     const group = new ElementGroup(this._createElementGroupObject(nonSubElements), this.shield);
     // 将前n-1个组件从链表中删除
@@ -2660,7 +2661,7 @@ export default class StageStore implements IStageStore {
       type: ElementActionTypes.Added,
       data: [group],
     };
-    await actionUndoCallback([groupAddedParams]);
+    await undoActionCallback([groupAddedParams]);
     // 组合添加之前的回调函数的参数
     actionParams.push(groupAddedParams);
     // 移除需要删除的组合
@@ -2677,7 +2678,7 @@ export default class StageStore implements IStageStore {
       (group as IElementGroup).refreshBySubs();
       group.refreshOriginals();
     });
-    await actionRedoCallback(actionParams);
+    await redoActionCallback(actionParams);
   }
 
   /**
@@ -2725,11 +2726,11 @@ export default class StageStore implements IStageStore {
    * 粘贴组件
    *
    * @param elementsJson
-   * @param actionUndoCallback
-   * @param actionRedoCallback
+   * @param undoActionCallback
+   * @param redoActionCallback
    * @returns
    */
-  async pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]> {
+  async pasteElements(elementsJson: Array<ElementObject>, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<IElement[]> {
     // 原始的组件id集合，用以判断目标组合是否包含在原始组件集合内
     const outerLevelElementIds: Set<string> = ElementUtils.calcOuterLayerElementIds(elementsJson);
     // 被选中组件中的最高层级组件
@@ -2794,7 +2795,7 @@ export default class StageStore implements IStageStore {
       });
       targetGroup = this.getElementById(targetGroupId) as IElementGroup;
     }
-    await actionUndoCallback(actionParams);
+    await undoActionCallback(actionParams);
     if (targetGroup) {
       if (targetIndexOfGroupSubs > -1) {
         targetSubIds.splice(targetIndexOfGroupSubs + 1, 0, ...newSubIds);
@@ -2805,7 +2806,7 @@ export default class StageStore implements IStageStore {
       targetGroup.refreshBySubs();
       targetGroup.refreshOriginals();
     }
-    await actionRedoCallback(actionParams);
+    await redoActionCallback(actionParams);
     return result;
   }
 
@@ -2949,14 +2950,14 @@ export default class StageStore implements IStageStore {
    *
    * @param elements 要重新整理的组件集合
    * @param executeFunction 执行组件重新整理的函数
-   * @param layerChangeBefore 在执行操作前的回调函数
-   * @param layerChangeAfter 在执行操作后的回调函数
+   * @param undoActionCallback 在执行操作前的回调函数
+   * @param redoActionCallback 在执行操作后的回调函数
    */
   private async _doElementsLayerChange(
     elements: IElement[],
     executeFunction: ElementsLayerExecuteFunction,
-    layerChangeBefore: ElementActionCallback,
-    layerChangeAfter: ElementActionCallback,
+    undoActionCallback: ElementActionCallback,
+    redoActionCallback: ElementActionCallback,
   ): Promise<void> {
     const groupElements = this._divideElementsByGroup(elements);
     const noGroupElements: IElement[] = [];
@@ -2979,9 +2980,9 @@ export default class StageStore implements IStageStore {
                 data: [group],
               },
             ];
-            await layerChangeBefore(actionParams);
+            await undoActionCallback(actionParams);
             executeFunction(partElements, true);
-            await layerChangeAfter(actionParams);
+            await redoActionCallback(actionParams);
           } else {
             noGroupElements.push(partElements);
           }
@@ -2996,9 +2997,9 @@ export default class StageStore implements IStageStore {
           data: noGroupElements,
         },
       ];
-      await layerChangeBefore(actionParams);
+      await undoActionCallback(actionParams);
       executeFunction(noGroupElements, false);
-      await layerChangeAfter(actionParams);
+      await redoActionCallback(actionParams);
     }
   }
 
@@ -3006,12 +3007,12 @@ export default class StageStore implements IStageStore {
    * 组件下移
    *
    * @param elements 要移动层级的组件集合
-   * @param layerChangeBefore 在执行操作前的回调函数
-   * @param layerChangeAfter 在执行操作后的回调函数
+   * @param undoActionCallback 在执行操作前的回调函数
+   * @param redoActionCallback 在执行操作后的回调函数
    */
-  async setElementsGoDown(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void> {
+  async setElementsGoDown(elements: IElement[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
-    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsGoDownIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
+    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsGoDownIfy(partElements, isGroupInternal), undoActionCallback, redoActionCallback);
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
@@ -3145,12 +3146,12 @@ export default class StageStore implements IStageStore {
    * 组件上移
    *
    * @param elements 要移动层级的组件集合
-   * @param layerChangeBefore 在执行操作前的回调函数
-   * @param layerChangeAfter 在执行操作后的回调函数
+   * @param undoActionCallback 在执行操作前的回调函数
+   * @param redoActionCallback 在执行操作后的回调函数
    */
-  async setElementsShiftMove(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void> {
+  async setElementsShiftMove(elements: IElement[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
-    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsShiftMoveIfy(partElements, isGroupInternal), layerChangeBefore, layerChangeAfter);
+    await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsShiftMoveIfy(partElements, isGroupInternal), undoActionCallback, redoActionCallback);
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
@@ -3327,5 +3328,16 @@ export default class StageStore implements IStageStore {
   getOuterLayerElements(elements: IElement[]): IElement[] {
     const result = ElementUtils.calcOuterLayerElements(elements);
     return this.sortElements(result);
+  }
+
+  /**
+   * 将组件移动到指定位置
+   * 
+   * @param ids 
+   * @param target 
+   * @param dropType 
+   */
+  async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType): Promise<void> {
+    
   }
 }

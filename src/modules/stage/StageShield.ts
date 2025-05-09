@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { ElementObject, IElementText, RefreshSubOptions } from "@/types/IElement";
+import IElement, { ElementObject, IElementText, RefreshSubOptions, TreeNodeDropType } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -2697,5 +2697,26 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
     this.store.setElementsDetachedSelected(ids, isDetachedSelected);
+  }
+
+  /**
+   * 移动组件到指定位置
+   * 
+   * @param ids 
+   * @param target 
+   * @param dropType
+   */
+  async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType): Promise<void> {
+    const uDataList: Array<ICommandElementObject> = [];
+    const rDataList: Array<ICommandElementObject> = [];
+    await this.store.moveElementsTo(ids, target, dropType, async (actionParams: ElementsActionParam[]) => {
+      uDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+    }, async (actionParams: ElementsActionParam[]) => {
+      rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+    });
+    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsMoved, this.store);
+    if (command) {
+      this.undoRedo.add(command);
+    }
   }
 }

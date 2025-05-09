@@ -2,7 +2,7 @@ import StageContainer from "@/modules/stage/StageContainer";
 import StageShield from "@/modules/stage/StageShield";
 import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@/types";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
-import IElement, { DefaultCornerModel, ElementTreeNode } from "@/types/IElement";
+import IElement, { DefaultCornerModel, ElementTreeNode, TreeNodeDropType } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { throttle } from "lodash";
 import { defineStore } from "pinia";
@@ -1410,6 +1410,16 @@ export const useStageStore = defineStore("stage", {
      */
     setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
       shield.setElementsDetachedSelected(toRaw(ids), isDetachedSelected);
-    }
+    },
+    /**
+     * 移动元素到指定位置
+     *
+     * @param ids 要移动的元素id集合
+     * @param targetId 目标元素id
+     * @param isPrepend 是否前置
+     */
+    moveElementsTo(ids: string[], targetId: string, dropType: TreeNodeDropType): void {
+      shield.moveElementsTo(toRaw(ids), targetId, dropType);
+    },
   },
 });

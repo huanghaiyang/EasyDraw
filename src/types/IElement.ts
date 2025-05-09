@@ -1440,3 +1440,6 @@ export type ElementTreeNode = Partial<
   label: string;
   children: ElementTreeNode[];
 };
+
+// 组件树节点拖动类型
+export type TreeNodeDropType = "before" | "after" | "inner" | "none";

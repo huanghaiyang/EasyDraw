@@ -67,6 +67,7 @@ export enum ElementCommandTypes {
   ElementsRemoved = "elements_removed",
   ElementsUpdated = "elements_updated",
   ElementsRearranged = "elements_rearranged",
+  ElementsMoved = "elements_moved",
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
   DetachedElementsRemoved = "detached_elements_removed",

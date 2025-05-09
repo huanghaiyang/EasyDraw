@@ -111,6 +111,7 @@ const handleDragEnd = (draggingNode: Node, dropNode: Node, dropType: NodeDropTyp
   console.log("tree drag end:", dropNode && dropNode.label, dropType);
 };
 const handleDrop = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, ev: DragEvents) => {
+  stageStore.moveElementsTo([draggingNode.data.id], dropNode.data.id, dropType);
   console.log("tree drop:", dropNode.label, dropType);
 };
 const allowDrop = (draggingNode: Node, dropNode: Node, type: AllowDropType) => {

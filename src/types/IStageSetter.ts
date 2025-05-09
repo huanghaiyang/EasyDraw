@@ -1,6 +1,6 @@
 import { IPoint } from "@/types/index";
 import { FontStyler, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
-import IElement from "@/types/IElement";
+import IElement, { TreeNodeDropType } from "@/types/IElement";
 import { ElementActionCallback } from "@/types/ICommand";
 
 export default interface IStageSetter {
@@ -295,14 +295,14 @@ export default interface IStageSetter {
    *
    * @param elements 要修改的元件集合
    */
-  setElementsShiftMove(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void>;
+  setElementsShiftMove(elements: IElement[], undoActionCallback?: ElementActionCallback, redoActionCallback?: ElementActionCallback): Promise<void>;
 
   /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
    */
-  setElementsGoDown(elements: IElement[], layerChangeBefore: ElementActionCallback, layerChangeAfter: ElementActionCallback): Promise<void>;
+  setElementsGoDown(elements: IElement[], undoActionCallback?: ElementActionCallback, redoActionCallback?: ElementActionCallback): Promise<void>;
 
   /**
    * 组件旋转
@@ -347,4 +347,13 @@ export default interface IStageSetter {
    * @param ids 组件id集合
    */
   setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
+
+  /**
+   * 将组件移动到指定位置
+   *
+   * @param ids 
+   * @param target 
+   * @param dropType
+   */
+  moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback?: ElementActionCallback, redoActionCallback?: ElementActionCallback): Promise<void>;
 }

@@ -188,7 +188,7 @@ export default interface IStageStore extends IStageSetter {
   // 过滤事件并发送
   filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void;
   // 创建组合
-  createElementGroup(elements: (IElement | IElementGroup)[], actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElementGroup>;
+  createElementGroup(elements: (IElement | IElementGroup)[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<IElementGroup>;
   // 删除组合
   removeElementGroup(group: IElementGroup): void;
   // 取消组合
@@ -200,7 +200,7 @@ export default interface IStageStore extends IStageSetter {
   // 复制选中的组件
   copySelectElements(): Promise<Array<ElementObject>>;
   // 粘贴组件
-  pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]>;
+  pasteElements(elementsJson: Array<ElementObject>, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<IElement[]>;
   // 将给定组件移动到指定组件之后
   moveElementAfter(element: IElement, targetElement?: IElement, isPrepend?: boolean): void;
   // 将给定组件移动到指定组件之前
