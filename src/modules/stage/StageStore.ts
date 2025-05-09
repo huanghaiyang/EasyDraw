@@ -319,6 +319,16 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 获取组件名称
+   *
+   * @param type 组件类型
+   * @returns 组件名称
+   */
+  private _getElementName(type: CreatorTypes): string {
+    return `${CreatorHelper.getCreatorByType(type).name} ${this._increaseElementSerialNumber(type)}`;
+  }
+
+  /**
    * 组件新增
    */
   private _reactionElementAdded(): void {
@@ -2211,7 +2221,7 @@ export default class StageStore implements IStageStore {
       boxCoords: CommonUtils.getBoxByPoints(coords),
       type: CreatorTypes.image,
       data: image,
-      name: `${CreatorHelper.getCreatorByType(CreatorTypes.image).name} ${this._increaseElementSerialNumber(CreatorTypes.image)}`,
+      name: this._getElementName(CreatorTypes.image),
       width,
       height,
       length: 0,
@@ -2464,7 +2474,7 @@ export default class StageStore implements IStageStore {
     // 返回组合组件的数据对象
     return {
       ...ElementUtils.createEmptyGroupObject(),
-      name: `${CreatorHelper.getCreatorByType(CreatorTypes.group).name} ${this._increaseElementSerialNumber(CreatorTypes.group)}`,
+      name: this._getElementName(CreatorTypes.group),
       subIds,
       coords,
       boxCoords: CommonUtils.getBoxByPoints(coords),
@@ -2755,7 +2765,7 @@ export default class StageStore implements IStageStore {
     let newSubIds: string[] = [];
     for (const model of models) {
       await ElementUtils.convertElementModel(model);
-      model.name = `${CreatorHelper.getCreatorByType(model.type).name} ${this._increaseElementSerialNumber(model.type)}`;
+      model.name = this._getElementName(model.type);
       if (!groupModelIds.has(model.groupId)) {
         model.groupId = targetGroupId;
         newSubIds.push(model.id);
