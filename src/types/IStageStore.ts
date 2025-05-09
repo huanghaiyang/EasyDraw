@@ -215,8 +215,6 @@ export default interface IStageStore extends IStageSetter {
   findRemovedElemements(elements: IElement[]): { list: IElement[]; ancestors: IElement[] };
   // 获取独立组件的祖先组件集合
   getAncestorsByDetachedElements(elements: IElement[]): IElementGroup[];
-  // 选中给定组件
-  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
   // 排序组件
   sortElements(elements: IElement[]): IElement[];
   // 获取最外层组件

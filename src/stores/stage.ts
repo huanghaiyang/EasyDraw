@@ -1403,5 +1403,13 @@ export const useStageStore = defineStore("stage", {
     toggleElementsDetachedSelected(ids: string[]): void {
       shield.toggleElementsDetachedSelected(toRaw(ids));
     },
+    /**
+     * 切换组件选中状态(组件选中状态切换)
+     *
+     * @param ids 组件id集合
+     */
+    setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+      shield.setElementsDetachedSelected(toRaw(ids), isDetachedSelected);
+    }
   },
 });
