@@ -796,6 +796,17 @@ export default class ElementUtils {
   /**
    * 计算最外层组件
    *
+   * @param elements
+   * @returns
+   */
+  static calcOuterLayerElements(elements: IElement[]): IElement[] {
+    const outerLayerIds: Set<string> = ElementUtils.calcOuterLayerElementIds(elements.map(element => element.model));
+    return elements.filter(element => outerLayerIds.has(element.model.id));
+  }
+
+  /**
+   * 计算最外层组件对象
+   *
    * 1. 遍历所有组件，将组件的id和组件本身存入map中
    * 2. 遍历所有组件，判断当前组件是否是子组
    * 3. 如果当前组件是子组，那么需要找到最外层组合
@@ -814,48 +825,37 @@ export default class ElementUtils {
    * 5. 组件3的id是3
    * 6. 返回组件3
    *
-   * @param elements
+   * @param elementObject
    * @returns
    */
-  static calcOuterLayerElements(elements: IElement[]): IElement[] {
-    const elementMap: Map<string, IElement> = new Map();
+  static calcOuterLayerElementIds(elementObject: ElementObject[]): Set<string> {
+    const elementMap: Map<string, ElementObject> = new Map();
     // 遍历所有组件，将组件的id和组件本身存入map中
-    elements.forEach(element => {
+    elementObject.forEach(element => {
       elementMap.set(element.id, element);
     });
     const outerLayerIds: Set<string> = new Set();
-    elements.forEach(element => {
-      // 如果当前组件是子组，那么需要找到最外层组合
-      if (element.isGroupSubject) {
-        // 组合id
-        let groupId = element.model.groupId;
-        // 判断组合是否存在
+    elementObject.forEach(obj => {
+      let { groupId, id } = obj;
+      if (groupId) {
         if (elementMap.has(groupId)) {
-          // 获取组合
-          let group = elementMap.get(groupId) as IElementGroup;
-          // 遍历组合的祖先组件，直到找到最外层组合
-          while (group.isGroupSubject) {
-            // 更新组合id
-            groupId = group.model.groupId;
-            // 如果map中存在组合id，那么说明当前组合不是最外层组合，需要继续遍历
+          let group = elementMap.get(groupId);
+          while (group.groupId) {
+            groupId = group.groupId;
             if (elementMap.has(groupId)) {
-              // 更新组合
-              group = elementMap.get(groupId) as IElementGroup;
+              group = elementMap.get(groupId);
             } else {
-              // 如果map中不存在组合id，那么说明当前组合是最外层组合，将其id存入set中
               outerLayerIds.add(group.id);
               break;
             }
           }
         } else {
-          // 如果map中不存在组合id，那么说明当前组件是最外层组件，将其id存入set中
-          outerLayerIds.add(element.id);
+          outerLayerIds.add(id);
         }
       } else {
-        outerLayerIds.add(element.id);
+        outerLayerIds.add(id);
       }
     });
-    // 将set中的id转换为组件数组
-    return Array.from(outerLayerIds).map(id => elementMap.get(id));
+    return outerLayerIds;
   }
 }

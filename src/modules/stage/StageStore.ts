@@ -2730,21 +2730,30 @@ export default class StageStore implements IStageStore {
    * @returns
    */
   async pasteElements(elementsJson: Array<ElementObject>, actionUndoCallback: ElementActionCallback, actionRedoCallback: ElementActionCallback): Promise<IElement[]> {
+    // 原始的组件id集合，用以判断目标组合是否包含在原始组件集合内
+    const outerLevelElementIds: Set<string> = ElementUtils.calcOuterLayerElementIds(elementsJson);
     // 被选中组件中的最高层级组件
-    let topLevelSelectedElement = this.isSelectedEmpty ? null : this.selectedElements[this.selectedElements.length - 1];
+    let topLevelSelectedElement = this.selectedElements[this.selectedElements.length - 1];
+    // 默认允许直接将内容插入到目标组合内部
+    let groupIn: boolean = !outerLevelElementIds.has(topLevelSelectedElement?.id || "");
     // 目标组件的节点，新的组件将插入到这个组件之后
     let targetElement: IElement | null = null;
+    // 目标组合的id
     let targetGroupId: string | undefined = undefined;
+    // 目标组合
     let targetGroup: IElementGroup | undefined = undefined;
+    // 目标组合的子组件id集合
     let targetSubIds: string[] = [];
+    // 目标组件在目标组合中的索引
     let targetIndexOfGroupSubs = -1;
     if (topLevelSelectedElement) {
       // 如果被选中组件中存在组合，则将新的组件插入到这个组合的最后一个节点之后
-      if (topLevelSelectedElement.isGroup) {
+      if (topLevelSelectedElement.isGroup && groupIn) {
         targetGroupId = topLevelSelectedElement.id;
         targetSubIds = topLevelSelectedElement.model.subIds;
         targetElement = this._elementsMap.get(targetSubIds[targetSubIds.length - 1]);
       } else {
+        // targetElement可能是组件也可能是组合
         targetElement = topLevelSelectedElement;
         if (targetElement.isGroupSubject) {
           targetGroupId = targetElement.model.groupId;
