@@ -48,14 +48,23 @@ export enum ElementReactionPropNames {
   isRatioLocked = "isRatioLocked",
 }
 
+// 组件列表节点变更事件名
 export enum ElementListEventNames {
   added,
   removed,
 }
 
+// 组件序列化时的的必要属性
 export const CommonJsonKeys = ["id", "coords", "boxCoords", "x", "y", "type"];
 
 export default class ElementUtils {
+  /**
+   * 创建组件渲染任务
+   *
+   * @param element
+   * @param canvas
+   * @returns
+   */
   static createElementTask(element: IElement, canvas: HTMLCanvasElement): IElementTask {
     let task: IElementTask;
     switch (element.model.type) {
@@ -179,6 +188,7 @@ export default class ElementUtils {
    * 根据对象创建组件
    *
    * @param model
+   * @param shield
    * @returns
    */
   static createElement(model: ElementObject, shield: IStageShield): IElement {
@@ -785,7 +795,7 @@ export default class ElementUtils {
 
   /**
    * 计算最外层组件
-   * 
+   *
    * 1. 遍历所有组件，将组件的id和组件本身存入map中
    * 2. 遍历所有组件，判断当前组件是否是子组
    * 3. 如果当前组件是子组，那么需要找到最外层组合
@@ -804,8 +814,8 @@ export default class ElementUtils {
    * 5. 组件3的id是3
    * 6. 返回组件3
    *
-   * @param elements 
-   * @returns 
+   * @param elements
+   * @returns
    */
   static calcOuterLayerElements(elements: IElement[]): IElement[] {
     const elementMap: Map<string, IElement> = new Map();

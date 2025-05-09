@@ -3301,7 +3301,7 @@ export default class StageStore implements IStageStore {
 
   /**
    * 给定组件集合，返回该集合中的所有外层组件
-   * 
+   *
    * @param elements
    * @returns
    */

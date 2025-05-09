@@ -1185,9 +1185,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _updateStatusWhileElementsOperating(): Promise<void> {
     if (
-      ![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
-      this.store.isSelectedContainsTarget() &&
-      this.store.isEditingEmpty
+      this.elementsStatus === StageShieldElementsStatus.MOVE_READY ||
+      (![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
+        this.store.isSelectedContainsTarget() &&
+        this.store.isEditingEmpty)
     ) {
       // 已经确定是拖动操作的情况下，做如下逻辑判断
       if (this.elementsStatus !== StageShieldElementsStatus.MOVING) {
@@ -1226,11 +1227,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.selection.refreshTransformerModels();
       } else if (this.isMoveableActive) {
         // 如果是选择模式
-        // 如果不存在选中的组件
         if (this.store.isSelectedEmpty) {
+          // 没有选中组件，那么就创建一个范围组件
           this._createRange();
         } else if (this.checkCursorPressMovedALittle(e)) {
+          // 更新当前组件状态
           await this._updateStatusWhileElementsOperating();
+          // 处理组件操作
           await this._doElementsOperating();
         }
       } else if (this.isHandActive) {
@@ -1240,6 +1243,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isMoveableActive) {
       this._tryActiveController();
     }
+    // 如果正在操作组件，那么就清除目标组件的isTarget状态
     if (this.isElementsBusy) {
       this.store.cancelTargetElements();
     }
@@ -1398,6 +1402,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._clearStageSelects();
         if (targetElement) {
           this.store.selectElement(targetElement);
+          // 准备拖动
+          this.elementsStatus = StageShieldElementsStatus.MOVE_READY;
         }
       }
     }

@@ -16,6 +16,7 @@ import { IElementCommandPayload } from "@/types/ICommand";
 export enum StageShieldElementsStatus {
   NONE,
   MOVING,
+  MOVE_READY,
   ROTATING,
   TRANSFORMING,
   CORNER_MOVING,
