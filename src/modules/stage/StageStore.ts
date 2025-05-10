@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { every, isArray, isBoolean, isEqual, isString, pick, throttle } from "lodash";
+import { drop, every, isArray, isBoolean, isEqual, isString, pick, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
@@ -2532,8 +2532,7 @@ export default class StageStore implements IStageStore {
    */
   private _calcEffectedElementsOfMoved(
     elements: IElement[],
-    targetElementGroup: IElementGroup,
-    targetElementGroupAncestors: IElementGroup[],
+    targetElementGroup?: IElementGroup,
   ): {
     actionParams: ElementsActionParam[];
     removedGroups: IElementGroup[];
@@ -2543,11 +2542,10 @@ export default class StageStore implements IStageStore {
     updatedGroupIdSet: Set<string>;
     removedGroupIdSet: Set<string>;
   } {
+    // 目标组合的所有祖先节点
+    const targetElementGroupAncestors = targetElementGroup?.ancestorGroups || [];
     // 组件id集合
-    const elementIdSet: Set<string> = new Set();
-    elements.forEach(element => {
-      elementIdSet.add(element.id);
-    });
+    const elementIdSet: Set<string> = new Set(elements.map(element => element.id));
     // 需要删除或者更新的组合
     const groupIdSet: Set<string> = new Set();
     // 需要删除的组合id集合，用于后续删除组合
@@ -2581,7 +2579,11 @@ export default class StageStore implements IStageStore {
     function groupShouldRemove(group: IElementGroup): boolean {
       const subIds = group.model.subIds;
       // 如果组合内的所有子组件都在给定的组件集合内，则需要删除组合
-      return subIds.every(id => elementIdSet.has(id) || subIds.every(id => removedGroupIdSet.has(id))) && group.id !== targetElementGroup?.id && !targetElementGroupAncestors?.includes(group);
+      return (
+        subIds.every(id => elementIdSet.has(id) || subIds.every(id => removedGroupIdSet.has(id))) &&
+        group.id !== targetElementGroup?.id &&
+        targetElementGroupAncestors?.findIndex(ancestor => ancestor.id === group.id) === -1
+      );
     }
     // 找到需要删除或者更新的组合
     groups.forEach(group => {
@@ -2631,6 +2633,36 @@ export default class StageStore implements IStageStore {
   }
 
   /**
+   * 处理移动组件位置时，受影响的组件
+   *
+   * @param removedGroups
+   * @param updatedGroups
+   * @param elementIdSet
+   * @param removedGroupIdSet
+   */
+  private _processEffectedElementGroups({ removedGroups, updatedGroups, elementIdSet, removedGroupIdSet }: {
+    removedGroups: IElementGroup[],
+    updatedGroups: IElementGroup[],
+    elementIdSet: Set<string>,
+    removedGroupIdSet: Set<string>,
+  }): void {
+    // 移除需要删除的组合
+    removedGroups.forEach(rGroup => {
+      this.removeElement(rGroup);
+    });
+    // 更新需要更新的组合
+    updatedGroups.forEach(uGroup => {
+      // 计算组合的子组件id集合
+      const subIds = uGroup.model.subIds.filter(id => !elementIdSet.has(id) && !removedGroupIdSet.has(id));
+      // 更新组合的子组件id集合
+      this.updateElementModel(uGroup.id, { subIds });
+      // 因为组合内的子组件发生变化，需要刷新组合的尺寸和位置
+      (uGroup as IElementGroup).refreshBySubs();
+      uGroup.refreshOriginals();
+    });
+  }
+
+  /**
    * 将选中的组件转换为组合
    *
    * 处理组件的流程如下：
@@ -2650,8 +2682,6 @@ export default class StageStore implements IStageStore {
     const targetElement = sortedElements[sortedElements.length - 1];
     // 目标组件所属的组合
     const targetElementGroup = targetElement.group;
-    // 目标组件所属的组合的祖先组件
-    const targetElementGroupAncestors = targetElementGroup?.ancestorGroups;
     // 目标组件在目标组件所属的组合中的索引
     let targetIndexOfGroupSubs = -1;
     // 计算目标组件在目标组件所属的组合中的索引
@@ -2660,7 +2690,6 @@ export default class StageStore implements IStageStore {
     const { actionParams, removedGroups, updatedGroups, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(
       sortedElements,
       targetElementGroup,
-      targetElementGroupAncestors,
     );
     // 顶层组合集合
     const outerLayerElements: IElement[] = this.getOrderedElementsByIds(Array.from(outerLayerIdSet));
@@ -2699,20 +2728,7 @@ export default class StageStore implements IStageStore {
     await undoActionCallback([groupAddedParams]);
     // 组合添加之前的回调函数的参数
     actionParams.push(groupAddedParams);
-    // 移除需要删除的组合
-    removedGroups.forEach(rGroup => {
-      this.removeElement(rGroup);
-    });
-    // 更新需要更新的组合
-    updatedGroups.forEach(uGroup => {
-      // 计算组合的子组件id集合
-      const subIds = uGroup.model.subIds.filter(id => !elementIdSet.has(id) && !removedGroupIdSet.has(id));
-      // 更新组合的子组件id集合
-      this.updateElementModel(uGroup.id, { subIds });
-      // 因为组合内的子组件发生变化，需要刷新组合的尺寸和位置
-      (uGroup as IElementGroup).refreshBySubs();
-      uGroup.refreshOriginals();
-    });
+    this._processEffectedElementGroups({ removedGroups, updatedGroups, elementIdSet, removedGroupIdSet });
     await redoActionCallback(actionParams);
   }
 
@@ -3377,15 +3393,10 @@ export default class StageStore implements IStageStore {
    */
   async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (ids.length === 0 || !target) return;
+    // 需要移动位置的组件集合
     const elements = this.getOrderedElementsByIds(ids);
+    // 目标组件
     let targetElement = this.getElementById(target);
-    // 获取所有要移动的组件的组合id集合
-    const groupIds: Set<string> = new Set();
-    elements.forEach(element => {
-      if (element.model.type === CreatorTypes.group) {
-        groupIds.add(element.id);
-      }
-    });
     // 目标组合的id
     let targetGroupId: string | undefined = undefined;
     // 目标组合
@@ -3399,6 +3410,7 @@ export default class StageStore implements IStageStore {
       targetGroupId = targetElement.id;
       targetSubIds = targetElement.model.subIds;
       targetElement = this._elementsMap.get(targetSubIds[targetSubIds.length - 1]);
+      dropType = TreeNodeDropType.after;
     } else if (targetElement.isGroupSubject) {
       targetGroupId = targetElement.model.groupId;
       targetSubIds = this._elementsMap.get(targetGroupId)?.model.subIds || [];
@@ -3406,28 +3418,49 @@ export default class StageStore implements IStageStore {
       targetGroup = targetElement.group;
     }
     const actionParams: ElementsActionParam[] = [];
-    const updatedGroupIdSet: Set<string> = new Set();
-    const removedGroupIdSet: Set<string> = new Set();
-    elements.forEach(element => {});
-    let newSubIds: string[] = [];
-    if (targetGroupId) {
+    // 查找需要删除或者更新的组合
+    const { updatedGroups, removedGroups, actionParams: effectedActionParams, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(elements, targetGroup);
+    actionParams.push(...effectedActionParams);
+    if (targetGroup) {
       actionParams.push({
         type: ElementActionTypes.GroupUpdated,
-        data: [this.getElementById(targetGroupId)],
-      });
-      targetGroup = this.getElementById(targetGroupId) as IElementGroup;
+        data: [targetGroup],
+      })
     }
     await undoActionCallback(actionParams);
-    if (targetGroup) {
-      if (targetIndexOfGroupSubs > -1) {
-        targetSubIds.splice(targetIndexOfGroupSubs + 1, 0, ...newSubIds);
-      } else {
-        targetSubIds.push(...newSubIds);
+    // 将组件从链表中移除
+    const removedNodes = this._removeNodesByElements(elements);
+    // 重新调整顺序后的组件外层组件id集合
+    const outerLayerIds: string[] = [];
+    removedNodes.forEach(node => {
+      const id = node.value.id;
+      switch(dropType) {
+        case TreeNodeDropType.before:
+          this._elementList.insertBefore(node, targetElement.node, false);
+          break;
+        case TreeNodeDropType.after:
+          this._elementList.insertAfter(node, targetElement.node, false);
+          break;
+        default: {
+          break;
+        }
       }
-      this.updateElementModel(targetGroupId, { subIds: targetSubIds });
-      targetGroup.refreshBySubs();
-      targetGroup.refreshOriginals();
+      // 如果组件移动到了不同的组合，那么需要更新组件的组合id（仅更新层级最高的组件的组合id）
+      if (targetGroupId && outerLayerIdSet.has(id)) {
+        outerLayerIds.push(id);
+        this.updateElementModel(id, { groupId: targetGroupId });
+      }
+      targetElement = node.value;
+    });
+    if (targetGroup) {
+      // 原始的目标组合的子组件id集合
+      const subIds = [...targetGroup.model.subIds];
+      // 将目标组件id替换为新建组合的id
+      subIds.splice(targetIndexOfGroupSubs, 1, ...outerLayerIds);
+      // 更新目标组合的子组件id集合
+      this.updateElementModel(targetGroup.id, { subIds });
     }
+    this._processEffectedElementGroups({ updatedGroups, removedGroups, elementIdSet, removedGroupIdSet });
     await redoActionCallback(actionParams);
   }
 }

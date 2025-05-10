@@ -351,8 +351,8 @@ export default interface IStageSetter {
   /**
    * 将组件移动到指定位置
    *
-   * @param ids 
-   * @param target 
+   * @param ids
+   * @param target
    * @param dropType
    */
   moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback?: ElementActionCallback, redoActionCallback?: ElementActionCallback): Promise<void>;
