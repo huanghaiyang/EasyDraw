@@ -1442,4 +1442,9 @@ export type ElementTreeNode = Partial<
 };
 
 // 组件树节点拖动类型
-export type TreeNodeDropType = "before" | "after" | "inner" | "none";
+export enum TreeNodeDropType {
+  before = "before",
+  after = "after",
+  inner = "inner",
+  none = "none",
+}

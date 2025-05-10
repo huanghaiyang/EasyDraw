@@ -2305,7 +2305,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     if (group) {
       this._clearStageSelects();
-      this.store.selectElement(group);
+      this.store.setElementsDetachedSelected([group.id], true);
     }
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.GroupAdded, this.store);
     if (command) {
@@ -2691,9 +2691,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 设置组件选中状态(组件脱离组合的独立选中状态切换)
-   * 
-   * @param ids 
-   * @param isDetachedSelected 
+   *
+   * @param ids
+   * @param isDetachedSelected
    */
   setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
     this.store.setElementsDetachedSelected(ids, isDetachedSelected);
@@ -2701,19 +2701,25 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 移动组件到指定位置
-   * 
-   * @param ids 
-   * @param target 
+   *
+   * @param ids
+   * @param target
    * @param dropType
    */
   async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType): Promise<void> {
     const uDataList: Array<ICommandElementObject> = [];
     const rDataList: Array<ICommandElementObject> = [];
-    await this.store.moveElementsTo(ids, target, dropType, async (actionParams: ElementsActionParam[]) => {
-      uDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
-    }, async (actionParams: ElementsActionParam[]) => {
-      rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
-    });
+    await this.store.moveElementsTo(
+      ids,
+      target,
+      dropType,
+      async (actionParams: ElementsActionParam[]) => {
+        uDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+      },
+      async (actionParams: ElementsActionParam[]) => {
+        rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
+      },
+    );
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsMoved, this.store);
     if (command) {
       this.undoRedo.add(command);

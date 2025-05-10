@@ -55,7 +55,7 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
 import { CreatorIcons } from "@/types/CreatorDicts";
-import { ElementTreeNode } from "@/types/IElement";
+import { ElementTreeNode, TreeNodeDropType } from "@/types/IElement";
 import { TreeInstance } from "element-plus";
 import type Node from "element-plus/es/components/tree/src/model/node";
 import type { DragEvents } from "element-plus/es/components/tree/src/model/useDragNode";
@@ -111,7 +111,7 @@ const handleDragEnd = (draggingNode: Node, dropNode: Node, dropType: NodeDropTyp
   console.log("tree drag end:", dropNode && dropNode.label, dropType);
 };
 const handleDrop = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, ev: DragEvents) => {
-  stageStore.moveElementsTo([draggingNode.data.id], dropNode.data.id, dropType);
+  stageStore.moveElementsTo([draggingNode.data.id], dropNode.data.id, TreeNodeDropType[dropType]);
   console.log("tree drop:", dropNode.label, dropType);
 };
 const allowDrop = (draggingNode: Node, dropNode: Node, type: AllowDropType) => {
