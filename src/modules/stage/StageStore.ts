@@ -2554,8 +2554,10 @@ export default class StageStore implements IStageStore {
     const updatedGroupIdSet: Set<string> = new Set();
     // 外层组件id集合
     const outerLayerIdSet: Set<string> = new Set();
-    // 组合添加之前的回调函数的参数
-    const actionParams: ElementsActionParam[] = [];
+    // 组件移动参数
+    const movedActionParams: ElementsActionParam[] = [];
+    // 组合更新或者删除参数
+    const groupActionParams: ElementsActionParam[] = [];
     // 找到需要删除或者更新的组合
     elements.forEach(element => {
       if (element.isGroupSubject) {
@@ -2568,7 +2570,7 @@ export default class StageStore implements IStageStore {
         outerLayerIdSet.add(element.id);
       }
       // 标记需要移动位置的组件
-      actionParams.push({
+      movedActionParams.push({
         type: ElementActionTypes.Moved,
         data: [element],
       });
@@ -2608,7 +2610,7 @@ export default class StageStore implements IStageStore {
     // 获取需要删除的组合
     const removedGroups = this.getOrderedElementsByIds(Array.from(removedGroupIdSet)) as IElementGroup[];
     removedGroups.forEach(group => {
-      actionParams.push({
+      groupActionParams.push({
         type: ElementActionTypes.Removed,
         data: [group],
       });
@@ -2616,11 +2618,16 @@ export default class StageStore implements IStageStore {
     // 获取需要更新的组合
     const updatedGroups = this.getOrderedElementsByIds(Array.from([...updatedGroupIdSet, ...(targetElementGroupAncestors?.map(group => group.id).flat() || [])])) as IElementGroup[];
     updatedGroups.forEach(group => {
-      actionParams.push({
+      groupActionParams.push({
         type: ElementActionTypes.GroupUpdated,
         data: [group],
       });
     });
+    // redo操作时，优先处理组合的更新和删除操作，因为组合的更新和删除操作会影响到组合内的子组件的位置
+    const actionParams: ElementsActionParam[] = [
+      ...groupActionParams,
+      ...movedActionParams,
+    ];
     return {
       actionParams,
       removedGroups,
