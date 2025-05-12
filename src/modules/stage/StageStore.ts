@@ -2648,19 +2648,19 @@ export default class StageStore implements IStageStore {
    * @param removedGroupIdSet
    */
   private _processEffectedElementGroups({ removedGroups, updatedGroups, elementIdSet, removedGroupIdSet }: {
-    removedGroups: IElementGroup[],
-    updatedGroups: IElementGroup[],
-    elementIdSet: Set<string>,
-    removedGroupIdSet: Set<string>,
+    removedGroups?: IElementGroup[],
+    updatedGroups?: IElementGroup[],
+    elementIdSet?: Set<string>,
+    removedGroupIdSet?: Set<string>,
   }): void {
     // 移除需要删除的组合
-    removedGroups.forEach(rGroup => {
+    removedGroups?.forEach(rGroup => {
       this.removeElement(rGroup);
     });
     // 更新需要更新的组合
-    updatedGroups.forEach(uGroup => {
+    updatedGroups?.forEach(uGroup => {
       // 计算组合的子组件id集合
-      const subIds = uGroup.model.subIds.filter(id => !elementIdSet.has(id) && !removedGroupIdSet.has(id));
+      const subIds = uGroup.model.subIds.filter(id => !elementIdSet?.has(id) && !removedGroupIdSet?.has(id));
       // 更新组合的子组件id集合
       this.updateElementModel(uGroup.id, { subIds });
       // 因为组合内的子组件发生变化，需要刷新组合的尺寸和位置
@@ -3410,8 +3410,6 @@ export default class StageStore implements IStageStore {
     let targetGroup: IElementGroup | undefined = undefined;
     // 目标组合的子组件id集合
     let targetSubIds: string[] = [];
-    // 目标组件在目标组合中的索引
-    let targetIndexOfGroupSubs = -1;
     // 插入到组合内部的操作
     if (dropType === TreeNodeDropType.inner && targetElement.isGroup) {
       targetGroupId = targetElement.id;
@@ -3421,7 +3419,6 @@ export default class StageStore implements IStageStore {
     } else if (targetElement.isGroupSubject) {
       targetGroupId = targetElement.model.groupId;
       targetSubIds = this._elementsMap.get(targetGroupId)?.model.subIds || [];
-      targetIndexOfGroupSubs = targetSubIds.indexOf(targetElement.id);
       targetGroup = targetElement.group;
     }
     const actionParams: ElementsActionParam[] = [];
@@ -3439,14 +3436,16 @@ export default class StageStore implements IStageStore {
     const removedNodes = this._removeNodesByElements(elements);
     // 重新调整顺序后的组件外层组件id集合
     const outerLayerIds: string[] = [];
+    // 按顺序将被临时移除的组件节点插入到目标节点前
+    let targetNode: ILinkedNode<IElement> = targetElement.node;
     removedNodes.forEach(node => {
       const id = node.value.id;
       switch(dropType) {
         case TreeNodeDropType.before:
-          this._elementList.insertBefore(node, targetElement.node, false);
+          this._elementList.insertBefore(node, targetNode, false);
           break;
         case TreeNodeDropType.after:
-          this._elementList.insertAfter(node, targetElement.node, false);
+          this._elementList.insertAfter(node, targetNode, false);
           break;
         default: {
           break;
@@ -3457,17 +3456,29 @@ export default class StageStore implements IStageStore {
         outerLayerIds.push(id);
         this.updateElementModel(id, { groupId: targetGroupId });
       }
-      targetElement = node.value;
+      targetNode = node;
     });
     if (targetGroup) {
       // 原始的目标组合的子组件id集合
-      const subIds = [...targetGroup.model.subIds];
-      // 将目标组件id替换为新建组合的id
-      subIds.splice(targetIndexOfGroupSubs, 1, ...outerLayerIds);
+      let subIds = [...targetSubIds];
+      // 过滤掉已经被删除的组件id
+      subIds = subIds.filter(id => !elementIdSet.has(id));
+      // 目标组件的索引
+      const targetIndex = subIds.findIndex(id => id === targetElement.id);
+      switch(dropType) {
+        case TreeNodeDropType.before: {
+          subIds = [...subIds.slice(0, targetIndex), ...outerLayerIds, ...subIds.slice(targetIndex)];
+          break;
+        }
+        case TreeNodeDropType.after: {
+          subIds.splice(targetIndex + 1, 0, ...outerLayerIds);
+          break;
+        }
+      }
       // 更新目标组合的子组件id集合
       this.updateElementModel(targetGroup.id, { subIds });
     }
-    this._processEffectedElementGroups({ updatedGroups, removedGroups, elementIdSet, removedGroupIdSet });
+    this._processEffectedElementGroups({ updatedGroups, removedGroups, removedGroupIdSet });
     await redoActionCallback(actionParams);
   }
 }

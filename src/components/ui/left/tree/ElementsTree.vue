@@ -2,7 +2,6 @@
   <el-tree
     style="max-width: 600px"
     :allow-drop="allowDrop"
-    :allow-drag="allowDrag"
     :data="stageStore.treeNodes"
     draggable
     default-expand-all
@@ -12,10 +11,6 @@
     :expand-on-click-node="false"
     @node-click="handleClickNode"
     @node-drag-start="handleDragStart"
-    @node-drag-enter="handleDragEnter"
-    @node-drag-leave="handleDragLeave"
-    @node-drag-over="handleDragOver"
-    @node-drag-end="handleDragEnd"
     @node-drop="handleDrop"
   >
     <template #default="{ data: { id, label, isSelected, isDetachedSelected, isTarget, isGroup, type } }">
@@ -63,6 +58,7 @@ import type { AllowDropType, NodeDropType } from "element-plus/es/components/tre
 import { Paperclip } from "@element-plus/icons-vue";
 import { ref } from "vue";
 import CreatorHelper from "@/types/CreatorHelper";
+import { CreatorTypes } from "@/types/Creator";
 
 const stageStore = useStageStore();
 const treeRef = ref<TreeInstance>();
@@ -94,35 +90,48 @@ function handleClickNode(node: ElementTreeNode) {
   stageStore.toggleElementsDetachedSelected([node.id]);
 }
 
+/**
+ * 开始拖拽
+ *
+ * @param node
+ * @param ev
+ */
 const handleDragStart = (node: Node, ev: DragEvents) => {
   stageStore.setElementsDetachedSelected([node.data.id], true);
-  console.log("drag start", node);
 };
-const handleDragEnter = (draggingNode: Node, dropNode: Node, ev: DragEvents) => {
-  console.log("tree drag enter:", dropNode.label);
-};
-const handleDragLeave = (draggingNode: Node, dropNode: Node, ev: DragEvents) => {
-  console.log("tree drag leave:", dropNode.label);
-};
-const handleDragOver = (draggingNode: Node, dropNode: Node, ev: DragEvents) => {
-  console.log("tree drag over:", dropNode.label);
-};
-const handleDragEnd = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, ev: DragEvents) => {
-  console.log("tree drag end:", dropNode && dropNode.label, dropType);
-};
+
+/**
+ * 拖拽到指定节点
+ *
+ * @param draggingNode
+ * @param dropNode
+ * @param dropType
+ * @param ev
+ */
 const handleDrop = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, ev: DragEvents) => {
   stageStore.moveElementsTo([draggingNode.data.id], dropNode.data.id, TreeNodeDropType[dropType]);
-  console.log("tree drop:", dropNode.label, dropType);
 };
+
+/**
+ * 判断是否允许拖拽到指定节点
+ *
+ * @param draggingNode 
+ * @param dropNode 
+ * @param type 
+ */
 const allowDrop = (draggingNode: Node, dropNode: Node, type: AllowDropType) => {
-  if (dropNode.data.label === "Level two 3-1") {
-    return type !== "inner";
-  } else {
-    return true;
+  let result: boolean = true;
+  const { type: dropNodeType } = dropNode.data;
+  switch(type) {
+    case "inner": {
+      if (dropNodeType !== CreatorTypes.group) {
+        result = false;
+        console.log("inner dropNode is not group, the dropNode's type is ", dropNodeType);
+      }
+      break;
+    }
   }
-};
-const allowDrag = (draggingNode: Node) => {
-  return !draggingNode.data.label.includes("Level three 3-1-1");
+  return result;
 };
 </script>
 
