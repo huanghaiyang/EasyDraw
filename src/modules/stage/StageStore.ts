@@ -2624,10 +2624,7 @@ export default class StageStore implements IStageStore {
       });
     });
     // redo操作时，优先处理组合的更新和删除操作，因为组合的更新和删除操作会影响到组合内的子组件的位置
-    const actionParams: ElementsActionParam[] = [
-      ...groupActionParams,
-      ...movedActionParams,
-    ];
+    const actionParams: ElementsActionParam[] = [...groupActionParams, ...movedActionParams];
     return {
       actionParams,
       removedGroups,
@@ -2647,11 +2644,16 @@ export default class StageStore implements IStageStore {
    * @param elementIdSet
    * @param removedGroupIdSet
    */
-  private _processEffectedElementGroups({ removedGroups, updatedGroups, elementIdSet, removedGroupIdSet }: {
-    removedGroups?: IElementGroup[],
-    updatedGroups?: IElementGroup[],
-    elementIdSet?: Set<string>,
-    removedGroupIdSet?: Set<string>,
+  private _processEffectedElementGroups({
+    removedGroups,
+    updatedGroups,
+    excludeElementIdSet,
+    excludeGroupIdSet,
+  }: {
+    removedGroups?: IElementGroup[];
+    updatedGroups?: IElementGroup[];
+    excludeElementIdSet?: Set<string>;
+    excludeGroupIdSet?: Set<string>;
   }): void {
     // 移除需要删除的组合
     removedGroups?.forEach(rGroup => {
@@ -2660,7 +2662,7 @@ export default class StageStore implements IStageStore {
     // 更新需要更新的组合
     updatedGroups?.forEach(uGroup => {
       // 计算组合的子组件id集合
-      const subIds = uGroup.model.subIds.filter(id => !elementIdSet?.has(id) && !removedGroupIdSet?.has(id));
+      const subIds = uGroup.model.subIds.filter(id => !excludeElementIdSet?.has(id) && !excludeGroupIdSet?.has(id));
       // 更新组合的子组件id集合
       this.updateElementModel(uGroup.id, { subIds });
       // 因为组合内的子组件发生变化，需要刷新组合的尺寸和位置
@@ -2694,10 +2696,7 @@ export default class StageStore implements IStageStore {
     // 计算目标组件在目标组件所属的组合中的索引
     targetIndexOfGroupSubs = targetElementGroup?.model.subIds.indexOf(targetElement.id);
     // 计算移动组件位置时，受影响的组件
-    const { actionParams, removedGroups, updatedGroups, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(
-      sortedElements,
-      targetElementGroup,
-    );
+    const { actionParams, removedGroups, updatedGroups, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(sortedElements, targetElementGroup);
     // 顶层组合集合
     const outerLayerElements: IElement[] = this.getOrderedElementsByIds(Array.from(outerLayerIdSet));
     await undoActionCallback(actionParams);
@@ -2735,7 +2734,7 @@ export default class StageStore implements IStageStore {
     await undoActionCallback([groupAddedParams]);
     // 组合添加之前的回调函数的参数
     actionParams.push(groupAddedParams);
-    this._processEffectedElementGroups({ removedGroups, updatedGroups, elementIdSet, removedGroupIdSet });
+    this._processEffectedElementGroups({ removedGroups, updatedGroups, excludeElementIdSet: elementIdSet, excludeGroupIdSet: removedGroupIdSet });
     await redoActionCallback(actionParams);
   }
 
@@ -3411,12 +3410,7 @@ export default class StageStore implements IStageStore {
     // 目标组合的子组件id集合
     let targetSubIds: string[] = [];
     // 插入到组合内部的操作
-    if (dropType === TreeNodeDropType.inner && targetElement.isGroup) {
-      targetGroupId = targetElement.id;
-      targetSubIds = targetElement.model.subIds;
-      targetElement = this._elementsMap.get(targetSubIds[targetSubIds.length - 1]);
-      dropType = TreeNodeDropType.after;
-    } else if (targetElement.isGroupSubject) {
+    if (targetElement.isGroupSubject) {
       targetGroupId = targetElement.model.groupId;
       targetSubIds = this._elementsMap.get(targetGroupId)?.model.subIds || [];
       targetGroup = targetElement.group;
@@ -3424,61 +3418,66 @@ export default class StageStore implements IStageStore {
     const actionParams: ElementsActionParam[] = [];
     // 查找需要删除或者更新的组合
     const { updatedGroups, removedGroups, actionParams: effectedActionParams, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(elements, targetGroup);
+    // 用于更新组合移出的组件id集合
+    const excludeElementIdSet: Set<string> = new Set(elementIdSet);
     actionParams.push(...effectedActionParams);
     if (targetGroup) {
       actionParams.push({
         type: ElementActionTypes.GroupUpdated,
         data: [targetGroup],
-      })
+      });
     }
     await undoActionCallback(actionParams);
     // 将组件从链表中移除
     const removedNodes = this._removeNodesByElements(elements);
-    // 重新调整顺序后的组件外层组件id集合
-    const outerLayerIds: string[] = [];
     // 按顺序将被临时移除的组件节点插入到目标节点前
     let targetNode: ILinkedNode<IElement> = targetElement.node;
     removedNodes.forEach(node => {
-      const id = node.value.id;
-      switch(dropType) {
-        case TreeNodeDropType.before:
+      const {
+        id,
+        model: { groupId },
+      } = node.value;
+      // 树节点的after和before操作，与当前链表中的顺序是相反的
+      switch (dropType) {
+        case TreeNodeDropType.after:
           this._elementList.insertBefore(node, targetNode, false);
           break;
-        case TreeNodeDropType.after:
+        case TreeNodeDropType.before:
           this._elementList.insertAfter(node, targetNode, false);
           break;
         default: {
           break;
         }
       }
+      // 判断是否是组内平级移动
+      if (groupId && groupId === targetElement.model.groupId) {
+        // 组内平级移动时，组合的子组件id不应该将当前组件的id删除，所以需要将id从excludeElementIdSet中删除
+        excludeElementIdSet.delete(id);
+        targetGroup = this._elementsMap.get(groupId) as IElementGroup;
+        targetSubIds = targetGroup.model.subIds;
+      }
       // 如果组件移动到了不同的组合，那么需要更新组件的组合id（仅更新层级最高的组件的组合id）
-      if (targetGroupId && outerLayerIdSet.has(id)) {
-        outerLayerIds.push(id);
+      if (outerLayerIdSet.has(id)) {
         this.updateElementModel(id, { groupId: targetGroupId });
       }
       targetNode = node;
     });
     if (targetGroup) {
-      // 原始的目标组合的子组件id集合
-      let subIds = [...targetSubIds];
+      // 外层组件的id集合
+      const outerLayerIds = this.getOrderedElementIds(Array.from(outerLayerIdSet));
       // 过滤掉已经被删除的组件id
-      subIds = subIds.filter(id => !elementIdSet.has(id));
+      let subIds = targetSubIds.filter(id => !elementIdSet.has(id));
       // 目标组件的索引
       const targetIndex = subIds.findIndex(id => id === targetElement.id);
-      switch(dropType) {
-        case TreeNodeDropType.before: {
-          subIds = [...subIds.slice(0, targetIndex), ...outerLayerIds, ...subIds.slice(targetIndex)];
-          break;
-        }
-        case TreeNodeDropType.after: {
-          subIds.splice(targetIndex + 1, 0, ...outerLayerIds);
-          break;
-        }
-      }
+      // 重新插入组件id
+      subIds = LodashUtils.insertToArray(subIds, targetIndex, dropType === TreeNodeDropType.after, ...outerLayerIds);
       // 更新目标组合的子组件id集合
       this.updateElementModel(targetGroup.id, { subIds });
     }
-    this._processEffectedElementGroups({ updatedGroups, removedGroups, removedGroupIdSet });
+    this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeElementIdSet, excludeGroupIdSet: removedGroupIdSet });
     await redoActionCallback(actionParams);
+    this.retrieveElements();
+    this.emitElementsLayerChanged();
+    this.throttleRefreshTreeNodes();
   }
 }

@@ -2240,9 +2240,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       },
     );
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsAdded, this.store);
-    if (command) {
-      this.undoRedo.add(command);
-    }
+    this.undoRedo.add(command);
     this.store.setElementsDetachedSelected(
       elements.map(element => element.id),
       true,
@@ -2308,9 +2306,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.setElementsDetachedSelected([group.id], true);
     }
     const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupAdded, this.store);
-    if (command) {
-      this.undoRedo.add(command);
-    }
+    this.undoRedo.add(command);
   }
 
   /**
@@ -2375,6 +2371,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         ElementCommandTypes.GroupAdded,
         ElementCommandTypes.GroupRemoved,
         ElementCommandTypes.DetachedElementsRemoved,
+        ElementCommandTypes.ElementsMoved,
       ].includes(tailCommand.payload.type)
     ) {
       this.store.refreshStageElements();
@@ -2720,9 +2717,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
       },
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsMoved, this.store);
-    if (command) {
-      this.undoRedo.add(command);
-    }
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsMoved, this.store);
+    this.undoRedo.add(command);
+    this.selection.refresh();
   }
 }

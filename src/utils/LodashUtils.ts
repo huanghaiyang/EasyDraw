@@ -173,4 +173,21 @@ export default class LodashUtils {
     }
     return result;
   }
+
+  /**
+   * 给定一个元素不重复的数组，将数组中的某些元素，移动到数组中某个元素的前面或后面
+   *
+   * @param arr
+   * @param elements
+   * @param targetElement
+   */
+  static insertToArray<T>(arr: T[], index: number, isBefore: boolean, ...elements: T[]): T[] {
+    const result: T[] = [...arr];
+    if (isBefore) {
+      result.splice(index, 0, ...elements);
+    } else {
+      result.splice(index + 1, 0, ...elements);
+    }
+    return result;
+  }
 }

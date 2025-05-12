@@ -115,14 +115,14 @@ const handleDrop = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, 
 /**
  * 判断是否允许拖拽到指定节点
  *
- * @param draggingNode 
- * @param dropNode 
- * @param type 
+ * @param draggingNode
+ * @param dropNode
+ * @param type
  */
 const allowDrop = (draggingNode: Node, dropNode: Node, type: AllowDropType) => {
   let result: boolean = true;
   const { type: dropNodeType } = dropNode.data;
-  switch(type) {
+  switch (type) {
     case "inner": {
       if (dropNodeType !== CreatorTypes.group) {
         result = false;
