@@ -120,18 +120,7 @@ const handleDrop = (draggingNode: Node, dropNode: Node, dropType: NodeDropType, 
  * @param type
  */
 const allowDrop = (draggingNode: Node, dropNode: Node, type: AllowDropType) => {
-  let result: boolean = true;
-  const { type: dropNodeType } = dropNode.data;
-  switch (type) {
-    case "inner": {
-      if (dropNodeType !== CreatorTypes.group) {
-        result = false;
-        console.log("inner dropNode is not group, the dropNode's type is ", dropNodeType);
-      }
-      break;
-    }
-  }
-  return result;
+  return type !== "inner";
 };
 </script>
 

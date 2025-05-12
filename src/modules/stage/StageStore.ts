@@ -3432,6 +3432,7 @@ export default class StageStore implements IStageStore {
         data: [targetGroup],
       });
     }
+    // undo数据回调
     await undoActionCallback(actionParams);
     // 将组件从链表中移除
     const removedNodes = this._removeNodesByElements(elements);
@@ -3465,6 +3466,7 @@ export default class StageStore implements IStageStore {
       }
       targetNode = node;
     });
+    // 组内平级移动以及移动到其他组内，targetGroup都会存在
     if (targetGroup) {
       // 外层组件的id集合
       const outerLayerIds = this.getOrderedElementIds(Array.from(outerLayerIdSet));
@@ -3476,9 +3478,16 @@ export default class StageStore implements IStageStore {
       subIds = LodashUtils.insertToArray(subIds, targetIndex, dropType === TreeNodeDropType.after, ...outerLayerIds);
       // 更新目标组合的子组件id集合
       this.updateElementModel(targetGroup.id, { subIds });
+      // 更新组合的尺寸及位置
+      targetGroup.refreshBySubs();
+      // 更新组合的原始数据
+      targetGroup.refreshOriginals();
     }
+    // 剔除掉已经更新子组件id的组合
     updatedGroups = updatedGroups.filter(group => group.id !== targetGroupId);
-    this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeGroupIdSet: removedGroupIdSet });
+    // 删除或者更新组合的子组件id集合
+    this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeElementIdSet: elementIdSet, excludeGroupIdSet: removedGroupIdSet });
+    // redo数据回调
     await redoActionCallback(actionParams);
   }
 
