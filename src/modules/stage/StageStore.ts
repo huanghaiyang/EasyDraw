@@ -3412,15 +3412,21 @@ export default class StageStore implements IStageStore {
     if (targetElement.isGroupSubject) {
       targetGroupId = targetElement.model.groupId;
       targetSubIds = this._elementsMap.get(targetGroupId)?.model.subIds || [];
-      targetGroup = targetElement.group;
+      targetGroup = this._elementsMap.get(targetGroupId) as IElementGroup;
     }
     const actionParams: ElementsActionParam[] = [];
     // 查找需要删除或者更新的组合
-    const { updatedGroups, removedGroups, actionParams: effectedActionParams, outerLayerIdSet, elementIdSet, removedGroupIdSet } = this._calcEffectedElementsOfMoved(elements, targetGroup);
-    // 用于更新组合移出的组件id集合
-    const excludeElementIdSet: Set<string> = new Set(elementIdSet);
+    let {
+      updatedGroups,
+      removedGroups,
+      actionParams: effectedActionParams,
+      outerLayerIdSet,
+      elementIdSet,
+      removedGroupIdSet,
+      updatedGroupIdSet,
+    } = this._calcEffectedElementsOfMoved(elements, targetGroup);
     actionParams.push(...effectedActionParams);
-    if (targetGroup) {
+    if (targetGroup && !updatedGroupIdSet.has(targetGroup.id)) {
       actionParams.push({
         type: ElementActionTypes.GroupUpdated,
         data: [targetGroup],
@@ -3450,8 +3456,6 @@ export default class StageStore implements IStageStore {
       }
       // 判断是否是组内平级移动
       if (groupId && groupId === targetElement.model.groupId) {
-        // 组内平级移动时，组合的子组件id不应该将当前组件的id删除，所以需要将id从excludeElementIdSet中删除
-        excludeElementIdSet.delete(id);
         targetGroup = this._elementsMap.get(groupId) as IElementGroup;
         targetSubIds = targetGroup.model.subIds;
       }
@@ -3465,7 +3469,7 @@ export default class StageStore implements IStageStore {
       // 外层组件的id集合
       const outerLayerIds = this.getOrderedElementIds(Array.from(outerLayerIdSet));
       // 过滤掉已经被删除的组件id
-      let subIds = targetSubIds.filter(id => !elementIdSet.has(id));
+      let subIds = targetSubIds.filter(id => !elementIdSet.has(id) && !removedGroupIdSet.has(id));
       // 目标组件的索引
       const targetIndex = subIds.findIndex(id => id === targetElement.id);
       // 重新插入组件id
@@ -3473,7 +3477,8 @@ export default class StageStore implements IStageStore {
       // 更新目标组合的子组件id集合
       this.updateElementModel(targetGroup.id, { subIds });
     }
-    this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeElementIdSet, excludeGroupIdSet: removedGroupIdSet });
+    updatedGroups = updatedGroups.filter(group => group.id !== targetGroupId);
+    this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeGroupIdSet: removedGroupIdSet });
     await redoActionCallback(actionParams);
   }
 
