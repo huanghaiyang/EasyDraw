@@ -592,7 +592,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _createFontStyleCommand(elements: IElement[], elementsUpdateFunction: () => Promise<void>, updateType: TextFontStyleUpdateTypes): Promise<void> {
     const shouldRelationUndoCommand = TextElementUtils.shouldRelationUndoCommand(updateType);
-    const commandId = nanoid();
+    const commandId = CommonUtils.getRandomId();
     const uDataList = await Promise.all(
       elements.map(async element => {
         if (shouldRelationUndoCommand && element.isEditing && element instanceof ElementText) {

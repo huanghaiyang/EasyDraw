@@ -458,7 +458,7 @@ export default class ElementText extends ElementRect implements IElementText {
         this._cursorVisibleStatus = false;
         this._editorOperation = TextEditorOperations.MOVE_SELECTION;
         if (!this._selectionMoveId) {
-          this._selectionMoveId = nanoid();
+          this._selectionMoveId = CommonUtils.getRandomId();
           this._undoCommandObject = this._getTextEditorCommandObject({ dataExclude: true });
         }
       } else {
@@ -1737,7 +1737,7 @@ export default class ElementText extends ElementRect implements IElementText {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject();
     } else {
       const command = new TextEditorUpdatedCommand(
-        nanoid(),
+        CommonUtils.getRandomId(),
         {
           type: TextEeditorCommandTypes.TextUpdated,
           operation: this._editorOperation,
@@ -1776,7 +1776,7 @@ export default class ElementText extends ElementRect implements IElementText {
       tailUndoCommand.payload.rData = this._getTextEditorCommandObject({ dataExclude: true });
     } else {
       const command = new TextEditorUpdatedCommand(
-        nanoid(),
+        CommonUtils.getRandomId(),
         {
           type: TextEeditorCommandTypes.CursorSelectionUpdated,
           operation: this._editorOperation,
@@ -1923,7 +1923,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   relationUndoCommand(commandId: string): void {
     const editCommand = new TextEditorUpdatedCommand(
-      nanoid(),
+      CommonUtils.getRandomId(),
       {
         type: TextEeditorCommandTypes.CursorSelectionUpdated,
         operation: this._editorOperation,

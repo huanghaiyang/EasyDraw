@@ -617,7 +617,7 @@ export default class ElementUtils {
    * 创建空对象
    */
   static createEmptyObject(): Partial<ElementObject> {
-    const id = CommonUtils.getDateId();
+    const id = CommonUtils.getRandomId();
     return {
       id: `${id}`,
       subIds: [],
@@ -659,11 +659,10 @@ export default class ElementUtils {
   static convertElementsJson(elementsJson: Array<ElementObject>): Array<ElementObject> {
     const models = elementsJson as unknown as Array<ElementObject>;
     const modelsMap: Map<String, ElementObject> = new Map();
-    const ids: number[] = [];
-    const timestamp = CommonUtils.getDateId();
-    models.forEach((model, index) => {
+    const ids: string[] = [];
+    models.forEach((model) => {
       modelsMap.set(model.id, model);
-      ids.push(timestamp + index);
+      ids.push(CommonUtils.getRandomId());
     });
     models.forEach((model, index) => {
       ElementUtils.reBindGroup(model, modelsMap, `${ids[index]}`);

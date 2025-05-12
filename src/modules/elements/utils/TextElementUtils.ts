@@ -77,7 +77,7 @@ export default class TextElementUtils {
    */
   static createTextNode(value: string, fontStyle: FontStyle): ITextNode {
     return {
-      id: nanoid(),
+      id: CommonUtils.getRandomId(),
       content: value,
       fontStyle,
     };
@@ -1058,7 +1058,7 @@ export default class TextElementUtils {
   static cloneTextNode(textNode: ITextNode): ITextNode {
     const { content, fontStyle } = textNode;
     return {
-      id: nanoid(),
+      id: CommonUtils.getRandomId(),
       content,
       fontStyle: LodashUtils.jsonClone(fontStyle),
     };

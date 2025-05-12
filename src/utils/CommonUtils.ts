@@ -78,21 +78,12 @@ export default class CommonUtils {
   }
 
   /**
-   * 获取时间戳
-   *
-   * @returns
-   */
-  static getDateId() {
-    return +new Date();
-  }
-
-  /**
    * 生成一个随机的id
    *
    * @returns
    */
   static getRandomId() {
-    return nanoid(8);
+    return `${nanoid(8)}-${nanoid(4)}`;
   }
 
   /**

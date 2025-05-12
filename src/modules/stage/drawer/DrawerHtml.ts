@@ -8,6 +8,7 @@ import ColorUtils from "@/utils/ColorUtils";
 import { nanoid } from "nanoid";
 import CoderUtils from "@/utils/CoderUtils";
 import EventUtils from "@/utils/EventUtils";
+import CommonUtils from "@/utils/CommonUtils";
 
 const minWidth = 100;
 const minHeight = 20;
@@ -95,7 +96,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
   _resetTextCursorInput(): void {
     if (this.textCursorEditor) {
       this.textCursorEditor.value = "";
-      this._textEditorUpdateId = nanoid();
+      this._textEditorUpdateId = CommonUtils.getRandomId();
     }
   }
 

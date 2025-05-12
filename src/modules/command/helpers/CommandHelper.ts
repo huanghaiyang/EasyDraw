@@ -6,6 +6,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 import { nanoid } from "nanoid";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementsChangedCommand from "@/modules/command/ElementsChangedCommand";
+import CommonUtils from "@/utils/CommonUtils";
 
 export default class CommandHelper {
   /**
@@ -136,7 +137,7 @@ export default class CommandHelper {
     id?: string,
   ): ICommand<IElementCommandPayload> {
     const command = new ElementsChangedCommand(
-      id || nanoid(),
+      id || CommonUtils.getRandomId(),
       {
         type,
         uDataList,
