@@ -3388,7 +3388,7 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 将组件移动到指定位置
+   * 执行将组件移动到指定位置
    *
    * @param ids
    * @param target
@@ -3397,8 +3397,7 @@ export default class StageStore implements IStageStore {
    * @param redoActionCallback
    * @returns
    */
-  async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
-    if (ids.length === 0 || !target) return;
+  async _doMoveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     // 需要移动位置的组件集合
     const elements = this.getOrderedElementsByIds(ids);
     // 目标组件
@@ -3476,6 +3475,21 @@ export default class StageStore implements IStageStore {
     }
     this._processEffectedElementGroups({ updatedGroups, removedGroups, excludeElementIdSet, excludeGroupIdSet: removedGroupIdSet });
     await redoActionCallback(actionParams);
+  }
+
+  /**
+   * 将组件移动到指定位置
+   *
+   * @param ids
+   * @param target
+   * @param dropType
+   * @param undoActionCallback
+   * @param redoActionCallback
+   * @returns
+   */
+  async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
+    if (ids.length === 0 || !target) return;
+    await this._doMoveElementsTo(ids, target, dropType, undoActionCallback, redoActionCallback);
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
