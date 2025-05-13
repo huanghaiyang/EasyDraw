@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontStyler, FontStyler } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { FontStyler } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-
-const fontStyler = ref(DefaultFontStyler);
+const fontStyler = ref(DefaultStage.fontStyler);
 
 watch(
   () => stageStore.fontStyler,

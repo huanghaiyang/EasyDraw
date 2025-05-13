@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultParagraphSpacing, ParagraphSpacingList } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { ParagraphSpacingList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-const paragraphSpacing = ref(DefaultParagraphSpacing);
+const paragraphSpacing = ref(DefaultStage.paragraphSpacing);
 
 watch(
   () => stageStore.paragraphSpacing,

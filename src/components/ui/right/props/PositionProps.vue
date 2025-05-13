@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import MathUtils from "@/utils/MathUtils";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-
-const xValue = ref(0);
-const yValue = ref(0);
+const xValue = ref(DefaultStage.position.x);
+const yValue = ref(DefaultStage.position.y);
 
 watch(
   () => stageStore.position,

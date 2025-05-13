@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultTextCase, TextCase } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { TextCase } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-
-const textCase = ref(DefaultTextCase);
+const textCase = ref(DefaultStage.textCase);
 
 watch(
   () => stageStore.textCase,

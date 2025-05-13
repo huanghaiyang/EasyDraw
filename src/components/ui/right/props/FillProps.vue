@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFillStyle } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 import { Plus, Minus } from "@element-plus/icons-vue";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
-
-const fills = ref([{ ...DefaultFillStyle }]);
+const fills = ref([...DefaultStage.fills]);
 
 watch(
   () => stageStore.fills,
@@ -56,7 +54,7 @@ const toggleColorPickerVisible = () => {
           </el-input>
         </div>
         <el-icon>
-          <Minus @click="stageStore.removeElementsFill(index)" v-if="fills.length > 1" />
+          <Minus @click="stageStore.removeElementsFill(index)" v-show="fills.length > 1" />
         </el-icon>
       </div>
     </div>

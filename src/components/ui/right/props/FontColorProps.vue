@@ -1,14 +1,13 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontColor, DefaultFontColorOpacity } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
-const fontColor = ref(DefaultFontColor);
-const fontColorOpacity = ref(DefaultFontColorOpacity);
-const fontColorMixin = ref(false);
-const fontColorOpacityMixin = ref(false);
+const fontColor = ref(DefaultStage.fontColor);
+const fontColorOpacity = ref(DefaultStage.fontColorOpacity);
+const fontColorMixin = ref(DefaultStage.fontColorMixin);
+const fontColorOpacityMixin = ref(DefaultStage.fontColorOpacityMixin);
 
 watch(
   () => stageStore.fontColor,

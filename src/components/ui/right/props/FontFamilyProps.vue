@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontFamily, FontFamilyList } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { FontFamilyList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-const fontFamily = ref(DefaultFontFamily);
-const fontFamilyMixin = ref(false);
+const fontFamily = ref(DefaultStage.fontFamily);
+const fontFamilyMixin = ref(DefaultStage.fontFamilyMixin);
 
 watch(
   () => stageStore.fontFamily,

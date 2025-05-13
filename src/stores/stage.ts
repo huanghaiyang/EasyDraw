@@ -23,7 +23,7 @@ const ThrottleTime = 200;
 const tOptions = { leading: true, trailing: true };
 
 // 舞台默认数据
-const DefaultStage = {
+export const DefaultStage = {
   // 组件位置
   position: {
     x: 0,

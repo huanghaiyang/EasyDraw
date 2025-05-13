@@ -1,13 +1,12 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 import { Lock, Unlock } from "@element-plus/icons-vue";
 import MathUtils from "@/utils/MathUtils";
 
 const stageStore = useStageStore();
-
-const wValue = ref(0);
-const hValue = ref(0);
+const wValue = ref(DefaultStage.width);
+const hValue = ref(DefaultStage.height);
 
 watch(
   () => stageStore.width,

@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontLineHeight, DefaultFontLineHeightAutoFit, DefaultFontLineHeightFactor, DefaultFontSize, FontLineHeightFactorList, FontLineHeightList } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { DefaultFontSize, FontLineHeightFactorList, FontLineHeightList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-const fontLineHeight = ref(DefaultFontLineHeight);
-const fontLineHeightFactor = ref(DefaultFontLineHeightFactor);
-const fontLineHeightAutoFit = ref(DefaultFontLineHeightAutoFit);
-const fontLineHeightFactorInputEnable = ref(false);
+const fontLineHeight = ref(DefaultStage.fontLineHeight);
+const fontLineHeightFactor = ref(DefaultStage.fontLineHeightFactor);
+const fontLineHeightAutoFit = ref(DefaultStage.fontLineHeightAutoFit);
+const fontLineHeightFactorInputEnable = ref(DefaultStage.fontLineHeightFactorInputEnable);
 
 watch(
   () => stageStore.fontLineHeight,
@@ -54,7 +54,7 @@ watch(
       </el-tooltip>
     </div>
 
-    <div class="font-props__row" v-if="fontLineHeightAutoFit">
+    <div class="font-props__row" v-show="fontLineHeightAutoFit">
       <div class="font-props__row-item">
         <el-select
           v-model="fontLineHeightFactor"
@@ -83,7 +83,7 @@ watch(
       </div>
     </div>
 
-    <div class="font-props__row" v-else>
+    <div class="font-props__row" v-show="!fontLineHeightAutoFit">
       <div class="font-props__row-item">
         <el-select v-model="fontLineHeight" size="small" @change="value => stageStore.setElementsFontLineHeight(value)" :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable">
           <el-option v-for="item in FontLineHeightList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>

@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultTextDecoration, DefaultTextDecorationColor, DefaultTextDecorationOpacity, DefaultTextDecorationThickness, TextDecoration } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { TextDecoration } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const colorPickerRef = ref();
-const textDecoration = ref(DefaultTextDecoration);
-const textDecorationThickness = ref(DefaultTextDecorationThickness);
-const textDecorationThicknessMixin = ref(false);
-const textDecorationColor = ref(DefaultTextDecorationColor);
-const textDecorationOpacity = ref(DefaultTextDecorationOpacity);
-const textDecorationColorMixin = ref(false);
-const textDecorationOpacityMixin = ref(false);
+const textDecoration = ref(DefaultStage.textDecoration);
+const textDecorationThickness = ref(DefaultStage.textDecorationThickness);
+const textDecorationThicknessMixin = ref(DefaultStage.textDecorationThicknessMixin);
+const textDecorationColor = ref(DefaultStage.textDecorationColor);
+const textDecorationOpacity = ref(DefaultStage.textDecorationOpacity);
+const textDecorationColorMixin = ref(DefaultStage.textDecorationColorMixin);
+const textDecorationOpacityMixin = ref(DefaultStage.textDecorationOpacityMixin);
 
 watch(
   () => stageStore.textDecoration,

@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultTextAlign, DefaultTextVerticalAlign, TextVerticalAlign } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { TextVerticalAlign } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-
-const textAlign = ref(DefaultTextAlign);
-const textVerticalAlign = ref(DefaultTextVerticalAlign);
+const textAlign = ref(DefaultStage.textAlign);
+const textVerticalAlign = ref(DefaultStage.textVerticalAlign);
 
 watch(
   () => stageStore.textAlign,

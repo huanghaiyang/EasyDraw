@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
-import { DefaultCornerModel } from "@/types/IElement";
 import { uniq } from "lodash";
 
 const stageStore = useStageStore();
-const corners = ref(DefaultCornerModel.corners);
+const corners = ref([...DefaultStage.corners]);
 const value = ref(0);
 const isAllCornerEqual = ref(false);
 

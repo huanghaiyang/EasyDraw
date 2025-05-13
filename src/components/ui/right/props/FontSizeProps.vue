@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontSize, FontSizeList } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { FontSizeList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-const fontSize = ref(DefaultFontSize);
-const fontSizeMixin = ref(false);
+const fontSize = ref(DefaultStage.fontSize);
+const fontSizeMixin = ref(DefaultStage.fontSizeMixin);
 
 watch(
   () => stageStore.fontSize,

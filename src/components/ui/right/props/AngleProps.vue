@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ref, watch } from "vue";
 import { clamp } from "lodash";
 import MathUtils from "@/utils/MathUtils";
 
 const stageStore = useStageStore();
-const aValue = ref(0);
-const leanYValue = ref(0);
+const aValue = ref(DefaultStage.angle);
+const leanYValue = ref(DefaultStage.leanYAngle);
 
 watch(
   () => stageStore.angle,
@@ -54,7 +54,7 @@ function setElementsLeanYAngle(value: string) {
   <div class="angle-props right-props">
     <div class="angle-props__title">
       <span class="angle-props__title-text">角度</span>
-      <el-icon :class="['iconfont', 'icon-verbise-flip-horizontal']" v-if="stageStore.flipX"> </el-icon>
+      <el-icon :class="['iconfont', 'icon-verbise-flip-horizontal']" v-show="stageStore.flipX"> </el-icon>
     </div>
 
     <div class="angle-props__row">

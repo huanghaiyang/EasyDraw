@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
-import { DefaultFontLetterSpacing, FontLetterSpacingList } from "@/styles/ElementStyles";
+import { DefaultStage, useStageStore } from "@/stores/stage";
+import { FontLetterSpacingList } from "@/styles/ElementStyles";
 import { ref, watch } from "vue";
 
 const stageStore = useStageStore();
-const fontLetterSpacing = ref(DefaultFontLetterSpacing);
-const fontLetterSpacingMixin = ref(false);
+const fontLetterSpacing = ref(DefaultStage.fontLetterSpacing);
+const fontLetterSpacingMixin = ref(DefaultStage.fontLetterSpacingMixin);
 
 watch(
   () => stageStore.fontLetterSpacing,

@@ -1,13 +1,13 @@
 <script lang="ts" setup>
-import { useStageStore } from "@/stores/stage";
+import { DefaultStage, useStageStore } from "@/stores/stage";
 import { CreatorTypes } from "@/types/Creator";
-import { DefaultStrokeStyle, getStokeTypes } from "@/styles/ElementStyles";
+import { getStokeTypes } from "@/styles/ElementStyles";
 import { Plus, Minus } from "@element-plus/icons-vue";
 import { ref, watch } from "vue";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
-const strokes = ref([{ ...DefaultStrokeStyle }]);
+const strokes = ref([...DefaultStage.strokes]);
 
 watch(
   () => stageStore.strokes,
@@ -65,7 +65,7 @@ const toggleColorPickerVisible = () => {
         </div>
 
         <el-icon>
-          <Minus @click="stageStore.removeElementsStroke(index)" v-if="strokes.length > 1" />
+          <Minus @click="stageStore.removeElementsStroke(index)" v-show="strokes.length > 1" />
         </el-icon>
       </div>
 
