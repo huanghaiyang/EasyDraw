@@ -6,7 +6,6 @@ import ITextData, { ITextCursor, ITextLine, ITextNode, ITextSelection, TextFontS
 import CommonUtils from "@/utils/CommonUtils";
 import LodashUtils from "@/utils/LodashUtils";
 import { pick, every, isString, isNumber } from "lodash";
-import { nanoid } from "nanoid";
 
 /**
  * 获取文本光标与文本节点的对应关系，并更新光标位置和宽高

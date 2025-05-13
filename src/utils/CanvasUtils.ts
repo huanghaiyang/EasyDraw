@@ -659,7 +659,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawRotateTextWithScale(target: HTMLCanvasElement, textData: ITextData, points: IPoint[], renderRect: RenderRect, fontStyle: FontStyle, options: RenderParams = {}) {
-    points = CanvasUtils.transPointsWidthScale(points);
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     fontStyle = CanvasUtils.transFontWithScale(fontStyle);
     CanvasUtils.drawRotateText(target, textData, points, renderRect, fontStyle, options);
   }
@@ -688,6 +688,25 @@ export default class CanvasUtils {
   }
 
   /**
+   * 测量文本
+   *
+   * @param target
+   * @param text
+   * @param center
+   * @param styles
+   * @param options
+   */
+  static measureText(ctx: CanvasRenderingContext2D, text: string, styles: ElementStyles): TextMetrics {
+    ctx.save();
+    ctx.font = StyleUtils.joinFont(styles);
+    ctx.textAlign = styles.textAlign;
+    ctx.textBaseline = styles.textBaseline;
+    const result = ctx.measureText(text);
+    ctx.restore();
+    return result;
+  }
+
+  /**
    * 绘制中心点需要缩放的文本
    *
    * @param target
@@ -697,24 +716,8 @@ export default class CanvasUtils {
    * @param options
    */
   static drawCommonRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}) {
-    if (CanvasUtils.scale !== 1) {
-      center = {
-        x: center.x * CanvasUtils.scale,
-        y: center.y * CanvasUtils.scale,
-      };
-    }
+    center = CommonUtils.scalePoint(center, CanvasUtils.scale);
     CanvasUtils.drawCommonRotateText(target, text, center, styles, fillStyle, options);
-  }
-
-  /**
-   * 点缩放
-   *
-   * @param points
-   * @returns
-   */
-  static transPointsWidthScale(points: IPoint[]): IPoint[] {
-    if (CanvasUtils.scale === 1) return points;
-    return CommonUtils.scalePoints(points, CanvasUtils.scale);
   }
 
   /**
@@ -791,7 +794,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawPathWithScale(target: HTMLCanvasElement, points: IPoint[], fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
-    points = CanvasUtils.transPointsWidthScale(points);
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(target, points, fillStyle, strokeStyle, options);
@@ -832,7 +835,7 @@ export default class CanvasUtils {
    * @param options
    */
   static drawInnerPathFillWithScale(target: HTMLCanvasElement, points: IPoint[], fillStyle: FillStyle, strokeStyle: StrokeStyle, options: RenderParams = {}): void {
-    points = CanvasUtils.transPointsWidthScale(points);
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     if (fillStyle.colorOpacity) {
       CanvasUtils.drawInnerPathFill(target, points, fillStyle, strokeStyle, options);
@@ -885,7 +888,7 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawPathStrokeWidthScale(target: HTMLCanvasElement, points: IPoint[], strokeStyle: StrokeStyle, options: RenderParams = {}) {
-    points = CanvasUtils.transPointsWidthScale(points);
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawPathStroke(target, points, strokeStyle, options);
   }
@@ -1166,7 +1169,7 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawEllipseStrokeWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, strokeStyle: StrokeStyle, rect?: RenderRect, options?: RenderParams) {
-    const points = CanvasUtils.transPointsWidthScale([point]);
+    const points = CommonUtils.scalePoints([point], CanvasUtils.scale);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawEllipseStroke(target, points[0], model, strokeStyle, rect, options);
   }
@@ -1180,7 +1183,7 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawEllipseFillWithScale(target: HTMLCanvasElement, point: IPoint, model: EllipseModel, fillStyle: FillStyle, rect?: RenderRect, options?: RenderParams) {
-    const points = CanvasUtils.transPointsWidthScale([point]);
+    const points = CommonUtils.scalePoints([point], CanvasUtils.scale);
     CanvasUtils.drawEllipseFill(target, points[0], model, fillStyle, rect, options);
   }
 
@@ -1217,7 +1220,7 @@ export default class CanvasUtils {
    * @param styles
    */
   static drawLineWidthScale(target: HTMLCanvasElement, points: IPoint[], strokeStyle: StrokeStyle) {
-    points = CanvasUtils.transPointsWidthScale(points);
+    points = CommonUtils.scalePoints(points, CanvasUtils.scale);
     strokeStyle = CanvasUtils.transStrokeWithScale(strokeStyle);
     CanvasUtils.drawLine(target, points, strokeStyle);
   }

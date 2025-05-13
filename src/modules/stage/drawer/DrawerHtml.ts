@@ -5,7 +5,6 @@ import { DefaultFontStyle } from "@/styles/ElementStyles";
 import { SelectionStrokeColor } from "@/styles/MaskStyles";
 import FontUtils from "@/utils/FontUtils";
 import ColorUtils from "@/utils/ColorUtils";
-import { nanoid } from "nanoid";
 import CoderUtils from "@/utils/CoderUtils";
 import EventUtils from "@/utils/EventUtils";
 import CommonUtils from "@/utils/CommonUtils";

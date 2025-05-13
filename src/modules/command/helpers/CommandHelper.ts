@@ -3,7 +3,6 @@ import IElement, { ElementObject } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
-import { nanoid } from "nanoid";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementsChangedCommand from "@/modules/command/ElementsChangedCommand";
 import CommonUtils from "@/utils/CommonUtils";

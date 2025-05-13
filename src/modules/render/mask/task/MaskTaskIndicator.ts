@@ -13,6 +13,8 @@ export default class MaskTaskIndicator extends MaskTaskBase {
     let { text, point } = this.model;
     point = ElementUtils.calcStageRelativePoint(point);
 
+    const { width, fontBoundingBoxDescent, fontBoundingBoxAscent } = CanvasUtils.measureText(this.canvas.getContext('2d'), text, SelectionIndicatorStyle);
+
     CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, point, SelectionIndicatorStyle, SelectionIndicatorStyle.fills[0], {
       angle: this.model.angle,
     });

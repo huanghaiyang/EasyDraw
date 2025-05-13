@@ -45,7 +45,6 @@ import UndoRedo from "@/modules/base/UndoRedo";
 import { TextEditorPressTypes, TextFontStyleUpdateTypes } from "@/types/IText";
 import GlobalConfig from "@/config";
 import { computed, makeObservable, observable, reaction } from "mobx";
-import { nanoid } from "nanoid";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
 

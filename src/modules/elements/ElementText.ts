@@ -21,7 +21,6 @@ import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommand
 import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
-import { nanoid } from "nanoid";
 import { RenderRect } from "@/types/IRender";
 import MathUtils from "@/utils/MathUtils";
 
