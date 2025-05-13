@@ -521,7 +521,14 @@ export default interface IElement {
    * @param value
    * @param rotating
    */
-  setAngle(value: number, rotating?: boolean): void;
+  setAngle(value: number): void;
+
+  /**
+   * 更新角度
+   * 
+   * @param value 
+   */
+  updateAngle(value: number): void;
   /**
    * 设置Y倾斜角度
    * @param value Y倾斜角度值（度）

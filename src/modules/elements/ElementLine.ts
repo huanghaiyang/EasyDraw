@@ -203,16 +203,34 @@ export default class ElementLine extends Element implements IElementLine {
   }
 
   /**
+   * 更新角度
+   *
+   * @param value
+   */
+  private __updateAngle(value: number): void {
+    const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, this.model.width, value - 90);
+    this.model.coords = [this.startRotateCoord, endRotateCoord];
+    this.model.boxCoords = CommonUtils.getBoxByPoints(this.model.coords);
+  }
+
+  /**
    * 设置角度，注意直线的角度始终为0，属性菜单显示的角度是通过开始坐标和结束坐标计算出来的
    *
    * @param value
    */
-  setAngle(value: number, rotating?: boolean): void {
-    const endRotateCoord = MathUtils.calcTargetPoint(this.startRotateCoord, this.model.width, value - 90);
-    this.model.coords = [this.startRotateCoord, endRotateCoord];
-    this.model.boxCoords = CommonUtils.getBoxByPoints(this.model.coords);
-    this.model.angle = 0;
-    this._refreshOnAngleChanged(rotating);
+  setAngle(value: number): void {
+    this.__updateAngle(value);
+    super.setAngle(0);
+  }
+
+  /**
+   * 更新角度
+   * 
+   * @param value 
+   */
+  updateAngle(value: number): void {
+    this.__updateAngle(value);
+    super.updateAngle(0);
   }
 
   /**

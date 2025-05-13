@@ -2234,7 +2234,7 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @param rotating
    */
-  protected _refreshOnAngleChanged(rotating: boolean): void {
+  private _refreshOnAngleChanged(rotating: boolean): void {
     if (rotating) {
       this.refresh(LodashUtils.toBooleanObject(["points", "rotation", "position", "angles", "outline", "strokes", "corners"]));
     } else {
@@ -2243,13 +2243,32 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 更新角度
+   *
+   * @param options
+   */
+  private _updateAngle(value: number): void {
+    this.model.angle = value;
+  }
+
+  /**
    * 设置角度
    *
    * @param value
    */
-  setAngle(value: number, rotating?: boolean): void {
-    this.model.angle = value;
-    this._refreshOnAngleChanged(rotating);
+  setAngle(value: number): void {
+    this._updateAngle(value);
+    this._refreshOnAngleChanged(false);
+  }
+
+  /**
+   * 更新角度
+   * 
+   * @param value 
+   */
+  updateAngle(value: number): void {
+    this._updateAngle(value);
+    this._refreshOnAngleChanged(true);
   }
 
   /**

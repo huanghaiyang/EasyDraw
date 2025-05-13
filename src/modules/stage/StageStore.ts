@@ -2191,7 +2191,11 @@ export default class StageStore implements IStageStore {
         angle = MathUtils.constraintAngle(elementOriginalAngle + angle - originalAngle);
         angle = MathUtils.precise(angle, 1);
       }
-      element.setAngle(angle, rotating);
+      if (rotating) {
+        element.updateAngle(angle);
+      } else {
+        element.setAngle(angle);
+      }
       !element.isOnStage && this._updateElementStageStatusIfy(element);
       if (element.isGroup) {
         (element as IElementGroup).deepSubs.forEach(sub => {
