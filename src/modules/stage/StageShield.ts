@@ -209,11 +209,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       stageRect: observable,
       stageWorldCoord: observable,
       stageScale: observable,
+      elementsStatus: observable,
     });
     reaction(
       () => this.stageCalcParams,
       () => {
         GlobalConfig.stageCalcParams = this.stageCalcParams;
+      },
+    );
+    reaction(
+      () => this.elementsStatus,
+      () => {
+        this.emit(ShieldDispatcherNames.elementsStatusChanged, this.elementsStatus);
       },
     );
     this._requestAnimationRedraw();

@@ -79,6 +79,8 @@ export type ScaleValue = {
 
 // 舞台通知名称
 export enum ShieldDispatcherNames {
+  // 元素状态变更
+  elementsStatusChanged = "elementsStatusChanged",
   // 组件树变更
   treeNodesChanged = "treeNodesChanged",
   // 组件树属性变更

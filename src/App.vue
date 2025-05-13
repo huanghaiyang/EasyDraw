@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
+import { useStageStore } from "@/stores/stage";
 
 const { locale: i18nLocale } = useI18n();
 const appStore = useAppStore();
+const stageStore = useStageStore();
 const { init, locale } = appStore;
 init().then(() => {
   i18nLocale.value = locale;
@@ -11,18 +13,30 @@ init().then(() => {
 </script>
 
 <template>
-  <div class="left">
-    <left-bar />
-  </div>
-  <div class="right">
-    <right-bar />
-  </div>
-  <div class="stage">
-    <container />
+  <div :class="[{ penetrate: stageStore.shouldUIPassThrough }]">
+    <div class="left">
+      <left-bar />
+    </div>
+    
+    <div class="stage">
+      <container />
+    </div>
+
+    <div class="right">
+      <right-bar />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
+.penetrate {
+  .left,
+  .right,
+  :deep(.create-bar),
+  :deep(.arbitrary-bar) {
+    pointer-events: none;
+  }
+}
 .left,
 .right {
   position: absolute;
@@ -32,6 +46,7 @@ init().then(() => {
 .right {
   top: 0;
   bottom: 0;
+  z-index: 1;
 }
 
 .left {
@@ -48,7 +63,7 @@ init().then(() => {
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 220px;
-  right: 250px;
+  left: 0;
+  right: 0;
 }
 </style>

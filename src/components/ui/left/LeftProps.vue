@@ -27,7 +27,7 @@ const stageStore = useStageStore();
     height: 42px;
   }
   .tree {
-    height: calc(100% - 42px);
+    max-height: calc(100% - 42px);
     overflow-y: scroll;
   }
 }

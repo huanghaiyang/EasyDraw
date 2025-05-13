@@ -9,6 +9,7 @@ import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
 import { toRaw } from "vue";
 import LodashUtils from "@/utils/LodashUtils";
+import { StageShieldElementsStatus } from "@/types/IStageShield";
 
 // 舞台实例
 const shield = new StageShield();
@@ -187,6 +188,8 @@ export const useStageStore = defineStore("stage", {
       layerShiftMoveEnable: false,
       // 层下移动是否可用
       layerGoDownEnable: false,
+      // 组件状态
+      elementsStatus: StageShieldElementsStatus.NONE,
       // 舞台默认数据
       ...LodashUtils.jsonClone(DefaultStage),
     };
@@ -200,6 +203,7 @@ export const useStageStore = defineStore("stage", {
     alignEnable(): boolean {
       return this.selectedElements?.length >= 2;
     },
+    // 是否允许显示旋转属性菜单
     rotateEnable(): boolean {
       return this.selectedElements?.length >= 1;
     },
@@ -210,6 +214,10 @@ export const useStageStore = defineStore("stage", {
     // 自由线条绘制是否可见
     arbitraryVisible(): boolean {
       return this.currentCreator?.type === CreatorTypes.arbitrary;
+    },
+    // UI是否透传
+    shouldUIPassThrough(): boolean {
+      return [StageShieldElementsStatus.MOVING, StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus);
     },
   },
   actions: {
@@ -232,6 +240,7 @@ export const useStageStore = defineStore("stage", {
         [ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged],
         [ShieldDispatcherNames.treeNodesChanged, this.onTreeNodesChanged],
         [ShieldDispatcherNames.treeNodePropsChanged, this.onTreeNodePropsChanged],
+        [ShieldDispatcherNames.elementsStatusChanged, this.onElementsStatusChanged],
       ].forEach(([name, callback]) => {
         shield.on(name, callback.bind(this));
       });
@@ -362,6 +371,14 @@ export const useStageStore = defineStore("stage", {
       if (treeNode) {
         Object.assign(treeNode, props);
       }
+    },
+    /**
+     * 舞台组件状态变更
+     *
+     * @param elementsStatus
+     */
+    onElementsStatusChanged(elementsStatus: StageShieldElementsStatus) {
+      this.elementsStatus = elementsStatus;
     },
     /**
      * 舞台组件创建完毕
