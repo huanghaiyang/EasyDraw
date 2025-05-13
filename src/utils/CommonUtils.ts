@@ -340,6 +340,7 @@ export default class CommonUtils {
    * @returns
    */
   static scalePoint(point: IPoint, scale: number) {
+    if (!point) return point;
     return {
       x: point.x * scale,
       y: point.y * scale,

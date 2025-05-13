@@ -1,4 +1,4 @@
-import { ElementStyles, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, StrokeTypes } from "@/styles/ElementStyles";
 
 // 鼠标样式画布尺寸
 export const MinCursorMXD = 2;
@@ -19,10 +19,11 @@ export const TransformerLineWidth = 1;
 export const TransformerSize = 6;
 export const RotationSize = 12;
 export const SelectionRotationMargin = 12;
-export const SelectionIndicatorMargin = 12;
+export const SelectionIndicatorMargin = 20;
 export const SelectionIndicatorFillColor = "#0c8ce9";
 export const SelectionIndicatorFillColorOpacity = 100;
-export const SelectionIndicatorTextColor = "#000000";
+export const SelectionIndicatorTextColor = "#ffffff";
+export const SelectionIndicatorTextColorOpacity = 100;
 export const SelectionIndicatorFontSize = 12;
 export const SelectionIndicatorFontFamily = "Arial";
 export const SelectionIndicatorTextAlign = "center";
@@ -74,17 +75,24 @@ export const ControllerStyle: ElementStyles = {
   ],
 };
 
+// 指示器样式
 export const SelectionIndicatorStyle: ElementStyles = {
   fontSize: SelectionIndicatorFontSize,
   fontFamily: SelectionIndicatorFontFamily,
-  fills: [
-    {
-      color: SelectionIndicatorFillColor,
-      colorOpacity: SelectionIndicatorFillColorOpacity,
-    },
-  ],
   textAlign: SelectionIndicatorTextAlign,
   textBaseline: SelectionIndicatorTextBaseline,
+};
+
+// 指示器背景色
+export const SelectionIndicatorBgStyle: FillStyle = {
+  color: SelectionIndicatorFillColor,
+  colorOpacity: SelectionIndicatorFillColorOpacity,
+};
+
+// 指示器文本颜色
+export const SelectionIndicatorTextStyle: FillStyle = {
+  color: SelectionIndicatorTextColor,
+  colorOpacity: SelectionIndicatorTextColorOpacity,
 };
 
 export const CursorPositionStyle = SelectionIndicatorStyle;

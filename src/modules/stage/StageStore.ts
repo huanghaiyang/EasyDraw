@@ -1,7 +1,7 @@
 import { ElementStatus, IPoint, ISize, ShieldDispatcherNames } from "@/types";
 import LinkedNode, { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ElementUtils, { ElementListEventNames, ElementReactionPropNames } from "@/modules/elements/utils/ElementUtils";
-import { drop, every, isArray, isBoolean, isEqual, isString, pick, throttle } from "lodash";
+import { every, isArray, isBoolean, isEqual, isString, pick, throttle } from "lodash";
 import ElementList from "@/modules/elements/helpers/ElementList";
 import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";

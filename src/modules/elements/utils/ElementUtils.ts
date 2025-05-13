@@ -660,7 +660,7 @@ export default class ElementUtils {
     const models = elementsJson as unknown as Array<ElementObject>;
     const modelsMap: Map<String, ElementObject> = new Map();
     const ids: string[] = [];
-    models.forEach((model) => {
+    models.forEach(model => {
       modelsMap.set(model.id, model);
       ids.push(CommonUtils.getRandomId());
     });

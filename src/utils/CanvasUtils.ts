@@ -375,9 +375,10 @@ export default class CanvasUtils {
    * @returns
    */
   static calcOffsetByRect(renderRect: RenderRect): IPoint {
+    const { x, y, width, height } = renderRect;
     return {
-      x: -(renderRect.x + renderRect.width / 2),
-      y: -(renderRect.y + renderRect.height / 2),
+      x: -x - width / 2,
+      y: -y - height / 2,
     };
   }
 
@@ -390,9 +391,7 @@ export default class CanvasUtils {
    */
   static transPointsOfBox(points: IPoint[], renderRect: RenderRect) {
     const offset = CanvasUtils.calcOffsetByRect(renderRect);
-    return points.map(point => {
-      return MathUtils.translate(point, offset);
-    });
+    return MathUtils.batchTranslate(points, offset);
   }
 
   /**
@@ -1305,5 +1304,61 @@ export default class CanvasUtils {
         reject(new Error("Failed to get 2d context from canvas"));
       }
     });
+  }
+
+  /**
+   * 计算圆角矩形路径
+   *
+   * @param radiuses 圆角值, 顺时针,从左上角开始到左下角
+   * @param width
+   * @param height
+   * @param center 中心点坐标
+   */
+  static getRadiusRectanglePaths(radiuses: number[], width: number, height: number, center?: IPoint): ArcPoints[] {
+    const hWidth = width / 2;
+    const hHeight = height / 2;
+    center = center || { x: hWidth, y: hHeight };
+    const { x: cX, y: cY } = center;
+    // 圆角半径
+    const [tfR, trR, brR, blR] = radiuses;
+    // 左上角控制点
+    const topLeftController = { x: cX - hWidth, y: cY - hHeight };
+    // 右上角控制点
+    const topRightController = { x: cX + hWidth, y: cY - hHeight };
+    // 右下角控制点
+    const bottomRightController = { x: cX + hWidth, y: cY + hHeight };
+    // 左下角控制点
+    const bottomLeftController = { x: cX - hWidth, y: cY + hHeight };
+    const result: ArcPoints[] = [];
+    // 一下按照顺时针计算start\end坐标
+    // 左上角
+    result.push({
+      start: { x: cX - hWidth, y: cY - hHeight + tfR },
+      controller: topLeftController,
+      end: { x: cX - hWidth + tfR, y: cY - hHeight },
+      value: tfR,
+    });
+    // 右上角
+    result.push({
+      start: { x: cX + hWidth - trR, y: cY - hHeight },
+      controller: topRightController,
+      end: { x: cX + hWidth, y: cY - hHeight + trR },
+      value: trR,
+    });
+    // 右下角
+    result.push({
+      start: { x: cX + hWidth, y: cY + hHeight - brR },
+      controller: bottomRightController,
+      end: { x: cX + hWidth - brR, y: cY + hHeight },
+      value: brR,
+    });
+    // 左下角
+    result.push({
+      start: { x: cX - blR, y: cY + hHeight },
+      controller: bottomLeftController,
+      end: { x: cX - hWidth, y: cY + hHeight - blR },
+      value: blR,
+    });
+    return result;
   }
 }

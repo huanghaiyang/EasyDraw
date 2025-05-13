@@ -99,7 +99,7 @@ export default class MathUtils {
    * @returns
    */
   static translate(coord: IPoint, offset: IPoint): IPoint {
-    if (!offset) return coord;
+    if (!offset || !coord) return coord;
     if (offset.x === 0 && offset.y === 0) return coord;
     return {
       x: coord.x + offset.x,
