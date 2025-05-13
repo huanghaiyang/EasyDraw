@@ -2325,17 +2325,37 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
+   * 更新圆角
+   * 
+   * @param value 
+   * @param index 
+   */
+  private _updateCorners(value: number, index?: number): void {
+    let values = LodashUtils.jsonClone(this.model.corners);
+    if (isNumber(index)) values[index] = value;
+    else values.fill(value);
+    values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
+    this.model.corners = values;
+  }
+
+  /**
    * 设置圆角
    *
    * @param value
    * @param index
    */
   setCorners(value: number, index?: number): void {
-    let values = LodashUtils.jsonClone(this.model.corners);
-    if (isNumber(index)) values[index] = value;
-    else values.fill(value);
-    values = ElementUtils.fixCornersBasedOnMinSize(values, this._minParallelogramVerticalSize);
-    this.model.corners = values;
+    this._updateCorners(value, index);
+    this.refresh(LodashUtils.toBooleanObject(["corners", "strokes", "originals"]));
+  }
+  /**
+   * 更新圆角
+   * 
+   * @param value 
+   * @param index 
+   */
+  updateCorners(value: number, index?: number): void {
+    this._updateCorners(value, index);
     this.refresh(LodashUtils.toBooleanObject(["corners", "strokes"]));
   }
 

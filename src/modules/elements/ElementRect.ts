@@ -488,9 +488,9 @@ export default class ElementRect extends Element implements IElementRect {
         proportion = 1 - proportion;
         let corner = proportion * (this.minParallelogramVerticalSize / 2);
         if (this._originalAllCornerEqual) {
-          this.setCorners(corner);
+          this.updateCorners(corner);
         } else {
-          this.setCorners(corner, index);
+          this.updateCorners(corner, index);
         }
       }
     }

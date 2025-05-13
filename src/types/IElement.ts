@@ -536,6 +536,13 @@ export default interface IElement {
   setCorners(value: number, index?: number): void;
 
   /**
+   * 更新圆角
+   * @param value 
+   * @param index 
+   */
+  updateCorners(value: number, index?: number): void;
+
+  /**
    * 设置描边类型
    * @param value 描边类型值
    * @param index 描边索引位置（从0开始）

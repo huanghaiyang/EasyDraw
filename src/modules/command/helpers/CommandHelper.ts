@@ -100,8 +100,8 @@ export default class CommandHelper {
    * @param store
    */
   static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson() })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson() })));
+    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson(), type: ElementActionTypes.Updated })));
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
     return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsUpdated, store);
   }
 
