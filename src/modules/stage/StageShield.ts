@@ -47,6 +47,7 @@ import GlobalConfig from "@/config";
 import { computed, makeObservable, observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
+import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -123,7 +124,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 移动舞台前的原始坐标
   private _originalStageWorldCoord: IPoint;
   // 编辑前的原始数据
-  private _originalEditingDataList: Array<ICommandElementObject>;
+  private _originalEditingUDataList: Array<ICommandElementObject>;
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
@@ -1618,17 +1619,31 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 在开始编辑组件时，处理组件相关数据
+   * 
+   * @param element 
+   */
+  private async _onEditingElementonStart(element: IElement): Promise<void> {
+    this._originalEditingUDataList = await Promise.all([element].map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
+    if (element instanceof ElementArbitrary) {
+      // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
+      await Promise.all(element.ancestorGroups.map(async ancestor => {
+        this._originalEditingUDataList.push({ model: await ancestor.toOriginalTranslateJson(), type: ElementActionTypes.Updated });
+      }));
+    } else if (element instanceof ElementText) {
+      // 如果是文本编辑模式，则创建文本光标输入框并聚焦
+      this._retreiveTextCursorInput(element as IElementText);
+    }
+  }
+
+  /**
    * 尝试编辑组件
    * 
    * @param element 
    */
   private async _tryEditElement(element: IElement): Promise<void> {
     this.store.beginEditingElements([element]);
-    this._originalEditingDataList = await Promise.all([element].map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
-    // 如果是文本编辑模式，则创建文本光标输入框并聚焦
-    if (element instanceof ElementText) {
-      this._retreiveTextCursorInput(element as IElementText);
-    }
+    this._onEditingElementonStart(element);
   }
 
   /**
@@ -2629,16 +2644,36 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 结束组件编辑
+   * 
+   * @param elements 
+   */
+  private async _onEditingElementEnd(elements: IElement[]): Promise<void> {
+    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toJson(), type: ElementActionTypes.Updated })));
+    await Promise.all(elements.map(async element => {
+      if (element instanceof ElementArbitrary) {
+        await Promise.all(element.ancestorGroups.map(async group => {
+          group.refreshBySubs();
+          group.refreshOriginals();
+          rDataList.push({
+            model: await group.toJson(),
+            type: ElementActionTypes.GroupUpdated,
+          });
+        }))
+      }
+    }));
+    await this._addUpdatedCommandByDataList(this._originalEditingUDataList, rDataList);
+    this._originalEditingUDataList = null;
+  }
+
+  /**
    * 提交编辑
    */
   private async _commitEidting(): Promise<void> {
-    const { editingElements } = this.store;
-    const rDataList = await Promise.all(editingElements.map(async element => ({ model: await element.toJson(), type: ElementActionTypes.Updated })));
-    await this._addUpdatedCommandByDataList(this._originalEditingDataList, rDataList);
-    this.store.endEditingElements(editingElements);
+    this._onEditingElementEnd(this.store.editingElements);
+    this.store.endEditingElements(this.store.editingElements);
     this.selection.refresh();
     this.elementsStatus = StageShieldElementsStatus.NONE;
-    this._originalEditingDataList = null;
   }
 
   /**
