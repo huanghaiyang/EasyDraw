@@ -345,8 +345,17 @@ export default interface IStageSetter {
    * 切换组件选中状态(组件组合的选中状态切换)
    *
    * @param ids 组件id集合
+   * @param isDetachedSelected 是否选中
    */
-  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void;
+  setElementsDetachedSelectedByIds(ids: string[], isDetachedSelected: boolean): void;
+
+  /**
+   * 切换组件选中状态(组件组合的选中状态切换)
+   *
+   * @param elements 组件集合
+   * @param isDetachedSelected 是否选中
+   */
+  setElementsDetachedSelected(elements: IElement[], isDetachedSelected: boolean): void;
 
   /**
    * 将组件移动到指定位置

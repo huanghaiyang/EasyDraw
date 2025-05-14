@@ -1618,21 +1618,37 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 尝试编辑组件
+   * 
+   * @param element 
+   */
+  private async _tryEditElement(element: IElement): Promise<void> {
+    this.store.beginEditingElements([element]);
+    this._originalEditingDataList = await Promise.all([element].map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
+    // 如果是文本编辑模式，则创建文本光标输入框并聚焦
+    if (element instanceof ElementText) {
+      this._retreiveTextCursorInput(element as IElementText);
+    }
+  }
+
+  /**
    * 处理鼠标双击事件
    *
    * @param e
    */
   async _handleDblClick(e: MouseEvent): Promise<void> {
     if (this.isMoveableActive) {
-      const { stageElements, selectedElements } = this.store;
-      this._selectTopAElement(stageElements);
-      this.store.beginEditingElements(selectedElements);
-      this.selection.refresh();
-      this._originalEditingDataList = await Promise.all(selectedElements.map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
-      // 如果是文本编辑模式，则创建文本光标输入框并聚焦
-      if (this.isTextEditing) {
-        this._retreiveTextCursorInput(selectedElements[0] as IElementText);
+      let topAElement = this._getTopAElemnt(this.store.stageElements);
+      if (topAElement?.isGroup) {
+        topAElement = this._getTopAElemnt((topAElement as IElementGroup).deepSubs.filter(element => !element.isGroup));
       }
+      if (topAElement) {
+        this.store.setElementsDetachedSelected([topAElement], true);
+        if (topAElement.editingEnable) {
+          this._tryEditElement(topAElement);
+        }
+      }
+      this.selection.refresh();
     }
   }
 
@@ -1776,22 +1792,39 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 获取当前鼠标位置最顶层的组件，如果有脱离组合被选中的组件，则提高其优先级
+   *
+   * @param elements
+   * @returns
+   */
+  private _getTopAElemnt(elements: IElement[]): IElement {
+    const detachedSelectedElements = elements.filter(element => element.isDetachedSelected);
+    return ElementUtils.getTopAElementByCoord(detachedSelectedElements.length ? detachedSelectedElements : elements, this.cursor.worldValue);
+  }
+
+  /**
+   * 选中组件
+   *
+   * @param element
+   */
+  private _doSelectElement(element: IElement): void {
+    this.store.deSelectElements(
+      this.store.selectedElements.filter(el => {
+        if (element && element.isGroup) {
+          return el.ancestorGroup !== element;
+        }
+        return el !== element;
+      }),
+    );
+    !!element && this.store.selectElement(element);
+  }
+
+  /**
    * 将除当前鼠标位置的组件设置为被选中，其他组件取消选中状态
    */
   private _selectTopAElement(elements: IElement[]): void {
-    const detachedSelectedElements = elements.filter(element => element.isDetachedSelected);
-    const topAElement = ElementUtils.getTopAElementByCoord(detachedSelectedElements.length ? detachedSelectedElements : elements, this.cursor.worldValue);
-    this.store.deSelectElements(
-      this.store.selectedElements.filter(element => {
-        if (topAElement && topAElement.isGroup) {
-          return element.ancestorGroup !== topAElement;
-        }
-        return element !== topAElement;
-      }),
-    );
-    if (topAElement) {
-      this.store.selectElement(topAElement);
-    }
+    const topAElement = this._getTopAElemnt(elements);
+    this._doSelectElement(topAElement);
   }
 
   /**
@@ -2247,10 +2280,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
-    this.store.setElementsDetachedSelected(
-      elements.map(element => element.id),
-      true,
-    );
+    this.store.setElementsDetachedSelected(elements, true);
     this.selection.refresh();
   }
 
@@ -2309,7 +2339,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     if (group) {
       this._clearStageSelects();
-      this.store.setElementsDetachedSelected([group.id], true);
+      this.store.setElementsDetachedSelected([group], true);
     }
     const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupAdded, this.store);
     this.undoRedo.add(command);
@@ -2698,8 +2728,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param ids
    * @param isDetachedSelected
    */
-  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
-    this.store.setElementsDetachedSelected(ids, isDetachedSelected);
+  setElementsDetachedSelectedByIds(ids: string[], isDetachedSelected: boolean): void {
+    this.store.setElementsDetachedSelectedByIds(ids, isDetachedSelected);
+  }
+
+  /**
+   * 设置组件选中状态(组件脱离组合的独立选中状态切换)
+   *
+   * @param elements
+   * @param isDetachedSelected
+   */
+  setElementsDetachedSelected(elements: IElement[], isDetachedSelected: boolean): void {
+    this.store.setElementsDetachedSelected(elements, isDetachedSelected);
   }
 
   /**

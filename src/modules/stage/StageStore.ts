@@ -3266,7 +3266,7 @@ export default class StageStore implements IStageStore {
    * @param ids 组件id集合
    * @param isDetachedSelected 是否选中
    */
-  setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
+  setElementsDetachedSelectedByIds(ids: string[], isDetachedSelected: boolean): void {
     // 先取消选中先前的组件
     if (isDetachedSelected) {
       this._selectedElementIds.forEach(id => {
@@ -3285,6 +3285,16 @@ export default class StageStore implements IStageStore {
         this.updateElementById(id, { isDetachedSelected });
       }
     });
+  }
+  /**
+   * 设置组件脱离组合的独立选中状态
+   *
+   * @param elements 组件集合
+   * @param isDetachedSelected 是否选中
+   */
+  setElementsDetachedSelected(elements: IElement[], isDetachedSelected: boolean): void {
+    const ids = elements.map(el => el.id);
+    this.setElementsDetachedSelectedByIds(ids, isDetachedSelected);
   }
 
   /**
@@ -3320,7 +3330,7 @@ export default class StageStore implements IStageStore {
     if (this.shield.event.isCtrl) {
       this._setElementsMixinDetachedSelected(ids);
     } else {
-      this.setElementsDetachedSelected(ids, true);
+      this.setElementsDetachedSelectedByIds(ids, true);
     }
   }
 

@@ -1425,8 +1425,8 @@ export const useStageStore = defineStore("stage", {
      *
      * @param ids 组件id集合
      */
-    setElementsDetachedSelected(ids: string[], isDetachedSelected: boolean): void {
-      shield.setElementsDetachedSelected(toRaw(ids), isDetachedSelected);
+    setElementsDetachedSelectedByIds(ids: string[], isDetachedSelected: boolean): void {
+      shield.setElementsDetachedSelectedByIds(toRaw(ids), isDetachedSelected);
     },
     /**
      * 移动元素到指定位置

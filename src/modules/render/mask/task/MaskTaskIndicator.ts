@@ -33,6 +33,6 @@ export default class MaskTaskIndicator extends MaskTaskBase {
     );
     const renderOptions = { angle };
     CanvasUtils.drawInnerArcPathFillWithScale(this.canvas, renderRect, arcPoints, SelectionIndicatorBgStyle, renderOptions);
-    CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, MathUtils.translate(point, {x: 0, y: 1}), SelectionIndicatorStyle, SelectionIndicatorTextStyle, renderOptions);
+    CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, MathUtils.translate(point, { x: 0, y: 1 }), SelectionIndicatorStyle, SelectionIndicatorTextStyle, renderOptions);
   }
 }

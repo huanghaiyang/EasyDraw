@@ -97,7 +97,7 @@ function handleClickNode(node: ElementTreeNode) {
  * @param ev
  */
 const handleDragStart = (node: Node, ev: DragEvents) => {
-  stageStore.setElementsDetachedSelected([node.data.id], true);
+  stageStore.setElementsDetachedSelectedByIds([node.data.id], true);
 };
 
 /**
