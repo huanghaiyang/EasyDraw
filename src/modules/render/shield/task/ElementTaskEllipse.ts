@@ -1,3 +1,4 @@
+import GlobalConfig from "@/config";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementTaskBase from "@/modules/render/shield/task/ElementTaskBase";
@@ -37,7 +38,7 @@ export default class ElementTaskEllipse extends ElementTaskBase {
     // 内描边的舞台坐标
     const innermostStrokePoints = unLeanStrokePoints[innermostStrokeCoordIndex];
     // 内描边的渲染盒模型
-    const renderRect = ElementRenderHelper.calcRenderRect(innermostStrokePoints, center, shield.stageScale) as RenderRect;
+    const renderRect = ElementRenderHelper.calcRenderRect(innermostStrokePoints, center, GlobalConfig.stageParams.scale) as RenderRect;
 
     // 绘制填充
     styles.fills.forEach(fillStyle => {
@@ -45,8 +46,8 @@ export default class ElementTaskEllipse extends ElementTaskBase {
         this.canvas,
         center,
         {
-          rx: renderRect.width / 2 / shield.stageScale,
-          ry: renderRect.height / 2 / shield.stageScale,
+          rx: renderRect.width / 2 / GlobalConfig.stageParams.scale,
+          ry: renderRect.height / 2 / GlobalConfig.stageParams.scale,
         },
         fillStyle,
         renderRect,
@@ -56,13 +57,13 @@ export default class ElementTaskEllipse extends ElementTaskBase {
 
     // 绘制边框
     unLeanStrokePoints.forEach((points, index) => {
-      const renderRect = ElementRenderHelper.calcRenderRect(points, center, shield.stageScale) as RenderRect;
+      const renderRect = ElementRenderHelper.calcRenderRect(points, center, GlobalConfig.stageParams.scale) as RenderRect;
       CanvasUtils.drawEllipseStrokeWithScale(
         this.canvas,
         center,
         {
-          rx: renderRect.width / 2 / shield.stageScale,
-          ry: renderRect.height / 2 / shield.stageScale,
+          rx: renderRect.width / 2 / GlobalConfig.stageParams.scale,
+          ry: renderRect.height / 2 / GlobalConfig.stageParams.scale,
         },
         strokes[index],
         renderRect,

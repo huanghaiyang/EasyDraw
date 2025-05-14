@@ -23,6 +23,7 @@ import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
 import { RenderRect } from "@/types/IRender";
 import MathUtils from "@/utils/MathUtils";
+import GlobalConfig from "@/config";
 
 export default class ElementText extends ElementRect implements IElementText {
   // 文本光标
@@ -1356,7 +1357,7 @@ export default class ElementText extends ElementRect implements IElementText {
   private _doReflowTextLines(force: boolean = false): boolean {
     const textData = this.model.data as ITextData;
     // 舞台缩放系数
-    const scale = this.shield.stageScale;
+    const scale = GlobalConfig.stageParams.scale;
     // 未自动换行之前的文本行
     const noneAutoWrapTextLines = TextElementUtils.restoreTextLines(textData.lines);
     // 未自动换行之前的文本行的最大宽度
@@ -1378,7 +1379,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @returns 文本宽度
    */
   private _calcTextRenderWidth(): number {
-    return Math.ceil(TextElementUtils.calcMaxLineWidth((this.model.data as ITextData).lines, this.shield.stageScale));
+    return Math.ceil(TextElementUtils.calcMaxLineWidth((this.model.data as ITextData).lines, GlobalConfig.stageParams.scale));
   }
 
   /**
@@ -1387,7 +1388,7 @@ export default class ElementText extends ElementRect implements IElementText {
    * @returns 文本高度
    */
   private _calcTextRenderHeight(): number {
-    return Math.ceil(TextElementUtils.calcTextRenderHeight((this.model.data as ITextData).lines, this.shield.stageScale));
+    return Math.ceil(TextElementUtils.calcTextRenderHeight((this.model.data as ITextData).lines, GlobalConfig.stageParams.scale));
   }
 
   /**

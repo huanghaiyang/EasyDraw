@@ -31,6 +31,7 @@ import ElementTaskTextSelectionCursor from "@/modules/render/shield/task/Element
 import { TextSelectionCursorType } from "@/types/IText";
 import ElementTaskTextHighlightUnderline from "@/modules/render/shield/task/ElementTaskTextHighlightUnderline";
 import { StageShieldElementsStatus } from "@/types/IStageShield";
+import GlobalConfig from "@/config";
 
 /**
  * 蒙版渲染器
@@ -164,7 +165,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 获取当前光标位置（舞台坐标系）
     const {
       cursor: { worldValue },
-      stageScale,
     } = this.drawer.shield;
     if (!worldValue) return;
 
@@ -172,8 +172,8 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const model: IMaskModel = {
       point: {
         // 在光标右下方20像素处显示（考虑舞台缩放比例）
-        x: worldValue.x + 20 / stageScale,
-        y: worldValue.y + 20 / stageScale,
+        x: worldValue.x + 20 / GlobalConfig.stageParams.scale,
+        y: worldValue.y + 20 / GlobalConfig.stageParams.scale,
       },
       type: DrawerMaskModelTypes.cursorPosition,
       text: `${MathUtils.precise(worldValue.x, 1)},${MathUtils.precise(worldValue.y, 1)}`, // 格式化坐标值
@@ -294,7 +294,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * @param element
    */
   private createMaskIndicatorTask(element: IElement): IRenderTask {
-    const { stageScale } = this.drawer.shield;
     let p1: IPoint, p2: IPoint;
     switch (element.model.type) {
       case CreatorTypes.line: {
@@ -325,7 +324,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     const angle = MathUtils.calcAngle(p1, p2);
     // 生成指示器数据对象
     const model: IMaskModel = {
-      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / stageScale),
+      point: MathUtils.calcSegmentLineCenterCrossPoint(p1, p2, true, SelectionIndicatorMargin / GlobalConfig.stageParams.scale),
       angle,
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,

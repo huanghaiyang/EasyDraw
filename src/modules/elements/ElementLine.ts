@@ -9,6 +9,7 @@ import PolygonUtils from "@/utils/PolygonUtils";
 import { TransformerTypes } from "@/types/ITransformer";
 import { some } from "lodash";
 import LodashUtils from "@/utils/LodashUtils";
+import GlobalConfig from "@/config";
 
 export default class ElementLine extends Element implements IElementLine {
   get editingEnable(): boolean {
@@ -145,7 +146,7 @@ export default class ElementLine extends Element implements IElementLine {
    */
   isContainsCoord(coord: IPoint): boolean {
     return some(this.model.styles.strokes, stroke => {
-      return MathUtils.isPointClosestSegment(coord, this.startRotateCoord, this.endRotateCoord, LineClosestMargin + stroke.width / 2 / this.shield.stageScale);
+      return MathUtils.isPointClosestSegment(coord, this.startRotateCoord, this.endRotateCoord, LineClosestMargin + stroke.width / 2 / GlobalConfig.stageParams.scale);
     });
   }
 
@@ -225,8 +226,8 @@ export default class ElementLine extends Element implements IElementLine {
 
   /**
    * 更新角度
-   * 
-   * @param value 
+   *
+   * @param value
    */
   updateAngle(value: number): void {
     this.__updateAngle(value);

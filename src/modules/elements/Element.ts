@@ -22,6 +22,7 @@ import IController, { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
 import LodashUtils from "@/utils/LodashUtils";
+import GlobalConfig from "@/config";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
@@ -666,11 +667,11 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   get visualStrokeWidth(): number {
-    return Math.max(...this.strokes.map(stroke => stroke.width * this.shield.stageScale));
+    return Math.max(...this.strokes.map(stroke => stroke.width * GlobalConfig.stageParams.scale));
   }
 
   get visualFontSize(): number {
-    return this.fontSize * this.shield.stageScale;
+    return this.fontSize * GlobalConfig.stageParams.scale;
   }
 
   get originalAngle(): number {
@@ -1301,11 +1302,12 @@ export default class Element implements IElement, ILinkedNodeValue {
    */
   getController4BoxCoords(controllerCoord: IPoint, size?: number): IPoint[] {
     size = size || TransformerSize;
+    size /= GlobalConfig.stageParams.scale;
     return CommonUtils.getBoxByCenter(
       controllerCoord,
       {
-        width: size / this.shield.stageScale,
-        height: size / this.shield.stageScale,
+        width: size,
+        height: size,
       },
       {
         angle: this.model.actualAngle,
@@ -1378,7 +1380,7 @@ export default class Element implements IElement, ILinkedNodeValue {
     const centerCoord = this.centerCoord;
     return this._rotateBoxCoords.map((coord, index) => {
       const angle = MathUtils.calcAngle(centerCoord, coord);
-      const { x, y } = MathUtils.calcTargetPoint(coord, RotateControllerMargin / this.shield.stageScale, angle);
+      const { x, y } = MathUtils.calcTargetPoint(coord, RotateControllerMargin / GlobalConfig.stageParams.scale, angle);
       const points = this.getController4BoxCoords({ x, y }, RotationSize);
       let controller = this._rotateControllers[index];
       if (controller) {
@@ -2263,8 +2265,8 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 更新角度
-   * 
-   * @param value 
+   *
+   * @param value
    */
   updateAngle(value: number): void {
     this._updateAngle(value);
@@ -2345,9 +2347,9 @@ export default class Element implements IElement, ILinkedNodeValue {
 
   /**
    * 更新圆角
-   * 
-   * @param value 
-   * @param index 
+   *
+   * @param value
+   * @param index
    */
   private _updateCorners(value: number, index?: number): void {
     let values = LodashUtils.jsonClone(this.model.corners);
@@ -2369,9 +2371,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
   /**
    * 更新圆角
-   * 
-   * @param value 
-   * @param index 
+   *
+   * @param value
+   * @param index
    */
   updateCorners(value: number, index?: number): void {
     this._updateCorners(value, index);

@@ -8,6 +8,7 @@ import ColorUtils from "@/utils/ColorUtils";
 import CoderUtils from "@/utils/CoderUtils";
 import EventUtils from "@/utils/EventUtils";
 import CommonUtils from "@/utils/CommonUtils";
+import GlobalConfig from "@/config";
 
 const minWidth = 100;
 const minHeight = 20;
@@ -48,7 +49,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    */
   updateSize(size: ISize): void {
     const { width, height } = size;
-    const { stageScale } = this.shield;
+    const stageScale = GlobalConfig.stageParams.scale;
     Object.assign(this.node.style, {
       width: `${width / stageScale}px`,
       height: `${height / stageScale}px`,
@@ -296,7 +297,7 @@ export default class DrawerHtml extends DrawerBase implements IDrawerHtml {
    */
   private _createInputElement(position: IPoint): HTMLTextAreaElement {
     this._textEditorPosition = position;
-    const strokeWidth = 1 / this.shield.stageScale;
+    const strokeWidth = 1 / GlobalConfig.stageParams.scale;
     const textEditor = document.createElement("textarea");
 
     Object.assign(textEditor.style, {

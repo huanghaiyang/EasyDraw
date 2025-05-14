@@ -80,7 +80,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 是否任意编辑
   get isArbitraryEditing(): boolean;
   // 舞台计算参数
-  get stageCalcParams(): StageCalcParams;
+  get stageParams(): stageParams;
 
   // 计算给定范围的自动缩放值
   calcScaleAutoFitValueByBox(box: IPoint[]): number;
@@ -114,7 +114,7 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
 }
 
 // 舞台计算参数
-export interface StageCalcParams {
+export interface stageParams {
   // 舞台矩形
   rect: DOMRect;
   // 舞台世界坐标

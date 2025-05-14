@@ -11,6 +11,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import LodashUtils from "@/utils/LodashUtils";
+import GlobalConfig from "@/config";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -113,7 +114,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     let outerPaths: IPoint[][][];
     if (this.visualStrokeWidth < LineClosestMinWidth) {
       outerPaths = this._strokeCoords.map((points: IPoint[]) => {
-        return ElementUtils.calcArbitraryBorderRegions(points, { width: LineClosestMinWidth / this.shield.stageScale }, this.model.isFold);
+        return ElementUtils.calcArbitraryBorderRegions(points, { width: LineClosestMinWidth / GlobalConfig.stageParams.scale }, this.model.isFold);
       });
     } else {
       outerPaths = this._outerWorldPaths;

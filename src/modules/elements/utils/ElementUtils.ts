@@ -128,7 +128,7 @@ export default class ElementUtils {
       rect: { width, height },
       scale,
       worldCoord: { x, y },
-    } = GlobalConfig.stageCalcParams;
+    } = GlobalConfig.stageParams;
     return {
       x: coord.x + width / 2 / scale - x,
       y: coord.y + height / 2 / scale - y,
@@ -156,7 +156,7 @@ export default class ElementUtils {
       rect: { width, height },
       scale,
       worldCoord: { x, y },
-    } = GlobalConfig.stageCalcParams;
+    } = GlobalConfig.stageParams;
     return {
       x: point.x - width / 2 / scale + x,
       y: point.y - height / 2 / scale + y,

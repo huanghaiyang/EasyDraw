@@ -17,7 +17,7 @@ import IElement, { ElementObject, IElementText, RefreshSubOptions, TreeNodeDropT
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
-import IStageShield, { StageCalcParams, StageShieldElementsStatus } from "@/types/IStageShield";
+import IStageShield, { stageParams, StageShieldElementsStatus } from "@/types/IStageShield";
 import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
@@ -176,7 +176,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   // 舞台计算参数
-  get stageCalcParams(): StageCalcParams {
+  get stageParams(): stageParams {
     return {
       rect: this.stageRect,
       worldCoord: this.stageWorldCoord,
@@ -206,16 +206,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.undoRedo = new UndoRedo();
     this.renderer = new ShieldRenderer(this);
     makeObservable(this, {
-      stageCalcParams: computed,
+      stageParams: computed,
       stageRect: observable,
       stageWorldCoord: observable,
       stageScale: observable,
       elementsStatus: observable,
     });
     reaction(
-      () => this.stageCalcParams,
+      () => this.stageParams,
       () => {
-        GlobalConfig.stageCalcParams = this.stageCalcParams;
+        GlobalConfig.stageParams = this.stageParams;
       },
     );
     reaction(
@@ -1620,16 +1620,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 在开始编辑组件时，处理组件相关数据
-   * 
-   * @param element 
+   *
+   * @param element
    */
   private async _onEditingElementonStart(element: IElement): Promise<void> {
     this._originalEditingUDataList = await Promise.all([element].map(async element => ({ model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
     if (element instanceof ElementArbitrary) {
       // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
-      await Promise.all(element.ancestorGroups.map(async ancestor => {
-        this._originalEditingUDataList.push({ model: await ancestor.toOriginalTranslateJson(), type: ElementActionTypes.Updated });
-      }));
+      await Promise.all(
+        element.ancestorGroups.map(async ancestor => {
+          this._originalEditingUDataList.push({ model: await ancestor.toOriginalTranslateJson(), type: ElementActionTypes.Updated });
+        }),
+      );
     } else if (element instanceof ElementText) {
       // 如果是文本编辑模式，则创建文本光标输入框并聚焦
       this._retreiveTextCursorInput(element as IElementText);
@@ -1638,8 +1640,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 尝试编辑组件
-   * 
-   * @param element 
+   *
+   * @param element
    */
   private async _tryEditElement(element: IElement): Promise<void> {
     this.store.beginEditingElements([element]);
@@ -2645,23 +2647,27 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   /**
    * 结束组件编辑
-   * 
-   * @param elements 
+   *
+   * @param elements
    */
   private async _onEditingElementEnd(elements: IElement[]): Promise<void> {
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toJson(), type: ElementActionTypes.Updated })));
-    await Promise.all(elements.map(async element => {
-      if (element instanceof ElementArbitrary) {
-        await Promise.all(element.ancestorGroups.map(async group => {
-          group.refreshBySubs();
-          group.refreshOriginals();
-          rDataList.push({
-            model: await group.toJson(),
-            type: ElementActionTypes.GroupUpdated,
-          });
-        }))
-      }
-    }));
+    await Promise.all(
+      elements.map(async element => {
+        if (element instanceof ElementArbitrary) {
+          await Promise.all(
+            element.ancestorGroups.map(async group => {
+              group.refreshBySubs();
+              group.refreshOriginals();
+              rDataList.push({
+                model: await group.toJson(),
+                type: ElementActionTypes.GroupUpdated,
+              });
+            }),
+          );
+        }
+      }),
+    );
     await this._addUpdatedCommandByDataList(this._originalEditingUDataList, rDataList);
     this._originalEditingUDataList = null;
   }

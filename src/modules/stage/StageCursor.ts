@@ -15,6 +15,7 @@ import ElementRotation from "@/modules/elements/rotation/ElementRotation";
 import CornerController from "@/modules/handler/controller/CornerController";
 import { IPointController } from "@/types/IController";
 import RotateController from "@/modules/handler/controller/RotateController";
+import GlobalConfig from "@/config";
 
 export default class StageCursor implements IStageCursor {
   // 光标位置
@@ -51,8 +52,8 @@ export default class StageCursor implements IStageCursor {
    * @returns
    */
   transform(e: MouseEvent): IPoint {
-    if (!this.shield.stageRect) return { x: 0, y: 0 };
-    this.value = CommonUtils.getEventPosition(e, this.shield.stageRect, this.shield.stageScale);
+    if (!GlobalConfig.stageParams.rect) return { x: 0, y: 0 };
+    this.value = CommonUtils.getEventPosition(e, GlobalConfig.stageParams.rect, GlobalConfig.stageParams.scale);
     this.value.x = Math.round(this.value.x);
     this.value.y = Math.round(this.value.y);
     return this.value;

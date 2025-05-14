@@ -31,6 +31,7 @@ import ElementGroup from "@/modules/elements/ElementGroup";
 import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "@/types/ICommand";
+import GlobalConfig from "@/config";
 
 /**
  * 调整组件层级
@@ -1855,7 +1856,7 @@ export default class StageStore implements IStageStore {
       // 如果tailAppend为true，则追加节点
       if (tailAppend) {
         // 判断点是否在第一个点附近
-        const isClosestFirst = MathUtils.isPointClosest(coord, model.coords[0], ArbitraryPointClosestMargin / this.shield.stageScale);
+        const isClosestFirst = MathUtils.isPointClosest(coord, model.coords[0], ArbitraryPointClosestMargin / GlobalConfig.stageParams.scale);
         if (isClosestFirst) {
           if (element.tailCoordIndex > 0) {
             model.isFold = true;
@@ -2215,7 +2216,7 @@ export default class StageStore implements IStageStore {
   async createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject> {
     const { colorSpace } = options;
     const { width, height } = image;
-    const coords = CommonUtils.getBoxByCenter(this.shield.stageWorldCoord, {
+    const coords = CommonUtils.getBoxByCenter(GlobalConfig.stageParams.worldCoord, {
       width,
       height,
     });

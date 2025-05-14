@@ -1,5 +1,5 @@
-import { StageCalcParams } from "@/types/IStageShield";
+import { stageParams } from "@/types/IStageShield";
 
 export default class GlobalConfig {
-  static stageCalcParams: StageCalcParams;
+  static stageParams: stageParams;
 }

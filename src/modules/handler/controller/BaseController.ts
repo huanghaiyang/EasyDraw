@@ -1,3 +1,4 @@
+import GlobalConfig from "@/config";
 import { IPoint } from "@/types";
 import IController from "@/types/IController";
 import IElement from "@/types/IElement";
@@ -11,7 +12,7 @@ export default class BaseController implements IController {
     return 0;
   }
   get scale(): number {
-    return 1 / this.host.shield.stageScale;
+    return 1 / GlobalConfig.stageParams.scale;
   }
 
   constructor(host: IElement) {
