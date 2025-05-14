@@ -17,7 +17,7 @@ import DOMUtils from "@/utils/DOMUtils";
 import { FontStyle, FontStyler, FontStyleSet, TextDecoration } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
 import IUndoRedo from "@/types/IUndoRedo";
-import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
+import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEditorCommandTypes } from "@/types/ICommand";
 import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
@@ -1739,7 +1739,7 @@ export default class ElementText extends ElementRect implements IElementText {
       const command = new TextEditorUpdatedCommand(
         CommonUtils.getRandomId(),
         {
-          type: TextEeditorCommandTypes.TextUpdated,
+          type: TextEditorCommandTypes.TextUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
           uData: this._undoCommandObject,
@@ -1778,7 +1778,7 @@ export default class ElementText extends ElementRect implements IElementText {
       const command = new TextEditorUpdatedCommand(
         CommonUtils.getRandomId(),
         {
-          type: TextEeditorCommandTypes.CursorSelectionUpdated,
+          type: TextEditorCommandTypes.CursorSelectionUpdated,
           operation: this._editorOperation,
           updateId: this._textUpdateId,
           uData: this._undoCommandObject,
@@ -1925,7 +1925,7 @@ export default class ElementText extends ElementRect implements IElementText {
     const editCommand = new TextEditorUpdatedCommand(
       CommonUtils.getRandomId(),
       {
-        type: TextEeditorCommandTypes.CursorSelectionUpdated,
+        type: TextEditorCommandTypes.CursorSelectionUpdated,
         operation: this._editorOperation,
         updateId: this._textUpdateId,
         uData: this._undoCommandObject,

@@ -17,6 +17,7 @@ import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ITextData, { ITextCursor, ITextSelection, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
+import { ArbitraryOperations } from "@/types/ICommand";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -1413,9 +1414,7 @@ export interface IElementLine extends IElement {
   get endRotateCoord(): IPoint;
   // 外框坐标
   get outerCoords(): IPoint[][];
-  /**
-   * 计算外框坐标
-   */
+  // 计算外框坐标
   calcOuterCoords(): IPoint[][];
 }
 
@@ -1425,25 +1424,16 @@ export interface IElementArbitrary extends IElement {
   tailCoordIndex: number;
   // 编辑点索引
   editingCoordIndex: number;
-
   // 外框世界路径
   get outerWorldPaths(): IPoint[][][];
-
-  /**
-   * 计算外框世界路径
-   */
+  // 计算外框世界路径
   calcOuterWorldPaths(): IPoint[][][];
-
-  /**
-   * 激活编辑点
-   * @param index 编辑点索引
-   */
+  // 激活编辑点
   activeEditingCoord(index: number): void;
-
-  /**
-   * 取消编辑点
-   */
+  // 取消编辑点
   deActiveEditingCoord(): void;
+  // 添加撤销命令
+  saveState(opreation: ArbitraryOperations): void;
 }
 
 // 组件树节点

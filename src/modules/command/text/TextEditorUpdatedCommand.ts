@@ -1,6 +1,8 @@
-import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEeditorCommandTypes } from "@/types/ICommand";
-import TextEditorBaseCommand from "@/modules/command/text/TextEditorBaseCommand";
-export default class TextEditorUpdatedCommand extends TextEditorBaseCommand<ITextEditorCommandPayload> {
+import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEditorCommandTypes } from "@/types/ICommand";
+import ElementBaseCommand from "@/modules/command/ElementBaseCommand";
+import { IElementText } from "@/types/IElement";
+
+export default class TextEditorUpdatedCommand extends ElementBaseCommand<ITextEditorCommandPayload> {
   /**
    * 恢复数据
    *
@@ -8,12 +10,12 @@ export default class TextEditorUpdatedCommand extends TextEditorBaseCommand<ITex
    * @param type
    *
    */
-  private async _restoreElementsFromData(data: ICommandTextEditorObject, type: TextEeditorCommandTypes): Promise<void> {
+  private async _restoreElementsFromData(data: ICommandTextEditorObject, type: TextEditorCommandTypes): Promise<void> {
     const { textData, textCursor, textSelection } = data;
-    if (type === TextEeditorCommandTypes.TextUpdated) {
+    if (type === TextEditorCommandTypes.TextUpdated) {
       this.element.model.data = textData;
     }
-    this.element.updateTextCursors(textCursor, textSelection);
+    (this.element as IElementText).updateTextCursors(textCursor, textSelection);
   }
 
   async undo(): Promise<void> {

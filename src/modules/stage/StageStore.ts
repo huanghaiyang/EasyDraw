@@ -30,7 +30,7 @@ import { GroupedElements, IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
-import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "@/types/ICommand";
+import { ElementActionTypes, ElementsActionParam, ElementActionCallback, ArbitraryOperations } from "@/types/ICommand";
 import GlobalConfig from "@/config";
 
 /**
@@ -1866,6 +1866,7 @@ export default class StageStore implements IStageStore {
         } else {
           model.coords.splice(model.coords.length - 1, 1, coord);
           element.tailCoordIndex = model.coords.length - 1;
+          element.saveState(ArbitraryOperations.coord_create);
         }
       } else {
         // 如果tailAppend为false，则更新尾部节点

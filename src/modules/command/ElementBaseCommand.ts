@@ -1,13 +1,13 @@
 import ICommand from "@/types/ICommand";
-import { IElementText } from "@/types/IElement";
+import IElement from "@/types/IElement";
 
-export default class TextEditorBaseCommand<T> implements ICommand<T> {
+export default class ElementBaseCommand<T> implements ICommand<T> {
   payload: T;
-  element: IElementText;
+  element: IElement;
   id: string;
   relationId?: string;
 
-  constructor(id: string, payload: T, element: IElementText, relationId?: string) {
+  constructor(id: string, payload: T, element: IElement, relationId?: string) {
     this.payload = payload;
     this.element = element;
     this.id = id;
