@@ -219,4 +219,6 @@ export default interface IStageStore extends IStageSetter {
   sortElements(elements: IElement[]): IElement[];
   // 获取最外层组件
   getOuterLayerElements(elements: IElement[]): IElement[];
+  // 清除正在创建的组件
+  clearCreatingElements(): void;
 }

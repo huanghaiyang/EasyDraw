@@ -1897,7 +1897,7 @@ export default class StageStore implements IStageStore {
   private _finishArbitraryElement(element: ElementArbitrary): void {
     const tailCoordIndex = element.tailCoordIndex;
     element.tailCoordIndex = -1;
-    if (tailCoordIndex < element.model.coords.length - 1) {
+    if (element.model.coords.length > 2) {
       element.model.coords = element.model.coords.slice(0, tailCoordIndex + 1);
     }
   }
@@ -3522,5 +3522,13 @@ export default class StageStore implements IStageStore {
     this.retrieveElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
+  }
+
+  /**
+   * 清除正在创建的组件
+   */
+  clearCreatingElements(): void {
+    this.removeElements(this.creatingElements);
+    this._currentCreatingElementId = null;
   }
 }

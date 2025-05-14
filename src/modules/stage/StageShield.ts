@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { ElementObject, IElementText, RefreshSubOptions, TreeNodeDropType } from "@/types/IElement";
+import IElement, { ElementObject, IElementArbitrary, IElementText, RefreshSubOptions, TreeNodeDropType } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -1673,7 +1673,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 绘制完成之后的重绘
    */
   private async _tryCreatedRedraw(): Promise<void> {
-    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this.tryEmitElementCreated()]);
+    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this._tryEmitElementCreated()]);
   }
 
   /**
@@ -1886,7 +1886,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 提交绘制
    */
-  async tryEmitElementCreated(): Promise<void> {
+  private async _tryEmitElementCreated(): Promise<void> {
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
       this.store.updateElements(provisionalElements, {
@@ -2640,8 +2640,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   async commitArbitraryDrawing(): Promise<void> {
     if (this.isArbitraryDrawing) {
       this._isPressDown = false;
-      this.store.finishCreatingElement();
-      await this._tryCreatedRedraw();
+      let failed: boolean = true;
+      const arbitraryElement = this.store.creatingElements[0] as IElementArbitrary;
+      if (arbitraryElement) {
+        if (arbitraryElement.model.coords.length >= 2) {
+          this.store.finishCreatingElement();
+          await this._tryCreatedRedraw();
+          failed = false;
+        } else {
+          this.store.clearCreatingElements();
+        }
+      }
+      if (failed) {
+        this._emitElementsCreated(null);
+      }
     }
   }
 
