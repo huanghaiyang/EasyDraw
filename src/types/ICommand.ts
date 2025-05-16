@@ -1,6 +1,6 @@
 import IElement, { ElementObject } from "@/types/IElement";
 import ITextData, { ITextCursor, ITextSelection, TextEditorOperations } from "@/types/IText";
-import { IPoint } from "@/types/index";
+import { IPoint, ISize } from "@/types/index";
 
 // 通用组件命令
 export type IBaseCommandElementObject = {
@@ -56,14 +56,14 @@ export default interface ICommand<T> {
 }
 
 // 组件操作数据
-export interface IElementCommandPayload {
-  type: ElementCommandTypes;
+export interface IElementsCommandPayload {
+  type: ElementsCommandTypes;
   uDataList: Array<ICommandElementObject>;
   rDataList?: Array<ICommandElementObject>;
 }
 
 // 组件命令类型
-export enum ElementCommandTypes {
+export enum ElementsCommandTypes {
   ElementsAdded = "elements_added",
   ElementsRemoved = "elements_removed",
   ElementsUpdated = "elements_updated",
@@ -73,6 +73,9 @@ export enum ElementCommandTypes {
   GroupRemoved = "group_removed",
   DetachedElementsRemoved = "detached_elements_removed",
 }
+
+// 单个组件操作数据
+export type IElementCommandPayload = { }
 
 // 文本编辑器命令类型
 export enum TextEditorCommandTypes {
@@ -88,7 +91,7 @@ export type ICommandTextEditorObject = {
 };
 
 // 文本组件编辑命令的保存数据
-export interface ITextEditorCommandPayload {
+export interface ITextEditorCommandPayload extends IElementCommandPayload {
   type: TextEditorCommandTypes;
   operation: TextEditorOperations;
   updateId?: string;
@@ -110,12 +113,15 @@ export enum ArbitraryCommandTypes {
 // 自由折线组件命令对象
 export type ICommandArbitraryObject = {
   coords: IPoint[];
+  boxCoords?: IPoint[];
+  size?: ISize;
+  position?: IPoint;
   tailCoordIndex?: number;
   editingCoordIndex?: number;
 }
 
 // 自由折线组件命令的保存数据
-export interface IArbitraryCommandPayload {
+export interface IArbitraryCommandPayload extends IElementCommandPayload {
   type: ArbitraryCommandTypes;
   operation: ArbitraryOperations;
   updateId?: string;

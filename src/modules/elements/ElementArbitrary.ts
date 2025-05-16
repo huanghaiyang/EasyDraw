@@ -12,8 +12,7 @@ import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import LodashUtils from "@/utils/LodashUtils";
 import GlobalConfig from "@/config";
-import { ArbitraryCommandTypes, ArbitraryOperations, IArbitraryCommandPayload, ICommandArbitraryObject } from "@/types/ICommand";
-import IUndoRedo from "@/types/IUndoRedo";
+import { ArbitraryCommandTypes, ArbitraryOperations, ICommandArbitraryObject } from "@/types/ICommand";
 import UndoRedo from "@/modules/base/UndoRedo";
 import ArbitraryEditorUpdatedCommand from "@/modules/command/arbitrary/ArbitraryEditorUpdatedCommand";
 
@@ -27,8 +26,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   private _outerWorldPaths: IPoint[][][] = [];
   // 原始外轮廓区域（世界坐标）
   private _originalOuterWorldPaths: IPoint[][][] = [];
-  // 撤销回退
-  private _undoRedo: IUndoRedo<IArbitraryCommandPayload, boolean>;
   // 回退命令对象
   private _undoCommandObject: ICommandArbitraryObject | null;
 
@@ -71,7 +68,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this.tailCoordIndex = -1;
-    this._undoRedo = new UndoRedo();
+    this.undoRedo = new UndoRedo();
     this._undoCommandObject = this._getCommandObject();
   }
 
@@ -84,6 +81,7 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     super._setStatus(status);
     if (status === ElementStatus.finished) {
       this.tailCoordIndex = -1;
+      this.undoRedo.clear();
     }
   }
 
@@ -280,6 +278,9 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   private _getCommandObject(): ICommandArbitraryObject {
     return {
       coords: LodashUtils.jsonClone(this.model.coords),
+      boxCoords: LodashUtils.jsonClone(this.model.boxCoords),
+      size: { width: this.model.width, height: this.model.height },
+      position: {  x: this.model.x, y: this.model.y},
       tailCoordIndex: this.tailCoordIndex,
       editingCoordIndex: this.editingCoordIndex,
     };
@@ -291,11 +292,13 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    * @param opreation 操作类型
    */
   saveState(opreation: ArbitraryOperations): void {
-    this._undoRedo.add(new ArbitraryEditorUpdatedCommand(CommonUtils.getRandomId(), {
+    const rData = this._getCommandObject();
+    this.undoRedo.add(new ArbitraryEditorUpdatedCommand(CommonUtils.getRandomId(), {
       type: ArbitraryCommandTypes.CoordsUpdated,
       operation: opreation,
       uData: this._undoCommandObject,
-      rData: this._getCommandObject(),
+      rData,
     }, this));
+    this._undoCommandObject = LodashUtils.jsonClone(rData);
   }
 }

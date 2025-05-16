@@ -16,8 +16,7 @@ import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import DOMUtils from "@/utils/DOMUtils";
 import { FontStyle, FontStyler, FontStyleSet, TextDecoration } from "@/styles/ElementStyles";
 import TextUtils from "@/utils/TextUtils";
-import IUndoRedo from "@/types/IUndoRedo";
-import { ICommandTextEditorObject, ITextEditorCommandPayload, TextEditorCommandTypes } from "@/types/ICommand";
+import { ICommandTextEditorObject, TextEditorCommandTypes } from "@/types/ICommand";
 import UndoRedo from "@/modules/base/UndoRedo";
 import IStageShield from "@/types/IStageShield";
 import TextEditorUpdatedCommand from "@/modules/command/text/TextEditorUpdatedCommand";
@@ -42,8 +41,6 @@ export default class ElementText extends ElementRect implements IElementText {
   private _textUpdateId: string;
   // 上一次是否重新计算了文本行
   private _prevTextLinesReflowed: boolean = false;
-  // 撤销回退
-  private _undoRedo: IUndoRedo<ITextEditorCommandPayload, boolean>;
   // 用以维护文本修改前的数据，包含文本内容，光标以及选区
   private _undoCommandObject: ICommandTextEditorObject | null;
   // 上一次操作类型
@@ -262,7 +259,7 @@ export default class ElementText extends ElementRect implements IElementText {
 
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
-    this._undoRedo = new UndoRedo();
+    this.undoRedo = new UndoRedo();
   }
 
   /**
@@ -286,7 +283,7 @@ export default class ElementText extends ElementRect implements IElementText {
     if (value) {
       this._selectAll();
     } else {
-      this._undoRedo.clear();
+      this.undoRedo.clear();
     }
     this._markSelection();
     this._checkFontStyleChangedByCursor();
@@ -541,11 +538,11 @@ export default class ElementText extends ElementRect implements IElementText {
         changed = this._pasteText(value, textData, states);
       } else if (CoderUtils.isZ(keyCode) && ctrlKey) {
         // 撤销
-        const tailUndoCommand = this._undoRedo.tailUndoCommand;
+        const tailUndoCommand = this.undoRedo.tailUndoCommand as TextEditorUpdatedCommand;
         if (tailUndoCommand) {
           const { relationId } = tailUndoCommand;
           if (relationId) await this.emitUndo();
-          await this._undoRedo.undo();
+          await this.undo();
           this._editorOperation = TextEditorOperations.UNDO;
           if (![TextEditorOperations.MOVE_CURSOR, TextEditorOperations.MOVE_SELECTION].includes(tailUndoCommand.payload.operation)) {
             reflow = true;
@@ -553,11 +550,11 @@ export default class ElementText extends ElementRect implements IElementText {
         }
       } else if (CoderUtils.isY(keyCode) && ctrlKey) {
         // 回退
-        const tailRedoCommand = this._undoRedo.tailRedoCommand;
+        const tailRedoCommand = this.undoRedo.tailRedoCommand as TextEditorUpdatedCommand;
         if (tailRedoCommand) {
           const { relationId } = tailRedoCommand;
           if (relationId) await this.emitRedo();
-          await this._undoRedo.redo();
+          await this.redo();
           this._editorOperation = TextEditorOperations.REDO;
           if (![TextEditorOperations.MOVE_CURSOR, TextEditorOperations.MOVE_SELECTION].includes(tailRedoCommand.payload.operation)) {
             reflow = true;
@@ -1724,7 +1721,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _addUpdateCommand(): void {
     let shouldUpdate: boolean = false;
-    const tailUndoCommand = this._undoRedo.tailUndoCommand;
+    const tailUndoCommand = this.undoRedo.tailUndoCommand as TextEditorUpdatedCommand;
     if (tailUndoCommand) {
       const {
         payload: { operation },
@@ -1747,7 +1744,7 @@ export default class ElementText extends ElementRect implements IElementText {
         },
         this,
       );
-      this._undoRedo.add(command);
+      this.undoRedo.add(command);
     }
   }
 
@@ -1756,7 +1753,7 @@ export default class ElementText extends ElementRect implements IElementText {
    */
   private _addCursorUpdateCommand(): void {
     let shouldUpdate: boolean = false;
-    const tailUndoCommand = this._undoRedo.tailUndoCommand;
+    const tailUndoCommand = this.undoRedo.tailUndoCommand as TextEditorUpdatedCommand;
     if (tailUndoCommand) {
       const {
         payload: {
@@ -1786,7 +1783,7 @@ export default class ElementText extends ElementRect implements IElementText {
         },
         this,
       );
-      this._undoRedo.add(command);
+      this.undoRedo.add(command);
     }
   }
 
@@ -1933,6 +1930,6 @@ export default class ElementText extends ElementRect implements IElementText {
       this,
       commandId,
     );
-    this._undoRedo.add(editCommand);
+    this.undoRedo.add(editCommand);
   }
 }

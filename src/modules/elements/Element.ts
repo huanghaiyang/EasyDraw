@@ -23,6 +23,8 @@ import RotateController from "@/modules/handler/controller/RotateController";
 import CreatorHelper from "@/types/CreatorHelper";
 import LodashUtils from "@/utils/LodashUtils";
 import GlobalConfig from "@/config";
+import { IElementCommandPayload } from "@/types/ICommand";
+import IUndoRedo from "@/types/IUndoRedo";
 
 export default class Element implements IElement, ILinkedNodeValue {
   // 组件模型
@@ -33,6 +35,8 @@ export default class Element implements IElement, ILinkedNodeValue {
   shield: IStageShield;
   // 所属节点
   node: ILinkedNode<IElement>;
+  // 撤销重做对象
+  undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
 
   // 原始变换器点坐标
   _originalTransformerCoords: IPoint[] = [];
@@ -837,6 +841,24 @@ export default class Element implements IElement, ILinkedNodeValue {
       isInRange: observable,
       isCornerMoving: observable,
     });
+  }
+
+  /**
+   * 撤销
+   */
+  async undo(): Promise<void> {
+    if (this.undoRedo.tailUndoCommand) {
+      await this.undoRedo.undo();
+    }
+  }
+
+  /**
+   * 重做
+   */
+  async redo(): Promise<void> {
+    if (this.undoRedo.tailRedoCommand) {
+      await this.undoRedo.redo();
+    }
   }
 
   /**

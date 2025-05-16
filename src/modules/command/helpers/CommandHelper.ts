@@ -1,4 +1,4 @@
-import ICommand, { ElementActionTypes, ElementCommandTypes, ElementsActionParam, IElementCommandPayload, IRelationNode, ICommandElementObject } from "@/types/ICommand";
+import ICommand, { ElementActionTypes, ElementsCommandTypes, ElementsActionParam, IElementsCommandPayload, IRelationNode, ICommandElementObject } from "@/types/ICommand";
 import IElement, { ElementObject } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import LodashUtils from "@/utils/LodashUtils";
@@ -99,10 +99,10 @@ export default class CommandHelper {
    * @param elements
    * @param store
    */
-  static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
+  static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
     const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson(), type: ElementActionTypes.Updated })));
     const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
-    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsUpdated, store);
+    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, store);
   }
 
   /**
@@ -112,7 +112,7 @@ export default class CommandHelper {
    * @param type
    * @param store
    */
-  static async createCommandByActionParams(actionParams: ElementsActionParam[], type: ElementCommandTypes, store: IStageStore): Promise<ICommand<IElementCommandPayload>> {
+  static async createCommandByActionParams(actionParams: ElementsActionParam[], type: ElementsCommandTypes, store: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
     return CommandHelper.createElementsChangedCommand(uDataList, rDataList, type, store);
@@ -131,10 +131,10 @@ export default class CommandHelper {
   static createElementsChangedCommand(
     uDataList: Array<ICommandElementObject>,
     rDataList: Array<ICommandElementObject>,
-    type: ElementCommandTypes,
+    type: ElementsCommandTypes,
     store: IStageStore,
     id?: string,
-  ): ICommand<IElementCommandPayload> {
+  ): ICommand<IElementsCommandPayload> {
     const command = new ElementsChangedCommand(
       id || CommonUtils.getRandomId(),
       {

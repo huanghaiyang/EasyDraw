@@ -35,7 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import ICommand, { ElementActionTypes, ElementCommandTypes, ElementsActionParam, ICommandElementObject, IElementCommandPayload } from "@/types/ICommand";
+import ICommand, { ElementActionTypes, ElementsCommandTypes, ElementsActionParam, ICommandElementObject, IElementsCommandPayload } from "@/types/ICommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
@@ -71,7 +71,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   // 对齐
   align: IStageAlign;
   // 撤销
-  undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
+  undoRedo: IUndoRedo<IElementsCommandPayload, boolean>;
   // 舞台缩放比例
   stageScale: number = 1;
   // 画布在世界中的坐标,画布始终是居中的,所以坐标都是相对于画布中心点的,当画布尺寸发生变化时,需要重新计算
@@ -273,7 +273,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param id
    */
   private async _addUpdatedCommandByDataList(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): Promise<void> {
-    const command = CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsUpdated, this.store, id);
+    const command = CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, this.store, id);
     this.undoRedo.add(command);
   }
 
@@ -1869,7 +1869,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         data: elements,
       },
     ];
-    const command = await CommandHelper.createCommandByActionParams(actionParams, ElementCommandTypes.ElementsAdded, this.store);
+    const command = await CommandHelper.createCommandByActionParams(actionParams, ElementsCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
   }
 
@@ -2225,7 +2225,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.store.isSelectedEmpty) {
       return;
     }
-    let command: ICommand<IElementCommandPayload> | null = null;
+    let command: ICommand<IElementsCommandPayload> | null = null;
     const { list, ancestors } = this.store.findRemovedElemements(this.store.selectedElements);
     const actionParams: ElementsActionParam[] = [];
     list.forEach(element => {
@@ -2251,7 +2251,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       ancestor.refreshOriginals();
     });
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
-    command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsRemoved, this.store);
+    command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsRemoved, this.store);
     this.undoRedo.add(command);
     this.store.removeElements(list);
   }
@@ -2295,7 +2295,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
       },
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementCommandTypes.ElementsAdded, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementsCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
     this.store.setElementsDetachedSelected(elements, true);
     this.selection.refresh();
@@ -2358,7 +2358,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._clearStageSelects();
       this.store.setElementsDetachedSelected([group], true);
     }
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupAdded, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.GroupAdded, this.store);
     this.undoRedo.add(command);
   }
 
@@ -2385,7 +2385,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     this.store.cancelGroups(groups);
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.GroupRemoved, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.GroupRemoved, this.store);
     this.undoRedo.add(command);
     groups.forEach(group => {
       this.store.selectElements(group.subs);
@@ -2411,20 +2411,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param tailCommand
    */
-  private async _processAfterUndoRedo(tailCommand: ICommand<IElementCommandPayload>): Promise<void> {
+  private async _processAfterUndoRedo(tailCommand: ICommand<IElementsCommandPayload>): Promise<void> {
     this.selection.refresh();
     await this._addRedrawTask(true);
     this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
     if (
       tailCommand &&
       [
-        ElementCommandTypes.ElementsRearranged,
-        ElementCommandTypes.ElementsRemoved,
-        ElementCommandTypes.ElementsAdded,
-        ElementCommandTypes.GroupAdded,
-        ElementCommandTypes.GroupRemoved,
-        ElementCommandTypes.DetachedElementsRemoved,
-        ElementCommandTypes.ElementsMoved,
+        ElementsCommandTypes.ElementsRearranged,
+        ElementsCommandTypes.ElementsRemoved,
+        ElementsCommandTypes.ElementsAdded,
+        ElementsCommandTypes.GroupAdded,
+        ElementsCommandTypes.GroupRemoved,
+        ElementsCommandTypes.DetachedElementsRemoved,
+        ElementsCommandTypes.ElementsMoved,
       ].includes(tailCommand.payload.type)
     ) {
       this.store.refreshStageElements();
@@ -2433,29 +2433,70 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 执行撤销
+   * 刷新并重绘
+   *
+   * @returns
    */
-  async _doUndo(): Promise<void> {
-    const tailUndoCommand = this.undoRedo.tailUndoCommand;
-    if (!tailUndoCommand) return;
-    if (!(tailUndoCommand.payload.type === ElementCommandTypes.ElementsUpdated)) {
+  private async _refreshAndRedraw(): Promise<void> {
+    this.selection.refresh();
+    await this._addRedrawTask(true);
+  }
+
+  /**
+   * 执行全局撤销
+   *
+   * @returns 
+   */
+  private async _doGlobalUndo(): Promise<void> {
+    const tailCommand = this.undoRedo.tailUndoCommand;
+    if (!tailCommand) return;
+    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
     await this.undoRedo.undo();
-    await this._processAfterUndoRedo(tailUndoCommand);
+    await this._processAfterUndoRedo(tailCommand);
+  }
+
+  /**
+   * 执行撤销
+   */
+  private async _doUndo(): Promise<void> {
+    if (this.isArbitraryDrawing) {
+      const arbitraryElement = this.store.creatingElements[0];
+      if (arbitraryElement.undoRedo.tailUndoCommand) {
+        await arbitraryElement.undo();
+      } else {
+        this.commitArbitraryDrawing();
+      }
+      await this._refreshAndRedraw();
+    } else {
+      this._doGlobalUndo();
+    }
+  }
+
+  /**
+   * 执行全局重做
+   */
+  private async _doGlobalRedo(): Promise<void> {
+    const tailCommand = this.undoRedo.tailRedoCommand;
+    if (!tailCommand) return;
+    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
+      this.store.deSelectAll();
+    }
+    await this.undoRedo.redo();
+    await this._processAfterUndoRedo(tailCommand);
   }
 
   /**
    * 执行重做
    */
-  async _doRedo(): Promise<void> {
-    const tailRedoCommand = this.undoRedo.tailRedoCommand;
-    if (!tailRedoCommand) return;
-    if (!(tailRedoCommand.payload.type === ElementCommandTypes.ElementsUpdated)) {
-      this.store.deSelectAll();
+  private async _doRedo(): Promise<void> {
+    if (this.isArbitraryDrawing || this.isArbitraryEditing) {
+      await Promise.all(this.store.creatingElements.map(async element => await element.redo()));
+      await this._refreshAndRedraw();
+    } else {
+      this._doGlobalRedo();
     }
-    await this.undoRedo.redo();
-    await this._processAfterUndoRedo(tailRedoCommand);
   }
 
   /**
@@ -2711,7 +2752,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param rDataList
    */
   private async _createElementsRearrangeCommand(elements: IElement[], uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>): Promise<void> {
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsRearranged, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsRearranged, this.store);
     this.undoRedo.add(command);
     elements.forEach(element => element.onLayerChanged());
     this._shouldRedraw = true;
@@ -2816,7 +2857,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
       },
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementCommandTypes.ElementsMoved, this.store);
+    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsMoved, this.store);
     this.undoRedo.add(command);
     this.selection.refresh();
   }

@@ -197,7 +197,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 合并主选区和子选区模型
     const models: IMaskModel[] = [...selection.getModels(), selection.selectionModel];
     models.forEach(model => {
-      if (model && model.points.length > 0) {
+      if (model?.points?.length > 0) {
         // 创建缩放适配的路径任务
         const task = new MaskTaskPath(model, this.canvas);
         tasks.push(task);

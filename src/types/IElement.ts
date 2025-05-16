@@ -17,7 +17,8 @@ import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ITextData, { ITextCursor, ITextSelection, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
-import { ArbitraryOperations } from "@/types/ICommand";
+import { ArbitraryOperations, IElementCommandPayload } from "@/types/ICommand";
+import IUndoRedo from "@/types/IUndoRedo";
 
 // 椭圆模型
 export type EllipseModel = {
@@ -219,6 +220,8 @@ export default interface IElement {
   isProvisional: boolean;
   // 是否拖动中
   isDragging: boolean;
+  // 撤销重做对象
+  undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
 
   get isRangeElement(): boolean;
   // 组件ID
@@ -1326,6 +1329,14 @@ export default interface IElement {
    * 将组件样式数据转换为json
    */
   toFontStyleJson(): Promise<ElementObject>;
+  /**
+   * 撤销
+   */
+  undo(): Promise<void>;
+  /**
+   * 重做
+   */
+  redo(): Promise<void>;
 }
 
 // 舞台组件（组件）-React
