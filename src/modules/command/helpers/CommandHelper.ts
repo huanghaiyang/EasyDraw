@@ -6,6 +6,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementsChangedCommand from "@/modules/command/ElementsChangedCommand";
 import CommonUtils from "@/utils/CommonUtils";
+import { ElementStatus } from "@/types";
 
 export default class CommandHelper {
   /**
@@ -72,13 +73,13 @@ export default class CommandHelper {
    * @param data
    * @param store
    */
-  static restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): void {
+  static restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): IElement {
     const { model, prevId } = data;
     let prevElement: IElement | undefined;
     if (prevId) {
       prevElement = store.getElementById(prevId);
     }
-    store.insertAfterElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
+    return store.insertAfterElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
   }
 
   /**
@@ -204,14 +205,15 @@ export default class CommandHelper {
    * 获取组件添加数据
    *
    * @param elements
+   * @param type
    * @returns
    */
-  static async getElementsAddedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
+  static async getElementsAddedDataList(elements: IElement[], type: ElementActionTypes = ElementActionTypes.Added): Promise<ICommandElementObject[]> {
     return Promise.all(
       elements.map(async element => {
         return {
           model: await element.toJson(),
-          type: ElementActionTypes.Added,
+          type,
           ...CommandHelper.createRearrangeModel(element),
         };
       }),
@@ -292,6 +294,22 @@ export default class CommandHelper {
               store.updateElementModel(id, model);
               break;
             }
+            case ElementActionTypes.Creating: {
+              if (isRedo) {
+                CommandHelper.restoreRemovedElementFromData(data, store);
+                store.currentCreatingElementId = id;
+                store.updateElementById(id, {
+                  status: ElementStatus.creating,
+                  isProvisional: true,
+                  isSelected: true,
+                  isOnStage: false,
+                });
+              } else {
+                store.removeElementById(id);
+                store.currentCreatingElementId = null;
+              }
+              break;
+            }
           }
           resolve();
         });
@@ -323,8 +341,9 @@ export default class CommandHelper {
             dataList.push(...(await CommandHelper.getAncestorsUpdateJson(data as IElementGroup[])));
             break;
           }
-          case ElementActionTypes.Added: {
-            dataList.push(...(await CommandHelper.getElementsAddedDataList(data)));
+          case ElementActionTypes.Added:
+          case ElementActionTypes.Creating: {
+            dataList.push(...(await CommandHelper.getElementsAddedDataList(data, type)));
             break;
           }
         }

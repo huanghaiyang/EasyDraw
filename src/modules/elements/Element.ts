@@ -817,6 +817,10 @@ export default class Element implements IElement, ILinkedNodeValue {
     return this.fills.some(fill => !fill.colorOpacity);
   }
 
+  get isValid(): boolean {
+    return true;
+  }
+
   constructor(model: ElementObject, shield: IStageShield, isRangeElement?: boolean) {
     this.model = model;
     this.rotation = new ElementRotation(this);

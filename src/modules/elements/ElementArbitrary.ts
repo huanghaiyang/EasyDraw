@@ -65,6 +65,10 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return true;
   }
 
+  get isValid(): boolean {
+    return this.model.coords.length >= 2;
+  }
+
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this.tailCoordIndex = -1;

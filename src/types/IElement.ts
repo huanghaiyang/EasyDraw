@@ -222,7 +222,9 @@ export default interface IElement {
   isDragging: boolean;
   // 撤销重做对象
   undoRedo: IUndoRedo<IElementCommandPayload, boolean>;
-
+  // 组件是否有效
+  get isValid(): boolean;
+  // 组件是否在选区范围内
   get isRangeElement(): boolean;
   // 组件ID
   get id(): string;

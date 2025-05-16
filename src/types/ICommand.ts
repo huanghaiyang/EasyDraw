@@ -21,6 +21,7 @@ export type IGroupNode = {
 
 // 组件变更类型
 export enum ElementActionTypes {
+  Creating = "Creating", // 组件创建中
   Added = "Added", // 组件添加
   Updated = "Updated", // 组件更新
   Removed = "removed",
@@ -69,6 +70,7 @@ export enum ElementsCommandTypes {
   ElementsUpdated = "elements_updated",
   ElementsRearranged = "elements_rearranged",
   ElementsMoved = "elements_moved",
+  ElementsCreating = "elements_creating",
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
   DetachedElementsRemoved = "detached_elements_removed",

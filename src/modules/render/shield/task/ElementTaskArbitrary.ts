@@ -13,8 +13,9 @@ export default class ElementTaskArbitrary extends ElementTaskBase {
     let {
       innermostStrokeCoordIndex,
       strokeCoords,
-      model: { styles, isFold },
+      model: { styles, isFold, coords },
     } = this.element;
+    if (coords?.length === 0) return;
     // 计算秒表的舞台坐标
     const strokePoints = ElementUtils.batchCalcStageRelativePoints(strokeCoords);
     // 判断路径是否闭合

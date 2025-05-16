@@ -48,6 +48,7 @@ import { computed, makeObservable, observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
+import CreatorHelper from "@/types/CreatorHelper";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的创作工具
@@ -1504,8 +1505,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 处理自由折线下的鼠标按下事件
    */
-  private _handleArbitraryPressUp(): void {
+  private async _handleArbitraryPressUp(): Promise<void> {
     const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
+    if (element.model.coords.length === 1) {
+      const actionParams: ElementsActionParam[] =  [{
+        type: ElementActionTypes.Creating,
+        data: [element],
+      }];
+      const command = await CommandHelper.createCommandByActionParams(actionParams, ElementsCommandTypes.ElementsCreating, this.store);
+      this.undoRedo.add(command);
+    }
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
     }
@@ -1600,7 +1609,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     // 非自由折线模式，绘制完成之后重绘
     if (!this.isArbitraryDrawing) {
-      await this._tryCreatedRedraw();
+      await this._afterElementCreated();
     }
   }
 
@@ -1672,8 +1681,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 绘制完成之后的重绘
    */
-  private async _tryCreatedRedraw(): Promise<void> {
-    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this._tryEmitElementCreated()]);
+  private async _afterElementCreated(): Promise<void> {
+    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this._commitElementCreated()]);
   }
 
   /**
@@ -1860,9 +1869,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 创建添加组件命令
    *
    * @param elements - 组件列表
-   * @param selectedAppend - 是否添加到选中组件的后面
    */
-  private async _createAddedCommand(elements: IElement[], selectedAppend?: boolean): Promise<void> {
+  private async _createAddedCommand(elements: IElement[]): Promise<void> {
     const actionParams: ElementsActionParam[] = [
       {
         type: ElementActionTypes.Added,
@@ -1886,7 +1894,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 提交绘制
    */
-  private async _tryEmitElementCreated(): Promise<void> {
+  private async _commitElementCreated(): Promise<void> {
     const provisionalElements = this.store.provisionalElements;
     if (provisionalElements.length) {
       this.store.updateElements(provisionalElements, {
@@ -2203,7 +2211,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
     }
-    await this._createAddedCommand([element], true);
+    await this._createAddedCommand([element]);
     callback && callback();
   }
 
@@ -2433,16 +2441,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 刷新并重绘
-   *
-   * @returns
-   */
-  private async _refreshAndRedraw(): Promise<void> {
-    this.selection.refresh();
-    await this._addRedrawTask(true);
-  }
-
-  /**
    * 执行全局撤销
    *
    * @returns 
@@ -2463,12 +2461,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _doUndo(): Promise<void> {
     if (this.isArbitraryDrawing) {
       const arbitraryElement = this.store.creatingElements[0];
-      if (arbitraryElement.undoRedo.tailUndoCommand) {
-        await arbitraryElement.undo();
-      } else {
-        this.commitArbitraryDrawing();
+      let clear: boolean = true;
+      if(arbitraryElement) {
+        if (arbitraryElement.undoRedo.tailUndoCommand) {
+          await arbitraryElement.undo();
+          this.selection.refresh();
+          await this._addRedrawTask(true);
+          clear = false;
+        } else {
+          this._doGlobalUndo();
+        }
       }
-      await this._refreshAndRedraw();
+      if (clear) {
+        this.setCreator(MoveableCreator);
+        this._isPressDown = false;
+      }
     } else {
       this._doGlobalUndo();
     }
@@ -2483,6 +2490,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
+    if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
+      const { model: { type } } = tailCommand.payload.rDataList[0] as ICommandElementObject;
+      this.setCreator(CreatorHelper.getCreatorByType(type));
+    }
     await this.undoRedo.redo();
     await this._processAfterUndoRedo(tailCommand);
   }
@@ -2491,9 +2502,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 执行重做
    */
   private async _doRedo(): Promise<void> {
-    if (this.isArbitraryDrawing || this.isArbitraryEditing) {
+    if (this.isArbitraryDrawing) {
       await Promise.all(this.store.creatingElements.map(async element => await element.redo()));
-      await this._refreshAndRedraw();
+      this.selection.refresh();
+      await this._addRedrawTask(true);
     } else {
       this._doGlobalRedo();
     }
@@ -2686,7 +2698,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       if (arbitraryElement) {
         if (arbitraryElement.model.coords.length >= 2) {
           this.store.finishCreatingElement();
-          await this._tryCreatedRedraw();
+          await this._afterElementCreated();
           failed = false;
         } else {
           this.store.clearCreatingElements();

@@ -72,9 +72,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     // 选区绘制阶段 ================
     if (elementsStatus !== StageShieldElementsStatus.MOVING) {
       selectionTasks = this.createMaskSelectionTasks();
-      selectionTasks.forEach(task => {
-        cargo.add(task);
-      });
+      cargo.addAll(selectionTasks);
       if (selectionTasks.length) {
         this._lastSelectionRendered = true; // 标记选区已渲染
       }
@@ -98,7 +96,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
           rotation = element.rotation;
         }
         // 添加指示器
-        cargo.add(this.createMaskIndicatorTask(element));
+        element.isValid && cargo.add(this.createMaskIndicatorTask(element));
       } else if (nonHomologousElements.length > 1 && rangeElement.subs.length > 0) {
         // 多选时添加范围组件的旋转任务
         rotation = rangeElement.rotation;

@@ -45,11 +45,10 @@ interface ElementsLayerExecuteFunction {
 
 export default class StageStore implements IStageStore {
   shield: IStageShield;
-
+  // 当前正在创建的组件id
+  currentCreatingElementId: string;
   // 画板上绘制的组件列表（形状、文字、图片等）
   private _elementList: ElementList = new ElementList();
-  // 当前正在创建的组件
-  private _currentCreatingElementId: string;
   // 组件对象映射关系，加快查询
   private _elementsMap: Map<string, IElement> = new Map<string, IElement>();
   // 当前组件类别下的最大序列号
@@ -172,7 +171,7 @@ export default class StageStore implements IStageStore {
 
   // 当前创建并更新中的组件
   get creatingElements(): IElement[] {
-    const element = this._elementsMap.get(this._currentCreatingElementId);
+    const element = this._elementsMap.get(this.currentCreatingElementId);
     if (element) {
       return [element];
     }
@@ -439,7 +438,6 @@ export default class StageStore implements IStageStore {
     this._isMultiSelected = this._nonHomologousElements.length > 1;
     this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
     this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
-
     this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
     this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
     this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
@@ -651,7 +649,7 @@ export default class StageStore implements IStageStore {
   filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void {
     if (!element) return;
     // 如果组件是创建中的组件或者选中的组件且组件没有组合，则发送事件
-    if (element.id === this.primarySelectedElement?.id || element.id === this._currentCreatingElementId) {
+    if (element.id === this.primarySelectedElement?.id || element.id === this.currentCreatingElementId) {
       this.shield.emit(name, element, ...args);
     }
   }
@@ -1803,7 +1801,7 @@ export default class StageStore implements IStageStore {
    */
   private _createProvisionalElement(model: ElementObject): IElement {
     const element = ElementUtils.createElement(model, this.shield);
-    this._currentCreatingElementId = element.id;
+    this.currentCreatingElementId = element.id;
     this.updateElementById(element.id, {
       status: ElementStatus.startCreating,
     });
@@ -1821,10 +1819,10 @@ export default class StageStore implements IStageStore {
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type), null, !isString(this._currentCreatingElementId));
-        if (this._currentCreatingElementId) {
+        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type), null, !isString(this.currentCreatingElementId));
+        if (this.currentCreatingElementId) {
           delete model.id;
-          element = this.updateElementModel(this._currentCreatingElementId, model);
+          element = this.updateElementModel(this.currentCreatingElementId, model);
           element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
           this._setElementProvisionalCreating(element);
         } else {
@@ -1850,8 +1848,8 @@ export default class StageStore implements IStageStore {
     let element: IElementArbitrary;
     let model: ElementObject;
     // 如果当前创建的组件id存在，则获取该组件
-    if (this._currentCreatingElementId) {
-      element = this.getElementById(this._currentCreatingElementId) as ElementArbitrary;
+    if (this.currentCreatingElementId) {
+      element = this.getElementById(this.currentCreatingElementId) as ElementArbitrary;
       model = element.model;
       // 如果tailAppend为true，则追加节点
       if (tailAppend) {
@@ -1907,10 +1905,10 @@ export default class StageStore implements IStageStore {
    * 完成创建组件
    */
   finishCreatingElement(): IElement {
-    if (this._currentCreatingElementId) {
-      let element = this.getElementById(this._currentCreatingElementId);
+    if (this.currentCreatingElementId) {
+      let element = this.getElementById(this.currentCreatingElementId);
       if (element) {
-        this._currentCreatingElementId = null;
+        this.currentCreatingElementId = null;
         const {
           model: { type },
         } = element;
@@ -3530,6 +3528,6 @@ export default class StageStore implements IStageStore {
    */
   clearCreatingElements(): void {
     this.removeElements(this.creatingElements);
-    this._currentCreatingElementId = null;
+    this.currentCreatingElementId = null;
   }
 }
