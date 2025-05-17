@@ -4,7 +4,7 @@ import { IDrawerHtml, IDrawerMask, IDrawerProvisional, IStageDrawer } from "@/ty
 import IStageSelection from "@/types/IStageSelection";
 import IStageStore from "@/types/IStageStore";
 import IStageCursor from "@/types/IStageCursor";
-import { Creator } from "@/types/Creator";
+import { Creator, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
 import IElement from "@/types/IElement";
@@ -44,8 +44,10 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   align: IStageAlign;
   // 撤销
   undoRedo: IUndoRedo<IElementsCommandPayload, boolean>;
-  // 当前创建者
+  // 当前工具
   currentCreator: Creator;
+  // 上一个工具
+  prevCreatorType: CreatorTypes;
   // 渲染组件
   renderEl: HTMLDivElement;
   // 舞台矩形

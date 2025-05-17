@@ -12,9 +12,6 @@ import IController from "@/types/IController";
 import VerticesTransformer from "@/modules/handler/transformer/VerticesTransformer";
 import LodashUtils from "@/utils/LodashUtils";
 import GlobalConfig from "@/config";
-import { ArbitraryCommandTypes, ArbitraryOperations, ICommandArbitraryObject } from "@/types/ICommand";
-import UndoRedo from "@/modules/base/UndoRedo";
-import ArbitraryEditorUpdatedCommand from "@/modules/command/arbitrary/ArbitraryEditorUpdatedCommand";
 
 export default class ElementArbitrary extends Element implements IElementArbitrary {
   // 线条绘制过程中已经绘制的点索引
@@ -26,8 +23,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   private _outerWorldPaths: IPoint[][][] = [];
   // 原始外轮廓区域（世界坐标）
   private _originalOuterWorldPaths: IPoint[][][] = [];
-  // 回退命令对象
-  private _undoCommandObject: ICommandArbitraryObject | null;
 
   // 变换器类型
   get transformerType(): TransformerTypes {
@@ -72,8 +67,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   constructor(model: ElementObject, shield: IStageShield) {
     super(model, shield);
     this.tailCoordIndex = -1;
-    this.undoRedo = new UndoRedo();
-    this._undoCommandObject = this._getCommandObject();
   }
 
   /**
@@ -85,7 +78,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     super._setStatus(status);
     if (status === ElementStatus.finished) {
       this.tailCoordIndex = -1;
-      this.undoRedo.clear();
     }
   }
 
@@ -272,37 +264,5 @@ export default class ElementArbitrary extends Element implements IElementArbitra
   translateBy(offset: IPoint): void {
     this._translateOuterCoords(offset);
     super.translateBy(offset);
-  }
-
-  /**
-   * 生成命令对象
-   * 
-   * @returns 
-   */
-  private _getCommandObject(): ICommandArbitraryObject {
-    return {
-      coords: LodashUtils.jsonClone(this.model.coords),
-      boxCoords: LodashUtils.jsonClone(this.model.boxCoords),
-      size: { width: this.model.width, height: this.model.height },
-      position: {  x: this.model.x, y: this.model.y},
-      tailCoordIndex: this.tailCoordIndex,
-      editingCoordIndex: this.editingCoordIndex,
-    };
-  }
-
-  /**
-   * 添加撤销命令
-   * 
-   * @param opreation 操作类型
-   */
-  saveState(opreation: ArbitraryOperations): void {
-    const rData = this._getCommandObject();
-    this.undoRedo.add(new ArbitraryEditorUpdatedCommand(CommonUtils.getRandomId(), {
-      type: ArbitraryCommandTypes.CoordsUpdated,
-      operation: opreation,
-      uData: this._undoCommandObject,
-      rData,
-    }, this));
-    this._undoCommandObject = LodashUtils.jsonClone(rData);
   }
 }

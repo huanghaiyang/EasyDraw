@@ -17,7 +17,7 @@ import IController, { IPointController } from "@/types/IController";
 import { ArcPoints } from "@/types/IRender";
 import { ILinkedNode } from "@/modules/struct/LinkedNode";
 import ITextData, { ITextCursor, ITextSelection, TextEditorPressTypes, TextUpdateResult } from "@/types/IText";
-import { ArbitraryOperations, IElementCommandPayload } from "@/types/ICommand";
+import { IElementCommandPayload } from "@/types/ICommand";
 import IUndoRedo from "@/types/IUndoRedo";
 
 // 椭圆模型
@@ -1445,8 +1445,6 @@ export interface IElementArbitrary extends IElement {
   activeEditingCoord(index: number): void;
   // 取消编辑点
   deActiveEditingCoord(): void;
-  // 添加撤销命令
-  saveState(opreation: ArbitraryOperations): void;
 }
 
 // 组件树节点

@@ -113,7 +113,7 @@ export default class CommandHelper {
    * @param type
    * @param store
    */
-  static async createCommandByActionParams(actionParams: ElementsActionParam[], type: ElementsCommandTypes, store: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
+  static async createCommandByActionParams(actionParams: ElementsActionParam[], type: ElementsCommandTypes, store?: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
     return CommandHelper.createElementsChangedCommand(uDataList, rDataList, type, store);
@@ -133,7 +133,7 @@ export default class CommandHelper {
     uDataList: Array<ICommandElementObject>,
     rDataList: Array<ICommandElementObject>,
     type: ElementsCommandTypes,
-    store: IStageStore,
+    store?: IStageStore,
     id?: string,
   ): ICommand<IElementsCommandPayload> {
     const command = new ElementsChangedCommand(
@@ -251,6 +251,23 @@ export default class CommandHelper {
   }
 
   /**
+   * 还原正在创建中的组件
+   * 
+   * @param id 
+   * @param data 
+   * @param store 
+   */
+  static async updateCreatingElementStatus(id: string, store: IStageStore): Promise<void> {
+    store.currentCreatingElementId = id;
+    store.updateElementById(id, {
+      status: ElementStatus.creating,
+      isProvisional: true,
+      isSelected: true,
+      isOnStage: false,
+    });
+  }
+
+  /**
    * 执行撤销操作
    *
    * @param datalist
@@ -295,15 +312,14 @@ export default class CommandHelper {
               break;
             }
             case ElementActionTypes.Creating: {
+              store.updateElementModel(id, model);
+              CommandHelper.updateCreatingElementStatus(id, store);
+              break;
+            }
+            case ElementActionTypes.StartCreating: {
               if (isRedo) {
-                CommandHelper.restoreRemovedElementFromData(data, store);
-                store.currentCreatingElementId = id;
-                store.updateElementById(id, {
-                  status: ElementStatus.creating,
-                  isProvisional: true,
-                  isSelected: true,
-                  isOnStage: false,
-                });
+                CommandHelper.restoreElementFromData(data, store);
+                CommandHelper.updateCreatingElementStatus(id, store);
               } else {
                 store.removeElementById(id);
                 store.currentCreatingElementId = null;
@@ -342,7 +358,8 @@ export default class CommandHelper {
             break;
           }
           case ElementActionTypes.Added:
-          case ElementActionTypes.Creating: {
+          case ElementActionTypes.Creating:
+          case ElementActionTypes.StartCreating: {
             dataList.push(...(await CommandHelper.getElementsAddedDataList(data, type)));
             break;
           }

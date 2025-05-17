@@ -9,7 +9,7 @@ import { ElementActionCallback } from "@/types/ICommand";
 // 用于维护舞台数据关系
 export default interface IStageStore extends IStageSetter {
   // 正在创建的组件ID
-  currentCreatingElementId: string;
+  currentCreatingElementId?: string;
   // 可见组件
   get visibleElements(): IElement[];
   // 正在绘制的组件

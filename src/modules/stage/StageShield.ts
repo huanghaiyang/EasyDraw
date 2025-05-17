@@ -51,8 +51,10 @@ import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import CreatorHelper from "@/types/CreatorHelper";
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
-  // 当前正在使用的创作工具
-  currentCreator: Creator;
+  // 当前正在使用的工具
+  currentCreator: Creator = HandCreator;
+  // 上一个使用的工具
+  prevCreatorType: CreatorTypes;
   // 鼠标操作
   cursor: IStageCursor;
   // 遮罩画板用以绘制鼠标样式,工具图标等
@@ -1109,8 +1111,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectHand", this._handleSelectHand.bind(this));
     this.event.on("groupAdd", this._handleGroupAdd.bind(this));
     this.event.on("groupRemove", this._handleGroupCancel.bind(this));
-    this.event.on("undo", this._handleUndo.bind(this));
-    this.event.on("redo", this._handleRedo.bind(this));
+    this.event.on("undo", this.execUndo.bind(this));
+    this.event.on("redo", this.execRedo.bind(this));
     this.html.on("textInput", this._handleTextInput.bind(this));
     this.html.on("textUpdate", this._handleTextUpdate.bind(this));
   }
@@ -1508,12 +1510,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _handleArbitraryPressUp(): Promise<void> {
     const element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
     if (element.model.coords.length === 1) {
-      const actionParams: ElementsActionParam[] =  [{
+      // 组件创建生效，生成一个切换绘图工具切换的命令
+      const creatorCommand = await CommandHelper.createCommandByActionParams([], ElementsCommandTypes.ElementsCreatorChanged, this.store);
+      Object.assign(creatorCommand.payload, {
+        prevCreatorType: this.prevCreatorType,
+        creatorType: CreatorTypes.arbitrary,
+      });
+      this.undoRedo.add(creatorCommand);
+      // 组件创建生效，生成一个组件创建的命令
+      this.undoRedo.add(await CommandHelper.createCommandByActionParams([{
+        type: ElementActionTypes.StartCreating,
+        data: [element],
+      }], ElementsCommandTypes.ElementsStartCreating, this.store));
+    } else {
+      this.undoRedo.add(await CommandHelper.createCommandByActionParams([{
         type: ElementActionTypes.Creating,
         data: [element],
-      }];
-      const command = await CommandHelper.createCommandByActionParams(actionParams, ElementsCommandTypes.ElementsCreating, this.store);
-      this.undoRedo.add(command);
+      }], ElementsCommandTypes.ElementsCreating, this.store));
     }
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
@@ -1984,17 +1997,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 设置当前创作工具
+   * 设置当前工具
    *
    * @param creator
    */
   async setCreator(creator: Creator): Promise<void> {
+    this.prevCreatorType = this.currentCreator?.type;
     this.currentCreator = creator;
     this.emit(ShieldDispatcherNames.creatorChanged, creator);
   }
 
   /**
-   * 尝试渲染创作工具
+   * 尝试渲染工具
    *
    * @param e
    */
@@ -2401,27 +2415,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 处理撤销操作
+   * 执行撤销或者回退操作
+   * 
+   * @param isRedo 
+   * @returns 
    */
-  async _handleUndo(): Promise<void> {
-    await this._doUndo();
-  }
-
-  /**
-   * 处理重做操作
-   */
-  async _handleRedo(): Promise<void> {
-    await this._doRedo();
-  }
-
-  /**
-   * 处理撤销重做操作
-   *
-   * @param tailCommand
-   */
-  private async _processAfterUndoRedo(tailCommand: ICommand<IElementsCommandPayload>): Promise<void> {
-    this.selection.refresh();
-    await this._addRedrawTask(true);
+  private async _doUndoRedo(isRedo: boolean): Promise<void> {
+    const tailCommand = isRedo? this.undoRedo.tailRedoCommand: this.undoRedo.tailUndoCommand;
+    if (!tailCommand) return;
+    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
+      this.store.deSelectAll();
+    }
+    if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreatorChanged) {
+      this.setCreator(CreatorHelper.getCreatorByType( isRedo? tailCommand.payload.creatorType: tailCommand.payload.prevCreatorType || HandCreator.type));
+    }
+    isRedo? await this.undoRedo.redo(): await this.undoRedo.undo();
     this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
     if (
       tailCommand &&
@@ -2433,96 +2441,31 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         ElementsCommandTypes.GroupRemoved,
         ElementsCommandTypes.DetachedElementsRemoved,
         ElementsCommandTypes.ElementsMoved,
+        ElementsCommandTypes.ElementsCreating,
+        ElementsCommandTypes.ElementsStartCreating,
       ].includes(tailCommand.payload.type)
     ) {
       this.store.refreshStageElements();
       this.store.throttleRefreshTreeNodes();
     }
-  }
-
-  /**
-   * 执行全局撤销
-   *
-   * @returns 
-   */
-  private async _doGlobalUndo(): Promise<void> {
-    const tailCommand = this.undoRedo.tailUndoCommand;
-    if (!tailCommand) return;
-    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
-      this.store.deSelectAll();
-    }
-    await this.undoRedo.undo();
-    await this._processAfterUndoRedo(tailCommand);
-  }
-
-  /**
-   * 执行撤销
-   */
-  private async _doUndo(): Promise<void> {
-    if (this.isArbitraryDrawing) {
-      const arbitraryElement = this.store.creatingElements[0];
-      let clear: boolean = true;
-      if(arbitraryElement) {
-        if (arbitraryElement.undoRedo.tailUndoCommand) {
-          await arbitraryElement.undo();
-          this.selection.refresh();
-          await this._addRedrawTask(true);
-          clear = false;
-        } else {
-          this._doGlobalUndo();
-        }
-      }
-      if (clear) {
-        this.setCreator(MoveableCreator);
-        this._isPressDown = false;
-      }
-    } else {
-      this._doGlobalUndo();
-    }
-  }
-
-  /**
-   * 执行全局重做
-   */
-  private async _doGlobalRedo(): Promise<void> {
-    const tailCommand = this.undoRedo.tailRedoCommand;
-    if (!tailCommand) return;
-    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
-      this.store.deSelectAll();
-    }
-    if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
-      const { model: { type } } = tailCommand.payload.rDataList[0] as ICommandElementObject;
-      this.setCreator(CreatorHelper.getCreatorByType(type));
-    }
-    await this.undoRedo.redo();
-    await this._processAfterUndoRedo(tailCommand);
-  }
-
-  /**
-   * 执行重做
-   */
-  private async _doRedo(): Promise<void> {
-    if (this.isArbitraryDrawing) {
-      await Promise.all(this.store.creatingElements.map(async element => await element.redo()));
-      this.selection.refresh();
-      await this._addRedrawTask(true);
-    } else {
-      this._doGlobalRedo();
-    }
+    this.selection.refresh();
+    console.log(this.store.primarySelectedElement, this.store.primarySelectedElement?.boxVerticesTransformEnable)
+    await this._addRedrawTask(true);
+    this._isPressDown = false;
   }
 
   /**
    * 执行撤销
    */
   async execUndo(): Promise<void> {
-    await this._doUndo();
+    await this._doUndoRedo(false);
   }
 
   /**
    * 执行重做
    */
   async execRedo(): Promise<void> {
-    await this._doRedo();
+    await  this._doUndoRedo(true);
   }
 
   /**

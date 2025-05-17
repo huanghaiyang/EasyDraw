@@ -1,6 +1,7 @@
 import IElement, { ElementObject } from "@/types/IElement";
 import ITextData, { ITextCursor, ITextSelection, TextEditorOperations } from "@/types/IText";
-import { IPoint, ISize } from "@/types/index";
+import { ElementStatus } from "@/types/index";
+import { CreatorTypes } from "@/types/Creator";
 
 // 通用组件命令
 export type IBaseCommandElementObject = {
@@ -9,19 +10,31 @@ export type IBaseCommandElementObject = {
 
 // 组件移出前的前后组件ID关系
 export type IRelationNode = {
-  prevId?: string;
-  nextId?: string;
+  prevId: string;
+  nextId: string;
 };
 
 // 组合关系
 export type IGroupNode = {
-  isGroup?: boolean;
-  isGroupSubject?: boolean;
+  isGroup: boolean;
+  isGroupSubject: boolean;
 };
+
+// 组件属性
+export type IAttributeNode = {
+  status: ElementStatus;
+}
+
+// 控制器属性
+export type ICoordEdtorNode = {
+  tailCoordIndex: number;
+  editingCoordIndex: number;
+}
 
 // 组件变更类型
 export enum ElementActionTypes {
   Creating = "Creating", // 组件创建中
+  StartCreating = "StartCreating", // 组件创建开始
   Added = "Added", // 组件添加
   Updated = "Updated", // 组件更新
   Removed = "removed",
@@ -42,8 +55,10 @@ export interface ElementActionCallback {
 
 // 独立组件移除命令
 export type ICommandElementObject = IBaseCommandElementObject &
-  IRelationNode &
-  IGroupNode & {
+  Partial<IRelationNode> &
+  Partial<IGroupNode> & 
+  Partial<IAttributeNode> & 
+  Partial<ICoordEdtorNode> & {
     type?: ElementActionTypes;
   };
 
@@ -61,6 +76,8 @@ export interface IElementsCommandPayload {
   type: ElementsCommandTypes;
   uDataList: Array<ICommandElementObject>;
   rDataList?: Array<ICommandElementObject>;
+  creatorType?: CreatorTypes;
+  prevCreatorType?: CreatorTypes;
 }
 
 // 组件命令类型
@@ -71,6 +88,8 @@ export enum ElementsCommandTypes {
   ElementsRearranged = "elements_rearranged",
   ElementsMoved = "elements_moved",
   ElementsCreating = "elements_creating",
+  ElementsStartCreating = "elements_start_creating",
+  ElementsCreatorChanged = "elements_creator_changed",
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
   DetachedElementsRemoved = "detached_elements_removed",
@@ -99,34 +118,4 @@ export interface ITextEditorCommandPayload extends IElementCommandPayload {
   updateId?: string;
   uData: ICommandTextEditorObject;
   rData?: ICommandTextEditorObject;
-}
-
-// 自由折线组件操作类型
-export enum ArbitraryOperations {
-  coord_create = "coord_create",
-  coord_move = "coord_move"
-};
-
-// 自由折线组件命令类型
-export enum ArbitraryCommandTypes {
-  CoordsUpdated = "coords_updated"
-}
-
-// 自由折线组件命令对象
-export type ICommandArbitraryObject = {
-  coords: IPoint[];
-  boxCoords?: IPoint[];
-  size?: ISize;
-  position?: IPoint;
-  tailCoordIndex?: number;
-  editingCoordIndex?: number;
-}
-
-// 自由折线组件命令的保存数据
-export interface IArbitraryCommandPayload extends IElementCommandPayload {
-  type: ArbitraryCommandTypes;
-  operation: ArbitraryOperations;
-  updateId?: string;
-  uData: ICommandArbitraryObject;
-  rData?: ICommandArbitraryObject
 }
