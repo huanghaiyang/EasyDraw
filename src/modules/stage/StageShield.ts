@@ -1229,7 +1229,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._tryRetrieveTextCursor(TextEditorPressTypes.PRESS_MOVE, true);
       } else if (this.isArbitraryDrawing) {
         // 移动过程中创建组件
-        this._updatingArbitraryElementOnMovement(e);
+        this._updateArbitraryTailOnMovement(e);
         this.selection.refreshTransformerModels();
       } else if (this.isDrawerActive) {
         // 移动过程中创建组件
@@ -1512,13 +1512,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     let uDataList: ICommandElementObject[] = [];
     let rDataList: ICommandElementObject[] = [];
     if (element) {
-      uDataList.push(...await CommandHelper.createDataListByActionParams([{
-        type: ElementActionTypes.Creating,
-        data: [element],
-      }]))
+      uDataList.push(
+        ...(await CommandHelper.createDataListByActionParams([
+          {
+            type: ElementActionTypes.Creating,
+            data: [element],
+          },
+        ])),
+      );
     }
     element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
-    if (element.model.coords.length === 1) {
+    if ((element as IElementArbitrary).tailCoordIndex === 0) {
       // 组件创建生效，生成一个切换绘图工具切换的命令
       const creatorCommand = await CommandHelper.createCommandByActionParams([], ElementsCommandTypes.ElementsCreatorChanged, this.store);
       Object.assign(creatorCommand.payload, {
@@ -1526,18 +1530,26 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         creatorType: CreatorTypes.arbitrary,
       });
       this.undoRedo.add(creatorCommand);
-      uDataList.push({ type: ElementActionTypes.StartCreating, model: { id: element.id } })
+      uDataList.push({ type: ElementActionTypes.StartCreating, model: { id: element.id } });
       // 组件创建生效，生成一个组件创建的命令
-      rDataList.push(...await CommandHelper.createDataListByActionParams([{
-        type: ElementActionTypes.StartCreating,
-        data: [element],
-      }]))
+      rDataList.push(
+        ...(await CommandHelper.createDataListByActionParams([
+          {
+            type: ElementActionTypes.StartCreating,
+            data: [element],
+          },
+        ])),
+      );
       this.undoRedo.add(await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsStartCreating, this.store, element.id));
     } else {
-      rDataList.push(...await CommandHelper.createDataListByActionParams([{
-        type: ElementActionTypes.Creating,
-        data: [element],
-      }]))
+      rDataList.push(
+        ...(await CommandHelper.createDataListByActionParams([
+          {
+            type: ElementActionTypes.Creating,
+            data: [element],
+          },
+        ])),
+      );
       this.undoRedo.add(await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsCreating, this.store, element.id));
     }
     if (element?.model.isFold) {
@@ -1615,7 +1627,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     } else if (this.isArbitraryDrawing) {
       // 如果是绘制模式，则完成组件的绘制
       this._isPressDown = true;
-      this._handleArbitraryPressUp();
+      await this._handleArbitraryPressUp();
     } else if (this.isDrawerActive) {
       this.store.finishCreatingElement();
     } else if (this.isMoveableActive) {
@@ -2038,8 +2050,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e
    * @returns
    */
-  _updatingArbitraryElementOnMovement(e: MouseEvent): IElement {
-    if (this.checkCursorPressMovedALittle(e)) {
+  _updateArbitraryTailOnMovement(e: MouseEvent): IElement {
+    const creatingElement = this.store.creatingElements[0] as IElementArbitrary;
+    if (creatingElement && creatingElement.tailCoordIndex >= 0 && this.checkCursorPressMovedALittle(e)) {
       return this.store.creatingArbitraryElement(this._pressMoveStageWorldCoord, false);
     }
   }
@@ -2461,7 +2474,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         // 使用上一次的组件创建中的命令的重做数据进行数据恢复
         const rDataList = this.undoRedo.tailUndoCommand.payload.rDataList;
         // 数据恢复
-        await CommandHelper.restoreDataList(rDataList, true, this.store)
+        await CommandHelper.restoreDataList(rDataList, true, this.store);
         this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type));
         tailCommand = this.undoRedo.tailUndoCommand;
       }

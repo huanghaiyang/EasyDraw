@@ -2073,7 +2073,7 @@ export default class StageStore implements IStageStore {
    * @param element
    */
   private _updateElementStageStatusIfy(element: IElement): void {
-    const isOnStage = element.isModelPolygonOverlap(this.shield.stageWordRectCoords);
+    const isOnStage = element.id === this.currentCreatingElementId? false: element.isModelPolygonOverlap(this.shield.stageWordRectCoords);
     this.updateElementById(element.id, { isOnStage });
   }
 
