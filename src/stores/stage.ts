@@ -386,7 +386,7 @@ export const useStageStore = defineStore("stage", {
      * @param elements
      */
     onElementCreated(elements: IElement[]) {
-      this.onElementChanged((!elements || elements.length === 0)? null: elements[0]);
+      this.onElementChanged(!elements || elements.length === 0 ? null : elements[0]);
     },
     /**
      * 舞台组件选中状态改变

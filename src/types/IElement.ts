@@ -531,8 +531,8 @@ export default interface IElement {
 
   /**
    * 更新角度
-   * 
-   * @param value 
+   *
+   * @param value
    */
   updateAngle(value: number): void;
   /**
@@ -550,8 +550,8 @@ export default interface IElement {
 
   /**
    * 更新圆角
-   * @param value 
-   * @param index 
+   * @param value
+   * @param index
    */
   updateCorners(value: number, index?: number): void;
 
@@ -1331,6 +1331,11 @@ export default interface IElement {
    * 将组件样式数据转换为json
    */
   toFontStyleJson(): Promise<ElementObject>;
+
+  /**
+   * 转换为组件属性
+   */
+  toElementJson(): Object;
   /**
    * 撤销
    */

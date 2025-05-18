@@ -10,7 +10,7 @@ export default class TextEditorUpdatedCommand extends ElementBaseCommand<ITextEd
    * @param type
    *
    */
-  private async _restoreElementsFromData(data: ICommandTextEditorObject, type: TextEditorCommandTypes): Promise<void> {
+  private async _batchUpdateElementFromDatas(data: ICommandTextEditorObject, type: TextEditorCommandTypes): Promise<void> {
     const { textData, textCursor, textSelection } = data;
     if (type === TextEditorCommandTypes.TextUpdated) {
       this.element.model.data = textData;
@@ -23,7 +23,7 @@ export default class TextEditorUpdatedCommand extends ElementBaseCommand<ITextEd
     if (!uData) {
       return;
     }
-    await this._restoreElementsFromData(uData, type);
+    await this._batchUpdateElementFromDatas(uData, type);
   }
 
   async redo(): Promise<void> {
@@ -31,6 +31,6 @@ export default class TextEditorUpdatedCommand extends ElementBaseCommand<ITextEd
     if (!rData) {
       return;
     }
-    await this._restoreElementsFromData(rData, type);
+    await this._batchUpdateElementFromDatas(rData, type);
   }
 }

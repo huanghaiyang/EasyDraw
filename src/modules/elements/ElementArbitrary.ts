@@ -265,4 +265,31 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     this._translateOuterCoords(offset);
     super.translateBy(offset);
   }
+
+  /**
+   * 转换为json
+   *
+   * @returns
+   */
+  async toJson(): Promise<ElementObject> {
+    const result = await super.toJson();
+    if (this.status === ElementStatus.creating) {
+      result.coords = this.model.coords.slice(0, this.tailCoordIndex + 1);
+    }
+    return result;
+  }
+
+  /**
+   * 转换为组件属性
+   *
+   * @returns
+   */
+  async toElementJson(): Promise<Object> {
+    const json = await super.toElementJson();
+    return {
+      ...json,
+      tailCoordIndex: this.tailCoordIndex,
+      editingCoordIndex: this.editingCoordIndex,
+    };
+  }
 }

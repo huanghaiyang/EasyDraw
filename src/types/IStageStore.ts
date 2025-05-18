@@ -223,4 +223,6 @@ export default interface IStageStore extends IStageSetter {
   getOuterLayerElements(elements: IElement[]): IElement[];
   // 清除正在创建的组件
   clearCreatingElements(): void;
+  // 设置组件正在创建中的状态
+  setElementProvisionalCreatingById(id: string): void;
 }

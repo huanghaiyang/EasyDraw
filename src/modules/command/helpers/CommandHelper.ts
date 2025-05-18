@@ -6,7 +6,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import ElementsChangedCommand from "@/modules/command/ElementsChangedCommand";
 import CommonUtils from "@/utils/CommonUtils";
-import { ElementStatus } from "@/types";
+import { isEmpty } from "lodash";
 
 export default class CommandHelper {
   /**
@@ -26,7 +26,7 @@ export default class CommandHelper {
    * @param store
    */
 
-  static async restoreElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<void> {
+  static async updateElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<void> {
     const { model } = commandElementObject;
     const element = store.updateElementModel(model.id, LodashUtils.jsonClone(model));
     if (element) {
@@ -41,9 +41,9 @@ export default class CommandHelper {
    * @param uDataList
    * @param store
    */
-  static async restoreElementsFromData(uDataList: Array<ICommandElementObject>, store: IStageStore): Promise<void> {
+  static async batchUpdateElementFromDatas(uDataList: Array<ICommandElementObject>, store: IStageStore): Promise<void> {
     uDataList.forEach(data => {
-      CommandHelper.restoreElementFromData(data, store);
+      CommandHelper.updateElementFromData(data, store);
     });
   }
 
@@ -55,11 +55,8 @@ export default class CommandHelper {
    */
   static async rearrange(uDataList: Array<ICommandElementObject>, store: IStageStore): Promise<void> {
     uDataList.forEach(data => {
-      const {
-        model: { id },
-        prevId,
-      } = data;
-      const element = store.getElementById(id);
+      const { model, prevId } = data;
+      const element = store.getElementById(model.id);
       const prevElement = prevId ? store.getElementById(prevId) : undefined;
       if (element) {
         store.moveElementAfter(element, prevElement, true);
@@ -95,14 +92,27 @@ export default class CommandHelper {
   }
 
   /**
+   * 封装组件原始数据
+   *
+   * @param element
+   * @param json
+   */
+  static async wrapElementJson(element: IElement, json: ICommandElementObject): Promise<ICommandElementObject> {
+    return {
+      props: await element.toElementJson(),
+      ...json,
+    };
+  }
+
+  /**
    * 创建组件原始圆角半径命令
    *
    * @param elements
    * @param store
    */
   static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
-    const uDataList = await Promise.all(elements.map(async element => ({ model: await element.toOriginalCornerJson(), type: ElementActionTypes.Updated })));
-    const rDataList = await Promise.all(elements.map(async element => ({ model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
+    const uDataList = await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toOriginalCornerJson(), type: ElementActionTypes.Updated })));
+    const rDataList = await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
     return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, store);
   }
 
@@ -157,10 +167,10 @@ export default class CommandHelper {
   static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<ICommandElementObject[]> {
     return await Promise.all(
       ancestors.map(async ancestor => {
-        return {
+        return CommandHelper.wrapElementJson(ancestor, {
           model: await (ancestor as IElementGroup).toSubUpdatedJson(),
           type: ElementActionTypes.GroupUpdated,
-        };
+        });
       }),
     );
   }
@@ -174,11 +184,11 @@ export default class CommandHelper {
   static async getRearrangeDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
     return Promise.all(
       elements.map(async element => {
-        return {
+        return CommandHelper.wrapElementJson(element, {
           model: await element.toGroupJson(),
           type: ElementActionTypes.Moved,
           ...CommandHelper.createRearrangeModel(element),
-        };
+        });
       }),
     );
   }
@@ -192,11 +202,11 @@ export default class CommandHelper {
   static async getElementsRemovedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
     return Promise.all(
       elements.map(async element => {
-        return {
+        return CommandHelper.wrapElementJson(element, {
           model: await element.toJson(),
           type: ElementActionTypes.Removed,
           ...CommandHelper.createRearrangeModel(element),
-        };
+        });
       }),
     );
   }
@@ -211,11 +221,11 @@ export default class CommandHelper {
   static async getElementsAddedDataList(elements: IElement[], type: ElementActionTypes = ElementActionTypes.Added): Promise<ICommandElementObject[]> {
     return Promise.all(
       elements.map(async element => {
-        return {
+        return CommandHelper.wrapElementJson(element, {
           model: await element.toJson(),
           type,
           ...CommandHelper.createRearrangeModel(element),
-        };
+        });
       }),
     );
   }
@@ -252,19 +262,16 @@ export default class CommandHelper {
 
   /**
    * 还原正在创建中的组件
-   * 
-   * @param id 
-   * @param data 
-   * @param store 
+   *
+   * @param id
+   * @param props
+   * @param store
    */
-  static async updateCreatingElementStatus(id: string, store: IStageStore): Promise<void> {
-    store.currentCreatingElementId = id;
-    store.updateElementById(id, {
-      status: ElementStatus.creating,
-      isProvisional: true,
-      isSelected: true,
-      isOnStage: false,
-    });
+  static async updateCreatingElementStatus(id: string, props: Object = {}, store: IStageStore): Promise<void> {
+    store.setElementProvisionalCreatingById(id);
+    if (!isEmpty(props)) {
+      store.updateElementById(id, props);
+    }
   }
 
   /**
@@ -279,7 +286,7 @@ export default class CommandHelper {
     await Promise.all(
       datalist.map(data => {
         return new Promise<void>(async resolve => {
-          const { model, type } = data;
+          const { model, type, props = {} } = data;
           const { id } = model;
           switch (type) {
             case ElementActionTypes.Added: {
@@ -293,7 +300,7 @@ export default class CommandHelper {
             }
             case ElementActionTypes.Updated:
             case ElementActionTypes.GroupUpdated: {
-              CommandHelper.restoreElementFromData(data, store);
+              CommandHelper.updateElementFromData(data, store);
               break;
             }
             case ElementActionTypes.Removed: {
@@ -313,13 +320,14 @@ export default class CommandHelper {
             }
             case ElementActionTypes.Creating: {
               store.updateElementModel(id, model);
-              CommandHelper.updateCreatingElementStatus(id, store);
+              CommandHelper.updateCreatingElementStatus(id, props, store);
               break;
             }
             case ElementActionTypes.StartCreating: {
               if (isRedo) {
-                CommandHelper.restoreElementFromData(data, store);
-                CommandHelper.updateCreatingElementStatus(id, store);
+                CommandHelper.restoreRemovedElementFromData(data, store);
+                CommandHelper.updateCreatingElementStatus(id, props, store);
+                store.currentCreatingElementId = id;
               } else {
                 store.removeElementById(id);
                 store.currentCreatingElementId = null;

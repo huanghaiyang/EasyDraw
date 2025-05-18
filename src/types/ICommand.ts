@@ -23,13 +23,7 @@ export type IGroupNode = {
 // 组件属性
 export type IAttributeNode = {
   status: ElementStatus;
-}
-
-// 控制器属性
-export type ICoordEdtorNode = {
-  tailCoordIndex: number;
-  editingCoordIndex: number;
-}
+};
 
 // 组件变更类型
 export enum ElementActionTypes {
@@ -56,10 +50,10 @@ export interface ElementActionCallback {
 // 独立组件移除命令
 export type ICommandElementObject = IBaseCommandElementObject &
   Partial<IRelationNode> &
-  Partial<IGroupNode> & 
-  Partial<IAttributeNode> & 
-  Partial<ICoordEdtorNode> & {
+  Partial<IGroupNode> &
+  Partial<IAttributeNode> & {
     type?: ElementActionTypes;
+    props?: Object;
   };
 
 // 命令
@@ -96,7 +90,7 @@ export enum ElementsCommandTypes {
 }
 
 // 单个组件操作数据
-export type IElementCommandPayload = { }
+export type IElementCommandPayload = {};
 
 // 文本编辑器命令类型
 export enum TextEditorCommandTypes {

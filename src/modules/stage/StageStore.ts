@@ -437,11 +437,10 @@ export default class StageStore implements IStageStore {
     this._nonHomologousElements = ElementUtils.getNonHomologousElements(this._selectedElements);
     this._isMultiSelected = this._nonHomologousElements.length > 1;
     this._selectedAncestorElement = ElementUtils.getAncestorGroup(this._selectedElements);
-    this._primarySelectedElement = this._selectedAncestorElement && !this._selectedAncestorElement.isProvisional ? this._selectedAncestorElement : null;
+    this._primarySelectedElement = this._selectedAncestorElement;
     this.shield.emit(ShieldDispatcherNames.selectedChanged, this._selectedElements);
     this.shield.emit(ShieldDispatcherNames.multiSelectedChanged, this._isMultiSelected);
     this.shield.emit(ShieldDispatcherNames.primarySelectedChanged, this._primarySelectedElement);
-
     this.emitElementsLayerChanged();
   }
 
@@ -1785,8 +1784,8 @@ export default class StageStore implements IStageStore {
    *
    * @param element
    */
-  private _setElementProvisionalCreating(element: IElement): void {
-    this.updateElementById(element.id, {
+  setElementProvisionalCreatingById(id: string): void {
+    this.updateElementById(id, {
       status: ElementStatus.creating,
       isOnStage: false,
       isProvisional: true,
@@ -1824,7 +1823,7 @@ export default class StageStore implements IStageStore {
           delete model.id;
           element = this.updateElementModel(this.currentCreatingElementId, model);
           element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
-          this._setElementProvisionalCreating(element);
+          this.setElementProvisionalCreatingById(element.id);
         } else {
           element = this._createProvisionalElement(model);
         }
@@ -1847,7 +1846,6 @@ export default class StageStore implements IStageStore {
   creatingArbitraryElement(coord: IPoint, tailAppend: boolean): IElement {
     let element: IElementArbitrary;
     let model: ElementObject;
-    console.log(this.currentCreatingElementId)
     // 如果当前创建的组件id存在，则获取该组件
     if (this.currentCreatingElementId) {
       element = this.getElementById(this.currentCreatingElementId) as ElementArbitrary;
@@ -1868,14 +1866,14 @@ export default class StageStore implements IStageStore {
         }
       } else {
         // 如果tailAppend为false，则更新尾部节点
-        if (element.tailCoordIndex + 1 === model.coords.length) {
+        if (model.coords.length - element.tailCoordIndex <= 1) {
           model.coords.push(coord);
         } else {
-          model.coords.splice(element.tailCoordIndex + 1, 1, coord);
+          model.coords = [...model.coords.slice(0, element.tailCoordIndex + 1), coord];
         }
       }
       element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
-      this._setElementProvisionalCreating(element);
+      this.setElementProvisionalCreatingById(element.id);
     } else {
       // 如果当前创建的组件id不存在，则创建一个新的组件
       model = this.createElementModel(CreatorTypes.arbitrary, [coord]);

@@ -3110,4 +3110,13 @@ export default class Element implements IElement, ILinkedNodeValue {
       ),
     ) as ElementObject;
   }
+
+  /**
+   * 转换为组件属性
+   *
+   * @returns
+   */
+  async toElementJson(): Promise<Object> {
+    return {};
+  }
 }
