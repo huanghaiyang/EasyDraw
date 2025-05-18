@@ -2435,15 +2435,37 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   private async _doUndoRedo(isRedo: boolean): Promise<void> {
-    const tailCommand = isRedo ? this.undoRedo.tailRedoCommand : this.undoRedo.tailUndoCommand;
+    let tailCommand = isRedo ? this.undoRedo.tailRedoCommand : this.undoRedo.tailUndoCommand;
     if (!tailCommand) return;
     if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
     if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreatorChanged) {
-      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? tailCommand.payload.creatorType : tailCommand.payload.prevCreatorType || HandCreator.type));
+      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? tailCommand.payload.creatorType : tailCommand.payload.prevCreatorType || MoveableCreator.type));
     }
     isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
+    if (isRedo && tailCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
+      if (this.undoRedo.tailRedoCommand && this.undoRedo.tailRedoCommand.payload.type === ElementsCommandTypes.ElementsAdded) {
+        // 先把创建中的组件删除
+        this.store.clearCreatingElements();
+        // 再把组件加回来
+        await this.undoRedo.redo();
+        this.setCreator(MoveableCreator);
+        tailCommand = this.undoRedo.tailRedoCommand;
+      }
+    }
+    if (!isRedo && tailCommand.payload.type === ElementsCommandTypes.ElementsAdded) {
+      if (this.undoRedo.tailUndoCommand && this.undoRedo.tailUndoCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
+        // 先把组件加回来
+        await CommandHelper.restoreDataList(tailCommand.payload.rDataList, true, this.store);
+        // 使用上一次的组件创建中的命令的重做数据进行数据恢复
+        const rDataList = this.undoRedo.tailUndoCommand.payload.rDataList;
+        // 数据恢复
+        await CommandHelper.restoreDataList(rDataList, true, this.store)
+        this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type));
+        tailCommand = this.undoRedo.tailUndoCommand;
+      }
+    }
     this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
     if (
       tailCommand &&

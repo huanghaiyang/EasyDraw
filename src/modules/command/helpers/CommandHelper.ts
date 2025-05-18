@@ -26,13 +26,14 @@ export default class CommandHelper {
    * @param store
    */
 
-  static async updateElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<void> {
+  static async updateElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<IElement> {
     const { model } = commandElementObject;
     const element = store.updateElementModel(model.id, LodashUtils.jsonClone(model));
     if (element) {
       element.refreshFlipX();
       element.refresh();
     }
+    return element;
   }
 
   /**
@@ -70,13 +71,15 @@ export default class CommandHelper {
    * @param data
    * @param store
    */
-  static restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): IElement {
+  static async restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): Promise<IElement> {
+    let element: IElement | undefined;
     const { model, prevId } = data;
     let prevElement: IElement | undefined;
     if (prevId) {
       prevElement = store.getElementById(prevId);
     }
-    return store.insertAfterElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
+    element = store.insertAfterElementByModel(LodashUtils.jsonClone(model) as ElementObject, prevElement, !prevId);
+    return element;
   }
 
   /**
@@ -292,7 +295,7 @@ export default class CommandHelper {
             case ElementActionTypes.Added: {
               // 对于add命令，如果是redo操作，需要还原插入组件，否则直接删除组件
               if (isRedo) {
-                CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.restoreRemovedElementFromData(data, store);
               } else {
                 store.removeElementById(id);
               }
@@ -300,7 +303,7 @@ export default class CommandHelper {
             }
             case ElementActionTypes.Updated:
             case ElementActionTypes.GroupUpdated: {
-              CommandHelper.updateElementFromData(data, store);
+              await CommandHelper.updateElementFromData(data, store);
               break;
             }
             case ElementActionTypes.Removed: {
@@ -308,25 +311,26 @@ export default class CommandHelper {
               if (isRedo) {
                 store.removeElementById(id);
               } else {
-                CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.restoreRemovedElementFromData(data, store);
               }
               break;
             }
             case ElementActionTypes.Moved: {
-              CommandHelper.rearrange([data], store);
+              await CommandHelper.rearrange([data], store);
               // 组件移动位置时，可能会改变组件的所属组合，需要更新组件的model
               store.updateElementModel(id, model);
               break;
             }
             case ElementActionTypes.Creating: {
-              store.updateElementModel(id, model);
-              CommandHelper.updateCreatingElementStatus(id, props, store);
+              await CommandHelper.updateElementFromData(data, store);
+              await CommandHelper.updateCreatingElementStatus(id, props, store);
+              store.currentCreatingElementId = id;
               break;
             }
             case ElementActionTypes.StartCreating: {
               if (isRedo) {
-                CommandHelper.restoreRemovedElementFromData(data, store);
-                CommandHelper.updateCreatingElementStatus(id, props, store);
+                await CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.updateCreatingElementStatus(id, props, store);
                 store.currentCreatingElementId = id;
               } else {
                 store.removeElementById(id);
