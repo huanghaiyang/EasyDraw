@@ -131,21 +131,21 @@ export default class CommandHelper {
    * 创建组件更新数据
    *
    * @param elements
-   * @param modelFunctionName
+   * @param dataTransferName
    * @param type
    * @param eachOperatingFunction
    * @returns
    */
   static async createCommandDataList(
     elements: IElement[],
-    modelFunctionName: string,
+    dataTransfer: (element: IElement) => Promise<ElementObject>,
     type: ElementActionTypes,
     eachOperatingFunction?: (element: IElement) => Promise<void>,
   ): Promise<ICommandElementObject[]> {
     return await Promise.all(
       elements.map(async element => {
         eachOperatingFunction && (await eachOperatingFunction(element));
-        return CommandHelper.wrapElementJson(element, { model: await (element as any)[modelFunctionName](), type });
+        return CommandHelper.wrapElementJson(element, { model: await dataTransfer(element), type });
       }),
     );
   }
@@ -160,7 +160,7 @@ export default class CommandHelper {
    */
   static async createCommandDataLists(
     elements: IElement[],
-    modelFunctionNames: string[],
+    dataTransfers: ((element: IElement) => Promise<ElementObject>)[],
     types: ElementActionTypes[],
     funcs?: {
       elementsOperatingFunction?: () => Promise<void>;
@@ -169,13 +169,13 @@ export default class CommandHelper {
     },
   ): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
     const { elementsOperatingFunction, eachUDataListOperatingFunction, eachRDataListOperatingFunction } = funcs || {};
-    const uDataFunctionName = modelFunctionNames[0];
-    const rDataFunctionName = modelFunctionNames[1] || uDataFunctionName;
+    const uDataTransfer = dataTransfers[0];
+    const rDataTransfer = dataTransfers[1] || uDataTransfer;
     const uDataType = types[0];
     const rDataType = types[1] || uDataType;
-    const uDataList = await CommandHelper.createCommandDataList(elements, uDataFunctionName, uDataType, eachUDataListOperatingFunction);
+    const uDataList = await CommandHelper.createCommandDataList(elements, uDataTransfer, uDataType, eachUDataListOperatingFunction);
     elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createCommandDataList(elements, rDataFunctionName, rDataType, eachRDataListOperatingFunction);
+    const rDataList = await CommandHelper.createCommandDataList(elements, rDataTransfer, rDataType, eachRDataListOperatingFunction);
     return [uDataList, rDataList];
   }
 
