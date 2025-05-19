@@ -108,17 +108,6 @@ export default class CommandHelper {
   }
 
   /**
-   * 创建组件原始圆角半径命令
-   *
-   * @param elements
-   * @param store
-   */
-  static async createOriginalCornerCommand(elements: IElement[], store: IStageStore): Promise<ICommand<IElementsCommandPayload>> {
-    const [uDataList, rDataList] = await CommandHelper.createOriginalCornerDataLists(elements);
-    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, store);
-  }
-
-  /**
    * 根据给定参数创建组件命令
    *
    * @param elements
@@ -137,246 +126,57 @@ export default class CommandHelper {
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
     return CommandHelper.createElementsChangedCommand(uDataList, rDataList, type, store);
   }
-  /**
-   * 创建圆角更新数据
-   *
-   * @param actionParams
-   */
-  static async createCornerDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toCornerJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始圆角半径数据
-   *
-   * @param elements
-   */
-  static async createOriginalCornerDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toOriginalCornerJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始圆角半径命令数据
-   *
-   * @param actionParams
-   */
-  static async createOriginalCornerDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createOriginalCornerDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createCornerDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建圆角半径命令数据
-   *
-   * @param actionParams
-   */
-  static async createCornerDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createCornerDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createCornerDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建填充更新数据
-   *
-   * @param elements
-   * @param store
-   */
-  static async createFillDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toFillsJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建填充更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createFillDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createFillDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createFillDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建描边更新数据
-   *
-   * @param elements
-   */
-  static async createStrokeDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toStrokesJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建描边更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createStrokeDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createStrokeDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createStrokeDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建移动更新数据
-   *
-   * @param elements
-   */
-  static async createTranslateDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toTranslateJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始移动更新数据
-   *
-   * @param elements
-   */
-  static async createOriginalTranslateDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toOriginalTranslateJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建移动更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createTranslateDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createTranslateDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createTranslateDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建原始移动更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createOriginalTranslateDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createOriginalTranslateDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createTranslateDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建旋转更新数据
-   *
-   * @param elements
-   */
-  static async createRotateDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toRotateJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始旋转更新数据
-   *
-   * @param elements
-   */
-  static async createOriginalRotateDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toOriginalRotateJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始旋转更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createOriginalRotateDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createOriginalRotateDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createRotateDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建原始形变更新数据
-   *
-   * @param elements
-   */
-  static async createOriginalTransformDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toOriginalTransformJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建形变更新数据
-   *
-   * @param elements
-   * @returns
-   */
-  static async createTransformDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toTransformJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建原始的形变更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   * @returns
-   */
-  static async createOringinalTransformDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createOriginalTransformDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createTransformDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建形变更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   * @returns
-   */
-  static async createTransformDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createTransformDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createTransformDataList(elements);
-    return [uDataList, rDataList];
-  }
-
-  /**
-   * 创建字体样式更新数据
-   *
-   * @param elements
-   */
-  static async createFontStyleDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toFontStyleJson(), type: ElementActionTypes.Updated })));
-  }
-
-  /**
-   * 创建字体样式更新命令数据
-   *
-   * @param elements
-   * @param elementsOperatingFunction
-   */
-  static async createFonStyleDataLists(elements: IElement[], elementsOperatingFunction?: () => Promise<void>): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
-    const uDataList = await CommandHelper.createFontStyleDataList(elements);
-    elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createFontStyleDataList(elements);
-    return [uDataList, rDataList];
-  }
 
   /**
    * 创建组件更新数据
    *
    * @param elements
+   * @param modelFunctionName
    * @param type
+   * @param eachOperatingFunction
    * @returns
    */
-  static async createDataList(elements: IElement[], type: ElementActionTypes = ElementActionTypes.Updated): Promise<ICommandElementObject[]> {
-    return await Promise.all(elements.map(async element => CommandHelper.wrapElementJson(element, { model: await element.toJson(), type })));
+  static async createCommandDataList(
+    elements: IElement[],
+    modelFunctionName: string,
+    type: ElementActionTypes,
+    eachOperatingFunction?: (element: IElement) => Promise<void>,
+  ): Promise<ICommandElementObject[]> {
+    return await Promise.all(
+      elements.map(async element => {
+        eachOperatingFunction && (await eachOperatingFunction(element));
+        return CommandHelper.wrapElementJson(element, { model: await (element as any)[modelFunctionName](), type });
+      }),
+    );
+  }
+
+  /**
+   * 创建组件更新命令数据
+   *
+   * @param elements
+   * @param type
+   * @param elementsOperatingFunction
+   * @returns
+   */
+  static async createCommandDataLists(
+    elements: IElement[],
+    modelFunctionNames: string[],
+    types: ElementActionTypes[],
+    funcs?: {
+      elementsOperatingFunction?: () => Promise<void>;
+      eachUDataListOperatingFunction?: (element: IElement) => Promise<void>;
+      eachRDataListOperatingFunction?: (element: IElement) => Promise<void>;
+    },
+  ): Promise<[ICommandElementObject[], ICommandElementObject[]]> {
+    const { elementsOperatingFunction, eachUDataListOperatingFunction, eachRDataListOperatingFunction } = funcs || {};
+    const uDataFunctionName = modelFunctionNames[0];
+    const rDataFunctionName = modelFunctionNames[1] || uDataFunctionName;
+    const uDataType = types[0];
+    const rDataType = types[1] || uDataType;
+    const uDataList = await CommandHelper.createCommandDataList(elements, uDataFunctionName, uDataType, eachUDataListOperatingFunction);
+    elementsOperatingFunction && (await elementsOperatingFunction());
+    const rDataList = await CommandHelper.createCommandDataList(elements, rDataFunctionName, rDataType, eachRDataListOperatingFunction);
+    return [uDataList, rDataList];
   }
 
   /**
