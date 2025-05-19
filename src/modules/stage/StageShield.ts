@@ -1664,16 +1664,26 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 更新组件编辑前的原始数据
+   *
+   * @param element 
+   */
+  private async _refreshOrignalEditingDataList(element: IElement): Promise<void> {
+    this._originalEditingUDataList = await CommandHelper.createCommandDataList(this.store.editingElements, "toOriginalTransformJson", ElementActionTypes.Updated);
+    if (element instanceof ElementArbitrary) {
+      // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
+      this._originalEditingUDataList.push(...(await CommandHelper.createCommandDataList(element.ancestorGroups, "toOriginalTransformJson", ElementActionTypes.Updated)));
+    }
+  }
+
+  /**
    * 在开始编辑组件时，处理组件相关数据
    *
    * @param element
    */
   private async _onEditingElementOnStart(element: IElement): Promise<void> {
-    this._originalEditingUDataList = await CommandHelper.createCommandDataList([element], "toOriginalTransformJson", ElementActionTypes.Updated);
-    if (element instanceof ElementArbitrary) {
-      // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
-      this._originalEditingUDataList.push(...(await CommandHelper.createCommandDataList(element.ancestorGroups, "toOriginalTransformJson", ElementActionTypes.Updated)));
-    } else if (element instanceof ElementText) {
+    this._refreshOrignalEditingDataList(element);
+    if (element instanceof ElementText) {
       // 如果是文本编辑模式，则创建文本光标输入框并聚焦
       this._retreiveTextCursorInput(element as IElementText);
     }
@@ -2700,7 +2710,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements
    */
-  private async _onEditingElementEnd(elements: IElement[]): Promise<void> {
+  private async _addCommandAfterEditing(elements: IElement[]): Promise<void> {
     const rDataList = await CommandHelper.createCommandDataList(elements, "toJson", ElementActionTypes.Updated);
     await Promise.all(
       elements.map(async element => {
@@ -2722,7 +2732,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 提交编辑
    */
   private async _commitEidting(): Promise<void> {
-    this._onEditingElementEnd(this.store.editingElements);
+    this._addCommandAfterEditing(this.store.editingElements);
     this.store.endEditingElements(this.store.editingElements);
     this.selection.refresh();
     this.elementsStatus = StageShieldElementsStatus.NONE;
