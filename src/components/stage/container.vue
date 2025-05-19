@@ -11,7 +11,7 @@ const stageShieldRef = ref<InstanceType<typeof StageShieldVue> & StageShieldInst
 const handleCreatorSelect = creator => {
   const { type } = creator;
   if (type !== CreatorTypes.image) {
-    stageStore.setCreator(creator);
+    stageStore.setCreator(creator, true);
   }
 };
 

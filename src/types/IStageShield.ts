@@ -113,6 +113,8 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   execUndo(): Promise<void>;
   // 执行重做
   execRedo(): Promise<void>;
+  // 切换工具
+  setCreator(creator: Creator, isSupportUndoRedo?: boolean): Promise<void>;
 }
 
 // 舞台计算参数

@@ -230,7 +230,7 @@ export const useStageStore = defineStore("stage", {
       await container.init(params.containerEl);
       await shield.init(params.shieldEl);
 
-      this.setCreator(MoveableCreator);
+      this.setCreator(MoveableCreator, false);
 
       [
         [ShieldDispatcherNames.elementCreated, this.onElementCreated],
@@ -297,9 +297,10 @@ export const useStageStore = defineStore("stage", {
      * 设置绘制工具
      *
      * @param creator
+     * @param isSupportUndoRedo
      */
-    async setCreator(creator: Creator) {
-      await shield.setCreator(creator);
+    async setCreator(creator: Creator, isSupportUndoRedo?: boolean) {
+      await shield.setCreator(creator, isSupportUndoRedo);
     },
     /**
      * 创作工具变更

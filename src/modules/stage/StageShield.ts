@@ -1106,8 +1106,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectCopy", this._handleSelectCopy.bind(this));
     this.event.on("pasteElements", this._handlePasteElements.bind(this));
     this.event.on("cancel", this._handleCancel.bind(this));
-    this.event.on("selectMoveable", this._handleSelectMoveable.bind(this));
-    this.event.on("selectHand", this._handleSelectHand.bind(this));
+    this.event.on("selectMoveable", () => this.setCreator(MoveableCreator));
+    this.event.on("selectHand", () => this.setCreator(HandCreator));
     this.event.on("groupAdd", this._handleGroupAdd.bind(this));
     this.event.on("groupRemove", this._handleGroupCancel.bind(this));
     this.event.on("undo", this.execUndo.bind(this));
@@ -1444,9 +1444,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       // 尝试激活控制器
       const controller = this._tryActiveController();
       if (controller) {
-        this._refreshElementsOriginals([...this.store.selectedElements, this.selection.rangeElement], {
-          deepSubs: true,
-        });
+        const elements = [...this.store.selectedElements, this.selection.rangeElement];
+        this.store.refreshElementsOriginalAngles(elements, { deepSubs: true });
+        this.store.refreshElementsOriginals(elements, { deepSubs: true });
       }
       if (controller instanceof ElementRotation) {
         this._preProcessRotationStates(controller);
@@ -1493,14 +1493,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 刷新组件原始数据
-   *
-   * @param elements
-   * @param options
+   * 添加一个工具切换的命令
    */
-  private _refreshElementsOriginals(elements: IElement[], options?: RefreshSubOptions): void {
-    this.store.refreshElementsOriginalAngles(elements, options);
-    this.store.refreshElementsOriginals(elements, options);
+  private async _addCreatorChangedCommand(): Promise<void> {
+    // 组件创建生效，生成一个切换绘图工具切换的命令
+    const creatorCommand = await CommandHelper.createCommandByActionParams([], ElementsCommandTypes.ElementsCreatorChanged, this.store);
+    Object.assign(creatorCommand.payload, {
+      prevCreatorType: this.prevCreatorType,
+      creatorType: this.currentCreator.type,
+    });
+    this.undoRedo.add(creatorCommand);
   }
 
   /**
@@ -1522,13 +1524,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
     element = this.store.creatingArbitraryElement(this.cursor.worldValue, true);
     if ((element as IElementArbitrary).tailCoordIndex === 0) {
-      // 组件创建生效，生成一个切换绘图工具切换的命令
-      const creatorCommand = await CommandHelper.createCommandByActionParams([], ElementsCommandTypes.ElementsCreatorChanged, this.store);
-      Object.assign(creatorCommand.payload, {
-        prevCreatorType: this.prevCreatorType,
-        creatorType: CreatorTypes.arbitrary,
-      });
-      this.undoRedo.add(creatorCommand);
       uDataList.push({ type: ElementActionTypes.StartCreating, model: { id: element.id } });
       // 组件创建生效，生成一个组件创建的命令
       rDataList.push(
@@ -1926,7 +1921,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements - 组件列表
    */
   private _emitElementsCreated(elements: IElement[]): void {
-    this.setCreator(MoveableCreator);
+    this.setCreator(MoveableCreator, false);
     this.emit(ShieldDispatcherNames.elementCreated, elements);
   }
 
@@ -2027,9 +2022,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param creator
    */
-  async setCreator(creator: Creator): Promise<void> {
+  async setCreator(creator: Creator, isSupportUndoRedo?: boolean): Promise<void> {
+    if (creator.type === this.currentCreator?.type) return;
+    isSupportUndoRedo && this._addCreatorChangedCommand();
     this.prevCreatorType = this.currentCreator?.type;
     this.currentCreator = creator;
+    this.cursor.updateStyle();
     this.emit(ShieldDispatcherNames.creatorChanged, creator);
   }
 
@@ -2362,26 +2360,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 处理组件移动操作
-   */
-  _handleSelectMoveable(): void {
-    if (this.currentCreator.type === HandCreator.type) {
-      this.setCreator(MoveableCreator);
-      this.cursor.updateStyle();
-    }
-  }
-
-  /**
-   * 处理组件手型操作
-   */
-  _handleSelectHand(): void {
-    if (this.currentCreator.type === MoveableCreator.type) {
-      this.setCreator(HandCreator);
-      this.cursor.updateStyle();
-    }
-  }
-
-  /**
    * 处理组件组合操作
    */
   async _handleGroupAdd(): Promise<void> {
@@ -2454,7 +2432,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.deSelectAll();
     }
     if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreatorChanged) {
-      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? tailCommand.payload.creatorType : tailCommand.payload.prevCreatorType || MoveableCreator.type));
+      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? tailCommand.payload.creatorType : tailCommand.payload.prevCreatorType || MoveableCreator.type), false);
     }
     isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
     if (isRedo && tailCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
@@ -2463,7 +2441,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this.store.clearCreatingElements();
         // 再把组件加回来
         await this.undoRedo.redo();
-        this.setCreator(MoveableCreator);
+        this.setCreator(MoveableCreator, false);
         tailCommand = this.undoRedo.tailRedoCommand;
       }
     }
@@ -2475,7 +2453,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         const rDataList = this.undoRedo.tailUndoCommand.payload.rDataList;
         // 数据恢复
         await CommandHelper.restoreDataList(rDataList, true, this.store);
-        this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type));
+        this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type), false);
         tailCommand = this.undoRedo.tailUndoCommand;
       }
     }
