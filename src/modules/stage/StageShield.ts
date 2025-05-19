@@ -1106,8 +1106,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("selectCopy", this._handleSelectCopy.bind(this));
     this.event.on("pasteElements", this._handlePasteElements.bind(this));
     this.event.on("cancel", this._handleCancel.bind(this));
-    this.event.on("selectMoveable", () => this.setCreator(MoveableCreator));
-    this.event.on("selectHand", () => this.setCreator(HandCreator));
+    this.event.on("selectMoveableCreator", () => this.setCreator(MoveableCreator, true));
+    this.event.on("selectHandCreator", () => this.setCreator(HandCreator, true));
     this.event.on("groupAdd", this._handleGroupAdd.bind(this));
     this.event.on("groupRemove", this._handleGroupCancel.bind(this));
     this.event.on("undo", this.execUndo.bind(this));
@@ -1664,10 +1664,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param element
    */
   private async _refreshOrignalEditingDataList(element: IElement): Promise<void> {
-    this._originalEditingUDataList = await CommandHelper.createCommandDataList(this.store.editingElements, element => element.toOriginalTransformJson(), ElementActionTypes.Updated);
+    this._originalEditingUDataList = await CommandHelper.createCommandDataList(this.store.editingElements, ElementActionTypes.Updated, {
+      dataTransfer: async element => await element.toOriginalTransformJson()
+    });
     if (element instanceof ElementArbitrary) {
       // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
-      this._originalEditingUDataList.push(...(await CommandHelper.createCommandDataList(element.ancestorGroups, element => element.toOriginalTransformJson(), ElementActionTypes.Updated)));
+      this._originalEditingUDataList.push(...(await CommandHelper.createCommandDataList(element.ancestorGroups, ElementActionTypes.Updated, {
+        dataTransfer: async element => await element.toOriginalTransformJson()
+      })));
     }
   }
 
@@ -2697,19 +2701,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   private async _addCommandAfterEditing(elements: IElement[]): Promise<void> {
-    const rDataList = await CommandHelper.createCommandDataList(elements, element => element.toJson(), ElementActionTypes.Updated);
+    const rDataList = await CommandHelper.createCommandDataList(elements, ElementActionTypes.Updated, {
+      dataTransfer: async element => await element.toJson()
+    });
     await Promise.all(
       elements.map(async element => {
         if (element instanceof ElementArbitrary) {
           rDataList.push(
             ...(await CommandHelper.createCommandDataList(
               element.ancestorGroups,
-              element => element.toJson(),
               ElementActionTypes.GroupUpdated,
-              async group => {
-                (group as IElementGroup).refreshBySubs();
-                group.refreshOriginals();
-              },
+              {
+                dataTransfer: async element => await element.toJson(),
+                eachOperatingFunction: async group => {
+                  (group as IElementGroup).refreshBySubs();
+                  group.refreshOriginals();
+                }
+              }
             )),
           );
         }

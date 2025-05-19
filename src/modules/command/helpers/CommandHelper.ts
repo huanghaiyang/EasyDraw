@@ -10,22 +10,11 @@ import { isEmpty } from "lodash";
 
 export default class CommandHelper {
   /**
-   * 当组件层级变更后，重新刷新store数据
-   *
-   * @param store
-   */
-  static refreshStoreAfterLayerChanged(store: IStageStore): void {
-    store.retrieveElements();
-    store.emitElementsLayerChanged();
-  }
-
-  /**
    * 组件数据恢复
-
+   * 
    * @param commandElementObject
    * @param store
    */
-
   static async updateElementFromData(commandElementObject: ICommandElementObject, store: IStageStore): Promise<IElement> {
     const { model } = commandElementObject;
     const element = store.updateElementModel(model.id, LodashUtils.jsonClone(model));
@@ -138,14 +127,18 @@ export default class CommandHelper {
    */
   static async createCommandDataList(
     elements: IElement[],
-    dataTransfer: (element: IElement) => Promise<ElementObject>,
     type: ElementActionTypes,
-    eachOperatingFunction?: (element: IElement) => Promise<void>,
+    funcs: {
+      dataTransfer: (element: IElement) => Promise<ElementObject>,
+      objectTransfer?: (element: IElement) => Promise<ICommandElementObject>,
+      eachOperatingFunction?: (element: IElement) => Promise<void>,
+    }
   ): Promise<ICommandElementObject[]> {
+    const { dataTransfer, objectTransfer, eachOperatingFunction } = funcs;
     return await Promise.all(
       elements.map(async element => {
         eachOperatingFunction && (await eachOperatingFunction(element));
-        return CommandHelper.wrapElementJson(element, { model: await dataTransfer(element), type });
+        return CommandHelper.wrapElementJson(element, { model: await dataTransfer(element), type, ...(objectTransfer ? await objectTransfer(element): {}) });
       }),
     );
   }
@@ -173,9 +166,15 @@ export default class CommandHelper {
     const rDataTransfer = dataTransfers[1] || uDataTransfer;
     const uDataType = types[0];
     const rDataType = types[1] || uDataType;
-    const uDataList = await CommandHelper.createCommandDataList(elements, uDataTransfer, uDataType, eachUDataListOperatingFunction);
+    const uDataList = await CommandHelper.createCommandDataList(elements, uDataType, {
+      dataTransfer: uDataTransfer,
+      eachOperatingFunction: eachUDataListOperatingFunction,
+    });
     elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createCommandDataList(elements, rDataTransfer, rDataType, eachRDataListOperatingFunction);
+    const rDataList = await CommandHelper.createCommandDataList(elements, rDataType, {
+      dataTransfer: rDataTransfer,
+      eachOperatingFunction: eachRDataListOperatingFunction,
+    });
     return [uDataList, rDataList];
   }
 
@@ -215,14 +214,11 @@ export default class CommandHelper {
    * @returns
    */
   static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<ICommandElementObject[]> {
-    return await Promise.all(
-      ancestors.map(async ancestor => {
-        return CommandHelper.wrapElementJson(ancestor, {
-          model: await (ancestor as IElementGroup).toSubUpdatedJson(),
-          type: ElementActionTypes.GroupUpdated,
-        });
-      }),
-    );
+    return await CommandHelper.createCommandDataList(ancestors, ElementActionTypes.GroupUpdated, {
+      dataTransfer: async ancestor => {
+        return await (ancestor as IElementGroup).toSubUpdatedJson();
+      },
+    });
   }
 
   /**
@@ -232,15 +228,14 @@ export default class CommandHelper {
    * @returns
    */
   static async getRearrangeDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return Promise.all(
-      elements.map(async element => {
-        return CommandHelper.wrapElementJson(element, {
-          model: await element.toGroupJson(),
-          type: ElementActionTypes.Moved,
-          ...CommandHelper.createRearrangeModel(element),
-        });
-      }),
-    );
+    return await CommandHelper.createCommandDataList(elements, ElementActionTypes.Moved, {
+      dataTransfer: async element => {
+        return await element.toGroupJson();
+      },
+      objectTransfer: async element => {
+        return CommandHelper.createRearrangeModel(element) as unknown as ICommandElementObject;
+      },
+    });
   }
 
   /**
@@ -250,15 +245,14 @@ export default class CommandHelper {
    * @returns
    */
   static async getElementsRemovedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return Promise.all(
-      elements.map(async element => {
-        return CommandHelper.wrapElementJson(element, {
-          model: await element.toJson(),
-          type: ElementActionTypes.Removed,
-          ...CommandHelper.createRearrangeModel(element),
-        });
-      }),
-    );
+    return await CommandHelper.createCommandDataList(elements, ElementActionTypes.Removed, {
+      dataTransfer: async element => {
+        return await element.toJson();
+      },
+      objectTransfer: async element => {
+        return CommandHelper.createRearrangeModel(element) as unknown as ICommandElementObject;
+      },
+    });
   }
 
   /**
@@ -269,15 +263,14 @@ export default class CommandHelper {
    * @returns
    */
   static async getElementsAddedDataList(elements: IElement[], type: ElementActionTypes = ElementActionTypes.Added): Promise<ICommandElementObject[]> {
-    return Promise.all(
-      elements.map(async element => {
-        return CommandHelper.wrapElementJson(element, {
-          model: await element.toJson(),
-          type,
-          ...CommandHelper.createRearrangeModel(element),
-        });
-      }),
-    );
+    return await CommandHelper.createCommandDataList(elements, type, {
+      dataTransfer: async element => {
+        return await element.toJson();
+      },
+      objectTransfer: async element => {
+        return CommandHelper.createRearrangeModel(element) as unknown as ICommandElementObject;
+      },
+    })
   }
 
   /**

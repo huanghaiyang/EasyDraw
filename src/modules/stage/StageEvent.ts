@@ -238,12 +238,12 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
         // 监听组件移动操作
         if (this._isCtrlMEvent(e)) {
           EventUtils.stopPP(e);
-          this.emit("selectMoveable");
+          this.emit("selectMoveableCreator");
         }
         // 监听组件手型操作
         if (this._isCtrlHEvent(e)) {
           EventUtils.stopPP(e);
-          this.emit("selectHand");
+          this.emit("selectHandCreator");
         }
         // 监听组件组合操作
         if (this._isCtrlGEvent(e)) {

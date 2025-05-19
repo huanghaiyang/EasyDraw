@@ -6,12 +6,14 @@ export default class ElementsChangedCommand extends ElementsBaseCommand<IElement
   async undo(): Promise<void> {
     if (!this.payload.uDataList) return;
     CommandHelper.restoreDataList(this.payload.uDataList, false, this.store);
-    CommandHelper.refreshStoreAfterLayerChanged(this.store);
+    this.store.retrieveElements();
+    this.store.emitElementsLayerChanged();
   }
 
   async redo(): Promise<void> {
     if (!this.payload.rDataList) return;
     CommandHelper.restoreDataList(this.payload.rDataList, true, this.store);
-    CommandHelper.refreshStoreAfterLayerChanged(this.store);
+    this.store.retrieveElements();
+    this.store.emitElementsLayerChanged();
   }
 }
