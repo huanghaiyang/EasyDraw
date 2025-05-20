@@ -31,8 +31,8 @@ export enum ElementActionTypes {
   StartCreating = "StartCreating", // 组件创建开始
   Added = "Added", // 组件添加
   Updated = "Updated", // 组件更新
-  Removed = "removed",
-  Moved = "moved", // 组件移动位置
+  Removed = "Removed",
+  Moved = "Moved", // 组件移动位置
   GroupUpdated = "GroupUpdated",
 }
 
@@ -72,6 +72,8 @@ export interface IElementsCommandPayload {
   rDataList?: Array<ICommandElementObject>;
   creatorType?: CreatorTypes;
   prevCreatorType?: CreatorTypes;
+  prevSelectedIds?: string[];
+  selectedIds?: string[];
 }
 
 // 组件命令类型
@@ -87,6 +89,7 @@ export enum ElementsCommandTypes {
   GroupAdded = "group_added",
   GroupRemoved = "group_removed",
   DetachedElementsRemoved = "detached_elements_removed",
+  ElementsSelected = "elements_selected",
 }
 
 // 单个组件操作数据
