@@ -234,13 +234,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 添加重绘任务
    *
-   * @param force
+   * @param shieldForceRedraw
    */
-  private async _addRedrawTask(force?: boolean): Promise<void> {
+  private async _addRedrawTask(shieldForceRedraw?: boolean): Promise<void> {
     return new Promise(resolve => {
       this._redrawQueue.add({
         run: async () => {
-          await Promise.all([this.redraw(force), this.mask.redraw(), this.provisional.redraw()]);
+          await Promise.all([this.selection.refresh(), this.redraw(shieldForceRedraw), this.mask.redraw(), this.provisional.redraw()]);
           resolve();
         },
       });
@@ -309,7 +309,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onPositionChanged();
       this._refreshAncestorsTransformed(element);
     });
-    this.selection.refresh();
     this._shouldRedraw = true;
   }
 
@@ -344,7 +343,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onWidthChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -363,7 +361,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onHeightChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -382,7 +379,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onLeanyAngleChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -401,7 +397,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onAngleChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -1021,7 +1016,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onAngleChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -1039,7 +1033,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onFlipXChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -1057,7 +1050,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         element.onFlipYChanged();
         this._refreshAncestorsTransformed(element);
       });
-      this.selection.refresh();
     });
     this._shouldRedraw = true;
   }
@@ -1229,11 +1221,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       } else if (this.isArbitraryDrawing) {
         // 移动过程中创建组件
         this._updateArbitraryTailOnMovement(e);
-        this.selection.refreshTransformerModels();
       } else if (this.isDrawerActive) {
         // 移动过程中创建组件
         this._creatingElementOnMovement(e);
-        this.selection.refreshTransformerModels();
       } else if (this.isMoveableActive) {
         // 如果是选择模式
         if (this.store.isSelectedEmpty) {
@@ -1284,7 +1274,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _dragStage(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
-    this.selection.refresh();
     this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
@@ -1300,7 +1289,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.isDragging = true;
       element.onTranslating();
     });
-    this.selection.refresh();
     this._shouldRedraw = true;
   }
 
@@ -1333,7 +1321,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.isTransforming = true;
       element.onTransforming();
     });
-    this.selection.refresh();
     this._shouldRedraw = true;
   }
 
@@ -1353,7 +1340,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.isRotating = true;
       element.onRotating();
     });
-    this.selection.refresh();
     this._shouldRedraw = true;
   }
 
@@ -1715,7 +1701,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           this._tryEditElement(topAElement);
         }
       }
-      this.selection.refresh();
     }
   }
 
@@ -1723,7 +1708,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 绘制完成之后的重绘
    */
   private async _afterElementCreated(): Promise<void> {
-    await Promise.all([this.selection.refresh(), this._addRedrawTask(true), this._commitElementCreated()]);
+    await Promise.all([this._addRedrawTask(true), this._commitElementCreated()]);
   }
 
   /**
@@ -1907,7 +1892,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private _processHandCreatorMove(e: MouseEvent): void {
     this._refreshStageWorldCoord(e);
     this.store.refreshStageElements();
-    this.selection.refresh();
     this._isStageMoving = false;
   }
 
@@ -2012,7 +1996,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.stageRect = rect;
     this._updateCanvasSize(rect);
     this.store.refreshStageElements();
-    this.selection.refresh();
     this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
@@ -2108,7 +2091,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.html.updateSize(this.renderEl.getBoundingClientRect());
     this.emit(ShieldDispatcherNames.scaleChanged, value);
     this.store.refreshStageElements();
-    this.selection.refresh();
     this.triggetEditingElementsStageChanged();
     this._shouldRedraw = true;
   }
@@ -2145,7 +2127,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
     this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
     this.store.refreshStageElements();
-    this.selection.refresh();
     this.store.editingElements.forEach(element => element.onStageChanged());
     this._shouldRedraw = true;
   }
@@ -2357,7 +2338,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementsCommandTypes.ElementsAdded, this.store);
     this.undoRedo.add(command);
     this.store.setElementsDetachedSelected(elements, true);
-    this.selection.refresh();
   }
 
   /**
@@ -2487,7 +2467,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this.store.refreshStageElements();
       this.store.throttleRefreshTreeNodes();
     }
-    this.selection.refresh();
     await this._addRedrawTask(true);
     const shouldKeepPressDownComandTypes = [ElementsCommandTypes.ElementsCreating];
     if (isRedo) {
@@ -2531,7 +2510,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     element.refreshTextSizeCoords();
     element.refresh();
     await this._createAddedCommand([element]);
-    this.selection.refresh();
     this._emitElementsCreated([element]);
   }
 
@@ -2564,7 +2542,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onPositionChanged();
       this._refreshAncestorsTransformed(element);
     });
-    this.selection.refresh();
     this._shouldRedraw = true;
   }
 
@@ -2733,7 +2710,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _commitEidting(): Promise<void> {
     this._addCommandAfterEditing(this.store.editingElements);
     this.store.endEditingElements(this.store.editingElements);
-    this.selection.refresh();
     this.elementsStatus = StageShieldElementsStatus.NONE;
   }
 
@@ -2861,6 +2837,5 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     );
     const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsMoved, this.store);
     this.undoRedo.add(command);
-    this.selection.refresh();
   }
 }
