@@ -13,7 +13,7 @@ import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import { clamp } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
-import IElement, { ElementObject, IElementArbitrary, IElementText, RefreshSubOptions, TreeNodeDropType } from "@/types/IElement";
+import IElement, { ElementObject, IElementArbitrary, IElementText, TreeNodeDropType } from "@/types/IElement";
 import IStageStore from "@/types/IStageStore";
 import IStageSelection from "@/types/IStageSelection";
 import { IDrawerHtml, IDrawerMask, IDrawerProvisional } from "@/types/IStageDrawer";
@@ -295,12 +295,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 执行操作
+   *
+   * @param action
+   * @param args
+   */
+  async executeMethod<T extends any[]>(action: (...args: T) => void, ...args: T): Promise<void> {
+    await action(...args);
+    this._shouldRedraw = true;
+  }
+
+  /**
    * 设置组件位置
    *
    * @param elements
    * @param value
    */
-  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+  async _setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
     await this._createTranslateCommand(elements, async () => {
       await this.store.setElementsPosition(elements, value);
       this._refreshAncesorsByDetachedElements(elements);
@@ -309,7 +320,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onPositionChanged();
       this._refreshAncestorsTransformed(element);
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件位置
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsPosition(elements: IElement[], value: IPoint): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsPosition(elements, value));
   }
 
   /**
@@ -335,7 +355,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsWidth(elements: IElement[], value: number): Promise<void> {
+  async _setElementsWidth(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsWidth(elements, value);
       this._refreshAncesorsByDetachedElements(elements);
@@ -344,7 +364,33 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._refreshAncestorsTransformed(element);
       });
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件宽度
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsWidth(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsWidth(elements, value));
+  }
+
+  /**
+   * 设置组件高度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsHeight(elements: IElement[], value: number): Promise<void> {
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsHeight(elements, value);
+      this._refreshAncesorsByDetachedElements(elements);
+      elements.forEach(element => {
+        element.onHeightChanged();
+        this._refreshAncestorsTransformed(element);
+      });
+    });
   }
 
   /**
@@ -354,15 +400,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsHeight(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsHeight(elements, value));
+  }
+
+  /**
+   * 设置组件Y倾斜角度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
-      await this.store.setElementsHeight(elements, value);
+      await this.store.setElementsLeanYAngle(elements, value);
       this._refreshAncesorsByDetachedElements(elements);
       elements.forEach(element => {
-        element.onHeightChanged();
+        element.onLeanyAngleChanged();
         this._refreshAncestorsTransformed(element);
       });
     });
-    this._shouldRedraw = true;
   }
 
   /**
@@ -372,15 +427,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsLeanYAngle(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsLeanYAngle(elements, value));
+  }
+
+  /**
+   * 设置组件角度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsAngle(elements: IElement[], value: number): Promise<void> {
     await this._createTransformCommand(elements, async () => {
-      await this.store.setElementsLeanYAngle(elements, value);
+      await this.store.setElementsAngle(elements, value);
       this._refreshAncesorsByDetachedElements(elements);
       elements.forEach(element => {
-        element.onLeanyAngleChanged();
+        element.onAngleChanged();
         this._refreshAncestorsTransformed(element);
       });
     });
-    this._shouldRedraw = true;
   }
 
   /**
@@ -390,15 +454,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsAngle(elements: IElement[], value: number): Promise<void> {
-    await this._createTransformCommand(elements, async () => {
-      await this.store.setElementsAngle(elements, value);
-      this._refreshAncesorsByDetachedElements(elements);
-      elements.forEach(element => {
-        element.onAngleChanged();
-        this._refreshAncestorsTransformed(element);
-      });
+    await this.executeMethod(async () => await this._setElementsAngle(elements, value));
+  }
+
+  /**
+   * 设置组件圆角
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async _setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
+    const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toCornerJson()], [ElementActionTypes.Updated], {
+      elementsOperatingFunction: async () => {
+        await this.store.setElementsCorners(elements, value, index);
+      },
     });
-    this._shouldRedraw = true;
+    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    elements.forEach(element => element.onCornerChanged());
   }
 
   /**
@@ -409,14 +482,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsCorners(elements: IElement[], value: number, index?: number): Promise<void> {
-    const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toCornerJson()], [ElementActionTypes.Updated], {
-      elementsOperatingFunction: async () => {
-        await this.store.setElementsCorners(elements, value, index);
-      },
-    });
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
-    elements.forEach(element => element.onCornerChanged());
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._setElementsCorners(elements, value, index));
   }
 
   /**
@@ -439,12 +505,36 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    * @param index
    */
-  async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
+  async _setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
     await this._createStrokeCommand(elements, async () => {
       await this.store.setElementsStrokeType(elements, value, index);
     });
     elements.forEach(element => element.onStrokeTypeChanged());
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件边框类型
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async setElementsStrokeType(elements: IElement[], value: StrokeTypes, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsStrokeType(elements, value, index));
+  }
+
+  /**
+   * 设置组件边框宽度
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async _setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
+    await this._createStrokeCommand(elements, async () => {
+      await this.store.setElementsStrokeWidth(elements, value, index);
+    });
+    elements.forEach(element => element.onStrokeWidthChanged());
   }
 
   /**
@@ -455,11 +545,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsStrokeWidth(elements: IElement[], value: number, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsStrokeWidth(elements, value, index));
+  }
+
+  /**
+   * 设置组件边框颜色
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async _setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this._createStrokeCommand(elements, async () => {
-      await this.store.setElementsStrokeWidth(elements, value, index);
+      await this.store.setElementsStrokeColor(elements, value, index);
     });
-    elements.forEach(element => element.onStrokeWidthChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onStrokeColorChanged());
   }
 
   /**
@@ -470,11 +570,21 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsStrokeColor(elements: IElement[], value: string, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsStrokeColor(elements, value, index));
+  }
+
+  /**
+   * 设置组件边框颜色透明度
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async _setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
     await this._createStrokeCommand(elements, async () => {
-      await this.store.setElementsStrokeColor(elements, value, index);
+      await this.store.setElementsStrokeColorOpacity(elements, value, index);
     });
-    elements.forEach(element => element.onStrokeColorChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onStrokeColorOpacityChanged());
   }
 
   /**
@@ -485,11 +595,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsStrokeColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsStrokeColorOpacity(elements, value, index));
+  }
+
+  /**
+   * 添加组件描边
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async _addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
     await this._createStrokeCommand(elements, async () => {
-      await this.store.setElementsStrokeColorOpacity(elements, value, index);
+      await this.store.addElementsStroke(elements, prevIndex);
     });
-    elements.forEach(element => element.onStrokeColorOpacityChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onStrokeAdded());
   }
 
   /**
@@ -499,11 +618,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param prevIndex
    */
   async addElementsStroke(elements: IElement[], prevIndex: number): Promise<void> {
+    await this.executeMethod(async () => await this._addElementsStroke(elements, prevIndex));
+  }
+
+  /**
+   * 删除组件描边
+   *
+   * @param elements
+   * @param index
+   */
+  async _removeElementsStroke(elements: IElement[], index: number): Promise<void> {
     await this._createStrokeCommand(elements, async () => {
-      await this.store.addElementsStroke(elements, prevIndex);
+      await this.store.removeElementsStroke(elements, index);
     });
-    elements.forEach(element => element.onStrokeAdded());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onStrokeRemoved());
   }
 
   /**
@@ -513,11 +641,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async removeElementsStroke(elements: IElement[], index: number): Promise<void> {
-    await this._createStrokeCommand(elements, async () => {
-      await this.store.removeElementsStroke(elements, index);
-    });
-    elements.forEach(element => element.onStrokeRemoved());
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._removeElementsStroke(elements, index));
   }
 
   /**
@@ -540,12 +664,36 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    * @param index
    */
-  async setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
+  async _setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
     await this._createFillCommand(elements, async () => {
       await this.store.setElementsFillColor(elements, value, index);
     });
     elements.forEach(element => element.onFillColorChanged());
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件填充颜色
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async setElementsFillColor(elements: IElement[], value: string, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFillColor(elements, value, index));
+  }
+
+  /**
+   * 设置组件填充颜色透明度
+   *
+   * @param elements
+   * @param value
+   * @param index
+   */
+  async _setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
+    await this._createFillCommand(elements, async () => {
+      await this.store.setElementsFillColorOpacity(elements, value, index);
+    });
+    elements.forEach(element => element.onFillColorOpacityChanged());
   }
 
   /**
@@ -556,11 +704,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async setElementsFillColorOpacity(elements: IElement[], value: number, index: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFillColorOpacity(elements, value, index));
+  }
+
+  /**
+   * 添加组件填充
+   *
+   * @param elements
+   * @param prevIndex
+   */
+  async _addElementsFill(elements: IElement[], prevIndex: number): Promise<void> {
     await this._createFillCommand(elements, async () => {
-      await this.store.setElementsFillColorOpacity(elements, value, index);
+      await this.store.addElementsFill(elements, prevIndex);
     });
-    elements.forEach(element => element.onFillColorOpacityChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onFillAdded());
   }
 
   /**
@@ -570,11 +727,20 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param prevIndex
    */
   async addElementsFill(elements: IElement[], prevIndex: number): Promise<void> {
+    await this.executeMethod(async () => await this._addElementsFill(elements, prevIndex));
+  }
+
+  /**
+   * 删除组件填充
+   *
+   * @param elements
+   * @param index
+   */
+  async _removeElementsFill(elements: IElement[], index: number): Promise<void> {
     await this._createFillCommand(elements, async () => {
-      await this.store.addElementsFill(elements, prevIndex);
+      await this.store.removeElementsFill(elements, index);
     });
-    elements.forEach(element => element.onFillAdded());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onFillRemoved());
   }
 
   /**
@@ -584,11 +750,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param index
    */
   async removeElementsFill(elements: IElement[], index: number): Promise<void> {
-    await this._createFillCommand(elements, async () => {
-      await this.store.removeElementsFill(elements, index);
-    });
-    elements.forEach(element => element.onFillRemoved());
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._removeElementsFill(elements, index));
   }
 
   /**
@@ -652,7 +814,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+  async _setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -666,12 +828,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件文本对齐方式
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextAlign(elements: IElement[], value: CanvasTextAlign): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextAlign(elements, value));
+  }
+
+  /**
    * 设置组件文本垂直对齐方式
    *
    * @param elements
    * @param value
    */
-  async setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
+  async _setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -685,12 +857,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 设置组件文本基线
-
- * @param elements
+   * 设置组件文本垂直对齐方式
+   *
+   * @param elements
    * @param value
    */
-  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+  async setElementsTextVerticalAlign(elements: IElement[], value: TextVerticalAlign): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextVerticalAlign(elements, value));
+  }
+
+  /**
+   * 设置组件文本基线
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -699,7 +881,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       TextFontStyleUpdateTypes.FONT_TEXT_BASELINE,
     );
     elements.forEach(element => element.onTextBaselineChanged());
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件文本基线
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextBaseline(elements: IElement[], value: CanvasTextBaseline): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextBaseline(elements, value));
   }
 
   /**
@@ -708,7 +899,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
+  async _setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -722,12 +913,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字体样式
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontStyler(elements: IElement[], value: FontStyler): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontStyler(elements, value));
+  }
+
+  /**
    * 设置组件字体大小
    *
    * @param elements
    * @param value
    */
-  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+  async _setElementsFontSize(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -746,12 +947,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字体大小
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontSize(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontSize(elements, value));
+  }
+
+  /**
    * 设置组件字体
    *
    * @param elements
    * @param value
    */
-  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+  async _setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -765,12 +976,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字体
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontFamily(elements: IElement[], value: string): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontFamily(elements, value));
+  }
+
+  /**
    * 设置组件字体行高
    *
    * @param elements
    * @param value
    */
-  async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
+  async _setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -782,7 +1003,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onFontLineHeightChanged();
       element.onFontLineHeightFactorChanged();
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体行高
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeight(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontLineHeight(elements, value));
   }
 
   /**
@@ -791,7 +1021,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
+  async _setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -803,7 +1033,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onFontLineHeightFactorChanged();
       element.onFontLineHeightChanged();
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体行高倍数
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightFactor(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontLineHeightFactor(elements, value));
   }
 
   /**
@@ -812,7 +1051,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
+  async _setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -824,7 +1063,33 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onFontLineHeightAutoFitChanged();
       element.onFontLineHeightChanged();
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件字体行高自动适应
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLineHeightAutoFit(elements: IElement[], value: boolean): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontLineHeightAutoFit(elements, value));
+  }
+
+  /**
+   * 设置组件字体颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsFontColor(elements: IElement[], value: string): Promise<void> {
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsFontColor(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_COLOR,
+    );
+    elements.forEach(element => element.onFontColorChanged());
   }
 
   /**
@@ -834,15 +1099,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontColor(elements: IElement[], value: string): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontColor(elements, value));
+  }
+
+  /**
+   * 设置组件字体颜色透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
-        await this.store.setElementsFontColor(elements, value);
+        await this.store.setElementsFontColorOpacity(elements, value);
       },
-      TextFontStyleUpdateTypes.FONT_COLOR,
+      TextFontStyleUpdateTypes.FONT_COLOR_OPACITY,
     );
-    elements.forEach(element => element.onFontColorChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onFontColorOpacityChanged());
   }
 
   /**
@@ -852,15 +1126,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsFontColorOpacity(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(
-      elements,
-      async () => {
-        await this.store.setElementsFontColorOpacity(elements, value);
-      },
-      TextFontStyleUpdateTypes.FONT_COLOR_OPACITY,
-    );
-    elements.forEach(element => element.onFontColorOpacityChanged());
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._setElementsFontColorOpacity(elements, value));
   }
 
   /**
@@ -869,7 +1135,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
+  async _setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -883,12 +1149,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件字间距
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsFontLetterSpacing(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFontLetterSpacing(elements, value));
+  }
+
+  /**
    * 设置组件文本装饰
    *
    * @param elements
    * @param value
    */
-  async setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
+  async _setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -897,7 +1173,33 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       TextFontStyleUpdateTypes.FONT_TEXT_DECORATION,
     );
     elements.forEach(element => element.onTextDecorationChanged());
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextDecoration(elements: IElement[], value: TextDecoration): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextDecoration(elements, value));
+  }
+
+  /**
+   * 设置组件文本装饰颜色
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void> {
+    await this._createFontStyleCommand(
+      elements,
+      async () => {
+        await this.store.setElementsTextDecorationColor(elements, value);
+      },
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_COLOR,
+    );
+    elements.forEach(element => element.onTextDecorationColorChanged());
   }
 
   /**
@@ -907,15 +1209,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationColor(elements: IElement[], value: string): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextDecorationColor(elements, value));
+  }
+
+  /**
+   * 设置组件文本装饰透明度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
-        await this.store.setElementsTextDecorationColor(elements, value);
+        await this.store.setElementsTextDecorationOpacity(elements, value);
       },
-      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_COLOR,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_OPACITY,
     );
-    elements.forEach(element => element.onTextDecorationColorChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onTextDecorationOpacityChanged());
   }
 
   /**
@@ -925,15 +1236,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationOpacity(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextDecorationOpacity(elements, value));
+  }
+
+  /**
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
-        await this.store.setElementsTextDecorationOpacity(elements, value);
+        await this.store.setElementsTextDecorationThickness(elements, value);
       },
-      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_OPACITY,
+      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_THICKNESS,
     );
-    elements.forEach(element => element.onTextDecorationOpacityChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onTextDecorationThicknessChanged());
   }
 
   /**
@@ -943,15 +1263,24 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsTextDecorationThickness(elements: IElement[], value: number): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextDecorationThickness(elements, value));
+  }
+
+  /**
+   * 设置段落间距
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
-        await this.store.setElementsTextDecorationThickness(elements, value);
+        await this.store.setElementsParagraphSpacing(elements, value);
       },
-      TextFontStyleUpdateTypes.FONT_TEXT_DECORATION_THICKNESS,
+      TextFontStyleUpdateTypes.FONT_PARAGRAPH_SPACING,
     );
-    elements.forEach(element => element.onTextDecorationThicknessChanged());
-    this._shouldRedraw = true;
+    elements.forEach(element => element.onParagraphSpacingChanged());
   }
 
   /**
@@ -961,15 +1290,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsParagraphSpacing(elements: IElement[], value: number): Promise<void> {
-    await this._createFontStyleCommand(
-      elements,
-      async () => {
-        await this.store.setElementsParagraphSpacing(elements, value);
-      },
-      TextFontStyleUpdateTypes.FONT_PARAGRAPH_SPACING,
-    );
-    elements.forEach(element => element.onParagraphSpacingChanged());
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._setElementsParagraphSpacing(elements, value));
   }
 
   /**
@@ -978,7 +1299,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    * @param value
    */
-  async setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
+  async _setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
     await this._createFontStyleCommand(
       elements,
       async () => {
@@ -992,14 +1313,51 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
+   * 设置组件文本装饰
+   *
+   * @param elements
+   * @param value
+   */
+  async setElementsTextCase(elements: IElement[], value: TextCase): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsTextCase(elements, value));
+  }
+
+  /**
+   * 锁定比例
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
+    await this.store.setElementsRatioLocked(elements, value);
+    elements.forEach(element => element.onRatioLockedChanged());
+  }
+
+  /**
    * 锁定比例
    *
    * @param elements
    * @param value
    */
   async setElementsRatioLocked(elements: IElement[], value: boolean): Promise<void> {
-    await this.store.setElementsRatioLocked(elements, value);
-    elements.forEach(element => element.onRatioLockedChanged());
+    await this.executeMethod(async () => await this._setElementsRatioLocked(elements, value));
+  }
+
+  /**
+   * 设置组件旋转角度
+   *
+   * @param elements
+   * @param value
+   */
+  async _setElementsRotate(elements: IElement[], value: number): Promise<void> {
+    await this._createTransformCommand(elements, async () => {
+      await this.store.setElementsRotate(elements, value);
+      this._refreshAncesorsByDetachedElements(elements);
+      elements.forEach(element => {
+        element.onAngleChanged();
+        this._refreshAncestorsTransformed(element);
+      });
+    });
   }
 
   /**
@@ -1009,15 +1367,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setElementsRotate(elements: IElement[], value: number): Promise<void> {
-    await this._createTransformCommand(elements, async () => {
-      await this.store.setElementsRotate(elements, value);
-      this._refreshAncesorsByDetachedElements(elements);
-      elements.forEach(element => {
-        element.onAngleChanged();
-        this._refreshAncestorsTransformed(element);
-      });
-    });
-    this._shouldRedraw = true;
+    await this.executeMethod(async () => await this._setElementsRotate(elements, value));
   }
 
   /**
@@ -1025,7 +1375,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements
    */
-  async setElementsFlipX(elements: IElement[]): Promise<void> {
+  async _setElementsFlipX(elements: IElement[]): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsFlipX(elements);
       this._refreshAncesorsByDetachedElements(elements);
@@ -1034,7 +1384,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._refreshAncestorsTransformed(element);
       });
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件水平翻转
+   *
+   * @param elements
+   */
+  async setElementsFlipX(elements: IElement[]): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFlipX(elements));
   }
 
   /**
@@ -1042,7 +1400,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements
    */
-  async setElementsFlipY(elements: IElement[]): Promise<void> {
+  async _setElementsFlipY(elements: IElement[]): Promise<void> {
     await this._createTransformCommand(elements, async () => {
       await this.store.setElementsFlipY(elements);
       this._refreshAncesorsByDetachedElements(elements);
@@ -1051,7 +1409,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         this._refreshAncestorsTransformed(element);
       });
     });
-    this._shouldRedraw = true;
+  }
+
+  /**
+   * 设置组件垂直翻转
+   *
+   * @param elements
+   */
+  async setElementsFlipY(elements: IElement[]): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsFlipY(elements));
   }
 
   /**
@@ -1272,75 +1638,80 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param e
    */
   private _dragStage(e: MouseEvent): void {
-    this._refreshStageWorldCoord(e);
-    this.store.refreshStageElements();
-    this.triggetEditingElementsStageChanged();
-    this._shouldRedraw = true;
+    this.executeMethod(() => {
+      this._refreshStageWorldCoord(e);
+      this.store.refreshStageElements();
+      this.triggetEditingElementsStageChanged();
+    });
   }
 
   /**
    * 拖动组件移动
    */
   private _dragElements(): void {
-    const { selectedElements } = this.store;
-    this.store.updateElementsTranslate(selectedElements, this.movingOffset);
-    this._refreshAncesorsByDetachedElements(selectedElements);
-    selectedElements.forEach(element => {
-      element.isDragging = true;
-      element.onTranslating();
+    this.executeMethod(() => {
+      const { selectedElements } = this.store;
+      this.store.updateElementsCoordsByOffset(selectedElements, this.movingOffset);
+      this._refreshAncesorsByDetachedElements(selectedElements);
+      selectedElements.forEach(element => {
+        element.isDragging = true;
+        element.onTranslating();
+      });
     });
-    this._shouldRedraw = true;
   }
 
   /**
    * 组件半径
    */
   private _movingElementsCorner(): void {
-    const { selectedElements } = this.store;
-    this.store.updateElementsCorner(selectedElements, this.movingOffset);
-    selectedElements.forEach(element => {
-      element.isCornerMoving = true;
-      element.onCornerChanging();
+    this.executeMethod(() => {
+      const { selectedElements } = this.store;
+      this.store.updateElementsCorner(selectedElements, this.movingOffset);
+      selectedElements.forEach(element => {
+        element.isCornerMoving = true;
+        element.onCornerChanging();
+      });
     });
-    this._shouldRedraw = true;
   }
 
   /**
    * 组件形变
    */
   private _transformElements(): void {
-    const { selectedElements } = this.store;
-    if (this.store.isMultiSelected) {
-      this.selection.rangeElement.isTransforming = true;
-      this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
-    } else {
-      this.store.updateElementsTransform(selectedElements, this.movingOffset);
-    }
-    this._refreshAncesorsByDetachedElements(selectedElements);
-    selectedElements.forEach(element => {
-      element.isTransforming = true;
-      element.onTransforming();
+    this.executeMethod(() => {
+      const { selectedElements } = this.store;
+      if (this.store.isMultiSelected) {
+        this.selection.rangeElement.isTransforming = true;
+        this.store.updateElementsTransform([this.selection.rangeElement], this.movingOffset);
+      } else {
+        this.store.updateElementsTransform(selectedElements, this.movingOffset);
+      }
+      this._refreshAncesorsByDetachedElements(selectedElements);
+      selectedElements.forEach(element => {
+        element.isTransforming = true;
+        element.onTransforming();
+      });
     });
-    this._shouldRedraw = true;
   }
 
   /**
    * 旋转组件
    */
   private _rotateElements(): void {
-    const { selectedElements, nonHomologousElements } = this.store;
-    if (this.store.isMultiSelected) {
-      this.selection.rangeElement.isRotating = true;
-      this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
-    } else {
-      this.store.updateElementsRotation(nonHomologousElements, this._pressMovePosition);
-    }
-    this._refreshAncesorsByDetachedElements(selectedElements);
-    selectedElements.forEach(element => {
-      element.isRotating = true;
-      element.onRotating();
+    this.executeMethod(() => {
+      const { selectedElements, nonHomologousElements } = this.store;
+      if (this.store.isMultiSelected) {
+        this.selection.rangeElement.isRotating = true;
+        this.store.updateElementsRotation([this.selection.rangeElement], this._pressMovePosition);
+      } else {
+        this.store.updateElementsRotation(nonHomologousElements, this._pressMovePosition);
+      }
+      this._refreshAncesorsByDetachedElements(selectedElements);
+      selectedElements.forEach(element => {
+        element.isRotating = true;
+        element.onRotating();
+      });
     });
-    this._shouldRedraw = true;
   }
 
   /**
@@ -1651,13 +2022,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _refreshOrignalEditingDataList(element: IElement): Promise<void> {
     this._originalEditingUDataList = await CommandHelper.createCommandDataList(this.store.editingElements, ElementActionTypes.Updated, {
-      dataTransfer: async element => await element.toOriginalTransformJson()
+      dataTransfer: async element => await element.toOriginalTransformJson(),
     });
     if (element instanceof ElementArbitrary) {
       // 自由折线工具在编辑时，会调整控制点，进而会影响组件的位置和尺寸，导致组件所属的祖先组件的位置和尺寸也需要变更，因此需要记录所有的祖先组件的原始数据
-      this._originalEditingUDataList.push(...(await CommandHelper.createCommandDataList(element.ancestorGroups, ElementActionTypes.Updated, {
-        dataTransfer: async element => await element.toOriginalTransformJson()
-      })));
+      this._originalEditingUDataList.push(
+        ...(await CommandHelper.createCommandDataList(element.ancestorGroups, ElementActionTypes.Updated, {
+          dataTransfer: async element => await element.toOriginalTransformJson(),
+        })),
+      );
     }
   }
 
@@ -1992,12 +2365,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 刷新画布尺寸
    */
   private async _refreshSize(): Promise<void> {
-    const rect = this.renderEl.getBoundingClientRect();
-    this.stageRect = rect;
-    this._updateCanvasSize(rect);
-    this.store.refreshStageElements();
-    this.triggetEditingElementsStageChanged();
-    this._shouldRedraw = true;
+    this.executeMethod(() => {
+      const rect = this.renderEl.getBoundingClientRect();
+      this.stageRect = rect;
+      this._updateCanvasSize(rect);
+      this.store.refreshStageElements();
+      this.triggetEditingElementsStageChanged();
+    });
   }
 
   /**
@@ -2086,13 +2460,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param value
    */
   async setScale(value: number): Promise<void> {
-    this.stageScale = value;
-    CanvasUtils.scale = value;
-    this.html.updateSize(this.renderEl.getBoundingClientRect());
-    this.emit(ShieldDispatcherNames.scaleChanged, value);
-    this.store.refreshStageElements();
-    this.triggetEditingElementsStageChanged();
-    this._shouldRedraw = true;
+    await this.executeMethod(() => {
+      this.stageScale = value;
+      CanvasUtils.scale = value;
+      this.html.updateSize(this.renderEl.getBoundingClientRect());
+      this.emit(ShieldDispatcherNames.scaleChanged, value);
+      this.store.refreshStageElements();
+      this.triggetEditingElementsStageChanged();
+    });
   }
 
   /**
@@ -2124,11 +2499,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param delta
    */
   private _handleWheelMove(delta: IPoint): void {
-    this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
-    this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
-    this.store.refreshStageElements();
-    this.store.editingElements.forEach(element => element.onStageChanged());
-    this._shouldRedraw = true;
+    this.executeMethod(() => {
+      this.stageWorldCoord.x += delta.x / 2 / this.stageScale;
+      this.stageWorldCoord.y += delta.y / 2 / this.stageScale;
+      this.store.refreshStageElements();
+      this.store.editingElements.forEach(element => element.onStageChanged());
+    });
   }
 
   /**
@@ -2542,7 +2918,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       element.onPositionChanged();
       this._refreshAncestorsTransformed(element);
     });
-    this._shouldRedraw = true;
   }
 
   /**
@@ -2551,11 +2926,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignLeft(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignLeft(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    await this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignLeft(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2564,11 +2941,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignRight(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignRight(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignRight(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2577,11 +2956,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignTop(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignTop(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignTop(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2590,11 +2971,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignBottom(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignBottom(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignBottom(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2603,11 +2986,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignCenter(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignCenter(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignCenter(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2616,11 +3001,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAlignMiddle(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAlignMiddle(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAlignMiddle(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2629,11 +3016,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAverageVertical(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAverageVertical(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    await this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAverageVertical(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2642,11 +3031,13 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements
    */
   async setElementsAverageHorizontal(elements: IElement[]): Promise<void> {
-    await this._createTranslateCommand(elements, async () => {
-      await this.align.setElementsAverageHorizontal(elements);
-      this._refreshAncesorsByDetachedElements(elements);
+    await this.executeMethod(async () => {
+      await this._createTranslateCommand(elements, async () => {
+        await this.align.setElementsAverageHorizontal(elements);
+        this._refreshAncesorsByDetachedElements(elements);
+      });
+      this._processOnAlignChanged(elements);
     });
-    this._processOnAlignChanged(elements);
   }
 
   /**
@@ -2679,23 +3070,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   private async _addCommandAfterEditing(elements: IElement[]): Promise<void> {
     const rDataList = await CommandHelper.createCommandDataList(elements, ElementActionTypes.Updated, {
-      dataTransfer: async element => await element.toJson()
+      dataTransfer: async element => await element.toJson(),
     });
     await Promise.all(
       elements.map(async element => {
         if (element instanceof ElementArbitrary) {
           rDataList.push(
-            ...(await CommandHelper.createCommandDataList(
-              element.ancestorGroups,
-              ElementActionTypes.GroupUpdated,
-              {
-                dataTransfer: async element => await element.toJson(),
-                eachOperatingFunction: async group => {
-                  (group as IElementGroup).refreshBySubs();
-                  group.refreshOriginals();
-                }
-              }
-            )),
+            ...(await CommandHelper.createCommandDataList(element.ancestorGroups, ElementActionTypes.GroupUpdated, {
+              dataTransfer: async element => await element.toJson(),
+              eachOperatingFunction: async group => {
+                (group as IElementGroup).refreshBySubs();
+                group.refreshOriginals();
+              },
+            })),
           );
         }
       }),
@@ -2725,15 +3112,12 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 生成组件层级变更命令
    *
-   * @param elements
    * @param uDataList
    * @param rDataList
    */
-  private async _createElementsRearrangeCommand(elements: IElement[], uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>): Promise<void> {
+  private async _createElementsRearrangeCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>): Promise<void> {
     const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsRearranged, this.store);
     this.undoRedo.add(command);
-    elements.forEach(element => element.onLayerChanged());
-    this._shouldRedraw = true;
   }
 
   /**
@@ -2741,7 +3125,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements 要修改的元件集合
    */
-  async setElementsGoDown(elements: IElement[]): Promise<void> {
+  async _setElementsGoDown(elements: IElement[]): Promise<void> {
     const uDataList: Array<ICommandElementObject> = [];
     const rDataList: Array<ICommandElementObject> = [];
     await this.store.setElementsGoDown(
@@ -2753,7 +3137,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    await this._createElementsRearrangeCommand(elements, uDataList, rDataList);
+    await this._createElementsRearrangeCommand(uDataList, rDataList);
+    elements.forEach(element => element.onLayerChanged());
+  }
+
+  /**
+   * 组件下移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsGoDown(elements: IElement[]): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsGoDown(elements));
   }
 
   /**
@@ -2761,7 +3155,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements 要修改的元件集合
    */
-  async setElementsShiftMove(elements: IElement[]): Promise<void> {
+  async _setElementsShiftMove(elements: IElement[]): Promise<void> {
     const uDataList: Array<ICommandElementObject> = [];
     const rDataList: Array<ICommandElementObject> = [];
     await this.store.setElementsShiftMove(
@@ -2773,8 +3167,19 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    await this._createElementsRearrangeCommand(elements, uDataList, rDataList);
+    await this._createElementsRearrangeCommand(uDataList, rDataList);
+    elements.forEach(element => element.onLayerChanged());
   }
+
+  /**
+   * 组件上移
+   *
+   * @param elements 要修改的元件集合
+   */
+  async setElementsShiftMove(elements: IElement[]): Promise<void> {
+    await this.executeMethod(async () => await this._setElementsShiftMove(elements));
+  }
+
   /**
    * 切换目标
    *

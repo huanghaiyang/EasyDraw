@@ -1992,7 +1992,7 @@ export default class StageStore implements IStageStore {
    * @param elements
    * @param offset
    */
-  updateElementsTranslate(elements: IElement[], offset: IPoint): void {
+  updateElementsCoordsByOffset(elements: IElement[], offset: IPoint): void {
     elements.forEach(element => {
       element.translateBy(offset);
       !element.isOnStage && this._updateElementStageStatusIfy(element);
