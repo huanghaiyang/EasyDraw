@@ -22,9 +22,12 @@ export default class ElementsChangedCommand extends ElementsBaseCommand<IElement
       default: {
         const dataList: Array<ICommandElementObject> = isRedo ? rDataList : uDataList;
         if (!dataList) return;
-        CommandHelper.restoreDataList(dataList, isRedo, this.store);
-        this.store.retrieveElements();
-        this.store.emitElementsLayerChanged();
+        const { addedIds, updatedIds } = await CommandHelper.restoreDataList(dataList, isRedo, this.store);
+        this.store.setElementsDetachedSelectedByIds([...addedIds, ...updatedIds], true);
+        if (dataList.length) {
+          this.store.reactionElements();
+          this.store.emitElementsLayerChanged();
+        }
         break;
       }
     }  

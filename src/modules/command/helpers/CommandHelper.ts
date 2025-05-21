@@ -60,7 +60,7 @@ export default class CommandHelper {
    * @param data
    * @param store
    */
-  static async restoreRemovedElementFromData(data: ICommandElementObject, store: IStageStore): Promise<IElement> {
+  static async restoreElementFromData(data: ICommandElementObject, store: IStageStore): Promise<IElement> {
     let element: IElement | undefined;
     const { model, prevId } = data;
     let prevElement: IElement | undefined;
@@ -325,33 +325,48 @@ export default class CommandHelper {
    * @param store
    * @returns
    */
-  static async restoreDataList(datalist: ICommandElementObject[], isRedo: boolean, store: IStageStore): Promise<void> {
+  static async restoreDataList(datalist: ICommandElementObject[], isRedo: boolean, store: IStageStore): Promise<{
+    updatedIds: Set<string>,
+    removedIds: Set<string>,
+    addedIds: Set<string>,
+  }> {
+    const updatedIds: Set<string> = new Set<string>();
+    const removedIds: Set<string> = new Set<string>();
+    const addedIds: Set<string> = new Set<string>();
     await Promise.all(
       datalist.map(data => {
         return new Promise<void>(async resolve => {
           const { model, type, props = {} } = data;
           const { id } = model;
+          let isAdded: boolean = false;
+          let isUpdated: boolean = false;
+          let isRemoved: boolean = false;
           switch (type) {
             case ElementActionTypes.Added: {
               // 对于add命令，如果是redo操作，需要还原插入组件，否则直接删除组件
               if (isRedo) {
-                await CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.restoreElementFromData(data, store);
+                isAdded = true;
               } else {
                 store.removeElementById(id);
+                isRemoved = true;
               }
               break;
             }
             case ElementActionTypes.Updated:
             case ElementActionTypes.GroupUpdated: {
               await CommandHelper.updateElementFromData(data, store);
+              isUpdated = true;
               break;
             }
             case ElementActionTypes.Removed: {
               // 对于remove命令，如果是redo操作，需要删除组件，否则还原插入组件
               if (isRedo) {
                 store.removeElementById(id);
+                isRemoved = true;
               } else {
-                await CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.restoreElementFromData(data, store);
+                isAdded = true;
               }
               break;
             }
@@ -359,30 +374,42 @@ export default class CommandHelper {
               await CommandHelper.rearrange([data], store);
               // 组件移动位置时，可能会改变组件的所属组合，需要更新组件的model
               store.updateElementModel(id, model);
+              isUpdated = true;
               break;
             }
             case ElementActionTypes.Creating: {
               await CommandHelper.updateElementFromData(data, store);
               await CommandHelper.updateCreatingElementStatus(id, props, store);
               store.currentCreatingElementId = id;
+              isUpdated = true;
               break;
             }
             case ElementActionTypes.StartCreating: {
               if (isRedo) {
-                await CommandHelper.restoreRemovedElementFromData(data, store);
+                await CommandHelper.restoreElementFromData(data, store);
                 await CommandHelper.updateCreatingElementStatus(id, props, store);
                 store.currentCreatingElementId = id;
+                isAdded = true;
               } else {
                 store.removeElementById(id);
                 store.currentCreatingElementId = null;
+                isRemoved = true;
               }
               break;
             }
+          }
+          if (isAdded) {
+            addedIds.add(id);
+          } else if (isUpdated) {
+            updatedIds.add(id);
+          } else if (isRemoved) {
+            removedIds.add(id);
           }
           resolve();
         });
       }),
     );
+    return { updatedIds, removedIds, addedIds };
   }
 
   /**

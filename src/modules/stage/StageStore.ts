@@ -537,7 +537,7 @@ export default class StageStore implements IStageStore {
   /**
    * 重新整理组件的顺序
    */
-  retrieveElements(): void {
+  reactionElements(): void {
     this._reactionStageElementsChanged();
     this._reactionVisibleElementsChanged();
     this._reactionSelectedElementsChanged();
@@ -3072,7 +3072,7 @@ export default class StageStore implements IStageStore {
   async setElementsGoDown(elements: IElement[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
     await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsGoDownIfy(partElements, isGroupInternal), undoActionCallback, redoActionCallback);
-    this.retrieveElements();
+    this.reactionElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
   }
@@ -3211,7 +3211,7 @@ export default class StageStore implements IStageStore {
   async setElementsShiftMove(elements: IElement[], undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (elements.length === 0) return;
     await this._doElementsLayerChange(elements, (partElements, isGroupInternal) => this._doElementsShiftMoveIfy(partElements, isGroupInternal), undoActionCallback, redoActionCallback);
-    this.retrieveElements();
+    this.reactionElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
   }
@@ -3516,7 +3516,7 @@ export default class StageStore implements IStageStore {
   async moveElementsTo(ids: string[], target: string, dropType: TreeNodeDropType, undoActionCallback: ElementActionCallback, redoActionCallback: ElementActionCallback): Promise<void> {
     if (ids.length === 0 || !target) return;
     await this._doMoveElementsTo(ids, target, dropType, undoActionCallback, redoActionCallback);
-    this.retrieveElements();
+    this.reactionElements();
     this.emitElementsLayerChanged();
     this.throttleRefreshTreeNodes();
   }
