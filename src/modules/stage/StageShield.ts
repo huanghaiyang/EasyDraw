@@ -275,10 +275,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param uDataList
    * @param rDataList
+   * @param commandType
    * @param id
    */
-  private async _addUpdatedCommandByDataList(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], id?: string): Promise<void> {
-    const command = CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, this.store, id);
+  private async _addCommandByDataList(uDataList: ICommandElementObject[], rDataList: ICommandElementObject[], commandType: ElementsCommandTypes, id?: string): Promise<void> {
+    const command = CommandHelper.createElementsChangedCommand(uDataList, rDataList, commandType, this.store, id);
     this.undoRedo.add(command);
   }
 
@@ -293,7 +294,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toTranslateJson()], [ElementActionTypes.Updated], {
       eachRDataListOperatingFunction: elementsUpdateFunction,
     });
-    await this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -348,7 +349,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         await this._reflowTextIfy(elements, true);
       },
     });
-    await this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -472,7 +473,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         await this.store.setElementsCorners(elements, value, index);
       },
     });
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
     elements.forEach(element => element.onCornerChanged());
   }
 
@@ -497,7 +498,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toStrokesJson()], [ElementActionTypes.Updated], {
       eachRDataListOperatingFunction: elementsUpdateFunction,
     });
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -656,7 +657,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toFillsJson()], [ElementActionTypes.Updated], {
       elementsOperatingFunction: elementsUpdateFunction,
     });
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -778,7 +779,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         }
       },
     });
-    this._addUpdatedCommandByDataList(uDataList, rDataList, commandId);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, commandId);
   }
 
   /**
@@ -1913,7 +1914,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           },
         ])),
       );
-      this.undoRedo.add(await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsStartCreating, this.store, element.id));
+      await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsStartCreating, element.id);
     } else {
       rDataList.push(
         ...(await CommandHelper.createDataListByActionParams([
@@ -1923,7 +1924,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           },
         ])),
       );
-      this.undoRedo.add(await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsCreating, this.store, element.id));
+      await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsCreating, element.id);
     }
     if (element?.model.isFold) {
       this.commitArbitraryDrawing();
@@ -2154,7 +2155,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       [element => element.toOriginalTranslateJson(), element => element.toTranslateJson()],
       [ElementActionTypes.Updated],
     );
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -2182,7 +2183,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _addOrignalRotateCommand(elements: IElement[]): Promise<void> {
     elements = this._flatWithAncestors(elements);
     const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toOriginalRotateJson(), element => element.toRotateJson()], [ElementActionTypes.Updated]);
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -2212,7 +2213,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   private async _addOriginalTransformCommand(elements: IElement[]): Promise<void> {
     elements = this._flatWithAncestors(elements);
     const [uDataList, rDataList] = await CommandHelper.createCommandDataLists(elements, [element => element.toOriginalCornerJson(), element => element.toCornerJson()], [ElementActionTypes.Updated]);
-    this._addUpdatedCommandByDataList(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
   }
 
   /**
@@ -2242,8 +2243,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       [element => element.toOriginalCornerJson(), element => element.toCornerJson()],
       [ElementActionTypes.Updated],
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
     // 更新组件状态
     this.store.selectedElements.forEach(element => {
       element.isCornerMoving = false;
@@ -2693,7 +2693,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     if (this.store.isSelectedEmpty) {
       return;
     }
-    let command: ICommand<IElementsCommandPayload> | null = null;
     const { list, ancestors } = this.store.findRemovedElemements(this.store.selectedElements);
     const actionParams: ElementsActionParam[] = [];
     list.forEach(element => {
@@ -2719,8 +2718,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       ancestor.refreshOriginals();
     });
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
-    command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsRemoved, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsRemoved);
     this.store.removeElements(list);
   }
 
@@ -2756,8 +2754,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
       },
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList.reverse(), rDataList, ElementsCommandTypes.ElementsAdded, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList.reverse(), rDataList, ElementsCommandTypes.ElementsAdded);
     this.store.setElementsDetachedSelected(elements, true);
   }
 
@@ -2798,8 +2795,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       this._clearSelects();
       this.store.setElementsDetachedSelected([group], true);
     }
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.GroupAdded, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.GroupAdded);
   }
 
   /**
@@ -2825,8 +2821,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     this.store.cancelGroups(groups);
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.GroupRemoved, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.GroupRemoved);
     groups.forEach(group => {
       this.store.selectElements(group.subs);
     });
@@ -3135,7 +3130,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         }
       }),
     );
-    await this._addUpdatedCommandByDataList(this._originalEditingUDataList, rDataList);
+    await this._addCommandByDataList(this._originalEditingUDataList, rDataList, ElementsCommandTypes.ElementsUpdated);
     this._originalEditingUDataList = null;
   }
 
@@ -3158,17 +3153,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 生成组件层级变更命令
-   *
-   * @param uDataList
-   * @param rDataList
-   */
-  private async _addElementsRearrangeCommand(uDataList: Array<ICommandElementObject>, rDataList: Array<ICommandElementObject>): Promise<void> {
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsRearranged, this.store);
-    this.undoRedo.add(command);
-  }
-
-  /**
    * 组件下移
    *
    * @param elements 要修改的元件集合
@@ -3185,7 +3169,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    await this._addElementsRearrangeCommand(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsRearranged);
     elements.forEach(element => element.onLayerChanged());
   }
 
@@ -3215,7 +3199,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createRearrangeDataList(params)));
       },
     );
-    await this._addElementsRearrangeCommand(uDataList, rDataList);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsRearranged);
     elements.forEach(element => element.onLayerChanged());
   }
 
@@ -3288,7 +3272,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         rDataList.push(...(await CommandHelper.createDataListByActionParams(actionParams)));
       },
     );
-    const command = await CommandHelper.createElementsChangedCommand(uDataList, rDataList, ElementsCommandTypes.ElementsMoved, this.store);
-    this.undoRedo.add(command);
+    await this._addCommandByDataList(uDataList, rDataList, ElementsCommandTypes.ElementsMoved);
   }
 }
