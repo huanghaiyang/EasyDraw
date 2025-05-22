@@ -11,7 +11,7 @@ import { isEmpty } from "lodash";
 export default class CommandHelper {
   /**
    * 组件数据恢复
-   * 
+   *
    * @param commandElementObject
    * @param store
    */
@@ -104,7 +104,7 @@ export default class CommandHelper {
    * @param store
    * @param elementsOperatingFunction
    */
-  static async createCommandByActionParams(
+  static async createByActionParams(
     actionParams: ElementsActionParam[],
     type: ElementsCommandTypes,
     store?: IStageStore,
@@ -113,7 +113,7 @@ export default class CommandHelper {
     const uDataList = await CommandHelper.createDataListByActionParams(actionParams);
     elementsOperatingFunction && (await elementsOperatingFunction());
     const rDataList = await CommandHelper.createDataListByActionParams(actionParams);
-    return CommandHelper.createElementsChangedCommand(uDataList, rDataList, type, store);
+    return CommandHelper.createElementsChangedCommand({ store, payload: { uDataList, rDataList, type } });
   }
 
   /**
@@ -125,20 +125,20 @@ export default class CommandHelper {
    * @param eachOperatingFunction
    * @returns
    */
-  static async createCommandDataList(
+  static async createDataList(
     elements: IElement[],
     type: ElementActionTypes,
     funcs: {
-      dataTransfer: (element: IElement) => Promise<ElementObject>,
-      objectTransfer?: (element: IElement) => Promise<ICommandElementObject>,
-      eachOperatingFunction?: (element: IElement) => Promise<void>,
-    }
+      dataTransfer: (element: IElement) => Promise<ElementObject>;
+      objectTransfer?: (element: IElement) => Promise<ICommandElementObject>;
+      eachOperatingFunction?: (element: IElement) => Promise<void>;
+    },
   ): Promise<ICommandElementObject[]> {
     const { dataTransfer, objectTransfer, eachOperatingFunction } = funcs;
     return await Promise.all(
       elements.map(async element => {
         eachOperatingFunction && (await eachOperatingFunction(element));
-        return CommandHelper.wrapElementJson(element, { model: await dataTransfer(element), type, ...(objectTransfer ? await objectTransfer(element): {}) });
+        return CommandHelper.wrapElementJson(element, { model: await dataTransfer(element), type, ...(objectTransfer ? await objectTransfer(element) : {}) });
       }),
     );
   }
@@ -151,7 +151,7 @@ export default class CommandHelper {
    * @param elementsOperatingFunction
    * @returns
    */
-  static async createCommandDataLists(
+  static async batchCreateDataList(
     elements: IElement[],
     dataTransfers: ((element: IElement) => Promise<ElementObject>)[],
     types: ElementActionTypes[],
@@ -166,12 +166,12 @@ export default class CommandHelper {
     const rDataTransfer = dataTransfers[1] || uDataTransfer;
     const uDataType = types[0];
     const rDataType = types[1] || uDataType;
-    const uDataList = await CommandHelper.createCommandDataList(elements, uDataType, {
+    const uDataList = await CommandHelper.createDataList(elements, uDataType, {
       dataTransfer: uDataTransfer,
       eachOperatingFunction: eachUDataListOperatingFunction,
     });
     elementsOperatingFunction && (await elementsOperatingFunction());
-    const rDataList = await CommandHelper.createCommandDataList(elements, rDataType, {
+    const rDataList = await CommandHelper.createDataList(elements, rDataType, {
       dataTransfer: rDataTransfer,
       eachOperatingFunction: eachRDataListOperatingFunction,
     });
@@ -188,22 +188,16 @@ export default class CommandHelper {
    * @param id 命令ID
    * @returns
    */
-  static createElementsChangedCommand(
-    uDataList: Array<ICommandElementObject>,
-    rDataList: Array<ICommandElementObject>,
-    type: ElementsCommandTypes,
-    store?: IStageStore,
-    id?: string,
-  ): ICommand<IElementsCommandPayload> {
-    const command = new ElementsChangedCommand(
-      id || CommonUtils.getRandomId(),
-      {
-        type,
-        uDataList,
-        rDataList,
-      },
-      store,
-    );
+  static createElementsChangedCommand({
+    store,
+    payload,
+    id,
+  }: {
+    store?: IStageStore;
+    id?: string;
+    payload: IElementsCommandPayload;
+  } & Partial<IElementsCommandPayload>): ICommand<IElementsCommandPayload> {
+    const command = new ElementsChangedCommand(id || CommonUtils.getRandomId(), payload, store);
     return command;
   }
 
@@ -214,7 +208,7 @@ export default class CommandHelper {
    * @returns
    */
   static async getAncestorsUpdateJson(ancestors: IElementGroup[]): Promise<ICommandElementObject[]> {
-    return await CommandHelper.createCommandDataList(ancestors, ElementActionTypes.GroupUpdated, {
+    return await CommandHelper.createDataList(ancestors, ElementActionTypes.GroupUpdated, {
       dataTransfer: async ancestor => {
         return await (ancestor as IElementGroup).toSubUpdatedJson();
       },
@@ -228,7 +222,7 @@ export default class CommandHelper {
    * @returns
    */
   static async getRearrangeDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await CommandHelper.createCommandDataList(elements, ElementActionTypes.Moved, {
+    return await CommandHelper.createDataList(elements, ElementActionTypes.Moved, {
       dataTransfer: async element => {
         return await element.toGroupJson();
       },
@@ -245,7 +239,7 @@ export default class CommandHelper {
    * @returns
    */
   static async getElementsRemovedDataList(elements: IElement[]): Promise<ICommandElementObject[]> {
-    return await CommandHelper.createCommandDataList(elements, ElementActionTypes.Removed, {
+    return await CommandHelper.createDataList(elements, ElementActionTypes.Removed, {
       dataTransfer: async element => {
         return await element.toJson();
       },
@@ -263,14 +257,14 @@ export default class CommandHelper {
    * @returns
    */
   static async getElementsAddedDataList(elements: IElement[], type: ElementActionTypes = ElementActionTypes.Added): Promise<ICommandElementObject[]> {
-    return await CommandHelper.createCommandDataList(elements, type, {
+    return await CommandHelper.createDataList(elements, type, {
       dataTransfer: async element => {
         return await element.toJson();
       },
       objectTransfer: async element => {
         return CommandHelper.createRearrangeModel(element) as unknown as ICommandElementObject;
       },
-    })
+    });
   }
 
   /**
@@ -325,10 +319,14 @@ export default class CommandHelper {
    * @param store
    * @returns
    */
-  static async restoreDataList(datalist: ICommandElementObject[], isRedo: boolean, store: IStageStore): Promise<{
-    updatedIds: Set<string>,
-    removedIds: Set<string>,
-    addedIds: Set<string>,
+  static async restoreDataList(
+    datalist: ICommandElementObject[],
+    isRedo: boolean,
+    store: IStageStore,
+  ): Promise<{
+    updatedIds: Set<string>;
+    removedIds: Set<string>;
+    addedIds: Set<string>;
   }> {
     const updatedIds: Set<string> = new Set<string>();
     const removedIds: Set<string> = new Set<string>();
