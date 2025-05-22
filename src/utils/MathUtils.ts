@@ -1775,6 +1775,28 @@ export default class MathUtils {
   }
 
   /**
+   * 计算两个向量之间的夹角
+   * 
+   * @param xVector 
+   * @param yVector 
+   * @returns 
+   */
+  static calcVectorAngle(xVector: IPoint, yVector: IPoint): number {
+    // 计算向量的模（长度）
+    const xVectorLength = Math.sqrt(xVector.x * xVector.x + xVector.y * xVector.y);
+    const yVectorLength = Math.sqrt(yVector.x * yVector.x + yVector.y * yVector.y);
+
+    // 归一化向量（转换为单位向量）
+    const xVectorNormalized = {
+      x: xVector.x / xVectorLength,
+      y: xVector.y / xVectorLength,
+    };
+    // 计算两个向量之间的夹角（弧度）
+    const dotProduct = xVectorNormalized.x * (yVector.x / yVectorLength) + xVectorNormalized.y * (yVector.y / yVectorLength);
+    return Math.acos(dotProduct);
+  }
+
+  /**
    * 计算包含所有点的最小平行四边形
    * @param points 点集合
    * @param xVector 第一个方向向量（平行四边形的一条边方向）
@@ -1804,32 +1826,16 @@ export default class MathUtils {
       x: yVector.x / yVectorLength,
       y: yVector.y / yVectorLength,
     };
-
-    // 计算两个向量之间的夹角（弧度）
-    const dotProduct = xVectorNormalized.x * (yVector.x / yVectorLength) + xVectorNormalized.y * (yVector.y / yVectorLength);
-    const angle = Math.acos(dotProduct);
-
-    // 如果向量近似垂直，直接使用原向量
-    if (Math.abs(angle - Math.PI / 2) < 0.001) {
-      const yVectorNormalized = {
-        x: yVector.x / yVectorLength,
-        y: yVector.y / yVectorLength,
-      };
-      return MathUtils.calculateParallelogram(points, xVectorNormalized, yVectorNormalized);
-    }
-
-    // 否则，计算正交基
-    // 以xVectorNormalized为基准，计算正交向量
-    const orthogonalVector = {
-      x: -xVectorNormalized.y,
-      y: xVectorNormalized.x,
-    };
-
-    return MathUtils.calculateParallelogram(points, xVectorNormalized, orthogonalVector);
+    return MathUtils.calculateParallelogram(points, xVectorNormalized, yVectorNormalized);
   }
 
   /**
    * 计算平行四边形
+   * 
+   * 注意：
+   * 1. 不能使用简单的点积来计算投影，而是解线性方程组来找到点在非正交基下的准确分量(u, v)
+   * 2. 添加行列式计算来检测基向量是否共线（如果共线则无法形成平行四边形）
+   * 3. 使用克莱姆法则解方程组，得到点在基向量方向上的准确分量
    *
    * @param points
    * @param xVector
@@ -1843,12 +1849,25 @@ export default class MathUtils {
     let vMin = Infinity;
     let vMax = -Infinity;
 
+    // 计算行列式（用于解方程组）
+    const det = xVector.x * yVector.y - xVector.y * yVector.x;
+    
+    // 如果向量共线，返回空数组或处理错误
+    if (Math.abs(det) < 1e-10) {
+        return [];
+    }
+
     // 计算每个点在两个向量方向上的投影
     for (const point of points) {
+      // ↓-------------错误的向量计算---------------↓
       // 计算点在xVector方向上的投影u
-      const u = point.x * xVector.x + point.y * xVector.y;
-      // 计算点在yVector方向上的投影v
-      const v = point.x * yVector.x + point.y * yVector.y;
+      // const u = point.x * xVector.x + point.y * xVector.y;
+      // // 计算点在yVector方向上的投影v
+      // const v = point.x * yVector.x + point.y * yVector.y;
+      // ↑-------------错误的向量计算---------------↑
+      // 使用克莱姆法则解方程组，得到点在基向量方向上的准确分量
+      const u = (point.x * yVector.y - point.y * yVector.x) / det;
+      const v = (xVector.x * point.y - xVector.y * point.x) / det;
 
       // 更新极值
       uMin = Math.min(uMin, u);
