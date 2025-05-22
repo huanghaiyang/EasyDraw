@@ -79,4 +79,16 @@ export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
     });
     return result;
   }
+
+  /**
+   * 弹出命令（不执行）
+   * 
+   * @param isRedo
+   */
+  pop(isRedo?: boolean): ICommand<T> {
+    if (isRedo) {
+      return this.redoStack.pop();
+    }
+    return this.undoStack.pop();
+  }
 }

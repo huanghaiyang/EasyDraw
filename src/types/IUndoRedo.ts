@@ -11,6 +11,7 @@ export default interface IUndoRedo<T, A> {
 
   undo(): Promise<A>;
   redo(): Promise<A>;
+  pop(isRedo?: boolean): ICommand<T> | undefined;
 
   add(command: ICommand<T>): void;
   clear(): void;
