@@ -110,25 +110,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    *
    * @param imageDataList
    */
-  private _createImages(imageDataList: ImageData[]): void {
+  private async _createImages(imageDataList: ImageData[]): Promise<void>  {
     if (imageDataList && imageDataList.length) {
-      let taskQueue = new TaskQueue();
-      imageDataList.forEach((imageData, index) => {
-        taskQueue.add(
-          new QueueTask(async () => {
-            await new Promise(resolve => {
-              this.emit("pasteImage", imageData, async () => {
-                await TimeUtils.wait(100);
-                resolve(true);
-              });
-            });
-            if (index === imageDataList.length - 1) {
-              await taskQueue.destroy();
-              taskQueue = null;
-            }
-          }),
-        );
-      });
+      return new Promise((resolve) => {
+        this.emit("pasteImages", imageDataList, async () => {
+          resolve();
+        });
+      })
     }
   }
 
@@ -317,7 +305,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   async onImagesUpload(images: File[]): Promise<void> {
     if (images.length) {
       const imageDataList = await FileUtils.getImageDataFromFiles(images);
-      this._createImages(imageDataList);
+      await this._createImages(imageDataList);
     }
   }
 }

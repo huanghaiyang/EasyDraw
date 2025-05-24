@@ -32,6 +32,8 @@ import { observable, reaction } from "mobx";
 import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "@/types/ICommand";
 import GlobalConfig from "@/config";
+import { TaskQueue } from "@/modules/render/RenderQueue";
+import { QueueTask } from "../render/RenderTask";
 
 /**
  * 调整组件层级
@@ -2240,19 +2242,47 @@ export default class StageStore implements IStageStore {
   }
 
   /**
-   * 创建并插入图片组件
-   *
-   * @param image
+   * 插入图片
+   * 
+   * @param image 
+   * @returns 
    */
-  async insertImageElement(image: HTMLImageElement | ImageData): Promise<IElement> {
+  async _insertImage(image: HTMLImageElement | ImageData): Promise<IElement> {
     let colorSpace;
     if (image instanceof ImageData) {
       colorSpace = image.colorSpace;
       image = ImageUtils.createImageFromImageData(image);
       await ImageUtils.waitForImageLoad(image);
     }
-    const model = await this.createImageElementModel(image, { colorSpace });
+    const model = await this.createImageElementModel(image, { colorSpace: colorSpace });
     return this.insertAfterElementByModel(model);
+  }
+
+  /**
+   * 创建并插入图片组件
+   *
+   * @param images
+   * @returns IElement[] 返回插入的组件列表
+   */
+  async insertImageElements(images: (HTMLImageElement[] | ImageData[])): Promise<IElement[]> {
+    const result: IElement[] = [];
+    await new Promise((resolve) => {
+      let taskQueue = new TaskQueue();
+      images.forEach((imageData, index) => {
+        taskQueue.add(
+          new QueueTask(async () => {
+            const element = await this._insertImage(imageData);
+            result.push(element);
+            if (index === images.length - 1) {
+              resolve(null);
+              await taskQueue.destroy();
+              taskQueue = null;
+            }
+          }),
+        );
+      });
+    });
+    return result;
   }
 
   /**

@@ -1498,7 +1498,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("scaleIncrease", this._handleScaleIncrease.bind(this));
     this.event.on("scaleAutoFit", this._handleScaleAutoFit.bind(this));
     this.event.on("scale100", this._handleScale100.bind(this));
-    this.event.on("pasteImage", this._handleImagePasted.bind(this));
+    this.event.on("pasteImages", this._handleImagesPasted.bind(this));
     this.event.on("deleteSelects", this._handleSelectsDelete.bind(this));
     this.event.on("selectAll", this.selectAll.bind(this));
     this.event.on("selectCopy", this._handleSelectCopy.bind(this));
@@ -2642,6 +2642,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
+    return this.calcScaleAutoFitValueBySize(width, height);
+  }
+
+  /**
+   * 给定尺寸计算自动适应缩放值
+   *
+   * @param width
+   * @param height
+   * @returns
+   */
+  calcScaleAutoFitValueBySize(width: number, height: number): number {
     let scale = MathUtils.precise(CommonUtils.calcScale(this.stageRect, { width, height }, AutoFitPadding * this.stageScale), 2);
     scale = clamp(scale, 0.02, 1);
     return scale;
@@ -2653,18 +2664,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   calcScaleAutoFitValue(): number {
-    const elementsBox = CommonUtils.getBoxByPoints(this.store.visibleElements.map(element => element.maxOutlineBoxCoords).flat());
-    return this.calcScaleAutoFitValueByBox(elementsBox);
+    return this.calcElementsAutoFitValue(this.store.visibleElements);
   }
 
   /**
-   * 计算某个组件的自动适应缩放值
+   * 计算给定组件的自动适应缩放值
    *
-   * @param element
-   * @returns
+   * @param elements 
+   * @returns 
    */
-  calcElementAutoFitValue(element: IElement): number {
-    return this.calcScaleAutoFitValueByBox(element.maxOutlineBoxCoords);
+  calcElementsAutoFitValue(elements: IElement[]): number {
+    const elementsBox = CommonUtils.getBoxByPoints(elements.map(element => element.maxOutlineBoxCoords).flat());
+    return this.calcScaleAutoFitValueByBox(elementsBox);
   }
 
   /**
@@ -2739,14 +2750,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param imageData
    * @param callback
    */
-  async _handleImagePasted(imageData: ImageData, callback?: Function): Promise<void> {
+  async _handleImagesPasted(imageDatas: ImageData[], callback?: Function): Promise<void> {
     this._clearSelects();
-    const element = await this.store.insertImageElement(imageData);
-    const nextScale = this.calcElementAutoFitValue(element);
+    const elements = await this.store.insertImageElements(imageDatas);
+    const nextScale = this.calcElementsAutoFitValue(elements);
     if (this.stageScale > nextScale) {
       await this.setScale(nextScale);
     }
-    await this._tryAddAddedCommand([element]);
+    await this._tryAddAddedCommand(elements);
     callback && callback();
   }
 
