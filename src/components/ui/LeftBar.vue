@@ -8,6 +8,6 @@
 .left-bar {
   width: 100%;
   height: 100%;
-  background-color: #fefefe;
+  background-color: rgba(255, 255, 255, 0.95);
 }
 </style>
