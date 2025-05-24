@@ -1,4 +1,4 @@
-import { IPoint, ISize } from "@/types";
+import { IPoint, IRect, ISize } from "@/types";
 import { nanoid } from "nanoid";
 import MathUtils from "@/utils/MathUtils";
 import { isNumber } from "lodash";
@@ -514,5 +514,134 @@ export default class CommonUtils {
       width,
       height,
     };
+  }
+
+  /**
+   * 二维平铺算法, 确保矩形在二维空间均匀分布
+   * 
+   * 1. 每行的高度不需要相同
+   * 2. 每行的个数不需要相同
+   * 3. 第一行在中间，第二行在第一行的上方，第三行在第一行的下方，呈上下上下的方式进行布局
+   * 4. 每行按照左对齐的方式进行布局
+   * 5. 每行的矩形之间的间距为margin
+   * 
+   * @param rectangles 矩形数组
+   * @param center 中心点
+   * @param margin 矩形之间的间距
+   * @returns 矩形数组
+   */
+  static packRectangles(rectangles: ISize[], center: IPoint, margin: number = 0): IRect[] {
+    if (rectangles.length === 0) return [];
+    // 利用np加减枝算法，计算第一行的最大宽度
+    let rowSize = Math.ceil(Math.sqrt(rectangles.length));
+    if (rowSize >= 1) {
+      rowSize--;
+    }
+    let rowWidth = 0;
+    while (true) {
+      rowSize++;
+      rowWidth = rectangles.slice(0, rowSize).reduce((prev, curr) => prev + curr.width, 0) + (rowSize - 1) * margin;
+      if (rowSize === rectangles.length) {
+        break;
+      }
+      const widths: number[] = [];
+      for (let i = 0; i < rectangles.length; i += rowSize) {
+        const width = rectangles.slice(i, i + rowSize).reduce((prev, curr) => prev + curr.width, 0) + (rowSize - 1) * margin;
+        widths.push(width);
+        i += rowSize;
+      }
+      let gtCounter = 0;
+      for (let i = 0; i < widths.length; i++) {
+        if (widths[i] <= rowWidth) {
+          gtCounter++;
+        }
+      }
+      if (gtCounter >= Math.ceil(widths.length / 2)) {
+        break;
+      }
+    }
+    const result: IRect[][] = [];
+    let totalHeight = 0;
+    let currentRowWidth = 0;
+    let currentRowHeight = 0;
+    // 计算第一行的矩形
+    const x = center.x - rowWidth / 2;
+    const y = center.y - rectangles[0].height / 2;
+    let row: IRect[] = [];
+    for (let i = 0; i < rowSize; i++) {
+      const { width, height } = rectangles[i];
+      row.push({
+        x: x + currentRowWidth + (currentRowWidth === 0 ? 0: margin) + width / 2,
+        y: y + height / 2,
+        width,
+        height,
+      });
+      if (height > currentRowHeight) {
+        currentRowHeight = height;
+      }
+      currentRowWidth += width + (currentRowWidth === 0? 0: margin);
+    }
+    result.push(row);
+
+    if (rowSize < rectangles.length) {
+      totalHeight += currentRowHeight;
+      currentRowWidth = 0;
+      currentRowHeight = 0;
+      row = [];
+      let currentRowSize = 0;
+      let currentRowDirection = 1; // 1: 向上, -1: 向下
+      let lastY = y + totalHeight;
+      let lastUpperRowIndex: number = -1;
+
+      // 重置当前行的状态
+      function reset(): void {
+        currentRowDirection = -currentRowDirection;
+        totalHeight += currentRowHeight + margin;
+        currentRowWidth = 0;
+        currentRowHeight = 0;
+        currentRowSize = 0;
+        row = [];
+      }
+
+      // 计算其他行的矩形,以第一行的第一个矩形为基准，左对齐
+      for (let i = rowSize; i < rectangles.length; i++) {
+        const { width, height } = rectangles[i];
+        row.push({
+          x: x + currentRowWidth + (currentRowWidth === 0 ? 0: margin) + width / 2,
+          y: 0,
+          width,
+          height,
+        });
+        if (height > currentRowHeight) {
+          currentRowHeight = height;
+        }
+        currentRowSize++;
+        currentRowWidth += width + (currentRowWidth === 0? 0: margin);
+        if (i < rectangles.length - 1 && currentRowWidth + rectangles[i + 1].width + margin > rowWidth || i === rectangles.length - 1) {
+          result.push(row);
+          // 计算当前行的y坐标
+          if (currentRowDirection === 1) {
+            lastY = lastY - totalHeight - margin - currentRowHeight;
+            lastUpperRowIndex = result.length - 1;
+          } else {
+            lastY = lastY + totalHeight + margin + currentRowHeight;
+          }
+          row.forEach((item, index) => {
+            item.y = lastY + (currentRowDirection === -1? -currentRowHeight: 0) + row[index].height / 2;
+          });
+          reset();
+        }
+      }
+
+      if (lastUpperRowIndex !== -1) {
+        const row = result[lastUpperRowIndex];
+        const rowHeight = Math.max(...row.map(item => item.height));
+        row.forEach((item) => {
+          item.y = item.y + (rowHeight - item.height);
+        });
+      }
+    }
+
+    return result.flat();
   }
 }

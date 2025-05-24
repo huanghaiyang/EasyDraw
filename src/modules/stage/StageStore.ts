@@ -34,6 +34,7 @@ import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "
 import GlobalConfig from "@/config";
 import { TaskQueue } from "@/modules/render/RenderQueue";
 import { QueueTask } from "../render/RenderTask";
+import { ImageMargin } from "@/types/Stage";
 
 /**
  * 调整组件层级
@@ -2211,11 +2212,13 @@ export default class StageStore implements IStageStore {
    *
    * @param image
    * @param options
+   * @param position
+   * @returns
    */
-  async createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>): Promise<ElementObject> {
+  async createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>, position?: IPoint): Promise<ElementObject> {
     const { colorSpace } = options;
     const { width, height } = image;
-    const coords = CommonUtils.getBoxByCenter(GlobalConfig.stageParams.worldCoord, {
+    const coords = CommonUtils.getBoxByCenter(position || GlobalConfig.stageParams.worldCoord, {
       width,
       height,
     });
@@ -2245,16 +2248,12 @@ export default class StageStore implements IStageStore {
    * 插入图片
    * 
    * @param image 
+   * @param position
    * @returns 
    */
-  async _insertImage(image: HTMLImageElement | ImageData): Promise<IElement> {
-    let colorSpace;
-    if (image instanceof ImageData) {
-      colorSpace = image.colorSpace;
-      image = ImageUtils.createImageFromImageData(image);
-      await ImageUtils.waitForImageLoad(image);
-    }
-    const model = await this.createImageElementModel(image, { colorSpace: colorSpace });
+  async _insertImage(image:  (HTMLImageElement & { colorSpace: PredefinedColorSpace }), position: IPoint): Promise<IElement> {
+    let colorSpace = image.colorSpace;
+    const model = await this.createImageElementModel(image, { colorSpace: colorSpace }, position);
     return this.insertAfterElementByModel(model);
   }
 
@@ -2266,12 +2265,14 @@ export default class StageStore implements IStageStore {
    */
   async insertImageElements(images: (HTMLImageElement[] | ImageData[])): Promise<IElement[]> {
     const result: IElement[] = [];
+    images = await ImageUtils.convertImages(images);
+    const placed = CommonUtils.packRectangles(images.map(image => ({ width: image.width, height: image.height })), GlobalConfig.stageParams.worldCoord, ImageMargin);
     await new Promise((resolve) => {
       let taskQueue = new TaskQueue();
-      images.forEach((imageData, index) => {
+      images.forEach((img, index) => {
         taskQueue.add(
           new QueueTask(async () => {
-            const element = await this._insertImage(imageData);
+            const element = await this._insertImage(img as (HTMLImageElement & { colorSpace: PredefinedColorSpace }), placed[index]);
             result.push(element);
             if (index === images.length - 1) {
               resolve(null);

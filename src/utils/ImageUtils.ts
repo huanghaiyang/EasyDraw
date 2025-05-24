@@ -43,4 +43,22 @@ export default class ImageUtils {
     await this.waitForImageLoad(img);
     return img;
   }
+
+  /**
+  * 转换图片
+  *
+  * @param images
+  * @returns
+  */
+  static async convertImages(images: (HTMLImageElement[] | ImageData[])): Promise<(HTMLImageElement & { colorSpace: PredefinedColorSpace })[]> {
+   return Promise.all(images.map(async (image) => {
+     if (image instanceof ImageData) {
+       const colorSpace = image.colorSpace;
+       image = ImageUtils.createImageFromImageData(image);
+       image.colorSpace = colorSpace;
+       await ImageUtils.waitForImageLoad(image);
+     }
+     return image;
+   }));
+ }
 }

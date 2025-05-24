@@ -10,6 +10,9 @@ export type IPoint = {
   y: number;
 };
 
+// 矩形
+export type IRect = IPoint & ISize;
+
 // 3D坐标
 export type IPoint3D = IPoint & {
   z: number;

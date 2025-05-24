@@ -25,3 +25,6 @@ export enum CursorTypes {
 
 // 舞台自动缩放时的内边距
 export const AutoFitPadding = 100;
+
+// 图片批量生成时，各图片之间的间距
+export const ImageMargin = 20;
