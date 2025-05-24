@@ -312,22 +312,26 @@ export default class ElementGroup extends Element implements IElementGroup {
     const yParrelSlopeLine = MathUtils.calcParrelLine(ySlopLine, subsCenterCoord);
     // 计算过subsCenterCoord与xSlopeLine平行的直线
     const xParrelSlopeLine = MathUtils.calcParrelLine(xSlopeLine, subsCenterCoord);
-    // 计算最小平行四边形的左上角
-    const topLeft = minParallelogramPoints.find(
-      point => !MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && !MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
-    );
-    // 计算最小平行四边形的右上角
-    const topRight = minParallelogramPoints.find(
-      point => MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && !MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
-    );
-    // 计算最小平行四边形的右下角
-    const bottomRight = minParallelogramPoints.find(
-      point => MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
-    );
-    // 计算最小平行四边形的左下角
-    const bottomLeft = minParallelogramPoints.find(
-      point => !MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end) && MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end),
-    );
+    let topLeft: IPoint;
+    let topRight: IPoint;
+    let bottomRight: IPoint;
+    let bottomLeft: IPoint;
+    minParallelogramPoints.forEach(point => {
+      const isPointClockwiseOfYSlopLine = MathUtils.isPointClockwiseOfLine(point, yParrelSlopeLine.start, yParrelSlopeLine.end);
+      const isPointClockwiseOfXSlopLine = MathUtils.isPointClockwiseOfLine(point, xParrelSlopeLine.start, xParrelSlopeLine.end);
+      if (!isPointClockwiseOfYSlopLine && !isPointClockwiseOfXSlopLine) {
+        topLeft = point;
+      }
+      if (isPointClockwiseOfYSlopLine &&!isPointClockwiseOfXSlopLine) {
+        topRight = point;
+      }
+      if (isPointClockwiseOfYSlopLine && isPointClockwiseOfXSlopLine) {
+        bottomRight = point;
+      }
+      if (!isPointClockwiseOfYSlopLine && isPointClockwiseOfXSlopLine) {
+        bottomLeft = point;
+      }
+    })
     // 旋转倾斜后的盒模型坐标
     const rotateBoxCoords = [topLeft, topRight, bottomRight, bottomLeft];
     // 计算不旋转的盒模型坐标
