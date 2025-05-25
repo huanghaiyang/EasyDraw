@@ -333,8 +333,10 @@ export const useStageStore = defineStore("stage", {
      * @param primarySelectedElement
      */
     onPrimarySelectedChanged(primarySelectedElement: IElement | null) {
-      this.primarySelectedElement = primarySelectedElement;
-      this.onElementChanged(primarySelectedElement);
+      if (this.primarySelectedElement?.id !== primarySelectedElement?.id) {
+        this.primarySelectedElement = primarySelectedElement;
+        this.onElementChanged(primarySelectedElement);
+      }
     },
     /**
      * 递归为舞台组件树形结构添加节点到 Map 中
@@ -404,7 +406,7 @@ export const useStageStore = defineStore("stage", {
      */
     onElementChanged(element: IElement) {
       if (!element) {
-        Object.assign(this, LodashUtils.jsonClone(omit(DefaultStage, ['scale'])));
+        Object.assign(this, LodashUtils.jsonClone(omit(DefaultStage, ["scale"])));
         return;
       }
       const {

@@ -2661,8 +2661,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 计算给定组件的自动适应缩放值
    *
-   * @param elements 
-   * @returns 
+   * @param elements
+   * @returns
    */
   _calcElementsAutoFitValue(elements: IElement[]): number {
     const elementsBox = CommonUtils.getBoxByPoints(elements.map(element => element.maxOutlineBoxCoords).flat());
@@ -2672,16 +2672,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   /**
    * 根据给定的组件进行舞台自适应，表征中心位置并缩放
    *
-   * @param elements 
+   * @param elements
    */
-  private async _setStageAutoFitByElements(elements: IElement[], options?: { scalePrdicate?: (scale: number) => boolean, relocatePredicate?: (scale: number) => boolean }): Promise<void> {
+  private async _setStageAutoFitByElements(elements: IElement[], options?: { scalePrdicate?: (scale: number) => boolean; relocatePredicate?: (scale: number) => boolean }): Promise<void> {
     const { scalePrdicate = () => true, relocatePredicate = () => true } = options || {};
     const value = this._calcElementsAutoFitValue(elements);
     if (relocatePredicate(value)) {
       const center = MathUtils.calcCenter(elements.map(element => element.rotateOutlineCoords.flat()).flat());
       this.stageWorldCoord = center;
     }
-    scalePrdicate(value) && await this.setScale(value);
+    scalePrdicate(value) && (await this.setScale(value));
     this.store.refreshStageElements();
   }
 
@@ -2921,42 +2921,78 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @returns
    */
   private async _doUndoRedo(isRedo: boolean): Promise<void> {
-    let tailCommand = isRedo ? this.undoRedo.tailRedoCommand : this.undoRedo.tailUndoCommand;
-    if (!tailCommand) return;
-    if (!(tailCommand.payload.type === ElementsCommandTypes.ElementsUpdated)) {
+    let command = isRedo ? this.undoRedo.tailRedoCommand : this.undoRedo.tailUndoCommand;
+    if (!command) return;
+    let {
+      payload: { type, creatorType, prevCreatorType, rDataList },
+      id,
+    } = command;
+    if (!(type === ElementsCommandTypes.ElementsUpdated)) {
       this.store.deSelectAll();
     }
-    if (tailCommand.payload.type === ElementsCommandTypes.ElementsCreatorChanged) {
-      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? tailCommand.payload.creatorType : tailCommand.payload.prevCreatorType || MoveableCreator.type), false);
-      this._tailCreatorCommandId = tailCommand.id;
-      this.undoRedo.pop(isRedo);
+
+    // 执行命令
+    isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
+
+    // 处理工具切换命令
+    if (type === ElementsCommandTypes.ElementsCreatorChanged) {
+      this.setCreator(CreatorHelper.getCreatorByType(isRedo ? creatorType : prevCreatorType || MoveableCreator.type), false);
+      this._tailCreatorCommandId = id;
     } else {
-      isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
-      if (isRedo && tailCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
-        if (this.undoRedo.tailRedoCommand && this.undoRedo.tailRedoCommand.payload.type === ElementsCommandTypes.ElementsAdded) {
-          // 先把创建中的组件删除
-          this.store.clearCreatingElements();
-          // 再把组件加回来
-          await this.undoRedo.redo();
-          this.setCreator(MoveableCreator, false);
-          tailCommand = this.undoRedo.tailRedoCommand;
+      if (isRedo) {
+        switch (type) {
+          case ElementsCommandTypes.ElementsStartCreating: {
+            this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type), false);
+            break;
+          }
+          case ElementsCommandTypes.ElementsCreating: {
+            const nextRedoCommand = this.undoRedo.tailRedoCommand;
+            if (nextRedoCommand) {
+              const {
+                payload: { type: nextCommandType },
+              } = nextRedoCommand;
+              switch (nextCommandType) {
+                case ElementsCommandTypes.ElementsAdded: {
+                  // 先把创建中的组件删除
+                  this.store.clearCreatingElements();
+                  // 再把组件加回来
+                  await this.undoRedo.redo();
+                  this.setCreator(MoveableCreator, false);
+                  type = nextCommandType;
+                  break;
+                }
+              }
+            }
+            break;
+          }
         }
-      }
-      if (!isRedo && tailCommand.payload.type === ElementsCommandTypes.ElementsAdded) {
-        if (this.undoRedo.tailUndoCommand && this.undoRedo.tailUndoCommand.payload.type === ElementsCommandTypes.ElementsCreating) {
-          // 先把组件加回来
-          await CommandHelper.restoreDataList(tailCommand.payload.rDataList, true, this.store);
-          // 使用上一次的组件创建中的命令的重做数据进行数据恢复
-          const rDataList = this.undoRedo.tailUndoCommand.payload.rDataList;
-          // 数据恢复
-          await CommandHelper.restoreDataList(rDataList, true, this.store);
-          this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type), false);
-          tailCommand = this.undoRedo.tailUndoCommand;
+      } else {
+        switch (type) {
+          case ElementsCommandTypes.ElementsAdded: {
+            const prevUndoCommand = this.undoRedo.tailUndoCommand;
+            if (prevUndoCommand) {
+              const {
+                payload: { type: prevCommandType, rDataList: prevRDataList },
+              } = prevUndoCommand;
+              switch (prevCommandType) {
+                case ElementsCommandTypes.ElementsCreating: {
+                  // 先把组件加回来
+                  await CommandHelper.restoreDataList(rDataList, true, this.store);
+                  // 数据恢复
+                  await CommandHelper.restoreDataList(prevRDataList, true, this.store);
+                  this.setCreator(CreatorHelper.getCreatorByType(prevRDataList[0].model.type), false);
+                  type = prevCommandType;
+                  break;
+                }
+              }
+            }
+            break;
+          }
         }
       }
       this.emit(ShieldDispatcherNames.primarySelectedChanged, this.store.primarySelectedElement);
+
       if (
-        tailCommand &&
         [
           ElementsCommandTypes.ElementsRearranged,
           ElementsCommandTypes.ElementsRemoved,
@@ -2967,17 +3003,17 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           ElementsCommandTypes.ElementsMoved,
           ElementsCommandTypes.ElementsCreating,
           ElementsCommandTypes.ElementsStartCreating,
-        ].includes(tailCommand.payload.type)
+        ].includes(type)
       ) {
         this.store.refreshStageElements();
         this.store.throttleRefreshTreeNodes();
       }
       await this._addRedrawTask(true);
-      const shouldKeepPressDownComandTypes = [ElementsCommandTypes.ElementsCreating];
+      const shouldKeepPressDownCommandTypes = [ElementsCommandTypes.ElementsCreating];
       if (isRedo) {
-        shouldKeepPressDownComandTypes.push(ElementsCommandTypes.ElementsStartCreating);
+        shouldKeepPressDownCommandTypes.push(ElementsCommandTypes.ElementsStartCreating);
       }
-      this._isPressDown = tailCommand && shouldKeepPressDownComandTypes.includes(tailCommand.payload.type);
+      this._isPressDown = shouldKeepPressDownCommandTypes.includes(type);
     }
   }
 

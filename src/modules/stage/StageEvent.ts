@@ -109,13 +109,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * @param position
    * @returns
    */
-  private async _createImages(imageDataList: ImageData[], e?: Event): Promise<void>  {
+  private async _createImages(imageDataList: ImageData[], e?: Event): Promise<void> {
     if (imageDataList && imageDataList.length) {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         this.emit("pasteImages", imageDataList, e, async () => {
           resolve();
         });
-      })
+      });
     }
   }
 

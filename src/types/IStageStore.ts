@@ -152,7 +152,7 @@ export default interface IStageStore extends IStageSetter {
   // 创建图片组件的数据模型
   createImageElementModel(image: HTMLImageElement | ImageData, options: Partial<ImageData>, position?: IPoint): Promise<ElementObject>;
   // 插入图片组件
-  insertImageElements(images: (HTMLImageElement[] | ImageData[]), position?: IPoint): Promise<IElement[]>;
+  insertImageElements(images: HTMLImageElement[] | ImageData[], position?: IPoint): Promise<IElement[]>;
   // 插入文本组件
   insertTextElement(text: string, fontStyle: FontStyle, coords?: IPoint[]): IElement;
   // 删除选中组件

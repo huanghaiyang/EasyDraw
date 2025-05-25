@@ -2246,12 +2246,12 @@ export default class StageStore implements IStageStore {
 
   /**
    * 插入图片
-   * 
-   * @param image 
+   *
+   * @param image
    * @param position
-   * @returns 
+   * @returns
    */
-  async _insertImage(image:  (HTMLImageElement & { colorSpace: PredefinedColorSpace }), position: IPoint): Promise<IElement> {
+  async _insertImage(image: HTMLImageElement & { colorSpace: PredefinedColorSpace }, position: IPoint): Promise<IElement> {
     let colorSpace = image.colorSpace;
     const model = await this.createImageElementModel(image, { colorSpace: colorSpace }, position);
     return this.insertAfterElementByModel(model);
@@ -2264,16 +2264,20 @@ export default class StageStore implements IStageStore {
    * @param position
    * @returns IElement[] 返回插入的组件列表
    */
-  async insertImageElements(images: (HTMLImageElement[] | ImageData[]), position?: IPoint): Promise<IElement[]> {
+  async insertImageElements(images: HTMLImageElement[] | ImageData[], position?: IPoint): Promise<IElement[]> {
     const result: IElement[] = [];
     images = await ImageUtils.convertImages(images);
-    const placed = CommonUtils.packRectangles(images.map(image => ({ width: image.width, height: image.height })), position || GlobalConfig.stageParams.worldCoord, ImageMargin);
-    await new Promise((resolve) => {
+    const placed = CommonUtils.packRectangles(
+      images.map(image => ({ width: image.width, height: image.height })),
+      position || GlobalConfig.stageParams.worldCoord,
+      ImageMargin,
+    );
+    await new Promise(resolve => {
       let taskQueue = new TaskQueue();
       images.forEach((img, index) => {
         taskQueue.add(
           new QueueTask(async () => {
-            const element = await this._insertImage(img as (HTMLImageElement & { colorSpace: PredefinedColorSpace }), placed[index]);
+            const element = await this._insertImage(img as HTMLImageElement & { colorSpace: PredefinedColorSpace }, placed[index]);
             result.push(element);
             if (index === images.length - 1) {
               resolve(null);
