@@ -1494,10 +1494,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     this.event.on("dblClick", this._handleDblClick.bind(this));
     this.event.on("wheelScale", this._handleWheelScale.bind(this));
     this.event.on("wheelMove", this._handleWheelMove.bind(this));
-    this.event.on("scaleReduce", this._handleScaleReduce.bind(this));
-    this.event.on("scaleIncrease", this._handleScaleIncrease.bind(this));
-    this.event.on("scaleAutoFit", this._handleScaleAutoFit.bind(this));
-    this.event.on("scale100", this._handleScale100.bind(this));
+    this.event.on("scaleReduce", this.setScaleReduce.bind(this));
+    this.event.on("scaleIncrease", this.setScaleIncrease.bind(this));
+    this.event.on("scaleAutoFit", this.setScaleAutoFit.bind(this));
+    this.event.on("scale100", this.setScale100.bind(this));
     this.event.on("pasteImages", this._handleImagesPasted.bind(this));
     this.event.on("deleteSelects", this._handleSelectsDelete.bind(this));
     this.event.on("selectAll", this.selectAll.bind(this));
@@ -2640,9 +2640,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param box
    * @returns
    */
-  calcScaleAutoFitValueByBox(box: IPoint[]): number {
+  _calcScaleAutoFitValueByBox(box: IPoint[]): number {
     const { width, height } = CommonUtils.calcRectangleSize(box);
-    return this.calcScaleAutoFitValueBySize(width, height);
+    return this._calcScaleAutoFitValueBySize(width, height);
   }
 
   /**
@@ -2652,19 +2652,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param height
    * @returns
    */
-  calcScaleAutoFitValueBySize(width: number, height: number): number {
+  _calcScaleAutoFitValueBySize(width: number, height: number): number {
     let scale = MathUtils.precise(CommonUtils.calcScale(this.stageRect, { width, height }, AutoFitPadding * this.stageScale), 2);
     scale = clamp(scale, 0.02, 1);
     return scale;
-  }
-
-  /**
-   * 计算自动适应缩放值
-   *
-   * @returns
-   */
-  calcScaleAutoFitValue(): number {
-    return this.calcElementsAutoFitValue(this.store.visibleElements);
   }
 
   /**
@@ -2673,9 +2664,22 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * @param elements 
    * @returns 
    */
-  calcElementsAutoFitValue(elements: IElement[]): number {
+  _calcElementsAutoFitValue(elements: IElement[]): number {
     const elementsBox = CommonUtils.getBoxByPoints(elements.map(element => element.maxOutlineBoxCoords).flat());
-    return this.calcScaleAutoFitValueByBox(elementsBox);
+    return this._calcScaleAutoFitValueByBox(elementsBox);
+  }
+
+  /**
+   * 根据给定的组件进行舞台自适应，表征中心位置并缩放
+   *
+   * @param elements 
+   */
+  private async _setStageAutoFitByElements(elements: IElement[], scalePrdicate: (value: number) => boolean = () => true): Promise<void> {
+    const center = MathUtils.calcCenter(elements.map(element => element.rotateOutlineCoords.flat()).flat());
+    this.stageWorldCoord = center;
+    this.store.refreshStageElements();
+    const value = this._calcElementsAutoFitValue(elements);
+    scalePrdicate && scalePrdicate(value) && await this.setScale(value);
   }
 
   /**
@@ -2683,10 +2687,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    */
   setScaleAutoFit(): void {
     if (!this.store.isVisibleEmpty) {
-      const center = MathUtils.calcCenter(this.store.visibleElements.map(element => element.rotateOutlineCoords.flat()).flat());
-      this.stageWorldCoord = center;
-      this.store.refreshStageElements();
-      this.setScale(this.calcScaleAutoFitValue());
+      this._setStageAutoFitByElements(this.store.visibleElements);
     } else {
       this.stageWorldCoord = { x: 0, y: 0 };
       this.setScale(1);
@@ -2717,48 +2718,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 处理缩小
-   */
-  _handleScaleReduce(): void {
-    this.setScaleReduce();
-  }
-
-  /**
-   * 处理放大
-   */
-  _handleScaleIncrease(): void {
-    this.setScaleIncrease();
-  }
-
-  /**
-   * 处理自适应
-   */
-  _handleScaleAutoFit(): void {
-    this.setScaleAutoFit();
-  }
-
-  /**
-   * 处理100%缩放
-   */
-  _handleScale100(): void {
-    this.setScale100();
-  }
-
-  /**
    * 处理图片粘贴
    *
    * @param imageData
    * @param callback
    */
-  async _handleImagesPasted(imageDatas: ImageData[], callback?: Function): Promise<void> {
+  async _handleImagesPasted(imageDatas: ImageData[]): Promise<void> {
     this._clearSelects();
     const elements = await this.store.insertImageElements(imageDatas);
-    const nextScale = this.calcElementsAutoFitValue(elements);
-    if (this.stageScale > nextScale) {
-      await this.setScale(nextScale);
-    }
+    await this._setStageAutoFitByElements(elements, value => value < this.stageScale);
     await this._tryAddAddedCommand(elements);
-    callback && callback();
   }
 
   /**

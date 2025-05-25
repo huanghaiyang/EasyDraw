@@ -84,12 +84,6 @@ export default interface IStageShield extends IStageDrawer, IStageSetter {
   // 舞台计算参数
   get stageParams(): stageParams;
 
-  // 计算给定范围的自动缩放值
-  calcScaleAutoFitValueByBox(box: IPoint[]): number;
-  // 计算自动缩放值
-  calcScaleAutoFitValue(): number;
-  // 计算组件自动缩放值
-  calcElementsAutoFitValue(elements: IElement[]): number;
   // 设置缩放
   setScale(value: number): void;
   // 设置缩放100%
