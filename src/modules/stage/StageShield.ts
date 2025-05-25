@@ -2674,12 +2674,15 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    *
    * @param elements 
    */
-  private async _setStageAutoFitByElements(elements: IElement[], scalePrdicate: (value: number) => boolean = () => true): Promise<void> {
-    const center = MathUtils.calcCenter(elements.map(element => element.rotateOutlineCoords.flat()).flat());
-    this.stageWorldCoord = center;
-    this.store.refreshStageElements();
+  private async _setStageAutoFitByElements(elements: IElement[], options?: { scalePrdicate?: (scale: number) => boolean, relocatePredicate?: (scale: number) => boolean }): Promise<void> {
+    const { scalePrdicate = () => true, relocatePredicate = () => true } = options || {};
     const value = this._calcElementsAutoFitValue(elements);
-    scalePrdicate && scalePrdicate(value) && await this.setScale(value);
+    if (relocatePredicate(value)) {
+      const center = MathUtils.calcCenter(elements.map(element => element.rotateOutlineCoords.flat()).flat());
+      this.stageWorldCoord = center;
+    }
+    scalePrdicate(value) && await this.setScale(value);
+    this.store.refreshStageElements();
   }
 
   /**
@@ -2721,13 +2724,18 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 处理图片粘贴
    *
    * @param imageData
+   * @param position
    * @param callback
    */
-  async _handleImagesPasted(imageDatas: ImageData[]): Promise<void> {
+  async _handleImagesPasted(imageDatas: ImageData[], e?: Event, callback?: () => Promise<void>): Promise<void> {
     this._clearSelects();
-    const elements = await this.store.insertImageElements(imageDatas);
-    await this._setStageAutoFitByElements(elements, value => value < this.stageScale);
+    const elements = await this.store.insertImageElements(imageDatas, this.cursor.worldValue);
+    await this._setStageAutoFitByElements(elements, {
+      scalePrdicate: scale => scale < this.stageScale,
+      relocatePredicate: scale => scale < this.stageScale,
+    });
     await this._tryAddAddedCommand(elements);
+    callback && (await callback());
   }
 
   /**

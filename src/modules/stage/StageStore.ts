@@ -33,7 +33,7 @@ import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import { ElementActionTypes, ElementsActionParam, ElementActionCallback } from "@/types/ICommand";
 import GlobalConfig from "@/config";
 import { TaskQueue } from "@/modules/render/RenderQueue";
-import { QueueTask } from "../render/RenderTask";
+import { QueueTask } from "@/modules/render/RenderTask";
 import { ImageMargin } from "@/types/Stage";
 
 /**
@@ -2261,12 +2261,13 @@ export default class StageStore implements IStageStore {
    * 创建并插入图片组件
    *
    * @param images
+   * @param position
    * @returns IElement[] 返回插入的组件列表
    */
-  async insertImageElements(images: (HTMLImageElement[] | ImageData[])): Promise<IElement[]> {
+  async insertImageElements(images: (HTMLImageElement[] | ImageData[]), position?: IPoint): Promise<IElement[]> {
     const result: IElement[] = [];
     images = await ImageUtils.convertImages(images);
-    const placed = CommonUtils.packRectangles(images.map(image => ({ width: image.width, height: image.height })), GlobalConfig.stageParams.worldCoord, ImageMargin);
+    const placed = CommonUtils.packRectangles(images.map(image => ({ width: image.width, height: image.height })), position || GlobalConfig.stageParams.worldCoord, ImageMargin);
     await new Promise((resolve) => {
       let taskQueue = new TaskQueue();
       images.forEach((img, index) => {

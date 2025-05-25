@@ -4,10 +4,7 @@ import EventUtils from "@/utils/EventUtils";
 import ResizeEvents from "@/utils/ResizeEvents";
 import { EventEmitter } from "events";
 import isHotkey from "is-hotkey";
-import { TaskQueue } from "@/modules/render/RenderQueue";
-import { QueueTask } from "@/modules/render/RenderTask";
 import FileUtils from "@/utils/FileUtils";
-import TimeUtils from "@/utils/TimerUtils";
 
 export default class StageEvent extends EventEmitter implements IStageEvent {
   shield: IStageShield;
@@ -109,11 +106,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
    * 创建图片组件
    *
    * @param imageDataList
+   * @param position
+   * @returns
    */
-  private async _createImages(imageDataList: ImageData[]): Promise<void>  {
+  private async _createImages(imageDataList: ImageData[], e?: Event): Promise<void>  {
     if (imageDataList && imageDataList.length) {
       return new Promise((resolve) => {
-        this.emit("pasteImages", imageDataList, async () => {
+        this.emit("pasteImages", imageDataList, e, async () => {
           resolve();
         });
       })
@@ -172,7 +171,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       // 解析图片
       FileUtils.getImageDataFromFileTransfer(e)
         .then(imageDataList => {
-          this._createImages(imageDataList);
+          this._createImages(imageDataList, e);
         })
         .catch(e => {
           e && console.warn(e);
