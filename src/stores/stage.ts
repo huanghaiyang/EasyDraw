@@ -4,7 +4,7 @@ import { ElementStatus, IPoint, ShieldDispatcherNames, StageInitParams } from "@
 import { Creator, CreatorCategories, CreatorTypes } from "@/types/Creator";
 import IElement, { DefaultCornerModel, ElementTreeNode, TreeNodeDropType } from "@/types/IElement";
 import { DefaultElementStyle, DefaultFillStyle, DefaultStrokeStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
-import { throttle } from "lodash";
+import { omit, throttle } from "lodash";
 import { defineStore } from "pinia";
 import { MoveableCreator, PenCreator, RectangleCreator, TextCreator } from "@/types/CreatorDicts";
 import { toRaw } from "vue";
@@ -404,7 +404,7 @@ export const useStageStore = defineStore("stage", {
      */
     onElementChanged(element: IElement) {
       if (!element) {
-        Object.assign(this, LodashUtils.jsonClone(DefaultStage));
+        Object.assign(this, LodashUtils.jsonClone(omit(DefaultStage, ['scale'])));
         return;
       }
       const {
