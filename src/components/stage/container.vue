@@ -3,17 +3,10 @@ import { useStageStore } from "@/stores/stage";
 import { ref, onMounted } from "vue";
 import StageShieldVue from "@/components/stage/shield.vue";
 import { StageShieldInstance } from "@/types";
-import { CreatorTypes } from "@/types/Creator";
 
 const stageStore = useStageStore();
 const stageRef = ref<HTMLElement | null>(null);
 const stageShieldRef = ref<InstanceType<typeof StageShieldVue> & StageShieldInstance>();
-const handleCreatorSelect = creator => {
-  const { type } = creator;
-  if (type !== CreatorTypes.image) {
-    stageStore.setCreator(creator, true);
-  }
-};
 
 onMounted(async () => {
   if (stageShieldRef.value) {
@@ -28,8 +21,6 @@ onMounted(async () => {
 <template>
   <div class="stage-container" ref="stageRef">
     <stage-shield-vue ref="stageShieldRef" />
-    <arbitrary-bar />
-    <creator-bar @select="handleCreatorSelect" />
   </div>
 </template>
 <style lang="less" scoped>

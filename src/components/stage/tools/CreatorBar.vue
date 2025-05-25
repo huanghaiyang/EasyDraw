@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { useStageStore } from "@/stores/stage";
 import { FreedomCreators, CursorCreators, ShapeCreators } from "@/types/CreatorDicts";
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import Moveable from 'vue3-moveable';
 
 const emits = defineEmits(["select"]);
 const stageStore = useStageStore();
@@ -14,9 +15,16 @@ const currentTextCreator = computed(() => stageStore.currentTextCreator);
 const select = item => {
   emits("select", item);
 };
+
+const createBarRef = ref<HTMLElement | null>(null);
+
+const onDrag = (e) => {
+  e.target.style.transform = e.transform;
+};
 </script>
+
 <template>
-  <div class="create-bar">
+  <div ref="createBarRef" class="create-bar">
     <div :class="['tool-item', { selected: currentCursorCreator.category === currentCreator.category }]" @click="select(currentCursorCreator)">
       <el-icon :class="['iconfont', currentCursorCreator.icon]"></el-icon>
     </div>
@@ -47,8 +55,19 @@ const select = item => {
       <el-icon :class="['iconfont', currentTextCreator.icon]"></el-icon>
     </div>
   </div>
+  <Moveable
+    :target="createBarRef"
+    :draggable="true"
+    :origin="false"
+    @drag="onDrag"
+  >
+  </Moveable>
 </template>
+
 <style lang="less">
+.moveable-line {
+  background: transparent !important;
+}
 .create-bar,
 .arbitrary-bar {
   display: flex;
@@ -62,6 +81,7 @@ const select = item => {
   bottom: 10px;
   left: calc(50% - 100px);
   padding: 0 5px;
+  cursor: move;
 
   .tool-item {
     width: 30px;
@@ -72,6 +92,7 @@ const select = item => {
     border-radius: 4px;
     transition: all 0.2s;
     margin: 0 0 0 5px;
+    cursor: default;
 
     &:first-of-type {
       margin: 0;
@@ -87,6 +108,10 @@ const select = item => {
         fill: #fff;
       }
     }
+  }
+
+  .el-dropdown {
+    cursor: default;
   }
 }
 </style>
