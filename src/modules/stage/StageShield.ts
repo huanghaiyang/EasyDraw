@@ -2984,6 +2984,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
                   type = prevCommandType;
                   break;
                 }
+                case ElementsCommandTypes.ElementsAdded: {
+                  this.store.setElementsDetachedSelectedByIds(prevRDataList.map(item => item.model.id), true);
+                  break;
+                }
               }
             }
             break;
