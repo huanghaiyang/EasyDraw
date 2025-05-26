@@ -172,6 +172,10 @@ export default class StageStore implements IStageStore {
     return this._selectedElementIds;
   }
 
+  get editingElementIds(): Set<string> {
+    return this._editingElementIds;
+  }
+
   // 当前创建并更新中的组件
   get creatingElements(): IElement[] {
     const element = this._elementsMap.get(this.currentCreatingElementId);
@@ -521,6 +525,7 @@ export default class StageStore implements IStageStore {
    */
   private _reactionEditingElementsChanged(): void {
     this._editingElements = this._filterList(this._editingElementIds);
+    this.shield.emit(ShieldDispatcherNames.editingChanged, this._editingElements);
   }
 
   /**
@@ -2413,7 +2418,17 @@ export default class StageStore implements IStageStore {
    *
    * @param elements
    */
-  beginEditingElements(elements: IElement[]): void {
+  beginEditElements(elements: IElement[]): void {
+    this._setElementsEditing(elements, true);
+  }
+
+  /**
+   * 开始编辑组件
+   * 
+   * @param ids 
+   */
+  beginEditElementsByIds(ids: string[]): void {
+    const elements = this.findElements(element => ids.includes(element.id));
     this._setElementsEditing(elements, true);
   }
 
@@ -2458,9 +2473,6 @@ export default class StageStore implements IStageStore {
             isEditing: value,
             status: value ? ElementStatus.editing : ElementStatus.finished,
           });
-          if (element.tfRefreshAfterEdChanged) {
-            element.refresh();
-          }
         }
       }
     });

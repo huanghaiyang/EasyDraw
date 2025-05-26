@@ -60,6 +60,8 @@ export default interface IStageStore extends IStageSetter {
   get isMultiSelected(): boolean;
   // 选中的组件ID
   get selectedElementIds(): Set<string>;
+  // 编辑中的组件ID
+  get editingElementIds(): Set<string>;
   // 当前最大组序列号
   get groupSerialNumber(): number;
   // 当前最大矩形序列号
@@ -178,7 +180,9 @@ export default interface IStageStore extends IStageSetter {
   // 取消高亮目标组件
   cancelTargetElements(): void;
   // 开始编辑组件
-  beginEditingElements(elements: IElement[]): void;
+  beginEditElements(elements: IElement[]): void;
+  // 开始编辑组件
+  beginEditElementsByIds(ids: string[]): void;
   // 结束编辑组件
   endEditingElements(elements: IElement[]): void;
   // 获取已完成的选中组件

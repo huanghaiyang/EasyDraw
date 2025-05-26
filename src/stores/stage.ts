@@ -178,6 +178,8 @@ export const useStageStore = defineStore("stage", {
       treeNodesMap: new Map<string, ElementTreeNode>(),
       // 选中组件
       selectedElements: [],
+      // 编辑组件
+      editingElements: [],
       // 目标组件
       targetElements: [],
       // 是否多选
@@ -213,7 +215,7 @@ export const useStageStore = defineStore("stage", {
     },
     // 自由线条绘制是否可见
     arbitraryVisible(): boolean {
-      return this.currentCreator?.type === CreatorTypes.arbitrary;
+      return this.currentCreator?.type === CreatorTypes.arbitrary || this.editingElements[0]?.model.type === CreatorTypes.arbitrary;
     },
     // UI是否透传
     shouldUIPassThrough(): boolean {
@@ -235,6 +237,7 @@ export const useStageStore = defineStore("stage", {
       [
         [ShieldDispatcherNames.elementCreated, this.onElementCreated],
         [ShieldDispatcherNames.selectedChanged, this.onSelectedChanged],
+        [ShieldDispatcherNames.editingChanged, this.onEditingChanged],
         [ShieldDispatcherNames.targetChanged, this.onTargetChanged],
         [ShieldDispatcherNames.multiSelectedChanged, this.onMultiSelectedChanged],
         [ShieldDispatcherNames.primarySelectedChanged, this.onPrimarySelectedChanged],
@@ -398,6 +401,14 @@ export const useStageStore = defineStore("stage", {
      */
     onSelectedChanged(selectedElements: IElement[]) {
       this.selectedElements = selectedElements;
+    },
+    /**
+     * 舞台组件编辑状态改变
+     *
+     * @param editingElements
+     */
+    onEditingChanged(editingElements: IElement[]) {
+      this.editingElements = editingElements;
     },
     /**
      * 舞台组件变更

@@ -1,4 +1,4 @@
-import IElement, { ElementObject } from "@/types/IElement";
+import IElement, { ElementObject, ElementProps } from "@/types/IElement";
 import ITextData, { ITextCursor, ITextSelection, TextEditorOperations } from "@/types/IText";
 import { ElementStatus } from "@/types/index";
 import { CreatorTypes } from "@/types/Creator";
@@ -51,9 +51,9 @@ export interface ElementActionCallback {
 export type ICommandElementObject = IBaseCommandElementObject &
   Partial<IRelationNode> &
   Partial<IGroupNode> &
-  Partial<IAttributeNode> & {
+  Partial<IAttributeNode> &
+  Partial<ElementProps> & {
     type?: ElementActionTypes;
-    props?: Object;
   };
 
 // 命令

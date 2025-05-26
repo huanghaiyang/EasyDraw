@@ -91,7 +91,7 @@ export default class CommandHelper {
    */
   static async wrapElementJson(element: IElement, json: ICommandElementObject): Promise<ICommandElementObject> {
     return {
-      props: await element.toElementJson(),
+      ...await element.toElementJson(),
       ...json,
     };
   }
@@ -197,8 +197,7 @@ export default class CommandHelper {
     id?: string;
     payload: IElementsCommandPayload;
   } & Partial<IElementsCommandPayload>): ICommand<IElementsCommandPayload> {
-    const command = new ElementsChangedCommand(id || CommonUtils.getRandomId(), payload, store);
-    return command;
+    return new ElementsChangedCommand(id || CommonUtils.getRandomId(), payload, store);
   }
 
   /**
@@ -301,13 +300,13 @@ export default class CommandHelper {
    * 还原正在创建中的组件
    *
    * @param id
-   * @param props
+   * @param unEffect
    * @param store
    */
-  static async updateCreatingElementStatus(id: string, props: Object = {}, store: IStageStore): Promise<void> {
-    store.setElementProvisionalCreatingById(id);
-    if (!isEmpty(props)) {
-      store.updateElementById(id, props);
+  static async updateElementProps(id: string, unEffect: Object = {}, store: IStageStore): Promise<void> {
+    // 特殊属性不需要在此处处理
+    if (!isEmpty(unEffect)) {
+      store.updateElementById(id, unEffect);
     }
   }
 
@@ -334,7 +333,7 @@ export default class CommandHelper {
     await Promise.all(
       datalist.map(data => {
         return new Promise<void>(async resolve => {
-          const { model, type, props = {} } = data;
+          const { model, type, unEffect } = data;
           const { id } = model;
           let isAdded: boolean = false;
           let isUpdated: boolean = false;
@@ -354,6 +353,7 @@ export default class CommandHelper {
             case ElementActionTypes.Updated:
             case ElementActionTypes.GroupUpdated: {
               await CommandHelper.updateElementFromData(data, store);
+              await CommandHelper.updateElementProps(id, unEffect, store);
               isUpdated = true;
               break;
             }
@@ -377,7 +377,8 @@ export default class CommandHelper {
             }
             case ElementActionTypes.Creating: {
               await CommandHelper.updateElementFromData(data, store);
-              await CommandHelper.updateCreatingElementStatus(id, props, store);
+              await CommandHelper.updateElementProps(id, unEffect, store);
+              store.setElementProvisionalCreatingById(id);
               store.currentCreatingElementId = id;
               isUpdated = true;
               break;
@@ -385,7 +386,8 @@ export default class CommandHelper {
             case ElementActionTypes.StartCreating: {
               if (isRedo) {
                 await CommandHelper.restoreElementFromData(data, store);
-                await CommandHelper.updateCreatingElementStatus(id, props, store);
+                await CommandHelper.updateElementProps(id, unEffect, store);
+                store.setElementProvisionalCreatingById(id);
                 store.currentCreatingElementId = id;
                 isAdded = true;
               } else {

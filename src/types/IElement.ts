@@ -104,6 +104,11 @@ export const DefaultCornerModel: CornerModel = {
   corners: [0, 0, 0, 0],
 };
 
+export type ElementProps = {
+  effect?: Object;
+  unEffect?: Object;
+}
+
 // 舞台组件数据模型
 export type ElementObject = AngleModel &
   FlipModel &
@@ -288,8 +293,6 @@ export default interface IElement {
   get cornersInputEnable(): boolean;
   // 圆角是否展示
   get cornersEnable(): boolean;
-  // 是否在编辑状态改变后刷新
-  get tfRefreshAfterEdChanged(): boolean;
   // 原始旋转角度
   get originalAngle(): number;
   // 变换矩阵
@@ -1335,7 +1338,8 @@ export default interface IElement {
   /**
    * 转换为组件属性
    */
-  toElementJson(): Object;
+  toElementJson(): Promise<ElementProps>;
+  
   /**
    * 撤销
    */

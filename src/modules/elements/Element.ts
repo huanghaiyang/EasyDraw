@@ -5,7 +5,7 @@ import CommonUtils from "@/utils/CommonUtils";
 import MathUtils from "@/utils/MathUtils";
 import { clamp, isNumber, isUndefined, pick, some } from "lodash";
 import { makeObservable, observable } from "mobx";
-import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
+import IElement, { AngleModel, DefaultElementRefreshOptions, DefaultRefreshAnglesOptions, ElementObject, ElementProps, FlipModel, RefreshAnglesOptions, RefreshOptions, TransformByOptions } from "@/types/IElement";
 import { DefaultFillStyle, DefaultStrokeStyle, FillStyle, FontStyler, StrokeStyle, StrokeTypes, TextCase, TextDecoration, TextVerticalAlign } from "@/styles/ElementStyles";
 import { RotateControllerMargin, RotationSize, TransformerSize } from "@/styles/MaskStyles";
 import IElementRotation from "@/types/IElementRotation";
@@ -342,11 +342,6 @@ export default class Element implements IElement, ILinkedNodeValue {
   // 是否可以编辑
   get editingEnable(): boolean {
     return true;
-  }
-
-  // 是否应该刷新变换控制器
-  get tfRefreshAfterEdChanged(): boolean {
-    return false;
   }
 
   // 是否应该锁定比例变换尺寸
@@ -1580,9 +1575,9 @@ export default class Element implements IElement, ILinkedNodeValue {
   }
 
   /**
-   * 刷新舞台坐标
+   * 刷新坐标
    */
-  refreshPoints() {
+  private _refreshCoords(): void {
     // 计算旋转后的路径坐标
     this._rotateCoords = this.calcRotateCoords();
     // 计算旋转后的盒模型坐标
@@ -1593,6 +1588,13 @@ export default class Element implements IElement, ILinkedNodeValue {
     this._unLeanBoxCoords = this.calcUnLeanBoxCoords();
     // 计算最大盒模型点
     this._maxBoxCoords = this.calcMaxBoxCoords();
+  }
+
+  /**
+   * 刷新舞台坐标
+   */
+  refreshPoints() {
+    this._refreshCoords();
     this.refreshTransformers();
   }
 
@@ -3116,7 +3118,13 @@ export default class Element implements IElement, ILinkedNodeValue {
    *
    * @returns
    */
-  async toElementJson(): Promise<Object> {
-    return {};
+  async toElementJson(): Promise<ElementProps> {
+    return {
+      effect: {
+        status: this.status,
+        isEditing: this.isEditing,
+      },
+      unEffect: { }
+    };
   }
 }

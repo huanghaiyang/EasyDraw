@@ -11,6 +11,7 @@ import { IElementGroup } from "@/types/IElementGroup";
 import ElementGroup from "@/modules/elements/ElementGroup";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import LodashUtils from "@/utils/LodashUtils";
+import RotateController from "@/modules/handler/controller/RotateController";
 
 export default class StageSelection implements IStageSelection {
   // 舞台
@@ -380,7 +381,11 @@ export default class StageSelection implements IStageSelection {
     if (this.shield.store.isSelectedEmpty) return;
     const element = this.shield.store.primarySelectedElement || this.rangeElement;
     if (element) {
-      const controller = element.getControllerByCoord(coord);
+      let controller = element.getControllerByCoord(coord);
+      // 非完成状态下的组件的旋转控制器不允许激活
+      if (controller instanceof RotateController && element.status !== ElementStatus.finished) {
+        controller = null;
+      }
       element.setControllersActive(
         element.controllers.filter(c => c.id !== controller?.id),
         false,

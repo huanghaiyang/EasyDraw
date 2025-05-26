@@ -1,4 +1,4 @@
-import { ElementObject, IElementArbitrary } from "@/types/IElement";
+import { ElementObject, ElementProps, IElementArbitrary } from "@/types/IElement";
 import Element from "@/modules/elements/Element";
 import IStageShield from "@/types/IStageShield";
 import { ElementStatus, IPoint } from "@/types";
@@ -55,11 +55,6 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     return this._outerWorldPaths;
   }
 
-  // 是否在编辑坐标时刷新变换器
-  get tfRefreshAfterEdChanged(): boolean {
-    return true;
-  }
-
   get isValid(): boolean {
     return this.model.coords.length >= 2;
   }
@@ -78,6 +73,22 @@ export default class ElementArbitrary extends Element implements IElementArbitra
     super._setStatus(status);
     if (status === ElementStatus.finished) {
       this.tailCoordIndex = -1;
+    }
+  }
+
+  /**
+   * 设置编辑状态
+   *
+   * @param value 编辑状态
+   */
+  _setIsEditing(value: boolean): void {
+    const isDifference = this.isEditing !== value;
+    super._setIsEditing(value);
+    if (isDifference) {
+      setTimeout(() => {
+        // TODO 不晓得为什么不延时执行，刷新就会有问题
+        this.refresh();
+      });
     }
   }
 
@@ -284,12 +295,12 @@ export default class ElementArbitrary extends Element implements IElementArbitra
    *
    * @returns
    */
-  async toElementJson(): Promise<Object> {
+  async toElementJson(): Promise<ElementProps> {
     const json = await super.toElementJson();
-    return {
-      ...json,
+    Object.assign(json.unEffect, {
       tailCoordIndex: this.tailCoordIndex,
       editingCoordIndex: this.editingCoordIndex,
-    };
+    });
+    return json;
   }
 }

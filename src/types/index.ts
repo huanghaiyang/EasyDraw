@@ -92,6 +92,8 @@ export enum ShieldDispatcherNames {
   elementCreated = "elementCreated",
   // 选中改变
   selectedChanged = "selectedChanged",
+  // 编辑改变
+  editingChanged = "editingChanged",
   // 目标改变
   targetChanged = "targetChanged",
   // 位置改变
