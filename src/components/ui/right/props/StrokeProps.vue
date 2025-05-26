@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { CreatorTypes } from "@/types/Creator";
-import { getStokeTypes } from "@/styles/ElementStyles";
+import { getStokeTypes, StrokeTypes } from "@/styles/ElementStyles";
 import { Plus, Minus } from "@element-plus/icons-vue";
-import { ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
 
 const colorPickerRef = ref();
 const stageStore = useStageStore();
@@ -28,6 +29,11 @@ const toggleColorPickerVisible = () => {
   if (!stageStore.strokeInputEnable) return;
   colorPickerRef.value.show();
 };
+
+function setElementsStrokeType(value: StrokeTypes, index: number) {
+  stageStore.setElementsStrokeType(value, index);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="stroke-props right-props" v-show="stageStore.strokeEnable">
@@ -75,7 +81,7 @@ const toggleColorPickerVisible = () => {
             v-model="stroke.type"
             placeholder="描边类型"
             size="small"
-            @change="value => stageStore.setElementsStrokeType(value, index)"
+            @change="value => setElementsStrokeType(value, index)"
             :disabled="stageStore.inputDisabled || !stageStore.strokeInputEnable"
           >
             <el-option v-for="item in strokeTypes" :key="item.type" :label="item.name" :value="item.type" />

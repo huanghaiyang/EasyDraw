@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { FontFamilyList } from "@/styles/ElementStyles";
-import { ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
+import { nextTick, ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontFamily = ref(DefaultStage.fontFamily);
@@ -20,6 +21,11 @@ watch(
     fontFamilyMixin.value = newValue;
   },
 );
+
+function setElementsFontFamily(value: string) {
+  stageStore.setElementsFontFamily(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
@@ -32,7 +38,7 @@ watch(
           v-model="fontFamily"
           :placeholder="`${fontFamilyMixin ? '混合字体' : fontFamily}`"
           size="small"
-          @change="value => stageStore.setElementsFontFamily(value)"
+          @change="setElementsFontFamily"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
           <template #label="{ label, value }">

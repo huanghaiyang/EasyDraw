@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { ParagraphSpacingList } from "@/styles/ElementStyles";
-import { ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
+import { nextTick, ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const paragraphSpacing = ref(DefaultStage.paragraphSpacing);
@@ -12,6 +13,11 @@ watch(
     paragraphSpacing.value = newValue;
   },
 );
+
+function setElementsParagraphSpacing(value: number) {
+  stageStore.setElementsParagraphSpacing(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
@@ -25,7 +31,7 @@ watch(
           v-model="paragraphSpacing"
           placeholder=""
           size="small"
-          @change="value => stageStore.setElementsParagraphSpacing(value)"
+          @change="setElementsParagraphSpacing"
           :disabled="stageStore.inputDisabled || !stageStore.paragraphSpacingInputEnable"
         >
           <el-option v-for="item in ParagraphSpacingList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
@@ -39,7 +45,7 @@ watch(
               :min="0"
               :max="100"
               :precision="0"
-              @change="value => stageStore.setElementsParagraphSpacing(Number(value))"
+              @change="value => setElementsParagraphSpacing(Number(value))"
             >
               <template #prepend>自定义</template>
               <template #append>px</template>

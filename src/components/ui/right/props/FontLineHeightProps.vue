@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { DefaultFontSize, FontLineHeightFactorList, FontLineHeightList } from "@/styles/ElementStyles";
-import { ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
+import { nextTick, ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontLineHeight = ref(DefaultStage.fontLineHeight);
@@ -36,6 +37,16 @@ watch(
     fontLineHeightFactorInputEnable.value = newValue;
   },
 );
+
+function setElementsFontLineHeightFactor(value: number) {
+  stageStore.setElementsFontLineHeightFactor(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
+
+function setElementsFontLineHeight(value: number) {
+  stageStore.setElementsFontLineHeight(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
@@ -59,7 +70,7 @@ watch(
         <el-select
           v-model="fontLineHeightFactor"
           size="small"
-          @change="value => stageStore.setElementsFontLineHeightFactor(value)"
+          @change="setElementsFontLineHeightFactor"
           :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightFactorInputEnable"
         >
           <el-option v-for="item in FontLineHeightFactorList" :key="item.name" :label="`${item.value}x字号`" :value="item.value"> {{ item.value }}x字号 </el-option>
@@ -73,7 +84,7 @@ watch(
               :min="0"
               :max="2"
               :precision="1"
-              @change="value => stageStore.setElementsFontLineHeightFactor(Number(value))"
+              @change="value => setElementsFontLineHeightFactor(Number(value))"
             >
               <template #prepend>自定义</template>
               <template #append>x字号</template>
@@ -85,7 +96,7 @@ watch(
 
     <div class="font-props__row" v-show="!fontLineHeightAutoFit">
       <div class="font-props__row-item">
-        <el-select v-model="fontLineHeight" size="small" @change="value => stageStore.setElementsFontLineHeight(value)" :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable">
+        <el-select v-model="fontLineHeight" size="small" @change="setElementsFontLineHeight" :disabled="stageStore.inputDisabled || !stageStore.fontLineHeightInputEnable">
           <el-option v-for="item in FontLineHeightList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
           <template #header>
             <el-input
@@ -97,7 +108,7 @@ watch(
               :min="DefaultFontSize"
               :max="100"
               :precision="1"
-              @change="value => stageStore.setElementsFontLineHeight(Number(value))"
+              @change="value => setElementsFontLineHeight(Number(value))"
             >
               <template #prepend>自定义</template>
               <template #append>px</template>

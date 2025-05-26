@@ -54,4 +54,12 @@ export default class DOMUtils {
   static isFocusOnInput(): boolean {
     return document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA";
   }
+
+  /**
+   * 清除焦点
+   */
+  static clearFocus() {
+    window.getSelection()?.removeAllRanges();
+    (document.activeElement as HTMLElement)?.blur();
+  }
 }

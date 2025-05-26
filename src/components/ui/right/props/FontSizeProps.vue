@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { FontSizeList } from "@/styles/ElementStyles";
-import { ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
+import { nextTick, ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontSize = ref(DefaultStage.fontSize);
@@ -20,6 +21,11 @@ watch(
     fontSizeMixin.value = newValue;
   },
 );
+
+function setElementsFontSize(value: number) {
+  stageStore.setElementsFontSize(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
@@ -33,7 +39,7 @@ watch(
           v-model="fontSize"
           :placeholder="`${fontSizeMixin ? '混合字号' : `${fontSize}px`}`"
           size="small"
-          @change="value => stageStore.setElementsFontSize(value)"
+          @change="setElementsFontSize"
           :disabled="stageStore.inputDisabled || !stageStore.fontInputEnable"
         >
           <el-option v-for="item in FontSizeList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
@@ -47,7 +53,7 @@ watch(
               :min="1"
               :max="100"
               :precision="0"
-              @change="value => stageStore.setElementsFontSize(Number(value))"
+              @change="value => setElementsFontSize(Number(value))"
             >
               <template #prepend>自定义</template>
               <template #append>px</template>

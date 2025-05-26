@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { DefaultStage, useStageStore } from "@/stores/stage";
 import { FontLetterSpacingList } from "@/styles/ElementStyles";
-import { ref, watch } from "vue";
+import DOMUtils from "@/utils/DOMUtils";
+import { nextTick, ref, watch } from "vue";
 
 const stageStore = useStageStore();
 const fontLetterSpacing = ref(DefaultStage.fontLetterSpacing);
@@ -20,6 +21,11 @@ watch(
     fontLetterSpacingMixin.value = newValue;
   },
 );
+
+function setElementsFontLetterSpacing(value: number) {
+  stageStore.setElementsFontLetterSpacing(value);
+  nextTick(() => DOMUtils.clearFocus());
+}
 </script>
 <template>
   <div class="font-props right-props" v-show="stageStore.fontEnable">
@@ -33,7 +39,7 @@ watch(
           v-model="fontLetterSpacing"
           :placeholder="`${stageStore.fontLetterSpacingMixin ? '混合字间距' : `${fontLetterSpacing}px`}`"
           size="small"
-          @change="value => stageStore.setElementsFontLetterSpacing(value)"
+          @change="setElementsFontLetterSpacing"
           :disabled="stageStore.inputDisabled || !stageStore.fontLetterSpacingInputEnable"
         >
           <el-option v-for="item in FontLetterSpacingList" :key="item.name" :label="`${item.value}px`" :value="item.value"> {{ item.value }}px </el-option>
@@ -47,7 +53,7 @@ watch(
               :min="1"
               :max="100"
               :precision="0"
-              @change="value => stageStore.setElementsFontLetterSpacing(Number(value))"
+              @change="value => setElementsFontLetterSpacing(Number(value))"
             >
               <template #prepend>自定义</template>
               <template #append>px</template>
