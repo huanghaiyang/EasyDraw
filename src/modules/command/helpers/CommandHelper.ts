@@ -342,6 +342,10 @@ export default class CommandHelper {
             case ElementActionTypes.Added: {
               // 对于add命令，如果是redo操作，需要还原插入组件，否则直接删除组件
               if (isRedo) {
+                if (store.currentCreatingId === id) {
+                  store.currentCreatingId = null;
+                }
+                store.hasElement(id) && store.removeElementById(id);
                 await CommandHelper.restoreElementFromData(data, store);
                 isAdded = true;
               } else {
@@ -379,7 +383,7 @@ export default class CommandHelper {
               await CommandHelper.updateElementFromData(data, store);
               await CommandHelper.updateElementProps(id, unEffect, store);
               store.setElementProvisionalCreatingById(id);
-              store.currentCreatingElementId = id;
+              store.currentCreatingId = id;
               isUpdated = true;
               break;
             }
@@ -388,11 +392,11 @@ export default class CommandHelper {
                 await CommandHelper.restoreElementFromData(data, store);
                 await CommandHelper.updateElementProps(id, unEffect, store);
                 store.setElementProvisionalCreatingById(id);
-                store.currentCreatingElementId = id;
+                store.currentCreatingId = id;
                 isAdded = true;
               } else {
                 store.removeElementById(id);
-                store.currentCreatingElementId = null;
+                store.currentCreatingId = null;
                 isRemoved = true;
               }
               break;

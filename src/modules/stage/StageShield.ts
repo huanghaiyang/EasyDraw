@@ -2969,9 +2969,10 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     // 执行命令
     isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
 
+    let nextCreatorType: CreatorTypes | null = null;
     switch (type) {
       case ElementsCommandTypes.ElementsCreatorChanged: {
-        this.setCreator(CreatorHelper.getCreatorByType(isRedo ? creatorType : prevCreatorType || MoveableCreator.type), false);
+        nextCreatorType = isRedo? creatorType : prevCreatorType || MoveableCreator.type;
         this._tailCreatorCommandId = id;
         break;
       }
@@ -2983,7 +2984,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
               break;
             }
             case ElementsCommandTypes.ElementsStartCreating: {
-              this.setCreator(CreatorHelper.getCreatorByType(rDataList[0].model.type), false);
+              nextCreatorType = rDataList[0].model.type;
               break;
             }
             case ElementsCommandTypes.ElementsCreating: {
@@ -2998,12 +2999,16 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
                     this.store.clearCreatingElements();
                     // 再把组件加回来
                     await this.undoRedo.redo();
-                    this.setCreator(MoveableCreator, false);
+                    nextCreatorType = MoveableCreator.type;
                     type = nextCommandType;
                     break;
                   }
                 }
               }
+              break;
+            }
+            case ElementsCommandTypes.ElementsAdded: {
+              nextCreatorType = MoveableCreator.type; // 组件添加完成后，需要切换到移动工具
               break;
             }
           }
@@ -3025,7 +3030,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
                     await CommandHelper.restoreDataList(rDataList, true, this.store);
                     // 数据恢复
                     await CommandHelper.restoreDataList(prevRDataList, true, this.store);
-                    this.setCreator(CreatorHelper.getCreatorByType(prevRDataList[0].model.type), false);
+                    nextCreatorType = prevRDataList[0].model.type;
                     type = prevCommandType;
                     break;
                   }
@@ -3069,6 +3074,8 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         break;
       }
     }
+
+    nextCreatorType !== null && await this.setCreator(CreatorHelper.getCreatorByType(nextCreatorType), false);
   }
 
   /**

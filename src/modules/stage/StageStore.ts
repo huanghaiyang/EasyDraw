@@ -49,7 +49,7 @@ interface ElementsLayerExecuteFunction {
 export default class StageStore implements IStageStore {
   shield: IStageShield;
   // 当前正在创建的组件id
-  currentCreatingElementId: string;
+  currentCreatingId: string;
   // 画板上绘制的组件列表（形状、文字、图片等）
   private _elementList: ElementList = new ElementList();
   // 组件对象映射关系，加快查询
@@ -178,7 +178,7 @@ export default class StageStore implements IStageStore {
 
   // 当前创建并更新中的组件
   get creatingElements(): IElement[] {
-    const element = this._elementsMap.get(this.currentCreatingElementId);
+    const element = this._elementsMap.get(this.currentCreatingId);
     if (element) {
       return [element];
     }
@@ -656,7 +656,7 @@ export default class StageStore implements IStageStore {
   filterEmit(name: ShieldDispatcherNames, element: IElement, ...args: any[]): void {
     if (!element) return;
     // 如果组件是创建中的组件或者选中的组件且组件没有组合，则发送事件
-    if (element.id === this.primarySelectedElement?.id || element.id === this.currentCreatingElementId) {
+    if (element.id === this.primarySelectedElement?.id || element.id === this.currentCreatingId) {
       this.shield.emit(name, element, ...args);
     }
   }
@@ -1808,7 +1808,7 @@ export default class StageStore implements IStageStore {
    */
   private _createProvisionalElement(model: ElementObject): IElement {
     const element = ElementUtils.createElement(model, this.shield);
-    this.currentCreatingElementId = element.id;
+    this.currentCreatingId = element.id;
     this.updateElementById(element.id, {
       status: ElementStatus.startCreating,
     });
@@ -1826,10 +1826,10 @@ export default class StageStore implements IStageStore {
     const { category, type } = this.shield.currentCreator;
     switch (category) {
       case CreatorCategories.shapes: {
-        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type), null, !isString(this.currentCreatingElementId));
-        if (this.currentCreatingElementId) {
+        const model = this.createElementModel(type, ElementUtils.calcCreatorPoints(coords, type), null, !isString(this.currentCreatingId));
+        if (this.currentCreatingId) {
           delete model.id;
-          element = this.updateElementModel(this.currentCreatingElementId, model);
+          element = this.updateElementModel(this.currentCreatingId, model);
           element.model.boxCoords = CommonUtils.getBoxByPoints(element.model.coords);
           this.setElementProvisionalCreatingById(element.id);
         } else {
@@ -1855,8 +1855,8 @@ export default class StageStore implements IStageStore {
     let element: IElementArbitrary;
     let model: ElementObject;
     // 如果当前创建的组件id存在，则获取该组件
-    if (this.currentCreatingElementId) {
-      element = this.getElementById(this.currentCreatingElementId) as ElementArbitrary;
+    if (this.currentCreatingId) {
+      element = this.getElementById(this.currentCreatingId) as ElementArbitrary;
       model = element.model;
       // 如果tailAppend为true，则追加节点
       if (tailAppend) {
@@ -1911,10 +1911,10 @@ export default class StageStore implements IStageStore {
    * 完成创建组件
    */
   finishCreatingElement(): IElement {
-    if (this.currentCreatingElementId) {
-      let element = this.getElementById(this.currentCreatingElementId);
+    if (this.currentCreatingId) {
+      let element = this.getElementById(this.currentCreatingId);
       if (element) {
-        this.currentCreatingElementId = null;
+        this.currentCreatingId = null;
         const {
           model: { type },
         } = element;
@@ -2081,7 +2081,7 @@ export default class StageStore implements IStageStore {
    * @param element
    */
   private _updateElementStageStatusIfy(element: IElement): void {
-    const isOnStage = element.id === this.currentCreatingElementId ? false : element.isModelPolygonOverlap(this.shield.stageWordRectCoords);
+    const isOnStage = element.id === this.currentCreatingId ? false : element.isModelPolygonOverlap(this.shield.stageWordRectCoords);
     this.updateElementById(element.id, { isOnStage });
   }
 
@@ -3574,6 +3574,6 @@ export default class StageStore implements IStageStore {
    */
   clearCreatingElements(): void {
     this.removeElements(this.creatingElements);
-    this.currentCreatingElementId = null;
+    this.currentCreatingId = null;
   }
 }
