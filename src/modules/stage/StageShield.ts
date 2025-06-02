@@ -10,7 +10,7 @@ import DrawerBase from "@/modules/stage/drawer/DrawerBase";
 import ShieldRenderer from "@/modules/render/renderer/drawer/ShieldRenderer";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
-import { clamp, isBoolean, isNumber } from "lodash";
+import { clamp, isBoolean, isNumber, some } from "lodash";
 import StageConfigure from "@/modules/stage/StageConfigure";
 import IStageConfigure from "@/types/IStageConfigure";
 import IElement, { ElementObject, IElementArbitrary, IElementText, TreeNodeDropType } from "@/types/IElement";
@@ -49,6 +49,8 @@ import TextElementUtils from "@/modules/elements/utils/TextElementUtils";
 import CommandHelper from "@/modules/command/helpers/CommandHelper";
 import ElementArbitrary from "@/modules/elements/ElementArbitrary";
 import CreatorHelper from "@/types/CreatorHelper";
+
+const ElementsBusyStatus = [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING];
 
 export default class StageShield extends DrawerBase implements IStageShield, IStageAlignFuncs {
   // 当前正在使用的工具
@@ -133,13 +135,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
 
   // 组件是否处于活动中
   get isElementsBusy(): boolean {
-    return (
-      [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.MOVING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) ||
-      this.isTextCreating ||
-      this.isTextEditing ||
-      this.isArbitraryDrawing ||
-      this.isArbitraryEditing
-    );
+    return ElementsBusyStatus.includes(this.elementsStatus) || this.isTextCreating || this.isTextEditing || this.isArbitraryDrawing || this.isArbitraryEditing;
   }
 
   // 舞台是否在移动
@@ -1588,24 +1584,6 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
   }
 
   /**
-   * 当组件操作时更新状态
-   */
-  private async _updateStatusWhileElementsOperating(): Promise<void> {
-    if (
-      this.elementsStatus === StageShieldElementsStatus.MOVE_READY ||
-      (![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
-        this.store.isSelectedContainsTarget() &&
-        this.store.isEditingEmpty)
-    ) {
-      // 已经确定是拖动操作的情况下，做如下逻辑判断
-      if (this.elementsStatus !== StageShieldElementsStatus.MOVING) {
-        this._refreshAncestorsOriginals(this.store.detachedSelectedElements);
-      }
-      this.elementsStatus = StageShieldElementsStatus.MOVING;
-    }
-  }
-
-  /**
    * 鼠标移动事件
    *
    * @param e
@@ -1636,10 +1614,27 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
           // 没有选中组件，那么就创建一个范围组件
           this._updateRange();
         } else if (this.checkCursorPressMovedALittle(e)) {
-          // 更新当前组件状态
-          await this._updateStatusWhileElementsOperating();
-          // 处理组件操作
-          await this._doElementsOperating();
+          let mOperating: boolean = ElementsBusyStatus.includes(this.elementsStatus);
+          if (!mOperating) {
+            const mMoving =
+              this.elementsStatus === StageShieldElementsStatus.MOVE_READY &&
+              ![StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING].includes(this.elementsStatus) &&
+              this.store.isSelectedContainsTarget() &&
+              this.store.isEditingEmpty;
+            if (mMoving) {
+              // 已经确定是拖动操作的情况下，做如下逻辑判断
+              if (this.elementsStatus !== StageShieldElementsStatus.MOVING) {
+                this._refreshAncestorsOriginals(this.store.detachedSelectedElements);
+              }
+              this.elementsStatus = StageShieldElementsStatus.MOVING;
+              mOperating = true;
+            } else {
+              this.elementsStatus = StageShieldElementsStatus.NONE;
+            }
+          }
+          if (mOperating) {
+            await this._doElementsOperating();
+          }
         }
       } else if (this.isHandActive) {
         this._isStageMoving = true;
@@ -1803,9 +1798,9 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (!isSelectContainsTarget) {
           this._clearSelects();
           this.store.selectElement(targetElement);
-          // 准备拖动
-          this.elementsStatus = StageShieldElementsStatus.MOVE_READY;
         }
+        // 准备拖动
+        this.elementsStatus = StageShieldElementsStatus.MOVE_READY;
       }
     }
   }
@@ -2025,10 +2020,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 当结束组件操作时更新组件状态
    */
   private _clearElementsStatus(): void {
-    if (
-      [StageShieldElementsStatus.ROTATING, StageShieldElementsStatus.TRANSFORMING, StageShieldElementsStatus.CORNER_MOVING, StageShieldElementsStatus.MOVING].includes(this.elementsStatus) &&
-      this.store.isEditingEmpty
-    ) {
+    if (ElementsBusyStatus.includes(this.elementsStatus) && this.store.isEditingEmpty) {
       this.elementsStatus = StageShieldElementsStatus.NONE;
     }
   }
@@ -2929,8 +2921,11 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     const list = dataList.filter(item => item.type === ElementActionTypes.Updated && item.effect.hasOwnProperty("isEditing"));
     await Promise.all(
       list.map(async item => {
-        const { effect, model: { id } } = item;
-        const { isEditing, status } = effect as { isEditing?: boolean, status?: ElementStatus };
+        const {
+          effect,
+          model: { id },
+        } = item;
+        const { isEditing, status } = effect as { isEditing?: boolean; status?: ElementStatus };
         const element = this.store.getElementById(id);
         if (!element) return;
         if (isBoolean(isEditing)) {
@@ -2945,7 +2940,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         if (isNumber(status)) {
           this.store.updateElementById(id, { status });
         }
-      })
+      }),
     );
   }
 
@@ -2972,7 +2967,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     let nextCreatorType: CreatorTypes | null = null;
     switch (type) {
       case ElementsCommandTypes.ElementsCreatorChanged: {
-        nextCreatorType = isRedo? creatorType : prevCreatorType || MoveableCreator.type;
+        nextCreatorType = isRedo ? creatorType : prevCreatorType || MoveableCreator.type;
         this._tailCreatorCommandId = id;
         break;
       }
@@ -3075,7 +3070,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
       }
     }
 
-    nextCreatorType !== null && await this.setCreator(CreatorHelper.getCreatorByType(nextCreatorType), false);
+    nextCreatorType !== null && (await this.setCreator(CreatorHelper.getCreatorByType(nextCreatorType), false));
   }
 
   /**

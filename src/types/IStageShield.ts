@@ -7,7 +7,6 @@ import IStageCursor from "@/types/IStageCursor";
 import { Creator, CreatorTypes } from "@/types/Creator";
 import IStageEvent from "@/types/IStageEvent";
 import IStageSetter from "@/types/IStageSetter";
-import IElement from "@/types/IElement";
 import IStageAlign from "@/types/IStageAlign";
 import IUndoRedo from "@/types/IUndoRedo";
 import { IElementsCommandPayload } from "@/types/ICommand";
