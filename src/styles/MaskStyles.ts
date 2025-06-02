@@ -1,4 +1,4 @@
-import { ElementStyles, FillStyle, StrokeTypes } from "@/styles/ElementStyles";
+import { ElementStyles, FillStyle, StrokeStyle, StrokeTypes } from "@/styles/ElementStyles";
 
 // 鼠标样式画布尺寸
 export const MinCursorMXD = 2;
@@ -75,14 +75,6 @@ export const ControllerStyle: ElementStyles = {
   ],
 };
 
-// 指示器样式
-export const SelectionIndicatorStyle: ElementStyles = {
-  fontSize: SelectionIndicatorFontSize,
-  fontFamily: SelectionIndicatorFontFamily,
-  textAlign: SelectionIndicatorTextAlign,
-  textBaseline: SelectionIndicatorTextBaseline,
-};
-
 // 指示器背景色
 export const SelectionIndicatorBgStyle: FillStyle = {
   color: SelectionIndicatorFillColor,
@@ -90,12 +82,20 @@ export const SelectionIndicatorBgStyle: FillStyle = {
 };
 
 // 指示器文本颜色
-export const SelectionIndicatorTextStyle: FillStyle = {
+export const SelectionIndicatorTextStyle: StrokeStyle = {
   color: SelectionIndicatorTextColor,
   colorOpacity: SelectionIndicatorTextColorOpacity,
 };
 
-export const CursorPositionStyle = SelectionIndicatorStyle;
+// 指示器样式
+export const SelectionIndicatorStyle: ElementStyles = {
+  fontSize: SelectionIndicatorFontSize,
+  fontFamily: SelectionIndicatorFontFamily,
+  textAlign: SelectionIndicatorTextAlign,
+  textBaseline: SelectionIndicatorTextBaseline,
+  fills: [SelectionIndicatorBgStyle],
+  text: [SelectionIndicatorTextStyle],
+};
 
 export const CursorSize = 20;
 

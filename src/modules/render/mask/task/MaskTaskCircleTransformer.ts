@@ -1,6 +1,5 @@
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
-import { ControllerStyle } from "@/styles/MaskStyles";
 import CanvasUtils from "@/utils/CanvasUtils";
 
 export default class MaskTaskCircleTransformer extends MaskTaskBase {
@@ -9,17 +8,8 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
-
-    let { point } = this.model;
-
+    let { point, radius } = this.model;
     if (!point) return;
-    let { radius } = this.model;
-    // 描边样式
-    const strokeStyle = { ...ControllerStyle.strokes[0] };
-    // 保证描边宽度在不同缩放下保持一致
-    strokeStyle.width /= CanvasUtils.scale;
-    // 填充样式
-    const fillStyle = { ...ControllerStyle.fills[0] };
     // 保证半径在不同缩放下保持一致
     radius /= CanvasUtils.scale;
     // 转换为舞台坐标
@@ -33,7 +23,7 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
         rx: radius,
         ry: radius,
       },
-      fillStyle,
+      this.styles?.fills[0],
     );
 
     // 绘制描边
@@ -44,7 +34,7 @@ export default class MaskTaskCircleTransformer extends MaskTaskBase {
         rx: radius,
         ry: radius,
       },
-      strokeStyle,
+      this.styles?.strokes[0],
     );
   }
 }

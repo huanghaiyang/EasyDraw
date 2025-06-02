@@ -71,7 +71,7 @@ export type FillStyle = {
 // 描边样式定义
 export type StrokeStyle = FillStyle & {
   type?: StrokeTypes;
-  width: number;
+  width?: number;
 };
 
 // 文本垂直对齐方式
@@ -154,6 +154,8 @@ export type ElementStyles = FontStyle & {
   strokes?: StrokeStyle[];
   // 填充
   fills?: FillStyle[];
+  // 文本
+  text?: StrokeStyle[];
 };
 
 // 默认描边类型，分为内描边，平分线宽，外描边

@@ -672,14 +672,14 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawCommonRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}): void {
+  static drawCommonRotateText(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options: RenderParams = {}): void {
     const { angle = 0 } = options;
     const ctx = target.getContext("2d");
     ctx.save();
     ctx.translate(center.x, center.y);
     ctx.rotate(MathUtils.angleToRadian(angle));
     ctx.font = StyleUtils.joinFont(styles);
-    ctx.fillStyle = StyleUtils.joinFillColor(fillStyle);
+    ctx.fillStyle = StyleUtils.joinFillColor(styles.text[0]);
     ctx.textAlign = styles.textAlign;
     ctx.textBaseline = styles.textBaseline;
     ctx.fillText(text, 0, 0);
@@ -714,9 +714,9 @@ export default class CanvasUtils {
    * @param styles
    * @param options
    */
-  static drawCommonRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, fillStyle: FillStyle, options: RenderParams = {}) {
+  static drawCommonRotateTextWithScale(target: HTMLCanvasElement, text: string, center: IPoint, styles: ElementStyles, options: RenderParams = {}) {
     center = CommonUtils.scalePoint(center, CanvasUtils.scale);
-    CanvasUtils.drawCommonRotateText(target, text, center, styles, fillStyle, options);
+    CanvasUtils.drawCommonRotateText(target, text, center, styles, options);
   }
 
   /**

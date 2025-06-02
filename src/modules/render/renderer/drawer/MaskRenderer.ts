@@ -13,7 +13,7 @@ import { IDrawerMask } from "@/types/IStageDrawer";
 import { IMaskRenderer } from "@/types/IStageRenderer";
 import { IMaskModel, IRotationModel } from "@/types/IModel";
 import { IRenderTask } from "@/types/IRenderTask";
-import { DefaultControllerRadius, SelectionIndicatorMargin } from "@/styles/MaskStyles";
+import { ControllerStyle, DefaultControllerRadius, SelectionIndicatorMargin, SelectionIndicatorStyle, SelectionStyle } from "@/styles/MaskStyles";
 import MaskTaskCursorPosition from "@/modules/render/mask/task/MaskTaskCursorPosition";
 import { CreatorCategories, CreatorTypes } from "@/types/Creator";
 import MaskTaskCircleTransformer from "@/modules/render/mask/task/MaskTaskCircleTransformer";
@@ -32,6 +32,8 @@ import { TextSelectionCursorType } from "@/types/IText";
 import ElementTaskTextHighlightUnderline from "@/modules/render/shield/task/ElementTaskTextHighlightUnderline";
 import { StageShieldElementsStatus } from "@/types/IStageShield";
 import GlobalConfig from "@/config";
+import { ElementStyles } from "@/styles/ElementStyles";
+import LodashUtils from "@/utils/LodashUtils";
 
 /**
  * 蒙版渲染器
@@ -45,6 +47,20 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
    * 最后选区渲染状态 - 用于检测是否需要清理残留
    */
   private _lastSelectionRendered = false;
+
+  /**
+   * 获取控制器样式
+   * 
+   * @param styles 原始样式
+   * @returns 处理后的样式
+   */
+  private _getStyle(styles: ElementStyles): ElementStyles {
+    const result = LodashUtils.jsonClone(styles) as ElementStyles;
+    result.strokes.forEach((item) => {
+      item.width /= GlobalConfig.stageParams.scale;
+    });
+    return result;
+  }
 
   /**
    * 执行蒙版渲染的主流程
@@ -178,8 +194,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     };
 
     // 创建并返回渲染任务
-    const task = new MaskTaskCursorPosition(model, this.canvas);
-    return task;
+    return new MaskTaskCursorPosition(model, this.canvas, SelectionIndicatorStyle);
   }
 
   /**
@@ -197,7 +212,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
     models.forEach(model => {
       if (model?.points?.length > 0) {
         // 创建缩放适配的路径任务
-        const task = new MaskTaskPath(model, this.canvas);
+        const task = new MaskTaskPath(model, this.canvas, this._getStyle(SelectionStyle));
         tasks.push(task);
       }
     });
@@ -228,9 +243,9 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       .map(model => {
         switch (model.element.transformerType) {
           case TransformerTypes.circle:
-            return new MaskTaskCircleTransformer(model, this.canvas);
+            return new MaskTaskCircleTransformer(model, this.canvas, this._getStyle(ControllerStyle));
           case TransformerTypes.rect:
-            return new MaskTaskTransformer(model, this.canvas);
+            return new MaskTaskTransformer(model, this.canvas, this._getStyle(ControllerStyle));
           default:
             return null;
         }
@@ -262,7 +277,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
               type: DrawerMaskModelTypes.transformer,
               radius: DefaultControllerRadius,
             };
-            return new MaskTaskCircleTransformer(model, this.canvas);
+            return new MaskTaskCircleTransformer(model, this.canvas, this._getStyle(ControllerStyle));
           }
           return null;
         })
@@ -327,7 +342,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       type: DrawerMaskModelTypes.indicator,
       text: `${element.width} x ${element.height}`,
     };
-    return new MaskTaskIndicator(model, this.canvas);
+    return new MaskTaskIndicator(model, this.canvas, SelectionIndicatorStyle);
   }
 
   /**
@@ -343,7 +358,7 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
         type: DrawerMaskModelTypes.cursor,
         radius: DefaultControllerRadius,
       };
-      return new MaskTaskCircleTransformer(model, this.canvas);
+      return new MaskTaskCircleTransformer(model, this.canvas, this._getStyle(ControllerStyle));
     }
   }
 
@@ -438,6 +453,6 @@ export default class MaskRenderer extends BaseRenderer<IDrawerMask> implements I
       type: DrawerMaskModelTypes.transformer,
       radius: DefaultControllerRadius,
     };
-    return new MaskTaskCircleTransformer(model, this.canvas);
+    return new MaskTaskCircleTransformer(model, this.canvas, this._getStyle(ControllerStyle));
   }
 }

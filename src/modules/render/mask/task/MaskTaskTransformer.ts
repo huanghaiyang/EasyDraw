@@ -1,7 +1,7 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
 import CommonUtils from "@/utils/CommonUtils";
-import { TransformerSize, ControllerStyle } from "@/styles/MaskStyles";
+import { TransformerSize } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class MaskTaskTransformer extends MaskTaskBase {
@@ -10,7 +10,6 @@ export default class MaskTaskTransformer extends MaskTaskBase {
    */
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
-    const { width } = ControllerStyle.strokes[0];
     let { point, leanYAngle, actualAngle } = this.model;
     point = ElementUtils.calcStageRelativePoint(point);
 
@@ -27,11 +26,8 @@ export default class MaskTaskTransformer extends MaskTaskBase {
           leanYAngle,
         },
       ),
-      ControllerStyle.fills[0],
-      {
-        ...ControllerStyle.strokes[0],
-        width: width / CanvasUtils.scale,
-      },
+      this.styles.fills[0],
+      this.styles.strokes[0],
       {
         calcVertices: false,
       },

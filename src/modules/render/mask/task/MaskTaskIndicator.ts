@@ -1,6 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { SelectionIndicatorBgStyle, SelectionIndicatorStyle, SelectionIndicatorTextStyle } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 import CommonUtils from "@/utils/CommonUtils";
 import ElementRenderHelper from "@/modules/elements/utils/ElementRenderHelper";
@@ -17,7 +16,7 @@ export default class MaskTaskIndicator extends MaskTaskBase {
   async run(): Promise<void> {
     if (!this.canvas || !this.model) return;
     let { text, point, angle } = this.model;
-    let { width, fontBoundingBoxDescent, fontBoundingBoxAscent } = CanvasUtils.measureText(this.canvas.getContext("2d"), text, SelectionIndicatorStyle);
+    let { width, fontBoundingBoxDescent, fontBoundingBoxAscent } = CanvasUtils.measureText(this.canvas.getContext("2d"), text, this.styles);
     let height = fontBoundingBoxDescent + fontBoundingBoxAscent + Padding * 2;
     width += Padding * 2;
     width /= CanvasUtils.scale;
@@ -32,7 +31,7 @@ export default class MaskTaskIndicator extends MaskTaskBase {
       point,
     );
     const renderOptions = { angle };
-    CanvasUtils.drawInnerArcPathFillWithScale(this.canvas, renderRect, arcPoints, SelectionIndicatorBgStyle, renderOptions);
-    CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, MathUtils.translate(point, { x: 0, y: 1 }), SelectionIndicatorStyle, SelectionIndicatorTextStyle, renderOptions);
+    CanvasUtils.drawInnerArcPathFillWithScale(this.canvas, renderRect, arcPoints, this.styles.fills[0], renderOptions);
+    CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, MathUtils.translate(point, { x: 0, y: 1 }), this.styles, renderOptions);
   }
 }

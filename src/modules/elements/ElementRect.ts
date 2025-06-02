@@ -26,7 +26,7 @@ export default class ElementRect extends Element implements IElementRect {
   }
 
   get cornersEnable(): boolean {
-    return true;
+    return this.status === ElementStatus.finished;
   }
 
   get cornerControllers(): ICornerController[] {

@@ -1,3 +1,4 @@
+import { ElementStyles } from "@/styles/ElementStyles";
 import IElement from "@/types/IElement";
 import { IMaskModel } from "@/types/IModel";
 import { TextSelectionCursorType } from "@/types/IText";
@@ -16,6 +17,8 @@ export interface IRenderTask {
 export interface IMaskTask extends IRenderTask {
   // 模型
   model: IMaskModel;
+  // 样式
+  styles?: ElementStyles;
 }
 
 // 舞台组件绘制任务

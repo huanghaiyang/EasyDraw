@@ -1,6 +1,5 @@
 import MaskTaskBase from "@/modules/render/mask/task/MaskTaskBase";
 import CanvasUtils from "@/utils/CanvasUtils";
-import { CursorPositionStyle } from "@/styles/MaskStyles";
 import ElementUtils from "@/modules/elements/utils/ElementUtils";
 
 export default class MaskTaskCursorPosition extends MaskTaskBase {
@@ -15,6 +14,6 @@ export default class MaskTaskCursorPosition extends MaskTaskBase {
     if (!point) return;
     // 转换为舞台坐标
     point = ElementUtils.calcStageRelativePoint(point);
-    await CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, point, CursorPositionStyle, CursorPositionStyle.fills[0]);
+    await CanvasUtils.drawCommonRotateTextWithScale(this.canvas, text, point, this.styles);
   }
 }
