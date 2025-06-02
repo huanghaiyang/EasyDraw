@@ -846,18 +846,14 @@ export default class Element implements IElement, ILinkedNodeValue {
    * 撤销
    */
   async undo(): Promise<void> {
-    if (this.undoRedo.tailUndoCommand) {
-      await this.undoRedo.undo();
-    }
+    await this.undoRedo.execute();
   }
 
   /**
    * 重做
    */
   async redo(): Promise<void> {
-    if (this.undoRedo.tailRedoCommand) {
-      await this.undoRedo.redo();
-    }
+    await this.undoRedo.execute(true);
   }
 
   /**

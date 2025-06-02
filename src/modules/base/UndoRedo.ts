@@ -81,6 +81,18 @@ export default class UndoRedo<T, A> implements IUndoRedo<T, A> {
   }
 
   /**
+   * 执行命令
+   * @param command
+   */
+  async execute(isRedo?: boolean): Promise<A> {
+    if (isRedo) {
+      return await this.redo();
+    } else {
+      return await this.undo();
+    }
+  }
+
+  /**
    * 弹出命令（不执行）
    * 
    * @param isRedo

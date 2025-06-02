@@ -35,7 +35,7 @@ import { HandCreator, MoveableCreator } from "@/types/CreatorDicts";
 import CornerController from "@/modules/handler/controller/CornerController";
 import DOMUtils from "@/utils/DOMUtils";
 import RenderQueue from "@/modules/render/RenderQueue";
-import ICommand, { ElementActionTypes, ElementsCommandTypes, ElementsActionParam, ICommandElementObject, IElementsCommandPayload } from "@/types/ICommand";
+import { ElementActionTypes, ElementsCommandTypes, ElementsActionParam, ICommandElementObject, IElementsCommandPayload } from "@/types/ICommand";
 import LodashUtils from "@/utils/LodashUtils";
 import { IElementGroup } from "@/types/IElementGroup";
 import DrawerHtml from "@/modules/stage/drawer/DrawerHtml";
@@ -2967,7 +2967,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
     }
 
     // 执行命令
-    isRedo ? await this.undoRedo.redo() : await this.undoRedo.undo();
+    await this.undoRedo.execute(isRedo);
 
     let nextCreatorType: CreatorTypes | null = null;
     switch (type) {
@@ -2998,7 +2998,7 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
                     // 先把创建中的组件删除
                     this.store.clearCreatingElements();
                     // 再把组件加回来
-                    await this.undoRedo.redo();
+                    await this.undoRedo.execute(true);
                     nextCreatorType = MoveableCreator.type;
                     type = nextCommandType;
                     break;
