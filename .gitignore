@@ -21,3 +21,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+apache-maven-3.9.9-bin.tar.gz
+apache-maven-3.9.9/*
+backend/target/*
