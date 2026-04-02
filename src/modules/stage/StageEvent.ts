@@ -179,121 +179,13 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
     });
 
     // 键盘事件
-    document.addEventListener("keydown", (e: KeyboardEvent) => {
-      this._isCtrl = this._isCtrlEvent(e);
-
-      // 非输入操作
-      if (!this._isInputEvent(e)) {
-        // 放大操作
-        if (this._isCtrlPlusEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("scaleIncrease");
-        }
-
-        // 缩小操作
-        if (this._isCtrlReduceEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("scaleReduce");
-        }
-
-        // 还原缩放到100%
-        if (this._isCtrl0Event(e)) {
-          EventUtils.stopPP(e);
-          this.emit("scale100");
-        }
-
-        // 舞台自适应操作
-        if (this._isShift1Event(e)) {
-          EventUtils.stopPP(e);
-          this.emit("scaleAutoFit");
-        } else if (this._isShiftEvent(e)) {
-          this._isShift = true;
-        } else {
-          this._isShift = false;
-        }
-
-        // 监听组件删除操作
-        if (this._isDeleteEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("deleteSelects");
-        }
-        // 监听组件全选操作
-        if (this._isCtrlAEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("selectAll");
-        }
-        // 监听组件移动操作
-        if (this._isCtrlMEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("selectMoveableCreator");
-        }
-        // 监听组件手型操作
-        if (this._isCtrlHEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("selectHandCreator");
-        }
-        // 监听组件组合操作
-        if (this._isCtrlGEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("groupAdd");
-        }
-        // 监听组件复制操作
-        if (this._isCtrlCEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("selectCopy", e);
-        }
-        // 监听撤销操作
-        if (this._isCtrlZEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("undo");
-        }
-        // 监听重做操作
-        if (this._isCtrlYEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("redo");
-        }
-        // 监听组件组合取消操作
-        if (this._isCtrlShiftGEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("groupRemove");
-        }
-        // 监听esc键
-        if (this._isEscEvent(e)) {
-          EventUtils.stopPP(e);
-          this.emit("cancel");
-        }
-      }
-    });
+    document.addEventListener("keydown", this._keydownHandler);
 
     // 键盘弹起事件监听
-    document.addEventListener("keyup", (e: KeyboardEvent) => {
-      this._isCtrl = e.ctrlKey;
-      this._isShift = e.shiftKey;
-    });
+    document.addEventListener("keyup", this._keyupHandler);
 
     // 粘贴操作
-    document.addEventListener("paste", (evt: ClipboardEvent) => {
-      if (this._isInputEvent(evt)) {
-        return;
-      }
-      // 解析图片
-      FileUtils.getImageDataFromClipboard(evt)
-        .then(imageDataList => {
-          this._createImages(imageDataList);
-        })
-        .catch(e => {
-          e && console.warn(e);
-          // 读取剪贴板，获取组件数组
-          try {
-            const elementsJson = JSON.parse(evt.clipboardData.getData("text/plain"));
-            if (elementsJson) {
-              this.emit("pasteElements", elementsJson);
-            }
-          } catch (e) {
-            e && console.warn(e);
-          }
-        });
-    });
+    document.addEventListener("paste", this._pasteHandler);
   }
 
   /**
@@ -307,4 +199,129 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
       await this._createImages(imageDataList);
     }
   }
+
+  /**
+   * 销毁事件监听器
+   */
+  destroy(): void {
+    // 清理document上的事件监听器
+    document.removeEventListener("keydown", this._keydownHandler);
+    document.removeEventListener("keyup", this._keyupHandler);
+    document.removeEventListener("paste", this._pasteHandler);
+  }
+
+  // 保存事件处理函数的引用，以便后续清理
+  private _keydownHandler = (e: KeyboardEvent) => {
+    this._isCtrl = this._isCtrlEvent(e);
+
+    // 非输入操作
+    if (!this._isInputEvent(e)) {
+      // 放大操作
+      if (this._isCtrlPlusEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("scaleIncrease");
+      }
+
+      // 缩小操作
+      if (this._isCtrlReduceEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("scaleReduce");
+      }
+
+      // 还原缩放到100%
+      if (this._isCtrl0Event(e)) {
+        EventUtils.stopPP(e);
+        this.emit("scale100");
+      }
+
+      // 舞台自适应操作
+      if (this._isShift1Event(e)) {
+        EventUtils.stopPP(e);
+        this.emit("scaleAutoFit");
+      } else if (this._isShiftEvent(e)) {
+        this._isShift = true;
+      } else {
+        this._isShift = false;
+      }
+
+      // 监听组件删除操作
+      if (this._isDeleteEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("deleteSelects");
+      }
+      // 监听组件全选操作
+      if (this._isCtrlAEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("selectAll");
+      }
+      // 监听组件移动操作
+      if (this._isCtrlMEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("selectMoveableCreator");
+      }
+      // 监听组件手型操作
+      if (this._isCtrlHEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("selectHandCreator");
+      }
+      // 监听组件组合操作
+      if (this._isCtrlGEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("groupAdd");
+      }
+      // 监听组件复制操作
+      if (this._isCtrlCEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("selectCopy", e);
+      }
+      // 监听撤销操作
+      if (this._isCtrlZEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("undo");
+      }
+      // 监听重做操作
+      if (this._isCtrlYEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("redo");
+      }
+      // 监听组件组合取消操作
+      if (this._isCtrlShiftGEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("groupRemove");
+      }
+      // 监听esc键
+      if (this._isEscEvent(e)) {
+        EventUtils.stopPP(e);
+        this.emit("cancel");
+      }
+    }
+  };
+
+  private _keyupHandler = (e: KeyboardEvent) => {
+    this._isCtrl = e.ctrlKey;
+    this._isShift = e.shiftKey;
+  };
+
+  private _pasteHandler = (evt: ClipboardEvent) => {
+    if (this._isInputEvent(evt)) {
+      return;
+    }
+    // 解析图片
+    FileUtils.getImageDataFromClipboard(evt)
+      .then(imageDataList => {
+        this._createImages(imageDataList);
+      })
+      .catch(e => {
+        e && console.warn(e);
+        // 读取剪贴板，获取组件数组
+        try {
+          const elementsJson = JSON.parse(evt.clipboardData.getData("text/plain"));
+          if (elementsJson) {
+            this.emit("pasteElements", elementsJson);
+          }
+        } catch (e) {
+          e && console.warn(e);
+        }
+      });
+  };
 }

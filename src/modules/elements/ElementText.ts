@@ -1932,4 +1932,12 @@ export default class ElementText extends ElementRect implements IElementText {
     );
     this.undoRedo.add(editCommand);
   }
+
+  /**
+   * 销毁组件，清理资源
+   */
+  destroy(): void {
+    // 清理光标可见状态计时器
+    this._clearCursorVisibleTimer();
+  }
 }

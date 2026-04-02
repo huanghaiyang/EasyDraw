@@ -254,8 +254,14 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
    * 3. 立刻拖动
    * 4. 发现拖动缓慢
    */
+  private _requestAnimationRedrawId: number;
+
   private async _requestAnimationRedraw(): Promise<void> {
-    requestAnimationFrame(async () => {
+    if (this._requestAnimationRedrawId) {
+      cancelAnimationFrame(this._requestAnimationRedrawId);
+    }
+    
+    this._requestAnimationRedrawId = requestAnimationFrame(async () => {
       await this._addRedrawTask(this._shouldRedraw);
       this._shouldRedraw = false;
       // 如果存在编辑中的文本组件
@@ -3476,5 +3482,23 @@ export default class StageShield extends DrawerBase implements IStageShield, ISt
         type: ElementsCommandTypes.ElementsMoved,
       },
     });
+  }
+
+  /**
+   * 销毁舞台，清理所有资源
+   */
+  destroy(): void {
+    // 清理渲染循环
+    if (this._requestAnimationRedrawId) {
+      cancelAnimationFrame(this._requestAnimationRedrawId);
+      this._requestAnimationRedrawId = null;
+    }
+    
+    // 清理任务队列
+    this._cursorMoveQueue.destroy();
+    this._redrawQueue.destroy();
+    
+    // 清理所有事件监听
+    this.removeAllListeners();
   }
 }
