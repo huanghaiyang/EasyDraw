@@ -57,6 +57,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   init(): void {
     this._isCtrl = false;
     this._isCtrlWheel = false;
+    // 使用isHotkey库，它会自动处理Mac系统的meta键
     this._isCtrlEvent = isHotkey("ctrl");
     this._isCtrlPlusEvent = isHotkey("ctrl+=");
     this._isCtrlReduceEvent = isHotkey("ctrl+-");
@@ -298,7 +299,7 @@ export default class StageEvent extends EventEmitter implements IStageEvent {
   };
 
   private _keyupHandler = (e: KeyboardEvent) => {
-    this._isCtrl = e.ctrlKey;
+    this._isCtrl = e.ctrlKey || e.metaKey; // 兼容Mac系统的meta键
     this._isShift = e.shiftKey;
   };
 
