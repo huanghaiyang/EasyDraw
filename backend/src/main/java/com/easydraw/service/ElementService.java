@@ -3,6 +3,8 @@ package com.easydraw.service;
 import com.easydraw.dto.ElementDto;
 import com.easydraw.entity.Element;
 import com.easydraw.repository.ElementRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,12 @@ public class ElementService {
     private static final Logger logger = LoggerFactory.getLogger(ElementService.class);
 
     private final ElementRepository elementRepository;
+    private final ObjectMapper objectMapper;
 
     @Autowired
     public ElementService(ElementRepository elementRepository) {
         this.elementRepository = elementRepository;
+        this.objectMapper = new ObjectMapper();
     }
 
     public ElementDto createElement(String boardId, Map<String, Object> data) {
@@ -38,7 +42,10 @@ public class ElementService {
             // 添加类型检查和默认值处理
             element.setType(data.get("type") instanceof String ? (String) data.get("type") : "unknown");
             element.setName(data.get("name") instanceof String ? (String) data.get("name") : "untitled");
-            element.setData(data);
+            
+            // 将Map转换为JSON字符串
+            String jsonData = objectMapper.writeValueAsString(data);
+            element.setData(jsonData);
             
             element = elementRepository.save(element);
             return convertToDto(element);
@@ -79,7 +86,10 @@ public class ElementService {
                 if (data.get("name") instanceof String) {
                     element.setName((String) data.get("name"));
                 }
-                element.setData(data);
+                
+                // 将Map转换为JSON字符串
+                String jsonData = objectMapper.writeValueAsString(data);
+                element.setData(jsonData);
                 
                 element = elementRepository.save(element);
                 return convertToDto(element);

@@ -36,6 +36,15 @@ export default defineConfig({
       scss: { api: "modern-compiler" },
     },
   },
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+        rewrite: (path) => path,
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

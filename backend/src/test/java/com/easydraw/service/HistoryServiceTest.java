@@ -3,6 +3,8 @@ package com.easydraw.service;
 import com.easydraw.dto.ElementDto;
 import com.easydraw.entity.ElementHistory;
 import com.easydraw.repository.ElementHistoryRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -33,10 +35,12 @@ class HistoryServiceTest {
     private ElementHistory history;
     private UUID boardId;
     private UUID elementId;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         MockitoAnnotations.openMocks(this);
+        objectMapper = new ObjectMapper();
         boardId = UUID.randomUUID();
         elementId = UUID.randomUUID();
         history = new ElementHistory();
@@ -44,12 +48,12 @@ class HistoryServiceTest {
         history.setBoardId(boardId);
         history.setElementId(elementId);
         history.setOperationType("create");
-        history.setBeforeData(new HashMap<>());
+        history.setBeforeData(objectMapper.writeValueAsString(new HashMap<>()));
         Map<String, Object> afterData = new HashMap<>();
         afterData.put("id", elementId.toString());
         afterData.put("type", "rectangle");
         afterData.put("name", "Test Element");
-        history.setAfterData(afterData);
+        history.setAfterData(objectMapper.writeValueAsString(afterData));
         history.setSessionId(UUID.randomUUID());
     }
 
@@ -83,14 +87,14 @@ class HistoryServiceTest {
     }
 
     @Test
-    void undoWithUpdateOperation() {
+    void undoWithUpdateOperation() throws JsonProcessingException {
         // 修改操作类型为update
         history.setOperationType("update");
         Map<String, Object> beforeData = new HashMap<>();
         beforeData.put("id", elementId.toString());
         beforeData.put("type", "rectangle");
         beforeData.put("name", "Original Element");
-        history.setBeforeData(beforeData);
+        history.setBeforeData(objectMapper.writeValueAsString(beforeData));
 
         // 模拟历史记录
         when(historyRepository.findTopByBoardIdOrderByOperationAtDesc(boardId)).thenReturn(history);
@@ -111,14 +115,14 @@ class HistoryServiceTest {
     }
 
     @Test
-    void undoWithDeleteOperation() {
+    void undoWithDeleteOperation() throws JsonProcessingException {
         // 修改操作类型为delete
         history.setOperationType("delete");
         Map<String, Object> beforeData = new HashMap<>();
         beforeData.put("id", elementId.toString());
         beforeData.put("type", "rectangle");
         beforeData.put("name", "Deleted Element");
-        history.setBeforeData(beforeData);
+        history.setBeforeData(objectMapper.writeValueAsString(beforeData));
 
         // 模拟历史记录
         when(historyRepository.findTopByBoardIdOrderByOperationAtDesc(boardId)).thenReturn(history);

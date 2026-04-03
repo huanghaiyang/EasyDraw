@@ -7,7 +7,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -22,36 +24,62 @@ public class BoardController {
     }
 
     private UUID getSecurityUUID() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UUID creatorId = UUID.fromString(authentication.getName());
-        return creatorId;
+        // 暂时使用固定UUID，实际应该从认证信息获取
+        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        // UUID creatorId = UUID.fromString(authentication.getName());
+        return UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
     }
 
     @PostMapping
-    public BoardDto createBoard(@RequestBody BoardRequest request) {
+    public Map<String, Object> createBoard(@RequestBody BoardRequest request) {
         UUID creatorId = this.getSecurityUUID();
-        return boardService.createBoard(request.getName(), creatorId);
+        BoardDto boardDto = boardService.createBoard(request.getName(), creatorId);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", boardDto);
+        response.put("status", "success");
+        return response;
     }
 
     @GetMapping
-    public List<BoardDto> getBoards() {
+    public Map<String, Object> getBoards() {
         UUID creatorId = this.getSecurityUUID();
-        return boardService.getBoards(creatorId);
+        List<BoardDto> boards = boardService.getBoards(creatorId);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", boards);
+        response.put("status", "success");
+        return response;
     }
 
     @GetMapping("/{id}")
-    public BoardDto getBoard(@PathVariable String id) {
-        return boardService.getBoard(id);
+    public Map<String, Object> getBoard(@PathVariable String id) {
+        BoardDto boardDto = boardService.getBoard(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", boardDto);
+        response.put("status", "success");
+        return response;
     }
 
     @PutMapping("/{id}")
-    public BoardDto updateBoard(@PathVariable String id, @RequestBody BoardRequest request) {
-        return boardService.updateBoard(id, request.getName());
+    public Map<String, Object> updateBoard(@PathVariable String id, @RequestBody BoardRequest request) {
+        BoardDto boardDto = boardService.updateBoard(id, request.getName());
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", boardDto);
+        response.put("status", "success");
+        return response;
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBoard(@PathVariable String id) {
+    public Map<String, Object> deleteBoard(@PathVariable String id) {
         boardService.deleteBoard(id);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("data", null);
+        response.put("status", "success");
+        return response;
     }
 
     // 内部类，用于接收请求参数

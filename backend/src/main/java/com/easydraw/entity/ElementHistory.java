@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 @Data
@@ -29,10 +28,10 @@ public class ElementHistory {
     private String operationType;
 
     @Column(name = "before_data", columnDefinition = "JSONB")
-    private Map<String, Object> beforeData;
+    private String beforeData;
 
     @Column(name = "after_data", columnDefinition = "JSONB")
-    private Map<String, Object> afterData;
+    private String afterData;
 
     @Column(name = "operation_at", nullable = false, updatable = false)
     private LocalDateTime operationAt;

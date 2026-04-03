@@ -3,6 +3,8 @@ package com.easydraw.service;
 import com.easydraw.dto.ElementDto;
 import com.easydraw.entity.Element;
 import com.easydraw.repository.ElementRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -29,10 +31,12 @@ class ElementServiceTest {
     private Element element;
     private UUID elementId;
     private UUID boardId;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         MockitoAnnotations.openMocks(this);
+        objectMapper = new ObjectMapper();
         elementId = UUID.randomUUID();
         boardId = UUID.randomUUID();
         element = new Element();
@@ -45,7 +49,7 @@ class ElementServiceTest {
         data.put("y", 100);
         data.put("width", 200);
         data.put("height", 150);
-        element.setData(data);
+        element.setData(objectMapper.writeValueAsString(data));
         element.setCreatedAt(LocalDateTime.now());
         element.setUpdatedAt(LocalDateTime.now());
     }
@@ -71,7 +75,7 @@ class ElementServiceTest {
     }
 
     @Test
-    void createElementWithNullType() {
+    void createElementWithNullType() throws JsonProcessingException {
         Map<String, Object> data = new HashMap<>();
         data.put("name", "Test Element");
         data.put("x", 100);
@@ -85,7 +89,7 @@ class ElementServiceTest {
         elementWithUnknownType.setBoardId(boardId);
         elementWithUnknownType.setType("unknown");
         elementWithUnknownType.setName("Test Element");
-        elementWithUnknownType.setData(data);
+        elementWithUnknownType.setData(objectMapper.writeValueAsString(data));
         elementWithUnknownType.setCreatedAt(LocalDateTime.now());
         elementWithUnknownType.setUpdatedAt(LocalDateTime.now());
 
@@ -99,7 +103,7 @@ class ElementServiceTest {
     }
 
     @Test
-    void createElementWithNullName() {
+    void createElementWithNullName() throws JsonProcessingException {
         Map<String, Object> data = new HashMap<>();
         data.put("type", "rectangle");
         data.put("x", 100);
@@ -113,7 +117,7 @@ class ElementServiceTest {
         elementWithUntitledName.setBoardId(boardId);
         elementWithUntitledName.setType("rectangle");
         elementWithUntitledName.setName("untitled");
-        elementWithUntitledName.setData(data);
+        elementWithUntitledName.setData(objectMapper.writeValueAsString(data));
         elementWithUntitledName.setCreatedAt(LocalDateTime.now());
         elementWithUntitledName.setUpdatedAt(LocalDateTime.now());
 

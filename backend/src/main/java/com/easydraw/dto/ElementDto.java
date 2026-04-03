@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -14,11 +13,11 @@ public class ElementDto {
     private String boardId;
     private String type;
     private String name;
-    private Map<String, Object> data;
+    private String data;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ElementDto(String id, String type, String name, Map<String, Object> data) {
+    public ElementDto(String id, String type, String name, String data) {
         this.id = id;
         this.type = type;
         this.name = name;
