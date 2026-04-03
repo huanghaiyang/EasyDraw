@@ -3,10 +3,12 @@ import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
 import { useStageStore } from "@/stores/stage";
 import { CreatorTypes } from "@/types/Creator";
+import { useRoute } from 'vue-router';
 
 const { locale: i18nLocale } = useI18n();
 const appStore = useAppStore();
 const stageStore = useStageStore();
+const route = useRoute();
 const { init, locale } = appStore;
 init().then(() => {
   i18nLocale.value = locale;
@@ -18,10 +20,21 @@ const handleCreatorSelect = creator => {
     stageStore.setCreator(creator, true);
   }
 };
+
+// 检查是否是画布编辑页面
+const isBoardEditor = () => {
+  return route.path.startsWith('/board/');
+};
 </script>
 
 <template>
-  <div :class="[{ penetrate: stageStore.shouldUIPassThrough }]">
+  <!-- 路由视图 -->
+  <router-view v-slot="{ Component }">
+    <component :is="Component" />
+  </router-view>
+  
+  <!-- 画布编辑页面的组件 -->
+  <div v-if="isBoardEditor()" :class="[{ penetrate: stageStore.shouldUIPassThrough }]">
     <div class="stage">
       <container />
     </div>

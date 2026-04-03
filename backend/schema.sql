@@ -1,3 +1,6 @@
+-- EasyDraw 数据库初始化脚本
+-- 生成时间: 2026-04-03 15:11:08
+
 -- 创建boards表
 CREATE TABLE IF NOT EXISTS boards (
     id UUID PRIMARY KEY,
@@ -49,3 +52,10 @@ CREATE INDEX IF NOT EXISTS idx_element_history_element_id ON element_history(ele
 CREATE INDEX IF NOT EXISTS idx_element_history_operation_at ON element_history(operation_at);
 CREATE INDEX IF NOT EXISTS idx_board_sessions_board_id ON board_sessions(board_id);
 CREATE INDEX IF NOT EXISTS idx_board_sessions_user_id ON board_sessions(user_id);
+
+-- 插入示例数据
+INSERT INTO boards (id, name, creator_id) 
+VALUES 
+    ('550e8400-e29b-41d4-a716-446655440000', '示例画布1', '550e8400-e29b-41d4-a716-446655440001'),
+    ('550e8400-e29b-41d4-a716-446655440002', '示例画布2', '550e8400-e29b-41d4-a716-446655440001')
+ON CONFLICT DO NOTHING;

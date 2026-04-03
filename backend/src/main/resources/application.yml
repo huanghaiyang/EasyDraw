@@ -4,6 +4,10 @@ spring:
     username: postgres
     password: psql24678
     driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
   jpa:
     hibernate:
       ddl-auto: update
