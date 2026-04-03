@@ -34,15 +34,15 @@
             <span>创建时间: {{ formatDate(board.createdAt) }}</span>
           </div>
           <div class="board-actions">
-            <el-button type="text" @click.stop="startEditing(board.id)">编辑</el-button>
-            <el-button type="text" @click.stop="deleteBoard(board.id)" style="color: #f56c6c;">删除</el-button>
+            <el-button link @click.stop="startEditing(board.id)">编辑</el-button>
+            <el-button link @click.stop="deleteBoard(board.id)" style="color: #f56c6c;">删除</el-button>
           </div>
         </div>
       </el-card>
       
-      <el-card v-if="loading" class="empty-board-card">
+      <el-card v-if="loading" class="empty-board-card" v-loading="loading" element-loading-text="加载中...">
         <div class="empty-board-content">
-          <el-loading :fullscreen="false" :text="'加载中...'" />
+          <!-- 加载中状态 -->
         </div>
       </el-card>
       
@@ -60,6 +60,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
+import { ElMessageBox, ElMessage } from 'element-plus';
 
 const router = useRouter();
 const boards = ref<any[]>([]);
@@ -73,7 +74,8 @@ const loadBoards = async () => {
   try {
     loading.value = true;
     const response = await axios.get('/api/boards');
-    boards.value = response.data;
+    // 正确处理后端返回的响应格式
+    boards.value = response.data.data || [];
   } catch (error) {
     console.error('加载画布列表失败:', error);
     // 加载失败时使用模拟数据
@@ -105,8 +107,10 @@ const createBoard = async () => {
     const response = await axios.post('/api/boards', {
       name: `新画布 ${boards.value.length + 1}`
     });
-    boards.value.push(response.data);
-    router.push(`/board/${response.data.id}`);
+    // 正确处理后端返回的响应格式
+    const newBoard = response.data.data;
+    boards.value.push(newBoard);
+    router.push(`/board/${newBoard.id}`);
   } catch (error) {
     console.error('创建画布失败:', error);
     // 创建失败时使用模拟数据
@@ -167,10 +171,22 @@ const cancelEditing = () => {
 // 删除画布
 const deleteBoard = async (boardId: string) => {
   try {
+    await ElMessageBox.confirm('确定要删除这个画布吗？删除后将无法恢复。', '删除确认', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    });
+    
     await axios.delete(`/api/boards/${boardId}`);
     boards.value = boards.value.filter(b => b.id !== boardId);
-  } catch (error) {
+    ElMessage.success('删除成功');
+  } catch (error: any) {
+    if (error.name === 'ElMessageBoxCancel') {
+      // 用户取消删除
+      return;
+    }
     console.error('删除画布失败:', error);
+    ElMessage.error('删除失败');
     // 删除失败时直接修改本地数据
     boards.value = boards.value.filter(b => b.id !== boardId);
   }

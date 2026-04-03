@@ -7,11 +7,8 @@
     
     <div class="board-editor-content">
       <!-- 这里是画布编辑区域 -->
-      <div class="canvas-container">
-        <div v-if="loading" class="canvas-placeholder">
-          <el-loading :fullscreen="false" :text="'加载中...'" />
-        </div>
-        <div v-else class="canvas-placeholder">
+      <div class="canvas-container" v-loading="loading" element-loading-text="加载中...">
+        <div v-if="!loading" class="canvas-placeholder">
           <el-empty description="画布编辑区域" />
           <p style="margin-top: 20px; color: #666;">画布ID: {{ boardId }}</p>
           <p style="margin-top: 10px; color: #666;">创建时间: {{ formatDate(board.createdAt) }}</p>
@@ -37,8 +34,17 @@ const loading = ref(true);
 const loadBoardInfo = async () => {
   try {
     loading.value = true;
+    
+    // 检查boardId是否存在
+    if (!boardId.value) {
+      console.error('画布ID不存在');
+      router.push('/');
+      return;
+    }
+    
     const response = await axios.get(`/api/boards/${boardId.value}`);
-    board.value = response.data;
+    // 正确处理后端返回的响应格式
+    board.value = response.data.data;
     boardName.value = board.value.name;
   } catch (error) {
     console.error('加载画布信息失败:', error);

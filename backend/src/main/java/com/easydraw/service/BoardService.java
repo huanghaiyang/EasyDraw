@@ -4,8 +4,10 @@ import com.easydraw.dto.BoardDto;
 import com.easydraw.dto.ElementDto;
 import com.easydraw.entity.Board;
 import com.easydraw.entity.Element;
+import com.easydraw.entity.ElementHistory;
 import com.easydraw.repository.BoardRepository;
 import com.easydraw.repository.ElementRepository;
+import com.easydraw.repository.ElementHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +20,13 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final ElementRepository elementRepository;
+    private final ElementHistoryRepository elementHistoryRepository;
 
     @Autowired
-    public BoardService(BoardRepository boardRepository, ElementRepository elementRepository) {
+    public BoardService(BoardRepository boardRepository, ElementRepository elementRepository, ElementHistoryRepository elementHistoryRepository) {
         this.boardRepository = boardRepository;
         this.elementRepository = elementRepository;
+        this.elementHistoryRepository = elementHistoryRepository;
     }
 
     public BoardDto createBoard(String name, UUID creatorId) {
@@ -112,6 +116,10 @@ public class BoardService {
             element.setDeleted(true);
             elementRepository.save(element);
         });
+
+        // 删除画板相关的历史记录
+        List<ElementHistory> histories = elementHistoryRepository.findByBoardIdOrderByOperationAtDesc(UUID.fromString(boardId));
+        elementHistoryRepository.deleteAll(histories);
     }
 
 }
