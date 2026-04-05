@@ -2,9 +2,9 @@ package com.easydraw.service;
 
 import com.easydraw.dto.BoardDto;
 import com.easydraw.entity.Board;
-import com.easydraw.entity.Element;
 import com.easydraw.repository.BoardRepository;
 import com.easydraw.repository.ElementRepository;
+import com.easydraw.repository.ElementHistoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -14,7 +14,6 @@ import org.mockito.MockitoAnnotations;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +26,9 @@ class BoardServiceTest {
 
     @Mock
     private ElementRepository elementRepository;
+
+    @Mock
+    private ElementHistoryRepository elementHistoryRepository;
 
     @InjectMocks
     private BoardService boardService;
@@ -43,6 +45,7 @@ class BoardServiceTest {
         board = new Board();
         board.setId(boardId);
         board.setName("Test Board");
+        board.setCategory("Test Category");
         board.setCreatorId(creatorId);
         board.setDeleted(false);
         board.setCreatedAt(LocalDateTime.now());
@@ -53,10 +56,11 @@ class BoardServiceTest {
     void createBoard() {
         when(boardRepository.save(any(Board.class))).thenReturn(board);
 
-        BoardDto result = boardService.createBoard("Test Board", creatorId);
+        BoardDto result = boardService.createBoard("Test Board", "Test Category", creatorId);
 
         assertNotNull(result);
         assertEquals("Test Board", result.getName());
+        assertEquals("Test Category", result.getCategory());
         verify(boardRepository, times(1)).save(any(Board.class));
     }
 
@@ -124,12 +128,15 @@ class BoardServiceTest {
         when(boardRepository.findByIdAndIsDeletedFalse(boardId)).thenReturn(board);
         when(boardRepository.save(any(Board.class))).thenReturn(board);
         when(elementRepository.findByBoardIdAndIsDeletedFalse(boardId)).thenReturn(new ArrayList<>());
+        when(elementHistoryRepository.findByBoardIdOrderByOperationAtDesc(boardId)).thenReturn(new ArrayList<>());
 
         boardService.deleteBoard(boardId.toString());
 
         verify(boardRepository, times(1)).findByIdAndIsDeletedFalse(boardId);
         verify(boardRepository, times(1)).save(any(Board.class));
         verify(elementRepository, times(1)).findByBoardIdAndIsDeletedFalse(boardId);
+        verify(elementHistoryRepository, times(1)).findByBoardIdOrderByOperationAtDesc(boardId);
+        verify(elementHistoryRepository, times(1)).deleteAll(anyList());
     }
 
     @Test

@@ -24,16 +24,20 @@ public class BoardController {
     }
 
     private UUID getSecurityUUID() {
-        // 暂时使用固定UUID，实际应该从认证信息获取
-        // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        // UUID creatorId = UUID.fromString(authentication.getName());
-        return UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        // 从认证信息获取用户ID
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            // 临时方案，实际应该抛出认证异常
+            return UUID.fromString("550e8400-e29b-41d4-a716-446655440001");
+        }
+        // 这里应该从JWT token中获取用户ID，暂时使用用户名作为ID
+        return UUID.fromString(authentication.getName());
     }
 
     @PostMapping
     public Map<String, Object> createBoard(@RequestBody BoardRequest request) {
         UUID creatorId = this.getSecurityUUID();
-        BoardDto boardDto = boardService.createBoard(request.getName(), creatorId);
+        BoardDto boardDto = boardService.createBoard(request.getName(), request.getCategory(), creatorId);
         
         Map<String, Object> response = new HashMap<>();
         response.put("data", boardDto);
@@ -85,6 +89,7 @@ public class BoardController {
     // 内部类，用于接收请求参数
     public static class BoardRequest {
         private String name;
+        private String category;
 
         public String getName() {
             return name;
@@ -92,6 +97,14 @@ public class BoardController {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
         }
     }
 

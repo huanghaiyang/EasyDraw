@@ -29,9 +29,10 @@ public class BoardService {
         this.elementHistoryRepository = elementHistoryRepository;
     }
 
-    public BoardDto createBoard(String name, UUID creatorId) {
+    public BoardDto createBoard(String name, String category, UUID creatorId) {
         Board board = new Board();
         board.setName(name);
+        board.setCategory(category);
         board.setCreatorId(creatorId);
         board.setDeleted(false);
         Board savedBoard = boardRepository.save(board);
@@ -39,6 +40,7 @@ public class BoardService {
         return new BoardDto(
                 savedBoard.getId().toString(),
                 savedBoard.getName(),
+                savedBoard.getCategory(),
                 savedBoard.getCreatedAt(),
                 savedBoard.getUpdatedAt(),
                 List.of()
@@ -51,6 +53,7 @@ public class BoardService {
                 .map(board -> new BoardDto(
                         board.getId().toString(),
                         board.getName(),
+                        board.getCategory(),
                         board.getCreatedAt(),
                         board.getUpdatedAt(),
                         List.of()
@@ -77,6 +80,7 @@ public class BoardService {
         return new BoardDto(
                 board.getId().toString(),
                 board.getName(),
+                board.getCategory(),
                 board.getCreatedAt(),
                 board.getUpdatedAt(),
                 elementDtos
@@ -95,6 +99,7 @@ public class BoardService {
         return new BoardDto(
                 updatedBoard.getId().toString(),
                 updatedBoard.getName(),
+                updatedBoard.getCategory(),
                 updatedBoard.getCreatedAt(),
                 updatedBoard.getUpdatedAt(),
                 List.of()
