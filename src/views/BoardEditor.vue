@@ -21,7 +21,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
+import axios from '../utils/axios';
+import FontLoader from "@/utils/FontLoader";
+import { FontFamilyList } from "@/styles/ElementStyles";
 
 const router = useRouter();
 const route = useRoute();
@@ -71,9 +73,23 @@ const formatDate = (dateString: string) => {
   return date.toLocaleString();
 };
 
-// 组件挂载时加载画布信息
-onMounted(() => {
-  loadBoardInfo();
+// 加载字体
+const loadFonts = async () => {
+  try {
+    await FontLoader.batchLoadFonts(FontFamilyList);
+    console.log('字体加载完成');
+  } catch (error) {
+    console.error('字体加载失败:', error);
+  }
+};
+
+// 组件挂载时加载画布信息和字体
+onMounted(async () => {
+  // 并行加载画布信息和字体
+  await Promise.all([
+    loadBoardInfo(),
+    loadFonts()
+  ]);
 });
 </script>
 
