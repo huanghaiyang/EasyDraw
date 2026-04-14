@@ -24,6 +24,43 @@ public class AppController {
         this.userService = userService;
         this.jwtService = jwtService;
     }
+    
+    /**
+     * 模糊处理邮箱地址
+     * @param email 邮箱地址
+     * @return 模糊处理后的邮箱地址
+     */
+    private String maskEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return email;
+        }
+        int atIndex = email.indexOf('@');
+        if (atIndex <= 2) {
+            // 邮箱前缀太短，只显示第一个字符
+            return email.substring(0, 1) + "***" + email.substring(atIndex);
+        } else {
+            // 显示前两个字符，其余用***替换
+            return email.substring(0, 2) + "***" + email.substring(atIndex);
+        }
+    }
+    
+    /**
+     * 模糊处理ID
+     * @param id ID字符串
+     * @return 模糊处理后的ID
+     */
+    private String maskId(String id) {
+        if (id == null || id.isEmpty()) {
+            return id;
+        }
+        if (id.length() <= 8) {
+            // ID太短，只显示前4个字符
+            return id.substring(0, Math.min(4, id.length())) + "***";
+        } else {
+            // 显示前4个字符和后4个字符，中间用***替换
+            return id.substring(0, 4) + "***" + id.substring(id.length() - 4);
+        }
+    }
 
     @GetMapping("/user")
     public Map<String, Object> getUser(@RequestHeader(value = "Authorization", required = false) String authorization) {
@@ -37,9 +74,9 @@ public class AppController {
                 UserDto userDto = userService.getUser(userId);
                 
                 Map<String, Object> user = new HashMap<>();
-                user.put("id", userDto.getId());
+                user.put("id", maskId(userDto.getId()));
                 user.put("name", userDto.getUsername());
-                user.put("email", userDto.getEmail());
+                user.put("email", maskEmail(userDto.getEmail()));
                 user.put("role", userDto.getRole());
                 
                 Map<String, Object> response = new HashMap<>();

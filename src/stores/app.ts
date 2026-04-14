@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from "../utils/axios";
 import { defineStore } from "pinia";
 
 export const useAppStore = defineStore("app", {

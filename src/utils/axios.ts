@@ -22,6 +22,15 @@ service.interceptors.request.use(
   }
 );
 
+// 处理未授权错误的公共函数
+const handleUnauthorizedError = () => {
+  // 清除本地存储的token和用户信息
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  // 跳转到登录页面
+  window.location.href = '/login';
+};
+
 // 响应拦截器
 service.interceptors.response.use(
   response => {
@@ -30,11 +39,12 @@ service.interceptors.response.use(
   error => {
     // 处理401错误（未授权）
     if (error.response && error.response.status === 401) {
-      // 清除本地存储的token和用户信息
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      // 跳转到登录页面
-      window.location.href = '/login';
+      handleUnauthorizedError();
+    }
+    // 处理403错误（禁止访问）
+    if (error.response && error.response.status === 403) {
+      console.error('403 Forbidden:', error);
+      handleUnauthorizedError();
     }
     return Promise.reject(error);
   }

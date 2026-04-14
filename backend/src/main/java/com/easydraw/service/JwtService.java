@@ -19,8 +19,10 @@ public class JwtService {
     private final long expirationTime = 86400000; // 24小时
 
     public JwtService() {
-        // 生成安全的密钥
-        this.secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        // 使用固定的密钥，确保token在应用重启后仍然有效
+        // 注意：在生产环境中，应该使用环境变量或配置文件来管理密钥
+        String secret = "your-secret-key-for-jwt-token-generation"; // 替换为更安全的密钥
+        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     // 生成token

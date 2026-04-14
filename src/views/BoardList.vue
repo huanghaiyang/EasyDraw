@@ -94,7 +94,7 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
+import axios from '../utils/axios';
 import { ElMessageBox, ElMessage } from 'element-plus';
 
 const router = useRouter();

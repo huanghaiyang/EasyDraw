@@ -1,11 +1,9 @@
 package com.easydraw.filter;
 
 import com.easydraw.service.JwtService;
+import com.easydraw.utils.AuthenticationUtils;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,7 +12,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -29,25 +26,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
+        String token = AuthenticationUtils.extractTokenFromHeader(authorizationHeader);
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7);
-
-            if (jwtService.validateToken(token)) {
-                Claims claims = jwtService.extractClaims(token);
-                String username = claims.getSubject();
-                String role = (String) claims.get("role");
-
-                // 创建认证对象
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        username,
-                        null,
-                        Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-                );
-
-                // 设置认证信息到上下文
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-            }
+        if (token != null && jwtService.validateToken(token)) {
+            Claims claims = jwtService.extractClaims(token);
+            AuthenticationUtils.setAuthenticationFromClaims(claims);
         }
 
         filterChain.doFilter(request, response);

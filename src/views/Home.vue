@@ -25,7 +25,7 @@
         <h1>轻松创建，无限创意</h1>
         <p>EasyDraw是一款强大的在线设计工具，让您的创意轻松实现</p>
         <div class="hero-buttons">
-          <el-button type="primary" size="large" @click="goToRegister">开始使用</el-button>
+          <el-button type="primary" size="large" @click="goToBoardList">开始使用</el-button>
           <el-button size="large" @click="goToBoardList">了解更多</el-button>
         </div>
       </div>
@@ -161,7 +161,7 @@ const goToRegister = () => {
 const goToBoardList = () => {
   const token = localStorage.getItem('token');
   if (token) {
-    router.push('/');
+    router.push('/boards');
   } else {
     router.push('/login');
   }
