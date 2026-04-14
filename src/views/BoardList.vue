@@ -1,68 +1,149 @@
 <template>
   <div class="board-list-container">
+    <!-- 顶部导航栏 -->
     <div class="board-list-header">
-      <h1>画布管理</h1>
-      <div class="header-actions">
-        <el-button @click="goToHome">首页</el-button>
-        <el-button type="primary" @click="createBoard">新建画布</el-button>
+      <div class="header-left">
+        <h1 class="app-title">EasyDraw</h1>
+        <div class="header-nav">
+          <span class="nav-item active">我的画布</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <el-button @click="goToHome" plain>
+          <el-icon><House /></el-icon>
+          <span>首页</span>
+        </el-button>
+        <el-button type="primary" @click="createBoard">
+          <el-icon><Plus /></el-icon>
+          <span>新建画布</span>
+        </el-button>
       </div>
     </div>
     
-    <div class="board-list">
-      <el-card
-        v-for="board in boards"
-        :key="board.id"
-        class="board-card"
-        @click="openBoard(board.id)"
-      >
-        <template #header>
-          <div class="board-card-header">
-            <div v-if="!editingBoardId || editingBoardId !== board.id" class="board-name" @dblclick="startEditing(board.id)">
-              {{ board.name }}
+    <!-- 画布列表 -->
+    <div class="board-list-content">
+      <!-- 分类筛选 -->
+      <div class="filter-section">
+        <div class="filter-buttons">
+          <el-button 
+            v-for="category in ['全部', ...categoryOptions.map(c => c.label)]" 
+            :key="category"
+            :type="activeCategory === category ? 'primary' : 'default'"
+            plain
+            @click="activeCategory = category"
+          >
+            {{ category }}
+          </el-button>
+        </div>
+        <div class="search-box">
+          <el-input
+            v-model="searchKeyword"
+            placeholder="搜索画布"
+            prefix-icon="el-icon-search"
+          />
+        </div>
+      </div>
+      
+      <!-- 画布网格 -->
+      <div class="board-grid">
+        <div 
+          v-for="board in filteredBoards" 
+          :key="board.id"
+          class="board-card"
+          @click="openBoard(board.id)"
+        >
+          <!-- 画布预览 -->
+          <div class="board-preview">
+            <div class="preview-placeholder">
+              <el-icon class="preview-icon"><Picture /></el-icon>
             </div>
-            <el-input
-              v-else
-              v-model="editingBoardName"
-              class="board-name-input"
-              @blur="saveBoardName(board.id)"
-              @keyup.enter="saveBoardName(board.id)"
-              @keyup.esc="cancelEditing"
-              ref="nameInput"
-              autofocus
-            />
           </div>
-        </template>
-        <div class="board-card-content">
+          
+          <!-- 画布信息 -->
           <div class="board-info">
-            <span>创建时间: {{ formatDate(board.createdAt) }}</span>
-            <span v-if="board.category" style="margin-left: 10px;">分类: {{ board.category }}</span>
+            <div class="board-name-container">
+              <div 
+                v-if="!editingBoardId || editingBoardId !== board.id" 
+                class="board-name" 
+                @dblclick="startEditing(board.id)"
+              >
+                {{ board.name }}
+              </div>
+              <el-input
+                v-else
+                v-model="editingBoardName"
+                class="board-name-input"
+                @blur="saveBoardName(board.id)"
+                @keyup.enter="saveBoardName(board.id)"
+                @keyup.esc="cancelEditing"
+                ref="nameInput"
+                autofocus
+              />
+            </div>
+            <div class="board-meta">
+              <span class="board-category" v-if="board.category">{{ board.category }}</span>
+              <span class="board-date">{{ formatDate(board.createdAt) }}</span>
+            </div>
           </div>
+          
+          <!-- 操作按钮 -->
           <div class="board-actions">
-            <el-button link @click.stop="startEditing(board.id)">编辑</el-button>
-            <el-button link @click.stop="deleteBoard(board.id)" style="color: #f56c6c;">删除</el-button>
+            <el-button 
+              size="small" 
+              link 
+              @click.stop="startEditing(board.id)"
+              class="action-button"
+            >
+              <el-icon><Edit /></el-icon>
+            </el-button>
+            <el-button 
+              size="small" 
+              link 
+              @click.stop="deleteBoard(board.id)"
+              class="action-button delete"
+            >
+              <el-icon><Delete /></el-icon>
+            </el-button>
           </div>
         </div>
-      </el-card>
-      
-      <el-card v-if="loading" class="empty-board-card" v-loading="loading" element-loading-text="加载中...">
-        <div class="empty-board-content">
-          <!-- 加载中状态 -->
+        
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-state">
+          <el-skeleton :rows="6" animated />
         </div>
-      </el-card>
-      
-      <el-card v-else-if="boards.length === 0" class="empty-board-card">
-        <div class="empty-board-content">
-          <el-empty description="暂无画布" />
-          <el-button type="primary" @click="createBoard" style="margin-top: 20px;">新建画布</el-button>
+        
+        <!-- 空状态 -->
+        <div v-else-if="filteredBoards.length === 0" class="empty-state">
+          <el-empty>
+            <template #default>
+              <div style="text-align: center;">
+                <p>暂无画布</p>
+                <el-button type="primary" @click="createBoard" style="margin-top: 20px;">
+                  <el-icon><Plus /></el-icon>
+                  <span>新建画布</span>
+                </el-button>
+              </div>
+            </template>
+          </el-empty>
         </div>
-      </el-card>
+      </div>
     </div>
 
     <!-- 新建画布对话框 -->
-    <el-dialog v-model="createDialogVisible" title="新建画布" width="500px">
+    <el-dialog 
+      v-model="createDialogVisible" 
+      title="新建画布" 
+      width="500px"
+      center
+    >
       <el-form :model="createForm" label-width="80px">
         <el-form-item label="画布名称">
-          <el-input v-model="createForm.name" placeholder="请输入画布名称" />
+          <el-input 
+            v-model="createForm.name" 
+            placeholder="请输入画布名称" 
+            maxlength="50"
+            show-word-limit
+          />
         </el-form-item>
         <el-form-item label="画布分类">
           <el-select
@@ -84,7 +165,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="createDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmCreate">确定</el-button>
+          <el-button type="primary" @click="confirmCreate">创建</el-button>
         </span>
       </template>
     </el-dialog>
@@ -92,10 +173,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../utils/axios';
 import { ElMessageBox, ElMessage } from 'element-plus';
+import { House, Plus, Picture, Edit, Delete, Search } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const boards = ref<any[]>([]);
@@ -103,6 +185,10 @@ const loading = ref(true);
 const editingBoardId = ref<string | null>(null);
 const editingBoardName = ref('');
 const nameInput = ref<HTMLElement | null>(null);
+
+// 分类和搜索
+const activeCategory = ref('全部');
+const searchKeyword = ref('');
 
 // 新建画布对话框
 const createDialogVisible = ref(false);
@@ -124,6 +210,27 @@ const categoryOptions = ref([
   { value: '其他', label: '其他' }
 ]);
 
+// 过滤后的画布列表
+const filteredBoards = computed(() => {
+  let result = [...boards.value];
+  
+  // 分类筛选
+  if (activeCategory.value !== '全部') {
+    result = result.filter(board => board.category === activeCategory.value);
+  }
+  
+  // 搜索筛选
+  if (searchKeyword.value) {
+    const keyword = searchKeyword.value.toLowerCase();
+    result = result.filter(board => 
+      board.name.toLowerCase().includes(keyword) ||
+      (board.category && board.category.toLowerCase().includes(keyword))
+    );
+  }
+  
+  return result;
+});
+
 // 加载画布列表
 const loadBoards = async () => {
   try {
@@ -137,17 +244,33 @@ const loadBoards = async () => {
     boards.value = [
       {
         id: '1',
-        name: '画布1',
+        name: '产品设计草图',
+        category: '互联网',
         createdAt: new Date().toISOString()
       },
       {
-        id: '2',
-        name: '画布2',
+        id: '用户流程图',
+        category: '互联网',
         createdAt: new Date().toISOString()
       },
       {
-        id: '3',
-        name: '画布3',
+        id: '金融分析图表',
+        category: '金融',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '教育课程规划',
+        category: '教育',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '医疗系统架构',
+        category: '医疗',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '电商网站原型',
+        category: '电商',
         createdAt: new Date().toISOString()
       }
     ];
@@ -269,7 +392,11 @@ const deleteBoard = async (boardId: string) => {
 // 格式化日期
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString();
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
 };
 
 // 跳转到首页
@@ -284,57 +411,153 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* 全局容器 */
 .board-list-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  min-height: 100vh;
+  background-color: #f5f7fa;
 }
 
+/* 顶部导航栏 */
 .board-list-header {
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 0 40px;
+  height: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.board-list-header h1 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.header-actions {
+.header-left {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 40px;
 }
 
-.board-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+.app-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #409eff;
+  margin: 0;
+}
+
+.header-nav {
+  display: flex;
   gap: 20px;
 }
 
-.board-card {
+.nav-item {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.board-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
+.nav-item.active {
+  background-color: #ecf5ff;
+  color: #409eff;
+  font-weight: 500;
 }
 
-.board-card-header {
+.header-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* 主要内容区域 */
+.board-list-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* 筛选区域 */
+.filter-section {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  min-width: 280px;
+}
+
+/* 画布网格 */
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+/* 画布卡片 */
+.board-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.board-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+/* 画布预览 */
+.board-preview {
+  height: 180px;
+  background-color: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-placeholder {
+  text-align: center;
+}
+
+.preview-icon {
+  font-size: 48px;
+  color: #c0c4cc;
+}
+
+/* 画布信息 */
+.board-info {
+  padding: 20px;
+}
+
+.board-name-container {
+  margin-bottom: 12px;
 }
 
 .board-name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-size: 16px;
+  font-weight: 500;
+  color: #303133;
+  line-height: 1.4;
   transition: all 0.3s ease;
+  word-break: break-word;
 }
 
 .board-name:hover {
@@ -342,35 +565,109 @@ onMounted(() => {
 }
 
 .board-name-input {
-  width: 200px;
+  width: 100%;
+  margin-top: 4px;
 }
 
-.board-card-content {
-  margin-top: 15px;
-}
-
-.board-info {
-  margin-bottom: 15px;
-  font-size: 14px;
-  color: #666;
-}
-
-.board-actions {
+.board-meta {
   display: flex;
-  gap: 10px;
-}
-
-.empty-board-card {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.empty-board-content {
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  min-height: 200px;
+  font-size: 12px;
+  color: #909399;
+}
+
+.board-category {
+  background-color: #ecf5ff;
+  color: #409eff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+/* 操作按钮 */
+.board-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 6px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.board-card:hover .board-actions {
+  opacity: 1;
+}
+
+.action-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.action-button:hover {
+  background-color: #f0f9eb;
+}
+
+.action-button.delete:hover {
+  background-color: #fef0f0;
+  color: #f56c6c;
+}
+
+/* 加载状态 */
+.loading-state {
+  grid-column: 1 / -1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* 空状态 */
+.empty-state {
+  grid-column: 1 / -1;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 80px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .board-list-header {
+    padding: 0 20px;
+  }
+  
+  .header-left {
+    gap: 20px;
+  }
+  
+  .filter-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-buttons {
+    justify-content: center;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  .board-grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
 }
 </style>
