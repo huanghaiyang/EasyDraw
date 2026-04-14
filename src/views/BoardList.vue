@@ -9,14 +9,14 @@
         </div>
       </div>
       <div class="header-right">
-        <el-button @click="goToHome" plain>
-          <el-icon><House /></el-icon>
+        <button class="btn btn-outline-secondary" @click="goToHome">
+          <i class="bi bi-house"></i>
           <span>首页</span>
-        </el-button>
-        <el-button type="primary" @click="createBoard">
-          <el-icon><Plus /></el-icon>
+        </button>
+        <button class="btn btn-primary" @click="createBoard">
+          <i class="bi bi-plus"></i>
           <span>新建画布</span>
-        </el-button>
+        </button>
       </div>
     </div>
     
@@ -25,22 +25,27 @@
       <!-- 分类筛选 -->
       <div class="filter-section">
         <div class="filter-buttons">
-          <el-button 
+          <button 
             v-for="category in ['全部', ...categoryOptions.map(c => c.label)]" 
             :key="category"
-            :type="activeCategory === category ? 'primary' : 'default'"
-            plain
+            :class="['btn', activeCategory === category ? 'btn-primary' : 'btn-outline-secondary']"
             @click="activeCategory = category"
           >
             {{ category }}
-          </el-button>
+          </button>
         </div>
         <div class="search-box">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索画布"
-            prefix-icon="el-icon-search"
-          />
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              v-model="searchKeyword"
+              placeholder="搜索画布"
+            />
+          </div>
         </div>
       </div>
       
@@ -55,7 +60,7 @@
           <!-- 画布预览 -->
           <div class="board-preview">
             <div class="preview-placeholder">
-              <el-icon class="preview-icon"><Picture /></el-icon>
+              <i class="bi bi-image preview-icon"></i>
             </div>
           </div>
           
@@ -69,10 +74,11 @@
               >
                 {{ board.name }}
               </div>
-              <el-input
+              <input
                 v-else
+                type="text"
+                class="form-control board-name-input"
                 v-model="editingBoardName"
-                class="board-name-input"
                 @blur="saveBoardName(board.id)"
                 @keyup.enter="saveBoardName(board.id)"
                 @keyup.esc="cancelEditing"
@@ -81,103 +87,122 @@
               />
             </div>
             <div class="board-meta">
-              <span class="board-category" v-if="board.category">{{ board.category }}</span>
+              <span class="board-category badge bg-primary" v-if="board.category">{{ board.category }}</span>
               <span class="board-date">{{ formatDate(board.createdAt) }}</span>
             </div>
           </div>
           
           <!-- 操作按钮 -->
           <div class="board-actions">
-            <el-button 
-              size="small" 
-              link 
+            <button 
+              class="btn btn-sm action-button"
               @click.stop="startEditing(board.id)"
-              class="action-button"
             >
-              <el-icon><Edit /></el-icon>
-            </el-button>
-            <el-button 
-              size="small" 
-              link 
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button 
+              class="btn btn-sm action-button delete"
               @click.stop="deleteBoard(board.id)"
-              class="action-button delete"
             >
-              <el-icon><Delete /></el-icon>
-            </el-button>
+              <i class="bi bi-trash"></i>
+            </button>
           </div>
         </div>
         
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-state">
-          <el-skeleton :rows="6" animated />
+          <div class="skeleton-loader" v-for="i in 6" :key="i"></div>
         </div>
         
         <!-- 空状态 -->
         <div v-else-if="filteredBoards.length === 0" class="empty-state">
-          <el-empty>
-            <template #default>
-              <div style="text-align: center;">
-                <p>暂无画布</p>
-                <el-button type="primary" @click="createBoard" style="margin-top: 20px;">
-                  <el-icon><Plus /></el-icon>
-                  <span>新建画布</span>
-                </el-button>
-              </div>
-            </template>
-          </el-empty>
+          <div class="text-center">
+            <i class="bi bi-file-earmark-image display-1 text-muted"></i>
+            <p class="mt-3">暂无画布</p>
+            <button class="btn btn-primary mt-4" @click="createBoard">
+              <i class="bi bi-plus"></i>
+              <span>新建画布</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- 新建画布对话框 -->
-    <el-dialog 
-      v-model="createDialogVisible" 
-      title="新建画布" 
-      width="500px"
-      center
-    >
-      <el-form :model="createForm" label-width="80px">
-        <el-form-item label="画布名称">
-          <el-input 
-            v-model="createForm.name" 
-            placeholder="请输入画布名称" 
-            maxlength="50"
-            show-word-limit
-          />
-        </el-form-item>
-        <el-form-item label="画布分类">
-          <el-select
-            v-model="createForm.category"
-            filterable
-            allow-create
-            placeholder="请选择或输入分类"
-            style="width: 100%"
-          >
-            <el-option
-              v-for="category in categoryOptions"
-              :key="category.value"
-              :label="category.label"
-              :value="category.value"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="createDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="confirmCreate">创建</el-button>
-        </span>
-      </template>
-    </el-dialog>
+    <div class="modal fade" id="createBoardModal" tabindex="-1" aria-labelledby="createBoardModalLabel" aria-hidden="true" v-if="createDialogVisible">
+      <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createBoardModalLabel">新建画布</h5>
+            <button type="button" class="btn-close" @click="createDialogVisible = false"></button>
+          </div>
+          <div class="modal-body">
+            <form @submit.prevent="confirmCreate">
+              <div class="mb-3">
+                <label for="boardName" class="form-label">画布名称</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="boardName"
+                  v-model="createForm.name" 
+                  placeholder="请输入画布名称" 
+                  maxlength="50"
+                />
+                <div class="form-text">{{ createForm.name.length }}/50</div>
+              </div>
+              <div class="mb-3">
+                <label for="boardCategory" class="form-label">画布分类</label>
+                <select
+                  class="form-select"
+                  id="boardCategory"
+                  v-model="createForm.category"
+                  placeholder="请选择或输入分类"
+                >
+                  <option value="">请选择分类</option>
+                  <option
+                    v-for="category in categoryOptions"
+                    :key="category.value"
+                    :value="category.value"
+                  >
+                    {{ category.label }}
+                  </option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="createDialogVisible = false">取消</button>
+            <button type="button" class="btn btn-primary" @click="confirmCreate">创建</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除确认对话框 -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true" v-if="deleteDialogVisible">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteConfirmModalLabel">删除确认</h5>
+            <button type="button" class="btn-close" @click="deleteDialogVisible = false"></button>
+          </div>
+          <div class="modal-body">
+            确定要删除这个画布吗？删除后将无法恢复。
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="deleteDialogVisible = false">取消</button>
+            <button type="button" class="btn btn-danger" @click="confirmDelete">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed } from 'vue';
+import { ref, onMounted, nextTick, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../utils/axios';
-import { ElMessageBox, ElMessage } from 'element-plus';
-import { House, Plus, Picture, Edit, Delete, Search } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const boards = ref<any[]>([]);
@@ -196,6 +221,10 @@ const createForm = ref({
   name: '',
   category: ''
 });
+
+// 删除确认对话框
+const deleteDialogVisible = ref(false);
+const boardToDelete = ref<string | null>(null);
 
 // 分类选项（按行业设计用途分类）
 const categoryOptions = ref([
@@ -229,6 +258,39 @@ const filteredBoards = computed(() => {
   }
   
   return result;
+});
+
+// 监听对话框状态变化，使用Bootstrap的模态框API
+watch(createDialogVisible, (newValue) => {
+  if (newValue) {
+    // 显示模态框
+    const modal = document.getElementById('createBoardModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
+  } else {
+    // 隐藏模态框
+    const modal = document.getElementById('createBoardModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+    }
+  }
+});
+
+watch(deleteDialogVisible, (newValue) => {
+  if (newValue) {
+    // 显示模态框
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
+    }
+  } else {
+    // 隐藏模态框
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+    }
+  }
 });
 
 // 加载画布列表
@@ -290,7 +352,8 @@ const createBoard = () => {
 // 确认创建画布
 const confirmCreate = async () => {
   if (!createForm.value.name.trim()) {
-    ElMessage.warning('请输入画布名称');
+    // 显示警告消息
+    alert('请输入画布名称');
     return;
   }
 
@@ -303,11 +366,13 @@ const confirmCreate = async () => {
     const newBoard = response.data.data;
     boards.value.push(newBoard);
     createDialogVisible.value = false;
-    ElMessage.success('创建成功');
+    // 显示成功消息
+    alert('创建成功');
     router.push(`/board/${newBoard.id}`);
   } catch (error) {
     console.error('创建画布失败:', error);
-    ElMessage.error('创建失败');
+    // 显示错误消息
+    alert('创建失败');
     // 创建失败时使用模拟数据
     const newBoard = {
       id: Date.now().toString(),
@@ -365,27 +430,30 @@ const cancelEditing = () => {
   editingBoardId.value = null;
 };
 
-// 删除画布
-const deleteBoard = async (boardId: string) => {
+// 显示删除确认对话框
+const deleteBoard = (boardId: string) => {
+  boardToDelete.value = boardId;
+  deleteDialogVisible.value = true;
+};
+
+// 确认删除
+const confirmDelete = async () => {
+  if (!boardToDelete.value) return;
+  
   try {
-    await ElMessageBox.confirm('确定要删除这个画布吗？删除后将无法恢复。', '删除确认', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    });
-    
-    await axios.delete(`/api/boards/${boardId}`);
-    boards.value = boards.value.filter(b => b.id !== boardId);
-    ElMessage.success('删除成功');
-  } catch (error: any) {
-    if (error.name === 'ElMessageBoxCancel') {
-      // 用户取消删除
-      return;
-    }
+    await axios.delete(`/api/boards/${boardToDelete.value}`);
+    boards.value = boards.value.filter(b => b.id !== boardToDelete.value);
+    // 显示成功消息
+    alert('删除成功');
+  } catch (error) {
     console.error('删除画布失败:', error);
-    ElMessage.error('删除失败');
+    // 显示错误消息
+    alert('删除失败');
     // 删除失败时直接修改本地数据
-    boards.value = boards.value.filter(b => b.id !== boardId);
+    boards.value = boards.value.filter(b => b.id !== boardToDelete.value);
+  } finally {
+    deleteDialogVisible.value = false;
+    boardToDelete.value = null;
   }
 };
 
@@ -414,14 +482,14 @@ onMounted(() => {
 /* 全局容器 */
 .board-list-container {
   min-height: 100vh;
-  background-color: #f5f7fa;
+  background-color: #f8f9fa;
 }
 
 /* 顶部导航栏 */
 .board-list-header {
   background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  padding: 0 40px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  padding: 0 2.5rem;
   height: 64px;
   display: flex;
   justify-content: space-between;
@@ -434,64 +502,70 @@ onMounted(() => {
 .header-left {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 2.5rem;
 }
 
 .app-title {
-  font-size: 20px;
-  font-weight: bold;
-  color: #409eff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0d6efd;
   margin: 0;
 }
 
 .header-nav {
   display: flex;
-  gap: 20px;
+  gap: 1.25rem;
 }
 
 .nav-item {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
 }
 
 .nav-item.active {
-  background-color: #ecf5ff;
-  color: #409eff;
+  background-color: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
   font-weight: 500;
 }
 
 .header-right {
   display: flex;
-  gap: 12px;
+  gap: 0.75rem;
+}
+
+.header-right button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* 主要内容区域 */
 .board-list-content {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 30px 20px;
+  padding: 1.875rem 1.25rem;
 }
 
 /* 筛选区域 */
 .filter-section {
   background-color: #ffffff;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 0.375rem;
+  padding: 1.25rem;
+  margin-bottom: 1.875rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 0.9375rem;
 }
 
 .filter-buttons {
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -503,29 +577,30 @@ onMounted(() => {
 .board-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 /* 画布卡片 */
 .board-card {
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0.375rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.125);
 }
 
 .board-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  transform: translateY(-0.25rem);
 }
 
 /* 画布预览 */
 .board-preview {
   height: 180px;
-  background-color: #f0f2f5;
+  background-color: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -538,66 +613,63 @@ onMounted(() => {
 }
 
 .preview-icon {
-  font-size: 48px;
-  color: #c0c4cc;
+  font-size: 3rem;
+  color: #6c757d;
 }
 
 /* 画布信息 */
 .board-info {
-  padding: 20px;
+  padding: 1.25rem;
 }
 
 .board-name-container {
-  margin-bottom: 12px;
+  margin-bottom: 0.75rem;
 }
 
 .board-name {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
-  color: #303133;
+  color: #212529;
   line-height: 1.4;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease-in-out;
   word-break: break-word;
 }
 
 .board-name:hover {
-  color: #409eff;
+  color: #0d6efd;
 }
 
 .board-name-input {
   width: 100%;
-  margin-top: 4px;
+  margin-top: 0.25rem;
 }
 
 .board-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
-  color: #909399;
+  font-size: 0.75rem;
+  color: #6c757d;
 }
 
 .board-category {
-  background-color: #ecf5ff;
-  color: #409eff;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
 }
 
 /* 操作按钮 */
 .board-actions {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 0.75rem;
+  right: 0.75rem;
   display: flex;
-  gap: 8px;
+  gap: 0.5rem;
   opacity: 0;
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.9);
-  padding: 6px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 0.375rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
 .board-card:hover .board-actions {
@@ -605,51 +677,79 @@ onMounted(() => {
 }
 
 .action-button {
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: all 0.3s ease;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
 }
 
 .action-button:hover {
-  background-color: #f0f9eb;
+  background-color: rgba(13, 110, 253, 0.1);
+  color: #0d6efd;
 }
 
 .action-button.delete:hover {
-  background-color: #fef0f0;
-  color: #f56c6c;
+  background-color: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
 }
 
 /* 加载状态 */
 .loading-state {
   grid-column: 1 / -1;
   background-color: #ffffff;
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0.375rem;
+  padding: 2.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.skeleton-loader {
+  height: 1.25rem;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  margin-bottom: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* 空状态 */
 .empty-state {
   grid-column: 1 / -1;
   background-color: #ffffff;
-  border-radius: 12px;
-  padding: 80px 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0.375rem;
+  padding: 5rem 1.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.empty-state button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto;
 }
 
 /* 响应式设计 */
 @media (max-width: 768px) {
   .board-list-header {
-    padding: 0 20px;
+    padding: 0 1.25rem;
   }
   
   .header-left {
-    gap: 20px;
+    gap: 1.25rem;
   }
   
   .filter-section {
@@ -667,7 +767,15 @@ onMounted(() => {
   
   .board-grid {
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 16px;
+    gap: 1rem;
+  }
+  
+  .header-right button span {
+    display: none;
+  }
+  
+  .header-right button {
+    padding: 0.375rem;
   }
 }
 </style>
