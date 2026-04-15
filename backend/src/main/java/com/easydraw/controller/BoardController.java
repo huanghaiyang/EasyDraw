@@ -68,6 +68,25 @@ public class BoardController {
         return ResponseUtils.buildSuccessResponse(null);
     }
 
+    @GetMapping("/trash")
+    public Map<String, Object> getTrashBoards() {
+        UUID creatorId = this.getSecurityUUID();
+        List<BoardDto> boards = boardService.getTrashBoards(creatorId);
+        return ResponseUtils.buildSuccessResponse(boards);
+    }
+
+    @PostMapping("/{id}/restore")
+    public Map<String, Object> restoreBoard(@PathVariable String id) {
+        BoardDto boardDto = boardService.restoreBoard(id);
+        return ResponseUtils.buildSuccessResponse(boardDto);
+    }
+
+    @DeleteMapping("/{id}/permanent")
+    public Map<String, Object> permanentDeleteBoard(@PathVariable String id) {
+        boardService.permanentDeleteBoard(id);
+        return ResponseUtils.buildSuccessResponse(null);
+    }
+
     // 内部类，用于接收请求参数
     public static class BoardRequest {
         private String name;

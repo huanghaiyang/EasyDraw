@@ -127,4 +127,62 @@ public class BoardService {
         elementHistoryRepository.deleteAll(histories);
     }
 
+    public List<BoardDto> getTrashBoards(UUID creatorId) {
+        List<Board> boards = boardRepository.findByCreatorIdAndIsDeletedTrue(creatorId);
+        return boards.stream()
+                .map(board -> new BoardDto(
+                        board.getId().toString(),
+                        board.getName(),
+                        board.getCategory(),
+                        board.getCreatedAt(),
+                        board.getUpdatedAt(),
+                        List.of()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public BoardDto restoreBoard(String boardId) {
+        Board board = boardRepository.findByIdAndIsDeletedTrue(UUID.fromString(boardId));
+        if (board == null) {
+            throw new RuntimeException("Board not found in trash");
+        }
+
+        board.setDeleted(false);
+        Board restoredBoard = boardRepository.save(board);
+
+        // 恢复画板下的所有组件
+        List<Element> elements = elementRepository.findByBoardIdAndIsDeletedTrue(UUID.fromString(boardId));
+        elements.forEach(element -> {
+            element.setDeleted(false);
+            elementRepository.save(element);
+        });
+
+        return new BoardDto(
+                restoredBoard.getId().toString(),
+                restoredBoard.getName(),
+                restoredBoard.getCategory(),
+                restoredBoard.getCreatedAt(),
+                restoredBoard.getUpdatedAt(),
+                List.of()
+        );
+    }
+
+    public void permanentDeleteBoard(String boardId) {
+        Board board = boardRepository.findByIdAndIsDeletedTrue(UUID.fromString(boardId));
+        if (board == null) {
+            throw new RuntimeException("Board not found in trash");
+        }
+
+        // 永久删除画板下的所有组件
+        List<Element> elements = elementRepository.findByBoardId(UUID.fromString(boardId));
+        elementRepository.deleteAll(elements);
+
+        // 永久删除画板相关的历史记录
+        List<ElementHistory> histories = elementHistoryRepository.findByBoardIdOrderByOperationAtDesc(UUID.fromString(boardId));
+        elementHistoryRepository.deleteAll(histories);
+
+        // 永久删除画板
+        boardRepository.delete(board);
+    }
+
 }

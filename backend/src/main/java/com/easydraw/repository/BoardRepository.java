@@ -14,4 +14,8 @@ public interface BoardRepository extends JpaRepository<Board, UUID> {
 
     Board findByIdAndIsDeletedFalse(UUID id);
 
+    List<Board> findByCreatorIdAndIsDeletedTrue(UUID creatorId);
+
+    Board findByIdAndIsDeletedTrue(UUID id);
+
 }

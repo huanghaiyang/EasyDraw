@@ -14,4 +14,8 @@ public interface ElementRepository extends JpaRepository<Element, UUID> {
 
     Element findByIdAndBoardIdAndIsDeletedFalse(UUID id, UUID boardId);
 
+    List<Element> findByBoardIdAndIsDeletedTrue(UUID boardId);
+
+    List<Element> findByBoardId(UUID boardId);
+
 }

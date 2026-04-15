@@ -49,6 +49,77 @@
         </div>
       </div>
       
+      <!-- 回收站 -->
+      <div class="trash-section">
+        <button 
+          class="btn btn-outline-danger w-100 d-flex justify-content-between align-items-center"
+          @click="toggleTrash"
+        >
+          <div class="d-flex align-items-center">
+            <i class="bi bi-trash3 me-2"></i>
+            <span>回收站</span>
+            <span v-if="trashBoards.length > 0" class="badge bg-danger ms-2">{{ trashBoards.length }}</span>
+          </div>
+          <i :class="['bi', trashExpanded ? 'bi-chevron-up' : 'bi-chevron-down']"></i>
+        </button>
+        
+        <!-- 回收站内容 -->
+        <div v-if="trashExpanded" class="trash-content">
+          <div v-if="trashLoading" class="loading-state">
+            <div class="skeleton-loader" v-for="i in 3" :key="i"></div>
+          </div>
+          <div v-else-if="trashBoards.length === 0" class="empty-trash">
+            <div class="text-center py-4">
+              <i class="bi bi-trash3 display-3 text-muted"></i>
+              <p class="mt-2">回收站为空</p>
+            </div>
+          </div>
+          <div v-else class="trash-grid">
+            <div 
+              v-for="board in trashBoards" 
+              :key="board.id"
+              class="board-card trash-card"
+            >
+              <!-- 画布预览 -->
+              <div class="board-preview">
+                <div class="preview-placeholder trash-placeholder">
+                  <i class="bi bi-image preview-icon"></i>
+                </div>
+              </div>
+              
+              <!-- 画布信息 -->
+              <div class="board-info">
+                <div class="board-name-container">
+                  <div class="board-name trash-name">{{ board.name }}</div>
+                </div>
+                <div class="board-meta">
+                  <span class="board-category badge bg-secondary" v-if="board.category">{{ board.category }}</span>
+                  <span class="board-date">{{ formatDate(board.createdAt) }}</span>
+                </div>
+              </div>
+              
+              <!-- 操作按钮 -->
+              <div class="board-actions">
+                <button 
+                  class="btn btn-sm action-button restore"
+                  @click="openRestoreModal(board.id)"
+                  title="恢复"
+                >
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </button>
+                <button 
+                  class="btn btn-sm action-button delete"
+                  @click="openPermanentDeleteModal(board.id)"
+                  title="永久删除"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- 画布网格 -->
       <div class="board-grid">
         <div 
@@ -187,11 +258,49 @@
             <button type="button" class="btn-close" @click="closeDeleteModal"></button>
           </div>
           <div class="modal-body">
-            确定要删除这个画布吗？删除后将无法恢复。
+            确定要删除这个画布吗？删除后将移至回收站。
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="closeDeleteModal">取消</button>
             <button type="button" class="btn btn-danger" @click="confirmDelete">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 永久删除确认对话框 -->
+    <div class="modal fade" id="permanentDeleteConfirmModal" tabindex="-1" aria-labelledby="permanentDeleteConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="permanentDeleteConfirmModalLabel">永久删除确认</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            确定要永久删除这个画布吗？此操作不可恢复。
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-danger" @click="confirmPermanentDelete">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 恢复确认对话框 -->
+    <div class="modal fade" id="restoreConfirmModal" tabindex="-1" aria-labelledby="restoreConfirmModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="restoreConfirmModalLabel">恢复确认</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            确定要恢复这个画布吗？恢复后将移至正常画布列表。
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-success" @click="confirmRestore">确定</button>
           </div>
         </div>
       </div>
@@ -234,6 +343,11 @@ const createForm = ref({
 
 // 删除确认
 const boardToDelete = ref<string | null>(null);
+
+// 回收站
+const trashExpanded = ref(false);
+const trashBoards = ref<any[]>([]);
+const trashLoading = ref(false);
 
 // 分类选项（按行业设计用途分类）
 const categoryOptions = ref([
@@ -447,6 +561,8 @@ const confirmDelete = async () => {
     boards.value = boards.value.filter(b => b.id !== boardToDelete.value);
     // 显示成功消息
     toast.value?.showToast('success', '成功', '删除成功');
+    // 更新回收站数据
+    await loadTrashBoards();
   } catch (error) {
     console.error('删除画布失败:', error);
     // 显示错误消息
@@ -473,9 +589,107 @@ const goToHome = () => {
   router.push('/');
 };
 
-// 组件挂载时加载画布列表
-onMounted(() => {
-  loadBoards();
+// 切换回收站展开/收起
+const toggleTrash = async () => {
+  trashExpanded.value = !trashExpanded.value;
+  if (trashExpanded.value) {
+    await loadTrashBoards();
+  }
+};
+
+// 加载回收站画板列表
+const loadTrashBoards = async () => {
+  try {
+    trashLoading.value = true;
+    const response = await axios.get('/api/boards/trash');
+    trashBoards.value = response.data.data || [];
+  } catch (error) {
+    console.error('加载回收站失败:', error);
+    trashBoards.value = [];
+  } finally {
+    trashLoading.value = false;
+  }
+};
+
+// 恢复画板
+const restoreBoard = async (boardId: string) => {
+  try {
+    await axios.post(`/api/boards/${boardId}/restore`);
+    toast.value?.showToast('success', '成功', '恢复成功');
+    // 重新加载回收站和画布列表
+    await loadTrashBoards();
+    await loadBoards();
+  } catch (error) {
+    console.error('恢复画板失败:', error);
+    toast.value?.showToast('danger', '错误', '恢复失败');
+  }
+};
+
+// 永久删除画板
+const boardToPermanentDelete = ref<string | null>(null);
+
+const openPermanentDeleteModal = (boardId: string) => {
+  boardToPermanentDelete.value = boardId;
+  const modal = new (window as any).bootstrap.Modal(document.getElementById('permanentDeleteConfirmModal'));
+  modal.show();
+};
+
+const confirmPermanentDelete = async () => {
+  if (!boardToPermanentDelete.value) return;
+  
+  try {
+    await axios.delete(`/api/boards/${boardToPermanentDelete.value}/permanent`);
+    toast.value?.showToast('success', '成功', '永久删除成功');
+    // 重新加载回收站
+    await loadTrashBoards();
+    // 关闭模态框
+    const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('permanentDeleteConfirmModal'));
+    if (modal) {
+      modal.hide();
+    }
+  } catch (error) {
+    console.error('永久删除画板失败:', error);
+    toast.value?.showToast('danger', '错误', '永久删除失败');
+  } finally {
+    boardToPermanentDelete.value = null;
+  }
+};
+
+// 恢复画板
+const boardToRestore = ref<string | null>(null);
+
+const openRestoreModal = (boardId: string) => {
+  boardToRestore.value = boardId;
+  const modal = new (window as any).bootstrap.Modal(document.getElementById('restoreConfirmModal'));
+  modal.show();
+};
+
+const confirmRestore = async () => {
+  if (!boardToRestore.value) return;
+  
+  try {
+    await axios.post(`/api/boards/${boardToRestore.value}/restore`);
+    toast.value?.showToast('success', '成功', '恢复成功');
+    // 重新加载回收站和画布列表
+    await loadTrashBoards();
+    await loadBoards();
+    // 关闭模态框
+    const modal = (window as any).bootstrap.Modal.getInstance(document.getElementById('restoreConfirmModal'));
+    if (modal) {
+      modal.hide();
+    }
+  } catch (error) {
+    console.error('恢复画板失败:', error);
+    toast.value?.showToast('danger', '错误', '恢复失败');
+  } finally {
+    boardToRestore.value = null;
+  }
+};
+
+// 组件挂载时加载画布列表和回收站个数
+onMounted(async () => {
+  await loadBoards();
+  await loadTrashBoards();
 });
 </script>
 
@@ -695,6 +909,73 @@ onMounted(() => {
 .action-button.delete:hover {
   background-color: rgba(220, 53, 69, 0.1);
   color: #dc3545;
+}
+
+/* 回收站 */
+.trash-section {
+  margin: 20px 0;
+  border: 1px solid #f8d7da;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.trash-section .btn {
+  border-radius: 0;
+  border: none;
+  background-color: #f8f9fa;
+}
+
+.trash-section .btn:hover {
+  background-color: #f1f3f5;
+}
+
+.trash-content {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #f8d7da;
+}
+
+.trash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.trash-card {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.trash-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.trash-placeholder {
+  opacity: 0.6;
+}
+
+.trash-name {
+  text-decoration: line-through;
+  color: #6c757d;
+}
+
+.trash-card .action-button.restore {
+  color: #28a745;
+}
+
+.trash-card .action-button.restore:hover {
+  background-color: #e8f5e8;
+}
+
+.empty-trash {
+  padding: 40px 20px;
+  text-align: center;
 }
 
 /* 加载状态 */
