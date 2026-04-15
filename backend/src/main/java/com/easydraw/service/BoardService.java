@@ -21,15 +21,25 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final ElementRepository elementRepository;
     private final ElementHistoryRepository elementHistoryRepository;
+    private final CategoryService categoryService;
 
     @Autowired
-    public BoardService(BoardRepository boardRepository, ElementRepository elementRepository, ElementHistoryRepository elementHistoryRepository) {
+    public BoardService(BoardRepository boardRepository, ElementRepository elementRepository, ElementHistoryRepository elementHistoryRepository, CategoryService categoryService) {
         this.boardRepository = boardRepository;
         this.elementRepository = elementRepository;
         this.elementHistoryRepository = elementHistoryRepository;
+        this.categoryService = categoryService;
     }
 
     public BoardDto createBoard(String name, String category, UUID creatorId) {
+        if (category != null && !category.isEmpty()) {
+            try {
+                categoryService.getCategoryById(category);
+            } catch (Exception e) {
+                throw new RuntimeException("Category not found: " + category);
+            }
+        }
+
         Board board = new Board();
         board.setName(name);
         board.setCategory(category);

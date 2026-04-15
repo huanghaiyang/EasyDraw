@@ -12,6 +12,21 @@ CREATE TABLE IF NOT EXISTS boards (
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE
 );
 
+-- 创建categories表
+CREATE TABLE IF NOT EXISTS categories (
+    id UUID PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    icon VARCHAR(255),
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    sort_order INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建唯一索引
+CREATE UNIQUE INDEX IF NOT EXISTS idx_categories_name ON categories(name);
+
 -- 创建elements表
 CREATE TABLE IF NOT EXISTS elements (
     id UUID PRIMARY KEY,
@@ -54,9 +69,17 @@ CREATE INDEX IF NOT EXISTS idx_element_history_operation_at ON element_history(o
 CREATE INDEX IF NOT EXISTS idx_board_sessions_board_id ON board_sessions(board_id);
 CREATE INDEX IF NOT EXISTS idx_board_sessions_user_id ON board_sessions(user_id);
 
--- 插入示例数据
-INSERT INTO boards (id, name, creator_id) 
+-- 插入初始分类数据
+-- 只插入必要的列，让数据库使用默认值填充其他列
+INSERT INTO categories (id, name, description, sort_order) 
 VALUES 
-    ('550e8400-e29b-41d4-a716-446655440000', '示例画布1', '550e8400-e29b-41d4-a716-446655440001'),
-    ('550e8400-e29b-41d4-a716-446655440002', '示例画布2', '550e8400-e29b-41d4-a716-446655440001')
+    ('550e8400-e29b-41d4-a716-446655440010', '互联网', '互联网相关设计', 1),
+    ('550e8400-e29b-41d4-a716-446655440011', '金融', '金融行业设计', 2),
+    ('550e8400-e29b-41d4-a716-446655440012', '教育', '教育行业设计', 3),
+    ('550e8400-e29b-41d4-a716-446655440013', '医疗', '医疗行业设计', 4),
+    ('550e8400-e29b-41d4-a716-446655440014', '电商', '电子商务设计', 5),
+    ('550e8400-e29b-41d4-a716-446655440015', '社交', '社交应用设计', 6),
+    ('550e8400-e29b-41d4-a716-446655440016', '娱乐', '娱乐应用设计', 7),
+    ('550e8400-e29b-41d4-a716-446655440017', '工具', '工具类应用设计', 8),
+    ('550e8400-e29b-41d4-a716-446655440018', '其他', '其他行业设计', 9)
 ON CONFLICT DO NOTHING;

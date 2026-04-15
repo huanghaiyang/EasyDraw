@@ -26,12 +26,12 @@
       <div class="filter-section">
         <div class="filter-buttons">
           <button 
-            v-for="category in ['全部', ...categoryOptions.map(c => c.label)]" 
-            :key="category"
-            :class="['btn', activeCategory === category ? 'btn-primary' : 'btn-outline-secondary']"
-            @click="activeCategory = category"
+            v-for="category in [{ value: '全部', label: '全部' }, ...categoryOptions]" 
+            :key="category.value"
+            :class="['btn', activeCategory === category.label ? 'btn-primary' : 'btn-outline-secondary']"
+            @click="activeCategory = category.label"
           >
-            {{ category }}
+            {{ category.label }}
           </button>
         </div>
         <div class="search-box">
@@ -93,9 +93,11 @@
                   <div class="board-name trash-name">{{ board.name }}</div>
                 </div>
                 <div class="board-meta">
-                  <span class="board-category badge bg-secondary" v-if="board.category">{{ board.category }}</span>
-                  <span class="board-date">{{ formatDate(board.createdAt) }}</span>
-                </div>
+              <span class="board-category badge bg-secondary" v-if="board.category">
+                {{ categoryOptions.find(cat => cat.value === board.category)?.label || board.category }}
+              </span>
+              <span class="board-date">{{ formatDate(board.createdAt) }}</span>
+            </div>
               </div>
               
               <!-- 操作按钮 -->
@@ -158,7 +160,9 @@
               />
             </div>
             <div class="board-meta">
-              <span class="board-category badge bg-primary" v-if="board.category">{{ board.category }}</span>
+              <span class="board-category badge bg-primary" v-if="board.category">
+                {{ categoryOptions.find(cat => cat.value === board.category)?.label || board.category }}
+              </span>
               <span class="board-date">{{ formatDate(board.createdAt) }}</span>
             </div>
           </div>
@@ -349,18 +353,28 @@ const trashExpanded = ref(false);
 const trashBoards = ref<any[]>([]);
 const trashLoading = ref(false);
 
-// 分类选项（按行业设计用途分类）
-const categoryOptions = ref([
-  { value: '互联网', label: '互联网' },
-  { value: '金融', label: '金融' },
-  { value: '教育', label: '教育' },
-  { value: '医疗', label: '医疗' },
-  { value: '电商', label: '电商' },
-  { value: '社交', label: '社交' },
-  { value: '娱乐', label: '娱乐' },
-  { value: '工具', label: '工具' },
-  { value: '其他', label: '其他' }
-]);
+// 分类选项
+const categoryOptions = ref<any[]>([]);
+const categoriesLoading = ref(false);
+
+// 加载分类选项
+const loadCategories = async () => {
+  try {
+    categoriesLoading.value = true;
+    const response = await axios.get('/api/categories');
+    const categories = response.data.data || [];
+    categoryOptions.value = categories.map((cat: any) => ({
+      value: cat.id,
+      label: cat.name
+    }));
+  } catch (error) {
+    console.error('加载分类失败:', error);
+    // 如果加载失败，使用空数组
+    categoryOptions.value = [];
+  } finally {
+    categoriesLoading.value = false;
+  }
+};
 
 // 过滤后的画布列表
 const filteredBoards = computed(() => {
@@ -368,7 +382,10 @@ const filteredBoards = computed(() => {
   
   // 分类筛选
   if (activeCategory.value !== '全部') {
-    result = result.filter(board => board.category === activeCategory.value);
+    const selectedCategory = categoryOptions.value.find(c => c.label === activeCategory.value);
+    if (selectedCategory) {
+      result = result.filter(board => board.category === selectedCategory.value);
+    }
   }
   
   // 搜索筛选
@@ -690,6 +707,7 @@ const confirmRestore = async () => {
 onMounted(async () => {
   await loadBoards();
   await loadTrashBoards();
+  await loadCategories();
 });
 </script>
 
