@@ -129,12 +129,12 @@
     </div>
 
     <!-- 新建画布对话框 -->
-    <div class="modal fade" id="createBoardModal" tabindex="-1" aria-labelledby="createBoardModalLabel" aria-hidden="true" v-if="createDialogVisible">
+    <div class="modal fade" ref="createBoardModal" tabindex="-1" aria-labelledby="createBoardModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="createBoardModalLabel">新建画布</h5>
-            <button type="button" class="btn-close" @click="createDialogVisible = false"></button>
+            <button type="button" class="btn-close" @click="closeCreateModal()"></button>
           </div>
           <div class="modal-body">
             <form @submit.prevent="confirmCreate">
@@ -171,7 +171,7 @@
             </form>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="createDialogVisible = false">取消</button>
+            <button type="button" class="btn btn-secondary" @click="closeCreateModal()">取消</button>
             <button type="button" class="btn btn-primary" @click="confirmCreate">创建</button>
           </div>
         </div>
@@ -179,30 +179,34 @@
     </div>
 
     <!-- 删除确认对话框 -->
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true" v-if="deleteDialogVisible">
+    <div class="modal fade" ref="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="deleteConfirmModalLabel">删除确认</h5>
-            <button type="button" class="btn-close" @click="deleteDialogVisible = false"></button>
+            <button type="button" class="btn-close" @click="closeDeleteModal"></button>
           </div>
           <div class="modal-body">
             确定要删除这个画布吗？删除后将无法恢复。
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="deleteDialogVisible = false">取消</button>
+            <button type="button" class="btn btn-secondary" @click="closeDeleteModal">取消</button>
             <button type="button" class="btn btn-danger" @click="confirmDelete">确定</button>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Toast组件 -->
+    <Toast ref="toast" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, nextTick, computed, watch } from 'vue';
+import { ref, onMounted, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../utils/axios';
+import Toast from '../components/Toast.vue';
 
 const router = useRouter();
 const boards = ref<any[]>([]);
@@ -211,19 +215,24 @@ const editingBoardId = ref<string | null>(null);
 const editingBoardName = ref('');
 const nameInput = ref<HTMLElement | null>(null);
 
+// Toast组件引用
+const toast = ref<InstanceType<typeof Toast>>();
+
+// 模态框引用
+const createBoardModal = ref<HTMLElement | null>(null);
+const deleteConfirmModal = ref<HTMLElement | null>(null);
+
 // 分类和搜索
 const activeCategory = ref('全部');
 const searchKeyword = ref('');
 
-// 新建画布对话框
-const createDialogVisible = ref(false);
+// 新建画布表单
 const createForm = ref({
   name: '',
   category: ''
 });
 
-// 删除确认对话框
-const deleteDialogVisible = ref(false);
+// 删除确认
 const boardToDelete = ref<string | null>(null);
 
 // 分类选项（按行业设计用途分类）
@@ -258,39 +267,6 @@ const filteredBoards = computed(() => {
   }
   
   return result;
-});
-
-// 监听对话框状态变化，使用Bootstrap的模态框API
-watch(createDialogVisible, (newValue) => {
-  if (newValue) {
-    // 显示模态框
-    const modal = document.getElementById('createBoardModal');
-    if (modal) {
-      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
-    }
-  } else {
-    // 隐藏模态框
-    const modal = document.getElementById('createBoardModal');
-    if (modal) {
-      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
-    }
-  }
-});
-
-watch(deleteDialogVisible, (newValue) => {
-  if (newValue) {
-    // 显示模态框
-    const modal = document.getElementById('deleteConfirmModal');
-    if (modal) {
-      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
-    }
-  } else {
-    // 隐藏模态框
-    const modal = document.getElementById('deleteConfirmModal');
-    if (modal) {
-      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
-    }
-  }
 });
 
 // 加载画布列表
@@ -346,14 +322,32 @@ const createBoard = () => {
   // 设置默认名称：画布+自增序号
   createForm.value.name = `画布${boards.value.length + 1}`;
   createForm.value.category = '';
-  createDialogVisible.value = true;
+  
+  // 显示模态框
+  if (createBoardModal.value) {
+    const modal = new (window as any).bootstrap.Modal(createBoardModal.value);
+    modal.show();
+  }
+};
+
+// 关闭新建画布模态框
+const closeCreateModal = (callback?: () => void) => {
+  if (createBoardModal.value) {
+    const modal = (window as any).bootstrap.Modal.getInstance(createBoardModal.value);
+    if (modal) {
+      modal.hide();
+      // 执行回调函数
+      if (callback) {
+        callback();
+      }
+    }
+  }
 };
 
 // 确认创建画布
 const confirmCreate = async () => {
   if (!createForm.value.name.trim()) {
-    // 显示警告消息
-    alert('请输入画布名称');
+    toast.value?.showToast('warning', '提示', '请输入画布名称');
     return;
   }
 
@@ -365,24 +359,16 @@ const confirmCreate = async () => {
     // 正确处理后端返回的响应格式
     const newBoard = response.data.data;
     boards.value.push(newBoard);
-    createDialogVisible.value = false;
     // 显示成功消息
-    alert('创建成功');
-    router.push(`/board/${newBoard.id}`);
+    toast.value?.showToast('success', '成功', '创建成功');
+    // 2秒后跳转到编辑页面
+    setTimeout(() => {
+      router.push(`/board/${newBoard.id}`);
+    }, 0.5);
   } catch (error) {
     console.error('创建画布失败:', error);
     // 显示错误消息
-    alert('创建失败');
-    // 创建失败时使用模拟数据
-    const newBoard = {
-      id: Date.now().toString(),
-      name: createForm.value.name,
-      category: createForm.value.category,
-      createdAt: new Date().toISOString()
-    };
-    boards.value.push(newBoard);
-    createDialogVisible.value = false;
-    router.push(`/board/${newBoard.id}`);
+    toast.value?.showToast('danger', '错误', '创建失败');
   }
 };
 
@@ -433,7 +419,23 @@ const cancelEditing = () => {
 // 显示删除确认对话框
 const deleteBoard = (boardId: string) => {
   boardToDelete.value = boardId;
-  deleteDialogVisible.value = true;
+  
+  // 显示模态框
+  if (deleteConfirmModal.value) {
+    const modal = new (window as any).bootstrap.Modal(deleteConfirmModal.value);
+    modal.show();
+  }
+};
+
+// 关闭删除确认模态框
+const closeDeleteModal = () => {
+  if (deleteConfirmModal.value) {
+    const modal = (window as any).bootstrap.Modal.getInstance(deleteConfirmModal.value);
+    if (modal) {
+      modal.hide();
+    }
+  }
+  boardToDelete.value = null;
 };
 
 // 确认删除
@@ -444,16 +446,15 @@ const confirmDelete = async () => {
     await axios.delete(`/api/boards/${boardToDelete.value}`);
     boards.value = boards.value.filter(b => b.id !== boardToDelete.value);
     // 显示成功消息
-    alert('删除成功');
+    toast.value?.showToast('success', '成功', '删除成功');
   } catch (error) {
     console.error('删除画布失败:', error);
     // 显示错误消息
-    alert('删除失败');
+    toast.value?.showToast('danger', '错误', '删除失败');
     // 删除失败时直接修改本地数据
     boards.value = boards.value.filter(b => b.id !== boardToDelete.value);
   } finally {
-    deleteDialogVisible.value = false;
-    boardToDelete.value = null;
+    closeDeleteModal();
   }
 };
 

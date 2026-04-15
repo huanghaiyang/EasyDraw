@@ -4,7 +4,6 @@ import "normalize.css";
 import "@/style.css";
 import "@/assets/iconfont/iconfont.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
@@ -16,6 +15,10 @@ import RotateSvg from "@/assets/svg/rotate.svg";
 import ResizeV from "@/assets/svg/resize-v.svg";
 import CrossSvg from "@/assets/svg/cross_.svg";
 import HandSvg from "@/assets/svg/hand.svg";
+
+// 导入 Bootstrap JS 并挂载到 window 对象
+import * as bootstrap from "bootstrap/dist/js/bootstrap.esm.min.js";
+(window as any).bootstrap = bootstrap;
 
 CanvasUtils.cacheStringImages([RotateSvg, ResizeV, CrossSvg, HandSvg]);
 
